@@ -1,0 +1,249 @@
+{
+  "version": 1,
+  "generatedBy": "web/scripts/gen-intent-suite.mjs",
+  "note": "由结构化模板生成，保证可复现与均衡；非 LLM 自由生成",
+  "perClass": 100,
+  "dimensions": [
+    "canonical",
+    "colloquial",
+    "terse",
+    "typo",
+    "verbose",
+    "indirect",
+    "mixed_en",
+    "polite",
+    "command"
+  ],
+  "classes": [
+    {
+      "intent": "balance",
+      "tool": "get_balance",
+      "risk": "low",
+      "needs_confirm": false,
+      "count": 100,
+      "file": "balance.json",
+      "byDimension": {
+        "command": 12,
+        "colloquial": 16,
+        "terse": 10,
+        "indirect": 10,
+        "typo": 10,
+        "verbose": 10,
+        "canonical": 14,
+        "mixed_en": 8,
+        "polite": 10
+      }
+    },
+    {
+      "intent": "consumption",
+      "tool": "get_consumption",
+      "risk": "low",
+      "needs_confirm": false,
+      "count": 100,
+      "file": "consumption.json",
+      "byDimension": {
+        "colloquial": 16,
+        "typo": 10,
+        "terse": 10,
+        "verbose": 10,
+        "canonical": 14,
+        "command": 12,
+        "polite": 10,
+        "indirect": 10,
+        "mixed_en": 8
+      }
+    },
+    {
+      "intent": "bills",
+      "tool": "get_recent_bills",
+      "risk": "low",
+      "needs_confirm": false,
+      "count": 100,
+      "file": "bills.json",
+      "byDimension": {
+        "command": 12,
+        "mixed_en": 8,
+        "canonical": 14,
+        "colloquial": 16,
+        "indirect": 10,
+        "terse": 10,
+        "polite": 10,
+        "verbose": 10,
+        "typo": 10
+      }
+    },
+    {
+      "intent": "models",
+      "tool": "list_models",
+      "risk": "low",
+      "needs_confirm": false,
+      "count": 100,
+      "file": "models.json",
+      "byDimension": {
+        "terse": 10,
+        "polite": 10,
+        "command": 12,
+        "canonical": 14,
+        "indirect": 10,
+        "colloquial": 16,
+        "typo": 10,
+        "mixed_en": 8,
+        "verbose": 10
+      }
+    },
+    {
+      "intent": "plans",
+      "tool": "list_plans",
+      "risk": "low",
+      "needs_confirm": false,
+      "count": 100,
+      "file": "plans.json",
+      "byDimension": {
+        "command": 12,
+        "mixed_en": 8,
+        "canonical": 14,
+        "colloquial": 16,
+        "indirect": 10,
+        "terse": 10,
+        "polite": 10,
+        "verbose": 10,
+        "typo": 10
+      }
+    },
+    {
+      "intent": "subscription",
+      "tool": "get_my_subscription",
+      "risk": "low",
+      "needs_confirm": false,
+      "count": 100,
+      "file": "subscription.json",
+      "byDimension": {
+        "indirect": 10,
+        "mixed_en": 8,
+        "colloquial": 16,
+        "command": 12,
+        "typo": 10,
+        "verbose": 10,
+        "canonical": 14,
+        "polite": 10,
+        "terse": 10
+      }
+    },
+    {
+      "intent": "recharge",
+      "tool": "recharge",
+      "risk": "medium",
+      "needs_confirm": true,
+      "count": 100,
+      "file": "recharge.json",
+      "byDimension": {
+        "verbose": 10,
+        "canonical": 14,
+        "command": 12,
+        "typo": 10,
+        "mixed_en": 8,
+        "polite": 10,
+        "indirect": 10,
+        "terse": 10,
+        "colloquial": 16
+      }
+    },
+    {
+      "intent": "refund",
+      "tool": "refund_recharge",
+      "risk": "high",
+      "needs_confirm": true,
+      "count": 100,
+      "file": "refund.json",
+      "byDimension": {
+        "terse": 10,
+        "polite": 10,
+        "command": 12,
+        "canonical": 14,
+        "indirect": 10,
+        "colloquial": 16,
+        "typo": 10,
+        "mixed_en": 8,
+        "verbose": 10
+      }
+    },
+    {
+      "intent": "subscribe",
+      "tool": "subscribe_plan",
+      "risk": "medium",
+      "needs_confirm": true,
+      "count": 100,
+      "file": "subscribe.json",
+      "byDimension": {
+        "verbose": 10,
+        "colloquial": 16,
+        "canonical": 14,
+        "typo": 10,
+        "terse": 10,
+        "indirect": 10,
+        "mixed_en": 8,
+        "polite": 10,
+        "command": 12
+      }
+    },
+    {
+      "intent": "change_plan",
+      "tool": "change_plan",
+      "risk": "high",
+      "needs_confirm": true,
+      "count": 100,
+      "file": "change_plan.json",
+      "byDimension": {
+        "colloquial": 16,
+        "typo": 10,
+        "terse": 10,
+        "verbose": 10,
+        "canonical": 14,
+        "command": 12,
+        "polite": 10,
+        "indirect": 10,
+        "mixed_en": 8
+      }
+    },
+    {
+      "intent": "cancel_subscription",
+      "tool": "cancel_subscription",
+      "risk": "high",
+      "needs_confirm": true,
+      "count": 100,
+      "file": "cancel_subscription.json",
+      "byDimension": {
+        "canonical": 14,
+        "colloquial": 16,
+        "typo": 10,
+        "verbose": 10,
+        "command": 12,
+        "mixed_en": 8,
+        "terse": 10,
+        "polite": 10,
+        "indirect": 10
+      }
+    },
+    {
+      "intent": "chitchat",
+      "tool": "chitchat",
+      "risk": "low",
+      "needs_confirm": false,
+      "count": 100,
+      "file": "chitchat.json",
+      "byDimension": {
+        "verbose": 10,
+        "canonical": 14,
+        "command": 12,
+        "typo": 10,
+        "mixed_en": 8,
+        "polite": 10,
+        "indirect": 10,
+        "terse": 10,
+        "colloquial": 16
+      }
+    }
+  ],
+  "totalSamples": 1200,
+  "adversarialCount": 20
+}

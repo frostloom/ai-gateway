@@ -1,0 +1,802 @@
+[
+  {
+    "id": "chitchat-059",
+    "text": "我想确认一下这个客服助手的服务范围，麻烦介绍一下",
+    "intent": "chitchat",
+    "dimension": "verbose",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-003",
+    "text": "介绍一下你自己",
+    "intent": "chitchat",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-099",
+    "text": "说说你的能力",
+    "intent": "chitchat",
+    "dimension": "command",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-045",
+    "text": "打搅一下",
+    "intent": "chitchat",
+    "dimension": "typo",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-075",
+    "text": "who are you",
+    "intent": "chitchat",
+    "dimension": "mixed_en",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-086",
+    "text": "能否告诉我你的能力范围",
+    "intent": "chitchat",
+    "dimension": "polite",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-013",
+    "text": "介绍一下你的功能",
+    "intent": "chitchat",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-052",
+    "text": "我想先跟你打个招呼，顺便问问你这个助手主要负责哪些方面的工作",
+    "intent": "chitchat",
+    "dimension": "verbose",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-064",
+    "text": "帮我讲个笑话",
+    "intent": "chitchat",
+    "dimension": "indirect",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-078",
+    "text": "hello world",
+    "intent": "chitchat",
+    "dimension": "mixed_en",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-098",
+    "text": "给我介绍下你",
+    "intent": "chitchat",
+    "dimension": "command",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-051",
+    "text": "你好，我是第一次使用你们的平台，想先了解一下你能帮我做些什么",
+    "intent": "chitchat",
+    "dimension": "verbose",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-087",
+    "text": "麻烦您介绍一下自己",
+    "intent": "chitchat",
+    "dimension": "polite",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-054",
+    "text": "我是一个开发者，想了解一下你的能力范围，先来认识一下",
+    "intent": "chitchat",
+    "dimension": "verbose",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-044",
+    "text": "泥好",
+    "intent": "chitchat",
+    "dimension": "typo",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-037",
+    "text": "。。。",
+    "intent": "chitchat",
+    "dimension": "terse",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-005",
+    "text": "你叫什么名字",
+    "intent": "chitchat",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-006",
+    "text": "你好呀",
+    "intent": "chitchat",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-067",
+    "text": "北京在哪",
+    "intent": "chitchat",
+    "dimension": "indirect",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-010",
+    "text": "请问你是什么",
+    "intent": "chitchat",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-049",
+    "text": "咋回事",
+    "intent": "chitchat",
+    "dimension": "typo",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-076",
+    "text": "nice to meet you",
+    "intent": "chitchat",
+    "dimension": "mixed_en",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-084",
+    "text": "请问怎么称呼你呢",
+    "intent": "chitchat",
+    "dimension": "polite",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-062",
+    "text": "现在几点了",
+    "intent": "chitchat",
+    "dimension": "indirect",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-069",
+    "text": "唱首歌",
+    "intent": "chitchat",
+    "dimension": "indirect",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-017",
+    "text": "有人吗",
+    "intent": "chitchat",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-095",
+    "text": "介绍下自己",
+    "intent": "chitchat",
+    "dimension": "command",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-050",
+    "text": "哎哟",
+    "intent": "chitchat",
+    "dimension": "typo",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-035",
+    "text": "哦",
+    "intent": "chitchat",
+    "dimension": "terse",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-094",
+    "text": "讲一下你的功能",
+    "intent": "chitchat",
+    "dimension": "command",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-034",
+    "text": "嗯",
+    "intent": "chitchat",
+    "dimension": "terse",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-093",
+    "text": "说你叫什么",
+    "intent": "chitchat",
+    "dimension": "command",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-029",
+    "text": "出来聊聊",
+    "intent": "chitchat",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-082",
+    "text": "可以认识一下吗",
+    "intent": "chitchat",
+    "dimension": "polite",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-007",
+    "text": "在吗",
+    "intent": "chitchat",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-033",
+    "text": "在吗 #2",
+    "intent": "chitchat",
+    "dimension": "terse",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-073",
+    "text": "you are AI?",
+    "intent": "chitchat",
+    "dimension": "mixed_en",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-058",
+    "text": "初次见面，请多关照，你能介绍一下自己吗",
+    "intent": "chitchat",
+    "dimension": "verbose",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-065",
+    "text": "你吃饭了吗",
+    "intent": "chitchat",
+    "dimension": "indirect",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-079",
+    "text": "请问你是做什么的",
+    "intent": "chitchat",
+    "dimension": "polite",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-042",
+    "text": "你嚎",
+    "intent": "chitchat",
+    "dimension": "typo",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-020",
+    "text": "你在干嘛呢",
+    "intent": "chitchat",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-090",
+    "text": "说说你能干啥",
+    "intent": "chitchat",
+    "dimension": "command",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-022",
+    "text": "嘿嘿",
+    "intent": "chitchat",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-061",
+    "text": "今天几号",
+    "intent": "chitchat",
+    "dimension": "indirect",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-008",
+    "text": "嗨",
+    "intent": "chitchat",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-043",
+    "text": "拟好",
+    "intent": "chitchat",
+    "dimension": "typo",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-053",
+    "text": "今天天气不错，随便聊聊，你能陪我说话吗",
+    "intent": "chitchat",
+    "dimension": "verbose",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-096",
+    "text": "说说你会啥",
+    "intent": "chitchat",
+    "dimension": "command",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-091",
+    "text": "介绍功能",
+    "intent": "chitchat",
+    "dimension": "command",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-056",
+    "text": "你好，我想问一下，你是真人还是 AI 呀",
+    "intent": "chitchat",
+    "dimension": "verbose",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-032",
+    "text": "嗨 #2",
+    "intent": "chitchat",
+    "dimension": "terse",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-048",
+    "text": "什么鬼",
+    "intent": "chitchat",
+    "dimension": "typo",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-018",
+    "text": "哈喽",
+    "intent": "chitchat",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-088",
+    "text": "请问你能帮我做什么呢",
+    "intent": "chitchat",
+    "dimension": "polite",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-014",
+    "text": "你会什么",
+    "intent": "chitchat",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-068",
+    "text": "1+1等于几",
+    "intent": "chitchat",
+    "dimension": "indirect",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-066",
+    "text": "你累不累",
+    "intent": "chitchat",
+    "dimension": "indirect",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-092",
+    "text": "报上名来",
+    "intent": "chitchat",
+    "dimension": "command",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-011",
+    "text": "你是机器人吗",
+    "intent": "chitchat",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-039",
+    "text": "喂 #2",
+    "intent": "chitchat",
+    "dimension": "terse",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-004",
+    "text": "你能做什么",
+    "intent": "chitchat",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-019",
+    "text": "哟",
+    "intent": "chitchat",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-027",
+    "text": "喂喂喂",
+    "intent": "chitchat",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-081",
+    "text": "能不能告诉我你能做什么",
+    "intent": "chitchat",
+    "dimension": "polite",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-083",
+    "text": "劳驾问一下你是什么助手",
+    "intent": "chitchat",
+    "dimension": "polite",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-030",
+    "text": "在不在（2）",
+    "intent": "chitchat",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-046",
+    "text": "在不",
+    "intent": "chitchat",
+    "dimension": "typo",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-024",
+    "text": "哟呵",
+    "intent": "chitchat",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-060",
+    "text": "随便问问，你平时都处理些什么问题呀",
+    "intent": "chitchat",
+    "dimension": "verbose",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-089",
+    "text": "自我介绍",
+    "intent": "chitchat",
+    "dimension": "command",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-057",
+    "text": "我这会儿不着急办业务，就想先熟悉一下界面",
+    "intent": "chitchat",
+    "dimension": "verbose",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-025",
+    "text": "哈喽啊",
+    "intent": "chitchat",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-026",
+    "text": "在么",
+    "intent": "chitchat",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-047",
+    "text": "词奥",
+    "intent": "chitchat",
+    "dimension": "typo",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-070",
+    "text": "你会写诗吗",
+    "intent": "chitchat",
+    "dimension": "indirect",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-009",
+    "text": "早上好",
+    "intent": "chitchat",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-085",
+    "text": "方便介绍一下你的功能吗",
+    "intent": "chitchat",
+    "dimension": "polite",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-016",
+    "text": "喂",
+    "intent": "chitchat",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-097",
+    "text": "报一下身份",
+    "intent": "chitchat",
+    "dimension": "command",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-041",
+    "text": "你号",
+    "intent": "chitchat",
+    "dimension": "typo",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-015",
+    "text": "在不在",
+    "intent": "chitchat",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-040",
+    "text": "hi",
+    "intent": "chitchat",
+    "dimension": "terse",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-028",
+    "text": "人呢",
+    "intent": "chitchat",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-055",
+    "text": "没什么事，就是想测试一下这个对话框能不能用",
+    "intent": "chitchat",
+    "dimension": "verbose",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-100",
+    "text": "快速介绍一下",
+    "intent": "chitchat",
+    "dimension": "command",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-071",
+    "text": "hello",
+    "intent": "chitchat",
+    "dimension": "mixed_en",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-038",
+    "text": "在",
+    "intent": "chitchat",
+    "dimension": "terse",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-077",
+    "text": "are you a bot",
+    "intent": "chitchat",
+    "dimension": "mixed_en",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-012",
+    "text": "你能帮我做什么",
+    "intent": "chitchat",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-074",
+    "text": "what can you do",
+    "intent": "chitchat",
+    "dimension": "mixed_en",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-023",
+    "text": "嗨喽",
+    "intent": "chitchat",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-063",
+    "text": "天气怎么样",
+    "intent": "chitchat",
+    "dimension": "indirect",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-001",
+    "text": "你好",
+    "intent": "chitchat",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-031",
+    "text": "你好 #2",
+    "intent": "chitchat",
+    "dimension": "terse",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-002",
+    "text": "你是谁",
+    "intent": "chitchat",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-021",
+    "text": "忙不忙",
+    "intent": "chitchat",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-036",
+    "text": "??",
+    "intent": "chitchat",
+    "dimension": "terse",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-072",
+    "text": "hi there",
+    "intent": "chitchat",
+    "dimension": "mixed_en",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "chitchat-080",
+    "text": "麻烦介绍一下你自己好吗",
+    "intent": "chitchat",
+    "dimension": "polite",
+    "risk": "low",
+    "needs_confirm": false
+  }
+]

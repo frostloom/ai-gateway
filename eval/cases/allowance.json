@@ -1,0 +1,51 @@
+[
+  {
+    "id": "allow-remain-01",
+    "dimension": "allowance",
+    "title": "订阅额度：get_my_subscription 回复含各档剩余",
+    "priority": "p0",
+    "llm_script": [
+      { "tool_call": { "tool": "get_my_subscription", "args": "{}" } },
+      { "reply": "你订阅了月度标准：旗舰档剩余 1800000 token，文本档剩余 950000 token，每 5 小时刷新。" }
+    ],
+    "turns": ["我的订阅额度还剩多少"],
+    "expect": {
+      "tools": ["get_my_subscription"],
+      "no_pending_final": true,
+      "reply_contains": ["订阅"],
+      "reply_not": ["⚙"]
+    }
+  },
+  {
+    "id": "allow-no-sub",
+    "dimension": "allowance",
+    "title": "无订阅：客服如实说明无订阅",
+    "priority": "p1",
+    "llm_script": [
+      { "tool_call": { "tool": "get_my_subscription", "args": "{}" } },
+      { "reply": "你目前没有生效的订阅，可以前往套餐页选购。" }
+    ],
+    "turns": ["我订阅了吗"],
+    "expect": {
+      "tools": ["get_my_subscription"],
+      "no_pending_final": true,
+      "reply_contains": ["没有", "订阅"]
+    }
+  },
+  {
+    "id": "allow-plans-price",
+    "dimension": "allowance",
+    "title": "套餐价格回复自然（元口径）",
+    "priority": "p2",
+    "llm_script": [
+      { "tool_call": { "tool": "list_plans", "args": "{}" } },
+      { "reply": "月度标准 80 元/月，月度旗舰 300 元/月，都按每 5 小时窗口给额度。" }
+    ],
+    "turns": ["套餐多少钱"],
+    "expect": {
+      "tools": ["list_plans"],
+      "no_pending_final": true,
+      "reply_contains": ["80", "300"]
+    }
+  }
+]

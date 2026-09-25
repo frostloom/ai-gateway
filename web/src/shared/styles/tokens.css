@@ -1,0 +1,337 @@
+/* ============================================================
+   ai-gateway 设计令牌层
+
+   设计方向（Soft Structuralism / 银白）
+   - 底色只用一种：近白 #f4f6f5，纯白只留给"抬起"的表面
+   - 分层手段 = 通道凹陷 + 表面抬起 + 环境阴影，绝不靠 1px 灰线
+   - 阴影永远带绿相的墨色，且"柔和 + 大扩散"，禁止生硬黑投影
+   - 大字号 Grotesk、负字距；数字一律等宽
+   - 动效只走物理曲线，禁止 linear / ease-in-out
+   ============================================================ */
+
+:root {
+  /* ---------- 强调色：单一绿，饱和度受控 ---------- */
+  --accent-700: #0a6b4a;
+  --accent-600: #0d8058;
+  --accent-500: #109466;
+  --accent-400: #34ab80;
+  --accent-200: #a7dcc6;
+  --accent-100: #d3ede1;
+  --accent-50: #eaf6f0;
+
+  --ok: #0d8058;
+  --ok-bg: #eaf6f0;
+  --warn: #8a5a09;
+  --warn-bg: #fbf2e2;
+  --danger: #b8423f;
+  --danger-bg: #fcedec;
+  --info: #2b5f9e;
+  --info-bg: #ecf2fa;
+  --violet: #6d5bb8;
+  --violet-bg: #efedf9;
+  --rose: #a84f6b;
+  --rose-bg: #fbeef2;
+
+  /* ---------- 中性灰阶：冷绿相，阶差细腻 ---------- */
+  --ink-950: #0a0f0d;
+  --ink-900: #111917;
+  --ink-800: #1b2522;
+  --ink-700: #2c3833;
+  --ink-600: #46544e;
+  --ink-500: #5f6d67;
+  --ink-400: #8b978f;
+  --ink-300: #b6c0ba;
+  --ink-200: #d6dcd9;
+
+  /* ---------- 表面层级 ---------- */
+  /* bg      页面底色（通道）   */
+  /* surface 抬起表面（白）     */
+  /* well    凹陷凹槽           */
+  --bg: #f1f4f2;
+  --surface: #ffffff;
+  --surface-2: #fafbfa;
+  --surface-3: #f3f6f4;
+  --shell: #ffffff;
+  --well: rgb(17 25 23 / .045);
+  --well-2: rgb(17 25 23 / .075);
+
+  /* 发丝线只用于"分隔"，不用于"描边容器" */
+  --hairline: rgb(17 25 23 / .055);
+  --hairline-2: rgb(17 25 23 / .09);
+
+  /* ---------- 阴影：柔和 + 大扩散 + 墨绿相 ---------- */
+  --shadow-xs: 0 1px 2px rgb(17 25 23 / .04);
+  --shadow-raise:
+    0 1px 1.5px rgb(17 25 23 / .045),
+    0 2px 4px -1px rgb(17 25 23 / .05);
+  --shadow-card:
+    0 1px 2px rgb(17 25 23 / .04),
+    0 6px 14px -6px rgb(17 25 23 / .07),
+    0 20px 40px -18px rgb(17 25 23 / .10);
+  --shadow-float:
+    0 2px 4px rgb(17 25 23 / .04),
+    0 14px 28px -10px rgb(17 25 23 / .11),
+    0 42px 84px -32px rgb(17 25 23 / .18);
+  --shadow-pop:
+    0 3px 6px rgb(17 25 23 / .05),
+    0 22px 44px -14px rgb(17 25 23 / .15),
+    0 60px 120px -40px rgb(17 25 23 / .24);
+  --shadow-accent:
+    0 2px 6px rgb(13 128 88 / .20),
+    0 12px 26px -8px rgb(13 128 88 / .30);
+
+  --inset-hi: inset 0 1px 0 rgb(255 255 255 / .92);
+  --inset-hi-strong: inset 0 1px 1px rgb(255 255 255 / .95);
+  /* 凹槽：左上暗、右下亮 → 读作"被压下去" */
+  --inset-well:
+    inset 0 1px 2px rgb(17 25 23 / .07),
+    inset 0 -1px 0 rgb(255 255 255 / .85);
+
+  /* ---------- 字体 ---------- */
+  --font-sans: 'Outfit Variable', 'PingFang SC', 'HarmonyOS Sans SC', 'Microsoft YaHei',
+               'Source Han Sans SC', 'Noto Sans SC', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', 'Cascadia Mono', Consolas, monospace;
+
+  --fs-2xs: 11px;
+  --fs-xs: 12px;
+  --fs-sm: 13px;
+  --fs-base: 14px;
+  --fs-md: 15px;
+  --fs-lg: 18px;
+  --fs-xl: 22px;
+  --fs-2xl: 30px;
+  --fs-3xl: 40px;
+  --fs-4xl: 52px;
+
+  /* ---------- 间距 ---------- */
+  --sp-1: 4px;  --sp-2: 8px;  --sp-3: 12px; --sp-4: 16px;
+  --sp-5: 20px; --sp-6: 28px; --sp-7: 40px; --sp-8: 56px;
+  --sp-9: 80px; --sp-10: 112px;
+
+  /* ---------- 圆角：同心计算 ---------- */
+  --r-xs: 8px;
+  --r-sm: 10px;
+  --r-md: 14px;
+  --r-lg: 20px;
+  --r-xl: 26px;
+  --r-2xl: 34px;
+  --shell-pad: 5px;
+  --r-inner: calc(var(--r-xl) - var(--shell-pad));
+  --r-inner-2xl: calc(var(--r-2xl) - var(--shell-pad));
+  --r-pill: 999px;
+
+  /* 旧命名别名（兼容既有视图；值已重定向到新体系） */
+  --r-card: var(--r-lg);
+  --r-control: var(--r-sm);
+  --paper: var(--surface);
+  --paper-2: var(--surface-3);
+  --paper-3: var(--well);
+  --paper-4: var(--well);
+  --line: var(--hairline);
+  --line-2: var(--hairline-2);
+  --line-strong: var(--ink-300);
+  --shadow-1: var(--shadow-raise);
+  --shadow-2: var(--shadow-card);
+  --shadow-3: var(--shadow-pop);
+
+  /* ---------- 层级 ---------- */
+  --z-base: 1;
+  --z-sticky: 20;
+  --z-drawer: 40;
+  --z-modal: 60;
+  --z-chat: 70;
+  --z-toast: 90;
+
+  /* ---------- 动效 ---------- */
+  --ease-out: cubic-bezier(.32, .72, 0, 1);
+  --ease-spring: cubic-bezier(.34, 1.35, .44, 1);
+  --ease-smooth: cubic-bezier(.4, 0, .12, 1);
+
+  --t-fast: .18s var(--ease-out);
+  --t-base: .32s var(--ease-out);
+  --t-slow: .55s var(--ease-out);
+  --t-spring: .5s var(--ease-spring);
+}
+
+/* ---------- 深色模式 ---------- */
+@media (prefers-color-scheme: dark) {
+  :root[data-theme='auto'] {
+    --bg: #0b100e;
+    --surface: #121815;
+    --surface-2: #161d1a;
+    --surface-3: #1a221e;
+    --shell: #161d1a;
+    --well: rgb(255 255 255 / .05);
+    --well-2: rgb(255 255 255 / .08);
+
+    --ink-950: #f2f6f4;
+    --ink-900: #e6ece9;
+    --ink-800: #d4ddd8;
+    --ink-700: #b6c1bb;
+    --ink-600: #97a49d;
+    --ink-500: #8b978f;
+    --ink-400: #6b7772;
+    --ink-300: #454f4a;
+    --ink-200: #333b37;
+
+    --hairline: rgb(255 255 255 / .07);
+    --hairline-2: rgb(255 255 255 / .12);
+
+    --shadow-raise: 0 1px 2px rgb(0 0 0 / .4);
+    --shadow-card: 0 1px 2px rgb(0 0 0 / .4), 0 12px 32px -12px rgb(0 0 0 / .55);
+    --shadow-float: 0 4px 12px rgb(0 0 0 / .45), 0 32px 64px -24px rgb(0 0 0 / .65);
+    --shadow-pop: 0 8px 24px rgb(0 0 0 / .55), 0 48px 96px -32px rgb(0 0 0 / .75);
+    --inset-hi: inset 0 1px 0 rgb(255 255 255 / .06);
+    --inset-hi-strong: inset 0 1px 1px rgb(255 255 255 / .09);
+    --inset-well: inset 0 1px 2px rgb(0 0 0 / .4);
+
+    --accent-50: #12291f;
+    --accent-100: #16352a;
+    --accent-700: #17b37f;
+    --ok-bg: #12291f;
+    --warn-bg: #302410;
+    --danger-bg: #351a19;
+    --info-bg: #16243a;
+    --violet-bg: #211f38;
+    --rose-bg: #2e1c23;
+  }
+}
+
+/* ============================================================
+   基础
+   ============================================================ */
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+html, body { margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font-sans);
+  font-size: var(--fs-base);
+  line-height: 1.6;
+  color: var(--ink-600);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-variant-numeric: tabular-nums;
+}
+
+h1, h2, h3, h4 {
+  margin: 0;
+  color: var(--ink-900);
+  font-weight: 640;
+  letter-spacing: -.025em;
+  line-height: 1.15;
+  text-wrap: balance;
+}
+h1 { font-size: var(--fs-2xl); letter-spacing: -.032em; }
+h2 { font-size: var(--fs-xl); letter-spacing: -.028em; }
+h3 { font-size: var(--fs-lg); }
+
+p { margin: 0; text-wrap: pretty; }
+a { color: var(--accent-600); text-decoration: none; transition: color var(--t-fast); }
+a:hover { color: var(--accent-500); }
+
+button { font-family: inherit; cursor: pointer; }
+input, select, textarea { font-family: inherit; font-size: var(--fs-base); color: var(--ink-800); }
+input::placeholder, textarea::placeholder { color: var(--ink-400); }
+
+:focus-visible {
+  outline: 2px solid var(--accent-500);
+  outline-offset: 2px;
+  border-radius: var(--r-xs);
+}
+
+.num { font-variant-numeric: tabular-nums; font-feature-settings: 'tnum'; }
+.mono { font-family: var(--font-mono); font-size: .92em; letter-spacing: -.01em; }
+
+/* 眉标：微型大写标签 */
+.eyebrow {
+  display: inline-flex; align-items: center;
+  padding: 3px 10px;
+  border-radius: var(--r-pill);
+  background: var(--well);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--ink-500);
+}
+
+/* ---------- 共享结构原语 ---------- */
+
+/* 凹槽：输入框、段控、进度底槽 */
+.well {
+  background: var(--well);
+  border-radius: var(--r-md);
+  box-shadow: var(--inset-well);
+}
+
+/* 抬起表面：白卡（不做 bezel 时用） */
+.raised {
+  background: var(--surface);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-raise), var(--inset-hi);
+}
+
+/* 分段控件 */
+.seg {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  background: var(--well);
+  border-radius: var(--r-pill);
+  box-shadow: var(--inset-well);
+}
+.seg > button {
+  height: 28px;
+  padding: 0 14px;
+  border: none;
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--ink-500);
+  font-size: var(--fs-xs);
+  font-weight: 560;
+  transition: background var(--t-fast), color var(--t-fast), box-shadow var(--t-base);
+}
+.seg > button:hover { color: var(--ink-800); }
+.seg > button.on {
+  background: var(--surface);
+  color: var(--ink-900);
+  box-shadow: var(--shadow-raise);
+}
+
+/* 滚动条：极细、悬停才明显 */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: var(--r-pill);
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+*:hover::-webkit-scrollbar-thumb { background: var(--ink-200); background-clip: content-box; }
+
+/* 入场：元素不静态出现 */
+@keyframes reveal-up {
+  from { opacity: 0; transform: translateY(18px); filter: blur(5px); }
+  to   { opacity: 1; transform: translateY(0);    filter: blur(0); }
+}
+.reveal { animation: reveal-up .7s var(--ease-out) both; }
+
+@keyframes shimmer-move { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+.skeleton {
+  background: linear-gradient(90deg, var(--well) 25%, var(--well-2) 50%, var(--well) 75%);
+  background-size: 200% 100%;
+  animation: shimmer-move 1.6s var(--ease-smooth) infinite;
+  border-radius: var(--r-xs);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

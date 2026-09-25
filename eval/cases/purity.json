@@ -1,0 +1,67 @@
+[
+  {
+    "id": "purity-sanitize-gear",
+    "dimension": "purity",
+    "title": "回复清洗：⚙ 独占工具行被剔除",
+    "priority": "p0",
+    "llm_script": [
+      { "tool_call": { "tool": "get_balance", "args": "{}" } },
+      { "reply": "⚙ get_balance\n你的余额为 2000.00 元。" }
+    ],
+    "turns": ["查余额"],
+    "expect": {
+      "tools": ["get_balance"],
+      "no_pending_final": true,
+      "reply_contains": ["余额"],
+      "env_reply_contains": ["2000.00"],
+      "reply_not": ["⚙", "get_balance"]
+    }
+  },
+  {
+    "id": "purity-sanitize-blanklines",
+    "dimension": "purity",
+    "title": "回复清洗：连续空行被压缩",
+    "priority": "p1",
+    "llm_script": [
+      { "tool_call": { "tool": "list_models", "args": "{}" } },
+      { "reply": "目录如下：\n\n\n\nDeepSeek V4 Flash\n\n\n\n共 37 款。" }
+    ],
+    "turns": ["看下商品"],
+    "expect": {
+      "tools": ["list_models"],
+      "no_pending_final": true,
+      "reply_not": ["\n\n\n\n"]
+    }
+  },
+  {
+    "id": "purity-clean-pass",
+    "dimension": "purity",
+    "title": "正常回复原样通过（不误伤）",
+    "priority": "p1",
+    "llm_script": [
+      { "tool_call": { "tool": "get_consumption", "args": "{\"days\":7}" } },
+      { "reply": "你近 7 天消费 450.00 元，主要花在模型推理上。" }
+    ],
+    "turns": ["这周花了多少"],
+    "expect": {
+      "tools": ["get_consumption"],
+      "no_pending_final": true,
+      "env_reply_contains": ["450.00"]
+    }
+  },
+  {
+    "id": "purity-pending-natural",
+    "dimension": "purity",
+    "title": "挂起文案为自然语言预览（非原始 JSON）",
+    "priority": "p1",
+    "llm_script": [
+      { "tool_call": { "tool": "recharge", "args": "{\"amount_money\":100}" } }
+    ],
+    "turns": ["充 100 元"],
+    "expect": {
+      "turn_pending": [true],
+      "pending_preview_contains": ["100"],
+      "pending_preview_not": ["amount_money"]
+    }
+  }
+]

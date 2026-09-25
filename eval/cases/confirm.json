@@ -1,0 +1,134 @@
+[
+  {
+    "id": "confirm-recharge-yes",
+    "dimension": "confirm",
+    "title": "充值：预览挂起 → 确认执行（recharge + pay）",
+    "priority": "p0",
+    "llm_script": [
+      { "tool_call": { "tool": "recharge", "args": "{\"amount_money\":100}" } }
+    ],
+    "turns": ["帮我充 100 块钱", "确认"],
+    "expect": {
+      "turn_pending": [true, false],
+      "confirmed_tool": "recharge",
+      "no_pending_final": true,
+      "reply_contains": ["充值成功"],
+      "admin_posts": ["/admin/recharge", "/admin/recharge/pay"]
+    }
+  },
+  {
+    "id": "confirm-recharge-no",
+    "dimension": "confirm",
+    "title": "充值：确认前不落任何账 → 取消零副作用",
+    "priority": "p0",
+    "llm_script": [
+      { "tool_call": { "tool": "recharge", "args": "{\"amount_money\":100}" } }
+    ],
+    "turns": ["帮我充 100 块钱", "取消"],
+    "expect": {
+      "turn_pending": [true, false],
+      "no_pending_final": true,
+      "reply_contains": ["已取消"],
+      "admin_posts": []
+    }
+  },
+  {
+    "id": "confirm-recharge-keep",
+    "dimension": "confirm",
+    "title": "挂起后输入无关内容：保留待确认状态",
+    "priority": "p1",
+    "llm_script": [
+      { "tool_call": { "tool": "recharge", "args": "{\"amount_money\":100}" } },
+      { "reply": "好的，那先不操作。请问还有什么可以帮你？" }
+    ],
+    "turns": ["帮我充 100 块钱", "那这个充值靠谱吗"],
+    "expect": {
+      "turn_pending": [true, true],
+      "admin_posts": []
+    }
+  },
+  {
+    "id": "confirm-refund-yes",
+    "dimension": "confirm",
+    "title": "按金额退款：确认后执行",
+    "priority": "p0",
+    "llm_script": [
+      { "tool_call": { "tool": "refund_recharge", "args": "{\"amount_money\":100}" } }
+    ],
+    "turns": ["退 100 块钱给我", "确认"],
+    "expect": {
+      "turn_pending": [true, false],
+      "confirmed_tool": "refund_recharge",
+      "no_pending_final": true,
+      "reply_contains": ["退款"],
+      "admin_posts": ["/admin/recharge/refund"]
+    }
+  },
+  {
+    "id": "confirm-subscribe-yes",
+    "dimension": "confirm",
+    "title": "订阅套餐：确认后执行",
+    "priority": "p1",
+    "llm_script": [
+      { "tool_call": { "tool": "subscribe_plan", "args": "{\"plan_id\":3}" } }
+    ],
+    "turns": ["帮我订阅月度标准套餐", "确认"],
+    "expect": {
+      "turn_pending": [true, false],
+      "confirmed_tool": "subscribe_plan",
+      "no_pending_final": true,
+      "reply_contains": ["订阅", "成功"],
+      "admin_posts": ["/admin/subscribe"]
+    }
+  },
+  {
+    "id": "confirm-changeplan-yes",
+    "dimension": "confirm",
+    "title": "改套餐：确认后执行（下期生效）",
+    "priority": "p2",
+    "llm_script": [
+      { "tool_call": { "tool": "change_plan", "args": "{\"plan_id\":4}" } }
+    ],
+    "turns": ["把我的套餐改成旗舰", "确认"],
+    "expect": {
+      "turn_pending": [true, false],
+      "confirmed_tool": "change_plan",
+      "no_pending_final": true,
+      "reply_contains": ["下期", "套餐"],
+      "admin_posts": ["/admin/change-plan"]
+    }
+  },
+  {
+    "id": "confirm-cancel-yes",
+    "dimension": "confirm",
+    "title": "退订：确认后执行（当期不退，停续费）",
+    "priority": "p1",
+    "llm_script": [
+      { "tool_call": { "tool": "cancel_subscription", "args": "{}" } }
+    ],
+    "turns": ["退订我的套餐", "确认"],
+    "expect": {
+      "turn_pending": [true, false],
+      "confirmed_tool": "cancel_subscription",
+      "no_pending_final": true,
+      "reply_contains": ["退订", "当期不退"],
+      "admin_posts": ["/admin/cancel-subscription"]
+    }
+  },
+  {
+    "id": "confirm-keyword-variant",
+    "dimension": "confirm",
+    "title": "确认关键字变体「好的」同样触发执行",
+    "priority": "p2",
+    "llm_script": [
+      { "tool_call": { "tool": "recharge", "args": "{\"amount_money\":50}" } }
+    ],
+    "turns": ["充 50 块", "好的"],
+    "expect": {
+      "turn_pending": [true, false],
+      "confirmed_tool": "recharge",
+      "no_pending_final": true,
+      "admin_posts": ["/admin/recharge", "/admin/recharge/pay"]
+    }
+  }
+]

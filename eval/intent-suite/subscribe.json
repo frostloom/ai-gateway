@@ -1,0 +1,867 @@
+[
+  {
+    "id": "subscribe-060",
+    "text": "我决定订你们的套餐了，麻烦开通月度旗舰",
+    "intent": "subscribe_plan",
+    "dimension": "verbose",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "subscribe-023",
+    "text": "我想订标准那个",
+    "intent": "subscribe_plan",
+    "dimension": "colloquial",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "subscribe-009",
+    "text": "我要订阅月度套餐",
+    "intent": "subscribe_plan",
+    "dimension": "canonical",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "subscribe-051",
+    "text": "我想订阅你们的月度标准套餐，麻烦帮我开通一下",
+    "intent": "subscribe_plan",
+    "dimension": "verbose",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "subscribe-026",
+    "text": "帮我订个便宜的套餐",
+    "intent": "subscribe_plan",
+    "dimension": "colloquial",
+    "risk": "medium",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "subscribe-008",
+    "text": "帮我订套餐",
+    "intent": "subscribe_plan",
+    "dimension": "canonical",
+    "risk": "medium",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "subscribe-049",
+    "text": "订阋月度套餐",
+    "intent": "subscribe_plan",
+    "dimension": "typo",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "subscribe-014",
+    "text": "订阅套餐服务",
+    "intent": "subscribe_plan",
+    "dimension": "canonical",
+    "risk": "medium",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "subscribe-012",
+    "text": "帮我订月度标准",
+    "intent": "subscribe_plan",
+    "dimension": "canonical",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "subscribe-028",
+    "text": "给我开个会员",
+    "intent": "subscribe_plan",
+    "dimension": "colloquial",
+    "risk": "medium",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "subscribe-038",
+    "text": "买套餐",
+    "intent": "subscribe_plan",
+    "dimension": "terse",
+    "risk": "medium",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "subscribe-063",
+    "text": "怎么订更划算",
+    "intent": "subscribe_plan",
+    "dimension": "indirect",
+    "risk": "medium",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "subscribe-062",
+    "text": "我想改成额度制",
+    "intent": "subscribe_plan",
+    "dimension": "indirect",
+    "risk": "medium",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "subscribe-077",
+    "text": "帮我 subscribe 旗舰套餐",
+    "intent": "subscribe_plan",
+    "dimension": "mixed_en",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "subscribe-003",
+    "text": "帮我开通套餐",
+    "intent": "subscribe_plan",
+    "dimension": "canonical",
+    "risk": "medium",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "subscribe-084",
+    "text": "请问怎么订阅套餐呢",
+    "intent": "subscribe_plan",
+    "dimension": "polite",
+    "risk": "medium",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "subscribe-039",
+    "text": "订购套餐",
+    "intent": "subscribe_plan",
+    "dimension": "terse",
+    "risk": "medium",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "subscribe-048",
+    "text": "我要定套餐",
+    "intent": "subscribe_plan",
+    "dimension": "typo",
+    "risk": "medium",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "subscribe-024",
+    "text": "给我开通下套餐",
+    "intent": "subscribe_plan",
+    "dimension": "colloquial",
+    "risk": "medium",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "subscribe-091",
+    "text": "立刻订阅套餐",
+    "intent": "subscribe_plan",
+    "dimension": "command",
+    "risk": "medium",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "subscribe-079",
+    "text": "请问可以帮我订阅套餐吗",
+    "intent": "subscribe_plan",
+    "dimension": "polite",
+    "risk": "medium",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "subscribe-066",
+    "text": "有没有包月的方式",
+    "intent": "subscribe_plan",
+    "dimension": "indirect",
+    "risk": "medium",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "subscribe-086",
+    "text": "能否帮我开通套餐订阅",
+    "intent": "subscribe_plan",
+    "dimension": "polite",
+    "risk": "medium",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "subscribe-011",
+    "text": "开通套餐订阅",
+    "intent": "subscribe_plan",
+    "dimension": "canonical",
+    "risk": "medium",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "subscribe-020",
+    "text": "给我整一个套餐",
+    "intent": "subscribe_plan",
+    "dimension": "colloquial",
+    "risk": "medium",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "subscribe-097",
+    "text": "给我订阅套餐",
+    "intent": "subscribe_plan",
+    "dimension": "command",
+    "risk": "medium",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "subscribe-092",
+    "text": "马上订月度旗舰",
+    "intent": "subscribe_plan",
+    "dimension": "command",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "subscribe-042",
+    "text": "订阅套惨",
+    "intent": "subscribe_plan",
+    "dimension": "typo",
+    "risk": "medium",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "subscribe-082",
+    "text": "可以帮忙订购月度旗舰吗",
+    "intent": "subscribe_plan",
+    "dimension": "polite",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "subscribe-058",
+    "text": "我想开通月度套餐，这样额度刷新更划算",
+    "intent": "subscribe_plan",
+    "dimension": "verbose",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "subscribe-088",
+    "text": "请问可以订阅套餐吗",
+    "intent": "subscribe_plan",
+    "dimension": "polite",
+    "risk": "medium",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "subscribe-050",
+    "text": "开通套惨",
+    "intent": "subscribe_plan",
+    "dimension": "typo",
+    "risk": "medium",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "subscribe-029",
+    "text": "我要订阅那个旗舰的",
+    "intent": "subscribe_plan",
+    "dimension": "colloquial",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "subscribe-006",
+    "text": "开通月度标准套餐",
+    "intent": "subscribe_plan",
+    "dimension": "canonical",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "subscribe-094",
+    "text": "给我开套餐",
+    "intent": "subscribe_plan",
+    "dimension": "command",
+    "risk": "medium",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "subscribe-090",
+    "text": "给我开通月度标准",
+    "intent": "subscribe_plan",
+    "dimension": "command",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "subscribe-061",
+    "text": "包月怎么开",
+    "intent": "subscribe_plan",
+    "dimension": "indirect",
+    "risk": "medium",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "subscribe-095",
+    "text": "直接订月度标准",
+    "intent": "subscribe_plan",
+    "dimension": "command",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "subscribe-067",
+    "text": "我想订个长期的",
+    "intent": "subscribe_plan",
+    "dimension": "indirect",
+    "risk": "medium",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "subscribe-040",
+    "text": "订旗舰",
+    "intent": "subscribe_plan",
+    "dimension": "terse",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "subscribe-018",
+    "text": "帮我订个会员",
+    "intent": "subscribe_plan",
+    "dimension": "colloquial",
+    "risk": "medium",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "subscribe-047",
+    "text": "帮我订顶阅",
+    "intent": "subscribe_plan",
+    "dimension": "typo",
+    "risk": "medium",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "subscribe-036",
+    "text": "订月度标准",
+    "intent": "subscribe_plan",
+    "dimension": "terse",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "subscribe-030",
+    "text": "帮我订个套餐试试",
+    "intent": "subscribe_plan",
+    "dimension": "colloquial",
+    "risk": "medium",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "subscribe-032",
+    "text": "订套餐",
+    "intent": "subscribe_plan",
+    "dimension": "terse",
+    "risk": "medium",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "subscribe-093",
+    "text": "帮我订套餐，快点",
+    "intent": "subscribe_plan",
+    "dimension": "command",
+    "risk": "medium",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "subscribe-033",
+    "text": "开通套餐",
+    "intent": "subscribe_plan",
+    "dimension": "terse",
+    "risk": "medium",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "subscribe-069",
+    "text": "我想换个计费方式",
+    "intent": "subscribe_plan",
+    "dimension": "indirect",
+    "risk": "medium",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "subscribe-099",
+    "text": "订月度标准 #2",
+    "intent": "subscribe_plan",
+    "dimension": "command",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "subscribe-081",
+    "text": "能不能帮我订个套餐",
+    "intent": "subscribe_plan",
+    "dimension": "polite",
+    "risk": "medium",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "subscribe-065",
+    "text": "按量太贵了",
+    "intent": "subscribe_plan",
+    "dimension": "indirect",
+    "risk": "medium",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "subscribe-100",
+    "text": "快给我订套餐",
+    "intent": "subscribe_plan",
+    "dimension": "command",
+    "risk": "medium",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "subscribe-073",
+    "text": "开通 pro plan",
+    "intent": "subscribe_plan",
+    "dimension": "mixed_en",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "subscribe-005",
+    "text": "我要订购套餐",
+    "intent": "subscribe_plan",
+    "dimension": "canonical",
+    "risk": "medium",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "subscribe-035",
+    "text": "订阅套餐",
+    "intent": "subscribe_plan",
+    "dimension": "terse",
+    "risk": "medium",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "subscribe-083",
+    "text": "劳驾帮我开通套餐",
+    "intent": "subscribe_plan",
+    "dimension": "polite",
+    "risk": "medium",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "subscribe-015",
+    "text": "我要包月",
+    "intent": "subscribe_plan",
+    "dimension": "colloquial",
+    "risk": "medium",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "subscribe-072",
+    "text": "我要订阅 standard plan",
+    "intent": "subscribe_plan",
+    "dimension": "mixed_en",
+    "risk": "medium",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "subscribe-089",
+    "text": "订套餐 #2",
+    "intent": "subscribe_plan",
+    "dimension": "command",
+    "risk": "medium",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "subscribe-052",
+    "text": "你好，我打算长期使用，想订阅一个月度套餐，请帮我办理",
+    "intent": "subscribe_plan",
+    "dimension": "verbose",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "subscribe-098",
+    "text": "立即开通月度旗舰",
+    "intent": "subscribe_plan",
+    "dimension": "command",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "subscribe-054",
+    "text": "麻烦帮我订购月度标准套餐，我想用额度制的方式",
+    "intent": "subscribe_plan",
+    "dimension": "verbose",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "subscribe-046",
+    "text": "订阅月度标尊",
+    "intent": "subscribe_plan",
+    "dimension": "typo",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "subscribe-041",
+    "text": "我要订阋套餐",
+    "intent": "subscribe_plan",
+    "dimension": "typo",
+    "risk": "medium",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "subscribe-057",
+    "text": "帮我办理一下套餐订阅，我要订月度标准",
+    "intent": "subscribe_plan",
+    "dimension": "verbose",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "subscribe-027",
+    "text": "我想包个月",
+    "intent": "subscribe_plan",
+    "dimension": "colloquial",
+    "risk": "medium",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "subscribe-096",
+    "text": "开通，快点",
+    "intent": "subscribe_plan",
+    "dimension": "command",
+    "risk": "medium",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "subscribe-010",
+    "text": "订购月度旗舰",
+    "intent": "subscribe_plan",
+    "dimension": "canonical",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "subscribe-053",
+    "text": "我比较了一下，决定订阅月度旗舰套餐，麻烦帮我开通",
+    "intent": "subscribe_plan",
+    "dimension": "verbose",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "subscribe-007",
+    "text": "订阅一个套餐",
+    "intent": "subscribe_plan",
+    "dimension": "canonical",
+    "risk": "medium",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "subscribe-044",
+    "text": "我要订越",
+    "intent": "subscribe_plan",
+    "dimension": "typo",
+    "risk": "medium",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "subscribe-002",
+    "text": "订阅月度标准",
+    "intent": "subscribe_plan",
+    "dimension": "canonical",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "subscribe-059",
+    "text": "请帮我订阅套餐，选月度标准档位的",
+    "intent": "subscribe_plan",
+    "dimension": "verbose",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "subscribe-031",
+    "text": "订阅",
+    "intent": "subscribe_plan",
+    "dimension": "terse",
+    "risk": "medium",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "subscribe-025",
+    "text": "我要搞个套餐",
+    "intent": "subscribe_plan",
+    "dimension": "colloquial",
+    "risk": "medium",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "subscribe-045",
+    "text": "开通套参",
+    "intent": "subscribe_plan",
+    "dimension": "typo",
+    "risk": "medium",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "subscribe-076",
+    "text": "我要开 plan",
+    "intent": "subscribe_plan",
+    "dimension": "mixed_en",
+    "risk": "medium",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "subscribe-021",
+    "text": "我要买套餐",
+    "intent": "subscribe_plan",
+    "dimension": "colloquial",
+    "risk": "medium",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "subscribe-019",
+    "text": "我想开通那个月度的",
+    "intent": "subscribe_plan",
+    "dimension": "colloquial",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "subscribe-078",
+    "text": "subscribe 一下套餐",
+    "intent": "subscribe_plan",
+    "dimension": "mixed_en",
+    "risk": "medium",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "subscribe-075",
+    "text": "subscribe 月度标准",
+    "intent": "subscribe_plan",
+    "dimension": "mixed_en",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "subscribe-085",
+    "text": "方便的话帮我订月度标准",
+    "intent": "subscribe_plan",
+    "dimension": "polite",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "subscribe-071",
+    "text": "帮我 subscribe monthly plan",
+    "intent": "subscribe_plan",
+    "dimension": "mixed_en",
+    "risk": "medium",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "subscribe-013",
+    "text": "我要开通订阅",
+    "intent": "subscribe_plan",
+    "dimension": "canonical",
+    "risk": "medium",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "subscribe-055",
+    "text": "我现在的按量付费太贵了，想改成订阅套餐，帮我订月度标准",
+    "intent": "subscribe_plan",
+    "dimension": "verbose",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "subscribe-004",
+    "text": "订阅月度旗舰",
+    "intent": "subscribe_plan",
+    "dimension": "canonical",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "subscribe-022",
+    "text": "帮我开个包月",
+    "intent": "subscribe_plan",
+    "dimension": "colloquial",
+    "risk": "medium",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "subscribe-017",
+    "text": "我想订个包月的",
+    "intent": "subscribe_plan",
+    "dimension": "colloquial",
+    "risk": "medium",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "subscribe-080",
+    "text": "麻烦帮我开通月度标准好吗",
+    "intent": "subscribe_plan",
+    "dimension": "polite",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "subscribe-016",
+    "text": "给我开个套餐",
+    "intent": "subscribe_plan",
+    "dimension": "colloquial",
+    "risk": "medium",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "subscribe-068",
+    "text": "怎么开通会员",
+    "intent": "subscribe_plan",
+    "dimension": "indirect",
+    "risk": "medium",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "subscribe-070",
+    "text": "套餐怎么订",
+    "intent": "subscribe_plan",
+    "dimension": "indirect",
+    "risk": "medium",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "subscribe-064",
+    "text": "我想长期用，选哪个",
+    "intent": "subscribe_plan",
+    "dimension": "indirect",
+    "risk": "medium",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "subscribe-037",
+    "text": "开通订阅",
+    "intent": "subscribe_plan",
+    "dimension": "terse",
+    "risk": "medium",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "subscribe-043",
+    "text": "帮我开同套餐",
+    "intent": "subscribe_plan",
+    "dimension": "typo",
+    "risk": "medium",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "subscribe-074",
+    "text": "帮我订个 monthly 套餐",
+    "intent": "subscribe_plan",
+    "dimension": "mixed_en",
+    "risk": "medium",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "subscribe-034",
+    "text": "包月",
+    "intent": "subscribe_plan",
+    "dimension": "terse",
+    "risk": "medium",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "subscribe-056",
+    "text": "我要订阅你们的套餐服务，选月度旗舰那个，请帮我开通",
+    "intent": "subscribe_plan",
+    "dimension": "verbose",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "subscribe-001",
+    "text": "我要订阅套餐",
+    "intent": "subscribe_plan",
+    "dimension": "canonical",
+    "risk": "medium",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "subscribe-087",
+    "text": "麻烦您帮我订月度旗舰",
+    "intent": "subscribe_plan",
+    "dimension": "polite",
+    "risk": "medium",
+    "needs_confirm": true
+  }
+]

@@ -1,0 +1,91 @@
+# AI 模型网关 / 计费平台 基础设施与各服务。
+# 用法：docker compose up -d mysql redis   # M1 只需这两
+#       docker compose up --build          # M5 全量
+services:
+  mysql:
+    # 国内网络 Docker Hub 直连不通，用本地已存在的 daocloud 镜像 tag。
+    # 网络可达环境可改回 mysql:8.0。
+    image: docker.m.daocloud.io/library/mysql:8.0.40
+    container_name: ai-gateway-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: ai_gateway
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./scripts/schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  redis:
+    image: docker.m.daocloud.io/library/redis:7-alpine
+    container_name: ai-gateway-redis
+    ports:
+      - "6381:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  # M10 Kafka 计费事件流（apache/kafka 官方镜像，KRaft 单节点无 zookeeper）。
+  # daocloud 镜像源没有 bitnami/kafka（403），改用 apache/kafka:3.7.0（可用）。
+  # 双 listener：PLAINTEXT(:9092, advertised=kafka:9092) 供容器内 kafka-init 建 topic；
+  # PLAINTEXT_HOST(:29092, advertised=localhost:29092) 供宿主本地 billing/event-consumer 连。
+  # 单 advertised=localhost 会让容器内客户端按 advertised 连回自己 localhost → 失败。
+  kafka:
+    image: docker.m.daocloud.io/apache/kafka:3.7.0
+    container_name: ai-gateway-kafka
+    environment:
+      KAFKA_NODE_ID: "1"
+      KAFKA_PROCESS_ROLES: "broker,controller"
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka:9093"
+      KAFKA_LISTENERS: "CONTROLLER://:9093,PLAINTEXT://:9092,PLAINTEXT_HOST://:29092"
+      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT"
+      KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
+      KAFKA_INTER_BROKER_LISTENER_NAME: "PLAINTEXT"
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: "1"
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: "1"
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: "0"
+      # 关键修复：镜像生成的 server.properties 只含显式 KAFKA_* 项，不设 KAFKA_LOG_DIRS 时
+      # Kafka 回落默认 /tmp/kafka-logs（容器可写层），compose 挂的 kafka-data 卷实际是空的，
+      # docker compose down 会丢全部 topic/offset。必须显式指向挂卷路径。
+      KAFKA_LOG_DIRS: "/tmp/kraft-combined-logs"
+    ports:
+      - "29092:29092" # 宿主 → PLAINTEXT_HOST（.env 的 KAFKA_BROKERS=127.0.0.1:29092）
+    volumes:
+      - kafka-data:/tmp/kraft-combined-logs
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:29092 --list >/dev/null 2>&1"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  # 一次性建 topic（幂等）：主事件流 + 死信流，各 3 分区。kafka 健康后才执行。
+  # 连容器内 PLAINTEXT listener（kafka:9092），与宿主 PLAINTEXT_HOST 分开。
+  # 注意：command 必须是「单元素数组」——compose 会按空白拆字符串，`\` 续行会被拆成
+  # 独立 "\n" 参数导致 kafka-topics.sh 打 usage。单元素字符串交给 bash -c 整段执行。
+  kafka-init:
+    image: docker.m.daocloud.io/apache/kafka:3.7.0
+    container_name: ai-gateway-kafka-init
+    depends_on:
+      kafka:
+        condition: service_healthy
+    entrypoint: ["/bin/bash", "-c"]
+    command: ["/opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9092 --create --if-not-exists --topic billing.events --partitions 3 --replication-factor 1 && /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9092 --create --if-not-exists --topic billing.events.dlq --partitions 3 --replication-factor 1"]
+
+  # ---- 以下服务在 M2/M5 加入 ----
+  # billing:
+  #   build: { context: ., dockerfile: Dockerfile }
+  #   command: ["/app/billing"]
+  #   ...
+volumes:
+  mysql-data:
+  kafka-data:

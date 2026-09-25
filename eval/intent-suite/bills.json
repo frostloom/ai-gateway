@@ -1,0 +1,802 @@
+[
+  {
+    "id": "bills-098",
+    "text": "给我查账单明细",
+    "intent": "get_recent_bills",
+    "dimension": "command",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-097",
+    "text": "账单亮出来",
+    "intent": "get_recent_bills",
+    "dimension": "command",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-074",
+    "text": "拉一下 billing 明细",
+    "intent": "get_recent_bills",
+    "dimension": "mixed_en",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-005",
+    "text": "账单查询",
+    "intent": "get_recent_bills",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-027",
+    "text": "帮我看看最近扣的钱",
+    "intent": "get_recent_bills",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-063",
+    "text": "哪次调用扣的钱",
+    "intent": "get_recent_bills",
+    "dimension": "indirect",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-020",
+    "text": "我这几笔都扣了啥",
+    "intent": "get_recent_bills",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-019",
+    "text": "给我看看最近的记录",
+    "intent": "get_recent_bills",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-033",
+    "text": "流水",
+    "intent": "get_recent_bills",
+    "dimension": "terse",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-018",
+    "text": "最近有扣费吗",
+    "intent": "get_recent_bills",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-094",
+    "text": "报一下最近账单",
+    "intent": "get_recent_bills",
+    "dimension": "command",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-082",
+    "text": "可以帮忙查询一下最近的消费记录吗",
+    "intent": "get_recent_bills",
+    "dimension": "polite",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-014",
+    "text": "查最近的流水",
+    "intent": "get_recent_bills",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-038",
+    "text": "我的账单",
+    "intent": "get_recent_bills",
+    "dimension": "terse",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-032",
+    "text": "查账单",
+    "intent": "get_recent_bills",
+    "dimension": "terse",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-085",
+    "text": "方便的话帮我查一下账单",
+    "intent": "get_recent_bills",
+    "dimension": "polite",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-054",
+    "text": "我想看看最近这几笔调用分别扣了多少钱，方便定位哪次用量异常",
+    "intent": "get_recent_bills",
+    "dimension": "verbose",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-096",
+    "text": "直接列出来",
+    "intent": "get_recent_bills",
+    "dimension": "command",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-056",
+    "text": "我这边发现余额少了一些，想看看最近的账单明细确认一下扣费情况",
+    "intent": "get_recent_bills",
+    "dimension": "verbose",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-030",
+    "text": "把最近的记录拉一下",
+    "intent": "get_recent_bills",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-015",
+    "text": "我最近都买了啥",
+    "intent": "get_recent_bills",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-002",
+    "text": "查询账单明细",
+    "intent": "get_recent_bills",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-036",
+    "text": "消费记录",
+    "intent": "get_recent_bills",
+    "dimension": "terse",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-060",
+    "text": "最近有几笔扣费我记不清了，麻烦帮我查一下明细",
+    "intent": "get_recent_bills",
+    "dimension": "verbose",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-055",
+    "text": "麻烦帮我查一下最近的消费流水，我想逐笔核对一下金额",
+    "intent": "get_recent_bills",
+    "dimension": "verbose",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-092",
+    "text": "马上拉账单",
+    "intent": "get_recent_bills",
+    "dimension": "command",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-013",
+    "text": "账单明细查询",
+    "intent": "get_recent_bills",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-016",
+    "text": "看看我最近几笔单",
+    "intent": "get_recent_bills",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-022",
+    "text": "我上次调用扣了多少",
+    "intent": "get_recent_bills",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-044",
+    "text": "涨单明细",
+    "intent": "get_recent_bills",
+    "dimension": "typo",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-058",
+    "text": "我需要最近的账单流水来做报销凭证，麻烦帮我导出一下",
+    "intent": "get_recent_bills",
+    "dimension": "verbose",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-004",
+    "text": "查看最近几笔账单",
+    "intent": "get_recent_bills",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-086",
+    "text": "能否告知我最近的扣费记录",
+    "intent": "get_recent_bills",
+    "dimension": "polite",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-061",
+    "text": "我余额怎么少了",
+    "intent": "get_recent_bills",
+    "dimension": "indirect",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-007",
+    "text": "查询我的账单流水",
+    "intent": "get_recent_bills",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-084",
+    "text": "请问我的最近账单在哪看呢",
+    "intent": "get_recent_bills",
+    "dimension": "polite",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-049",
+    "text": "帐单查询",
+    "intent": "get_recent_bills",
+    "dimension": "typo",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-083",
+    "text": "劳驾帮我查下账单明细",
+    "intent": "get_recent_bills",
+    "dimension": "polite",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-078",
+    "text": "查下流水 transaction",
+    "intent": "get_recent_bills",
+    "dimension": "mixed_en",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-090",
+    "text": "把账单给我",
+    "intent": "get_recent_bills",
+    "dimension": "command",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-043",
+    "text": "帮我差账单",
+    "intent": "get_recent_bills",
+    "dimension": "typo",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-024",
+    "text": "最近的单子给我瞅瞅",
+    "intent": "get_recent_bills",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-047",
+    "text": "最近帐单",
+    "intent": "get_recent_bills",
+    "dimension": "typo",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-062",
+    "text": "刚才那笔算成功了吗",
+    "intent": "get_recent_bills",
+    "dimension": "indirect",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-066",
+    "text": "帮我看看扣费对不对",
+    "intent": "get_recent_bills",
+    "dimension": "indirect",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-045",
+    "text": "查帐单记录",
+    "intent": "get_recent_bills",
+    "dimension": "typo",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-026",
+    "text": "最近花了几笔",
+    "intent": "get_recent_bills",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-034",
+    "text": "最近账单",
+    "intent": "get_recent_bills",
+    "dimension": "terse",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-076",
+    "text": "看下 payment 记录",
+    "intent": "get_recent_bills",
+    "dimension": "mixed_en",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-028",
+    "text": "我最近消费明细呢",
+    "intent": "get_recent_bills",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-052",
+    "text": "你好，我需要查看最近的账单明细来做对账，能帮我拉一下吗",
+    "intent": "get_recent_bills",
+    "dimension": "verbose",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-089",
+    "text": "账单报一下",
+    "intent": "get_recent_bills",
+    "dimension": "command",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-067",
+    "text": "有没有重复扣费",
+    "intent": "get_recent_bills",
+    "dimension": "indirect",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-003",
+    "text": "我要看账单",
+    "intent": "get_recent_bills",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-048",
+    "text": "查看涨单",
+    "intent": "get_recent_bills",
+    "dimension": "typo",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-035",
+    "text": "明细",
+    "intent": "get_recent_bills",
+    "dimension": "terse",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-023",
+    "text": "看看我最近都干了啥",
+    "intent": "get_recent_bills",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-037",
+    "text": "账单明细",
+    "intent": "get_recent_bills",
+    "dimension": "terse",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-029",
+    "text": "最近几单扣多少",
+    "intent": "get_recent_bills",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-072",
+    "text": "看下最近的 order 记录",
+    "intent": "get_recent_bills",
+    "dimension": "mixed_en",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-064",
+    "text": "有异常扣费吗",
+    "intent": "get_recent_bills",
+    "dimension": "indirect",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-041",
+    "text": "查帐单",
+    "intent": "get_recent_bills",
+    "dimension": "typo",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-095",
+    "text": "查账单，快点",
+    "intent": "get_recent_bills",
+    "dimension": "command",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-051",
+    "text": "我想核对一下最近的调用记录，麻烦帮我查一下最近几笔扣费的明细",
+    "intent": "get_recent_bills",
+    "dimension": "verbose",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-057",
+    "text": "请帮我把最近十笔的消费记录列出来，我要做成本分析",
+    "intent": "get_recent_bills",
+    "dimension": "verbose",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-088",
+    "text": "请问可以看下我的账单明细吗",
+    "intent": "get_recent_bills",
+    "dimension": "polite",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-025",
+    "text": "我这两天扣费记录",
+    "intent": "get_recent_bills",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-017",
+    "text": "我昨天那笔扣了多少",
+    "intent": "get_recent_bills",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-080",
+    "text": "麻烦帮我看看最近账单好吗",
+    "intent": "get_recent_bills",
+    "dimension": "polite",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-011",
+    "text": "查询最近十笔账单",
+    "intent": "get_recent_bills",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-046",
+    "text": "账单留水",
+    "intent": "get_recent_bills",
+    "dimension": "typo",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-009",
+    "text": "我要查账单记录",
+    "intent": "get_recent_bills",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-068",
+    "text": "这笔钱扣得对吗",
+    "intent": "get_recent_bills",
+    "dimension": "indirect",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-010",
+    "text": "查下账单",
+    "intent": "get_recent_bills",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-039",
+    "text": "看流水",
+    "intent": "get_recent_bills",
+    "dimension": "terse",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-069",
+    "text": "我账户变动记录",
+    "intent": "get_recent_bills",
+    "dimension": "indirect",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-040",
+    "text": "扣费记录",
+    "intent": "get_recent_bills",
+    "dimension": "terse",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-077",
+    "text": "我的 order 列表",
+    "intent": "get_recent_bills",
+    "dimension": "mixed_en",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-006",
+    "text": "帮我查最近的消费记录",
+    "intent": "get_recent_bills",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-008",
+    "text": "看一下最近的账单明细",
+    "intent": "get_recent_bills",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-021",
+    "text": "最近扣了几次钱",
+    "intent": "get_recent_bills",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-093",
+    "text": "账单明细给我",
+    "intent": "get_recent_bills",
+    "dimension": "command",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-031",
+    "text": "账单",
+    "intent": "get_recent_bills",
+    "dimension": "terse",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-071",
+    "text": "查下 bill 明细",
+    "intent": "get_recent_bills",
+    "dimension": "mixed_en",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-053",
+    "text": "因为财务要核对，我需要最近这段时间每一笔扣费的记录，麻烦查一下",
+    "intent": "get_recent_bills",
+    "dimension": "verbose",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-050",
+    "text": "流水记路",
+    "intent": "get_recent_bills",
+    "dimension": "typo",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-042",
+    "text": "账单明细查下",
+    "intent": "get_recent_bills",
+    "dimension": "typo",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-012",
+    "text": "看看我的账单",
+    "intent": "get_recent_bills",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-070",
+    "text": "钱是怎么花出去的",
+    "intent": "get_recent_bills",
+    "dimension": "indirect",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-099",
+    "text": "流水发我",
+    "intent": "get_recent_bills",
+    "dimension": "command",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-001",
+    "text": "查一下最近的账单",
+    "intent": "get_recent_bills",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-065",
+    "text": "我这几天的钱怎么没的",
+    "intent": "get_recent_bills",
+    "dimension": "indirect",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-100",
+    "text": "快速查下账单",
+    "intent": "get_recent_bills",
+    "dimension": "command",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-081",
+    "text": "能不能帮我拉一下账单明细",
+    "intent": "get_recent_bills",
+    "dimension": "polite",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-091",
+    "text": "立刻查账单",
+    "intent": "get_recent_bills",
+    "dimension": "command",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-075",
+    "text": "帮我查 recent bills",
+    "intent": "get_recent_bills",
+    "dimension": "mixed_en",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-079",
+    "text": "请问可以帮我查一下账单吗",
+    "intent": "get_recent_bills",
+    "dimension": "polite",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-073",
+    "text": "查 transaction 记录",
+    "intent": "get_recent_bills",
+    "dimension": "mixed_en",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-087",
+    "text": "麻烦您帮我查一下账单流水",
+    "intent": "get_recent_bills",
+    "dimension": "polite",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "bills-059",
+    "text": "帮我看看最近几笔单子，我想确认下有没有异常扣费",
+    "intent": "get_recent_bills",
+    "dimension": "verbose",
+    "risk": "low",
+    "needs_confirm": false
+  }
+]

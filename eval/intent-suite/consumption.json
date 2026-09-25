@@ -1,0 +1,802 @@
+[
+  {
+    "id": "consumption-019",
+    "text": "我最近花钱多吗",
+    "intent": "get_consumption",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-049",
+    "text": "查下晓费",
+    "intent": "get_consumption",
+    "dimension": "typo",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-047",
+    "text": "查看销费",
+    "intent": "get_consumption",
+    "dimension": "typo",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-036",
+    "text": "花了多少",
+    "intent": "get_consumption",
+    "dimension": "terse",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-030",
+    "text": "帮我算算花了多少",
+    "intent": "get_consumption",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-052",
+    "text": "你好，我做成本核算需要知道最近七天一共消费了多少钱，能帮我查一下吗",
+    "intent": "get_consumption",
+    "dimension": "verbose",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-005",
+    "text": "查消费记录",
+    "intent": "get_consumption",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-039",
+    "text": "我的消费",
+    "intent": "get_consumption",
+    "dimension": "terse",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-095",
+    "text": "查消费，快点",
+    "intent": "get_consumption",
+    "dimension": "command",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-093",
+    "text": "消费明细给我",
+    "intent": "get_consumption",
+    "dimension": "command",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-079",
+    "text": "请问可以帮我查一下消费情况吗",
+    "intent": "get_consumption",
+    "dimension": "polite",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-061",
+    "text": "我这个月超支了吗",
+    "intent": "get_consumption",
+    "dimension": "indirect",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-092",
+    "text": "马上统计消费",
+    "intent": "get_consumption",
+    "dimension": "command",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-063",
+    "text": "我的钱主要花在哪了",
+    "intent": "get_consumption",
+    "dimension": "indirect",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-027",
+    "text": "这阵子花了多少",
+    "intent": "get_consumption",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-058",
+    "text": "我想复盘一下这个月的支出，能帮我查一下消费记录吗",
+    "intent": "get_consumption",
+    "dimension": "verbose",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-035",
+    "text": "用量",
+    "intent": "get_consumption",
+    "dimension": "terse",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-032",
+    "text": "查消费",
+    "intent": "get_consumption",
+    "dimension": "terse",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-077",
+    "text": "我的 usage 多吗",
+    "intent": "get_consumption",
+    "dimension": "mixed_en",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-070",
+    "text": "最近的支出趋势如何",
+    "intent": "get_consumption",
+    "dimension": "indirect",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-010",
+    "text": "查下消费",
+    "intent": "get_consumption",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-021",
+    "text": "我花了多少啊",
+    "intent": "get_consumption",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-023",
+    "text": "我这两天的开销",
+    "intent": "get_consumption",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-083",
+    "text": "劳驾帮我查下消费记录",
+    "intent": "get_consumption",
+    "dimension": "polite",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-090",
+    "text": "把消费统计给我",
+    "intent": "get_consumption",
+    "dimension": "command",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-011",
+    "text": "查询我的用量消费",
+    "intent": "get_consumption",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-082",
+    "text": "可以帮忙查询一下近期的消费吗",
+    "intent": "get_consumption",
+    "dimension": "polite",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-009",
+    "text": "我要查消费总额",
+    "intent": "get_consumption",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-031",
+    "text": "消费",
+    "intent": "get_consumption",
+    "dimension": "terse",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-089",
+    "text": "消费报一下",
+    "intent": "get_consumption",
+    "dimension": "command",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-022",
+    "text": "最近消耗怎么样",
+    "intent": "get_consumption",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-071",
+    "text": "查下 usage 统计",
+    "intent": "get_consumption",
+    "dimension": "mixed_en",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-075",
+    "text": "帮我查 usage 消耗",
+    "intent": "get_consumption",
+    "dimension": "mixed_en",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-045",
+    "text": "肖费统计",
+    "intent": "get_consumption",
+    "dimension": "typo",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-007",
+    "text": "查询近七天消费",
+    "intent": "get_consumption",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-042",
+    "text": "查看小费",
+    "intent": "get_consumption",
+    "dimension": "typo",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-088",
+    "text": "请问我的花费统计在哪看",
+    "intent": "get_consumption",
+    "dimension": "polite",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-038",
+    "text": "近期消费",
+    "intent": "get_consumption",
+    "dimension": "terse",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-094",
+    "text": "报一下本周消费",
+    "intent": "get_consumption",
+    "dimension": "command",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-008",
+    "text": "看一下消费统计",
+    "intent": "get_consumption",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-060",
+    "text": "帮我拉一下最近的消费数据，我要做个汇报",
+    "intent": "get_consumption",
+    "dimension": "verbose",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-097",
+    "text": "消费数据亮出来",
+    "intent": "get_consumption",
+    "dimension": "command",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-069",
+    "text": "我这个用量算多吗",
+    "intent": "get_consumption",
+    "dimension": "indirect",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-003",
+    "text": "我要看消费情况",
+    "intent": "get_consumption",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-020",
+    "text": "看看我这两天用掉多少",
+    "intent": "get_consumption",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-051",
+    "text": "我想统计一下最近一段时间在这个平台上的总体花费情况，主要是想控制一下成本",
+    "intent": "get_consumption",
+    "dimension": "verbose",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-085",
+    "text": "方便的话帮我拉一下消费统计",
+    "intent": "get_consumption",
+    "dimension": "polite",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-014",
+    "text": "查消费汇总",
+    "intent": "get_consumption",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-046",
+    "text": "消费记路",
+    "intent": "get_consumption",
+    "dimension": "typo",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-065",
+    "text": "我的花费正常吗",
+    "intent": "get_consumption",
+    "dimension": "indirect",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-016",
+    "text": "最近用了多少",
+    "intent": "get_consumption",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-002",
+    "text": "查询消费统计",
+    "intent": "get_consumption",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-018",
+    "text": "这周花销大不大",
+    "intent": "get_consumption",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-078",
+    "text": "查下 token 消耗",
+    "intent": "get_consumption",
+    "dimension": "mixed_en",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-081",
+    "text": "能不能帮我看看消费统计",
+    "intent": "get_consumption",
+    "dimension": "polite",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-048",
+    "text": "消费统记",
+    "intent": "get_consumption",
+    "dimension": "typo",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-012",
+    "text": "看看我的消费情况",
+    "intent": "get_consumption",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-043",
+    "text": "消费了多少了",
+    "intent": "get_consumption",
+    "dimension": "typo",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-017",
+    "text": "我烧了多少钱",
+    "intent": "get_consumption",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-087",
+    "text": "麻烦您帮我查一下用量消费",
+    "intent": "get_consumption",
+    "dimension": "polite",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-028",
+    "text": "我消费高不高",
+    "intent": "get_consumption",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-029",
+    "text": "最近用得多不多",
+    "intent": "get_consumption",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-037",
+    "text": "消费统计",
+    "intent": "get_consumption",
+    "dimension": "terse",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-004",
+    "text": "查看消费明细",
+    "intent": "get_consumption",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-024",
+    "text": "用掉多少钱了",
+    "intent": "get_consumption",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-100",
+    "text": "快速统计下消费",
+    "intent": "get_consumption",
+    "dimension": "command",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-076",
+    "text": "看下 spending 情况",
+    "intent": "get_consumption",
+    "dimension": "mixed_en",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-006",
+    "text": "帮我查这周的消费",
+    "intent": "get_consumption",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-074",
+    "text": "查 cost 统计",
+    "intent": "get_consumption",
+    "dimension": "mixed_en",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-040",
+    "text": "消耗情况",
+    "intent": "get_consumption",
+    "dimension": "terse",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-044",
+    "text": "帮我差消费",
+    "intent": "get_consumption",
+    "dimension": "typo",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-034",
+    "text": "看消费",
+    "intent": "get_consumption",
+    "dimension": "terse",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-054",
+    "text": "我们团队在用这个平台，我想了解一下近期的消费统计，方便做预算",
+    "intent": "get_consumption",
+    "dimension": "verbose",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-041",
+    "text": "查消废",
+    "intent": "get_consumption",
+    "dimension": "typo",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-055",
+    "text": "我想知道最近一周在模型调用上花了多少钱，可以给我一个汇总吗",
+    "intent": "get_consumption",
+    "dimension": "verbose",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-072",
+    "text": "看下我的 consumption",
+    "intent": "get_consumption",
+    "dimension": "mixed_en",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-091",
+    "text": "立刻查消费",
+    "intent": "get_consumption",
+    "dimension": "command",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-080",
+    "text": "麻烦帮我统计一下消费好吗",
+    "intent": "get_consumption",
+    "dimension": "polite",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-086",
+    "text": "能否告知我的消费情况",
+    "intent": "get_consumption",
+    "dimension": "polite",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-033",
+    "text": "消费多少",
+    "intent": "get_consumption",
+    "dimension": "terse",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-062",
+    "text": "哪个模型最费钱",
+    "intent": "get_consumption",
+    "dimension": "indirect",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-053",
+    "text": "麻烦帮我看看最近这段时间我的消费情况，我想对比一下上个月的支出",
+    "intent": "get_consumption",
+    "dimension": "verbose",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-050",
+    "text": "销费情况",
+    "intent": "get_consumption",
+    "dimension": "typo",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-068",
+    "text": "钱都去哪了",
+    "intent": "get_consumption",
+    "dimension": "indirect",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-099",
+    "text": "消费拉出来",
+    "intent": "get_consumption",
+    "dimension": "command",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-098",
+    "text": "给我查消费统计",
+    "intent": "get_consumption",
+    "dimension": "command",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-013",
+    "text": "消费统计查询",
+    "intent": "get_consumption",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-064",
+    "text": "成本控制得怎么样",
+    "intent": "get_consumption",
+    "dimension": "indirect",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-084",
+    "text": "请问我最近消费了多少呢",
+    "intent": "get_consumption",
+    "dimension": "polite",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-026",
+    "text": "我都花哪儿去了",
+    "intent": "get_consumption",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-056",
+    "text": "为了控制成本，我需要定期查看消费情况，麻烦帮我查一下最近的",
+    "intent": "get_consumption",
+    "dimension": "verbose",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-073",
+    "text": "我这周的 cost 是多少",
+    "intent": "get_consumption",
+    "dimension": "mixed_en",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-067",
+    "text": "额度用得差不多了吧",
+    "intent": "get_consumption",
+    "dimension": "indirect",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-015",
+    "text": "我这几天花了多少钱",
+    "intent": "get_consumption",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-066",
+    "text": "是不是该省着点用了",
+    "intent": "get_consumption",
+    "dimension": "indirect",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-025",
+    "text": "最近很费钱吗",
+    "intent": "get_consumption",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-059",
+    "text": "最近账单有点多，我想看看总的消费是多少",
+    "intent": "get_consumption",
+    "dimension": "verbose",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-096",
+    "text": "直接告诉我花了多少",
+    "intent": "get_consumption",
+    "dimension": "command",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-057",
+    "text": "麻烦统计一下我近期的消费额度分布，我想看看钱主要花在哪个模型上",
+    "intent": "get_consumption",
+    "dimension": "verbose",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "consumption-001",
+    "text": "查一下我的消费",
+    "intent": "get_consumption",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  }
+]
