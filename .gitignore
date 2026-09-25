@@ -1,0 +1,41 @@
+# 构建产物
+*.exe
+bin/
+
+# 前端（web/ 独立工程）：node_modules 与本地缓存不入库；
+# dist/ 必须入库（go:embed 需要），构建产物是部署物
+web/node_modules/
+web/.npm-cache/
+
+# 环境与本地配置
+.env
+.env.local
+
+# 编辑器/系统
+.vscode/
+.idea/
+*.swp
+
+# 测试产物
+coverage.out
+
+# 本地构建缓存（go build cache，数百 MB，可重建）
+.gocache/
+
+# 运行期日志
+logs/
+*.log
+
+# 本地调试/误产物
+/-o
+err.txt
+
+# 设计预览与截图（web/src 才是前端源，这些是本地生成的对照稿）
+web/preview/
+.dsh-vision-toolkit/
+
+# 评测报告（由 go run ./cmd/eval 重新生成，见 eval/README.md）
+eval/reports/
+
+# 公开数据集调研的原始下载（web/scripts/survey-datasets.mjs 可重新拉取，几十 MB）
+web/.probe/

@@ -1,0 +1,115 @@
+// billing 计费服务的 gRPC 契约（控制面）。
+//
+// 状态机（bills 表 reserve 行）：
+//
+//	Reserve(原子扣减+落库) → [pending]
+//	  ── ReportUsage(写 usage_reported_at 持久 marker) → [pending + marker]
+//	        ── Settle(幂等) → [settled]（写 settle 行，delta 冲正 Redis）
+//	  ── Reverse(幂等) → [reversed]（Redis 退回预扣）
+syntax = "proto3";
+
+package billing.v1;
+
+option go_package = "github.com/frostloom/ai-gateway/internal/proto/billing/v1;billingv1";
+
+// BillingService 计费控制面。除 GetBalance 外全部幂等（按 request_id）。
+service BillingService {
+  // 预占额度：原子「判余额 ≥ 预扣额 再扣减」，修复 new-api 的 check-then-act 超卖缺陷。
+  // 同一 request_id 重复调用不重复扣（Redis guard + bills 唯一索引双保险）。
+  rpc Reserve(ReserveRequest) returns (ReserveResponse);
+  // 上报实际用量：gateway 在流结束/响应完成后调用，写 usage_reported_at 作为持久 marker，幂等。
+  rpc ReportUsage(ReportUsageRequest) returns (ReportUsageResponse);
+  // 结算：pending → settled，按实际用量冲正（正补扣 / 负退回），幂等。
+  rpc Settle(SettleRequest) returns (SettleResponse);
+  // 冲正/退款：pending → reversed，退回全部预扣，幂等。
+  rpc Reverse(ReverseRequest) returns (ReverseResponse);
+  // 查询租户当前余额（Redis 投影；权威口径是 MySQL bills 账本，重建 job 兜底）。
+  rpc GetBalance(GetBalanceRequest) returns (GetBalanceResponse);
+  // 校验 API Key：gateway 不碰 MySQL，密钥校验统一走 billing 控制面。
+  rpc ValidateAPIKey(ValidateAPIKeyRequest) returns (ValidateAPIKeyResponse);
+  // 从账本重建余额投影（M4 对账兜底）：以 MySQL bills 为权威重算 Redis balance，
+  // 收敛「预扣已扣但落库失败/结算丢失」等任何脏投影。
+  rpc RebuildBalance(RebuildBalanceRequest) returns (RebuildBalanceResponse);
+}
+
+message ReserveRequest {
+  string request_id = 1;           // gateway 生成（幂等键或 uuid），全局唯一
+  int64 tenant_id = 2;
+  int64 api_key_id = 3;
+  int64 provider_id = 4;           // router 选出的 provider；M5 前可为 0
+  string model = 5;
+  int64 est_prompt_tokens = 6;     // gateway 对输入消息的估算
+  int64 max_completion_tokens = 7; // 可选输出上限；0 表示不限制
+}
+
+enum ReserveCode {
+  RESERVE_OK = 0;
+  RESERVE_INSUFFICIENT = 1;        // 余额不足
+  RESERVE_DUPLICATE = 2;           // 已有同 request_id 预占（幂等重放）
+  RESERVE_SUB_QUOTA = 3;           // 订阅额度不足（每 N 小时滚动刷新，M9）
+}
+
+message ReserveResponse {
+  ReserveCode code = 1;
+  int64 bill_id = 2;               // reserve 行 id
+  int64 balance_after = 3;         // 预占后的余额
+}
+
+message ReportUsageRequest {
+  string request_id = 1;
+  int64 bill_id = 2;
+  int64 prompt_tokens = 3;
+  int64 completion_tokens = 4;
+}
+
+message ReportUsageResponse {
+  bool accepted = 1;
+}
+
+message SettleRequest {
+  string request_id = 1;
+  int64 bill_id = 2;
+}
+
+message SettleResponse {
+  bool settled = 1;
+  int64 delta_quota = 2;           // 实际 - 预扣（正补扣 / 负退回）
+  int64 balance_after = 3;
+}
+
+message ReverseRequest {
+  string request_id = 1;
+  int64 bill_id = 2;
+  string reason = 3;               // 对账冲正/上游故障/客户端断连等
+}
+
+message ReverseResponse {
+  bool reversed = 1;
+  int64 refund_quota = 2;          // 退回的预扣额度
+}
+
+message GetBalanceRequest {
+  int64 tenant_id = 1;
+}
+
+message GetBalanceResponse {
+  int64 balance = 1;
+}
+
+message ValidateAPIKeyRequest {
+  string api_key_hash = 1; // SHA-256(key)，明文 sk- 永不跨服务传递
+}
+
+message ValidateAPIKeyResponse {
+  bool valid = 1;
+  int64 api_key_id = 2;
+  int64 tenant_id = 3;
+}
+
+message RebuildBalanceRequest {
+  int64 tenant_id = 1;
+}
+
+message RebuildBalanceResponse {
+  int64 balance = 1;   // 重建后的余额（投影）
+}

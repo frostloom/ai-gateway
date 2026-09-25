@@ -1,0 +1,851 @@
+[
+  {
+    "id": "refund-038",
+    "text": "退额度",
+    "intent": "refund_recharge",
+    "dimension": "terse",
+    "risk": "high",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "refund-040",
+    "text": "来退款",
+    "intent": "refund_recharge",
+    "dimension": "terse",
+    "risk": "high",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "refund-039",
+    "text": "退 200",
+    "intent": "refund_recharge",
+    "dimension": "terse",
+    "risk": "high",
+    "needs_confirm": true
+  },
+  {
+    "id": "refund-087",
+    "text": "麻烦您帮我退 500 元",
+    "intent": "refund_recharge",
+    "dimension": "polite",
+    "risk": "high",
+    "needs_confirm": true
+  },
+  {
+    "id": "refund-032",
+    "text": "退钱",
+    "intent": "refund_recharge",
+    "dimension": "terse",
+    "risk": "high",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "refund-098",
+    "text": "立即退款 100 元",
+    "intent": "refund_recharge",
+    "dimension": "command",
+    "risk": "high",
+    "needs_confirm": true
+  },
+  {
+    "id": "refund-003",
+    "text": "退款 100 元",
+    "intent": "refund_recharge",
+    "dimension": "canonical",
+    "risk": "high",
+    "needs_confirm": true
+  },
+  {
+    "id": "refund-069",
+    "text": "我反悔了",
+    "intent": "refund_recharge",
+    "dimension": "indirect",
+    "risk": "high",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "refund-090",
+    "text": "给我退 200",
+    "intent": "refund_recharge",
+    "dimension": "command",
+    "risk": "high",
+    "needs_confirm": true
+  },
+  {
+    "id": "refund-018",
+    "text": "能退吗，我不用了",
+    "intent": "refund_recharge",
+    "dimension": "colloquial",
+    "risk": "high",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "refund-034",
+    "text": "申请退款 #2",
+    "intent": "refund_recharge",
+    "dimension": "terse",
+    "risk": "high",
+    "needs_confirm": true
+  },
+  {
+    "id": "refund-089",
+    "text": "退 100 #2",
+    "intent": "refund_recharge",
+    "dimension": "command",
+    "risk": "high",
+    "needs_confirm": true
+  },
+  {
+    "id": "refund-047",
+    "text": "退环 100",
+    "intent": "refund_recharge",
+    "dimension": "typo",
+    "risk": "high",
+    "needs_confirm": true
+  },
+  {
+    "id": "refund-046",
+    "text": "退款 200",
+    "intent": "refund_recharge",
+    "dimension": "typo",
+    "risk": "high",
+    "needs_confirm": true
+  },
+  {
+    "id": "refund-022",
+    "text": "我要把钱拿回来",
+    "intent": "refund_recharge",
+    "dimension": "colloquial",
+    "risk": "high",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "refund-004",
+    "text": "查询退款入口",
+    "intent": "refund_recharge",
+    "dimension": "canonical",
+    "risk": "high",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "refund-041",
+    "text": "我要退宽",
+    "intent": "refund_recharge",
+    "dimension": "typo",
+    "risk": "high",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "refund-042",
+    "text": "退款 100 元 #2",
+    "intent": "refund_recharge",
+    "dimension": "typo",
+    "risk": "high",
+    "needs_confirm": true
+  },
+  {
+    "id": "refund-083",
+    "text": "劳驾帮我退 100 块",
+    "intent": "refund_recharge",
+    "dimension": "polite",
+    "risk": "high",
+    "needs_confirm": true
+  },
+  {
+    "id": "refund-026",
+    "text": "我先退 200",
+    "intent": "refund_recharge",
+    "dimension": "colloquial",
+    "risk": "high",
+    "needs_confirm": true
+  },
+  {
+    "id": "refund-011",
+    "text": "给这个账户退款",
+    "intent": "refund_recharge",
+    "dimension": "canonical",
+    "risk": "high",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "refund-097",
+    "text": "给我退 50",
+    "intent": "refund_recharge",
+    "dimension": "command",
+    "risk": "high",
+    "needs_confirm": true
+  },
+  {
+    "id": "refund-021",
+    "text": "不玩了，退款",
+    "intent": "refund_recharge",
+    "dimension": "colloquial",
+    "risk": "high",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "refund-074",
+    "text": "我要 refund 200",
+    "intent": "refund_recharge",
+    "dimension": "mixed_en",
+    "risk": "high",
+    "needs_confirm": true
+  },
+  {
+    "id": "refund-078",
+    "text": "帮我 refund 一下",
+    "intent": "refund_recharge",
+    "dimension": "mixed_en",
+    "risk": "high",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "refund-085",
+    "text": "方便的话帮我退 300 元",
+    "intent": "refund_recharge",
+    "dimension": "polite",
+    "risk": "high",
+    "needs_confirm": true
+  },
+  {
+    "id": "refund-054",
+    "text": "麻烦帮我退款 100 元，因为充多了用不完",
+    "intent": "refund_recharge",
+    "dimension": "verbose",
+    "risk": "high",
+    "needs_confirm": true
+  },
+  {
+    "id": "refund-019",
+    "text": "我想退一百块",
+    "intent": "refund_recharge",
+    "dimension": "colloquial",
+    "risk": "high",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "refund-075",
+    "text": "refund 我的账户",
+    "intent": "refund_recharge",
+    "dimension": "mixed_en",
+    "risk": "high",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "refund-059",
+    "text": "麻烦把充值的钱退给我，先退 50 元试试",
+    "intent": "refund_recharge",
+    "dimension": "verbose",
+    "risk": "high",
+    "needs_confirm": true
+  },
+  {
+    "id": "refund-056",
+    "text": "我要申请退款 1000 元，请帮我走一下流程",
+    "intent": "refund_recharge",
+    "dimension": "verbose",
+    "risk": "high",
+    "needs_confirm": true
+  },
+  {
+    "id": "refund-079",
+    "text": "请问可以帮我退款 100 元吗",
+    "intent": "refund_recharge",
+    "dimension": "polite",
+    "risk": "high",
+    "needs_confirm": true
+  },
+  {
+    "id": "refund-091",
+    "text": "立刻退款 100",
+    "intent": "refund_recharge",
+    "dimension": "command",
+    "risk": "high",
+    "needs_confirm": true
+  },
+  {
+    "id": "refund-064",
+    "text": "不用了，怎么处理",
+    "intent": "refund_recharge",
+    "dimension": "indirect",
+    "risk": "high",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "refund-077",
+    "text": "我要 withdraw 100",
+    "intent": "refund_recharge",
+    "dimension": "mixed_en",
+    "risk": "high",
+    "needs_confirm": true
+  },
+  {
+    "id": "refund-031",
+    "text": "退款",
+    "intent": "refund_recharge",
+    "dimension": "terse",
+    "risk": "high",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "refund-014",
+    "text": "我要退充值",
+    "intent": "refund_recharge",
+    "dimension": "canonical",
+    "risk": "high",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "refund-013",
+    "text": "帮我申请退款",
+    "intent": "refund_recharge",
+    "dimension": "canonical",
+    "risk": "high",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "refund-035",
+    "text": "退 50",
+    "intent": "refund_recharge",
+    "dimension": "terse",
+    "risk": "high",
+    "needs_confirm": true
+  },
+  {
+    "id": "refund-088",
+    "text": "请问退款怎么操作",
+    "intent": "refund_recharge",
+    "dimension": "polite",
+    "risk": "high",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "refund-024",
+    "text": "给我退钱",
+    "intent": "refund_recharge",
+    "dimension": "colloquial",
+    "risk": "high",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "refund-037",
+    "text": "退款 100",
+    "intent": "refund_recharge",
+    "dimension": "terse",
+    "risk": "high",
+    "needs_confirm": true
+  },
+  {
+    "id": "refund-048",
+    "text": "把钱退给我 #2",
+    "intent": "refund_recharge",
+    "dimension": "typo",
+    "risk": "high",
+    "needs_confirm": true
+  },
+  {
+    "id": "refund-005",
+    "text": "帮我办理退款",
+    "intent": "refund_recharge",
+    "dimension": "canonical",
+    "risk": "high",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "refund-058",
+    "text": "我需要退款，请帮我处理 200 元的退款申请",
+    "intent": "refund_recharge",
+    "dimension": "verbose",
+    "risk": "high",
+    "needs_confirm": true
+  },
+  {
+    "id": "refund-033",
+    "text": "退 100",
+    "intent": "refund_recharge",
+    "dimension": "terse",
+    "risk": "high",
+    "needs_confirm": true
+  },
+  {
+    "id": "refund-099",
+    "text": "退 100 元",
+    "intent": "refund_recharge",
+    "dimension": "command",
+    "risk": "high",
+    "needs_confirm": true
+  },
+  {
+    "id": "refund-007",
+    "text": "退还 50 元",
+    "intent": "refund_recharge",
+    "dimension": "canonical",
+    "risk": "high",
+    "needs_confirm": true
+  },
+  {
+    "id": "refund-061",
+    "text": "我不想用了，钱能退吗",
+    "intent": "refund_recharge",
+    "dimension": "indirect",
+    "risk": "high",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "refund-063",
+    "text": "能退吗",
+    "intent": "refund_recharge",
+    "dimension": "indirect",
+    "risk": "high",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "refund-012",
+    "text": "退款 100 元到余额",
+    "intent": "refund_recharge",
+    "dimension": "canonical",
+    "risk": "high",
+    "needs_confirm": true
+  },
+  {
+    "id": "refund-052",
+    "text": "你好，我想申请退款，金额是 200 元，请帮我处理一下",
+    "intent": "refund_recharge",
+    "dimension": "verbose",
+    "risk": "high",
+    "needs_confirm": true
+  },
+  {
+    "id": "refund-096",
+    "text": "退钱，快点",
+    "intent": "refund_recharge",
+    "dimension": "command",
+    "risk": "high",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "refund-076",
+    "text": "帮我退款 100 CNY",
+    "intent": "refund_recharge",
+    "dimension": "mixed_en",
+    "risk": "high",
+    "needs_confirm": true
+  },
+  {
+    "id": "refund-045",
+    "text": "退 50 块",
+    "intent": "refund_recharge",
+    "dimension": "typo",
+    "risk": "high",
+    "needs_confirm": true
+  },
+  {
+    "id": "refund-071",
+    "text": "帮我 refund 100",
+    "intent": "refund_recharge",
+    "dimension": "mixed_en",
+    "risk": "high",
+    "needs_confirm": true
+  },
+  {
+    "id": "refund-068",
+    "text": "不续了，余额怎么退",
+    "intent": "refund_recharge",
+    "dimension": "indirect",
+    "risk": "high",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "refund-084",
+    "text": "请问可以退款吗",
+    "intent": "refund_recharge",
+    "dimension": "polite",
+    "risk": "high",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "refund-067",
+    "text": "能不能退回来",
+    "intent": "refund_recharge",
+    "dimension": "indirect",
+    "risk": "high",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "refund-050",
+    "text": "退宽 100",
+    "intent": "refund_recharge",
+    "dimension": "typo",
+    "risk": "high",
+    "needs_confirm": true
+  },
+  {
+    "id": "refund-006",
+    "text": "我要退钱",
+    "intent": "refund_recharge",
+    "dimension": "canonical",
+    "risk": "high",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "refund-073",
+    "text": "退 100 到 balance",
+    "intent": "refund_recharge",
+    "dimension": "mixed_en",
+    "risk": "high",
+    "needs_confirm": true
+  },
+  {
+    "id": "refund-070",
+    "text": "想把钱要回来",
+    "intent": "refund_recharge",
+    "dimension": "indirect",
+    "risk": "high",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "refund-001",
+    "text": "我要退款",
+    "intent": "refund_recharge",
+    "dimension": "canonical",
+    "risk": "high",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "refund-095",
+    "text": "直接退 100",
+    "intent": "refund_recharge",
+    "dimension": "command",
+    "risk": "high",
+    "needs_confirm": true
+  },
+  {
+    "id": "refund-065",
+    "text": "这钱还能拿回来吗",
+    "intent": "refund_recharge",
+    "dimension": "indirect",
+    "risk": "high",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "refund-027",
+    "text": "充多了，退点",
+    "intent": "refund_recharge",
+    "dimension": "colloquial",
+    "risk": "high",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "refund-049",
+    "text": "退k 100",
+    "intent": "refund_recharge",
+    "dimension": "typo",
+    "risk": "high",
+    "needs_confirm": true
+  },
+  {
+    "id": "refund-036",
+    "text": "退余额",
+    "intent": "refund_recharge",
+    "dimension": "terse",
+    "risk": "high",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "refund-028",
+    "text": "帮我把多的退掉",
+    "intent": "refund_recharge",
+    "dimension": "colloquial",
+    "risk": "high",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "refund-010",
+    "text": "我要退 500 元",
+    "intent": "refund_recharge",
+    "dimension": "canonical",
+    "risk": "high",
+    "needs_confirm": true
+  },
+  {
+    "id": "refund-025",
+    "text": "退 50 回来",
+    "intent": "refund_recharge",
+    "dimension": "colloquial",
+    "risk": "high",
+    "needs_confirm": true
+  },
+  {
+    "id": "refund-029",
+    "text": "退个三五百",
+    "intent": "refund_recharge",
+    "dimension": "colloquial",
+    "risk": "high",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "refund-015",
+    "text": "我不想用了，退钱",
+    "intent": "refund_recharge",
+    "dimension": "colloquial",
+    "risk": "high",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "refund-082",
+    "text": "可以帮忙申请退款吗",
+    "intent": "refund_recharge",
+    "dimension": "polite",
+    "risk": "high",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "refund-044",
+    "text": "我要退矿",
+    "intent": "refund_recharge",
+    "dimension": "typo",
+    "risk": "high",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "refund-030",
+    "text": "我不想充了，退钱",
+    "intent": "refund_recharge",
+    "dimension": "colloquial",
+    "risk": "high",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "refund-043",
+    "text": "帮我退钱",
+    "intent": "refund_recharge",
+    "dimension": "typo",
+    "risk": "high",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "refund-009",
+    "text": "退款操作",
+    "intent": "refund_recharge",
+    "dimension": "canonical",
+    "risk": "high",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "refund-100",
+    "text": "快给我退 200",
+    "intent": "refund_recharge",
+    "dimension": "command",
+    "risk": "high",
+    "needs_confirm": true
+  },
+  {
+    "id": "refund-055",
+    "text": "我需要把之前多充的钱退出来，申请退款 300 元",
+    "intent": "refund_recharge",
+    "dimension": "verbose",
+    "risk": "high",
+    "needs_confirm": true
+  },
+  {
+    "id": "refund-017",
+    "text": "我要退掉，钱还我",
+    "intent": "refund_recharge",
+    "dimension": "colloquial",
+    "risk": "high",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "refund-062",
+    "text": "充多了怎么办",
+    "intent": "refund_recharge",
+    "dimension": "indirect",
+    "risk": "high",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "refund-057",
+    "text": "帮我退 100 块钱吧，我不打算用了",
+    "intent": "refund_recharge",
+    "dimension": "verbose",
+    "risk": "high",
+    "needs_confirm": true
+  },
+  {
+    "id": "refund-053",
+    "text": "我不打算继续使用你们的服务了，想把账户里的钱退回来，先退 500 元",
+    "intent": "refund_recharge",
+    "dimension": "verbose",
+    "risk": "high",
+    "needs_confirm": true
+  },
+  {
+    "id": "refund-093",
+    "text": "退款 100，快点",
+    "intent": "refund_recharge",
+    "dimension": "command",
+    "risk": "high",
+    "needs_confirm": true
+  },
+  {
+    "id": "refund-081",
+    "text": "能不能帮我退 200 元",
+    "intent": "refund_recharge",
+    "dimension": "polite",
+    "risk": "high",
+    "needs_confirm": true
+  },
+  {
+    "id": "refund-080",
+    "text": "麻烦帮我办理退款好吗",
+    "intent": "refund_recharge",
+    "dimension": "polite",
+    "risk": "high",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "refund-072",
+    "text": "我要申请 refund",
+    "intent": "refund_recharge",
+    "dimension": "mixed_en",
+    "risk": "high",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "refund-002",
+    "text": "申请退款",
+    "intent": "refund_recharge",
+    "dimension": "canonical",
+    "risk": "high",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "refund-086",
+    "text": "能否帮我办理退款 100 元",
+    "intent": "refund_recharge",
+    "dimension": "polite",
+    "risk": "high",
+    "needs_confirm": true
+  },
+  {
+    "id": "refund-020",
+    "text": "帮我把钱退回来",
+    "intent": "refund_recharge",
+    "dimension": "colloquial",
+    "risk": "high",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "refund-060",
+    "text": "我想退回 500 元，不想继续充值了",
+    "intent": "refund_recharge",
+    "dimension": "verbose",
+    "risk": "high",
+    "needs_confirm": true
+  },
+  {
+    "id": "refund-023",
+    "text": "帮我退点钱",
+    "intent": "refund_recharge",
+    "dimension": "colloquial",
+    "risk": "high",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "refund-008",
+    "text": "帮我退 200 块",
+    "intent": "refund_recharge",
+    "dimension": "canonical",
+    "risk": "high",
+    "needs_confirm": true
+  },
+  {
+    "id": "refund-051",
+    "text": "我之前充值了一笔钱，现在用不上了，麻烦帮我办理退款 100 元",
+    "intent": "refund_recharge",
+    "dimension": "verbose",
+    "risk": "high",
+    "needs_confirm": true
+  },
+  {
+    "id": "refund-092",
+    "text": "马上退 500",
+    "intent": "refund_recharge",
+    "dimension": "command",
+    "risk": "high",
+    "needs_confirm": true
+  },
+  {
+    "id": "refund-094",
+    "text": "给我退 300",
+    "intent": "refund_recharge",
+    "dimension": "command",
+    "risk": "high",
+    "needs_confirm": true
+  },
+  {
+    "id": "refund-016",
+    "text": "把钱退给我",
+    "intent": "refund_recharge",
+    "dimension": "colloquial",
+    "risk": "high",
+    "needs_confirm": true,
+    "ask_back": true
+  },
+  {
+    "id": "refund-066",
+    "text": "我想撤回充值",
+    "intent": "refund_recharge",
+    "dimension": "indirect",
+    "risk": "high",
+    "needs_confirm": true,
+    "ask_back": true
+  }
+]

@@ -1,0 +1,132 @@
+[
+  {
+    "id": "intent-balance-01",
+    "dimension": "intent",
+    "title": "查余额：意图 → get_balance 即时执行",
+    "priority": "p0",
+    "llm_script": [
+      { "tool_call": { "tool": "get_balance", "args": "{}" } },
+      { "reply": "你的可用余额为 2000.00 元，账本与投影一致。" }
+    ],
+    "turns": ["帮我查一下余额"],
+    "expect": {
+      "tools": ["get_balance"],
+      "confirmed": false,
+      "no_pending_final": true,
+      "reply_contains": ["余额"],
+      "env_reply_contains": ["2000.00"],
+      "reply_not": ["⚙", "get_balance"]
+    }
+  },
+  {
+    "id": "intent-balance-02",
+    "dimension": "intent",
+    "title": "口语化提问也能路由到余额",
+    "priority": "p1",
+    "llm_script": [
+      { "tool_call": { "tool": "get_balance", "args": "{}" } },
+      { "reply": "当前余额 2000.00 元。" }
+    ],
+    "turns": ["我还有多少钱？"],
+    "expect": {
+      "tools": ["get_balance"],
+      "no_pending_final": true,
+      "env_reply_contains": ["2000.00"]
+    }
+  },
+  {
+    "id": "intent-spend-01",
+    "dimension": "intent",
+    "title": "查消费 → get_consumption",
+    "priority": "p0",
+    "llm_script": [
+      { "tool_call": { "tool": "get_consumption", "args": "{\"days\":7}" } },
+      { "reply": "近 7 天共消费 450.00 元。" }
+    ],
+    "turns": ["我近 7 天花了多少钱"],
+    "expect": {
+      "tools": ["get_consumption"],
+      "no_pending_final": true,
+      "env_reply_contains": ["450.00"]
+    }
+  },
+  {
+    "id": "intent-bills-01",
+    "dimension": "intent",
+    "title": "查最近账单 → get_recent_bills",
+    "priority": "p1",
+    "llm_script": [
+      { "tool_call": { "tool": "get_recent_bills", "args": "{\"limit\":5}" } },
+      { "reply": "最近 5 笔账单已列出。" }
+    ],
+    "turns": ["看看我最近的账单"],
+    "expect": {
+      "tools": ["get_recent_bills"],
+      "no_pending_final": true
+    }
+  },
+  {
+    "id": "intent-models-01",
+    "dimension": "intent",
+    "title": "查商品目录 → list_models",
+    "priority": "p1",
+    "llm_script": [
+      { "tool_call": { "tool": "list_models", "args": "{\"vendor\":\"\"}" } },
+      { "reply": "目录里有 37 款模型，可按厂商筛选。" }
+    ],
+    "turns": ["你们卖哪些模型？"],
+    "expect": {
+      "tools": ["list_models"],
+      "no_pending_final": true,
+      "reply_contains": ["模型"],
+      "env_reply_contains": ["37"]
+    }
+  },
+  {
+    "id": "intent-plans-01",
+    "dimension": "intent",
+    "title": "查套餐 → list_plans",
+    "priority": "p1",
+    "llm_script": [
+      { "tool_call": { "tool": "list_plans", "args": "{}" } },
+      { "reply": "有月度标准 80 元/月、月度旗舰 300 元/月。" }
+    ],
+    "turns": ["有什么套餐可以订阅"],
+    "expect": {
+      "tools": ["list_plans"],
+      "no_pending_final": true,
+      "env_reply_contains": ["80", "300"]
+    }
+  },
+  {
+    "id": "intent-sub-01",
+    "dimension": "intent",
+    "title": "查我的订阅 → get_my_subscription",
+    "priority": "p1",
+    "llm_script": [
+      { "tool_call": { "tool": "get_my_subscription", "args": "{}" } },
+      { "reply": "你当前订阅了月度标准，本期至下月同日。" }
+    ],
+    "turns": ["我的订阅情况怎么样"],
+    "expect": {
+      "tools": ["get_my_subscription"],
+      "no_pending_final": true,
+      "reply_contains": ["订阅"]
+    }
+  },
+  {
+    "id": "intent-chat-01",
+    "dimension": "intent",
+    "title": "闲聊：不触发任何工具",
+    "priority": "p2",
+    "llm_script": [
+      { "reply": "你好！我是商城 AI 客服，可以帮你查余额、充值、订阅等。" }
+    ],
+    "turns": ["你好，你是谁"],
+    "expect": {
+      "tools": [],
+      "no_pending_final": true,
+      "reply_contains": ["你好"]
+    }
+  }
+]
