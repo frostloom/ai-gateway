@@ -198,11 +198,18 @@ func TestAnthropicToMessageEmpty(t *testing.T) {
 	}
 }
 
-// 默认输出预算必须足够容纳 thinking。
+// 预算口径：**不是越大越好**。
+//
+// 实测带 thinking 的模型预算越大、思考越久，反而越容易撞 HTTP 超时
+//（「改套餐」在 32768 下会思考到超时）。默认值应当是"够用且促使收敛"，
+// 靠撞顶后加倍重试兜底。
 func TestAnthropicMaxTokensBudget(t *testing.T) {
-	// 实测：8192 撞顶、16384 仍会撞顶（改套餐这类长推理约 1/5 失败）、32768 稳定
-	if anthropicDefaultMaxTokens < 32768 {
-		t.Fatalf("anthropicDefaultMaxTokens = %d，实测 16384 仍会撞顶，至少要 32768", anthropicDefaultMaxTokens)
+	if anthropicDefaultMaxTokens > 16384 {
+		t.Fatalf("anthropicDefaultMaxTokens = %d 偏大：预算越大思考越久，反而更易超时",
+			anthropicDefaultMaxTokens)
+	}
+	if anthropicDefaultMaxTokens < 4096 {
+		t.Fatalf("anthropicDefaultMaxTokens = %d 偏小：正常回复会被截断", anthropicDefaultMaxTokens)
 	}
 	if anthropicMaxTokensCeiling < anthropicDefaultMaxTokens*2 {
 		t.Fatalf("ceiling(%d) 应至少是默认预算(%d)的 2 倍，留出加倍重试空间",

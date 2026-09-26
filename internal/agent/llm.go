@@ -97,28 +97,29 @@ func SetMaxTokensFromEnv(f func() int) {
 
 // llmTransport LLM 专用连接池。
 //
-// 关键：不能用 &http.Client{} 的默认 Transport —— 它的 MaxIdleConnsPerHost 只有 2，
-// 而客服是「多轮 tool loop + 评测并发」，同一上游会被并发打多次。
-// 空闲连接不够时新请求要等旧连接释放，表现为
-// "context deadline exceeded (Client.Timeout exceeded while awaiting headers)"，
-// 且耗时**精确撞上** client timeout（实测 304s / 300s）——
-// 而直接 curl 同一请求只要 1~2s，极难定位。
+// 关键设计（都是实测踩出来的）：
 //
-// （同类问题本项目在压测阶段也遇到过：每请求 new client 导致连接风暴。）
+//  1. 不能用 &http.Client{} 的默认 Transport —— 其 MaxIdleConnsPerHost 只有 2，
+//     而客服是「多轮 tool loop + 评测并发」，同一上游会被并发打多次。
+//     空闲连接不够时新请求要等旧连接释放，表现为耗时**精确撞上** client timeout。
+//
+//  2. **不启用 HTTP/2**。上游是网关型服务，HTTP/2 下长响应会出现
+//     "http2: timeout awaiting response headers" —— 同样的请求走 HTTP/1.1 正常。
+//     带 thinking 的模型响应头本身就慢，叠加 HTTP/2 的流控/头等待后更易触发。
+//
+//  3. **不设 ResponseHeaderTimeout**：它与 client.Timeout 语义重叠，
+//     且会和 HTTP/2 的超时逻辑打架。统一的失败边界交给 client.Timeout。
 var llmTransport = &http.Transport{
 	Proxy: http.ProxyFromEnvironment,
 	DialContext: (&net.Dialer{
 		Timeout:   30 * time.Second,
 		KeepAlive: 30 * time.Second,
 	}).DialContext,
-	ForceAttemptHTTP2:     true,
 	MaxIdleConns:          200,
 	MaxIdleConnsPerHost:   64, // 默认仅 2，是多轮并发卡死的根因
 	IdleConnTimeout:       90 * time.Second,
 	TLSHandshakeTimeout:   15 * time.Second,
 	ExpectContinueTimeout: 1 * time.Second,
-	// 上游返回大响应（长回复）时给足时间，避免读到一半被截断
-	ResponseHeaderTimeout: llmHTTPTimeout,
 }
 
 func NewLLMClient(baseURL, apiKey, model string) *LLMClient {
@@ -143,10 +144,20 @@ func (c *LLMClient) Protocol() string { return string(c.proto) }
 
 // Chat 调用一次 LLM，返回助手消息（可能带 tool_calls）。
 //
-// Anthropic 路径带「预算撞顶自动加倍重试」：带 thinking 的模型在复杂场景（改套餐要
-// 查现有档位+比对+算生效日）推理很长，可能把 max_tokens 全用在思考上，
-// 此时响应里一个 text/tool_use 块都没有。这类失败是**预算问题而非故障**，
-// 直接报 500 会让用户看到报错；这里自动加倍预算重试（最多 2 次）。
+// 「预算 vs 长思考」的实测结论（决定了下面的策略）：
+//
+//	带 thinking 的模型，max_tokens 越大 → 允许思考越久 → 反而越容易撞 HTTP 超时。
+//	实测「改套餐」类请求：
+//	  max_tokens=8192  → 撞顶（只有 thinking 块，无输出）
+//	  max_tokens=16384 → 仍撞顶
+//	  max_tokens=32768 → 思考更久，直接顶到 HTTP 超时
+//
+// 所以策略不是"预算越大越好"，而是**先小后大**：
+//  1. 先用小预算（快，逼模型尽快收敛到工具调用或回答）；
+//  2. 仅当确实因预算不足失败时才加倍重试；
+//  3. 每次尝试都受 HTTP 超时约束，避免单次无限拖。
+//
+// 常规请求一次即成（2~10s），少数复杂请求最多多花一轮。
 func (c *LLMClient) Chat(ctx context.Context, messages []Message, tools []Tool) (*Message, error) {
 	if c.apiKey == "" {
 		return nil, fmt.Errorf("AGENT_LLM_API_KEY 未配置，AI 客服不可用（请在 env 填入密钥）")
@@ -156,13 +167,14 @@ func (c *LLMClient) Chat(ctx context.Context, messages []Message, tools []Tool) 
 	}
 
 	budget := c.maxTokens
+	if budget <= 0 {
+		budget = anthropicFirstTryTokens
+	}
 	var lastErr error
-	// 最多尝试 3 次（初始 + 2 次加倍）；实测最费预算的改套餐在 32768 下稳定通过，
-	// 保留两次加倍是给更长推理留冗余，同时用 ceiling 防无限放大。
 	for attempt := 0; attempt < 3; attempt++ {
 		t0 := time.Now()
-		// 每次调用都记录（排查期用）：能看出是「单次慢」还是「多次重试」，
-		// 以及当时的预算和 payload 规模 —— 缺这些信息只能靠猜。
+		// 每次调用都记录：能看出是「单次慢」还是「多次重试」，
+		// 以及当时的预算和 payload 规模 —— 缺这些信息排查只能靠猜。
 		if callLog != nil {
 			callLog(attempt, budget, len(messages), len(tools))
 		}
@@ -171,9 +183,8 @@ func (c *LLMClient) Chat(ctx context.Context, messages []Message, tools []Tool) 
 			return msg, nil
 		}
 		if !isBudgetExhausted(err) {
-			return nil, err // 不是预算问题，直接失败
+			return nil, err // 不是预算问题（含 HTTP 超时），直接失败
 		}
-		// 记录重试：区分「慢是因为多轮 loop」还是「慢是因为反复撞顶重试」
 		if budgetLog != nil {
 			budgetLog(attempt, budget, time.Since(t0))
 		}
