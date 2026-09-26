@@ -91,22 +91,18 @@ type anthropicResponse struct {
 	} `json:"error,omitempty"`
 }
 
-// anthropicDefaultMaxTokens 上游要求 max_tokens 必填。
+// anthropicDefaultMaxTokens 输出预算（可被 AGENT_LLM_MAX_TOKENS 覆盖）。
 //
-// 这个值必须给足：deepseek-v4.1-flash 是带 thinking 的模型，推理内容同样计入
-// 输出预算。实测「改套餐」这类请求最费预算 —— 模型要先查当前订阅、再列可选档位、
-// 比对差价、判断生效时间，推理链很长：
-//
-//	max_tokens=8192   → 撞顶（content 里只有 thinking 块）
-//	max_tokens=16384  → 仍会撞顶（约 1/5 的改套餐请求）
-//	max_tokens=32768  → 稳定通过
-//
-// 所以默认给 32768。预算撞顶时还有一次加倍重试兜底（见 Chat）。
-// 可用 AGENT_LLM_MAX_TOKENS 覆盖。
-const anthropicDefaultMaxTokens = 32768
+// 注意：这个值**不是越大越好**。带 thinking 的模型预算越大、思考越久，
+// 反而更容易顶到 HTTP 超时（实测 32768 时"改套餐"类请求会思考到超时）。
+// 所以默认给一个"够用且能促使收敛"的值，靠撞顶后加倍重试兜底。
+const anthropicDefaultMaxTokens = 8192
+
+// anthropicFirstTryTokens 首次尝试的预算（越小越促使模型尽快收敛）。
+const anthropicFirstTryTokens = 8192
 
 // anthropicMaxTokensCeiling 自动重试时的预算上限，防无限放大。
-const anthropicMaxTokensCeiling = 131072
+const anthropicMaxTokensCeiling = 65536
 
 // DebugDumpRequest 为 true 时把即将发出的请求体交给 dumpFn（排查"卡住"用）。
 // 通过 AGENT_LLM_DEBUG=1 打开；只在需要时开，避免把对话内容刷进日志。
@@ -118,15 +114,61 @@ var (
 // SetDebugDump 注入 dump 回调（由 main 接日志）。
 func SetDebugDump(f func(size int, body string)) { dumpFn = f }
 
+// dumpFileFn 把请求体**原始字节**落盘（AGENT_LLM_DEBUG 时用），便于原样重放排查。
+var dumpFileFn func(raw []byte)
+
+// SetDebugDumpFile 注入原始字节落盘回调。
+func SetDebugDumpFile(f func(raw []byte)) { dumpFileFn = f }
+
+// chatAnthropicRaw 用**原始 JSON body** 发一次 Anthropic 请求。
+//
+// 仅用于诊断：把服务实际发出的 payload 原样重放，排除手工构造带来的差异。
+func (c *LLMClient) chatAnthropicRaw(ctx context.Context, raw []byte) (*Message, error) {
+	url := strings.TrimRight(c.baseURL, "/") + "/v1/messages"
+	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(raw))
+	if err != nil {
+		return nil, err
+	}
+	httpReq.Header.Set("Content-Type", "application/json")
+	httpReq.Header.Set("x-api-key", c.apiKey)
+	httpReq.Header.Set("anthropic-version", "2023-06-01")
+
+	resp, err := c.cli.Do(httpReq)
+	if err != nil {
+		return nil, fmt.Errorf("LLM 请求失败: %v", err)
+	}
+	defer func() { io.Copy(io.Discard, resp.Body); resp.Body.Close() }()
+
+	body, err := io.ReadAll(io.LimitReader(resp.Body, 1<<20))
+	if err != nil {
+		return nil, err
+	}
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("LLM HTTP %d: %s", resp.StatusCode, truncate(string(body), 200))
+	}
+	var out anthropicResponse
+	if err := json.Unmarshal(body, &out); err != nil {
+		return nil, fmt.Errorf("LLM 响应解析失败: %v", err)
+	}
+	return anthropicToMessage(&out)
+}
+
 // chatAnthropic 走 Anthropic Messages 协议。
 func (c *LLMClient) chatAnthropic(ctx context.Context, messages []Message, tools []Tool, maxTokens int) (*Message, error) {
 	req, err := buildAnthropicRequest(c.model, messages, tools, maxTokens)
 	if err != nil {
 		return nil, err
 	}
-	if DebugDumpRequest && dumpFn != nil {
+	if DebugDumpRequest {
+		// 日志与落盘是两个独立出口：只设了其中一个也要生效
+		// （早期版本把落盘嵌在 dumpFn != nil 里，结果只设 dumpFileFn 时静默失效）。
 		if b, err := json.Marshal(req); err == nil {
-			dumpFn(len(b), string(b))
+			if dumpFn != nil {
+				dumpFn(len(b), string(b))
+			}
+			if dumpFileFn != nil {
+				dumpFileFn(b)
+			}
 		}
 	}
 	raw, err := json.Marshal(req)
@@ -321,12 +363,13 @@ func anthropicToMessage(r *anthropicResponse) (*Message, error) {
 	return msg, nil
 }
 
-// llmHTTPTimeout 单次 LLM 调用超时。
+// llmHTTPTimeout 单次 LLM 调用超时（自保边界）。
 //
-// 这个值要同时容纳两件事：
-//  1. 带 thinking 的模型在复杂场景（改套餐要查现有档位+比对+算生效日）推理很长；
-//  2. 并发压测时上游会排队，单次排队 + 推理可能到 2 分钟以上。
-// 60s / 120s 实测都会在并发下被掐断（表现为 context deadline exceeded），
-// 用户看到的是"服务错误"，其实只是慢。给到 300s 与网关/评测侧对齐。
-// 注意：这是**自保**超时，不是性能目标；正常单次调用在 5~15s。
-const llmHTTPTimeout = 300 * time.Second
+// 实测分布：
+//   - 常规请求 2~10s
+//   - 复杂多轮（改套餐，历史累积后）可达 130s
+//
+// 给 180s：正常请求绰绰有余，真卡死时也能在 3 分钟内失败而不是无限等。
+// 注意：调大它**不解决**上游的长思考，只是让慢请求有机会完成；
+// 真正的规避见 llm.go（单工具裁剪 + 关闭 HTTP/2）。
+const llmHTTPTimeout = 180 * time.Second

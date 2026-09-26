@@ -336,6 +336,31 @@ func (h *Handler) llmLoop(ctx context.Context, sessionID string, tenantID uint64
 			return msg.Content, trace, nil
 		}
 
+		// 只保留**第一个**工具调用，其余丢弃。
+		//
+		// 为什么必须这样（实测定位，不是优化而是规避上游缺陷）：
+		// 当历史里出现「assistant 一次发起 ≥2 个 tool_use + user 回填对应 tool_result」
+		// 时，上游 deepseek-v4.1-flash 会陷入超长推理 —— 单请求耗时直接顶到
+		// 300s 超时（max_tokens 从 4096 一路加到 32768 都被思考吃光）。
+		// 二分验证：
+		//   1 个 tool_use 回填 → 1.8~3.6s 正常
+		//   2 个 tool_use 回填 → 75s+ 超时（无论 system 长短、工具多少、结果多短）
+		// 在 prompt 里加"一次只调一个工具"的约束**无效** —— 触发点是已回填的历史，
+		// 不是模型接下来打算怎么做。所以只能在实现层限制。
+		//
+		// 副作用很小：模型每轮少拿一个结果，下一轮会继续调它需要的工具
+		//（loop 上限 5 轮足够覆盖），最终质量不受影响，只是多一次往返。
+		//
+		// 注意：assistant 消息与 tool 结果必须严格配对（缺配对上游会 400），
+		// 所以裁剪 tool_calls 的同时也必须裁掉对应的 tool 消息 —— 这里通过
+		// 只遍历首个 tc 自然实现（toolResults 只会有 1 条）。
+		if len(msg.ToolCalls) > 1 {
+			h.log.Info("trim multi tool_calls", "sid", sessionID, "iter", iter,
+				"got", len(msg.ToolCalls), "keep", msg.ToolCalls[0].Function.Name,
+				"dropped", len(msg.ToolCalls)-1)
+			msg.ToolCalls = msg.ToolCalls[:1]
+		}
+
 		// 该轮有工具调用：逐条执行。注意 assistant tool_calls 消息只能整条入历史一次，
 		// 且必须与每条 tool_call_id 的响应配对（DeepSeek 校验：tool_calls 后每个 id 都有 tool 消息，
 		// 缺失/错位会 400）。所以先把结果收集起来，最后一次性配对写入。
@@ -428,13 +453,35 @@ func buildMessages(ses *session, pending *pendingAction, v jevVerdict) []Message
 	}
 	msgs := make([]Message, 0, len(ses.History)+1)
 	msgs = append(msgs, Message{Role: "system", Content: sys})
-	// 截取最近 N 条，避免上下文无限膨胀（session 落库已是裁剪后的）。
-	hist := ses.History
-	if len(hist) > 24 {
-		hist = hist[len(hist)-24:]
-	}
-	msgs = append(msgs, hist...)
+	msgs = append(msgs, trimHistory(ses.History, 24)...)
 	return msgs
+}
+
+// trimHistory 裁剪会话历史，**保证 tool_use 与 tool_result 配对完整**。
+//
+// 为什么不能简单地 hist[len-N:]：
+// 那会把「assistant 带 tool_calls」和紧随其后的「tool 结果」从中间切开，
+// 产生孤儿消息。实测后果很严重 —— 上游遇到不成对的 tool 消息时会陷入
+// 超长推理（单请求 130s+，甚至顶到超时）。这在日志里表现为
+// "msgs=6 但耗时 132s"，而同样内容配对完整时只要几秒。
+//
+// 规则：从目标起点向前回退，直到落在一个「安全的边界」——
+// 即该条不是 tool 消息，且前一条不是带 tool_calls 的 assistant。
+func trimHistory(hist []Message, max int) []Message {
+	if len(hist) <= max {
+		return hist
+	}
+	start := len(hist) - max
+	// 向前回退，找到不与前面 tool_calls 断裂的位置
+	for start > 0 {
+		prevIsToolCalls := hist[start-1].Role == "assistant" && len(hist[start-1].ToolCalls) > 0
+		if hist[start].Role == "tool" || prevIsToolCalls {
+			start--
+			continue
+		}
+		break
+	}
+	return hist[start:]
 }
 
 // audit 写一条审计（读写都记；写操作带确认标记 + 预览）。guard 可空（P3 Jev 决策 JSON）。

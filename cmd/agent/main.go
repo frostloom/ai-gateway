@@ -4,8 +4,10 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"os"
+	"path/filepath"
 	"time"
 
 	"gorm.io/driver/mysql"
@@ -44,12 +46,22 @@ func main() {
 	agent.SetProtocolFromEnv(func() string { return config.Getenv("AGENT_LLM_PROTOCOL", "") })
 	// 输出预算：带 thinking 的模型推理也计入 max_tokens，给小了会「只有思考、没有输出」。
 	agent.SetMaxTokensFromEnv(func() int { return int(config.GetenvInt64("AGENT_LLM_MAX_TOKENS", 0)) })
-	// 调试：AGENT_LLM_DEBUG=1 时把发给上游的请求体打到日志（排查"卡住"用）
+	// 调试：AGENT_LLM_DEBUG=1 时把发给上游的请求体落盘（排查"卡住"用）
 	if config.Getenv("AGENT_LLM_DEBUG", "") == "1" {
 		agent.DebugDumpRequest = true
-		agent.SetDebugDump(func(size int, body string) {
-			log.Info("llm request dump", "bytes", size, "body", body)
+		dir := config.Getenv("AGENT_LLM_DEBUG_DIR", "logs/llm-dump")
+		_ = os.MkdirAll(dir, 0o755)
+		var seq int
+		// 落**原始字节**：日志里的 %q 转义无法可靠还原（真实换行会与字符串
+		// 字面量混淆），要原样重放诊断就必须存未转义的 body。
+		agent.SetDebugDumpFile(func(raw []byte) {
+			seq++
+			p := filepath.Join(dir, fmt.Sprintf("req-%03d.json", seq))
+			if err := os.WriteFile(p, raw, 0o644); err != nil {
+				log.Error("dump request", "err", err)
+			}
 		})
+		log.Warn("LLM debug dump enabled", "dir", dir)
 	}
 	// 预算撞顶重试的日志：区分「慢是因为多轮 loop」还是「反复撞顶重试」
 	agent.SetBudgetLogger(func(attempt, budget int, spent time.Duration) {
