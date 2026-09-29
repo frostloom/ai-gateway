@@ -7,6 +7,7 @@ import { money, zhCount, fmtDay } from '../../shared/utils/format'
 import Card from '../../shared/components/ui/Card.vue'
 import BaseButton from '../../shared/components/ui/BaseButton.vue'
 import Sparkline from '../../shared/components/ui/Sparkline.vue'
+import { toastErr } from '../../shared/utils/toast'
 import Skeleton from '../../shared/components/ui/Skeleton.vue'
 import ProductCard from '../components/ProductCard.vue'
 import RechargeModal from '../components/RechargeModal.vue'
@@ -16,13 +17,22 @@ const emit = defineEmits<{ (e: 'me'): void }>()
 
 const me = ref<MeView | null>(null)
 const models = ref<Model[]>([])
+const loading = ref(true)
+const loadError = ref('')
 const rechargeOpen = ref(false)
 
 async function load() {
-  const [m, cat] = await Promise.all([meApi(), modelsApi()])
-  me.value = m
-  models.value = cat.items.slice(0, 4)
-  emit('me')
+  loading.value = true
+  loadError.value = ''
+  try {
+    const [m, cat] = await Promise.all([meApi(), modelsApi()])
+    me.value = m
+    models.value = cat.items.slice(0, 4)
+    emit('me')
+  } catch (e) {
+    loadError.value = e instanceof Error ? e.message : '加载失败，请重试'
+    toastErr(loadError.value)
+  } finally { loading.value = false }
 }
 onMounted(load)
 
@@ -36,11 +46,11 @@ function onTry(_m: Model) { if (go) go('console') }
     <div class="hero">
       <div class="hleft">
         <p class="eyebrow">AI 模型商城</p>
-        <h1 class="htitle">按量购买模型额度</h1>
-        <p class="hsub">OpenAI 兼容网关 · 真实计费 · 余额与账本实时一致</p>
+        <h1 class="htitle">欢迎回来</h1>
+        <p class="hsub">在一个工作台管理模型、用量与账户余额。</p>
         <div class="hacts">
           <BaseButton variant="primary" size="lg" @click="rechargeOpen = true">立即充值</BaseButton>
-          <BaseButton variant="secondary" size="lg" @click="go?.('catalog')">浏览全部商品</BaseButton>
+          <BaseButton variant="secondary" size="lg" @click="go?.('catalog')">浏览模型</BaseButton>
         </div>
       </div>
       <div class="hright">
@@ -57,7 +67,7 @@ function onTry(_m: Model) { if (go) go('console') }
             <p class="mval num">{{ me ? money(me.consumption.reduce((s, d) => s + d.tokens, 0)) : '-' }}</p>
           </div>
           <div class="mini">
-            <p class="mlabel">账单状态</p>
+            <p class="mlabel">计费方式</p>
             <p class="mval num">{{ me ? (me.subscription ? '订阅中' : '按量') : '-' }}</p>
           </div>
         </div>
@@ -77,17 +87,19 @@ function onTry(_m: Model) { if (go) go('console') }
       </div>
     </Card>
 
-    <!-- 推荐商品 -->
+    <!-- 可用模型 -->
     <section class="sec">
       <div class="sechead">
-        <h2>推荐商品</h2>
+        <h2>可用模型</h2>
         <button class="more" @click="go?.('catalog')">查看全部 <IconArrowRight :size="15" /></button>
       </div>
-      <div v-if="!models.length" class="grid">
+      <div v-if="loading" class="grid">
         <div v-for="i in 4" :key="i" class="skel"><Skeleton h="180px" /></div>
       </div>
+      <p v-else-if="loadError" class="load-error" role="alert">{{ loadError }} <button class="more" @click="load">重新加载</button></p>
+      <p v-else-if="!models.length" class="catalog-empty">暂无可用模型</p>
       <div v-else class="grid">
-        <ProductCard v-for="m in models" :key="m.id" :model="m" :featured="m.id % 2 === 1" @buy="onBuy" @try="onTry" />
+        <ProductCard v-for="m in models" :key="m.id" :model="m"  @buy="onBuy" @try="onTry" />
       </div>
     </section>
 
@@ -246,7 +258,7 @@ function onTry(_m: Model) { if (go) go('console') }
   padding: var(--sp-4);
   text-align: left;
   background: var(--paper);
-  border: 1px dashed var(--hairline);
+  border: 1px solid var(--hairline);
   border-radius: var(--r-md);
   transition: all var(--t-base);
 }
@@ -273,7 +285,7 @@ function onTry(_m: Model) { if (go) go('console') }
   display: flex; justify-content: space-between;
   font-size: var(--fs-xs);
   padding: 5px 0;
-  border-bottom: 1px dashed var(--hairline);
+  border-bottom: 1px solid var(--hairline);
 }
 .day:last-child { border-bottom: none; }
 .dl { color: var(--ink-500); }
@@ -288,5 +300,29 @@ function onTry(_m: Model) { if (go) go('console') }
   .hright { display: grid; grid-template-columns: 1fr; }
   .trendrow { grid-template-columns: 1fr; }
   .grid { grid-template-columns: 1fr; }
+}
+/* Account overview */
+.home { gap: 24px; }
+.catalog-empty, .load-error { padding: 32px; background: var(--surface); border: 1px solid var(--hairline); border-radius: 10px; text-align: center; color: var(--ink-500); }
+.load-error { color: var(--danger); }
+.hero { background: transparent; color: var(--ink-900); padding: 0; border-radius: 0; box-shadow: none; grid-template-columns: 1fr; gap: 24px; }
+.hleft { position: relative; padding-right: 280px; min-height: 64px; }
+.eyebrow { display: none; } .htitle { color: var(--ink-900); font-size: 22px; margin: 0 0 6px; font-weight: 600; }
+.hsub { color: var(--ink-500); font-size: 13px; margin: 0; max-width: none; }
+.hacts { position: absolute; right: 0; top: 8px; gap: 8px; }
+.hacts :deep(.btn) { height: 34px; padding: 0 14px; font-size: 12px; }
+.hright { display: grid; grid-template-columns: 1fr 2fr; gap: 16px; }
+.bcard, .mini { background: var(--surface); border: 1px solid var(--hairline); border-radius: 10px; padding: 20px; box-shadow: none; }
+.blabel, .mlabel { font-size: 12px; color: var(--ink-500); font-weight: 500; }
+.bval, .mval { color: var(--ink-900); font-size: 28px; font-weight: 600; margin: 10px 0 0; line-height: 1.4; }
+.bsub { color: var(--ink-400); margin-top: 6px; } .hmini { gap: 16px; }
+.sechead h2, .sechead2 { font-size: 15px; font-weight: 600; }
+.q { display: grid; grid-template-columns: 36px 1fr; column-gap: 12px; }
+.qic { grid-row: span 2; margin: 0; background: var(--well); color: var(--ink-600); }
+.q:hover { transform: none; box-shadow: none; background: var(--surface-2); }
+@media (max-width: 720px) {
+ .hleft { padding-right: 0; } .hacts { position: static; margin-top: 16px; }
+ .hright { grid-template-columns: 1fr; } .hmini { grid-template-columns: 1fr 1fr; }
+ .quick { grid-template-columns: 1fr; }
 }
 </style>

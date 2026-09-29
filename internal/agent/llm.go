@@ -232,6 +232,9 @@ func (c *LLMClient) chatOpenAI(ctx context.Context, messages []Message, tools []
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+c.apiKey)
 
+	if stats := turnTelemetry(ctx); stats != nil {
+		stats.LLMCalls++
+	}
 	resp, err := c.cli.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("LLM 请求失败: %v", err)

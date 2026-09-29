@@ -1,10 +1,4 @@
 <script setup lang="ts">
-/**
- * Modal —— 结构分层弹窗
- *
- * 遮罩做重模糊 + 深色渐层；面板用与 Card 同源的阶梯阴影抬起，
- * 不做 1px 描边，页脚用虚线分隔。
- */
 import { watch, onBeforeUnmount } from 'vue'
 
 const props = withDefaults(defineProps<{ open: boolean; title?: string; width?: number | string }>(), { width: 480 })
@@ -24,7 +18,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKey))
   <Teleport to="body">
     <Transition name="fade">
       <div v-if="open" class="overlay" @click.self="emit('close')">
-        <div class="modal" :style="{ maxWidth: width + 'px' }" role="dialog" aria-modal="true">
+        <div class="modal" :style="{ maxWidth: typeof width === 'number' ? width + 'px' : width }" role="dialog" aria-modal="true" :aria-label="title">
           <header v-if="title || $slots.extra" class="mhead">
             <h3 class="mt">{{ title }}</h3>
             <div class="mextra"><slot name="extra" /></div>
@@ -44,9 +38,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKey))
 <style scoped>
 .overlay {
   position: fixed; inset: 0; z-index: var(--z-modal);
-  background:
-    radial-gradient(120% 90% at 50% 0%, rgb(17 25 23 / .34), rgb(17 25 23 / .52));
-  backdrop-filter: blur(10px) saturate(120%);
+  background: rgb(24 26 32 / .32);
   display: flex; align-items: center; justify-content: center;
   padding: var(--sp-5);
 }
@@ -73,16 +65,16 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKey))
 .x {
   border: none; background: transparent; color: var(--ink-400);
   width: 30px; height: 30px;
-  border-radius: 50%;
+  border-radius: var(--r-sm);
   display: grid; place-items: center;
   transition: background var(--t-fast), color var(--t-fast), transform var(--t-spring);
 }
-.x:hover { background: var(--well); color: var(--ink-800); transform: rotate(90deg); }
+.x:hover { background: var(--well); color: var(--ink-800); }
 .mbody { padding: 0 var(--sp-6) var(--sp-4); overflow: auto; }
 .mfoot {
   display: flex; justify-content: flex-end; gap: var(--sp-2);
   padding: var(--sp-5) var(--sp-6);
-  border-top: 1px dashed var(--hairline-2);
+  border-top: 1px solid var(--hairline-2);
   background: var(--surface-2);
 }
 .fade-enter-active { transition: opacity var(--t-base); }

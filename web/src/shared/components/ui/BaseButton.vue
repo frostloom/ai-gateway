@@ -1,12 +1,4 @@
 <script setup lang="ts">
-/**
- * BaseButton —— Island 架构
- *
- * - 主按钮：全圆角药丸 + 充裕内边距
- * - 尾部图标：嵌进自己的圆形凹槽（button-in-button），不平铺在文字旁
- * - 悬停：内部图标圈斜向位移 + 微放大，形成内部动能张力
- * - 按下：整体 scale(.975) 模拟物理按压
- */
 withDefaults(defineProps<{
   variant?: 'primary' | 'secondary' | 'ghost' | 'danger' | 'accent-soft'
   size?: 'xs' | 'sm' | 'md' | 'lg'
@@ -17,7 +9,7 @@ withDefaults(defineProps<{
   trailingIcon?: any
   /** 药丸形（CTA 用 true；表格内小按钮可 false） */
   pill?: boolean
-}>(), { variant: 'secondary', size: 'md', pill: true })
+}>(), { variant: 'secondary', size: 'md', pill: false })
 </script>
 
 <template>
@@ -105,7 +97,7 @@ withDefaults(defineProps<{
 .btn.secondary:hover:not(:disabled) {
   border-color: var(--ink-300);
   color: var(--ink-900);
-  box-shadow: var(--shadow-card);
+  box-shadow: none;
 }
 
 .btn.ghost { background: transparent; color: var(--ink-500); }
@@ -126,7 +118,7 @@ withDefaults(defineProps<{
   color: #fff;
   box-shadow: var(--shadow-xs), inset 0 1px 0 rgb(255 255 255 / .16);
 }
-.btn.danger:hover:not(:disabled) { filter: brightness(.95); box-shadow: var(--shadow-card); }
+.btn.danger:hover:not(:disabled) { filter: brightness(.95); box-shadow: none; }
 
 .spinner {
   width: 13px; height: 13px;

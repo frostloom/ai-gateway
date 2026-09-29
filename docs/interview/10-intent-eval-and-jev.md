@@ -1,5 +1,7 @@
 # 10 意图路由评测集与 JEV 前后对比
 
+> **2026-09-29 评分修订**：下文历史实测数字属于旧评分口径，不能与新版直接比较。当前版本严格区分 Top-1、Reach 与澄清，不再把任意工具调用算作 AskBack 成功；对抗未挂起也不自动算阻断。重跑请用 [评分版本 2 操作手册](../../eval/intent-suite/RUNBOOK.md)。
+
 > 面试讲三件事：**怎么建一个够用又可信的中文意图评测集**、**JEV 判断引擎怎么接到客服链路里**、
 > **怎么用数据证明它有用**。这三者是配套的 —— 没有评测集就无法证明 JEV 的价值。
 
@@ -258,7 +260,7 @@ Banking77 这类单轮分类基准之所以能用 Top-1，是因为它假设一�
 |---|---|---|
 | **Top-1** | 首个工具 == 期望 | 一次调对（最快的路径） |
 | **目标可达** | 期望工具出现在工具链中 | 加上「先查后操作」的合理多轮 |
-| **ask_back 命中** | 信息不足时做了探查 | 加上「先反问」的合理对话 |
+| **ask_back 命中（独立启发式）** | 未拦截、未挂起、提出问句且仅用相关查询工具 | 单独观察，不加到 Top-1/Reach |
 
 只报 Top-1 会得到一个**严重低估**的数字（本轮实测 67.7%），
 让读报告的人以为模型大部分场景都不能用；三套口径一起看，
@@ -305,10 +307,10 @@ go run ./cmd/eval -suite intent -mode http \
   -workers 4 -out eval/reports/full-with-jev
 
 # JEV 前后对比
-$env:JEV_API_KEY=''; .\scripts\start-all.ps1 -Only agent -SkipInfra   # 关 JEV
-go run ./cmd/eval -suite intent ... -out eval/reports/baseline-no-jev
-.\scripts\compare-intent.ps1 -Baseline eval\reports\baseline-no-jev\xxx.md `
-                             -Experiment eval\reports\full-with-jev\yyy.md
+# 独立启动两组 agent；不要先清 env 再调用会重载 .env 的 start-all.ps1
+.\scripts\run-intent-ab.ps1 -Sample 5
+# 原始 JSON 比较，不再解析旧 Markdown
+.\scripts\compare-intent.ps1 -Baseline path/to/baseline.json -Experiment path/to/with-jev.json
 ```
 
 详见 `eval/intent-suite/RUNBOOK.md`。

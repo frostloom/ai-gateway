@@ -104,9 +104,9 @@ type jevVerdict struct {
 	RiskConf  float64
 
 	// 分层结论
-	Block bool   // 直接拦截
-	Warn  bool   // 放行但警告 + 强制确认
-	Hint  string // 注入系统提示的行（意图预判 / 谨慎提醒）
+	Block  bool   // 直接拦截
+	Warn   bool   // 放行但警告 + 强制确认
+	Hint   string // 注入系统提示的行（意图预判 / 谨慎提醒）
 	Reason string // 拦截原因
 }
 
@@ -174,8 +174,14 @@ func (h *Handler) evaluateTurn(ctx context.Context, userMsg string, ses *session
 		},
 	}
 
+	if stats := turnTelemetry(ctx); stats != nil {
+		stats.JevCalls++
+	}
 	r, err := h.jev.Evaluate(ctx, state, questions)
 	if err != nil {
+		if stats := turnTelemetry(ctx); stats != nil {
+			stats.JevErrors++
+		}
 		// JEV 不可用：不阻塞业务，退回原行为（仅记录）
 		v.Err = err
 		jevDecisions.WithLabelValues("intent", "skip").Inc()
@@ -270,6 +276,9 @@ func (h *Handler) guardWrite(ctx context.Context, tenantID uint64, tool string, 
 		return true, ""
 	}
 	argsJSON, _ := json.Marshal(args)
+	if stats := turnTelemetry(ctx); stats != nil {
+		stats.JevCalls++
+	}
 	r, err := h.jev.Evaluate(ctx, map[string]any{
 		"tenant_id":    tenantID,
 		"tool":         tool,
@@ -287,6 +296,9 @@ func (h *Handler) guardWrite(ctx context.Context, tenantID uint64, tool string, 
 		},
 	})
 	if err != nil {
+		if stats := turnTelemetry(ctx); stats != nil {
+			stats.JevErrors++
+		}
 		// Jev 不可用：默认放行（不因判断引擎故障阻塞业务），记 skip。
 		jevDecisions.WithLabelValues("guard", "skip").Inc()
 		return true, ""

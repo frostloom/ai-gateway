@@ -1,8 +1,4 @@
 <script setup lang="ts">
-/**
- * StatCard —— 行内统计块（比 KpiCard 轻）
- * 白面抬起 + 左侧语义色条；不做描边。
- */
 withDefaults(defineProps<{
   label: string
   value?: string | number
@@ -27,26 +23,10 @@ withDefaults(defineProps<{
   background: var(--surface);
   border-radius: var(--r-md);
   padding: var(--sp-4) var(--sp-5);
-  box-shadow: var(--shadow-raise), var(--inset-hi);
+  border: 1px solid var(--hairline);
   overflow: hidden;
   transition: box-shadow var(--t-base), transform var(--t-base);
 }
-.stat:hover { box-shadow: var(--shadow-card), var(--inset-hi); transform: translateY(-1px); }
-
-.stat::before {
-  content: '';
-  position: absolute; left: 0; top: var(--sp-4); bottom: var(--sp-4);
-  width: 2px;
-  border-radius: 0 var(--r-pill) var(--r-pill) 0;
-  background: var(--ink-200);
-  transition: background var(--t-base);
-}
-.stat.ok::before { background: var(--ok); }
-.stat.warn::before { background: var(--warn); }
-.stat.danger::before { background: var(--danger); }
-.stat.info::before { background: var(--info); }
-.stat.default::before { background: var(--accent-500); }
-
 .label {
   font-size: var(--fs-xs);
   color: var(--ink-500);

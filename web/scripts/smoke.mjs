@@ -72,6 +72,7 @@ async function run(entry, label) {
   global.sessionStorage = window.sessionStorage
   global.location = window.location
 
+  global.fetch = window.fetch = async () => ({ ok: true, status: 200, json: async () => ({ initialized: false }) })
   const errors = []
   const origError = console.error
   console.error = (...a) => { errors.push(a.map(String).join(' ')); origError(...a) }
@@ -155,7 +156,10 @@ async function checkChatDock(entry, label, { admin = false } = {}) {
 
   const d = window.document
 
-  // 新行为：默认展开（用户要求），所以首屏应直接有面板
+  // Open explicitly: support starts minimized so it does not cover the console.
+  const minimizedInitially = !!d.querySelector('.launcher') && !d.querySelector('.panel')
+  d.querySelector('.launcher')?.dispatchEvent(new window.MouseEvent('click', { bubbles: true }))
+  await new Promise(r => setTimeout(r, 150))
   const openByDefault = !!d.querySelector('.panel')
   const hasInput = !!d.querySelector('.pin')
   const hasHeader = !!d.querySelector('.phead')
@@ -174,7 +178,7 @@ async function checkChatDock(entry, label, { admin = false } = {}) {
 
   return {
     label,
-    openByDefault,
+    openByDefault, minimizedInitially,
     collapsedToLauncher,
     reopened,
     hasHeader,
@@ -439,7 +443,7 @@ for (const [entry, label, opts] of [
     const ok = r.openByDefault && r.hasHeader && r.hasInput && r.collapsedToLauncher && r.reopened && r.errors.length === 0
     if (!ok) failed++
     console.log(`[${ok ? 'PASS' : 'FAIL'}] ${r.label}`)
-    console.log(`        默认展开=${r.openByDefault} 头部=${r.hasHeader} 输入框=${r.hasInput} 快捷指令=${r.quick}`)
+    console.log(`        打开面板=${r.openByDefault} 头部=${r.hasHeader} 输入框=${r.hasInput} 快捷指令=${r.quick}`)
     console.log(`        可收起=${r.collapsedToLauncher} 可再展开=${r.reopened} 错误=${r.errors.length}`)
     for (const e of r.errors.slice(0, 6)) console.log('        ! ' + e.slice(0, 220))
   } catch (e) {

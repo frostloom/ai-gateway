@@ -141,7 +141,7 @@ async function doRefundAmount() {
   gap: 10px; align-items: center; padding: 10px 6px;
   font-size: 13px;
 }
-.thead { color: var(--ink-400); font-size: 12px; border-bottom: 1px dashed var(--hairline); margin-bottom: 4px; }
+.thead { color: var(--ink-400); font-size: 12px; border-bottom: 1px solid var(--hairline); margin-bottom: 4px; }
 .row { border-bottom: 1px dashed var(--line); }
 .row:hover { background: var(--paper-2); border-radius: 8px; }
 .ono { color: var(--ink-500); }

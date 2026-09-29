@@ -1,200 +1,50 @@
-/* ============================================================
-   ai-gateway 设计令牌层
-
-   设计方向（Soft Structuralism / 银白）
-   - 底色只用一种：近白 #f4f6f5，纯白只留给"抬起"的表面
-   - 分层手段 = 通道凹陷 + 表面抬起 + 环境阴影，绝不靠 1px 灰线
-   - 阴影永远带绿相的墨色，且"柔和 + 大扩散"，禁止生硬黑投影
-   - 大字号 Grotesk、负字距；数字一律等宽
-   - 动效只走物理曲线，禁止 linear / ease-in-out
-   ============================================================ */
-
+/* Shared console design: neutral surfaces, subtle borders, compact controls. */
 :root {
-  /* ---------- 强调色：单一绿，饱和度受控 ---------- */
-  --accent-700: #0a6b4a;
-  --accent-600: #0d8058;
-  --accent-500: #109466;
-  --accent-400: #34ab80;
-  --accent-200: #a7dcc6;
-  --accent-100: #d3ede1;
-  --accent-50: #eaf6f0;
-
-  --ok: #0d8058;
-  --ok-bg: #eaf6f0;
-  --warn: #8a5a09;
-  --warn-bg: #fbf2e2;
-  --danger: #b8423f;
-  --danger-bg: #fcedec;
-  --info: #2b5f9e;
-  --info-bg: #ecf2fa;
-  --violet: #6d5bb8;
-  --violet-bg: #efedf9;
-  --rose: #a84f6b;
-  --rose-bg: #fbeef2;
-
-  /* ---------- 中性灰阶：冷绿相，阶差细腻 ---------- */
-  --ink-950: #0a0f0d;
-  --ink-900: #111917;
-  --ink-800: #1b2522;
-  --ink-700: #2c3833;
-  --ink-600: #46544e;
-  --ink-500: #5f6d67;
-  --ink-400: #8b978f;
-  --ink-300: #b6c0ba;
-  --ink-200: #d6dcd9;
-
-  /* ---------- 表面层级 ---------- */
-  /* bg      页面底色（通道）   */
-  /* surface 抬起表面（白）     */
-  /* well    凹陷凹槽           */
-  --bg: #f1f4f2;
-  --surface: #ffffff;
-  --surface-2: #fafbfa;
-  --surface-3: #f3f6f4;
-  --shell: #ffffff;
-  --well: rgb(17 25 23 / .045);
-  --well-2: rgb(17 25 23 / .075);
-
-  /* 发丝线只用于"分隔"，不用于"描边容器" */
-  --hairline: rgb(17 25 23 / .055);
-  --hairline-2: rgb(17 25 23 / .09);
-
-  /* ---------- 阴影：柔和 + 大扩散 + 墨绿相 ---------- */
-  --shadow-xs: 0 1px 2px rgb(17 25 23 / .04);
-  --shadow-raise:
-    0 1px 1.5px rgb(17 25 23 / .045),
-    0 2px 4px -1px rgb(17 25 23 / .05);
-  --shadow-card:
-    0 1px 2px rgb(17 25 23 / .04),
-    0 6px 14px -6px rgb(17 25 23 / .07),
-    0 20px 40px -18px rgb(17 25 23 / .10);
-  --shadow-float:
-    0 2px 4px rgb(17 25 23 / .04),
-    0 14px 28px -10px rgb(17 25 23 / .11),
-    0 42px 84px -32px rgb(17 25 23 / .18);
-  --shadow-pop:
-    0 3px 6px rgb(17 25 23 / .05),
-    0 22px 44px -14px rgb(17 25 23 / .15),
-    0 60px 120px -40px rgb(17 25 23 / .24);
-  --shadow-accent:
-    0 2px 6px rgb(13 128 88 / .20),
-    0 12px 26px -8px rgb(13 128 88 / .30);
-
-  --inset-hi: inset 0 1px 0 rgb(255 255 255 / .92);
-  --inset-hi-strong: inset 0 1px 1px rgb(255 255 255 / .95);
-  /* 凹槽：左上暗、右下亮 → 读作"被压下去" */
-  --inset-well:
-    inset 0 1px 2px rgb(17 25 23 / .07),
-    inset 0 -1px 0 rgb(255 255 255 / .85);
-
-  /* ---------- 字体 ---------- */
-  --font-sans: 'Outfit Variable', 'PingFang SC', 'HarmonyOS Sans SC', 'Microsoft YaHei',
-               'Source Han Sans SC', 'Noto Sans SC', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', 'SF Mono', 'Cascadia Mono', Consolas, monospace;
-
-  --fs-2xs: 11px;
-  --fs-xs: 12px;
-  --fs-sm: 13px;
-  --fs-base: 14px;
-  --fs-md: 15px;
-  --fs-lg: 18px;
-  --fs-xl: 22px;
-  --fs-2xl: 30px;
-  --fs-3xl: 40px;
-  --fs-4xl: 52px;
-
-  /* ---------- 间距 ---------- */
-  --sp-1: 4px;  --sp-2: 8px;  --sp-3: 12px; --sp-4: 16px;
-  --sp-5: 20px; --sp-6: 28px; --sp-7: 40px; --sp-8: 56px;
-  --sp-9: 80px; --sp-10: 112px;
-
-  /* ---------- 圆角：同心计算 ---------- */
-  --r-xs: 8px;
-  --r-sm: 10px;
-  --r-md: 14px;
-  --r-lg: 20px;
-  --r-xl: 26px;
-  --r-2xl: 34px;
-  --shell-pad: 5px;
-  --r-inner: calc(var(--r-xl) - var(--shell-pad));
-  --r-inner-2xl: calc(var(--r-2xl) - var(--shell-pad));
-  --r-pill: 999px;
-
-  /* 旧命名别名（兼容既有视图；值已重定向到新体系） */
-  --r-card: var(--r-lg);
-  --r-control: var(--r-sm);
-  --paper: var(--surface);
-  --paper-2: var(--surface-3);
-  --paper-3: var(--well);
-  --paper-4: var(--well);
-  --line: var(--hairline);
-  --line-2: var(--hairline-2);
-  --line-strong: var(--ink-300);
-  --shadow-1: var(--shadow-raise);
-  --shadow-2: var(--shadow-card);
-  --shadow-3: var(--shadow-pop);
-
-  /* ---------- 层级 ---------- */
-  --z-base: 1;
-  --z-sticky: 20;
-  --z-drawer: 40;
-  --z-modal: 60;
-  --z-chat: 70;
-  --z-toast: 90;
-
-  /* ---------- 动效 ---------- */
-  --ease-out: cubic-bezier(.32, .72, 0, 1);
-  --ease-spring: cubic-bezier(.34, 1.35, .44, 1);
-  --ease-smooth: cubic-bezier(.4, 0, .12, 1);
-
-  --t-fast: .18s var(--ease-out);
-  --t-base: .32s var(--ease-out);
-  --t-slow: .55s var(--ease-out);
-  --t-spring: .5s var(--ease-spring);
+  --accent-700: #3154b7; --accent-600: #4263c7; --accent-500: #5575d7;
+  --accent-400: #839be6; --accent-200: #cbd6f6; --accent-100: #e2e9fc; --accent-50: #eff3ff;
+  --ok: #25835c; --ok-bg: #edf8f2; --warn: #9b6a14; --warn-bg: #fff7e6;
+  --danger: #c14343; --danger-bg: #fff0f0; --info: #4263c7; --info-bg: #eff3ff;
+  --violet: #7463a8; --violet-bg: #f3f0fa; --rose: #a65372; --rose-bg: #fbf0f4;
+  --ink-950: #181a20; --ink-900: #252831; --ink-800: #363a44; --ink-700: #494e5b;
+  --ink-600: #5b6170; --ink-500: #6e7482; --ink-400: #858b98; --ink-300: #b8bdc7; --ink-200: #e1e4eb;
+  --bg: #f7f8fa; --surface: #fff; --surface-2: #fcfcfd; --surface-3: #f3f4f7;
+  --shell: #fff; --well: #f5f6f8; --well-2: #eceef3;
+  --hairline: #e9ebf0; --hairline-2: #dfe3ea;
+  --shadow-xs: 0 1px 2px rgb(24 26 32 / .025);
+  --shadow-raise: var(--shadow-xs); --shadow-card: var(--shadow-xs);
+  --shadow-float: 0 8px 28px rgb(24 26 32 / .08);
+  --shadow-pop: 0 16px 56px rgb(24 26 32 / .14);
+  --shadow-accent: none; --inset-hi: none; --inset-hi-strong: none; --inset-well: none;
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --font-mono: 'JetBrains Mono Variable', 'SF Mono', Consolas, monospace;
+  --fs-2xs: 11px; --fs-xs: 12px; --fs-sm: 13px; --fs-base: 14px; --fs-md: 15px;
+  --fs-lg: 17px; --fs-xl: 20px; --fs-2xl: 28px; --fs-3xl: 32px; --fs-4xl: 40px;
+  --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px; --sp-5: 20px;
+  --sp-6: 24px; --sp-7: 32px; --sp-8: 40px; --sp-9: 56px; --sp-10: 72px;
+  --r-xs: 4px; --r-sm: 6px; --r-md: 8px; --r-lg: 10px; --r-xl: 12px; --r-2xl: 14px;
+  --shell-pad: 0px; --r-inner: var(--r-lg); --r-inner-2xl: var(--r-xl); --r-pill: 999px;
+  --r-card: var(--r-lg); --r-control: var(--r-sm);
+  --paper: var(--surface); --paper-2: var(--surface-3); --paper-3: var(--well); --paper-4: var(--well-2);
+  --line: var(--hairline); --line-2: var(--hairline-2); --line-strong: var(--ink-300);
+  --shadow-1: var(--shadow-xs); --shadow-2: var(--shadow-card); --shadow-3: var(--shadow-pop);
+  --z-base: 1; --z-sticky: 20; --z-drawer: 40; --z-chat: 50; --z-modal: 60; --z-toast: 90;
+  --ease-out: cubic-bezier(.2, .7, .3, 1); --ease-spring: var(--ease-out); --ease-smooth: var(--ease-out);
+  --t-fast: .15s var(--ease-out); --t-base: .2s var(--ease-out); --t-slow: .3s var(--ease-out); --t-spring: var(--t-base);
 }
 
-/* ---------- 深色模式 ---------- */
+/* Optional system-dark palette for deployments that set data-theme="auto". */
 @media (prefers-color-scheme: dark) {
-  :root[data-theme='auto'] {
-    --bg: #0b100e;
-    --surface: #121815;
-    --surface-2: #161d1a;
-    --surface-3: #1a221e;
-    --shell: #161d1a;
-    --well: rgb(255 255 255 / .05);
-    --well-2: rgb(255 255 255 / .08);
-
-    --ink-950: #f2f6f4;
-    --ink-900: #e6ece9;
-    --ink-800: #d4ddd8;
-    --ink-700: #b6c1bb;
-    --ink-600: #97a49d;
-    --ink-500: #8b978f;
-    --ink-400: #6b7772;
-    --ink-300: #454f4a;
-    --ink-200: #333b37;
-
-    --hairline: rgb(255 255 255 / .07);
-    --hairline-2: rgb(255 255 255 / .12);
-
-    --shadow-raise: 0 1px 2px rgb(0 0 0 / .4);
-    --shadow-card: 0 1px 2px rgb(0 0 0 / .4), 0 12px 32px -12px rgb(0 0 0 / .55);
-    --shadow-float: 0 4px 12px rgb(0 0 0 / .45), 0 32px 64px -24px rgb(0 0 0 / .65);
-    --shadow-pop: 0 8px 24px rgb(0 0 0 / .55), 0 48px 96px -32px rgb(0 0 0 / .75);
-    --inset-hi: inset 0 1px 0 rgb(255 255 255 / .06);
-    --inset-hi-strong: inset 0 1px 1px rgb(255 255 255 / .09);
-    --inset-well: inset 0 1px 2px rgb(0 0 0 / .4);
-
-    --accent-50: #12291f;
-    --accent-100: #16352a;
-    --accent-700: #17b37f;
-    --ok-bg: #12291f;
-    --warn-bg: #302410;
-    --danger-bg: #351a19;
-    --info-bg: #16243a;
-    --violet-bg: #211f38;
-    --rose-bg: #2e1c23;
-  }
+ :root[data-theme='auto'] {
+  --bg: #17191f; --surface: #20232b; --surface-2: #252831; --surface-3: #2a2e38;
+  --shell: #20232b; --well: #292d37; --well-2: #343945;
+  --ink-950: #f5f6fa; --ink-900: #eceef5; --ink-800: #dce0ea; --ink-700: #c5cbd8;
+  --ink-600: #afb7c7; --ink-500: #9aa4b8; --ink-400: #8791a5; --ink-300: #525a6a; --ink-200: #3b4250;
+  --hairline: #343946; --hairline-2: #454c5c;
+  --accent-50: #28334d; --accent-100: #303e60; --accent-700: #a6bbff;
+  --ok: #67c89c; --ok-bg: #213a30; --warn: #e3b369; --warn-bg: #403524;
+  --danger: #ef9393; --danger-bg: #402b30; --info: #a0b5f0; --info-bg: #28334d;
+  --violet-bg: #352e48; --rose-bg: #422e3a;
+ }
 }
 
 /* ============================================================
@@ -219,8 +69,8 @@ body {
 h1, h2, h3, h4 {
   margin: 0;
   color: var(--ink-900);
-  font-weight: 640;
-  letter-spacing: -.025em;
+  font-weight: 600;
+  letter-spacing: -.01em;
   line-height: 1.15;
   text-wrap: balance;
 }
@@ -335,3 +185,11 @@ input::placeholder, textarea::placeholder { color: var(--ink-400); }
     scroll-behavior: auto !important;
   }
 }
+
+/* Consistent page titles and toolbars across both consoles. */
+.page-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 4px; }
+.page-heading h1 { font-size: 22px; line-height: 1.4; font-weight: 600; }
+.page-heading p { margin-top: 5px; color: var(--ink-500); font-size: 13px; }
+.page-heading .page-meta { font-size: 12px; color: var(--ink-400); white-space: nowrap; }
+input, select, textarea { accent-color: var(--accent-600); }
+@media (max-width: 600px) { .page-heading { align-items: flex-start; } .page-meta { display: none; } }

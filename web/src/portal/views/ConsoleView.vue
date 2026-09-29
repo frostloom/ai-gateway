@@ -205,7 +205,7 @@ function setUsage(u: any, ms: number) {
 .usagenum {
   margin-top: var(--sp-4);
   padding-top: var(--sp-4);
-  border-top: 1px dashed var(--hairline);
+  border-top: 1px solid var(--hairline);
   font-size: var(--fs-xs);
   color: var(--ink-600);
 }

@@ -167,7 +167,7 @@ function finish() { close(); setTimeout(() => emit('changed'), 50) }
 /* 订单回执 */
 .receipt {
   background: var(--paper-2);
-  border: 1px dashed var(--hairline);
+  border: 1px solid var(--hairline);
   border-radius: var(--r-sm);
   padding: var(--sp-4);
   margin-bottom: var(--sp-3);
@@ -177,7 +177,7 @@ function finish() { close(); setTimeout(() => emit('changed'), 50) }
   padding: 7px 0;
   font-size: var(--fs-sm); color: var(--ink-500);
 }
-.rrow + .rrow { border-top: 1px dashed var(--hairline); }
+.rrow + .rrow { border-top: 1px solid var(--hairline); }
 .rrow .strong { color: var(--ink-900); font-size: var(--fs-md); font-weight: 680; }
 .mono { font-family: var(--font-mono); font-size: var(--fs-2xs); }
 

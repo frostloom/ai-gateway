@@ -213,7 +213,7 @@ function tiersOf(p: Plan): [string, number][] {
   display: flex; flex-direction: column; gap: var(--sp-3);
   padding: var(--sp-5);
   background: var(--paper);
-  border: 1px dashed var(--hairline);
+  border: 1px solid var(--hairline);
   border-radius: var(--r-md);
   box-shadow: var(--shadow-1);
   transition: border-color var(--t-fast), box-shadow var(--t-fast), transform var(--t-fast);
@@ -243,7 +243,7 @@ function tiersOf(p: Plan): [string, number][] {
 .pcur { font-size: var(--fs-sm); color: var(--ink-500); }
 .pfeat {
   list-style: none; margin: 0; padding: var(--sp-3) 0 0;
-  border-top: 1px dashed var(--hairline);
+  border-top: 1px solid var(--hairline);
   display: flex; flex-direction: column; gap: 8px;
   flex: 1;
 }

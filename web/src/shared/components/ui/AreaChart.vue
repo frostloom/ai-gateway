@@ -29,25 +29,8 @@ const H = computed(() => props.height)
 
 const hover = ref<{ i: number; x: number } | null>(null)
 
-/**
- * Y 轴上界。
- *
- * 关键：单点暴涨（如一次性大额入账）会把其余数据压成一条线。这里用
- * 「分位数 + 极值折中」：取 90 分位与最大值的加权，既保留量级感知，
- * 又不让单点离群值毁掉整张图的形状；超出上界的点做削顶标记。
- */
-const yMax = computed(() => {
-  const all: number[] = []
-  for (const s of props.series) for (const p of s.points) all.push(p.value)
-  if (!all.length) return 1
-  const sorted = [...all].sort((a, b) => a - b)
-  const max = sorted[sorted.length - 1]
-  if (max <= 0) return 1
-  const p90 = sorted[Math.floor(sorted.length * 0.9)] ?? max
-  // 最大值远高于 P90（>3 倍）→ 视为离群，用 P90 抬高一点作为上界
-  const base = max > p90 * 3 ? p90 * 1.6 : max
-  return (base > 0 ? base : max) * 1.12
-})
+/** Full data range: never visually truncate high-value days. */
+const yMax = computed(() => Math.max(1, ...props.series.flatMap(s => s.points.map(p => p.value))) * 1.12)
 
 const labels = computed(() => props.series[0]?.points.map(p => p.label) ?? [])
 const n = computed(() => labels.value.length)
@@ -91,9 +74,10 @@ function smoothPath(points: { value: number }[]): string {
     const p3 = pts[i + 2] ?? p2
     // 张力 0.5 的 Catmull-Rom → 三次贝塞尔控制点
     const c1x = p1.x + (p2.x - p0.x) / 6
-    const c1y = p1.y + (p2.y - p0.y) / 6
+    const lo = Math.min(p1.y, p2.y), hi = Math.max(p1.y, p2.y)
+    const c1y = Math.max(lo, Math.min(hi, p1.y + (p2.y - p0.y) / 6))
     const c2x = p2.x - (p3.x - p1.x) / 6
-    const c2y = p2.y - (p3.y - p1.y) / 6
+    const c2y = Math.max(lo, Math.min(hi, p2.y - (p3.y - p1.y) / 6))
     d += ` C${c1x.toFixed(1)},${c1y.toFixed(1)} ${c2x.toFixed(1)},${c2y.toFixed(1)} ${p2.x.toFixed(1)},${p2.y.toFixed(1)}`
   }
   return d
@@ -129,7 +113,7 @@ const xLabels = computed(() => {
   return out
 })
 
-const palette = ['var(--accent-500)', 'var(--info)', 'var(--warn)']
+const palette = ['var(--accent-500)', 'var(--ink-400)', 'var(--warn)']
 
 function onMove(e: MouseEvent) {
   const svg = e.currentTarget as SVGSVGElement
@@ -261,7 +245,7 @@ function hoverRows() {
   color: var(--ink-400);
   margin-bottom: 6px;
   padding-bottom: 5px;
-  border-bottom: 1px dashed var(--hairline-2);
+  border-bottom: 1px solid var(--hairline-2);
 }
 .trow { display: flex; align-items: center; gap: 6px; font-size: var(--fs-2xs); }
 .tdot { width: 7px; height: 7px; border-radius: 2px; flex: none; }
