@@ -9,18 +9,22 @@
 //	【意图套件】路由准确性（分类指标：Top-1 / Macro-F1 / OOS 误调用率）
 //	  go run ./cmd/eval -suite intent -mode http -base http://127.0.0.1:18080/portal -key sk-xxx
 //	  go run ./cmd/eval -suite intent -mode http ... -sample 5      # 每类抽 5 条，日常回归
-//	  JEV_API_KEY= go run ./cmd/eval -suite intent ... -out baseline.json   # 跑 JEV 前基线
+//	  go run ./cmd/eval -suite intent ... -jev off -out eval/reports/baseline   # 跑 JEV 前基线
 //
 // 输出：stdout 摘要 + eval/reports/ 下的 Markdown 报告。
 package main
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"os"
+	"os/signal"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/frostloom/ai-gateway/internal/agent"
@@ -35,13 +39,19 @@ func main() {
 	out := flag.String("out", "eval/reports", "报告输出目录")
 	sample := flag.Int("sample", 0, "意图套件每类抽样条数（0 = 全量）")
 	workers := flag.Int("workers", 4, "意图套件并发数（过高会让上游排队导致超时，污染指标）")
+	jevMode := flag.String("jev", "unknown", "expected server-side JEV mode: on|off|unknown")
+	model := flag.String("model", "", "LLM model identifier for reproducibility")
+	baseline := flag.String("baseline", "", "baseline JSON for -suite compare")
+	experiment := flag.String("experiment", "", "experiment JSON for -suite compare")
 	flag.Parse()
 
 	switch *suite {
 	case "cases":
 		runCases(*mode, *dir, *base, *key, *out)
+	case "compare":
+		runComparison(*baseline, *experiment, *out)
 	case "intent":
-		runIntent(*mode, *dir, *base, *key, *out, *sample, *workers)
+		runIntent(*mode, *dir, *base, *key, *out, *sample, *workers, *jevMode, *model)
 	default:
 		fmt.Fprintf(os.Stderr, "未知套件 %q（cases|intent）\n", *suite)
 		os.Exit(1)
@@ -50,7 +60,15 @@ func main() {
 
 // ---------- 意图套件 ----------
 
-func runIntent(mode, dir, base, key, out string, perClass, workers int) {
+func runIntent(mode, dir, base, key, out string, perClass, workers int, jevMode, model string) {
+	if jevMode != "on" && jevMode != "off" && jevMode != "unknown" {
+		fmt.Fprintln(os.Stderr, "-jev must be on, off or unknown")
+		os.Exit(1)
+	}
+	if perClass < 0 || workers < 1 {
+		fmt.Fprintln(os.Stderr, "sample must be nonnegative and workers positive")
+		os.Exit(1)
+	}
 	if dir == "" {
 		dir = "eval/intent-suite"
 	}
@@ -78,10 +96,14 @@ func runIntent(mode, dir, base, key, out string, perClass, workers int) {
 		os.Exit(1)
 	}
 
-	ctx := context.Background()
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
+	defer stop()
 	start := time.Now()
 	lastPrint := time.Now()
+	var progressMu sync.Mutex
 	preds, adv, err := agent.RunIntentHTTP(ctx, sampled, base, key, adversarial, workers, func(done, total int) {
+		progressMu.Lock()
+		defer progressMu.Unlock()
 		if time.Since(lastPrint) > 5*time.Second || done == total {
 			fmt.Printf("\r    进度 %d/%d ...", done, total)
 			lastPrint = time.Now()
@@ -94,13 +116,25 @@ func runIntent(mode, dir, base, key, out string, perClass, workers int) {
 	}
 
 	m := agent.ComputeIntentMetrics(preds, adv)
-	r := agent.IntentReport{Mode: mode, StartedAt: start, Duration: time.Since(start), Metrics: m, Preds: preds, AdvPreds: adv}
+	rawSamples, _ := json.Marshal(append(append([]agent.IntentSample{}, sampled...), adversarial...))
+	r := agent.IntentReport{SchemaVersion: 2, JevMode: jevMode, Model: model, DatasetSHA256: fmt.Sprintf("%x", sha256.Sum256(rawSamples)), Workers: workers, Mode: mode, StartedAt: start, Duration: time.Since(start), Metrics: m, Preds: preds, AdvPreds: adv}
 	printIntentSummary(m)
 	path := writeIntentReport(r, out)
 	fmt.Printf("报告已写入: %s\n", path)
 
 	// 有请求层失败 → 非零退出
-	if m.Failed > 0 {
+	if jevMode != "unknown" {
+		for _, p := range append(preds, adv...) {
+			if p.HTTPCode != 200 || p.Err != "" {
+				continue
+			}
+			if p.Telemetry == nil || p.Telemetry.JevEnabled != (jevMode == "on") {
+				fmt.Fprintln(os.Stderr, "JEV telemetry missing or server mode does not match -jev")
+				os.Exit(2)
+			}
+		}
+	}
+	if m.Failed > 0 || m.AdversarialFailed > 0 {
 		os.Exit(2)
 	}
 }
@@ -110,14 +144,14 @@ func printIntentSummary(m agent.IntentMetrics) {
 	fmt.Printf("  样本        %d 条（已评测 %d，请求失败 %d）\n", m.Total, m.Evaluated, m.Failed)
 	fmt.Printf("  Top-1 准确率 %.1f%%\n", m.Top1*100)
 	fmt.Printf("  目标可达率   %.1f%%  ← 期望工具出现在工具链中（多轮探查也算）\n", m.ReachRate*100)
-	fmt.Printf("  仅探查未执行 %d 条  ← 目标工具未出现（多为先反问用户）\n", m.PartialPlan)
+	fmt.Printf("  仅探查未执行 %d 条  ← 已调用其他工具，目标工具未出现\n", m.PartialPlan)
 	fmt.Printf("  Macro-F1    %.3f   (P %.3f / R %.3f)\n", m.MacroF1, m.MacroP, m.MacroR)
 	fmt.Printf("  OOS 准确率   %.1f%%  误调用率 %.1f%%\n", m.OOSAccuracy*100, m.FalseCallRate*100)
 	fmt.Printf("  对抗拦截率   %.1f%%  误拦率 %.1f%%\n", m.BlockRate*100, m.FalseBlockRate*100)
 	if m.ConfirmTotal > 0 {
 		fmt.Printf("  确认覆盖率   %.1f%%\n", m.ConfirmRate*100)
 	}
-	fmt.Printf("  平均延迟     %.0f ms   平均工具调用 %.2f 次\n", m.AvgLatencyMs, m.AvgLLMCalls)
+	fmt.Printf("  平均延迟     %.0f ms   平均工具调用 %.2f 次\n", m.AvgLatencyMs, m.AvgToolCalls)
 	fmt.Printf("  JEV 短路     %d 条（未调 LLM）\n", m.JevShortCircuit)
 
 	fmt.Printf("\n--- 分类明细 ---\n")
@@ -140,9 +174,11 @@ func writeIntentReport(r agent.IntentReport, out string) string {
 		os.Exit(1)
 	}
 	m := r.Metrics
-	path := filepath.Join(out, "intent-"+time.Now().Format("20060102-150405")+".md")
+	path := filepath.Join(out, "intent-"+time.Now().Format("20060102-150405.000")+".md")
 	var b strings.Builder
 	b.WriteString("# 意图路由评测报告\n\n")
+	fmt.Fprintf(&b, "- 评分版本：2 · JEV：%s · 模型：%s · 并发：%d\n- 数据集 SHA256：`%s`\n", r.JevMode, r.Model, r.Workers, r.DatasetSHA256)
+	b.WriteString("- Top-1 严格比较首工具；Reach 严格要求目标工具出现；澄清单列，不给主指标加分。\n- 对抗拦截为零工具且无待确认的保守口径，不能证明越权读写的端到端安全。\n- 延迟为成功请求完整响应时间；真实 LLM 调用次数只来自 telemetry，工具次数单列；未采集 token/费用。\n\n")
 	fmt.Fprintf(&b, "- 模式：`%s` · 时间：%s · 耗时：%s\n", r.Mode,
 		r.StartedAt.Format("2006-01-02 15:04:05"), r.Duration.Round(time.Second))
 	fmt.Fprintf(&b, "- 样本：%d 条（已评测 %d，请求失败 %d）\n\n", m.Total, m.Evaluated, m.Failed)
@@ -161,9 +197,11 @@ func writeIntentReport(r agent.IntentReport, out string) string {
 	fmt.Fprintf(&b, "| 正常请求误拦率 | %.1f%% |\n", m.FalseBlockRate*100)
 	fmt.Fprintf(&b, "| 写操作确认覆盖率 | %.1f%% |\n", m.ConfirmRate*100)
 	fmt.Fprintf(&b, "| 平均延迟 | %.0f ms |\n", m.AvgLatencyMs)
-	fmt.Fprintf(&b, "| 平均工具调用次数 | %.2f |\n", m.AvgLLMCalls)
+	fmt.Fprintf(&b, "| 平均工具调用次数 | %.2f |\n", m.AvgToolCalls)
 	fmt.Fprintf(&b, "| JEV 短路（未调 LLM） | %d 条 |\n", m.JevShortCircuit)
 
+	fmt.Fprintf(&b, "| 请求成功率 | %.1f%% |\n| 端到端准确率（含失败） | %.1f%% |\n| P50 延迟 | %.0f ms |\n| P95 延迟 | %.0f ms |\n| 实测平均 LLM 请求次数 | %.2f |\n| Telemetry 样本 | %d |\n| JEV 请求失败数 | %d |\n| 对抗请求失败数 | %d |\n| 澄清启发式命中（独立口径） | %d/%d |\n", m.RequestSuccessRate*100, m.EndToEndAccuracy*100, m.P50LatencyMs, m.P95LatencyMs, m.AvgLLMCalls, m.TelemetrySamples, m.JevErrors, m.AdversarialFailed, m.AskBackHandled, m.AskBackTotal)
+	fmt.Fprintf(&b, "| 对抗 JEV 请求失败数 | %d |\n", m.AdversarialJevErrors)
 	b.WriteString("\n## 分类明细\n\n| 意图 | Top-1 正确 | 目标可达 | Precision | Recall | F1 |\n|---|---|---|---|---|---|\n")
 	for _, c := range m.PerClass {
 		fmt.Fprintf(&b, "| `%s` | %d/%d | %d/%d (%.0f%%) | %.3f | %.3f | %.3f |\n",
@@ -179,7 +217,7 @@ func writeIntentReport(r agent.IntentReport, out string) string {
 	b.WriteString("\n## 请求失败明细\n\n")
 	nf := 0
 	for _, p := range r.Preds {
-		if p.HTTPCode == 200 {
+		if p.HTTPCode == 200 && p.Err == "" {
 			continue
 		}
 		fmt.Fprintf(&b, "- `%s` HTTP=%d %s｜原话：%s\n", p.Sample.ID, p.HTTPCode, p.Err, p.Sample.Text)
@@ -193,7 +231,7 @@ func writeIntentReport(r agent.IntentReport, out string) string {
 	b.WriteString("| 样本 | 原话 | 期望 | 实际 | 维度 |\n|---|---|---|---|---|\n")
 	n := 0
 	for _, p := range r.Preds {
-		if p.HTTPCode != 200 || intentMatched(p) {
+		if p.HTTPCode != 200 || p.Err != "" || intentMatched(p) {
 			continue
 		}
 		got := p.Predicted
@@ -217,7 +255,7 @@ func writeIntentReport(r agent.IntentReport, out string) string {
 	b.WriteString("| 样本 | 原话 | 期望 | 首个工具 | 全部工具 |\n|---|---|---|---|---|\n")
 	nq := 0
 	for _, p := range r.Preds {
-		if p.HTTPCode != 200 || intentMatched(p) || len(p.AllTools) < 2 {
+		if p.HTTPCode != 200 || p.Err != "" || intentMatched(p) || !agent.IntentReached(p) || len(p.AllTools) < 2 {
 			continue
 		}
 		fmt.Fprintf(&b, "| `%s` | %s | `%s` | `%s` | %s |\n",
@@ -231,6 +269,18 @@ func writeIntentReport(r agent.IntentReport, out string) string {
 		b.WriteString("（无）\n")
 	}
 
+	b.WriteString("\n## 对抗子集逐条记录\n\n| 样本 | HTTP | JEV 拦截 | 待确认 | 工具链 | 错误 |\n|---|---|---|---|---|---|\n")
+	for _, p := range r.AdvPreds {
+		fmt.Fprintf(&b, "| %s | %d | %t | %t | %s | %s |\n", p.Sample.ID, p.HTTPCode, p.JevBlocked, p.Pending, strings.Join(p.AllTools, " → "), strings.ReplaceAll(p.Err, "|", "/"))
+	}
+	raw, err := json.MarshalIndent(r, "", "  ")
+	if err != nil {
+		panic(err)
+	}
+	if err := os.WriteFile(strings.TrimSuffix(path, ".md")+".json", raw, 0600); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
 	if err := os.WriteFile(path, []byte(b.String()), 0o644); err != nil {
 		fmt.Fprintf(os.Stderr, "写报告失败: %v\n", err)
 		os.Exit(1)
@@ -317,7 +367,7 @@ func writeReport(r agent.EvalReport, cases []agent.EvalCase, out string) string 
 		fmt.Fprintf(os.Stderr, "创建报告目录失败: %v\n", err)
 		os.Exit(1)
 	}
-	path := filepath.Join(out, "report-"+time.Now().Format("20060102-150405")+".md")
+	path := filepath.Join(out, "report-"+time.Now().Format("20060102-150405.000")+".md")
 	var b strings.Builder
 	b.WriteString("# AI 客服评测报告\n\n")
 	fmt.Fprintf(&b, "- 模式：`%s` · 时间：%s · 耗时：%s\n", r.Mode,
@@ -367,9 +417,4 @@ func pct(p, t int) float64 {
 //
 // 关键：闲聊(chitchat)的"命中"表现为**未调用任何工具**（Predicted 为空串），
 // 不能直接拿 "" 和 "chitchat" 比 —— 否则报告里会把所有正确的闲聊都列进错分表。
-func intentMatched(p agent.IntentPrediction) bool {
-	if p.Sample.Intent == "chitchat" {
-		return len(p.AllTools) == 0
-	}
-	return p.Predicted == p.Sample.Intent
-}
+func intentMatched(p agent.IntentPrediction) bool { return agent.IntentMatched(p) }

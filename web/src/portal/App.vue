@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref, shallowRef, provide, onMounted } from 'vue'
+import { ref, shallowRef, provide, onMounted, computed } from 'vue'
 import {
   IconShoppingBag, IconCategory, IconCreditCard, IconReceipt2,
-  IconTrendingUp, IconTerminal2, IconWallet, IconLogout, IconUserShield,
+  IconTrendingUp, IconTerminal2, IconWallet, IconLogout, IconUserShield, IconMenu2,
 } from '@tabler/icons-vue'
 import { api, auth, ApiError } from '../shared/api'
 import { money } from '../shared/utils/format'
@@ -20,11 +20,11 @@ import ConsoleView from './views/ConsoleView.vue'
 type ViewKey = 'home' | 'catalog' | 'plans' | 'orders' | 'consumption' | 'console'
 
 const navs: { key: ViewKey; label: string; icon: any }[] = [
-  { key: 'home', label: '商城', icon: IconShoppingBag },
-  { key: 'catalog', label: '全部商品', icon: IconCategory },
-  { key: 'plans', label: '套餐', icon: IconCreditCard },
-  { key: 'orders', label: '订单', icon: IconReceipt2 },
-  { key: 'consumption', label: '消费', icon: IconTrendingUp },
+  { key: 'home', label: '工作台', icon: IconShoppingBag },
+  { key: 'catalog', label: '模型广场', icon: IconCategory },
+  { key: 'plans', label: '订阅套餐', icon: IconCreditCard },
+  { key: 'orders', label: '我的订单', icon: IconReceipt2 },
+  { key: 'consumption', label: '用量统计', icon: IconTrendingUp },
   { key: 'console', label: '接口调试', icon: IconTerminal2 },
 ]
 
@@ -33,6 +33,8 @@ const views: Record<ViewKey, any> = {
   orders: OrdersView, consumption: ConsumptionView, console: ConsoleView,
 }
 
+const mobileOpen = ref(false)
+const currentLabel = computed(() => navs.find(n => n.key === cur.value)?.label || '工作台')
 const logged = ref(false)
 const busy = ref(false)
 const keyInput = ref('')
@@ -115,22 +117,20 @@ onMounted(() => {
   </div>
 
   <!-- 商城主体 -->
-  <div v-else class="app">
+  <div v-else class="app" :class="{ mobileOpen }" @keydown.esc="mobileOpen = false">
+    <button v-if="mobileOpen" class="nav-backdrop" aria-label="关闭导航" @click="mobileOpen = false" />
+    <aside class="sidebar">
+      <a class="portal-brand" href="/portal"><div class="mark sm"><IconShoppingBag :size="17" /></div><div><strong>AI Gateway</strong><small>用户控制台</small></div></a>
+      <p class="nav-group">工作空间</p>
+      <nav class="nav" aria-label="主导航">
+        <button v-for="n in navs" :key="n.key" class="navitem" :class="{ on: cur === n.key }" :aria-current="cur === n.key ? 'page' : undefined" @click="cur = n.key; mobileOpen = false"><component :is="n.icon" :size="17" :stroke-width="1.7" />{{ n.label }}</button>
+      </nav>
+      <div class="sidebar-foot"><span>统一模型接口</span><code>OpenAI compatible</code></div>
+    </aside>
     <header class="topbar">
       <div class="tleft">
-        <div class="mark sm"><IconShoppingBag :size="17" stroke-width="1.9" /></div>
-        <span class="tb">AI 模型商城</span>
+        <button class="icon-btn mobile-menu" aria-label="打开导航" :aria-expanded="mobileOpen" @click="mobileOpen = !mobileOpen"><IconMenu2 :size="18" /></button><span class="crumb">用户控制台 /</span><span class="tb">{{ currentLabel }}</span>
       </div>
-
-      <nav class="nav" aria-label="主导航">
-        <button
-          v-for="n in navs"
-          :key="n.key"
-          class="navitem"
-          :class="{ on: cur === n.key }"
-          @click="cur = n.key"
-        >{{ n.label }}</button>
-      </nav>
 
       <div class="tright">
         <span class="bal num" title="可用余额">
@@ -140,7 +140,7 @@ onMounted(() => {
         <a class="icon-btn" href="/" target="_blank" title="管理面板">
           <IconUserShield :size="16" />
         </a>
-        <span class="keychip mono" :title="keyInput">{{ masked(keyInput) }}</span>
+        <span class="keychip mono" title="当前 API Key">{{ masked(keyInput) }}</span>
         <button class="icon-btn danger" title="退出登录" @click="logout">
           <IconLogout :size="16" />
         </button>
@@ -170,7 +170,7 @@ onMounted(() => {
 .gate-card {
   width: 100%; max-width: 430px;
   background: var(--paper);
-  border: 1px dashed var(--hairline);
+  border: 1px solid var(--hairline);
   border-radius: var(--r-lg);
   box-shadow: var(--shadow-2);
   padding: var(--sp-7);
@@ -220,7 +220,7 @@ onMounted(() => {
   height: 58px; padding: 0 var(--sp-6);
   background: rgb(255 255 255 / .82);
   backdrop-filter: blur(14px) saturate(180%);
-  border-bottom: 1px dashed var(--hairline);
+  border-bottom: 1px solid var(--hairline);
 }
 .tleft { display: flex; align-items: center; gap: 9px; flex: none; }
 .tb {
@@ -285,5 +285,31 @@ onMounted(() => {
   .nav { order: 3; width: 100%; }
   .keychip { display: none; }
   .content { padding: var(--sp-4) var(--sp-4) var(--sp-9); }
+}
+/* Console shell */
+.gate { background: var(--bg); } .gate-card { box-shadow: none; border: 1px solid var(--hairline); padding: 32px; }
+.krow { flex-direction: column; } .keyin { flex: auto; width: 100%; background: var(--surface); border: 1px solid var(--hairline-2); }
+.app { display: grid; grid-template-columns: 216px minmax(0, 1fr); grid-template-rows: 65px 1fr; }
+.sidebar { position: sticky; top: 0; grid-row: 1 / 3; height: 100dvh; background: var(--surface); border-right: 1px solid var(--hairline); display: flex; flex-direction: column; padding: 0 12px 20px; }
+.portal-brand { height: 65px; display: flex; align-items: center; gap: 10px; padding: 0 8px; color: var(--ink-900); }
+.portal-brand strong { font-size: 15px; font-weight: 650; } .portal-brand small { display: block; font-size: 11px; color: var(--ink-400); }
+.nav-group { margin: 28px 12px 8px; color: var(--ink-400); font-size: 11px; }
+.nav { display: flex; flex-direction: column; flex: 1; gap: 4px; overflow: auto; }
+.navitem { display: flex; align-items: center; gap: 10px; text-align: left; padding: 10px 12px; min-height: 38px; border-radius: 6px; }
+.navitem.on { box-shadow: none; font-weight: 600; }
+.sidebar-foot { display: flex; flex-direction: column; gap: 4px; padding: 14px 12px 0; border-top: 1px solid var(--hairline); color: var(--ink-400); font-size: 11px; }
+.sidebar-foot code { font-size: 10px; }
+.topbar { height: 65px; padding: 0 28px; justify-content: space-between; background: var(--surface); backdrop-filter: none; }
+.tb { font-size: 13px; font-weight: 500; } .crumb { font-size: 13px; color: var(--ink-400); margin-right: 5px; }
+.bal { background: var(--well); color: var(--ink-700); border: 0; border-radius: 6px; }
+.keychip { border-radius: 6px; } .mobile-menu, .nav-backdrop { display: none; }
+.content { max-width: 1480px; padding: 28px 28px 64px; min-width: 0; }
+@media (max-width: 900px) {
+ .app { grid-template-columns: minmax(0, 1fr); grid-template-rows: 58px 1fr; }
+ .sidebar { position: fixed; left: 0; top: 0; width: 216px; z-index: var(--z-drawer); transform: translateX(-100%); transition: transform var(--t-base); }
+ .mobileOpen .sidebar { transform: translateX(0); }
+ .nav { order: initial; width: auto; } .nav-backdrop { display: block; position: fixed; inset: 0; z-index: 39; border: 0; background: rgb(20 24 35 / .25); }
+ .mobile-menu { display: grid; } .topbar { height: 58px; flex-wrap: nowrap; padding: 0 16px; gap: 8px; } .crumb { display: none; }
+ .content { padding: 20px 16px 64px; }
 }
 </style>

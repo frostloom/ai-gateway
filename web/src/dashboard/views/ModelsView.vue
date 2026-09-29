@@ -206,7 +206,7 @@ async function createModel() {
   font-size: var(--fs-sm); color: var(--ink-500);
   margin-bottom: var(--sp-3);
   padding-bottom: var(--sp-3);
-  border-bottom: 1px dashed var(--hairline);
+  border-bottom: 1px solid var(--hairline);
 }
 
 @media (max-width: 880px) {

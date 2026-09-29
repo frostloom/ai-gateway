@@ -127,7 +127,7 @@ async function query() {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: var(--sp-5);
-  border-top: 1px dashed var(--hairline);
+  border-top: 1px solid var(--hairline);
   padding-top: var(--sp-4);
 }
 .atop {
@@ -158,7 +158,7 @@ async function query() {
   display: grid; grid-template-columns: 1.15fr .75fr 1fr 96px;
   gap: var(--sp-2); align-items: center;
   padding: 9px var(--sp-5);
-  border-bottom: 1px dashed var(--hairline);
+  border-bottom: 1px solid var(--hairline);
   font-size: var(--fs-xs);
   font-variant-numeric: tabular-nums;
 }

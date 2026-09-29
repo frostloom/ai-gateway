@@ -9,7 +9,7 @@ function initialOpen(): boolean {
     if (v === '0') return false
     if (v === '1') return true
   } catch { /* ignore */ }
-  return true // 默认展开（用户可收起，选择会被记住）
+  return false // 首次访问收起，避免遮挡工作区；记住用户后续选择
 }
 
 export const chatLayer = reactive({

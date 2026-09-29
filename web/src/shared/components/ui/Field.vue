@@ -1,10 +1,4 @@
 <script setup lang="ts">
-/**
- * Field —— 表单单元
- *
- * 输入框读作「凹槽」：浅底 + 内阴影，focus 时才出现强调色描边。
- * 平时不画 1px 灰线，避免表单变成一堆格子。
- */
 withDefaults(defineProps<{ label: string; hint?: string; error?: string; required?: boolean }>(), {})
 </script>
 
@@ -34,9 +28,9 @@ withDefaults(defineProps<{ label: string; hint?: string; error?: string; require
 .ctl :deep(select),
 .ctl :deep(textarea) {
   width: 100%; height: 38px; padding: 0 var(--sp-4);
-  border: none;
+  border: 1px solid var(--hairline-2);
   border-radius: var(--r-md);
-  background: var(--well);
+  background: var(--surface);
   box-shadow: var(--inset-well);
   transition: box-shadow var(--t-base), background var(--t-fast);
 }

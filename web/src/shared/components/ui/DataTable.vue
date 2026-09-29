@@ -1,12 +1,4 @@
 <script setup lang="ts">
-/**
- * 数据表（后台统一表格语言）
- *
- * 用法：传入 cols 栅格模板，用 #head 放表头，默认插槽放 .dt-row 行。
- *
- * 设计要点：行与行之间不用 1px 实线（那是"廉价表格"的头号特征），
- * 改用细虚线 + hover 时的白色抬起层。表头是小号大写的弱化标签。
- */
 withDefaults(defineProps<{
   /** 列宽模板，如 '60px 1fr 120px'，与行内元素一一对应 */
   cols?: string
@@ -69,10 +61,11 @@ withDefaults(defineProps<{
   grid-template-columns: var(--cols, repeat(auto-fit, minmax(0, 1fr)));
   gap: var(--sp-3);
   align-items: center;
-  padding: var(--sp-2) var(--sp-4) var(--sp-3);
-  font-size: 10px;
+  padding: 11px var(--sp-4);
+  background: var(--surface-3);
+  font-size: 12px;
   font-weight: 650;
-  letter-spacing: .1em;
+  letter-spacing: 0;
   text-transform: uppercase;
   color: var(--ink-400);
   white-space: nowrap;
@@ -91,7 +84,7 @@ withDefaults(defineProps<{
   padding: var(--sp-3) var(--sp-4);
   font-size: var(--fs-sm);
   color: var(--ink-700);
-  border-radius: var(--r-sm);
+  border-radius: 0;
   transition: background var(--t-fast), box-shadow var(--t-fast);
   min-width: 0;
 }
@@ -99,11 +92,10 @@ withDefaults(defineProps<{
   content: '';
   position: absolute;
   top: 0; left: var(--sp-4); right: var(--sp-4);
-  border-top: 1px dashed var(--hairline-2);
+  border-top: 1px solid var(--hairline-2);
 }
 .dt-rows :deep(.dt-row:hover) {
-  background: var(--surface);
-  box-shadow: var(--shadow-raise);
+  background: var(--surface-2);
 }
 .dt-rows :deep(.dt-row:hover)::before,
 .dt-rows :deep(.dt-row:hover + .dt-row)::before { border-color: transparent; }
@@ -116,12 +108,8 @@ withDefaults(defineProps<{
 
 .dt-foot { padding-top: var(--sp-5); }
 
-/* 窄屏：表格退化为两列 */
+/* Preserve column labels and alignment on narrow screens. */
 @media (max-width: 880px) {
-  .dt-head { display: none; }
-  .dt-rows :deep(.dt-row) {
-    grid-template-columns: 1fr auto;
-    row-gap: var(--sp-2);
-  }
+  .dt-head, .dt-rows { min-width: 760px; }
 }
 </style>

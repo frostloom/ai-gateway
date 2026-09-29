@@ -415,7 +415,7 @@ function riskTag(a: AuditLogItem): { text: string; tone: 'danger' | 'warn' | 'in
   display: flex; align-items: flex-start; gap: 7px;
   margin-top: var(--sp-4);
   padding-top: var(--sp-4);
-  border-top: 1px dashed var(--hairline);
+  border-top: 1px solid var(--hairline);
   font-size: var(--fs-2xs); color: var(--ink-500); line-height: 1.6;
 }
 .note svg { flex: none; margin-top: 2px; color: var(--accent-600); }

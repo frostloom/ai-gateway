@@ -70,15 +70,15 @@ const isFree = computed(() => props.model.input_price_cent === 0 && props.model.
 .card {
   display: flex; flex-direction: column;
   background: var(--surface);
-  border: none;
+  border: 1px solid var(--hairline);
   border-radius: var(--r-lg);
   padding: var(--sp-5);
   box-shadow: var(--shadow-raise), var(--inset-hi);
   transition: transform var(--t-base), box-shadow var(--t-base);
 }
 .card:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-float), var(--inset-hi);
+  border-color: var(--accent-200);
+  box-shadow: none;
 }
 
 .top {
@@ -137,7 +137,7 @@ const isFree = computed(() => props.model.input_price_cent === 0 && props.model.
 .pricing {
   display: flex; align-items: baseline; gap: var(--sp-3);
   padding-bottom: var(--sp-3);
-  border-bottom: 1px dashed var(--hairline);
+  border-bottom: 1px solid var(--hairline);
   margin-bottom: var(--sp-3);
   flex-wrap: wrap;
 }
@@ -173,21 +173,21 @@ const isFree = computed(() => props.model.input_price_cent === 0 && props.model.
 .buy {
   flex: 1; height: 36px;
   background: var(--accent-600); color: #fff;
-  border: none; border-radius: var(--r-pill);
+  border: none; border-radius: var(--r-sm);
   font-size: var(--fs-sm); font-weight: 580;
   box-shadow: var(--shadow-accent);
   transition: background var(--t-fast), transform var(--t-spring), box-shadow var(--t-base);
 }
 .buy:hover {
   background: var(--accent-500);
-  box-shadow: var(--shadow-accent), 0 16px 32px -12px rgb(13 128 88 / .5);
+  box-shadow: none;
 }
 .buy:active { transform: scale(.975); }
 .try {
   display: inline-flex; align-items: center; gap: 5px;
   height: 36px; padding: 0 16px;
   background: var(--well); color: var(--ink-600);
-  border: none; border-radius: var(--r-pill);
+  border: none; border-radius: var(--r-sm);
   box-shadow: var(--inset-well);
   font-size: var(--fs-sm); font-weight: 540;
   transition: background var(--t-fast), color var(--t-fast), transform var(--t-spring);

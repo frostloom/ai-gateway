@@ -136,7 +136,7 @@ onMounted(load)
   display: flex; flex-direction: column; gap: 7px;
   padding: var(--sp-4);
   background: var(--paper-2);
-  border: 1px dashed var(--hairline);
+  border: 1px solid var(--hairline);
   border-radius: var(--r-sm);
   transition: border-color var(--t-fast), box-shadow var(--t-fast);
 }
@@ -165,7 +165,7 @@ onMounted(load)
   flex-wrap: wrap;
   margin-top: 3px;
   padding-top: var(--sp-3);
-  border-top: 1px dashed var(--hairline);
+  border-top: 1px solid var(--hairline);
 }
 .fact { display: inline-flex; align-items: baseline; gap: 5px; }
 .fk { font-size: var(--fs-2xs); color: var(--ink-400); font-style: normal; }

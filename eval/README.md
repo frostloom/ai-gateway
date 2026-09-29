@@ -67,3 +67,8 @@ go run ./cmd/eval -mode http -base http://127.0.0.1:9105 -key sk-真实key
 - 离线模式用独立库 `ai_gateway_eval` + Redis DB 4，与业务/单测库隔离，可重复跑。
 - 报告输出到 `eval/reports/report-<时间戳>.md`（含逐条明细与失败快照）。
 - 用例是**回归基线**：prompt / 工具描述 / 校验逻辑改动后跑一遍，通过率下降即回归。
+## 真实意图路由与 JEV A/B
+
+全量数据每组 1,220 条；执行 `./scripts/run-intent-ab.ps1` 自动启动 JEV 开/关两个独立实例并输出对照报告。评分口径、JSON 原始明细、失败处理和复现命令见 [操作手册](intent-suite/RUNBOOK.md)。
+
+本地指标回归：`go test ./internal/agent ./cmd/eval -run 'TestIntent|TestLLMTelemetry|TestComparison' -count=1`。覆盖严格分类、澄清独立计分、误拦、确认目标、无效响应、取消请求、混淆矩阵与 telemetry。

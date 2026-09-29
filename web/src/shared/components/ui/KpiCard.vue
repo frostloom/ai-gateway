@@ -1,10 +1,4 @@
 <script setup lang="ts">
-/**
- * KpiCard —— 指标卡
- *
- * 结构：白面 + 受光顶边 + 右上圆形图标凹槽 + 底部趋势图。
- * 指标卡不套双圈壳（避免仪表盘变成"卡中卡"），改由外壳的阶梯阴影分层。
- */
 import { computed } from 'vue'
 import MiniBars from './MiniBars.vue'
 import Sparkline from './Sparkline.vue'
@@ -57,7 +51,7 @@ const deltaText = computed(() =>
 <template>
   <article class="kpi" :class="[tone, { loading }]">
     <div class="top">
-      <div class="info">
+      <div class="metric-info">
         <p class="label">{{ label }}</p>
         <p v-if="loading" class="ph skeleton" />
         <p v-else class="value num">{{ value ?? '-' }}</p>
@@ -99,27 +93,11 @@ const deltaText = computed(() =>
   padding: var(--sp-6) var(--sp-6) var(--sp-5);
   background: var(--surface);
   border-radius: var(--r-lg);
-  box-shadow: var(--shadow-raise), var(--inset-hi);
+  border: 1px solid var(--hairline);
   transition: box-shadow var(--t-base), transform var(--t-base);
 }
-.kpi:hover { box-shadow: var(--shadow-float), var(--inset-hi); transform: translateY(-2px); }
-
-/* 左侧语义色条 */
-.kpi::before {
-  content: '';
-  position: absolute; left: 0; top: var(--sp-6); bottom: var(--sp-6);
-  width: 3px;
-  border-radius: 0 var(--r-pill) var(--r-pill) 0;
-  background: var(--ink-200);
-}
-.kpi.ok::before { background: var(--ok); }
-.kpi.warn::before { background: var(--warn); }
-.kpi.danger::before { background: var(--danger); }
-.kpi.info::before { background: var(--info); }
-.kpi.default::before { background: var(--accent-500); }
-
 .top { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--sp-4); }
-.info { min-width: 0; padding-left: 8px; }
+.metric-info { min-width: 0; padding-left: 0; }
 
 .label {
   font-size: var(--fs-xs);
@@ -139,15 +117,15 @@ const deltaText = computed(() =>
 .iconSlot {
   flex: none;
   width: 38px; height: 38px;
-  border-radius: 50%;
+  border-radius: var(--r-md);
   display: grid; place-items: center;
   box-shadow: inset 0 0 0 1px rgb(255 255 255 / .6);
   transition: transform var(--t-spring);
 }
-.kpi:hover .iconSlot { transform: scale(1.07) rotate(-5deg); }
+
 
 .foot { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--sp-4); }
-.meta { display: flex; flex-direction: column; gap: 7px; padding-left: 8px; min-width: 0; }
+.meta { display: flex; flex-direction: column; gap: 7px; padding-left: 0; min-width: 0; }
 
 .delta {
   display: inline-flex; align-items: center; gap: 2px;

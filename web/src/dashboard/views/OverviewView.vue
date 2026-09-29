@@ -328,7 +328,7 @@ onBeforeUnmount(() => { if (timer) clearInterval(timer) })
 .consist {
   margin-top: var(--sp-6);
   padding-top: var(--sp-5);
-  border-top: 1px dashed var(--hairline-2);
+  border-top: 1px solid var(--hairline-2);
 }
 .cbar-top {
   display: flex; align-items: baseline; justify-content: space-between;

@@ -95,7 +95,8 @@ func NewHandler(b *client.Billing, tb *Toolbox, llm *LLMClient, st *store.Store,
 //     X-Agent-Internal + X-Agent-Tenant（管理员以某个租户身份代为操作，默认租户由 gateway 决定）。
 //     内部头必须匹配 AGENT_INTERNAL_TOKEN，否则一律按未授权处理——防止直接打 :9105 伪造管理员。
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
+	stats := &TurnTelemetry{JevEnabled: h.jev != nil}
+	ctx := context.WithValue(r.Context(), telemetryKey{}, stats)
 
 	var req struct {
 		SessionID string `json:"session_id"`
@@ -147,6 +148,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	writeJSON(w, http.StatusOK, map[string]any{
+		"telemetry":       stats,
 		"session_id":      req.SessionID,
 		"reply":           reply,
 		"trace":           trace,
@@ -258,6 +260,10 @@ func (h *Handler) process(ctx context.Context, sessionID string, tenantID uint64
 	// JEV 未接入或调用失败时静默退回原行为，绝不因判断引擎故障阻塞业务。
 	v := h.evaluateTurn(ctx, userMsg, ses)
 	if v.Block {
+		if stats := turnTelemetry(ctx); stats != nil {
+			stats.JevBlocked = true
+			stats.JevShortCircuit = true
+		}
 		reply := "抱歉，这个请求我不能执行。它未通过安全校验，可能存在越权或异常操作的风险。" +
 			"如果你确实需要办理，请联系人工客服核实。"
 		h.audit(sessionID, tenantID, "jev_block", map[string]any{"message": userMsg}, false, "", v.Reason,
@@ -396,6 +402,9 @@ func (h *Handler) llmLoop(ctx context.Context, sessionID string, tenantID uint64
 			if h.jev != nil {
 				allowed, reason := h.guardWrite(ctx, tenantID, name, args, lastUserMsg(ses))
 				if !allowed {
+					if stats := turnTelemetry(ctx); stats != nil {
+						stats.JevBlocked = true
+					}
 					result := reason
 					h.audit(sessionID, tenantID, name, args, false, preview, result,
 						fmt.Sprintf(`{"engine":"jev","decision":"block","reason":%q}`, reason))

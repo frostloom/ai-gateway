@@ -147,7 +147,7 @@ const VENDOR_COLS = '1.3fr .8fr 1fr 1fr'
   display: flex; align-items: center; gap: var(--sp-3);
   padding: var(--sp-2) var(--sp-4);
   background: var(--paper);
-  border: 1px dashed var(--hairline);
+  border: 1px solid var(--hairline);
   border-radius: var(--r-sm);
 }
 .d { display: inline-flex; align-items: center; gap: 7px; }

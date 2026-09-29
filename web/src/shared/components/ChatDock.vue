@@ -667,4 +667,14 @@ defineExpose({ send })
   }
   .resizer { display: none; }
 }
+/* Quiet support drawer */
+.launcher { width: 46px; height: 46px; border-radius: 14px; background: var(--accent-600); box-shadow: 0 4px 16px rgb(30 45 80 / .16); }
+.launcher::after { display: none; } .launcher:hover { transform: translateY(-1px); }
+.panel { border: 1px solid var(--hairline-2); box-shadow: var(--shadow-pop); border-radius: 12px; }
+.phead { background: var(--surface); backdrop-filter: none; border-bottom: 1px solid var(--hairline); }
+.plist { background: var(--surface-2); } .bubble { border-radius: 8px; }
+.brow.agent .bubble { border: 1px solid var(--hairline); box-shadow: none; }
+.qbtn { border: 1px solid var(--hairline); border-radius: 6px; box-shadow: none; }
+.qbtn:hover { transform: none; box-shadow: none; background: var(--accent-50); }
+.hbtn { border-radius: 6px; } .pin { border: 1px solid var(--hairline-2); border-radius: 6px; background: var(--surface); }
 </style>

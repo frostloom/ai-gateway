@@ -133,6 +133,9 @@ func (c *LLMClient) chatAnthropicRaw(ctx context.Context, raw []byte) (*Message,
 	httpReq.Header.Set("x-api-key", c.apiKey)
 	httpReq.Header.Set("anthropic-version", "2023-06-01")
 
+	if stats := turnTelemetry(ctx); stats != nil {
+		stats.LLMCalls++
+	}
 	resp, err := c.cli.Do(httpReq)
 	if err != nil {
 		return nil, fmt.Errorf("LLM 请求失败: %v", err)
@@ -185,6 +188,9 @@ func (c *LLMClient) chatAnthropic(ctx context.Context, messages []Message, tools
 	httpReq.Header.Set("x-api-key", c.apiKey)
 	httpReq.Header.Set("anthropic-version", "2023-06-01")
 
+	if stats := turnTelemetry(ctx); stats != nil {
+		stats.LLMCalls++
+	}
 	resp, err := c.cli.Do(httpReq)
 	if err != nil {
 		return nil, fmt.Errorf("LLM 请求失败: %v", err)

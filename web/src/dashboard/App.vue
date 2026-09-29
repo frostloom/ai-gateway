@@ -58,7 +58,10 @@ const cur = shallowRef<ViewKey>('overview')
 const user = ref('')
 const refreshTick = ref(0)
 const collapsed = ref(false)
+const mobileOpen = ref(false)
 const tenants = ref<{ id: number; name: string }[]>([])
+
+const descriptions: Record<ViewKey, string> = { overview: '查看网关运行状态、资金与模型使用情况', sales: '追踪收入、消耗和模型销售表现', models: '管理可用模型、定价与展示信息', channels: '配置上游渠道与模型映射', providers: '查看节点健康状态与熔断记录', bills: '查询请求账单与结算明细', subscription: '管理套餐订阅与资金入账', reconcile: '核对账本余额与缓存投影', audit: '查看客服操作、用户确认与安全判定', try: '发送请求，验证模型接口' }
 
 const curLabel = computed(() => navs.find(n => n.key === cur.value)?.label ?? '')
 
@@ -125,7 +128,8 @@ async function logout() {
 
   <!-- 登录 / 初始化 -->
   <div v-if="status !== 'in'" class="gate">
-    <div class="gate-card">
+    <div v-if="status === 'loading'" class="gate-card" role="status" aria-live="polite">正在连接控制台…</div>
+    <div v-else class="gate-card">
       <div class="brand">
         <div class="mark"><IconShieldLock :size="20" stroke-width="1.9" /></div>
         <div>
@@ -157,21 +161,21 @@ async function logout() {
   </div>
 
   <!-- 主界面 -->
-  <div v-else class="app" :class="{ collapsed }">
-    <!-- 浮动岛侧边栏：不贴边，圆角浮起 -->
+  <div v-else class="app" :class="{ collapsed, mobileOpen }" @keydown.esc="mobileOpen = false">
+    <button v-if="mobileOpen" class="nav-backdrop" aria-label="关闭导航" @click="mobileOpen = false" />
     <aside class="side">
       <div class="sideInner">
         <div class="sbrand">
           <div class="mark sm"><IconShieldLock :size="15" stroke-width="1.9" /></div>
-          <div v-if="!collapsed" class="stext">
-            <strong>模型商城</strong>
-            <small>管理后台</small>
+          <div v-if="!collapsed || mobileOpen" class="stext">
+            <strong>AI Gateway</strong>
+            <small>管理控制台</small>
           </div>
         </div>
 
-        <nav class="snav">
+        <nav class="snav" aria-label="管理导航">
           <template v-for="grp in grouped" :key="grp.g">
-            <p v-if="!collapsed" class="sgroup">{{ grp.g }}</p>
+            <p v-if="!collapsed || mobileOpen" class="sgroup">{{ grp.g }}</p>
             <p v-else class="sgroup mini">·</p>
             <button
               v-for="n in grp.items"
@@ -179,28 +183,30 @@ async function logout() {
               class="sitem"
               :class="{ on: cur === n.key }"
               :title="collapsed ? n.label : undefined"
-              @click="cur = n.key"
+              @click="cur = n.key; mobileOpen = false"
+              :aria-current="cur === n.key ? 'page' : undefined"
+              :aria-label="n.label"
             >
               <component :is="n.icon" :size="17" :stroke-width="1.7" />
-              <span v-if="!collapsed">{{ n.label }}</span>
+              <span v-if="!collapsed || mobileOpen">{{ n.label }}</span>
             </button>
           </template>
         </nav>
 
-        <button class="scollapse" @click="collapsed = !collapsed">
+        <button class="scollapse" aria-label="切换侧栏宽度" @click="collapsed = !collapsed">
           <IconChevronLeft :size="15" :style="{ transform: collapsed ? 'rotate(180deg)' : 'none' }" />
-          <span v-if="!collapsed">收起</span>
+          <span v-if="!collapsed || mobileOpen">收起</span>
         </button>
       </div>
     </aside>
 
     <div class="main">
-      <!-- 浮动岛顶栏 -->
+      <!-- 控制台顶栏 -->
       <header class="top">
         <div class="topInner">
           <div class="tleft">
-            <button class="mobmenu" @click="collapsed = !collapsed"><IconMenu2 :size="17" /></button>
-            <h1 class="tt">{{ curLabel }}</h1>
+            <button class="mobmenu" aria-label="打开导航" :aria-expanded="mobileOpen" @click="mobileOpen = !mobileOpen"><IconMenu2 :size="17" /></button>
+            <span class="breadcrumb">管理控制台 <span>/</span></span><span class="tt">{{ curLabel }}</span>
           </div>
           <div class="tright">
             <BaseButton variant="secondary" size="sm" @click="refreshTick++">
@@ -213,6 +219,7 @@ async function logout() {
       </header>
 
       <main class="content">
+        <div class="page-heading"><div><h1>{{ curLabel }}</h1><p>{{ descriptions[cur] }}</p></div><span class="page-meta">AI Gateway / 控制台</span></div>
         <component :is="views[cur]" :key="cur + ':' + refreshTick" />
       </main>
     </div>
@@ -228,197 +235,38 @@ async function logout() {
 </template>
 
 <style scoped>
-/* ---------- 登录 ---------- */
-.gate {
-  min-height: 100dvh; display: grid; place-items: center;
-  padding: var(--sp-5);
-  background:
-    radial-gradient(880px 460px at 88% -16%, var(--accent-50), transparent 60%),
-    radial-gradient(700px 380px at -10% 108%, var(--accent-50), transparent 56%),
-    var(--bg);
-}
-.gate-card {
-  width: 100%; max-width: 404px;
-  background: var(--surface);
-  border-radius: var(--r-2xl);
-  box-shadow: var(--shadow-pop), var(--inset-hi-strong);
-  padding: var(--sp-8) var(--sp-7) var(--sp-7);
-  animation: gate-in .7s var(--ease-out) both;
-}
-@keyframes gate-in {
-  from { opacity: 0; transform: translateY(22px) scale(.985); filter: blur(6px); }
-}
-.brand { display: flex; align-items: center; gap: var(--sp-4); margin-bottom: var(--sp-7); }
-.mark {
-  width: 46px; height: 46px; border-radius: var(--r-md);
-  background: var(--ink-900); color: #fff;
-  display: grid; place-items: center; flex: none;
-  box-shadow: var(--shadow-card);
-}
-.mark.sm { width: 32px; height: 32px; border-radius: var(--r-sm); background: var(--accent-600); box-shadow: var(--shadow-accent); }
-.bt { font-size: var(--fs-xl); letter-spacing: -.028em; }
-.bs { font-size: var(--fs-xs); color: var(--ink-500); margin-top: 4px; }
-.gerr {
-  font-size: var(--fs-xs); color: var(--danger);
-  background: var(--danger-bg);
-  padding: 9px 13px; border-radius: var(--r-sm);
-  margin: 0 0 var(--sp-4);
-}
-
-/* ---------- 壳体：页面留白 + 浮动岛 ---------- */
-.app {
-  min-height: 100dvh;
-  display: grid;
-  grid-template-columns: 236px 1fr;
-  gap: var(--sp-5);
-  padding: var(--sp-5);
-  background: var(--bg);
-}
-.app.collapsed { grid-template-columns: 78px 1fr; }
-
-/* 浮动岛侧边栏：不贴边、圆角、浮起 */
-.side {
-  position: sticky; top: var(--sp-5);
-  height: calc(100dvh - var(--sp-5) * 2);
-}
-.sideInner {
-  height: 100%;
-  display: flex; flex-direction: column;
-  gap: var(--sp-4);
-  padding: var(--sp-4);
-  background: var(--surface);
-  border-radius: var(--r-xl);
-  box-shadow: var(--shadow-card), var(--inset-hi);
-}
-.sbrand {
-  display: flex; align-items: center; gap: 10px;
-  padding: var(--sp-2) var(--sp-2) var(--sp-4);
-}
-.stext { display: flex; flex-direction: column; min-width: 0; }
-.stext strong {
-  font-size: var(--fs-sm); font-weight: 650;
-  color: var(--ink-900); letter-spacing: -.018em;
-}
-.stext small { font-size: var(--fs-2xs); color: var(--ink-400); }
-
-.snav { display: flex; flex-direction: column; gap: 2px; flex: 1; overflow-y: auto; }
-.sgroup {
-  font-size: 10px; font-weight: 600;
-  letter-spacing: .14em; text-transform: uppercase;
-  color: var(--ink-400);
-  padding: var(--sp-4) var(--sp-3) 7px;
-}
-.sgroup.mini { text-align: center; letter-spacing: 0; }
-.sitem {
-  position: relative;
-  display: flex; align-items: center; gap: 11px;
-  height: 37px; padding: 0 11px;
-  border: none; border-radius: var(--r-md);
-  background: transparent;
-  color: var(--ink-500);
-  font-size: var(--fs-sm); font-weight: 540;
-  text-align: left;
-  white-space: nowrap;
-  transition: background var(--t-fast), color var(--t-fast), transform var(--t-spring);
-}
-.sitem:hover { background: var(--well); color: var(--ink-800); }
-.sitem:active { transform: scale(.985); }
-.sitem.on {
-  background: var(--accent-600);
-  color: #fff;
-  box-shadow: var(--shadow-accent);
-}
-/* 选中态左侧指示条 */
-.sitem.on::before {
-  content: '';
-  position: absolute; left: -9px; top: 50%;
-  width: 3px; height: 17px;
-  margin-top: -8.5px;
-  border-radius: var(--r-pill);
-  background: var(--accent-500);
-}
-
-.scollapse {
-  display: flex; align-items: center; justify-content: center; gap: 6px;
-  height: 34px;
-  border: none; border-radius: var(--r-md);
-  background: var(--well);
-  box-shadow: var(--inset-well);
-  color: var(--ink-500);
-  font-size: var(--fs-xs); font-weight: 540;
-  transition: background var(--t-fast), color var(--t-fast);
-}
-.scollapse:hover { background: var(--well-2); color: var(--ink-800); }
-
-.main { display: flex; flex-direction: column; min-width: 0; }
-
-/* 浮动岛顶栏 */
-.top {
-  position: sticky; top: var(--sp-5);
-  z-index: var(--z-sticky);
-  margin-bottom: var(--sp-5);
-}
-.topInner {
-  display: flex; align-items: center; justify-content: space-between;
-  gap: var(--sp-4);
-  height: 60px;
-  padding: 0 var(--sp-4) 0 var(--sp-6);
-  background: rgb(255 255 255 / .82);
-  backdrop-filter: blur(20px) saturate(180%);
-  border-radius: var(--r-lg);
-  box-shadow: var(--shadow-card), var(--inset-hi-strong);
-}
-.tleft { display: flex; align-items: center; gap: var(--sp-2); min-width: 0; }
-.mobmenu {
-  display: none;
-  width: 34px; height: 34px;
-  border: none; border-radius: var(--r-sm);
-  background: transparent; color: var(--ink-500);
-}
-.tt {
-  font-size: var(--fs-xl);
-  font-weight: 640;
-  letter-spacing: -.028em;
-  white-space: nowrap;
-}
-.tright { display: flex; align-items: center; gap: var(--sp-2); }
-.user {
-  font-size: var(--fs-xs); font-weight: 540; color: var(--ink-600);
-  padding: 6px 13px;
-  background: var(--well);
-  border-radius: var(--r-pill);
-  box-shadow: var(--inset-well);
-}
-.logout {
-  width: 34px; height: 34px;
-  display: grid; place-items: center;
-  border: none; border-radius: 50%;
-  background: transparent; color: var(--ink-400);
-  transition: background var(--t-fast), color var(--t-fast), transform var(--t-spring);
-}
-.logout:hover { background: var(--danger-bg); color: var(--danger); transform: rotate(-8deg); }
-
-/* 内容：宏留白 */
-.content {
-  flex: 1;
-  padding: 0 var(--sp-1) var(--sp-9);
-  max-width: 1560px; width: 100%;
-}
-
-@media (max-width: 1100px) {
-  .app, .app.collapsed { grid-template-columns: 1fr; padding: var(--sp-4); gap: var(--sp-4); }
-  .side {
-    position: fixed; left: var(--sp-4); top: var(--sp-4);
-    z-index: var(--z-drawer);
-    width: 236px; height: calc(100dvh - var(--sp-4) * 2);
-    transform: translateX(calc(-100% - var(--sp-5)));
-    transition: transform var(--t-base);
-  }
-  .app:not(.collapsed) .side { transform: translateX(0); }
-  .app:not(.collapsed) .sideInner { box-shadow: var(--shadow-pop); }
-  .mobmenu { display: grid; place-items: center; }
-  .top { top: var(--sp-4); }
-  .tt { font-size: var(--fs-lg); }
-  .content { padding-bottom: var(--sp-8); }
+.gate { min-height: 100dvh; display: grid; place-items: center; padding: 24px; background: var(--bg); }
+.gate-card { width: 100%; max-width: 400px; padding: 32px; background: var(--surface); border: 1px solid var(--hairline); border-radius: 12px; }
+.brand { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; }
+.mark { width: 40px; height: 40px; border-radius: 10px; background: var(--accent-600); color: #fff; display: grid; place-items: center; flex: none; }
+.mark.sm { width: 30px; height: 30px; border-radius: 8px; }
+.bt { font-size: 18px; } .bs { font-size: 12px; color: var(--ink-500); margin-top: 5px; }
+.gerr { padding: 10px; background: var(--danger-bg); color: var(--danger); border-radius: 6px; margin-bottom: 16px; font-size: 12px; }
+.app { min-height: 100dvh; display: grid; grid-template-columns: 216px minmax(0, 1fr); }
+.app.collapsed { grid-template-columns: 68px minmax(0, 1fr); }
+.side { position: sticky; top: 0; height: 100dvh; background: var(--surface); border-right: 1px solid var(--hairline); }
+.sideInner { display: flex; flex-direction: column; height: 100%; padding: 0 12px 16px; }
+.sbrand { display: flex; align-items: center; gap: 10px; height: 65px; padding: 0 8px; flex: none; }
+.stext { display: flex; flex-direction: column; } .stext strong { font-size: 15px; font-weight: 650; color: var(--ink-900); } .stext small { font-size: 11px; color: var(--ink-400); }
+.snav { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; padding-top: 12px; }
+.sgroup { padding: 16px 12px 6px; font-size: 11px; color: var(--ink-400); } .sgroup.mini { text-align: center; }
+.sitem { display: flex; align-items: center; gap: 10px; min-height: 38px; padding: 0 12px; border: none; border-radius: 6px; background: transparent; color: var(--ink-600); font-size: 13px; text-align: left; white-space: nowrap; transition: background var(--t-fast), color var(--t-fast); }
+.sitem:hover { background: var(--well); color: var(--ink-900); } .sitem.on { background: var(--accent-50); color: var(--accent-700); font-weight: 600; }
+.scollapse { display: flex; align-items: center; justify-content: center; gap: 8px; height: 34px; border: 1px solid var(--hairline); border-radius: 6px; background: var(--surface); color: var(--ink-500); font-size: 12px; }
+.main { min-width: 0; } .top { position: sticky; top: 0; z-index: var(--z-sticky); }
+.topInner { height: 65px; padding: 0 28px; display: flex; align-items: center; justify-content: space-between; gap: 16px; background: var(--surface); border-bottom: 1px solid var(--hairline); }
+.tleft, .tright { display: flex; align-items: center; gap: 12px; } .tt { font-size: 13px; color: var(--ink-800); } .breadcrumb { color: var(--ink-400); font-size: 13px; } .breadcrumb span { margin-left: 12px; }
+.user { padding: 5px 10px; background: var(--well); border-radius: 6px; font-size: 12px; color: var(--ink-600); }
+.logout, .mobmenu { width: 32px; height: 32px; border: none; border-radius: 6px; background: transparent; color: var(--ink-500); display: grid; place-items: center; }
+.logout:hover { background: var(--danger-bg); color: var(--danger); } .mobmenu { display: none; }
+.content { display: flex; flex-direction: column; gap: 24px; width: 100%; max-width: 1640px; margin: 0 auto; padding: 28px 28px 64px; }
+.nav-backdrop { display: none; }
+@media (max-width: 900px) {
+  .app, .app.collapsed { grid-template-columns: minmax(0, 1fr); }
+  .side { position: fixed; left: 0; top: 0; z-index: var(--z-drawer); width: 216px; transform: translateX(-100%); transition: transform var(--t-base); }
+  .mobileOpen .side { transform: translateX(0); } .mobileOpen .side .stext { display: flex; }
+  .nav-backdrop { display: block; position: fixed; inset: 0; border: 0; background: rgb(20 24 35 / .25); z-index: 39; }
+  .mobmenu { display: grid; } .scollapse { display: none; } .topInner { padding: 0 16px; height: 58px; }
+  .content { padding: 20px 16px 64px; gap: 20px; } .breadcrumb { display: none; }
 }
 </style>

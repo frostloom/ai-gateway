@@ -71,7 +71,7 @@ function onTry(m: Model) {
   gap: var(--sp-4); margin-bottom: var(--sp-5); flex-wrap: wrap;
 }
 .t {
-  font-size: var(--fs-2xl);
+  font-size: 22px;
   font-weight: 650;
   letter-spacing: -.026em;
 }
@@ -99,7 +99,7 @@ function onTry(m: Model) {
 }
 .f {
   height: 30px; padding: 0 var(--sp-4);
-  border-radius: var(--r-pill);
+  border-radius: var(--r-sm);
   border: none;
   background: var(--paper);
   color: var(--ink-500);
@@ -108,9 +108,9 @@ function onTry(m: Model) {
 }
 .f:hover { border-color: var(--line-strong); color: var(--ink-800); }
 .f.on {
-  background: var(--ink-900);
-  border-color: var(--ink-900);
-  color: #fff;
+  background: var(--accent-50);
+  border-color: var(--accent-100);
+  color: var(--accent-700);
 }
 
 .grid {
