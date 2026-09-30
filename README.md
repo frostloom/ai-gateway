@@ -6,7 +6,7 @@
 - **语言/框架**：Go 1.25 · gin · gRPC · go-redis/v9 · GORM(MySQL) · Prometheus · **前端 web/（Vite+Vue3+TS）**
 - **服务**：gateway（API 网关 + Web 面板）· billing（计费 + admin 观测）· router（路由/熔断）· mock-provider（故障注入假上游）· **agent（AI 智能客服，第 6 服务，接入 JEV 判断引擎）** · reconciler · event-consumer
 - **存储**：MySQL（权威账本）· Redis（余额投影 / 会话态 / 限流 / 缓存）· Kafka（计费事件流，M10）
-- **Web 页面**：`/` 管理面板（X-Admin-Token）· `/portal` 用户自助页（Bearer 租户 key，含 AI 客服聊天）——独立前端工程构建，go:embed 托管，无 CDN
+- **Web 页面**：`/` 管理员账号登录 · `/portal` 普通用户直接注册、账号密码登录（无需邀请码，含 AI 客服聊天）——分别使用 HttpOnly 会话，独立前端工程构建，go:embed 托管，无 CDN
 - **AI 客服安全性**：执行层不信任 LLM（tenant 只来自验证过的 key、写操作必须用户确认、参数服务端重校验）
   + **JEV「System One」判断引擎**（每轮先过一道判定，按置信度分层拦截/警告/预判，见 [docs/interview/10](docs/interview/10-intent-eval-and-jev.md)）
 - **评测**：30 条功能用例（离线确定性，2 秒跑完）+ **1220 条意图路由评测集**（12 类 × 100 条 × 9 种说法维度，量化 JEV 前后差异）

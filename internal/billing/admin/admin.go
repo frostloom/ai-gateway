@@ -30,6 +30,7 @@ func Handler(st *store.Store, log *slog.Logger) http.Handler {
 
 	// 管理员认证（newapi 式初始登录，HttpOnly cookie 保持会话）。
 	registerAuth(mux, st, log)
+	registerPortalAuth(mux, st, log)
 
 	// Prometheus 抓取（outbox relay produced / 消费 lag 等计费指标）。
 	mux.Handle("/metrics", promhttp.Handler())

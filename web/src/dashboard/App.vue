@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import { ref, shallowRef, onMounted, computed } from 'vue'
+import { ref, shallowRef, onMounted, onUnmounted, computed } from 'vue'
 import {
   IconLayoutDashboard, IconChartLine, IconBox, IconNetwork, IconActivity,
   IconReceipt2, IconCreditCard, IconScale, IconClipboardList, IconTerminal2,
   IconLogout, IconRefresh, IconShieldLock, IconChevronLeft, IconMenu2,
 } from '@tabler/icons-vue'
-import { authInitialized, authLogin, authSetup, authLogout, authMe, overviewApi } from './api'
-import { toastErr, toastOk } from '../shared/utils/toast'
+import { authInitialized, authLogout, authMe, overviewApi } from './api'
+import { toastErr } from '../shared/utils/toast'
 import ToastHost from '../shared/components/ui/ToastHost.vue'
 import BaseButton from '../shared/components/ui/BaseButton.vue'
-import Field from '../shared/components/ui/Field.vue'
+import AuthGate from '../shared/components/AuthGate.vue'
 import ChatDock from '../shared/components/ChatDock.vue'
 import OverviewView from './views/OverviewView.vue'
 import SalesView from './views/SalesView.vue'
@@ -49,11 +49,6 @@ const views: Record<ViewKey, any> = {
 }
 
 const status = ref<'loading' | 'setup' | 'login' | 'in'>('loading')
-const username = ref('')
-const pass = ref('')
-const pass2 = ref('')
-const busy = ref(false)
-const err = ref('')
 const cur = shallowRef<ViewKey>('overview')
 const user = ref('')
 const refreshTick = ref(0)
@@ -93,72 +88,23 @@ async function loadTenants() {
 
 onMounted(boot)
 
-async function submit() {
-  err.value = ''
-  if (!username.value.trim()) { err.value = '请输入用户名'; return }
-  if (pass.value.length < 6) { err.value = '密码至少 6 位'; return }
-  if (status.value === 'setup' && pass.value !== pass2.value) { err.value = '两次密码不一致'; return }
-  busy.value = true
-  try {
-    if (status.value === 'setup') {
-      await authSetup(username.value, pass.value)
-      toastOk('管理员已创建')
-    } else {
-      await authLogin(username.value, pass.value)
-    }
-    user.value = username.value
-    status.value = 'in'
-    loadTenants()
-  } catch (e: any) {
-    err.value = e?.message || '登录失败'
-  } finally {
-    busy.value = false
-  }
+async function authenticated(identity: { username: string; role: 'admin' | 'user' }) {
+  if (identity.role === 'user') { window.location.assign('/portal'); return }
+  await boot()
 }
-
+function expired() { status.value = 'login'; sessionStorage.removeItem('agw.chat.adminSid') }
+onMounted(() => window.addEventListener('admin-session-expired', expired))
+onUnmounted(() => window.removeEventListener('admin-session-expired', expired))
 async function logout() {
-  try { await authLogout() } catch { /* ignore */ }
-  status.value = 'login'
-  pass.value = ''
+  try { await authLogout(); expired() } catch (e: any) { toastErr(e.message || '退出失败，请重试') }
 }
 </script>
 
 <template>
   <ToastHost />
 
-  <!-- 登录 / 初始化 -->
-  <div v-if="status !== 'in'" class="gate">
-    <div v-if="status === 'loading'" class="gate-card" role="status" aria-live="polite">正在连接控制台…</div>
-    <div v-else class="gate-card">
-      <div class="brand">
-        <div class="mark"><IconShieldLock :size="20" stroke-width="1.9" /></div>
-        <div>
-          <h1 class="bt">模型商城 · 管理后台</h1>
-          <p class="bs">{{ status === 'setup' ? '首次使用，创建管理员账号' : '使用管理员账号登录' }}</p>
-        </div>
-      </div>
-      <form @submit.prevent="submit">
-        <Field label="用户名" required>
-          <input v-model="username" autocomplete="username" placeholder="admin" />
-        </Field>
-        <Field label="密码" required>
-          <input
-            v-model="pass"
-            type="password"
-            :autocomplete="status === 'setup' ? 'new-password' : 'current-password'"
-            placeholder="至少 6 位"
-          />
-        </Field>
-        <Field v-if="status === 'setup'" label="确认密码" required>
-          <input v-model="pass2" type="password" autocomplete="new-password" />
-        </Field>
-        <p v-if="err" class="gerr">{{ err }}</p>
-        <BaseButton variant="primary" block size="lg" :loading="busy" type="submit">
-          {{ status === 'setup' ? '创建并进入' : '登录' }}
-        </BaseButton>
-      </form>
-    </div>
-  </div>
+  <div v-if="status === 'loading'" class="gate" role="status">正在连接控制台…</div>
+  <AuthGate v-else-if="status !== 'in'" default-role="admin" @authenticated="authenticated" />
 
   <!-- 主界面 -->
   <div v-else class="app" :class="{ collapsed, mobileOpen }" @keydown.esc="mobileOpen = false">

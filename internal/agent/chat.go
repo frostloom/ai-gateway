@@ -6,6 +6,7 @@ import (
 	"crypto/subtle"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -123,6 +124,12 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	if err := h.st.RecordSession(ctx, req.SessionID, tenantID, apiKeyID); err != nil {
 		h.log.Error("record session", "err", err)
+		if errors.Is(err, store.ErrSessionTenantMismatch) {
+			writeErr(w, http.StatusForbidden, "无权访问该客服会话")
+		} else {
+			writeErr(w, http.StatusServiceUnavailable, "会话服务暂不可用")
+		}
+		return
 	}
 
 	ses, err := h.loadSession(ctx, req.SessionID)

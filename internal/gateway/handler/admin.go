@@ -10,7 +10,9 @@ import (
 	"log/slog"
 	"net/http"
 	"net/url"
+	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -198,6 +200,20 @@ func proxyJSON(c *gin.Context, target string, log *slog.Logger) {
 	proxy(c, http.MethodGet, target, nil, log)
 }
 
+func RegisterUserAuth(g *gin.RouterGroup, base string, log *slog.Logger) {
+	g.GET("/me", func(c *gin.Context) { proxyJSON(c, base+"/auth/me", log) })
+	for _, action := range []string{"register", "login", "logout"} {
+		g.POST("/"+action, func(c *gin.Context) {
+			body, err := io.ReadAll(http.MaxBytesReader(c.Writer, c.Request.Body, 4096))
+			if err != nil {
+				c.JSON(400, gin.H{"error": "请求过大"})
+				return
+			}
+			proxy(c, http.MethodPost, base+"/auth/"+action, body, log)
+		})
+	}
+}
+
 // proxy 转发到上游（billing/router 观测端点）。body 非空时为 POST + application/json。
 func proxy(c *gin.Context, method, target string, body []byte, log *slog.Logger) {
 	if _, err := url.Parse(target); err != nil {
@@ -215,7 +231,16 @@ func proxy(c *gin.Context, method, target string, body []byte, log *slog.Logger)
 	// 透传鉴权凭证到上游：/admin/auth/me、/logout 需要 billing 读到 HttpOnly cookie；
 	// 脚本/curl 用 X-Admin-Token 头。两者都转发，避免上游误判未登录。
 	if ck, err := c.Cookie("agw_admin"); err == nil && ck != "" {
-		req.Header.Set("Cookie", "agw_admin="+ck)
+		req.AddCookie(&http.Cookie{Name: "agw_admin", Value: ck})
+	}
+	if ck, err := c.Cookie("agw_user"); err == nil && ck != "" {
+		req.AddCookie(&http.Cookie{Name: "agw_user", Value: ck})
+	}
+	if c.Request.TLS != nil || os.Getenv("AUTH_COOKIE_SECURE") == "1" {
+		req.Header.Set("X-Forwarded-Proto", "https")
+	}
+	if strings.Contains(c.Request.URL.Path, "/auth/") {
+		c.Header("Cache-Control", "no-store")
 	}
 	if h := c.GetHeader("X-Admin-Token"); h != "" {
 		req.Header.Set("X-Admin-Token", h)

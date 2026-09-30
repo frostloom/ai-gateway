@@ -3,7 +3,6 @@ import { ref, computed, onMounted } from 'vue'
 import { IconSend } from '@tabler/icons-vue'
 import { modelsApi } from '../api'
 import type { Model } from '../types'
-import { auth } from '../../shared/api'
 import { money, zhCount } from '../../shared/utils/format'
 import { toastErr, toastWarn } from '../../shared/utils/toast'
 import Card from '../../shared/components/ui/Card.vue'
@@ -38,12 +37,14 @@ async function send() {
   usage.value = null
   const tm = Date.now()
   try {
-    const res = await fetch('/v1/chat/completions', {
+    const res = await fetch('/portal/completions', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + auth.getKey() },
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify({ model: model.value, messages: [{ role: 'user', content: prompt.value }], stream: stream.value }),
     })
     if (!res.ok) {
+      if (res.status === 401) window.dispatchEvent(new Event('portal-session-expired'))
       const d = await res.json().catch(() => null)
       toastErr(d?.error?.message || `请求失败（${res.status}）`)
       return

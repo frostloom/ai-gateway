@@ -138,7 +138,7 @@ func NewStore(db *gorm.DB, rdb *goredis.Client) *Store {
 func (s *Store) AutoMigrate() error {
 	return s.db.AutoMigrate(&Tenant{}, &APIKey{}, &Provider{}, &Model{}, &Bill{},
 		&Plan{}, &Subscription{}, &RechargeOrder{}, &Topup{}, &AgentSession{}, &AgentAuditLog{},
-		&OutboxEvent{}, &AuditEvent{}, &AdminUser{}, &AdminSession{})
+		&OutboxEvent{}, &AuditEvent{}, &AdminUser{}, &AdminSession{}, &PortalUser{}, &PortalSession{})
 }
 
 // ---------- 预占（核心） ----------
@@ -571,6 +571,19 @@ func (s *Store) ValidateAPIKey(ctx context.Context, keyHash string) (*APIKey, er
 	}
 	if k.Status != 0 || (k.ExpiresAt != nil && time.Now().After(*k.ExpiresAt)) {
 		return nil, nil
+	}
+	if k.Name == browserKeyName {
+		var n int64
+		err := s.db.WithContext(ctx).Model(&PortalSession{}).
+			Joins("JOIN portal_users ON portal_users.id = portal_sessions.user_id").
+			Joins("JOIN tenants ON tenants.id = portal_users.tenant_id").
+			Where("portal_sessions.api_key_id = ? AND portal_users.status = 0 AND tenants.status = 0 AND tenants.id = ?", k.ID, k.TenantID).Count(&n).Error
+		if err != nil {
+			return nil, err
+		}
+		if n != 1 {
+			return nil, nil
+		}
 	}
 	return &k, nil
 }

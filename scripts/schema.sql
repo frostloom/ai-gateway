@@ -240,6 +240,27 @@ CREATE TABLE IF NOT EXISTS admin_sessions (
 
 -- ---------- 种子数据 ----------
 
+-- 普通用户独立租户；网页会话关联限时 api_keys，仅保存 token 的 SHA-256。
+CREATE TABLE IF NOT EXISTS portal_users (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  username VARCHAR(64) NOT NULL,
+  password_hash VARCHAR(255) NOT NULL,
+  tenant_id BIGINT UNSIGNED NOT NULL,
+  status TINYINT NOT NULL DEFAULT 0,
+  created_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  UNIQUE KEY idx_portal_users_username (username),
+  UNIQUE KEY idx_portal_users_tenant_id (tenant_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS portal_sessions (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  user_id BIGINT UNSIGNED NOT NULL,
+  api_key_id BIGINT UNSIGNED NOT NULL,
+  created_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  KEY idx_portal_sessions_user_id (user_id),
+  UNIQUE KEY idx_portal_sessions_api_key_id (api_key_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 -- 演示租户：初始额度 5000 分 = ¥50（billing 服务启动时会据此补建 Redis balance key）。
 INSERT INTO tenants (name, initial_quota) VALUES ('demo', 5000);
 
