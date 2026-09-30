@@ -72,7 +72,9 @@ async function run(entry, label) {
   global.sessionStorage = window.sessionStorage
   global.location = window.location
 
-  global.fetch = window.fetch = async () => ({ ok: true, status: 200, json: async () => ({ initialized: false }) })
+  global.fetch = window.fetch = async url => String(url) === '/auth/me'
+    ? ({ ok: false, status: 401, json: async () => ({ error: '请先登录' }) })
+    : ({ ok: true, status: 200, json: async () => ({ initialized: false }) })
   const errors = []
   const origError = console.error
   console.error = (...a) => { errors.push(a.map(String).join(' ')); origError(...a) }

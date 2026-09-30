@@ -20,6 +20,7 @@ import (
 	"time"
 
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 
 	"github.com/frostloom/ai-gateway/internal/pkg/quota"
 )
@@ -806,33 +807,23 @@ func (s *Store) RenewDueSubscriptions(ctx context.Context) (int, error) {
 
 // RecordSession 记录/刷新客服会话。
 //
-// 实现说明：不要先 Create 再靠 duplicate-key 兜回 Update —— 那样每轮对话都会让
-// GORM 打一条 Error 1062 日志。同一 session 连续多轮是常态，这些噪音会淹没真错误。
-// 这里改用 UPDATE 优先，未命中再 INSERT（并发下 INSERT 仍可能撞键，保留兜底）。
+// 唯一键原子占用会话，再核对所属租户；冲突不覆盖已有归属。
+// 同一租户换登录会话后仍可继续，其他租户即便持有 session_id 也拒绝。
 func (s *Store) RecordSession(ctx context.Context, sessionID string, tenantID, apiKeyID uint64) error {
 	now := time.Now()
 	db := s.db.WithContext(ctx)
-
-	res := db.Model(&AgentSession{}).
-		Where("session_id = ?", sessionID).
-		Update("last_active_at", now)
-	if res.Error != nil {
-		return res.Error
-	}
-	if res.RowsAffected > 0 {
-		return nil
-	}
-
 	ses := &AgentSession{SessionID: sessionID, TenantID: tenantID, APIKeyID: apiKeyID, CreatedAt: now, LastActiveAt: now}
-	if err := db.Create(ses).Error; err != nil {
-		if isDupKey(err) { // 并发下被别的请求抢先插入 → 视为已存在
-			return db.Model(&AgentSession{}).
-				Where("session_id = ?", sessionID).
-				Update("last_active_at", now).Error
-		}
+	if err := db.Clauses(clause.OnConflict{DoNothing: true}).Create(ses).Error; err != nil {
 		return err
 	}
-	return nil
+	var owner AgentSession
+	if err := db.Where("session_id = ?", sessionID).First(&owner).Error; err != nil {
+		return err
+	}
+	if owner.TenantID != tenantID {
+		return ErrSessionTenantMismatch
+	}
+	return db.Model(&AgentSession{}).Where("session_id = ? AND tenant_id = ?", sessionID, tenantID).Update("last_active_at", now).Error
 }
 
 // RecordAudit 记录一次 AI 工具执行（读/写都记，写操作含确认标记与预览文案）。

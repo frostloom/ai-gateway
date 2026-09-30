@@ -66,7 +66,7 @@ func registerAuth(mux *http.ServeMux, st *store.Store, log *slog.Logger) {
 			writeErr(w, http.StatusInternalServerError, "password hash failed")
 			return
 		}
-		u := &store.AdminUser{Username: in.Username, PasswordHash: string(hash)}
+		u := &store.AdminUser{ID: 1, Username: in.Username, PasswordHash: string(hash)}
 		if err := st.CreateAdmin(r.Context(), u); err != nil {
 			log.Error("auth setup create", "err", err)
 			writeErr(w, http.StatusConflict, err.Error())
@@ -124,7 +124,13 @@ func registerAuth(mux *http.ServeMux, st *store.Store, log *slog.Logger) {
 			writeErr(w, http.StatusUnauthorized, "unauthorized")
 			return
 		}
-		writeJSON(w, http.StatusOK, map[string]any{"username": se.Username})
+		u, err := st.GetAdminByUsername(r.Context(), se.Username)
+		if err != nil || u.Status != 0 {
+			writeErr(w, http.StatusUnauthorized, "unauthorized")
+			return
+		}
+		w.Header().Set("Cache-Control", "no-store")
+		writeJSON(w, http.StatusOK, map[string]any{"username": se.Username, "role": "admin"})
 	})
 }
 
@@ -144,9 +150,10 @@ func issueSession(w http.ResponseWriter, r *http.Request, st *store.Store, log *
 	}
 	http.SetCookie(w, &http.Cookie{
 		Name: cookieName, Value: tok, Path: "/", HttpOnly: true,
+		Secure:   r.TLS != nil || r.Header.Get("X-Forwarded-Proto") == "https",
 		SameSite: http.SameSiteLaxMode, MaxAge: int(sessionTTL.Seconds()),
 	})
-	writeJSON(w, http.StatusOK, map[string]any{"username": username})
+	writeJSON(w, http.StatusOK, map[string]any{"username": username, "role": "admin"})
 }
 
 // sessionToken 从 cookie 或 X-Admin-Token 头取会话 token（gateway 把请求头的 cookie 透传过来）。

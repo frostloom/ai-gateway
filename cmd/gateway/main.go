@@ -34,7 +34,7 @@ func main() {
 	redisAddr := config.Getenv("REDIS_ADDR", "127.0.0.1:6381")
 	redisPwd := config.Getenv("REDIS_PASSWORD", "")
 	ratePerMin := config.GetenvInt("RATE_LIMIT_PER_MIN", 600)
-	adminToken := config.Getenv("ADMIN_TOKEN", "admin-demo")
+	adminToken := config.Getenv("ADMIN_TOKEN", "")
 
 	rdb := redisx.New(redisAddr, redisPwd)
 	if err := redisx.Ping(context.Background(), rdb); err != nil {
@@ -52,6 +52,7 @@ func main() {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
 	r.Use(gin.Recovery())
+	r.Use(middleware.BrowserSameOrigin())
 	r.Use(metrics.GinMiddleware("gateway")) // M5 可观测
 	r.GET("/metrics", gin.WrapH(metrics.Handler()))
 
@@ -80,12 +81,17 @@ func main() {
 	r.GET("/portal", serveHTML("portal.html"))
 	r.Any("/assets/*filepath", gin.WrapH(http.FileServer(http.FS(webFS))))
 	portal := r.Group("/portal")
-	portal.Use(middleware.APIKey(bc)) // tenant 由 key 派生
+	portal.Use(middleware.PortalSession(billingAdminAddr, bc))
 	handler.RegisterPortal(portal, billingAdminAddr, agentAddr, log)
+	portal.POST("/completions", middleware.Idempotency(rdb), middleware.RateLimit(rdb, time.Minute, ratePerMin), handler.Chat(bc, rc, log, 2*time.Minute))
+	userAuth := r.Group("/auth")
+	userAuth.Use(middleware.AuthRateLimit(rdb))
+	handler.RegisterUserAuth(userAuth, billingAdminAddr, log)
 
 	// /admin/auth/*：登录/初始化/登出/会话校验，不套登录中间件（登录前即可访问）。
 	// billing 收尾签发 HttpOnly cookie，经 proxy 透传给浏览器。
 	auth := r.Group("/admin/auth")
+	auth.Use(middleware.AuthRateLimit(rdb))
 	handler.RegisterAdminAuth(auth, billingAdminAddr, log)
 
 	// /admin/*：面板数据接口，需登录态（cookie/token/admin-demo 兜底）。

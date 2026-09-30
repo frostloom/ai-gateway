@@ -181,13 +181,13 @@ async function send(text?: string) {
     if (props.mode === 'admin' && chatLayer.tenantId > 0) body.tenant_id = chatLayer.tenantId
 
     const headers: Record<string, string> = { 'Content-Type': 'application/json' }
-    if (props.mode === 'portal') headers['Authorization'] = 'Bearer ' + auth.getKey()
 
     const res = await fetch(url, { method: 'POST', headers, body: JSON.stringify(body), credentials: 'include' })
     const raw = await res.text()
     let data: any = null
     try { data = JSON.parse(raw) } catch { /* 非 JSON */ }
     if (!res.ok) {
+      if (res.status === 401) window.dispatchEvent(new Event(props.mode === 'admin' ? 'admin-session-expired' : 'portal-session-expired'))
       const msg = data?.error?.message || data?.error || `请求失败（${res.status}）`
       push({ role: 'agent', text: String(msg), error: true, at: Date.now() })
       return

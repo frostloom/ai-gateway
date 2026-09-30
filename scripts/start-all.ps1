@@ -174,8 +174,8 @@ foreach ($s in $targets) {
 Write-Host ""
 if ($failed -eq 0) {
     Write-Host "完成。打开：" -ForegroundColor Green
-    Write-Host "  管理面板    http://localhost:$gatewayPort/         (账号 zlx)"
-    Write-Host "  用户自助页  http://localhost:$gatewayPort/portal   (key sk-demo-8f3a2b1c9d4e5f60)"
+    Write-Host "  管理面板    http://localhost:$gatewayPort/         (已有管理员账号登录，首次使用初始化)"
+    Write-Host "  用户自助页  http://localhost:$gatewayPort/portal   (直接注册或账号密码登录，无需邀请码)"
 } else {
     Write-Host "$failed 个端口未就绪，检查 logs/ 下对应 .log / .err.log" -ForegroundColor Yellow
 }

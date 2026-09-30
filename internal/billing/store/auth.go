@@ -11,6 +11,7 @@ import (
 
 // ErrSessionExpired 会话过期/无效（admin auth me 返回 401）。
 var ErrSessionExpired = errors.New("session expired")
+var ErrSessionTenantMismatch = errors.New("session belongs to another tenant")
 
 // AdminUser 管理员账号。PasswordHash 存 bcrypt 哈希，绝不回显。
 type AdminUser struct {

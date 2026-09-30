@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import { ref, shallowRef, provide, onMounted, computed } from 'vue'
+import { ref, shallowRef, provide, onMounted, onUnmounted, computed } from 'vue'
 import {
   IconShoppingBag, IconCategory, IconCreditCard, IconReceipt2,
   IconTrendingUp, IconTerminal2, IconWallet, IconLogout, IconUserShield, IconMenu2,
 } from '@tabler/icons-vue'
-import { api, auth, ApiError } from '../shared/api'
+import { api, auth } from '../shared/api'
 import { money } from '../shared/utils/format'
 import { toastErr } from '../shared/utils/toast'
-import BaseButton from '../shared/components/ui/BaseButton.vue'
 import ToastHost from '../shared/components/ui/ToastHost.vue'
 import ChatDock from '../shared/components/ChatDock.vue'
+import AuthGate from '../shared/components/AuthGate.vue'
 import HomeView from './views/HomeView.vue'
 import CatalogView from './views/CatalogView.vue'
 import PlansView from './views/PlansView.vue'
@@ -36,27 +36,17 @@ const views: Record<ViewKey, any> = {
 const mobileOpen = ref(false)
 const currentLabel = computed(() => navs.find(n => n.key === cur.value)?.label || '工作台')
 const logged = ref(false)
-const busy = ref(false)
-const keyInput = ref('')
+const loading = ref(true)
+const username = ref('')
 const cur = shallowRef<ViewKey>('home')
 const balance = ref<number | null>(null)
 
-const masked = (k: string) => (k.length <= 10 ? k : k.slice(0, 6) + '…' + k.slice(-4))
-
-async function tryLogin() {
-  const k = keyInput.value.trim()
-  if (!k) return
-  busy.value = true
-  try {
-    await api('/portal/me', { key: k })
-    auth.setKey(k)
-    logged.value = true
-    refreshMe()
-  } catch (e) {
-    toastErr(e instanceof ApiError ? e.message : '登录失败')
-  } finally {
-    busy.value = false
-  }
+async function authenticated(identity: { username: string; role: 'admin' | 'user' }) {
+  if (identity.role === 'admin') { window.location.assign('/'); return }
+  auth.clearKey(); auth.clearSid()
+  username.value = identity.username
+  logged.value = true
+  await refreshMe()
 }
 
 async function refreshMe() {
@@ -66,55 +56,27 @@ async function refreshMe() {
   } catch { /* ignore */ }
 }
 
-function logout() {
-  auth.clearKey()
-  auth.clearSid()
-  logged.value = false
-  balance.value = null
-  keyInput.value = ''
+function expired() { logged.value = false; balance.value = null; auth.clearSid(); cur.value = 'home' }
+async function logout() {
+  try { await api('/auth/logout', { body: {} }); auth.clearKey(); expired() }
+  catch (e: any) { toastErr(e.message || '退出失败，请重试') }
 }
-
 provide('go', (v: ViewKey) => { cur.value = v; window.scrollTo({ top: 0 }) })
-
-onMounted(() => {
-  if (auth.getKey()) {
-    keyInput.value = auth.getKey()
-    logged.value = true
-    refreshMe()
-  }
+onMounted(async () => {
+  window.addEventListener('portal-session-expired', expired)
+  auth.clearKey()
+  try { const me = await api<{ username: string }>('/auth/me'); username.value = me.username; logged.value = true; await refreshMe() }
+  catch { logged.value = false }
+  finally { loading.value = false }
 })
+onUnmounted(() => window.removeEventListener('portal-session-expired', expired))
 </script>
 
 <template>
   <ToastHost />
 
-  <!-- 登录闸门 -->
-  <div v-if="!logged" class="gate">
-    <div class="gate-card">
-      <div class="brand">
-        <div class="mark"><IconShoppingBag :size="21" stroke-width="1.9" /></div>
-        <div>
-          <h1 class="bt">AI 模型商城</h1>
-          <p class="bs">多租户模型网关 · 按量计费 · 商品即模型额度</p>
-        </div>
-      </div>
-      <label class="glabel" for="apikey">租户 API Key</label>
-      <div class="krow">
-        <input
-          id="apikey"
-          v-model="keyInput"
-          class="keyin"
-          type="password"
-          placeholder="sk-..."
-          autocomplete="off"
-          spellcheck="false"
-          @keyup.enter="tryLogin"
-        />
-        <BaseButton variant="primary" size="lg" :loading="busy" @click="tryLogin">进入商城</BaseButton>
-      </div>
-      <p class="ghint">Key 仅保存在本地浏览器，用于调用 <code>/portal</code> 与 <code>/v1</code> 接口。</p>
-    </div>
-  </div>
+  <div v-if="loading" class="gate" role="status">正在连接控制台…</div>
+  <AuthGate v-else-if="!logged" default-role="user" @authenticated="authenticated" />
 
   <!-- 商城主体 -->
   <div v-else class="app" :class="{ mobileOpen }" @keydown.esc="mobileOpen = false">
@@ -140,7 +102,7 @@ onMounted(() => {
         <a class="icon-btn" href="/" target="_blank" title="管理面板">
           <IconUserShield :size="16" />
         </a>
-        <span class="keychip mono" title="当前 API Key">{{ masked(keyInput) }}</span>
+        <span class="keychip mono" title="当前用户">{{ username }}</span>
         <button class="icon-btn danger" title="退出登录" @click="logout">
           <IconLogout :size="16" />
         </button>
