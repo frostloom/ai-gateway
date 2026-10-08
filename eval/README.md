@@ -81,10 +81,12 @@ go run ./cmd/eval -mode http -base http://127.0.0.1:9105 -key sk-真实key
 
 ```powershell
 . ./scripts/load-env.ps1
-go build -o bin/task-eval.exe ./cmd/task-eval
-# 先启动与下列元数据匹配的agent。source是该agent二进制的源提交，不能误填评测器提交。
-$taskOutputPath = 'eval/reports/task-' + [guid]::NewGuid().ToString('N') + '.json'
-./bin/task-eval.exe -base http://127.0.0.1:9105 -out $taskOutputPath -version optimized-on -jev on -model $env:AGENT_LLM_MODEL -source 1a7a729 -agent-binary bin/agent.exe -allow-simulated-writes
+go build -o bin/agent-task-r2.exe ./cmd/agent
+go build -o bin/task-eval-v2.exe ./cmd/task-eval
+# 从干净的已提交agent源码构建；source必须是运行二进制的实际源码提交。
+$agentSourceCommit = git rev-parse HEAD
+$taskOutputPath = 'eval/reports/task-' + [guid]::NewGuid().ToString('N')
+./scripts/run-task-experiment.ps1 -JevMode on -Version optimized-on -AgentExe bin/agent-task-r2.exe -SourceRevision $agentSourceCommit -Port 19214 -Out $taskOutputPath
 ```
 
 `-jev`必须与响应中实际JEV遥测一致；缺失或不一致时不发送确认。`-agent-binary`保存二进制哈希，报告另存评测器自身哈希、数据集哈希及每轮真实回复。JSON/Markdown和运行锁均拒绝覆盖。外部用例可用`-cases`指定独立JSON数组；执行内容另作数据集哈希，不继承默认用例的省略字段。
@@ -92,3 +94,5 @@ $taskOutputPath = 'eval/reports/task-' + [guid]::NewGuid().ToString('N') + '.jso
 主要指标：完成任务/所有尝试（包含失败）、必要追问提供/应追问、追问后完成/应追问、参数正确预览/实际预览、确认前写入违规、取消无写入、重复确认不重复写入。任务耗时从首轮请求到最终状态核验；不包含fixture准备和模拟用户思考时间，分别列全部尝试和成功任务的平均/P50/P95，零成功时完成耗时不可评估。HTTP失败与fixture失败单列，不能解释为意图识别能力为零。
 
 该固定任务集是多轮回归证据，不是大规模未知说法的泛化准确率；金额回复与追问文案使用固定文本规则，仍需结合原始轮次核对。首工具Top-1/F1/Reach继续作为诊断指标，历史V1/V2评分和原始语料不更改。
+
+最新同模型四组多轮实测与字节归档见 [DeepSeek任务实验](experiments/2026-10-08-deepseek-flash/README.md)。评分规则`taskbench.v2`与客服有无JEV的V1/V2是两个不同版本维度。旧规则和有评测器错误的探针保留，不能混入最终任务完成率。自动冗余追问候选必须复核：完成查询后询问是否需要其他服务，不作为任务错误。

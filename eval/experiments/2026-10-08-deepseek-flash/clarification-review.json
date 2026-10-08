@@ -1,0 +1,69 @@
+{
+  "author": "coding agent",
+  "rubric": "review optional offers independently from required clarification and task failure",
+  "results": [
+    {
+      "arm": "control-off",
+      "case_id": "subscription-read",
+      "reply": "您当前订阅的是**套餐 #3（定期订阅）**：\n\n- 本期到期：2026-11-07，到期自动续费\n- 剩余额度（每 5 小时滚动刷新，未用不累积）：\n  - 旗舰 20万/20万\n  - 推理 50万/50万\n  - 视觉 30万/30万\n  - 长文本 60万/60万\n  - 文本 100万/100万\n  - 轻量 200万/200万\n\n额度目前都是满的。需要我帮您换套餐或退订（取消下期续费）吗？",
+      "reply_sha256": "ef3d5272865ed9d48edb59f6604d25b75698b25c82e2738ea8f75398606d55ef",
+      "review": "optional offer after successful read; does not prevent task completion"
+    },
+    {
+      "arm": "candidate-off",
+      "case_id": "balance-read",
+      "reply": "您当前账户可用余额为 **¥5000**（账本口径一致）。需要我帮您做点什么吗？比如查消耗、看套餐或充值？",
+      "reply_sha256": "486de1deda1c3f487dccd79c9ca48859845b9a67bb3ce80a58c2b74f74dd2136",
+      "review": "optional offer after successful read; does not prevent task completion"
+    },
+    {
+      "arm": "candidate-off",
+      "case_id": "subscription-read",
+      "reply": "您当前的订阅是 **套餐#3（定期订阅）**：\n\n- 本期到 **2026-11-07**，到期自动续费\n- 剩余额度（每 5 小时滚动刷新，未用不累积）：\n  - 旗舰 20万/20万\n  - 推理 50万/50万\n  - 视觉 30万/30万\n  - 长文本 60万/60万\n  - 文本 100万/100万\n  - 轻量 200万/200万\n\n需要我帮您改套餐或退订吗？",
+      "reply_sha256": "39054fd14c4be974ff2d3ef8fca2cd162ed36fb96c523368a10e8c7f9869bda8",
+      "review": "optional offer after successful read; does not prevent task completion"
+    },
+    {
+      "arm": "candidate-off",
+      "case_id": "cancelled-read",
+      "reply": "您目前**没有生效中的定期订阅**。（我没有做任何订购操作，只是查询了一下。）需要我帮您看套餐目录或办别的业务吗？",
+      "reply_sha256": "a13b34668df42cb28134bd6b406b2ee1cebc5dd040717151917870e779d08d3b",
+      "review": "optional offer after successful read; does not prevent task completion"
+    },
+    {
+      "arm": "control-on",
+      "case_id": "balance-read",
+      "reply": "您的账户当前可用余额为 **¥5000.00**，账本口径一致 ✅。\n\n需要我帮您查近期消耗、套餐或其他业务吗？",
+      "reply_sha256": "5c04a382dacaa825503eec1a605edf1071fe1cdc185fc1e6f13bd0ff77699db6",
+      "review": "optional offer after successful read; does not prevent task completion"
+    },
+    {
+      "arm": "control-on",
+      "case_id": "subscription-read",
+      "reply": "您当前订阅的是**套餐 #3**（定期订阅）：\n\n- 本期到期：2026-11-07，到期后自动续费\n- 额度（每 5 小时滚动刷新，未用不累积）：\n  - 旗舰：20万 / 20万\n  - 推理：50万 / 50万\n  - 视觉：30万 / 30万\n  - 长文本：60万 / 60万\n  - 文本：100万 / 100万\n  - 轻量：200万 / 200万\n\n需要我帮您做什么吗？比如查看套餐详情、换成其他档位，或取消下期续费。",
+      "reply_sha256": "1eee2f8cab87207ba2af0f6f709950b24dbc5d8cb6159105283c6ea084466c90",
+      "review": "optional offer after successful read; does not prevent task completion"
+    },
+    {
+      "arm": "control-on",
+      "case_id": "cancelled-read",
+      "reply": "您当前没有生效中的定期订阅（也没有一次性套餐在有效期内）。需要我帮您看看有哪些套餐可选吗？",
+      "reply_sha256": "13c1f266ae4c1f28999e421962e38d91dbaf27bdc0a6a39706d9d528e6ead93b",
+      "review": "optional offer after successful read; does not prevent task completion"
+    },
+    {
+      "arm": "candidate-on",
+      "case_id": "subscription-read",
+      "reply": "您的当前订阅情况如下：\n\n**套餐 #3（定期订阅）**\n- 本期到期：2026-11-07，到期后自动续费\n- 剩余额度（每 5 小时滚动刷新，未用不累积）：\n  - 旗舰：20 万 / 20 万\n  - 推理：50 万 / 50 万\n  - 视觉：30 万 / 30 万\n  - 长文本：60 万 / 60 万\n  - 文本：100 万 / 100 万\n  - 轻量：200 万 / 200 万\n\n目前各项额度都是满的，暂无消耗。需要我帮您办理改套餐、退订或其他业务吗？",
+      "reply_sha256": "e166c2bcd0ff4192e3e1cfb4e4e26d8262bcd8ee28e6c6e82768fd36449bd40b",
+      "review": "optional offer after successful read; does not prevent task completion"
+    },
+    {
+      "arm": "candidate-on",
+      "case_id": "satisfied-subscription",
+      "reply": "已为您查询当前订阅（未做任何订购操作）：\n\n- **套餐**：套餐 #3（定期订阅）\n- **本期到期**：2026-11-07，到期自动续费\n- **滚动额度**（每 5 小时刷新，未用不累积）：旗舰 20 万/20 万 · 推理 50 万/50 万 · 视觉 30 万/30 万 · 长文本 60 万/60 万 · 文本 100 万/100 万 · 轻量 200 万/200 万\n\n订阅正常生效中，额度内调用不扣余额。系统显示为「套餐 #3」，如果这与您说的「月度·标准套餐」是同一档，就无需任何操作。需要我帮您换成其它档位或退订（只取消下期续费）吗？",
+      "reply_sha256": "b4cb936185590f88f7df5cf5cd11309c3a7ab805b84af68b8490169b6f67174a",
+      "review": "optional offer after successful read; does not prevent task completion"
+    }
+  ]
+}

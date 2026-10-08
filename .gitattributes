@@ -1,0 +1,5 @@
+# Frozen evidence must retain exact bytes across Windows and Unix checkouts.
+eval/baselines/2026-09-29-v1-v2/** -text
+eval/experiments/2026-10-08/** -text
+eval/experiments/2026-10-08-deepseek-flash/** -text
+eval/behavior-review/** -text
