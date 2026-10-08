@@ -1,0 +1,1765 @@
+{
+  "schema": "task-experiment-comparison.v1",
+  "task_source": "taskbench-v2-full-1791456515215",
+  "task_scoring": "taskbench.v2",
+  "same_dataset": true,
+  "unique_tenants": 96,
+  "dataset_sha256": "ea10920183f5c9c46afe9d6eaaadd2a15e1cbcdcebffe79a7ef9ee8ed637b1d9",
+  "arms": {
+    "control-off": {
+      "metadata": {
+        "version": "control-off",
+        "jev_mode": "off",
+        "model": "deepseek-flash",
+        "source_git": "b26642876e78255a89c87de3982888f14d6532d4",
+        "binary_sha256": "02d52fe76975ab562a63645024e7f5cdb64b157dd05bbc7957883258145ce181",
+        "evaluator_binary_sha256": "45351ff28f9901bfffbdee0cbf719bae749169b7703868cc28f1c7ee5e4abe07"
+      },
+      "metrics": {
+        "total": 24,
+        "completed": 19,
+        "completion_rate": 0.7916666666666666,
+        "by_category": {
+          "already_satisfied": {
+            "total": 3,
+            "completed": 3,
+            "completion_rate": 1
+          },
+          "cancel_subscription": {
+            "total": 2,
+            "completed": 1,
+            "completion_rate": 0.5
+          },
+          "change": {
+            "total": 3,
+            "completed": 2,
+            "completion_rate": 0.6666666666666666
+          },
+          "read": {
+            "total": 2,
+            "completed": 2,
+            "completion_rate": 1
+          },
+          "recharge": {
+            "total": 4,
+            "completed": 3,
+            "completion_rate": 0.75
+          },
+          "refund": {
+            "total": 6,
+            "completed": 5,
+            "completion_rate": 0.8333333333333334
+          },
+          "subscribe": {
+            "total": 4,
+            "completed": 3,
+            "completion_rate": 0.75
+          }
+        },
+        "failed_http": 0,
+        "fixture_failures": 0,
+        "clarification_required": 4,
+        "clarification_offered": 4,
+        "clarification_coverage": 1,
+        "clarification_completed": 4,
+        "redundant_clarifications": 1,
+        "preview_observed": 19,
+        "preview_correct": 19,
+        "preview_parameter_accuracy": 1,
+        "premature_writes": 0,
+        "cancel_cases": 5,
+        "cancel_no_write": 0,
+        "cancel_no_write_observed": 5,
+        "duplicate_confirm_cases": 1,
+        "duplicate_confirm_passed": 1,
+        "llm_calls": 54,
+        "telemetry_turns": 48,
+        "all_task_latency": {
+          "count": 24,
+          "average_ms": 2531.9222875,
+          "p50_ms": 2160.3681,
+          "p95_ms": 4063.1975
+        },
+        "successful_task_latency": {
+          "count": 19,
+          "average_ms": 2462.4623631578947,
+          "p50_ms": 2098.6398,
+          "p95_ms": 4063.1975
+        },
+        "time_to_preview": {
+          "count": 19,
+          "average_ms": 2097.4014,
+          "p50_ms": 1760.8347,
+          "p95_ms": 3922.0979
+        }
+      }
+    },
+    "candidate-off": {
+      "metadata": {
+        "version": "candidate-off",
+        "jev_mode": "off",
+        "model": "deepseek-flash",
+        "source_git": "d07e671f1ab4eaa7f1f8a5d3e3bc3711f129094b",
+        "binary_sha256": "5dd4c6a6df28fb517f904c0eb88d443cc7b5b3b5fa73dc41c9fa00592e4a22b8",
+        "evaluator_binary_sha256": "45351ff28f9901bfffbdee0cbf719bae749169b7703868cc28f1c7ee5e4abe07"
+      },
+      "metrics": {
+        "total": 24,
+        "completed": 24,
+        "completion_rate": 1,
+        "by_category": {
+          "already_satisfied": {
+            "total": 3,
+            "completed": 3,
+            "completion_rate": 1
+          },
+          "cancel_subscription": {
+            "total": 2,
+            "completed": 2,
+            "completion_rate": 1
+          },
+          "change": {
+            "total": 3,
+            "completed": 3,
+            "completion_rate": 1
+          },
+          "read": {
+            "total": 2,
+            "completed": 2,
+            "completion_rate": 1
+          },
+          "recharge": {
+            "total": 4,
+            "completed": 4,
+            "completion_rate": 1
+          },
+          "refund": {
+            "total": 6,
+            "completed": 6,
+            "completion_rate": 1
+          },
+          "subscribe": {
+            "total": 4,
+            "completed": 4,
+            "completion_rate": 1
+          }
+        },
+        "failed_http": 0,
+        "fixture_failures": 0,
+        "clarification_required": 4,
+        "clarification_offered": 4,
+        "clarification_coverage": 1,
+        "clarification_completed": 4,
+        "redundant_clarifications": 3,
+        "preview_observed": 19,
+        "preview_correct": 19,
+        "preview_parameter_accuracy": 1,
+        "premature_writes": 0,
+        "cancel_cases": 5,
+        "cancel_no_write": 5,
+        "cancel_no_write_observed": 5,
+        "duplicate_confirm_cases": 1,
+        "duplicate_confirm_passed": 1,
+        "llm_calls": 39,
+        "telemetry_turns": 48,
+        "all_task_latency": {
+          "count": 24,
+          "average_ms": 2179.121508333333,
+          "p50_ms": 1699.7689,
+          "p95_ms": 3733.1824
+        },
+        "successful_task_latency": {
+          "count": 24,
+          "average_ms": 2179.121508333333,
+          "p50_ms": 1699.7689,
+          "p95_ms": 3733.1824
+        },
+        "time_to_preview": {
+          "count": 19,
+          "average_ms": 1860.4599842105265,
+          "p50_ms": 1507.5013,
+          "p95_ms": 4249.9473
+        }
+      }
+    },
+    "control-on": {
+      "metadata": {
+        "version": "control-on",
+        "jev_mode": "on",
+        "model": "deepseek-flash",
+        "source_git": "b26642876e78255a89c87de3982888f14d6532d4",
+        "binary_sha256": "02d52fe76975ab562a63645024e7f5cdb64b157dd05bbc7957883258145ce181",
+        "evaluator_binary_sha256": "45351ff28f9901bfffbdee0cbf719bae749169b7703868cc28f1c7ee5e4abe07"
+      },
+      "metrics": {
+        "total": 24,
+        "completed": 19,
+        "completion_rate": 0.7916666666666666,
+        "by_category": {
+          "already_satisfied": {
+            "total": 3,
+            "completed": 3,
+            "completion_rate": 1
+          },
+          "cancel_subscription": {
+            "total": 2,
+            "completed": 1,
+            "completion_rate": 0.5
+          },
+          "change": {
+            "total": 3,
+            "completed": 2,
+            "completion_rate": 0.6666666666666666
+          },
+          "read": {
+            "total": 2,
+            "completed": 2,
+            "completion_rate": 1
+          },
+          "recharge": {
+            "total": 4,
+            "completed": 3,
+            "completion_rate": 0.75
+          },
+          "refund": {
+            "total": 6,
+            "completed": 5,
+            "completion_rate": 0.8333333333333334
+          },
+          "subscribe": {
+            "total": 4,
+            "completed": 3,
+            "completion_rate": 0.75
+          }
+        },
+        "failed_http": 0,
+        "fixture_failures": 0,
+        "clarification_required": 4,
+        "clarification_offered": 4,
+        "clarification_coverage": 1,
+        "clarification_completed": 4,
+        "redundant_clarifications": 3,
+        "preview_observed": 19,
+        "preview_correct": 19,
+        "preview_parameter_accuracy": 1,
+        "premature_writes": 0,
+        "cancel_cases": 5,
+        "cancel_no_write": 0,
+        "cancel_no_write_observed": 5,
+        "duplicate_confirm_cases": 1,
+        "duplicate_confirm_passed": 1,
+        "llm_calls": 51,
+        "telemetry_turns": 48,
+        "all_task_latency": {
+          "count": 24,
+          "average_ms": 3143.3874291666666,
+          "p50_ms": 2891.1821,
+          "p95_ms": 5077.7578
+        },
+        "successful_task_latency": {
+          "count": 19,
+          "average_ms": 3038.9379473684216,
+          "p50_ms": 2796.9366,
+          "p95_ms": 5736.7274
+        },
+        "time_to_preview": {
+          "count": 19,
+          "average_ms": 2670.552015789474,
+          "p50_ms": 2583.1145,
+          "p95_ms": 5574.1738
+        }
+      }
+    },
+    "candidate-on": {
+      "metadata": {
+        "version": "candidate-on",
+        "jev_mode": "on",
+        "model": "deepseek-flash",
+        "source_git": "d07e671f1ab4eaa7f1f8a5d3e3bc3711f129094b",
+        "binary_sha256": "5dd4c6a6df28fb517f904c0eb88d443cc7b5b3b5fa73dc41c9fa00592e4a22b8",
+        "evaluator_binary_sha256": "45351ff28f9901bfffbdee0cbf719bae749169b7703868cc28f1c7ee5e4abe07"
+      },
+      "metrics": {
+        "total": 24,
+        "completed": 24,
+        "completion_rate": 1,
+        "by_category": {
+          "already_satisfied": {
+            "total": 3,
+            "completed": 3,
+            "completion_rate": 1
+          },
+          "cancel_subscription": {
+            "total": 2,
+            "completed": 2,
+            "completion_rate": 1
+          },
+          "change": {
+            "total": 3,
+            "completed": 3,
+            "completion_rate": 1
+          },
+          "read": {
+            "total": 2,
+            "completed": 2,
+            "completion_rate": 1
+          },
+          "recharge": {
+            "total": 4,
+            "completed": 4,
+            "completion_rate": 1
+          },
+          "refund": {
+            "total": 6,
+            "completed": 6,
+            "completion_rate": 1
+          },
+          "subscribe": {
+            "total": 4,
+            "completed": 4,
+            "completion_rate": 1
+          }
+        },
+        "failed_http": 0,
+        "fixture_failures": 0,
+        "clarification_required": 4,
+        "clarification_offered": 4,
+        "clarification_coverage": 1,
+        "clarification_completed": 4,
+        "redundant_clarifications": 2,
+        "preview_observed": 19,
+        "preview_correct": 19,
+        "preview_parameter_accuracy": 1,
+        "premature_writes": 0,
+        "cancel_cases": 5,
+        "cancel_no_write": 5,
+        "cancel_no_write_observed": 5,
+        "duplicate_confirm_cases": 1,
+        "duplicate_confirm_passed": 1,
+        "llm_calls": 40,
+        "telemetry_turns": 48,
+        "all_task_latency": {
+          "count": 24,
+          "average_ms": 2676.7687875,
+          "p50_ms": 2180.6313,
+          "p95_ms": 4538.5009
+        },
+        "successful_task_latency": {
+          "count": 24,
+          "average_ms": 2676.7687875,
+          "p50_ms": 2180.6313,
+          "p95_ms": 4538.5009
+        },
+        "time_to_preview": {
+          "count": 19,
+          "average_ms": 2505.582468421052,
+          "p50_ms": 2193.8532,
+          "p95_ms": 5545.8197
+        }
+      }
+    }
+  },
+  "matched_success_latency": {
+    "off": {
+      "case_ids": [
+        "balance-read",
+        "cancel-subscription",
+        "cancelled-read",
+        "change-missing",
+        "change-ready",
+        "recharge-missing",
+        "recharge-ready",
+        "recharge-repeat",
+        "refund-capped",
+        "refund-composite",
+        "refund-missing",
+        "refund-order",
+        "refund-ready",
+        "satisfied-balance",
+        "satisfied-subscription",
+        "subscribe-flagship",
+        "subscribe-missing",
+        "subscribe-ready",
+        "subscription-read"
+      ],
+      "control": {
+        "count": 19,
+        "average_ms": 2462.4623631578947,
+        "p50_ms": 2098.6398,
+        "p95_ms": 4063.1975
+      },
+      "candidate": {
+        "count": 19,
+        "average_ms": 2166.3625894736842,
+        "p50_ms": 1752.8195,
+        "p95_ms": 3733.1824
+      }
+    },
+    "on": {
+      "case_ids": [
+        "balance-read",
+        "cancel-subscription",
+        "cancelled-read",
+        "change-missing",
+        "change-ready",
+        "recharge-missing",
+        "recharge-ready",
+        "recharge-repeat",
+        "refund-capped",
+        "refund-composite",
+        "refund-missing",
+        "refund-order",
+        "refund-ready",
+        "satisfied-balance",
+        "satisfied-subscription",
+        "subscribe-flagship",
+        "subscribe-missing",
+        "subscribe-ready",
+        "subscription-read"
+      ],
+      "control": {
+        "count": 19,
+        "average_ms": 3038.937947368421,
+        "p50_ms": 2796.9366,
+        "p95_ms": 5736.7274
+      },
+      "candidate": {
+        "count": 19,
+        "average_ms": 2775.7406684210523,
+        "p50_ms": 2368.3058,
+        "p95_ms": 6352.7793
+      }
+    }
+  },
+  "intent_source": "deepseek-flash-full-1791453809005",
+  "intent_metrics": {
+    "control-off": {
+      "total": 1200,
+      "evaluated": 1200,
+      "failed": 0,
+      "correct": 741,
+      "top1": 0.6175,
+      "macro_f1": 0.5326275340000518,
+      "macro_precision": 0.7341180580893004,
+      "macro_recall": 0.6174999999999999,
+      "reach": 928,
+      "reach_rate": 0.7733333333333333,
+      "partial_plan": 226,
+      "ask_back_total": 182,
+      "ask_back_handled": 169,
+      "oos_total": 100,
+      "oos_correct": 99,
+      "oos_accuracy": 0.99,
+      "false_call_rate": 0.01,
+      "adversarial_total": 20,
+      "adversarial_blocked": 15,
+      "block_rate": 0.75,
+      "normal_blocked": 0,
+      "false_block_rate": 0,
+      "confirm_covered": 246,
+      "confirm_total": 500,
+      "confirm_rate": 0.492,
+      "avg_latency_ms": 2378.321373000001,
+      "jev_short_circuit": 0,
+      "avg_tool_calls": 1.1316666666666666,
+      "p50_latency_ms": 2170.0554,
+      "p95_latency_ms": 4372.2313,
+      "request_success_rate": 1,
+      "end_to_end_accuracy": 0.6175,
+      "adversarial_evaluated": 20,
+      "adversarial_failed": 0,
+      "adversarial_jev_errors": 0,
+      "adversarial_jev_calls": 0,
+      "adversarial_jev_blocked": 0,
+      "telemetry_samples": 1200,
+      "jev_calls": 0,
+      "jev_errors": 0,
+      "confusion": {
+        "cancel_subscription": {
+          "cancel_subscription": 7,
+          "chitchat": 2,
+          "get_my_subscription": 91
+        },
+        "change_plan": {
+          "chitchat": 1,
+          "get_my_subscription": 49,
+          "list_plans": 50
+        },
+        "chitchat": {
+          "chitchat": 99,
+          "list_models": 1
+        },
+        "get_balance": {
+          "chitchat": 1,
+          "get_balance": 98,
+          "get_my_subscription": 1
+        },
+        "get_consumption": {
+          "chitchat": 1,
+          "get_consumption": 86,
+          "get_my_subscription": 1,
+          "get_recent_bills": 11,
+          "list_models": 1
+        },
+        "get_my_subscription": {
+          "chitchat": 1,
+          "get_balance": 2,
+          "get_my_subscription": 95,
+          "list_plans": 2
+        },
+        "get_recent_bills": {
+          "chitchat": 1,
+          "get_balance": 1,
+          "get_consumption": 1,
+          "get_my_subscription": 1,
+          "get_recent_bills": 96
+        },
+        "list_models": {
+          "chitchat": 2,
+          "list_models": 97,
+          "list_plans": 1
+        },
+        "list_plans": {
+          "get_consumption": 1,
+          "list_plans": 99
+        },
+        "recharge": {
+          "chitchat": 35,
+          "get_balance": 6,
+          "get_my_subscription": 2,
+          "recharge": 57
+        },
+        "refund_recharge": {
+          "chitchat": 2,
+          "get_balance": 93,
+          "refund_recharge": 5
+        },
+        "subscribe_plan": {
+          "get_consumption": 1,
+          "get_my_subscription": 2,
+          "list_plans": 95,
+          "subscribe_plan": 2
+        }
+      },
+      "avg_llm_calls": 1.9258333333333333,
+      "per_class": [
+        {
+          "name": "cancel_subscription",
+          "total": 100,
+          "correct": 7,
+          "precision": 1,
+          "recall": 0.07,
+          "f1": 0.13084112149532712,
+          "reach": 89,
+          "reach_rate": 0.89
+        },
+        {
+          "name": "change_plan",
+          "total": 100,
+          "correct": 0,
+          "precision": 0,
+          "recall": 0,
+          "f1": 0,
+          "reach": 23,
+          "reach_rate": 0.23
+        },
+        {
+          "name": "chitchat",
+          "total": 100,
+          "correct": 99,
+          "precision": 0.6827586206896552,
+          "recall": 0.99,
+          "f1": 0.8081632653061224,
+          "reach": 99,
+          "reach_rate": 0.99
+        },
+        {
+          "name": "get_balance",
+          "total": 100,
+          "correct": 98,
+          "precision": 0.49,
+          "recall": 0.98,
+          "f1": 0.6533333333333333,
+          "reach": 98,
+          "reach_rate": 0.98
+        },
+        {
+          "name": "get_consumption",
+          "total": 100,
+          "correct": 86,
+          "precision": 0.9662921348314607,
+          "recall": 0.86,
+          "f1": 0.9100529100529101,
+          "reach": 90,
+          "reach_rate": 0.9
+        },
+        {
+          "name": "get_my_subscription",
+          "total": 100,
+          "correct": 95,
+          "precision": 0.3925619834710744,
+          "recall": 0.95,
+          "f1": 0.5555555555555556,
+          "reach": 96,
+          "reach_rate": 0.96
+        },
+        {
+          "name": "get_recent_bills",
+          "total": 100,
+          "correct": 96,
+          "precision": 0.897196261682243,
+          "recall": 0.96,
+          "f1": 0.927536231884058,
+          "reach": 98,
+          "reach_rate": 0.98
+        },
+        {
+          "name": "list_models",
+          "total": 100,
+          "correct": 97,
+          "precision": 0.9797979797979798,
+          "recall": 0.97,
+          "f1": 0.9748743718592964,
+          "reach": 98,
+          "reach_rate": 0.98
+        },
+        {
+          "name": "list_plans",
+          "total": 100,
+          "correct": 99,
+          "precision": 0.4008097165991903,
+          "recall": 0.99,
+          "f1": 0.5706051873198847,
+          "reach": 100,
+          "reach_rate": 1
+        },
+        {
+          "name": "recharge",
+          "total": 100,
+          "correct": 57,
+          "precision": 1,
+          "recall": 0.57,
+          "f1": 0.7261146496815287,
+          "reach": 57,
+          "reach_rate": 0.57
+        },
+        {
+          "name": "refund_recharge",
+          "total": 100,
+          "correct": 5,
+          "precision": 1,
+          "recall": 0.05,
+          "f1": 0.09523809523809523,
+          "reach": 49,
+          "reach_rate": 0.49
+        },
+        {
+          "name": "subscribe_plan",
+          "total": 100,
+          "correct": 2,
+          "precision": 1,
+          "recall": 0.02,
+          "f1": 0.0392156862745098,
+          "reach": 31,
+          "reach_rate": 0.31
+        }
+      ],
+      "per_dimension": [
+        {
+          "name": "canonical",
+          "total": 168,
+          "correct": 102,
+          "precision": 0,
+          "recall": 0,
+          "f1": 0.6071428571428571,
+          "reach": 129,
+          "reach_rate": 0.7678571428571429,
+          "acc": 0.6071428571428571
+        },
+        {
+          "name": "colloquial",
+          "total": 192,
+          "correct": 113,
+          "precision": 0,
+          "recall": 0,
+          "f1": 0.5885416666666666,
+          "reach": 134,
+          "reach_rate": 0.6979166666666666,
+          "acc": 0.5885416666666666
+        },
+        {
+          "name": "command",
+          "total": 144,
+          "correct": 94,
+          "precision": 0,
+          "recall": 0,
+          "f1": 0.6527777777777778,
+          "reach": 120,
+          "reach_rate": 0.8333333333333334,
+          "acc": 0.6527777777777778
+        },
+        {
+          "name": "indirect",
+          "total": 120,
+          "correct": 64,
+          "precision": 0,
+          "recall": 0,
+          "f1": 0.5333333333333333,
+          "reach": 74,
+          "reach_rate": 0.6166666666666667,
+          "acc": 0.5333333333333333
+        },
+        {
+          "name": "mixed_en",
+          "total": 96,
+          "correct": 60,
+          "precision": 0,
+          "recall": 0,
+          "f1": 0.625,
+          "reach": 78,
+          "reach_rate": 0.8125,
+          "acc": 0.625
+        },
+        {
+          "name": "polite",
+          "total": 120,
+          "correct": 76,
+          "precision": 0,
+          "recall": 0,
+          "f1": 0.6333333333333333,
+          "reach": 97,
+          "reach_rate": 0.8083333333333333,
+          "acc": 0.6333333333333333
+        },
+        {
+          "name": "terse",
+          "total": 120,
+          "correct": 75,
+          "precision": 0,
+          "recall": 0,
+          "f1": 0.625,
+          "reach": 88,
+          "reach_rate": 0.7333333333333333,
+          "acc": 0.625
+        },
+        {
+          "name": "typo",
+          "total": 120,
+          "correct": 77,
+          "precision": 0,
+          "recall": 0,
+          "f1": 0.6416666666666667,
+          "reach": 91,
+          "reach_rate": 0.7583333333333333,
+          "acc": 0.6416666666666667
+        },
+        {
+          "name": "verbose",
+          "total": 120,
+          "correct": 80,
+          "precision": 0,
+          "recall": 0,
+          "f1": 0.6666666666666666,
+          "reach": 117,
+          "reach_rate": 0.975,
+          "acc": 0.6666666666666666
+        }
+      ]
+    },
+    "candidate-off": {
+      "total": 1200,
+      "evaluated": 1200,
+      "failed": 0,
+      "correct": 863,
+      "top1": 0.7191666666666666,
+      "macro_f1": 0.7006809812011947,
+      "macro_precision": 0.857389135845394,
+      "macro_recall": 0.7191666666666667,
+      "reach": 930,
+      "reach_rate": 0.775,
+      "partial_plan": 167,
+      "ask_back_total": 182,
+      "ask_back_handled": 168,
+      "oos_total": 100,
+      "oos_correct": 100,
+      "oos_accuracy": 1,
+      "false_call_rate": 0,
+      "adversarial_total": 20,
+      "adversarial_blocked": 17,
+      "block_rate": 0.85,
+      "normal_blocked": 0,
+      "false_block_rate": 0,
+      "confirm_covered": 249,
+      "confirm_total": 500,
+      "confirm_rate": 0.498,
+      "avg_latency_ms": 2228.8943484166657,
+      "jev_short_circuit": 0,
+      "avg_tool_calls": 0.9516666666666667,
+      "p50_latency_ms": 2031.8157,
+      "p95_latency_ms": 4167.4419,
+      "request_success_rate": 1,
+      "end_to_end_accuracy": 0.7191666666666666,
+      "adversarial_evaluated": 20,
+      "adversarial_failed": 0,
+      "adversarial_jev_errors": 0,
+      "adversarial_jev_calls": 0,
+      "adversarial_jev_blocked": 0,
+      "telemetry_samples": 1200,
+      "jev_calls": 0,
+      "jev_errors": 0,
+      "confusion": {
+        "cancel_subscription": {
+          "cancel_subscription": 40,
+          "chitchat": 2,
+          "get_my_subscription": 58
+        },
+        "change_plan": {
+          "change_plan": 22,
+          "chitchat": 4,
+          "get_my_subscription": 22,
+          "list_plans": 52
+        },
+        "chitchat": {
+          "chitchat": 100
+        },
+        "get_balance": {
+          "chitchat": 3,
+          "get_balance": 96,
+          "get_my_subscription": 1
+        },
+        "get_consumption": {
+          "get_consumption": 87,
+          "get_my_subscription": 1,
+          "get_recent_bills": 11,
+          "list_models": 1
+        },
+        "get_my_subscription": {
+          "get_balance": 1,
+          "get_my_subscription": 97,
+          "list_plans": 2
+        },
+        "get_recent_bills": {
+          "chitchat": 3,
+          "get_consumption": 1,
+          "get_recent_bills": 96
+        },
+        "list_models": {
+          "list_models": 100
+        },
+        "list_plans": {
+          "get_consumption": 1,
+          "list_plans": 99
+        },
+        "recharge": {
+          "chitchat": 40,
+          "get_balance": 2,
+          "list_plans": 1,
+          "recharge": 57
+        },
+        "refund_recharge": {
+          "chitchat": 50,
+          "get_my_subscription": 2,
+          "refund_recharge": 48
+        },
+        "subscribe_plan": {
+          "chitchat": 1,
+          "get_my_subscription": 1,
+          "list_plans": 77,
+          "subscribe_plan": 21
+        }
+      },
+      "avg_llm_calls": 1.7433333333333334,
+      "per_class": [
+        {
+          "name": "cancel_subscription",
+          "total": 100,
+          "correct": 40,
+          "precision": 1,
+          "recall": 0.4,
+          "f1": 0.5714285714285715,
+          "reach": 86,
+          "reach_rate": 0.86
+        },
+        {
+          "name": "change_plan",
+          "total": 100,
+          "correct": 22,
+          "precision": 1,
+          "recall": 0.22,
+          "f1": 0.36065573770491804,
+          "reach": 31,
+          "reach_rate": 0.31
+        },
+        {
+          "name": "chitchat",
+          "total": 100,
+          "correct": 100,
+          "precision": 0.49261083743842365,
+          "recall": 1,
+          "f1": 0.6600660066006601,
+          "reach": 100,
+          "reach_rate": 1
+        },
+        {
+          "name": "get_balance",
+          "total": 100,
+          "correct": 96,
+          "precision": 0.9696969696969697,
+          "recall": 0.96,
+          "f1": 0.964824120603015,
+          "reach": 96,
+          "reach_rate": 0.96
+        },
+        {
+          "name": "get_consumption",
+          "total": 100,
+          "correct": 87,
+          "precision": 0.9775280898876404,
+          "recall": 0.87,
+          "f1": 0.9206349206349206,
+          "reach": 88,
+          "reach_rate": 0.88
+        },
+        {
+          "name": "get_my_subscription",
+          "total": 100,
+          "correct": 97,
+          "precision": 0.532967032967033,
+          "recall": 0.97,
+          "f1": 0.6879432624113475,
+          "reach": 97,
+          "reach_rate": 0.97
+        },
+        {
+          "name": "get_recent_bills",
+          "total": 100,
+          "correct": 96,
+          "precision": 0.897196261682243,
+          "recall": 0.96,
+          "f1": 0.927536231884058,
+          "reach": 97,
+          "reach_rate": 0.97
+        },
+        {
+          "name": "list_models",
+          "total": 100,
+          "correct": 100,
+          "precision": 0.9900990099009901,
+          "recall": 1,
+          "f1": 0.9950248756218906,
+          "reach": 100,
+          "reach_rate": 1
+        },
+        {
+          "name": "list_plans",
+          "total": 100,
+          "correct": 99,
+          "precision": 0.42857142857142855,
+          "recall": 0.99,
+          "f1": 0.5981873111782477,
+          "reach": 100,
+          "reach_rate": 1
+        },
+        {
+          "name": "recharge",
+          "total": 100,
+          "correct": 57,
+          "precision": 1,
+          "recall": 0.57,
+          "f1": 0.7261146496815287,
+          "reach": 57,
+          "reach_rate": 0.57
+        },
+        {
+          "name": "refund_recharge",
+          "total": 100,
+          "correct": 48,
+          "precision": 1,
+          "recall": 0.48,
+          "f1": 0.6486486486486487,
+          "reach": 48,
+          "reach_rate": 0.48
+        },
+        {
+          "name": "subscribe_plan",
+          "total": 100,
+          "correct": 21,
+          "precision": 1,
+          "recall": 0.21,
+          "f1": 0.34710743801652894,
+          "reach": 30,
+          "reach_rate": 0.3
+        }
+      ],
+      "per_dimension": [
+        {
+          "name": "canonical",
+          "total": 168,
+          "correct": 118,
+          "precision": 0,
+          "recall": 0,
+          "f1": 0.7023809523809523,
+          "reach": 131,
+          "reach_rate": 0.7797619047619048,
+          "acc": 0.7023809523809523
+        },
+        {
+          "name": "colloquial",
+          "total": 192,
+          "correct": 124,
+          "precision": 0,
+          "recall": 0,
+          "f1": 0.6458333333333334,
+          "reach": 135,
+          "reach_rate": 0.703125,
+          "acc": 0.6458333333333334
+        },
+        {
+          "name": "command",
+          "total": 144,
+          "correct": 114,
+          "precision": 0,
+          "recall": 0,
+          "f1": 0.7916666666666666,
+          "reach": 120,
+          "reach_rate": 0.8333333333333334,
+          "acc": 0.7916666666666666
+        },
+        {
+          "name": "indirect",
+          "total": 120,
+          "correct": 61,
+          "precision": 0,
+          "recall": 0,
+          "f1": 0.5083333333333333,
+          "reach": 70,
+          "reach_rate": 0.5833333333333334,
+          "acc": 0.5083333333333333
+        },
+        {
+          "name": "mixed_en",
+          "total": 96,
+          "correct": 76,
+          "precision": 0,
+          "recall": 0,
+          "f1": 0.7916666666666666,
+          "reach": 80,
+          "reach_rate": 0.8333333333333334,
+          "acc": 0.7916666666666666
+        },
+        {
+          "name": "polite",
+          "total": 120,
+          "correct": 91,
+          "precision": 0,
+          "recall": 0,
+          "f1": 0.7583333333333333,
+          "reach": 97,
+          "reach_rate": 0.8083333333333333,
+          "acc": 0.7583333333333333
+        },
+        {
+          "name": "terse",
+          "total": 120,
+          "correct": 81,
+          "precision": 0,
+          "recall": 0,
+          "f1": 0.675,
+          "reach": 87,
+          "reach_rate": 0.725,
+          "acc": 0.675
+        },
+        {
+          "name": "typo",
+          "total": 120,
+          "correct": 89,
+          "precision": 0,
+          "recall": 0,
+          "f1": 0.7416666666666667,
+          "reach": 93,
+          "reach_rate": 0.775,
+          "acc": 0.7416666666666667
+        },
+        {
+          "name": "verbose",
+          "total": 120,
+          "correct": 109,
+          "precision": 0,
+          "recall": 0,
+          "f1": 0.9083333333333333,
+          "reach": 117,
+          "reach_rate": 0.975,
+          "acc": 0.9083333333333333
+        }
+      ]
+    },
+    "control-on": {
+      "total": 1200,
+      "evaluated": 1200,
+      "failed": 0,
+      "correct": 812,
+      "top1": 0.6766666666666666,
+      "macro_f1": 0.6273980814724779,
+      "macro_precision": 0.8438498173307297,
+      "macro_recall": 0.6766666666666667,
+      "reach": 913,
+      "reach_rate": 0.7608333333333334,
+      "partial_plan": 241,
+      "ask_back_total": 182,
+      "ask_back_handled": 162,
+      "oos_total": 100,
+      "oos_correct": 91,
+      "oos_accuracy": 0.91,
+      "false_call_rate": 0.01,
+      "adversarial_total": 20,
+      "adversarial_blocked": 19,
+      "block_rate": 0.95,
+      "normal_blocked": 33,
+      "false_block_rate": 0.0275,
+      "confirm_covered": 235,
+      "confirm_total": 500,
+      "confirm_rate": 0.47,
+      "avg_latency_ms": 2611.138827166667,
+      "jev_short_circuit": 8,
+      "avg_tool_calls": 1.0541666666666667,
+      "p50_latency_ms": 2348.5733,
+      "p95_latency_ms": 4657.2761,
+      "request_success_rate": 1,
+      "end_to_end_accuracy": 0.6766666666666666,
+      "adversarial_evaluated": 20,
+      "adversarial_failed": 0,
+      "adversarial_jev_errors": 0,
+      "adversarial_jev_calls": 20,
+      "adversarial_jev_blocked": 19,
+      "telemetry_samples": 1200,
+      "jev_calls": 1460,
+      "jev_errors": 0,
+      "confusion": {
+        "cancel_subscription": {
+          "__blocked__": 14,
+          "cancel_subscription": 74,
+          "get_my_subscription": 12
+        },
+        "change_plan": {
+          "__blocked__": 4,
+          "change_plan": 4,
+          "get_my_subscription": 34,
+          "list_plans": 58
+        },
+        "chitchat": {
+          "__blocked__": 8,
+          "chitchat": 91,
+          "list_plans": 1
+        },
+        "get_balance": {
+          "chitchat": 1,
+          "get_balance": 96,
+          "get_consumption": 1,
+          "get_my_subscription": 1,
+          "list_plans": 1
+        },
+        "get_consumption": {
+          "get_balance": 2,
+          "get_consumption": 88,
+          "get_recent_bills": 9,
+          "list_models": 1
+        },
+        "get_my_subscription": {
+          "get_balance": 2,
+          "get_my_subscription": 96,
+          "list_plans": 2
+        },
+        "get_recent_bills": {
+          "chitchat": 1,
+          "get_balance": 1,
+          "get_recent_bills": 97,
+          "list_models": 1
+        },
+        "list_models": {
+          "chitchat": 2,
+          "list_models": 97,
+          "list_plans": 1
+        },
+        "list_plans": {
+          "get_consumption": 1,
+          "list_plans": 99
+        },
+        "recharge": {
+          "__blocked__": 1,
+          "chitchat": 33,
+          "get_balance": 9,
+          "get_my_subscription": 1,
+          "recharge": 56
+        },
+        "refund_recharge": {
+          "__blocked__": 5,
+          "chitchat": 1,
+          "get_balance": 80,
+          "get_my_subscription": 1,
+          "refund_recharge": 13
+        },
+        "subscribe_plan": {
+          "__blocked__": 1,
+          "list_plans": 98,
+          "subscribe_plan": 1
+        }
+      },
+      "avg_llm_calls": 1.8516666666666666,
+      "per_class": [
+        {
+          "name": "cancel_subscription",
+          "total": 100,
+          "correct": 74,
+          "precision": 1,
+          "recall": 0.74,
+          "f1": 0.8505747126436781,
+          "reach": 83,
+          "reach_rate": 0.83
+        },
+        {
+          "name": "change_plan",
+          "total": 100,
+          "correct": 4,
+          "precision": 1,
+          "recall": 0.04,
+          "f1": 0.07692307692307693,
+          "reach": 28,
+          "reach_rate": 0.28
+        },
+        {
+          "name": "chitchat",
+          "total": 100,
+          "correct": 91,
+          "precision": 0.7054263565891473,
+          "recall": 0.91,
+          "f1": 0.7947598253275109,
+          "reach": 91,
+          "reach_rate": 0.91
+        },
+        {
+          "name": "get_balance",
+          "total": 100,
+          "correct": 96,
+          "precision": 0.5052631578947369,
+          "recall": 0.96,
+          "f1": 0.6620689655172414,
+          "reach": 97,
+          "reach_rate": 0.97
+        },
+        {
+          "name": "get_consumption",
+          "total": 100,
+          "correct": 88,
+          "precision": 0.9777777777777777,
+          "recall": 0.88,
+          "f1": 0.9263157894736842,
+          "reach": 91,
+          "reach_rate": 0.91
+        },
+        {
+          "name": "get_my_subscription",
+          "total": 100,
+          "correct": 96,
+          "precision": 0.6620689655172414,
+          "recall": 0.96,
+          "f1": 0.7836734693877551,
+          "reach": 97,
+          "reach_rate": 0.97
+        },
+        {
+          "name": "get_recent_bills",
+          "total": 100,
+          "correct": 97,
+          "precision": 0.9150943396226415,
+          "recall": 0.97,
+          "f1": 0.9417475728155339,
+          "reach": 98,
+          "reach_rate": 0.98
+        },
+        {
+          "name": "list_models",
+          "total": 100,
+          "correct": 97,
+          "precision": 0.9797979797979798,
+          "recall": 0.97,
+          "f1": 0.9748743718592964,
+          "reach": 97,
+          "reach_rate": 0.97
+        },
+        {
+          "name": "list_plans",
+          "total": 100,
+          "correct": 99,
+          "precision": 0.38076923076923075,
+          "recall": 0.99,
+          "f1": 0.55,
+          "reach": 100,
+          "reach_rate": 1
+        },
+        {
+          "name": "recharge",
+          "total": 100,
+          "correct": 56,
+          "precision": 1,
+          "recall": 0.56,
+          "f1": 0.717948717948718,
+          "reach": 56,
+          "reach_rate": 0.56
+        },
+        {
+          "name": "refund_recharge",
+          "total": 100,
+          "correct": 13,
+          "precision": 1,
+          "recall": 0.13,
+          "f1": 0.23008849557522126,
+          "reach": 45,
+          "reach_rate": 0.45
+        },
+        {
+          "name": "subscribe_plan",
+          "total": 100,
+          "correct": 1,
+          "precision": 1,
+          "recall": 0.01,
+          "f1": 0.019801980198019802,
+          "reach": 30,
+          "reach_rate": 0.3
+        }
+      ],
+      "per_dimension": [
+        {
+          "name": "canonical",
+          "total": 168,
+          "correct": 116,
+          "precision": 0,
+          "recall": 0,
+          "f1": 0.6904761904761905,
+          "reach": 131,
+          "reach_rate": 0.7797619047619048,
+          "acc": 0.6904761904761905
+        },
+        {
+          "name": "colloquial",
+          "total": 192,
+          "correct": 129,
+          "precision": 0,
+          "recall": 0,
+          "f1": 0.671875,
+          "reach": 137,
+          "reach_rate": 0.7135416666666666,
+          "acc": 0.671875
+        },
+        {
+          "name": "command",
+          "total": 144,
+          "correct": 100,
+          "precision": 0,
+          "recall": 0,
+          "f1": 0.6944444444444444,
+          "reach": 111,
+          "reach_rate": 0.7708333333333334,
+          "acc": 0.6944444444444444
+        },
+        {
+          "name": "indirect",
+          "total": 120,
+          "correct": 61,
+          "precision": 0,
+          "recall": 0,
+          "f1": 0.5083333333333333,
+          "reach": 69,
+          "reach_rate": 0.575,
+          "acc": 0.5083333333333333
+        },
+        {
+          "name": "mixed_en",
+          "total": 96,
+          "correct": 70,
+          "precision": 0,
+          "recall": 0,
+          "f1": 0.7291666666666666,
+          "reach": 78,
+          "reach_rate": 0.8125,
+          "acc": 0.7291666666666666
+        },
+        {
+          "name": "polite",
+          "total": 120,
+          "correct": 84,
+          "precision": 0,
+          "recall": 0,
+          "f1": 0.7,
+          "reach": 98,
+          "reach_rate": 0.8166666666666667,
+          "acc": 0.7
+        },
+        {
+          "name": "terse",
+          "total": 120,
+          "correct": 83,
+          "precision": 0,
+          "recall": 0,
+          "f1": 0.6916666666666667,
+          "reach": 88,
+          "reach_rate": 0.7333333333333333,
+          "acc": 0.6916666666666667
+        },
+        {
+          "name": "typo",
+          "total": 120,
+          "correct": 82,
+          "precision": 0,
+          "recall": 0,
+          "f1": 0.6833333333333333,
+          "reach": 85,
+          "reach_rate": 0.7083333333333334,
+          "acc": 0.6833333333333333
+        },
+        {
+          "name": "verbose",
+          "total": 120,
+          "correct": 87,
+          "precision": 0,
+          "recall": 0,
+          "f1": 0.725,
+          "reach": 116,
+          "reach_rate": 0.9666666666666667,
+          "acc": 0.725
+        }
+      ]
+    },
+    "candidate-on": {
+      "total": 1200,
+      "evaluated": 1200,
+      "failed": 0,
+      "correct": 859,
+      "top1": 0.7158333333333333,
+      "macro_f1": 0.6942760041332252,
+      "macro_precision": 0.8562728353300001,
+      "macro_recall": 0.7158333333333333,
+      "reach": 942,
+      "reach_rate": 0.785,
+      "partial_plan": 161,
+      "ask_back_total": 182,
+      "ask_back_handled": 151,
+      "oos_total": 100,
+      "oos_correct": 100,
+      "oos_accuracy": 1,
+      "false_call_rate": 0,
+      "adversarial_total": 20,
+      "adversarial_blocked": 19,
+      "block_rate": 0.95,
+      "normal_blocked": 2,
+      "false_block_rate": 0.0016666666666666668,
+      "confirm_covered": 251,
+      "confirm_total": 500,
+      "confirm_rate": 0.502,
+      "avg_latency_ms": 2553.8913029166665,
+      "jev_short_circuit": 0,
+      "avg_tool_calls": 0.9708333333333333,
+      "p50_latency_ms": 2247.2887,
+      "p95_latency_ms": 4593.2761,
+      "request_success_rate": 1,
+      "end_to_end_accuracy": 0.7158333333333333,
+      "adversarial_evaluated": 20,
+      "adversarial_failed": 0,
+      "adversarial_jev_errors": 0,
+      "adversarial_jev_calls": 20,
+      "adversarial_jev_blocked": 19,
+      "telemetry_samples": 1200,
+      "jev_calls": 1454,
+      "jev_errors": 0,
+      "confusion": {
+        "cancel_subscription": {
+          "__blocked__": 1,
+          "cancel_subscription": 37,
+          "get_my_subscription": 62
+        },
+        "change_plan": {
+          "change_plan": 23,
+          "chitchat": 3,
+          "get_my_subscription": 25,
+          "list_plans": 49
+        },
+        "chitchat": {
+          "chitchat": 100
+        },
+        "get_balance": {
+          "chitchat": 1,
+          "get_balance": 97,
+          "get_my_subscription": 1,
+          "list_plans": 1
+        },
+        "get_consumption": {
+          "chitchat": 1,
+          "get_balance": 1,
+          "get_consumption": 88,
+          "get_recent_bills": 9,
+          "list_models": 1
+        },
+        "get_my_subscription": {
+          "get_balance": 1,
+          "get_my_subscription": 97,
+          "list_plans": 2
+        },
+        "get_recent_bills": {
+          "chitchat": 1,
+          "get_consumption": 1,
+          "get_recent_bills": 97,
+          "list_models": 1
+        },
+        "list_models": {
+          "chitchat": 1,
+          "list_models": 99
+        },
+        "list_plans": {
+          "get_consumption": 1,
+          "list_plans": 99
+        },
+        "recharge": {
+          "chitchat": 40,
+          "get_balance": 3,
+          "recharge": 57
+        },
+        "refund_recharge": {
+          "chitchat": 49,
+          "get_my_subscription": 2,
+          "refund_recharge": 49
+        },
+        "subscribe_plan": {
+          "__blocked__": 1,
+          "chitchat": 1,
+          "list_plans": 82,
+          "subscribe_plan": 16
+        }
+      },
+      "avg_llm_calls": 1.7591666666666668,
+      "per_class": [
+        {
+          "name": "cancel_subscription",
+          "total": 100,
+          "correct": 37,
+          "precision": 1,
+          "recall": 0.37,
+          "f1": 0.5401459854014599,
+          "reach": 95,
+          "reach_rate": 0.95
+        },
+        {
+          "name": "change_plan",
+          "total": 100,
+          "correct": 23,
+          "precision": 1,
+          "recall": 0.23,
+          "f1": 0.3739837398373984,
+          "reach": 30,
+          "reach_rate": 0.3
+        },
+        {
+          "name": "chitchat",
+          "total": 100,
+          "correct": 100,
+          "precision": 0.5076142131979695,
+          "recall": 1,
+          "f1": 0.6734006734006733,
+          "reach": 100,
+          "reach_rate": 1
+        },
+        {
+          "name": "get_balance",
+          "total": 100,
+          "correct": 97,
+          "precision": 0.9509803921568627,
+          "recall": 0.97,
+          "f1": 0.9603960396039604,
+          "reach": 97,
+          "reach_rate": 0.97
+        },
+        {
+          "name": "get_consumption",
+          "total": 100,
+          "correct": 88,
+          "precision": 0.9777777777777777,
+          "recall": 0.88,
+          "f1": 0.9263157894736842,
+          "reach": 91,
+          "reach_rate": 0.91
+        },
+        {
+          "name": "get_my_subscription",
+          "total": 100,
+          "correct": 97,
+          "precision": 0.5187165775401069,
+          "recall": 0.97,
+          "f1": 0.67595818815331,
+          "reach": 97,
+          "reach_rate": 0.97
+        },
+        {
+          "name": "get_recent_bills",
+          "total": 100,
+          "correct": 97,
+          "precision": 0.9150943396226415,
+          "recall": 0.97,
+          "f1": 0.9417475728155339,
+          "reach": 98,
+          "reach_rate": 0.98
+        },
+        {
+          "name": "list_models",
+          "total": 100,
+          "correct": 99,
+          "precision": 0.9801980198019802,
+          "recall": 0.99,
+          "f1": 0.9850746268656716,
+          "reach": 99,
+          "reach_rate": 0.99
+        },
+        {
+          "name": "list_plans",
+          "total": 100,
+          "correct": 99,
+          "precision": 0.4248927038626609,
+          "recall": 0.99,
+          "f1": 0.5945945945945946,
+          "reach": 100,
+          "reach_rate": 1
+        },
+        {
+          "name": "recharge",
+          "total": 100,
+          "correct": 57,
+          "precision": 1,
+          "recall": 0.57,
+          "f1": 0.7261146496815287,
+          "reach": 57,
+          "reach_rate": 0.57
+        },
+        {
+          "name": "refund_recharge",
+          "total": 100,
+          "correct": 49,
+          "precision": 1,
+          "recall": 0.49,
+          "f1": 0.6577181208053691,
+          "reach": 49,
+          "reach_rate": 0.49
+        },
+        {
+          "name": "subscribe_plan",
+          "total": 100,
+          "correct": 16,
+          "precision": 1,
+          "recall": 0.16,
+          "f1": 0.2758620689655173,
+          "reach": 29,
+          "reach_rate": 0.29
+        }
+      ],
+      "per_dimension": [
+        {
+          "name": "canonical",
+          "total": 168,
+          "correct": 117,
+          "precision": 0,
+          "recall": 0,
+          "f1": 0.6964285714285714,
+          "reach": 130,
+          "reach_rate": 0.7738095238095238,
+          "acc": 0.6964285714285714
+        },
+        {
+          "name": "colloquial",
+          "total": 192,
+          "correct": 125,
+          "precision": 0,
+          "recall": 0,
+          "f1": 0.6510416666666666,
+          "reach": 139,
+          "reach_rate": 0.7239583333333334,
+          "acc": 0.6510416666666666
+        },
+        {
+          "name": "command",
+          "total": 144,
+          "correct": 118,
+          "precision": 0,
+          "recall": 0,
+          "f1": 0.8194444444444444,
+          "reach": 122,
+          "reach_rate": 0.8472222222222222,
+          "acc": 0.8194444444444444
+        },
+        {
+          "name": "indirect",
+          "total": 120,
+          "correct": 66,
+          "precision": 0,
+          "recall": 0,
+          "f1": 0.55,
+          "reach": 75,
+          "reach_rate": 0.625,
+          "acc": 0.55
+        },
+        {
+          "name": "mixed_en",
+          "total": 96,
+          "correct": 72,
+          "precision": 0,
+          "recall": 0,
+          "f1": 0.75,
+          "reach": 79,
+          "reach_rate": 0.8229166666666666,
+          "acc": 0.75
+        },
+        {
+          "name": "polite",
+          "total": 120,
+          "correct": 87,
+          "precision": 0,
+          "recall": 0,
+          "f1": 0.725,
+          "reach": 98,
+          "reach_rate": 0.8166666666666667,
+          "acc": 0.725
+        },
+        {
+          "name": "terse",
+          "total": 120,
+          "correct": 85,
+          "precision": 0,
+          "recall": 0,
+          "f1": 0.7083333333333334,
+          "reach": 90,
+          "reach_rate": 0.75,
+          "acc": 0.7083333333333334
+        },
+        {
+          "name": "typo",
+          "total": 120,
+          "correct": 84,
+          "precision": 0,
+          "recall": 0,
+          "f1": 0.7,
+          "reach": 91,
+          "reach_rate": 0.7583333333333333,
+          "acc": 0.7
+        },
+        {
+          "name": "verbose",
+          "total": 120,
+          "correct": 105,
+          "precision": 0,
+          "recall": 0,
+          "f1": 0.875,
+          "reach": 118,
+          "reach_rate": 0.9833333333333333,
+          "acc": 0.875
+        }
+      ]
+    }
+  },
+  "reviewed_optional_offers": 9,
+  "review_author": "coding agent review; not an external human annotation"
+}
