@@ -1,0 +1,34 @@
+{
+  "schema": "clarification-review.v1",
+  "source_revision": "f2b62e5",
+  "reviewer": "coding agent; not external human gold annotation",
+  "entries": [
+    {
+      "arm": "nojev",
+      "case_id": "subscription-read",
+      "reply": "您当前的订阅是**套餐 #3**（定期订阅）：\n\n- 本期到 **2026-11-07**，到期后自动续费\n- 剩余额度（每 5 小时滚动刷新，未用不累积）：\n  - 旗舰 20万/20万\n  - 推理 50万/50万\n  - 视觉 30万/30万\n  - 长文本 60万/60万\n  - 文本 100万/100万\n  - 轻量 200万/200万\n\n需要我帮您做改套餐或退订吗？",
+      "reply_sha256": "d0333ae1b1723b9a301b52fcd96b8c692a480e0de91dd34b3db55e88d94118bc",
+      "classification": "optional_offer_after_completed_read",
+      "review": "Answer already contains actual subscription state; follow-on offer does not block or fail the current task."
+    },
+    {
+      "arm": "nojev",
+      "case_id": "satisfied-subscription",
+      "reply": "已为您查到当前订阅，不会重复订购：\n\n- 套餐：#3（定期订阅）\n- 本期到期：2026-11-07，到期后自动续费\n- 本期待用额度（每 5 小时滚动刷新，未用不累积）：\n  - 旗舰 20万/20万\n  - 推理 50万/50万\n  - 视觉 30万/30万\n  - 长文本 60万/60万\n  - 文本 100万/100万\n  - 轻量 200万/200万\n\n需要我帮您做别的吗？比如查余额、看近期消耗，或调整下期套餐。",
+      "reply_sha256": "4c09f0fcb7df42d4461fe51512864c9f2c623c688636d1b0b549054ad7838511",
+      "classification": "optional_offer_after_completed_read",
+      "review": "Answer already contains actual subscription state; follow-on offer does not block or fail the current task."
+    },
+    {
+      "arm": "hint",
+      "case_id": "subscription-read",
+      "reply": "您当前的订阅情况如下：\n\n- **套餐**：套餐 #3（定期订阅）\n- **本期到期**：2026-11-07，到期后自动续费\n- **剩余额度**（每 5 小时滚动刷新，未用不累积）：\n  - 旗舰：20 万 / 20 万\n  - 推理：50 万 / 50 万\n  - 视觉：30 万 / 30 万\n  - 长文本：60 万 / 60 万\n  - 文本：100 万 / 100 万\n  - 轻量：200 万 / 200 万\n\n需要我帮您改套餐、退订，或做其他操作吗？",
+      "reply_sha256": "a62c11ada2c14d21ae8c823fe4f32679014e52348993fb9c41829afb57815cc6",
+      "classification": "optional_offer_after_completed_read",
+      "review": "Answer already contains actual subscription state; follow-on offer does not block or fail the current task."
+    }
+  ],
+  "optional_offers": 3,
+  "confirmed_avoidable_followups": 0,
+  "necessary_clarification_per_arm": 4
+}

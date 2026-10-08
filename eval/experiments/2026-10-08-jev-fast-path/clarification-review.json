@@ -1,0 +1,69 @@
+{
+  "schema": "clarification-review.v1",
+  "reviewer": "coding agent; not external human gold annotation",
+  "entries": [
+    {
+      "arm": "nojev",
+      "case_id": "subscribe-cancel",
+      "raw_candidate": true,
+      "task_completed": false,
+      "reply": "没有找到叫「月度·标准套餐」的套餐，不过在售的定期套餐里有相近的一档，请您确认要订哪一档：\n\n- **月度·标准** · 月费 ¥80 · 每 5 小时刷新额度：旗舰 20 万 / 推理 50 万 / 视觉 30 万 / 长文本 60 万 / 文本 100 万 / 轻量 200 万\n- **月度·旗舰** · 月费 ¥300 · 每 5 小时刷新额度：旗舰 80 万 / 推理 200 万 / 视觉 120 万 / 长文本 250 万 / 文本 400 万 / 轻量 800 万\n- **场景·限量** · 月费 ¥1 · 每 5 小时刷新额度：文本 300\n\n您要订的是「月度·标准」吗？确认名称后我这就帮您下单。",
+      "reply_sha256": "dea7e2e278776900f0a01d672c2166f2cd22e2e7b2157ca0dd3ff623d93e6123",
+      "classification": "avoidable_name_resolution_followup",
+      "review": "User provided plan name with ordinary suffix; LLM passed suffix as part of exact name, preview was not reached. This is an actual unresolved task in this attempt, separate from necessary missing-slot clarification."
+    },
+    {
+      "arm": "nojev",
+      "case_id": "subscription-read",
+      "raw_candidate": true,
+      "task_completed": true,
+      "reply": "您当前订阅的是**套餐#3（定期订阅）**：\n\n- 本期到 **2026-11-07**，到期自动续费\n- 剩余额度：旗舰 20万/20万 · 推理 50万/50万 · 视觉 30万/30万 · 长文本 60万/60万 · 文本 100万/100万 · 轻量 200万/200万\n- 额度每 **5 小时**滚动刷新，未用完不累积\n\n需要我帮您改套餐或退订吗？",
+      "reply_sha256": "d6ecad015d0b8940619a9b00219bef47eb3c48d5386c755fa5b5b3ee10d53c1c",
+      "classification": "optional_offer_after_completed_read",
+      "review": "Successful real read with optional further-service question; not a required clarification or task error."
+    },
+    {
+      "arm": "nojev",
+      "case_id": "satisfied-balance",
+      "raw_candidate": true,
+      "task_completed": true,
+      "reply": "您好，您当前账户可用余额为 **¥5000.00**（账本口径与可用余额一致）。\n\n已按您的要求仅查询余额，未做任何充值或退款操作。还需要我帮您看消耗明细或套餐吗？",
+      "reply_sha256": "7efc203a5d63df4f47ffc8bd9fcade33f55ac51f2eb88312e6bab5eb119297d8",
+      "classification": "optional_offer_after_completed_read",
+      "review": "Successful real read with optional further-service question; not a required clarification or task error."
+    },
+    {
+      "arm": "hint",
+      "case_id": "balance-read",
+      "raw_candidate": true,
+      "task_completed": true,
+      "reply": "您的账户当前可用余额是 **¥5000.00**（账本口径也是 ¥5000.00，两者一致）。\n\n需要我帮您做点别的吗？比如查近 7 天消耗、看消费明细，或者充值、看套餐。",
+      "reply_sha256": "e434d55aefc6e85f1d1472a24946d17f08d72941c4647a26d5647fca8be86864",
+      "classification": "optional_offer_after_completed_read",
+      "review": "Successful real read with optional further-service question; not a required clarification or task error."
+    },
+    {
+      "arm": "hint",
+      "case_id": "subscription-read",
+      "raw_candidate": true,
+      "task_completed": true,
+      "reply": "您当前订阅的是**套餐 #3（定期订阅）**：\n\n- 本期到 **2026-11-07**，到期自动续费\n- 每 5 小时滚动刷新额度（未用不累积），本期剩余额度：\n  - 旗舰 20万/20万\n  - 推理 50万/50万\n  - 视觉 30万/30万\n  - 长文本 60万/60万\n  - 文本 100万/100万\n  - 轻量 200万/200万\n\n需要帮您改套餐或退订吗？",
+      "reply_sha256": "561c9245eca5690ee2a1571cf4a0b56cc49a6cf06f7b52b7f313984d55792cd1",
+      "classification": "optional_offer_after_completed_read",
+      "review": "Successful real read with optional further-service question; not a required clarification or task error."
+    },
+    {
+      "arm": "fast",
+      "case_id": "satisfied-balance",
+      "raw_candidate": true,
+      "task_completed": true,
+      "reply": "您的当前可用余额是 **¥5000.00**（账本口径一致）。\n\n未做任何充值或退款操作。需要我再帮您查消耗、账单或套餐信息吗？",
+      "reply_sha256": "72f624fc41b0581497eccb470d4558f0f6f3b4c85226f76d1a5c05828a590ea5",
+      "classification": "optional_offer_after_completed_read",
+      "review": "Successful real read with optional further-service question; not a required clarification or task error."
+    }
+  ],
+  "optional_offers": 5,
+  "avoidable_name_followups": 1,
+  "necessary_clarification_per_arm": 4
+}
