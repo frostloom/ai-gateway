@@ -272,6 +272,20 @@ def paired(indexes, ids):
     return result
 
 
+def matched_cost(indexes, ids, prices):
+    result = {'ids': ids, 'count': len(ids), 'runs': {}}
+    for name, index in indexes.items():
+        rows = [index[i] for i in ids]
+        units = usage(rows)
+        result['runs'][name] = {'usage': units, 'jev_usage': jev_usage(rows),
+                                'estimated_cost': cost(rows, prices, units)}
+    for name in ('baseline', 'hint'):
+        before = result['runs'][name]['estimated_cost']['total']
+        after = result['runs']['fast']['estimated_cost']['total']
+        result[name + '_minus_fast_estimated_cost'] = before - after if before is not None and after is not None else None
+    return result
+
+
 def compare(reports, prices=None):
     indexes = validate(reports)
     ids = sorted(indexes['baseline'])
@@ -314,6 +328,7 @@ def compare(reports, prices=None):
             'paired_latency': {'all_three_success': paired(indexes, common_success),
                                'fast_selected_all_three_success': paired(indexes, [i for i in common_success if i in selected_ids])},
             'llm_attempts_avoided': avoided,
+            'matched_fast_selected_cost': matched_cost(indexes, selected_ids, prices),
             'matched_quality': quality,
             'matched_complete_usage': {'ids': complete_usage_ids, 'count': len(complete_usage_ids),
                                       'fast_selected_complete_ids': [i for i in selected_ids if i in complete_usage_ids],
@@ -350,6 +365,7 @@ def markdown(result):
                   '## Observed LLM attempts and token differences', '', '```json',
                   json.dumps({'llm_attempts_avoided': result['llm_attempts_avoided'],
                               'matched_complete_usage': result['matched_complete_usage'],
+                              'matched_fast_selected_cost': result['matched_fast_selected_cost'],
                               'matched_quality': result['matched_quality']}, indent=2, ensure_ascii=False), '```'])
     for name, run in result['runs'].items():
         lines.extend(['', '## ' + name + ': failures, usage, cost, confidence and safety', '', '```json',
