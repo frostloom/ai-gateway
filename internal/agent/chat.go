@@ -235,7 +235,7 @@ func toolOf(p *pendingAction) string {
 func (h *Handler) process(ctx context.Context, sessionID string, tenantID uint64, userMsg string, ses *session) (string, []traceItem, error) {
 	ses.History = append(ses.History, Message{Role: "user", Content: userMsg})
 
-	// 有挂起的写操作 → 先判定确认/取消（不依赖 LLM：关键字精确匹配，避免幻觉误触发）。
+	// 有挂起的写操作 → 先判定确认/取消（不依赖 LLM：完整词句匹配，避免幻觉误触发）。
 	if ses.PendingAction != nil {
 		switch classifyConfirmation(userMsg) {
 		case -1: // 取消
@@ -562,7 +562,7 @@ func (h *Handler) saveSession(ctx context.Context, sid string, s *session) error
 	return h.rdb.Set(ctx, sessionKey(sid), raw, sessionTTL).Err()
 }
 
-// ---------- 确认分类（不依赖 LLM：关键字精确匹配） ----------
+// ---------- 确认分类（不依赖 LLM：完整词句匹配） ----------
 
 var (
 	confirmKeywords = []string{"确认", "确定", "好的", "可以", "是的", "嗯", "ok", "yes", "yes.", "执行", "没问题"}
@@ -577,12 +577,55 @@ func classifyConfirmation(text string) int {
 			return -1
 		}
 	}
+	if isPendingCancellation(strings.ToLower(strings.TrimSpace(text))) {
+		return -1
+	}
 	for _, k := range confirmKeywords {
 		if n == k {
 			return 1
 		}
 	}
 	return 0
+}
+
+// isPendingCancellation accepts only complete abort clauses. A business request
+// such as “取消订阅”, a negated cancellation, or a mixed request stays with the
+// normal conversation path; substring/prefix matches must not clear pending state.
+func isPendingCancellation(text string) bool {
+	clauses := strings.FieldsFunc(text, func(r rune) bool {
+		return strings.ContainsRune("，,。.!！;；\n", r)
+	})
+	if len(clauses) == 0 {
+		return false
+	}
+	for i, clause := range clauses {
+		clause = strings.TrimSpace(clause)
+		abort := false
+		for _, k := range cancelKeywords {
+			abort = abort || clause == k
+		}
+		for _, verb := range []string{"取消", "放弃", "不执行", "不要执行", "不用执行"} {
+			if !strings.HasPrefix(clause, verb) {
+				continue
+			}
+			target := strings.TrimPrefix(clause, verb)
+			abort = abort || target == "这次操作" || target == "本次操作" || target == "当前操作"
+			if verb == "不执行" || verb == "不要执行" || verb == "不用执行" {
+				abort = abort || target == "" || target == "了"
+			}
+		}
+		// A reason such as “不充值了” is accepted only after an explicit abort
+		// clause, never as an independent intent or an arbitrary trailing request.
+		if !abort && i > 0 {
+			for _, action := range []string{"充值", "退款", "订阅", "换套餐"} {
+				abort = abort || clause == "不"+action+"了"
+			}
+		}
+		if !abort {
+			return false
+		}
+	}
+	return true
 }
 
 // readTools 只读工具集（即时执行，无需确认）。
