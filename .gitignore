@@ -18,6 +18,9 @@ web/.npm-cache/
 
 # 测试产物
 coverage.out
+__pycache__/
+# Companion raw JSON remains local; byte-identical gzip and SHA manifests are tracked.
+eval/behavior-review/v*/*.behavior.json
 
 # 本地构建缓存（go build cache，数百 MB，可重建）
 .gocache/

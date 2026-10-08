@@ -50,18 +50,19 @@ type EvalToolCall struct {
 
 // EvalExpect 断言集合（全部通过才算 PASS）。
 type EvalExpect struct {
-	TurnHTTP               []int    `json:"turn_http"`
-	TurnPending            []bool   `json:"turn_pending"`
-	PendingPreviewContains []string `json:"pending_preview_contains"`
-	PendingPreviewNot      []string `json:"pending_preview_not"`
-	Tools                  []string `json:"tools"`
-	ConfirmedTool          string   `json:"confirmed_tool"`
-	TraceContains          []string `json:"trace_contains"`
-	NoPendingFinal         bool     `json:"no_pending_final"`
-	ReplyContains          []string `json:"reply_contains"`
-	ReplyNot               []string `json:"reply_not"`
-	AdminPosts             []string `json:"admin_posts"`
-	TenantOverride         bool     `json:"tenant_override"`
+	TurnHTTP               []int      `json:"turn_http"`
+	TurnPending            []bool     `json:"turn_pending"`
+	TurnReplyContains      [][]string `json:"turn_reply_contains"`
+	PendingPreviewContains []string   `json:"pending_preview_contains"`
+	PendingPreviewNot      []string   `json:"pending_preview_not"`
+	Tools                  []string   `json:"tools"`
+	ConfirmedTool          string     `json:"confirmed_tool"`
+	TraceContains          []string   `json:"trace_contains"`
+	NoPendingFinal         bool       `json:"no_pending_final"`
+	ReplyContains          []string   `json:"reply_contains"`
+	ReplyNot               []string   `json:"reply_not"`
+	AdminPosts             []string   `json:"admin_posts"`
+	TenantOverride         bool       `json:"tenant_override"`
 
 	// EnvReplyContains 只在离线（fake）模式断言的回复子串。
 	//
@@ -102,10 +103,10 @@ type EvalCase struct {
 
 // EvalResult 单条结果。
 type EvalResult struct {
-	CaseID   string
-	Pass     bool
-	Failures []string
-	Detail   string // 最终回复摘要（高亮）
+	CaseID    string
+	Pass      bool
+	Failures  []string
+	Detail    string // 最终回复摘要（高亮）
 	HTTPCalls int
 }
 
@@ -373,12 +374,12 @@ func evalContentMsg(c string) *Message { return &Message{Role: "assistant", Cont
 // ---------- 执行 + 断言 ----------
 
 type turnResp struct {
-	Code       int        `json:"code"`
-	ErrorBody  string     `json:"error_body,omitempty"`
-	Reply      string     `json:"reply"`
-	Trace      []traceItem `json:"trace"`
-	Pending    bool       `json:"pending"`
-	PendingPrev string    `json:"pending_preview"`
+	Code        int         `json:"code"`
+	ErrorBody   string      `json:"error_body,omitempty"`
+	Reply       string      `json:"reply"`
+	Trace       []traceItem `json:"trace"`
+	Pending     bool        `json:"pending"`
+	PendingPrev string      `json:"pending_preview"`
 }
 
 func runHTTPCase(h *Handler, key string, turns []string) []turnResp {
@@ -396,10 +397,10 @@ func runHTTPCase(h *Handler, key string, turns []string) []turnResp {
 			continue
 		}
 		var body struct {
-			Reply    string      `json:"reply"`
-			Trace    []traceItem `json:"trace"`
-			Pending  bool        `json:"pending_confirm"`
-			Prev     string      `json:"pending_preview"`
+			Reply   string      `json:"reply"`
+			Trace   []traceItem `json:"trace"`
+			Pending bool        `json:"pending_confirm"`
+			Prev    string      `json:"pending_preview"`
 		}
 		_ = json.Unmarshal(rec.Body.Bytes(), &body)
 		out = append(out, turnResp{Code: 200, Reply: body.Reply, Trace: body.Trace, Pending: body.Pending, PendingPrev: body.Prev})
@@ -443,6 +444,19 @@ func evaluate(c EvalCase, resps []turnResp, fa *evalAdmin, online bool) []string
 		}
 		if resps[i].Pending != want {
 			fail("第 %d 轮 pending = %v, want %v", i+1, resps[i].Pending, want)
+		}
+	}
+	// Clarification belongs to the turn where information is missing, not the
+	// final success reply. Verify each stage independently for multi-turn cases.
+	for i, terms := range c.Expect.TurnReplyContains {
+		if i >= len(resps) {
+			fail("缺少第 %d 轮回复", i+1)
+			continue
+		}
+		for _, term := range terms {
+			if !strings.Contains(resps[i].Reply, term) {
+				fail("第 %d 轮回复缺 %q（实际 %q）", i+1, term, resps[i].Reply)
+			}
 		}
 	}
 	if len(resps) > 0 {

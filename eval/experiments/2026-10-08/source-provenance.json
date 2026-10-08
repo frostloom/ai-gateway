@@ -1,0 +1,16 @@
+{
+  "control_binary_sha256": "02d52fe76975ab562a63645024e7f5cdb64b157dd05bbc7957883258145ce181",
+  "control_source_revision": "b26642876e78255a89c87de3982888f14d6532d4",
+  "basis": "Parent task observed the pre-existing control binary copied before candidate build and identified its source as b266428; original run.json separately records this binary SHA. This is a supplementary record, not reconstructed original run metadata.",
+  "limitations": [
+    "Original control run.json has no SourceRevision field.",
+    "Original control implementation.patch is a candidate working-tree diff and is not the control binary source.",
+    "Original protocol, max_tokens and jev_model are null; do not infer unavailable configuration."
+  ],
+  "fixture": "HTTP probes sent no confirmation turns; no business writes. Fake functional runs use isolated fixture.",
+  "functional_results": {
+    "original": "30/30",
+    "expanded_first_attempt": "30/35, retained; expectation issue reported by parent task",
+    "expanded_final": "35/35"
+  }
+}

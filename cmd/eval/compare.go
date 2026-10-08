@@ -66,6 +66,11 @@ func runComparison(baseline, experiment, out string) {
 	var text strings.Builder
 	text.WriteString("# 客服意图路由：JEV 开关对照\n\n")
 	fmt.Fprintf(&text, "- 模型：`%s`；并发：%d；数据集：`%s`\n- 基线：`%s`\n- 实验：`%s`\n- 同一数据与评分版本；两组分开运行，延迟仍可能受上游负载影响。\n\n", b.Model, b.Workers, b.DatasetSHA256, baseline, experiment)
+	text.WriteString("必要澄清不属于业务错误。首工具命中与全请求首工具命中率仅衡量工具路径；不代表业务任务完成率。原始确认覆盖率含缺参数请求，行为复核应分开解释。\n\n")
+	fmt.Fprintf(&text, "成功正常请求：无 JEV %d/%d，有 JEV %d/%d。\n\n", bm.Evaluated, bm.Total, em.Evaluated, em.Total)
+	if bm.Evaluated == 0 || em.Evaluated == 0 {
+		text.WriteString("**存在无成功正常请求的组：该组工具路径准确率和成功请求延迟不可评估；零字段是兼容默认值，不能解释为模型能力为零或版本退步。**\n\n")
+	}
 	text.WriteString("| 指标 | 无 JEV | 有 JEV | 差值（有−无） |\n|---|---:|---:|---:|\n")
 	rows := []struct {
 		name    string
@@ -73,8 +78,8 @@ func runComparison(baseline, experiment, out string) {
 		percent bool
 	}{
 		{"请求成功率", bm.RequestSuccessRate, em.RequestSuccessRate, true},
-		{"Top-1 准确率", bm.Top1, em.Top1, true},
-		{"端到端准确率（含失败）", bm.EndToEndAccuracy, em.EndToEndAccuracy, true},
+		{"首工具命中率 Top-1", bm.Top1, em.Top1, true},
+		{"全请求首工具命中率（含失败）", bm.EndToEndAccuracy, em.EndToEndAccuracy, true},
 		{"目标可达率", bm.ReachRate, em.ReachRate, true},
 		{"Macro-F1", bm.MacroF1, em.MacroF1, false},
 		{"Macro-Precision", bm.MacroP, em.MacroP, false},
@@ -103,7 +108,7 @@ func runComparison(baseline, experiment, out string) {
 		}
 	}
 	paired, better, worse := 0, 0, 0
-	text.WriteString("\n## 配对错分变化\n\n| 样本 | 无 JEV 首工具 | 有 JEV 首工具 | 变化 |\n|---|---|---|---|\n")
+	text.WriteString("\n## 配对首工具命中变化\n\n必要澄清不属于业务错误。此处仅比较严格工具路径命中，不衡量最终业务成功；参数不足时追问是正确处理，行为复核需独立查看。\n\n| 样本 | 无 JEV 首工具 | 有 JEV 首工具 | 变化 |\n|---|---|---|---|\n")
 	for i, p := range b.Preds {
 		q := e.Preds[i]
 		if p.HTTPCode != 200 || p.Err != "" || q.HTTPCode != 200 || q.Err != "" {
@@ -114,16 +119,16 @@ func runComparison(baseline, experiment, out string) {
 		if bp == ep {
 			continue
 		}
-		verdict := "改善"
+		verdict := "首工具未命中→命中"
 		if ep {
 			better++
 		} else {
 			worse++
-			verdict = "变差"
+			verdict = "首工具命中→未命中"
 		}
 		fmt.Fprintf(&text, "| %s | %s | %s | %s |\n", p.Sample.ID, p.Predicted, q.Predicted, verdict)
 	}
-	fmt.Fprintf(&text, "\n共同成功样本 %d；错→对 %d；对→错 %d。\n", paired, better, worse)
+	fmt.Fprintf(&text, "\n共同成功样本 %d；首工具未命中→命中 %d；首工具命中→未命中 %d。\n", paired, better, worse)
 	text.WriteString("\n## 分类与表达维度\n\n| 分组 | 名称 | 无 JEV Top-1 | 有 JEV Top-1 | 无 JEV Reach | 有 JEV Reach |\n|---|---|---:|---:|---:|---:|\n")
 	for _, group := range []struct {
 		name string

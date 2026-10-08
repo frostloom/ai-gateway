@@ -1,0 +1,37 @@
+[
+  {
+    "id": "clarify-recharge-fill-confirm", "dimension": "clarification", "priority": "p0",
+    "title": "缺充值金额先追问，补金额后预览，再确认执行",
+    "llm_script": [{"reply":"请问要充值多少元？"},{"tool_call":{"tool":"recharge","args":"{\"amount_money\":100}"}}],
+    "turns": ["帮我充值","100元","确认"],
+    "expect": {"turn_http":[200,200,200],"turn_pending":[false,true,false],"turn_reply_contains":[["多少元"],["请回复"],["充值成功"]],"confirmed_tool":"recharge","no_pending_final":true,"admin_posts":["/admin/recharge","/admin/recharge/pay"]}
+  },
+  {
+    "id": "clarify-refund-fill-confirm", "dimension": "clarification", "priority": "p0",
+    "title": "缺退款范围先追问，补金额后预览，再确认执行",
+    "llm_script": [{"reply":"请提供退款金额或充值订单号。"},{"tool_call":{"tool":"refund_recharge","args":"{\"amount_money\":100}"}}],
+    "turns": ["我要退款","退100元","确认"],
+    "expect": {"turn_http":[200,200,200],"turn_pending":[false,true,false],"turn_reply_contains":[["退款金额"],["将退款","请回复"],["退款成功"]],"confirmed_tool":"refund_recharge","no_pending_final":true,"admin_posts":["/admin/recharge/refund"]}
+  },
+  {
+    "id": "clarify-subscribe-name-confirm", "dimension": "clarification", "priority": "p0",
+    "title": "缺套餐先追问，补名称后服务端解析，再确认订阅",
+    "llm_script": [{"reply":"您想订阅哪一档套餐？"},{"tool_call":{"tool":"subscribe_plan","args":"{\"plan_name\":\"月度标准\"}"}}],
+    "turns": ["我要订阅套餐","月度标准","确认"],
+    "expect": {"turn_http":[200,200,200],"turn_pending":[false,true,false],"turn_reply_contains":[["哪一档"],["月度·标准","请回复"],["订阅成功"]],"confirmed_tool":"subscribe_plan","no_pending_final":true,"admin_posts":["/admin/subscribe"]}
+  },
+  {
+    "id": "clarify-change-name-cancel", "dimension": "clarification", "priority": "p0",
+    "title": "缺目标档位先追问，补名称后预览，取消不写业务",
+    "llm_script": [{"reply":"请问您想换到哪一档套餐？"},{"tool_call":{"tool":"change_plan","args":"{\"plan_name\":\"月度旗舰\"}"}}],
+    "turns": ["帮我升级套餐","换月度旗舰","取消"],
+    "expect": {"turn_http":[200,200,200],"turn_pending":[false,true,false],"turn_reply_contains":[["哪一档"],["月度·旗舰","请回复"],["已取消"]],"no_pending_final":true,"admin_posts":[]}
+  },
+  {
+    "id": "clarify-composite-read-reuse-refund", "dimension": "clarification", "priority": "p0",
+    "title": "重复余额读可复用，复合退款仍预览，取消不写业务",
+    "llm_script": [{"tool_call":{"tool":"get_balance","args":"{}"}},{"tool_call":{"tool":"get_balance","args":"{}"}},{"tool_call":{"tool":"refund_recharge","args":"{\"amount_money\":50}"}}],
+    "turns": ["查余额后帮我退款50元","取消"],
+    "expect": {"turn_http":[200,200],"turn_pending":[true,false],"turn_reply_contains":[["将退款","请回复"],["已取消"]],"tools":["get_balance","refund_recharge"],"no_pending_final":true,"admin_posts":[]}
+  }
+]
