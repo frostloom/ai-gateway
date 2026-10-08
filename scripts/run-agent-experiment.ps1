@@ -10,6 +10,7 @@ param(
     [int]$Sample = 5,
     [int]$Workers = 4,
     [int]$Port = 19108,
+    [string]$DatasetDir = '',
     [string]$Out = ''
 )
 $ErrorActionPreference = 'Stop'
@@ -42,6 +43,7 @@ try {
         protocol = $env:AGENT_LLM_PROTOCOL; max_tokens = $env:AGENT_LLM_MAX_TOKENS
         jev_model = $env:JEV_MODEL; fixture = 'existing development tenant; no confirmation turns or business writes'
         fast_path = [bool]$FastPath; fast_path_min = 0.90
+        dataset_dir = $DatasetDir
     }
     # Preserve the exact implementation diff without exporting environment variables or credentials.
     $diffPath = Join-Path $outputPath 'implementation.patch'
@@ -60,7 +62,9 @@ try {
         try { Invoke-RestMethod -Uri "http://127.0.0.1:$Port/healthz" -TimeoutSec 1 | Out-Null; $ready = $true; break } catch { Start-Sleep -Milliseconds 500 }
     }
     if (!$ready) { throw 'Experiment agent did not become ready.' }
-    go run ./cmd/eval -suite intent -mode http -base "http://127.0.0.1:$Port" -key $Key -sample $Sample -workers $Workers -jev $JevMode -model $model -out $outputPath
+    $evalArgs = @('run','./cmd/eval','-suite','intent','-mode','http','-base',"http://127.0.0.1:$Port",'-key',$Key,'-sample',[string]$Sample,'-workers',[string]$Workers,'-jev',$JevMode,'-model',$model,'-out',$outputPath)
+    if ($DatasetDir) { $evalArgs += @('-dir',$DatasetDir) }
+    & go @evalArgs
     $runExit = $LASTEXITCODE
     [IO.File]::WriteAllText((Join-Path $outputPath 'exit-code.txt'), [string]$runExit, [Text.UTF8Encoding]::new($false))
     if ($runExit -ne 0) { throw "Experiment contains failures (exit $runExit); all reports preserved at $outputPath." }

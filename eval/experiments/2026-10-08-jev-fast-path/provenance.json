@@ -1,0 +1,90 @@
+{
+  "schema": "jev-fast-provenance.v1",
+  "source_revision": "f83b6498e9a9c4faf3329486aae4ca4cd85ee22a",
+  "agent_sha256": "64c67789ab95ef3d2a23f3a709b7e6c7a9e819ba98615bf395bd821bc85f9f2e",
+  "evaluator_sha256": "f39fecdf8f8e4c514c5866b34655e2248eba64d7f2fe990731aa97c560b352cb",
+  "go_build_info": "bin/agent-jev-fast.exe: go1.25.12\n\tpath\tgithub.com/frostloom/ai-gateway/cmd/agent\n\tmod\tgithub.com/frostloom/ai-gateway\tv0.0.0-20261008115330-f83b6498e9a9+dirty\t\n\tdep\tfilippo.io/edwards25519\tv1.2.0\th1:crnVqOiS4jqYleHd9vaKZ+HKtHfllngJIiOpNpoJsjo=\n\tdep\tgithub.com/beorn7/perks\tv1.0.1\th1:VlbKKnNfV8bJzeqoa4cOKqO6bYr3WgKZxO8Z16+hsOM=\n\tdep\tgithub.com/cespare/xxhash/v2\tv2.3.0\th1:UL815xU9SqsFlibzuggzjXhog7bL6oX9BbNZnL2UFvs=\n\tdep\tgithub.com/go-sql-driver/mysql\tv1.10.0\th1:Q+1LV8DkHJvSYAdR83XzuhDaTykuDx0l6fkXxoWCWfw=\n\tdep\tgithub.com/jinzhu/inflection\tv1.0.0\th1:K317FqzuhWc8YvSVlFMCCUb36O/S9MCKRDI7QkRKD/E=\n\tdep\tgithub.com/jinzhu/now\tv1.1.5\th1:/o9tlHleP7gOFmsnYNz3RGnqzefHA47wQpKrrdTIwXQ=\n\tdep\tgithub.com/munnerz/goautoneg\tv0.0.0-20191010083416-a7dc8b61c822\th1:C3w9PqII01/Oq1c1nUAm88MOHcQC9l5mIlSMApZMrHA=\n\tdep\tgithub.com/prometheus/client_golang\tv1.24.1\th1:JnJkREXzWxUdCuPFpIWZiPispT9xVV59uiuyR2bPlnU=\n\tdep\tgithub.com/prometheus/client_model\tv0.6.2\th1:oBsgwpGs7iVziMvrGhE53c/GrLUsZdHnqNwqPLxwZyk=\n\tdep\tgithub.com/prometheus/common\tv0.70.1\th1:1HvjP4D5oL3t8RsPlwxA9onvvStjtIHYE5XuuwOi/PY=\n\tdep\tgithub.com/redis/go-redis/v9\tv9.22.0\th1:laDvpYXTJtZLloinw1fA5Kqd6HAEH2XKxOkG/PDq2F0=\n\tdep\tgo.uber.org/atomic\tv1.11.0\th1:ZvwS0R+56ePWxUNi+Atn9dWONBPp/AUETXlHW0DxSjE=\n\tdep\tgolang.org/x/net\tv0.57.0\th1:K5+3DljvIuDG9/Jv9rvyMywYNFCQ9RSUY6OOTTkT+tE=\n\tdep\tgolang.org/x/sys\tv0.47.0\th1:o7XGOvZQCADBQQ4Y7VNq2dRWQR7JmOUW8Kxx4ZsNgWs=\n\tdep\tgolang.org/x/text\tv0.40.0\th1:Ub2Z6/xjgF1WrYQz2nuITOEegKFtiIy+rieRJ5lHZKs=\n\tdep\tgoogle.golang.org/genproto/googleapis/rpc\tv0.0.0-20260526163538-3dc84a4a5aaa\th1:mZHHdPZl0dbGHCflZgAq/Q468DWVFcU2whhB2KAo8fk=\n\tdep\tgoogle.golang.org/grpc\tv1.83.0\th1:JeNZEKJFbQxArAMl+hiytHauacDNqJUllNfmIMmpqnQ=\n\tdep\tgoogle.golang.org/protobuf\tv1.36.12\th1:pJOKDDOyeXErUroCihFAd5LQuwXBSpVnKGrj5o/fwxc=\n\tdep\tgorm.io/driver/mysql\tv1.6.0\th1:eNbLmNTpPpTOVZi8MMxCi2aaIm0ZpInbORNXDwyLGvg=\n\tdep\tgorm.io/gorm\tv1.31.2\th1:3o8FXNo9v9S858gil+3LlZA1LkCOzgb4g5BL64FgaCo=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tCGO_ENABLED=0\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=windows\n\tbuild\tGOAMD64=v1\n\tbuild\tvcs=git\n\tbuild\tvcs.revision=f83b6498e9a9c4faf3329486aae4ca4cd85ee22a\n\tbuild\tvcs.time=2026-10-08T11:53:30Z\n\tbuild\tvcs.modified=true\n",
+  "build_info_modified_note": "vcs.modified=true; unrelated untracked plate_sim.py existed at build. Relevant tracked agent sources were committed and not modified for these runs. This is locally recorded provenance, not a third-party reproducible-build attestation.",
+  "relevant_source_sha256": [
+    {
+      "path": "cmd/agent/main.go",
+      "sha256": "d5bc4a58ea5fd03582c2acf81002a82a0a87fb2fc9945ba43c6660541df3fbf3"
+    },
+    {
+      "path": "go.mod",
+      "sha256": "0604ed01aed23342006d813e1f81fbf0a0a27a79a07b83ccbe78c6af2cf6e89e"
+    },
+    {
+      "path": "go.sum",
+      "sha256": "b1ccf7c9194a85284e9cbd60729a6e6487f7f5ba43b97f08ae0cd1bf734dce5a"
+    },
+    {
+      "path": "internal/agent/chat.go",
+      "sha256": "efd57189ed306e88e89af2c8d97aeffc51ca30d4aefd50747e857044e338adc4"
+    },
+    {
+      "path": "internal/agent/evalcore.go",
+      "sha256": "ec3846fd8ebe144f783ed1ebee15a64d15047b267f607cc581f87231034f9a34"
+    },
+    {
+      "path": "internal/agent/fast_path.go",
+      "sha256": "f818b9abc92349361111d86f404458480edd7753d8f82e755934df8859c2bb29"
+    },
+    {
+      "path": "internal/agent/guard.go",
+      "sha256": "cb5c5e7b6a362574a94411d36d4649e403fb680cfafb4e80fafd959e1f1e74f4"
+    },
+    {
+      "path": "internal/agent/intentsuite.go",
+      "sha256": "067c2d4d620bd26fb5a6be2b7a5f6efa484683f838b58b3cfdcb47c33f81bc39"
+    },
+    {
+      "path": "internal/agent/llm.go",
+      "sha256": "4f19c229acb825c82639b820a778a910107ae889e1c30ef7636d502da8ec84d5"
+    },
+    {
+      "path": "internal/agent/llm_protocol.go",
+      "sha256": "57da1cd401ccc0d0a63914360aaa50aaeb4c8b5cfa42dd191ee4873c718fef85"
+    },
+    {
+      "path": "internal/agent/prompt.go",
+      "sha256": "480bdfaf3d353ab8448f602be4711d7e957ec551286ed946d8ebeae55d316520"
+    },
+    {
+      "path": "internal/agent/telemetry.go",
+      "sha256": "cb4c4db587b854b39af6d45babc58a5dd9a4460649994429445e17d8851190aa"
+    },
+    {
+      "path": "internal/agent/tools.go",
+      "sha256": "ae278d26bc9bfe0c412642290baefdf4420989de6cd8f666c61158e2d6ae4a4c"
+    },
+    {
+      "path": "internal/jev/fake.go",
+      "sha256": "551ae226b7a313283014657deda9767d344d6818589a7d2a768a7af06fe02c47"
+    },
+    {
+      "path": "internal/jev/jev.go",
+      "sha256": "d62e1c8da8117c776fc2759180d8db446dd4ed806d4c7ec441d020fd443cdca1"
+    }
+  ],
+  "fast_policy": {
+    "intent_and_shape_min": 0.9,
+    "legit_min": 0.85,
+    "risk_score_max_exclusive": 0.5,
+    "risk_conf_min": 0.8,
+    "tools": [
+      "get_balance",
+      "get_consumption",
+      "list_plans",
+      "get_my_subscription"
+    ],
+    "fresh_single_turn_only": true
+  },
+  "verification": {
+    "go_test": "./... -count=1 passed before live tests; agent 26.614s, store 50.943s",
+    "go_vet": "./... passed",
+    "analyzer_tests": "16 tests passed before live tests; later analyzer additions separately verified"
+  },
+  "run_design": "3 simultaneous full arms, 4 workers each; 3 simultaneous task arms, sequential tasks per arm; pilot preceded full. Observational, one full run; no inference of causality or production SLA.",
+  "captured_at": "2026-10-08T12:02:32.019483+00:00"
+}

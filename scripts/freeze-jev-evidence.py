@@ -31,11 +31,11 @@ def main():
     if output.exists():
         raise ValueError('Archive already exists; all previous bytes preserved.')
     for arm in ('nojev', 'hint', 'fast'):
-        if len(list((source / ('full-' + arm)).glob('intent-*.json'))) != 1:
+        if len(list((source / ('revised-full-' + arm)).glob('intent-*.json'))) != 1:
             raise ValueError('Require one completed full-suite result per arm.')
-        if not (source / ('tasks-' + arm) / 'tasks.json').is_file():
+        if not (source / ('revised-tasks-' + arm) / 'tasks.json').is_file():
             raise ValueError('Require completed task results per arm.')
-    for name in ('README.md', 'comparison-offpeak/comparison.json', 'comparison-peak/comparison.json', 'task-comparison/comparison.json'):
+    for name in ('README.md', 'comparison-offpeak/comparison.json', 'comparison-peak/comparison.json', 'revised-task-comparison/comparison.json'):
         if not (source / name).is_file():
             raise ValueError('Missing reviewed supporting report: ' + name)
     # Read credentials only for a no-export check. Never print matching values.
@@ -66,10 +66,14 @@ def main():
     write(output / 'verify.py', (ROOT / 'eval/experiments/2026-10-08-deepseek-flash/verify.py').read_bytes())
     for name, destination in [('comparison-offpeak/comparison.json', 'comparison-offpeak.json'),
                                ('comparison-peak/comparison.json', 'comparison-peak.json'),
-                               ('task-comparison/comparison.json', 'task-comparison.json'),
+                               ('revised-task-comparison/comparison.json', 'task-comparison.json'),
                                ('clarification-review.json', 'clarification-review.json'),
                                ('provenance.json', 'provenance.json')]:
         write(output / destination, (source / name).read_bytes())
+    write(output / 'revised-provenance.json', (source / 'revised-provenance.json').read_bytes())
+    write(output / 'revised-clarification-review.json', (source / 'revised-clarification-review.json').read_bytes())
+    write(output / 'matched-fast-observation.json', (source / 'matched-fast-observation.json').read_bytes())
+    write(output / 'recovery-comparison.json', (source / 'recovery-comparison/comparison.json').read_bytes())
     supporting = [{'path': p.name, 'sha256': digest(p.read_bytes())} for p in sorted(output.iterdir()) if p.is_file()]
     manifest = {'schema_version': 1, 'archived_at': datetime.datetime.now(datetime.timezone.utc).isoformat(),
                 'credential_pattern_matches': 0, 'credential_review_scope': 'explicit experiment root; actual configured API keys and DeepSeek key pattern',
