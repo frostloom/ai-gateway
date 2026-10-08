@@ -97,6 +97,7 @@ type jevVerdict struct {
 	Intent     string
 	IntentConf float64
 	SingleRead bool
+	RouteShape string
 	ShapeConf  float64
 
 	// 合法性：这是否为租户本人的合理请求（越低越可疑）
@@ -214,6 +215,7 @@ func (h *Handler) evaluateTurn(ctx context.Context, userMsg string, ses *session
 	v.Available = true
 	v.FastFieldsValid = validFastAnswers(r)
 	if a, ok := r.Answers["route_shape"]; ok && a.Type == string(jev.QChoice) {
+		v.RouteShape = a.Choice
 		v.SingleRead = a.Choice == "single_read"
 		v.ShapeConf = a.Conf()
 	}
@@ -238,6 +240,11 @@ func (h *Handler) evaluateTurn(ctx context.Context, userMsg string, ses *session
 	if stats := turnTelemetry(ctx); stats != nil {
 		stats.JevIntent = v.Intent
 		stats.JevIntentConfidence = v.IntentConf
+		stats.JevRouteShape = v.RouteShape
+		stats.JevShapeConfidence = v.ShapeConf
+		stats.JevLegitProbability = v.LegitProb
+		stats.JevRiskScore = v.RiskScore
+		stats.JevRiskConfidence = v.RiskConf
 	}
 	return v
 }

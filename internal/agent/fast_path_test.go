@@ -96,6 +96,9 @@ func TestJevFastPathFallbackBoundaries(t *testing.T) {
 		enabled       bool
 	}{
 		{"disabled", "查余额", nil, false},
+		{"quota_ambiguous", "剩余额度", nil, true},
+		{"quota_indirect", "我的额度还有多少没用", nil, true},
+		{"quota_english", "remaining quota", nil, true},
 		{"malformed_risk", "查余额", func(v *jev.FakeScript, s *session) { v.Answers["risk"] = jev.AnswerChoice("high", .99) }, true},
 		{"malformed_legit", "查余额", func(v *jev.FakeScript, s *session) { v.Answers["legit"] = jev.AnswerChoice("yes", .99) }, true},
 		{"low_confidence", "查余额", func(v *jev.FakeScript, s *session) { v.Answers["intent"] = jev.AnswerChoice("get_balance", .89) }, true},
