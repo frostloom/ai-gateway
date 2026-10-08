@@ -20,6 +20,11 @@ type TurnTelemetry struct {
 	ToolLatencyMS          float64 `json:"tool_latency_ms"`
 	JevIntent              string  `json:"jev_intent,omitempty"`
 	JevIntentConfidence    float64 `json:"jev_intent_confidence"`
+	JevRouteShape          string  `json:"jev_route_shape,omitempty"`
+	JevShapeConfidence     float64 `json:"jev_shape_confidence"`
+	JevLegitProbability    float64 `json:"jev_legit_probability"`
+	JevRiskScore           float64 `json:"jev_risk_score"`
+	JevRiskConfidence      float64 `json:"jev_risk_confidence"`
 	JevFastPathEligible    bool    `json:"jev_fast_path_eligible"`
 	JevFastPath            bool    `json:"jev_fast_path"`
 	JevFastPathTool        string  `json:"jev_fast_path_tool,omitempty"`

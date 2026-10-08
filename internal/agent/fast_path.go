@@ -54,6 +54,11 @@ func (h *Handler) fastPathReason(userMsg string, ses *session, v jevVerdict) str
 		return "tool_not_supported"
 	}
 	text := strings.ToLower(userMsg)
+	for _, term := range []string{"额度", "配额", "quota", "credits", "次数", "tokens"} {
+		if strings.Contains(text, term) {
+			return "ambiguous_account_measure"
+		}
+	}
 	// A conservative execution-level exclusion supplements the judge. It does
 	// not classify positive intent or pick a tool and may only force fallback.
 	for _, term := range []string{"充", "退款", "退订", "改套餐", "换套餐", "订购", "下单", "购买", "开通", "转账", "然后", "再帮", "并且", "同时", "顺便", "以及", "不要", "不用", "别查", "不查", "recharge", "refund", "cancel", "subscribe", "switch", "buy", "pay", " and ", "don't", "do not"} {
