@@ -93,6 +93,9 @@ func validFastAnswers(r *jev.Result) bool {
 		if !ok || a.Type != want {
 			return false
 		}
+		if want != "noul" && (a.Noul != 0 || !boundedProbability(a.Confidence) || a.Confidence == 0) {
+			return false
+		}
 	}
 	if r.Raw == "" {
 		return true

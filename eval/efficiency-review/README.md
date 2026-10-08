@@ -110,3 +110,52 @@ monetary savings.
 
 Separate sequential runs can have different upstream conditions. The report
 offers observational paired comparisons, not a causal speedup guarantee.
+
+## Multi-turn task comparison
+
+```powershell
+python eval/efficiency-review/analyze_tasks.py compare `
+  --baseline tasks-nojev/tasks.json --hint tasks-hint/tasks.json `
+  --fast tasks-fast/tasks.json --out NEW-task-efficiency-directory `
+  --prices path/to/prices.json
+python -m unittest discover -s eval/efficiency-review -p 'test_analyze*.py'
+```
+
+`--prices` is optional and uses the same mutually exclusive pricing configuration
+as the single-request analyzer. The tool requires three `taskbench.v2` reports
+with the full 24 actual cases, matching complete case content, dataset hash,
+model, source Git revision, product binary hash, and evaluator binary hash.
+Versions/run IDs may differ by arm. Every fixture tenant ID must be distinct
+across tasks and arms; setup failures without an assigned ID remain explicitly
+reported. Actual cases receive a separate canonical content hash for inspection.
+
+Original `metrics`, `success`, clarification/preview/confirmation/cancellation
+observations, errors and rubric limitations are retained. The analyzer never
+re-scores necessary followups. Redundant clarification remains a heuristic
+candidate for manual review rather than a proven business error. Task latency
+includes final state verification and excludes fixture setup, as described by
+the source evaluator. All tasks including failures are shown; common-success
+latency uses identical successful task IDs across all three arms.
+
+Every actual turn is included in request latency, LLM/JEV attempts, observed
+tokens and costs, including HTTP failures, retries represented as actual turns,
+and selected tool errors. Full telemetry is parsed from each `turn.raw_body`:
+the typed `response.telemetry` discards most fields and is intentionally ignored.
+Missing/malformed raw telemetry is unavailable and cannot become zero usage.
+Per-task, whole-run and per-stage usage are shown, with failed task and failed
+request details. Raw bodies, original reports and business records are never
+rewritten. The new JSON and Markdown output require a fresh directory.
+
+Fast-selected-task cost and tokens compare the same IDs across all arms,
+including failed selected tasks. A task may contain different turn sequences
+between arms: this is a complete-task comparison, not an invented one-to-one
+turn pairing. Selected-task totals alone do not isolate a causal fast-path
+effect. Task comparisons with no selected fast path are reported separately;
+confirmation/cancellation guards and ordinary model variation cannot be
+attributed to JEV fast execution. Tasks with unavailable selection telemetry
+are explicitly listed rather than classified as known non-fast tasks.
+
+The single-request analyzer also writes `matched_fast_selected_cost`, containing
+each arm's cost and usage on identical fast-selected IDs, including failures.
+Net estimated differences remain unavailable when either matched arm lacks
+pricing or usage; a selected subset never replaces the whole-run result.

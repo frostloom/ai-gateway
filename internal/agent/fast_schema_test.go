@@ -11,6 +11,11 @@ import (
 )
 
 func TestFastAnswersRequireExplicitFields(t *testing.T) {
+	malformed := fastVerdict("get_balance", .99)
+	malformed.Answers["intent"] = jev.Answer{Type: "choice", Choice: "get_balance", Confidence: 0, Noul: .99}
+	if validFastAnswers(&jev.Result{Answers: malformed.Answers}) {
+		t.Fatal("choice confidence must not borrow an unrelated noul probability")
+	}
 	for _, risk := range []string{`{"type":"score","confidence":0.99}`, `{"type":"score","score":null,"confidence":0.99}`, `{"type":"choice","choice":"high","confidence":0.99}`, `{"type":"score","score":0,"confidence":0.99}`} {
 		t.Run(risk, func(t *testing.T) {
 			srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

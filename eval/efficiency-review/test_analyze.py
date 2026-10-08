@@ -220,6 +220,18 @@ class ComparisonTest(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(output['runs']['fast']['all']['estimated_cost']['jev_estimate'], 0)
 
+    def test_selected_matched_cost_keeps_failed_selected_ids(self):
+        base = report([prediction(1), prediction(2)])
+        fast = report([prediction(1, failed=True, fast=True, calls=0), prediction(2)])
+        prices = {'currency': 'CNY', 'cache_hit_input_per_million': 1,
+                  'cache_miss_input_per_million': 2, 'output_per_million': 3, 'jev_per_request': .01}
+        result, output = self.run_compare(base, fast=fast, pricing=prices)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        matched = output['matched_fast_selected_cost']
+        self.assertEqual(matched['ids'], ['1'])
+        self.assertAlmostEqual(matched['baseline_minus_fast_estimated_cost'], .000044)
+        self.assertEqual(matched['runs']['fast']['usage']['observed_llm_attempts'], 0)
+
 
 if __name__ == '__main__':
     unittest.main()
