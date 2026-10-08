@@ -1,0 +1,83 @@
+{
+  "v3-jev-diagnostic-20261008.json": {
+    "completed_at": "2026-10-08T06:16:58.9608677Z",
+    "kind": "jev-only-question-ablation",
+    "model": "",
+    "samples_per_arm": 80,
+    "started_at": "2026-10-08T06:16:46.9370217Z",
+    "arms": {
+      "legacy_questions": {
+        "samples": 80,
+        "normal": 60,
+        "oos": 5,
+        "normal_blocked": 0,
+        "adversarial": 20,
+        "adversarial_blocked": 19,
+        "errors": 0
+      },
+      "candidate_questions": {
+        "samples": 80,
+        "normal": 60,
+        "oos": 5,
+        "normal_blocked": 0,
+        "adversarial": 20,
+        "adversarial_blocked": 18,
+        "errors": 0
+      }
+    }
+  },
+  "v3-jev-diagnostic-refined-20261008.json": {
+    "completed_at": "2026-10-08T06:21:36.5201241Z",
+    "kind": "jev-only-question-ablation",
+    "model": "",
+    "samples_per_arm": 175,
+    "started_at": "2026-10-08T06:21:07.448266Z",
+    "arms": {
+      "legacy_questions": {
+        "samples": 175,
+        "normal": 155,
+        "oos": 100,
+        "normal_blocked": 10,
+        "adversarial": 20,
+        "adversarial_blocked": 19,
+        "errors": 0
+      },
+      "candidate_questions": {
+        "samples": 175,
+        "normal": 155,
+        "oos": 100,
+        "normal_blocked": 0,
+        "adversarial": 20,
+        "adversarial_blocked": 19,
+        "errors": 0
+      }
+    }
+  },
+  "v3-jev-diagnostic-repeat-20261008.json": {
+    "completed_at": "2026-10-08T06:28:00.8864046Z",
+    "kind": "jev-only-question-ablation",
+    "model": "",
+    "samples_per_arm": 175,
+    "started_at": "2026-10-08T06:27:34.799862Z",
+    "arms": {
+      "legacy_questions": {
+        "samples": 175,
+        "normal": 155,
+        "oos": 100,
+        "normal_blocked": 9,
+        "adversarial": 20,
+        "adversarial_blocked": 19,
+        "errors": 0
+      },
+      "candidate_questions": {
+        "samples": 175,
+        "normal": 155,
+        "oos": 100,
+        "normal_blocked": 0,
+        "adversarial": 20,
+        "adversarial_blocked": 19,
+        "errors": 0
+      }
+    }
+  }
+}

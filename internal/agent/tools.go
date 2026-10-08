@@ -6,11 +6,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"math"
 	"net/http"
 	"net/url"
 	"sort"
 	"strings"
 	"time"
+	"unicode"
 
 	"github.com/frostloom/ai-gateway/internal/billing/store"
 )
@@ -509,11 +511,9 @@ func (tb *Toolbox) refundRechargeTool() *execTool {
 func (tb *Toolbox) subscribePlanTool() *execTool {
 	return &execTool{
 		name:        "subscribe_plan",
-		description: "订购定期订阅套餐：月费 ¥X 换每 N 小时滚动的各档次 token 额度（GPT Plus 式，不入账钱）。需要用户确认。",
+		description: "订购定期订阅套餐：月费 ¥X 换每 N 小时滚动的各档次 token 额度（GPT Plus 式，不入账钱）。用户已指定套餐名称时直接传 plan_name，无需先 list_plans；服务器唯一匹配后预览，需要用户确认。",
 		confirm:     true,
-		parameters: obj(map[string]any{
-			"plan_id": numProp("套餐 ID（用 list_plans 查询）"),
-		}, []string{"plan_id"}),
+		parameters:  planParameters(),
 		preview: func(ctx context.Context, args map[string]any, tenantID uint64) (string, error) {
 			plan, err := tb.findPlan(ctx, tenantID, args)
 			if err != nil {
@@ -524,7 +524,7 @@ func (tb *Toolbox) subscribePlanTool() *execTool {
 				plan.Name, plan.PriceMoney, plan.RefreshHours, planQuotaLine(plan)), nil
 		},
 		run: func(ctx context.Context, args map[string]any, tenantID uint64, _ string) (string, error) {
-			planID, err := argInt(args, "plan_id")
+			planID, err := planIDArg(args)
 			if err != nil {
 				return "", err
 			}
@@ -532,8 +532,8 @@ func (tb *Toolbox) subscribePlanTool() *execTool {
 				return "", err
 			}
 			name := fmt.Sprintf("#%d", planID)
-			if plan, err := tb.findPlan(ctx, tenantID, args); err == nil {
-				name = plan.Name
+			if frozenName, err := argStr(args, "plan_name"); err == nil {
+				name = frozenName
 			}
 			return fmt.Sprintf("订阅成功：已开通套餐「%s」并到账本期额度。", name), nil
 		},
@@ -543,11 +543,9 @@ func (tb *Toolbox) subscribePlanTool() *execTool {
 func (tb *Toolbox) changePlanTool() *execTool {
 	return &execTool{
 		name:        "change_plan",
-		description: "改套餐：仅定期订阅之间，下期生效（当期额度不变）。需要用户确认。",
+		description: "改套餐：仅定期订阅之间，下期生效（当期额度不变）。用户已指定目标套餐名称时直接传 plan_name，无需先 list_plans；服务器唯一匹配后预览，需要用户确认。",
 		confirm:     true,
-		parameters: obj(map[string]any{
-			"plan_id": numProp("目标套餐 ID（用 list_plans 查询，须为定期套餐）"),
-		}, []string{"plan_id"}),
+		parameters:  planParameters(),
 		preview: func(ctx context.Context, args map[string]any, tenantID uint64) (string, error) {
 			plan, err := tb.findPlan(ctx, tenantID, args)
 			if err != nil {
@@ -559,7 +557,7 @@ func (tb *Toolbox) changePlanTool() *execTool {
 			return fmt.Sprintf("将把当前订阅改为定期套餐「%s」：下期续费生效，当期已订购额度与到期日不变。确认后生效。", plan.Name), nil
 		},
 		run: func(ctx context.Context, args map[string]any, tenantID uint64, _ string) (string, error) {
-			planID, err := argInt(args, "plan_id")
+			planID, err := planIDArg(args)
 			if err != nil {
 				return "", err
 			}
@@ -651,25 +649,126 @@ func (tb *Toolbox) findPaidOrder(ctx context.Context, tenantID uint64, orderNo s
 	return nil, fmt.Errorf("未找到你名下的订单 %s", orderNo)
 }
 
-// findPlan 从目录里取套餐并校验存在且上架。
+// findPlan 唯一解析当前在售定期套餐，并冻结确认时使用的 ID 和目录名称。
+// ID 与名称同时提供时必须一致；名称的精确匹配优先于包含匹配。
 func (tb *Toolbox) findPlan(ctx context.Context, tenantID uint64, args map[string]any) (*store.Plan, error) {
-	planID, err := argInt(args, "plan_id")
-	if err != nil {
-		return nil, err
+	_, hasID := args["plan_id"]
+	_, hasName := args["plan_name"]
+	if !hasID && !hasName {
+		return nil, fmt.Errorf("请提供套餐名称 plan_name 或套餐 ID plan_id")
+	}
+	var planID int64
+	if hasID {
+		var err error
+		planID, err = planIDArg(args)
+		if err != nil {
+			return nil, err
+		}
+	}
+	var name string
+	if hasName {
+		rawName, err := argStr(args, "plan_name")
+		if err != nil {
+			return nil, err
+		}
+		name = normalizePlanName(rawName)
+		if name == "" {
+			return nil, fmt.Errorf("套餐名称不能为空")
+		}
 	}
 	v, err := tb.me(ctx, tenantID)
 	if err != nil {
 		return nil, err
 	}
-	for i := range v.Plans {
-		if v.Plans[i].ID == uint64(planID) {
-			if v.Plans[i].Status != 0 {
-				return nil, fmt.Errorf("套餐 #%d 已下架", planID)
+	var selected *store.Plan
+	if hasName {
+		var exact, partial []*store.Plan
+		for i := range v.Plans {
+			p := &v.Plans[i]
+			if p.Status != 0 || p.PlanType != store.PlanTypeRecurring {
+				continue
 			}
-			return &v.Plans[i], nil
+			candidate := normalizePlanName(p.Name)
+			if candidate == name {
+				exact = append(exact, p)
+			} else if strings.Contains(candidate, name) {
+				partial = append(partial, p)
+			}
+		}
+		matches := exact
+		if len(matches) == 0 {
+			matches = partial
+		}
+		if len(matches) == 0 {
+			return nil, fmt.Errorf("未找到名称为「%s」的在售定期套餐，请查询套餐目录", name)
+		}
+		if len(matches) != 1 {
+			return nil, fmt.Errorf("套餐名称「%s」匹配多个在售定期套餐，请提供完整名称", name)
+		}
+		selected = matches[0]
+		if hasID && selected.ID != uint64(planID) {
+			return nil, fmt.Errorf("套餐 ID 与名称不一致，请重新选择")
+		}
+	} else {
+		for i := range v.Plans {
+			if v.Plans[i].ID == uint64(planID) {
+				selected = &v.Plans[i]
+				break
+			}
+		}
+		if selected == nil {
+			return nil, fmt.Errorf("套餐 #%d 不存在", planID)
 		}
 	}
-	return nil, fmt.Errorf("套餐 #%d 不存在", planID)
+	if selected.Status != 0 {
+		return nil, fmt.Errorf("套餐 #%d 已下架", selected.ID)
+	}
+	if selected.PlanType != store.PlanTypeRecurring {
+		return nil, fmt.Errorf("只能选择在售定期订阅套餐（%s 是一次性套餐）", selected.Name)
+	}
+	if selected.ID == 0 || selected.ID > math.MaxInt64 {
+		return nil, fmt.Errorf("套餐 ID 无效")
+	}
+	args["plan_id"] = int64(selected.ID)
+	args["plan_name"] = selected.Name
+	return selected, nil
+}
+
+func normalizePlanName(name string) string {
+	return strings.Map(func(r rune) rune {
+		if unicode.IsSpace(r) || r == '·' {
+			return -1
+		}
+		return r
+	}, name)
+}
+
+func planIDArg(args map[string]any) (int64, error) {
+	if n, ok := args["plan_id"].(float64); ok {
+		if math.IsNaN(n) || math.IsInf(n, 0) || n <= 0 || n >= float64(math.MaxInt64) || n != math.Trunc(n) {
+			return 0, fmt.Errorf("套餐 ID 必须为正整数")
+		}
+	}
+	id, err := argInt(args, "plan_id")
+	if err != nil {
+		return 0, err
+	}
+	if id <= 0 {
+		return 0, fmt.Errorf("套餐 ID 必须为正整数")
+	}
+	return id, nil
+}
+
+func planParameters() map[string]any {
+	schema := obj(map[string]any{
+		"plan_name": strProp("用户指定的套餐名称；有名称时直接填写，无需先查目录。服务器仅匹配唯一在售定期套餐，名称歧义时需询问用户"),
+		"plan_id":   numProp("已知的定期套餐 ID；与 plan_name 至少提供一个，同时提供时必须一致，不得猜测 ID"),
+	}, nil)
+	schema["anyOf"] = []any{
+		map[string]any{"required": []string{"plan_name"}},
+		map[string]any{"required": []string{"plan_id"}},
+	}
+	return schema
 }
 
 func (tb *Toolbox) postJSON(ctx context.Context, path string, body any, out any) error {

@@ -329,6 +329,9 @@ func isGearToolLine(t string) bool {
 func (h *Handler) llmLoop(ctx context.Context, sessionID string, tenantID uint64, v jevVerdict, ses *session) (string, []traceItem, error) {
 	var trace []traceItem
 	pending := ses.PendingAction
+	// Request-local only: current-balance queries in a later turn must hit billing again.
+	readResults := map[string]string{}
+	readReuses := map[string]int{}
 
 	for iter := 0; iter < 5; iter++ {
 		messages := buildMessages(ses, pending, v)
@@ -387,12 +390,29 @@ func (h *Handler) llmLoop(ctx context.Context, sessionID string, tenantID uint64
 			}
 
 			if _, read := readTools[name]; read {
+				readKey := name + ":" + jsonString(args)
+				if result, repeated := readResults[readKey]; repeated {
+					if readReuses[readKey] == 0 {
+						// One reuse lets the model continue a composite request without
+						// another billing read. Keep the call/result pair valid but do not
+						// invent a second executed tool in the trace.
+						readReuses[readKey]++
+						toolResults = append(toolResults, Message{Role: "tool", ToolCallID: tc.ID, Content: result})
+						continue
+					}
+					// The previous call/result remains paired in history. Do not append an
+					// unexecuted call to the trace or let the model spin on the same query.
+					reply := sanitizeReply(result)
+					ses.History = append(ses.History, Message{Role: "assistant", Content: reply})
+					return reply, trace, nil
+				}
 				result, err := h.tb.Run(ctx, name, args, tenantID, "")
 				if err != nil {
 					result = "错误：" + err.Error()
 				}
 				h.audit(sessionID, tenantID, name, args, false, "", result)
 				trace = append(trace, traceItem{Tool: name, Args: tc.Function.Arguments, Confirmed: false, Result: result})
+				readResults[readKey] = result
 				toolResults = append(toolResults, Message{Role: "tool", ToolCallID: tc.ID, Content: result})
 				continue
 			}
@@ -416,8 +436,10 @@ func (h *Handler) llmLoop(ctx context.Context, sessionID string, tenantID uint64
 					h.audit(sessionID, tenantID, name, args, false, preview, result,
 						fmt.Sprintf(`{"engine":"jev","decision":"block","reason":%q}`, reason))
 					trace = append(trace, traceItem{Tool: name, Args: tc.Function.Arguments, Confirmed: false, Preview: preview, Result: result})
-					toolResults = append(toolResults, Message{Role: "tool", ToolCallID: tc.ID, Content: result})
-					continue
+					// A guard rejection is terminal for this turn. Another model call
+					// must not turn it into a retry or tell the user to confirm a blocked action.
+					ses.History = append(ses.History, Message{Role: "assistant", Content: result})
+					return result, trace, nil
 				}
 			}
 			pa := &pendingAction{

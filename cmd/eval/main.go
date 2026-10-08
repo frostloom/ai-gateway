@@ -142,12 +142,16 @@ func runIntent(mode, dir, base, key, out string, perClass, workers int, jevMode,
 func printIntentSummary(m agent.IntentMetrics) {
 	fmt.Printf("\n=== 意图路由指标 ===\n")
 	fmt.Printf("  样本        %d 条（已评测 %d，请求失败 %d）\n", m.Total, m.Evaluated, m.Failed)
-	fmt.Printf("  Top-1 准确率 %.1f%%\n", m.Top1*100)
+	fmt.Println("  口径：首工具路径命中不等于业务正确；必要澄清不属于业务错误。")
+	if m.Evaluated == 0 {
+		fmt.Println("  无成功正常请求，工具路径准确率和成功请求延迟不可评估。")
+	}
+	fmt.Printf("  首工具命中率 %.1f%%\n", m.Top1*100)
 	fmt.Printf("  目标可达率   %.1f%%  ← 期望工具出现在工具链中（多轮探查也算）\n", m.ReachRate*100)
 	fmt.Printf("  仅探查未执行 %d 条  ← 已调用其他工具，目标工具未出现\n", m.PartialPlan)
 	fmt.Printf("  Macro-F1    %.3f   (P %.3f / R %.3f)\n", m.MacroF1, m.MacroP, m.MacroR)
 	fmt.Printf("  OOS 准确率   %.1f%%  误调用率 %.1f%%\n", m.OOSAccuracy*100, m.FalseCallRate*100)
-	fmt.Printf("  对抗拦截率   %.1f%%  误拦率 %.1f%%\n", m.BlockRate*100, m.FalseBlockRate*100)
+	fmt.Printf("  成功对抗零工具率 %.1f%%（成功 %d/%d，失败 %d）  正常误拦率 %.1f%%\n", m.BlockRate*100, m.AdversarialEvaluated, m.AdversarialTotal, m.AdversarialFailed, m.FalseBlockRate*100)
 	if m.ConfirmTotal > 0 {
 		fmt.Printf("  确认覆盖率   %.1f%%\n", m.ConfirmRate*100)
 	}
@@ -178,14 +182,17 @@ func writeIntentReport(r agent.IntentReport, out string) string {
 	var b strings.Builder
 	b.WriteString("# 意图路由评测报告\n\n")
 	fmt.Fprintf(&b, "- 评分版本：2 · JEV：%s · 模型：%s · 并发：%d\n- 数据集 SHA256：`%s`\n", r.JevMode, r.Model, r.Workers, r.DatasetSHA256)
-	b.WriteString("- Top-1 严格比较首工具；Reach 严格要求目标工具出现；澄清单列，不给主指标加分。\n- 对抗拦截为零工具且无待确认的保守口径，不能证明越权读写的端到端安全。\n- 延迟为成功请求完整响应时间；真实 LLM 调用次数只来自 telemetry，工具次数单列；未采集 token/费用。\n\n")
+	b.WriteString("- Top-1 严格比较首工具；Reach 严格要求目标工具出现。这是工具路径指标，必要澄清不属于业务错误；先查询再操作也可能合理。\n- 缺少金额、订单或目标套餐时应追问，不能猜参数或调用空写工具提高分数。行为复核见 scripts/review-intent-behavior.py，补充视图独立于原始评分。\n- 对抗零工具率仅以成功对抗请求为分母，失败另列，不能证明越权读写的端到端安全。\n- 原始写操作确认覆盖率含缺参样本，不等于参数充分请求的确认率，也不等于二次确认安全合规率。\n- 延迟为成功请求完整响应时间；真实 LLM 调用次数只来自 telemetry，工具次数单列；未采集 token/费用。\n\n")
 	fmt.Fprintf(&b, "- 模式：`%s` · 时间：%s · 耗时：%s\n", r.Mode,
 		r.StartedAt.Format("2006-01-02 15:04:05"), r.Duration.Round(time.Second))
 	fmt.Fprintf(&b, "- 样本：%d 条（已评测 %d，请求失败 %d）\n\n", m.Total, m.Evaluated, m.Failed)
+	if m.Evaluated == 0 {
+		b.WriteString("**无成功正常请求，工具路径准确率和成功请求延迟不可评估；下表的零值是兼容评分字段的空样本默认值，不能解释为模型能力为零。**\n\n")
+	}
 
 	b.WriteString("## 核心指标\n\n")
 	b.WriteString("| 指标 | 值 |\n|---|---|\n")
-	fmt.Fprintf(&b, "| Top-1 准确率 | **%.1f%%** |\n", m.Top1*100)
+	fmt.Fprintf(&b, "| 首工具命中率 Top-1（工具路径） | **%.1f%%** |\n", m.Top1*100)
 	fmt.Fprintf(&b, "| 目标可达率（期望工具出现在工具链中） | **%.1f%%** |\n", m.ReachRate*100)
 	fmt.Fprintf(&b, "| 仅探查未执行（目标工具未出现） | %d 条 |\n", m.PartialPlan)
 	fmt.Fprintf(&b, "| Macro-F1 | %.3f |\n", m.MacroF1)
@@ -193,14 +200,14 @@ func writeIntentReport(r agent.IntentReport, out string) string {
 	fmt.Fprintf(&b, "| Macro-Recall | %.3f |\n", m.MacroR)
 	fmt.Fprintf(&b, "| OOS 准确率（闲聊零工具调用） | %.1f%% |\n", m.OOSAccuracy*100)
 	fmt.Fprintf(&b, "| OOS 误调用率 | %.1f%% |\n", m.FalseCallRate*100)
-	fmt.Fprintf(&b, "| 对抗拦截率 | %.1f%% |\n", m.BlockRate*100)
+	fmt.Fprintf(&b, "| 成功对抗请求零工具且无待确认比例 | %.1f%%（成功 %d/%d，失败 %d） |\n", m.BlockRate*100, m.AdversarialEvaluated, m.AdversarialTotal, m.AdversarialFailed)
 	fmt.Fprintf(&b, "| 正常请求误拦率 | %.1f%% |\n", m.FalseBlockRate*100)
 	fmt.Fprintf(&b, "| 写操作确认覆盖率 | %.1f%% |\n", m.ConfirmRate*100)
 	fmt.Fprintf(&b, "| 平均延迟 | %.0f ms |\n", m.AvgLatencyMs)
 	fmt.Fprintf(&b, "| 平均工具调用次数 | %.2f |\n", m.AvgToolCalls)
 	fmt.Fprintf(&b, "| JEV 短路（未调 LLM） | %d 条 |\n", m.JevShortCircuit)
 
-	fmt.Fprintf(&b, "| 请求成功率 | %.1f%% |\n| 端到端准确率（含失败） | %.1f%% |\n| P50 延迟 | %.0f ms |\n| P95 延迟 | %.0f ms |\n| 实测平均 LLM 请求次数 | %.2f |\n| Telemetry 样本 | %d |\n| JEV 请求失败数 | %d |\n| 对抗请求失败数 | %d |\n| 澄清启发式命中（独立口径） | %d/%d |\n", m.RequestSuccessRate*100, m.EndToEndAccuracy*100, m.P50LatencyMs, m.P95LatencyMs, m.AvgLLMCalls, m.TelemetrySamples, m.JevErrors, m.AdversarialFailed, m.AskBackHandled, m.AskBackTotal)
+	fmt.Fprintf(&b, "| 请求成功率 | %.1f%% |\n| 全请求首工具命中率（含失败） | %.1f%% |\n| P50 延迟 | %.0f ms |\n| P95 延迟 | %.0f ms |\n| 实测平均 LLM 请求次数 | %.2f |\n| Telemetry 样本 | %d |\n| JEV 请求失败数 | %d |\n| 对抗请求失败数 | %d |\n| 澄清启发式命中（独立口径） | %d/%d |\n", m.RequestSuccessRate*100, m.EndToEndAccuracy*100, m.P50LatencyMs, m.P95LatencyMs, m.AvgLLMCalls, m.TelemetrySamples, m.JevErrors, m.AdversarialFailed, m.AskBackHandled, m.AskBackTotal)
 	fmt.Fprintf(&b, "| 对抗 JEV 请求失败数 | %d |\n", m.AdversarialJevErrors)
 	b.WriteString("\n## 分类明细\n\n| 意图 | Top-1 正确 | 目标可达 | Precision | Recall | F1 |\n|---|---|---|---|---|---|\n")
 	for _, c := range m.PerClass {
@@ -227,7 +234,7 @@ func writeIntentReport(r agent.IntentReport, out string) string {
 		b.WriteString("（无）\n")
 	}
 
-	b.WriteString("\n## 错分明细\n\n")
+	b.WriteString("\n## 首工具未命中明细\n\n本表包括必要澄清、合理前置查询、误拦与真正的选工具问题，不能将整张表称为业务错误。需结合槽位与行为复核逐条解释。\n\n")
 	b.WriteString("| 样本 | 原话 | 期望 | 实际 | 维度 |\n|---|---|---|---|---|\n")
 	n := 0
 	for _, p := range r.Preds {
@@ -246,12 +253,12 @@ func writeIntentReport(r agent.IntentReport, out string) string {
 		}
 	}
 	if n == 0 {
-		b.WriteString("（无错分）\n")
+		b.WriteString("（无首工具未命中）\n")
 	}
 
 	// 多工具调用：退款/退订这类操作，模型常先查一次余额/订阅再操作。
 	// 首个工具与期望不符，但流程是合理的 —— 单列出来，避免误判为"路由错误"。
-	b.WriteString("\n## 先查询后操作（首个工具不符，但流程合理）\n\n")
+	b.WriteString("\n## 先查询后目标工具出现（需结合业务状态复核）\n\n")
 	b.WriteString("| 样本 | 原话 | 期望 | 首个工具 | 全部工具 |\n|---|---|---|---|---|\n")
 	nq := 0
 	for _, p := range r.Preds {

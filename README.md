@@ -353,12 +353,16 @@ go run ./cmd/eval -suite intent -mode http \
 **JEV 前后对比**：
 
 ```powershell
-$env:JEV_API_KEY=''; .\scripts\start-all.ps1 -Only agent -SkipInfra   # 关闭 JEV
-go run ./cmd/eval -suite intent ... -out eval/reports/baseline-no-jev
-.\scripts\start-all.ps1 -Only agent -SkipInfra                        # 恢复（读 .env）
-go run ./cmd/eval -suite intent ... -out eval/reports/full-with-jev
-.\scripts\compare-intent.ps1 -Baseline <基线报告.md> -Experiment <实验报告.md>
+# 独立启动两组 agent；服务端 JEV 开关由脚本控制，不重启主客服
+.\scripts\run-intent-ab.ps1 -Sample 5 -Workers 4
+# 全量省略 -Sample；比较输入必须是原始 JSON
+.\scripts\compare-intent.ps1 -Baseline <无JEV报告.json> -Experiment <有JEV报告.json>
 ```
+
+历史无 JEV = V1、有 JEV = V2；原始证据及哈希见 `eval/baselines/2026-09-29-v1-v2/README.md`。
+**必要追问不是业务错误**：缺少金额、订单或目标套餐必须先澄清；Top-1/Reach 只是工具路径统计，不能用 `1−Top-1` 当业务错误率。
+逐条槽位复核和历史修订视图见 `docs/intent-behavior-v1-v2-review.md`；后续报告使用 `scripts/review-intent-behavior.py` 生成独立行为视图，不覆盖原始分数。
+客服优化实现、实验限制和验证记录见 `docs/agent-optimization-2026-10-08.md`。单版本实验可用 `scripts/run-agent-experiment.ps1`，输出目录已存在时拒绝覆盖。
 
 ---
 
