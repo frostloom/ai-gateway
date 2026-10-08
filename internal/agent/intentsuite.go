@@ -324,6 +324,15 @@ func predictOne(ctx context.Context, cli *http.Client, baseURL, apiKey string, s
 		p.Err = "解析响应失败: " + err.Error()
 		return p
 	}
+	p.PendingTool = out.PendingTool
+	p.Telemetry = out.Telemetry
+	p.Pending = out.Pending
+	for _, t := range out.Trace {
+		p.AllTools = append(p.AllTools, t.Tool)
+	}
+	if len(p.AllTools) > 0 {
+		p.Predicted = p.AllTools[0]
+	}
 	if resp.StatusCode != http.StatusOK {
 		p.Err = fmt.Sprintf("HTTP %d", resp.StatusCode)
 		return p
@@ -332,16 +341,7 @@ func predictOne(ctx context.Context, cli *http.Client, baseURL, apiKey string, s
 		p.Err = "响应缺少 reply 字段"
 		return p
 	}
-	p.PendingTool = out.PendingTool
-	p.Telemetry = out.Telemetry
 	p.Reply = *out.Reply
-	p.Pending = out.Pending
-	for _, t := range out.Trace {
-		p.AllTools = append(p.AllTools, t.Tool)
-	}
-	if len(p.AllTools) > 0 {
-		p.Predicted = p.AllTools[0]
-	}
 	// JEV 拦截：回复是固定话术，且没有任何工具调用
 	p.JevBlocked = len(p.AllTools) == 0 && strings.Contains(p.Reply, "未通过安全校验")
 	if out.Telemetry != nil {

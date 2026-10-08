@@ -67,6 +67,25 @@ func TestRunnerRejectsUnattestedDeclaredModeBeforeConfirmation(t *testing.T) {
 		t.Fatalf("calls=%d result=%+v", calls, report.Results[0])
 	}
 }
+
+func TestRunnerHTTPFailurePreservesEvidenceWithoutConfirming(t *testing.T) {
+	calls := 0
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		calls++
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]any{"error": "upstream failed", "session_id": "failed-session", "pending_confirm": true, "pending_tool": "recharge", "trace": []Trace{{Tool: "recharge", Result: "failed"}}, "telemetry": map[string]any{"jev_enabled": true, "llm_calls": 2, "jev_calls": 1}})
+	}))
+	defer server.Close()
+	report := Run(context.Background(), Options{BaseURL: server.URL, Metadata: Metadata{JevMode: "on"}, Backend: &controlledBackend{pending: Pending{TenantID: 8, Tool: "recharge", Args: map[string]any{"amount_money": 100.0}}}, Cases: []Case{{ID: "failed", Message: "充值100元", Tool: "recharge", AmountMoney: 100}}})
+	r := report.Results[0]
+	if calls != 1 || r.Success || report.Metrics.FailedHTTP != 1 {
+		t.Fatalf("failed request was confirmed or counted successful: calls=%d result=%+v", calls, r)
+	}
+	response := r.Turns[0].Response
+	if response.SessionID != "failed-session" || !response.Pending || len(response.Trace) != 1 || response.Telemetry == nil || response.Telemetry.LLMCalls != 2 || report.Metrics.LLMCalls != 2 {
+		t.Fatalf("failed request lost observed evidence: %+v", r)
+	}
+}
 func TestRunnerMultiTurnWorkflowUsesSameSessionAndChecksState(t *testing.T) {
 	for _, mode := range []string{"clarify", "cancel", "duplicate", "premature"} {
 		t.Run(mode, func(t *testing.T) {

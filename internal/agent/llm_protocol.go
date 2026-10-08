@@ -76,6 +76,12 @@ type anthropicTool struct {
 
 // anthropicResponse 只取我们关心的字段。
 type anthropicResponse struct {
+	Usage *struct {
+		InputTokens              *int64 `json:"input_tokens"`
+		OutputTokens             *int64 `json:"output_tokens"`
+		CacheReadInputTokens     *int64 `json:"cache_read_input_tokens"`
+		CacheCreationInputTokens *int64 `json:"cache_creation_input_tokens"`
+	} `json:"usage"`
 	ID         string `json:"id"`
 	StopReason string `json:"stop_reason"`
 	Content    []struct {
@@ -133,9 +139,8 @@ func (c *LLMClient) chatAnthropicRaw(ctx context.Context, raw []byte) (*Message,
 	httpReq.Header.Set("x-api-key", c.apiKey)
 	httpReq.Header.Set("anthropic-version", "2023-06-01")
 
-	if stats := turnTelemetry(ctx); stats != nil {
-		stats.LLMCalls++
-	}
+	finishAttempt := beginLLMAttempt(ctx, protoAnthropic)
+	defer finishAttempt()
 	resp, err := c.cli.Do(httpReq)
 	if err != nil {
 		return nil, fmt.Errorf("LLM 请求失败: %v", err)
@@ -146,12 +151,17 @@ func (c *LLMClient) chatAnthropicRaw(ctx context.Context, raw []byte) (*Message,
 	if err != nil {
 		return nil, err
 	}
+	var out anthropicResponse
+	parseErr := json.Unmarshal(body, &out)
+	if parseErr == nil && out.Usage != nil {
+		u := out.Usage
+		recordLLMUsage(ctx, u.InputTokens, u.OutputTokens, u.CacheReadInputTokens, nil, u.CacheCreationInputTokens)
+	}
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("LLM HTTP %d: %s", resp.StatusCode, truncate(string(body), 200))
 	}
-	var out anthropicResponse
-	if err := json.Unmarshal(body, &out); err != nil {
-		return nil, fmt.Errorf("LLM 响应解析失败: %v", err)
+	if parseErr != nil {
+		return nil, fmt.Errorf("LLM 响应解析失败: %v", parseErr)
 	}
 	return anthropicToMessage(&out)
 }
@@ -188,9 +198,8 @@ func (c *LLMClient) chatAnthropic(ctx context.Context, messages []Message, tools
 	httpReq.Header.Set("x-api-key", c.apiKey)
 	httpReq.Header.Set("anthropic-version", "2023-06-01")
 
-	if stats := turnTelemetry(ctx); stats != nil {
-		stats.LLMCalls++
-	}
+	finishAttempt := beginLLMAttempt(ctx, protoAnthropic)
+	defer finishAttempt()
 	resp, err := c.cli.Do(httpReq)
 	if err != nil {
 		return nil, fmt.Errorf("LLM 请求失败: %v", err)
@@ -200,6 +209,12 @@ func (c *LLMClient) chatAnthropic(ctx context.Context, messages []Message, tools
 	body, err := io.ReadAll(io.LimitReader(resp.Body, 1<<20))
 	if err != nil {
 		return nil, err
+	}
+	var out anthropicResponse
+	parseErr := json.Unmarshal(body, &out)
+	if parseErr == nil && out.Usage != nil {
+		u := out.Usage
+		recordLLMUsage(ctx, u.InputTokens, u.OutputTokens, u.CacheReadInputTokens, nil, u.CacheCreationInputTokens)
 	}
 	if resp.StatusCode != http.StatusOK {
 		var e anthropicResponse
@@ -211,9 +226,8 @@ func (c *LLMClient) chatAnthropic(ctx context.Context, messages []Message, tools
 		return nil, fmt.Errorf("LLM HTTP %d: %s", resp.StatusCode, msg)
 	}
 
-	var out anthropicResponse
-	if err := json.Unmarshal(body, &out); err != nil {
-		return nil, fmt.Errorf("LLM 响应解析失败: %v", err)
+	if parseErr != nil {
+		return nil, fmt.Errorf("LLM 响应解析失败: %v", parseErr)
 	}
 	return anthropicToMessage(&out)
 }

@@ -49,6 +49,12 @@ type chatRequest struct {
 }
 
 type chatResponse struct {
+	Usage *struct {
+		PromptTokens          *int64 `json:"prompt_tokens"`
+		CompletionTokens      *int64 `json:"completion_tokens"`
+		PromptCacheHitTokens  *int64 `json:"prompt_cache_hit_tokens"`
+		PromptCacheMissTokens *int64 `json:"prompt_cache_miss_tokens"`
+	} `json:"usage"`
 	Choices []struct {
 		Message Message `json:"message"`
 	} `json:"choices"`
@@ -232,9 +238,8 @@ func (c *LLMClient) chatOpenAI(ctx context.Context, messages []Message, tools []
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+c.apiKey)
 
-	if stats := turnTelemetry(ctx); stats != nil {
-		stats.LLMCalls++
-	}
+	finishAttempt := beginLLMAttempt(ctx, protoOpenAI)
+	defer finishAttempt()
 	resp, err := c.cli.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("LLM 请求失败: %v", err)
@@ -245,6 +250,12 @@ func (c *LLMClient) chatOpenAI(ctx context.Context, messages []Message, tools []
 	if err != nil {
 		return nil, err
 	}
+	var out chatResponse
+	parseErr := json.Unmarshal(raw, &out)
+	if parseErr == nil && out.Usage != nil {
+		u := out.Usage
+		recordLLMUsage(ctx, u.PromptTokens, u.CompletionTokens, u.PromptCacheHitTokens, u.PromptCacheMissTokens, nil)
+	}
 	if resp.StatusCode != http.StatusOK {
 		var e chatResponse
 		_ = json.Unmarshal(raw, &e)
@@ -254,9 +265,8 @@ func (c *LLMClient) chatOpenAI(ctx context.Context, messages []Message, tools []
 		}
 		return nil, fmt.Errorf("LLM HTTP %d: %s", resp.StatusCode, msg)
 	}
-	var out chatResponse
-	if err := json.Unmarshal(raw, &out); err != nil {
-		return nil, fmt.Errorf("LLM 响应解析失败: %v", err)
+	if parseErr != nil {
+		return nil, fmt.Errorf("LLM 响应解析失败: %v", parseErr)
 	}
 	if len(out.Choices) == 0 {
 		return nil, fmt.Errorf("LLM 返回空 choices")

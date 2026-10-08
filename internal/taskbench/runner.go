@@ -78,7 +78,7 @@ func runCase(ctx context.Context, o Options, runID string, c Case) Result {
 				resp.Body.Close()
 				t.RawBody = string(body)
 				err = readErr
-				if err == nil && resp.StatusCode == 200 {
+				if err == nil {
 					err = json.Unmarshal(body, &t.Response)
 				}
 			}
