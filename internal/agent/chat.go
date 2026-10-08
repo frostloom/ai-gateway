@@ -66,11 +66,14 @@ type Handler struct {
 	log     *slog.Logger
 
 	/*** P3 Jev 判断引擎（nil = 停用，行为与未接入时一致） ***/
-	jev          jevEvaluator
-	jevGuardMin  float64 // 写操作守门阈值（默认 0.8）
-	jevBlockMin  float64 // 每轮判定：合法性低于此值直接拦截（默认 0.30）
-	jevWarnMin   float64 // 每轮判定：合法性低于此值放行但警告+强制确认（默认 0.60）
-	jevIntentMin float64 // 意图预判阈值（默认 0.75）
+	jev                   jevEvaluator
+	jevGuardMin           float64 // 写操作守门阈值（默认 0.8）
+	jevBlockMin           float64 // 每轮判定：合法性低于此值直接拦截（默认 0.30）
+	jevWarnMin            float64 // 每轮判定：合法性低于此值放行但警告+强制确认（默认 0.60）
+	jevIntentMin          float64 // 意图预判阈值（默认 0.75）
+	jevFastPathConfigured bool
+	jevFastPathEnabled    bool
+	jevFastPathMin        float64
 
 	/*** 管理面板身份（gateway 注入内部密钥头时生效） ***/
 	internalToken string // AGENT_INTERNAL_TOKEN：gateway 与 agent 共享，防伪造管理员
@@ -150,7 +153,15 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		h.log.Error("process failed",
 			"sid", req.SessionID, "tenant", tenantID,
 			"msg", truncate(req.Message, 60), "err", err)
-		writeErr(w, http.StatusInternalServerError, err.Error())
+		writeJSON(w, http.StatusInternalServerError, map[string]any{
+			"error":           err.Error(),
+			"telemetry":       stats,
+			"session_id":      req.SessionID,
+			"trace":           trace,
+			"pending_confirm": ses.PendingAction != nil,
+			"pending_preview": previewOf(ses.PendingAction),
+			"pending_tool":    toolOf(ses.PendingAction),
+		})
 		return
 	}
 
@@ -248,7 +259,7 @@ func (h *Handler) process(ctx context.Context, sessionID string, tenantID uint64
 		case 1: // 确认 → 执行
 			pa := ses.PendingAction
 			ses.PendingAction = nil
-			result, err := h.tb.Run(ctx, pa.Tool, pa.Args, pa.TenantID, pa.IdemKey)
+			result, err := h.runTimedTool(ctx, pa.Tool, pa.Args, pa.TenantID, pa.IdemKey)
 			reply := result
 			if err != nil {
 				reply = "执行失败：" + err.Error()
@@ -280,6 +291,10 @@ func (h *Handler) process(ctx context.Context, sessionID string, tenantID uint64
 			}))
 		ses.History = append(ses.History, Message{Role: "assistant", Content: reply})
 		return reply, nil, nil
+	}
+
+	if reply, trace, handled, err := h.tryJevFastPath(ctx, sessionID, tenantID, userMsg, ses, v); handled {
+		return reply, trace, err
 	}
 
 	reply, trace, err := h.llmLoop(ctx, sessionID, tenantID, v, ses)
@@ -406,7 +421,7 @@ func (h *Handler) llmLoop(ctx context.Context, sessionID string, tenantID uint64
 					ses.History = append(ses.History, Message{Role: "assistant", Content: reply})
 					return reply, trace, nil
 				}
-				result, err := h.tb.Run(ctx, name, args, tenantID, "")
+				result, err := h.runTimedTool(ctx, name, args, tenantID, "")
 				if err != nil {
 					result = "错误：" + err.Error()
 				}
@@ -418,7 +433,7 @@ func (h *Handler) llmLoop(ctx context.Context, sessionID string, tenantID uint64
 			}
 
 			// 写操作：先过 Jev 守门（P3，nil 时直接放行）→ 算预览 + 挂起，回确认文案，本轮结束。
-			preview, err := h.tb.Preview(ctx, name, args, tenantID)
+			preview, err := h.previewTimedTool(ctx, name, args, tenantID)
 			if err != nil {
 				result := "操作不可执行：" + err.Error()
 				h.audit(sessionID, tenantID, name, args, false, "", result)

@@ -99,6 +99,13 @@ func main() {
 	tb := agent.NewToolbox(agent.NewAdminClient(adminBase))
 	llm := agent.NewLLMClient(llmBase, llmKey, llmModel)
 	h := agent.NewHandler(bc, tb, llm, st, rdb, log)
+	fastPathEnabled := config.Getenv("JEV_FAST_PATH", "0") == "1"
+	fastPathMin := config.GetenvFloat("JEV_FAST_PATH_MIN", 0.90)
+	if err := h.SetJevFastPath(fastPathEnabled, fastPathMin); err != nil {
+		log.Error("invalid fast path configuration", "err", err)
+		os.Exit(1)
+	}
+	log.Info("jev read fast path policy", "enabled", fastPathEnabled, "confidence_min", fastPathMin)
 
 	// P3 Jev 判断引擎：JEV_API_KEY 配置即启用（端点/模型有默认值）。
 	//

@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 
@@ -88,12 +89,15 @@ func (h *Handler) SetJevGuardMin(v float64) {
 // jevVerdict 一轮对话的 JEV 综合判定结果。
 type jevVerdict struct {
 	// 可用性
-	Available bool
-	Err       error
+	Available       bool
+	FastFieldsValid bool
+	Err             error
 
 	// 意图
 	Intent     string
 	IntentConf float64
+	SingleRead bool
+	ShapeConf  float64
 
 	// 合法性：这是否为租户本人的合理请求（越低越可疑）
 	LegitProb float64
@@ -176,8 +180,26 @@ func (h *Handler) evaluateTurn(ctx context.Context, userMsg string, ses *session
 
 	if stats := turnTelemetry(ctx); stats != nil {
 		stats.JevCalls++
+		stats.JevUsageMissing++
 	}
+	if h.jevFastPathConfigured {
+		questions["route_shape"] = jev.Question{
+			Type:         jev.QChoice,
+			Instructions: "用户是否仅要求一个可直接返回完整结果、无需提取参数、无需之前对话上下文的查询？single_read只能是查询当前本人余额、默认近7天消耗、全部套餐目录、当前本人订阅。充值/退款/订购/改套餐/退订、已满足目标状态判断、复合步骤、解释比较推荐、缺参数、否定指令、其他账户、自定义时间/筛选/笔数均属于complex；不要因为需要先查询信息而把办理任务判成single_read。",
+			Criteria:     map[string]string{"single_read": "单个独立且无参数的白名单查询，可以直接返回实时工具结果", "complex": "办理操作、多个目标、需要解释推理、参数或上下文、非支持查询或不确定"},
+		}
+	}
+	started := time.Now()
 	r, err := h.jev.Evaluate(ctx, state, questions)
+	if err == nil && r == nil {
+		err = fmt.Errorf("jev returned no result")
+	}
+	if r != nil {
+		recordJevResultUsage(ctx, r.Raw)
+	}
+	if stats := turnTelemetry(ctx); stats != nil {
+		stats.JevLatencyMS += float64(time.Since(started)) / float64(time.Millisecond)
+	}
 	if err != nil {
 		if stats := turnTelemetry(ctx); stats != nil {
 			stats.JevErrors++
@@ -190,6 +212,11 @@ func (h *Handler) evaluateTurn(ctx context.Context, userMsg string, ses *session
 		return v
 	}
 	v.Available = true
+	v.FastFieldsValid = validFastAnswers(r)
+	if a, ok := r.Answers["route_shape"]; ok && a.Type == string(jev.QChoice) {
+		v.SingleRead = a.Choice == "single_read"
+		v.ShapeConf = a.Conf()
+	}
 
 	if a, ok := r.Answers["intent"]; ok {
 		v.Intent = a.Choice
@@ -208,6 +235,10 @@ func (h *Handler) evaluateTurn(ctx context.Context, userMsg string, ses *session
 	}
 
 	h.decideVerdict(&v)
+	if stats := turnTelemetry(ctx); stats != nil {
+		stats.JevIntent = v.Intent
+		stats.JevIntentConfidence = v.IntentConf
+	}
 	return v
 }
 
@@ -278,7 +309,9 @@ func (h *Handler) guardWrite(ctx context.Context, tenantID uint64, tool string, 
 	argsJSON, _ := json.Marshal(args)
 	if stats := turnTelemetry(ctx); stats != nil {
 		stats.JevCalls++
+		stats.JevUsageMissing++
 	}
+	started := time.Now()
 	r, err := h.jev.Evaluate(ctx, map[string]any{
 		"tenant_id":    tenantID,
 		"tool":         tool,
@@ -295,6 +328,15 @@ func (h *Handler) guardWrite(ctx context.Context, tenantID uint64, tool string, 
 			},
 		},
 	})
+	if err == nil && r == nil {
+		err = fmt.Errorf("jev returned no result")
+	}
+	if r != nil {
+		recordJevResultUsage(ctx, r.Raw)
+	}
+	if stats := turnTelemetry(ctx); stats != nil {
+		stats.JevLatencyMS += float64(time.Since(started)) / float64(time.Millisecond)
+	}
 	if err != nil {
 		if stats := turnTelemetry(ctx); stats != nil {
 			stats.JevErrors++

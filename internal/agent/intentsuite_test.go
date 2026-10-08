@@ -54,6 +54,21 @@ func TestIntentHTTPReadsTelemetryAndPendingTarget(t *testing.T) {
 	}
 }
 
+func TestIntentHTTPFailurePreservesTelemetryAndTrace(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]any{"error": "upstream failed", "trace": []map[string]string{{"tool": "get_balance"}}, "telemetry": TurnTelemetry{JevEnabled: true, JevCalls: 1, JevFastPath: true, LLMCalls: 2, LLMInputTokens: 42}})
+	}))
+	defer srv.Close()
+	p := predictOne(context.Background(), srv.Client(), srv.URL, "test", IntentSample{Intent: "get_balance"})
+	if p.HTTPCode != 500 || p.Err == "" || IntentMatched(p) {
+		t.Fatalf("failure counted as success: %+v", p)
+	}
+	if p.Telemetry == nil || !p.Telemetry.JevFastPath || p.Telemetry.LLMCalls != 2 || p.Telemetry.LLMInputTokens != 42 || len(p.AllTools) != 1 || p.Predicted != "get_balance" {
+		t.Fatalf("failed request lost observed evidence: %+v", p)
+	}
+}
+
 func TestLLMTelemetryCountsUpstreamAttempts(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(`{"choices":[{"message":{"role":"assistant","content":"hello"}}]}`))

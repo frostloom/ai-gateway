@@ -5,6 +5,7 @@ param(
     [string]$Version = 'v3',
     [string]$AgentExe = 'bin/agent.exe',
     [string]$SourceRevision = '',
+    [switch]$FastPath,
     [string]$Key = 'sk-demo-8f3a2b1c9d4e5f60',
     [int]$Sample = 5,
     [int]$Workers = 4,
@@ -16,9 +17,13 @@ $rootPath = Split-Path -Parent $PSScriptRoot
 $process = $null
 $savedPort = $env:AGENT_PORT
 $savedJev = $env:JEV_API_KEY
+$savedFastPath = $env:JEV_FAST_PATH
+$savedFastPathMin = $env:JEV_FAST_PATH_MIN
 Push-Location $rootPath
 try {
     . "$PSScriptRoot/load-env.ps1"
+    $env:JEV_FAST_PATH = $(if ($FastPath) { '1' } else { '0' })
+    $env:JEV_FAST_PATH_MIN = '0.90'
     if (!$env:AGENT_LLM_API_KEY -or ($JevMode -eq 'on' -and !$env:JEV_API_KEY)) { throw 'Required model credentials are missing.' }
     if ($Workers -lt 1 -or $Sample -lt 0) { throw 'Invalid sample/workers.' }
     if (Get-NetTCPConnection -State Listen -LocalPort $Port -ErrorAction SilentlyContinue) { throw "Experiment port $Port is already occupied." }
@@ -33,13 +38,17 @@ try {
         version = $Version; jev_mode = $JevMode; model = $model; workers = $Workers; sample_per_class = $Sample
         started_at = (Get-Date).ToUniversalTime().ToString('o'); git_head = (git rev-parse HEAD)
         worktree_diff_sha256 = $null; agent_sha256 = (Get-FileHash -Algorithm SHA256 -LiteralPath $agentPath).Hash.ToLower()
-        source_revision = $SourceRevision; source_kind = $(if ($SourceRevision) { 'declared committed control binary' } else { 'candidate binary built from worktree' })
+        source_revision = $SourceRevision; source_kind = 'declared committed agent binary'
         protocol = $env:AGENT_LLM_PROTOCOL; max_tokens = $env:AGENT_LLM_MAX_TOKENS
         jev_model = $env:JEV_MODEL; fixture = 'existing development tenant; no confirmation turns or business writes'
+        fast_path = [bool]$FastPath; fast_path_min = 0.90
     }
     # Preserve the exact implementation diff without exporting environment variables or credentials.
     $diffPath = Join-Path $outputPath 'implementation.patch'
-    $diff = if ($SourceRevision) { @("Control binary source revision declared by caller: $SourceRevision. Candidate worktree changes do not describe this binary.") } else { git diff -- internal/agent cmd/agent }
+    if (!$SourceRevision) { throw 'Declare the committed binary source revision with -SourceRevision.' }
+    git cat-file -e "$SourceRevision^{commit}"
+    if ($LASTEXITCODE -ne 0) { throw 'SourceRevision must name an existing commit.' }
+    $diff = @("Agent binary source revision declared by caller: $SourceRevision. Worktree changes do not describe this binary.")
     [IO.File]::WriteAllText($diffPath, ($diff -join "`n"), [Text.UTF8Encoding]::new($false))
     $metadata.worktree_diff_sha256 = (Get-FileHash -Algorithm SHA256 -LiteralPath $diffPath).Hash.ToLower()
     [IO.File]::WriteAllText((Join-Path $outputPath 'run.json'), ($metadata | ConvertTo-Json -Depth 5), [Text.UTF8Encoding]::new($false))
@@ -60,5 +69,7 @@ try {
     if ($process -and !$process.HasExited) { Stop-Process -Id $process.Id -ErrorAction SilentlyContinue }
     $env:AGENT_PORT = $savedPort
     $env:JEV_API_KEY = $savedJev
+    $env:JEV_FAST_PATH = $savedFastPath
+    $env:JEV_FAST_PATH_MIN = $savedFastPathMin
     Pop-Location
 }
