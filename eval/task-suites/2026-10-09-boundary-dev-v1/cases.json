@@ -1,0 +1,128 @@
+[
+  {
+    "message": "给账户充值",
+    "tool": "recharge",
+    "amount_money": 100,
+    "category": "clarification",
+    "cancel": false,
+    "missing_slot": "amount",
+    "read": false,
+    "initial_subscription": false,
+    "followup": "充值100元",
+    "id": "dev-recharge-missing"
+  },
+  {
+    "message": "帮我申请退款",
+    "tool": "refund_recharge",
+    "amount_money": 100,
+    "category": "clarification",
+    "cancel": false,
+    "missing_slot": "amount",
+    "read": false,
+    "initial_subscription": false,
+    "followup": "按金额退款100元",
+    "id": "dev-refund-missing"
+  },
+  {
+    "message": "帮我订套餐",
+    "tool": "subscribe_plan",
+    "category": "clarification",
+    "cancel": false,
+    "missing_slot": "plan",
+    "read": false,
+    "plan": "standard",
+    "initial_subscription": false,
+    "followup": "订购月度·标准套餐",
+    "id": "dev-subscribe-missing"
+  },
+  {
+    "message": "套餐变更",
+    "tool": "change_plan",
+    "initial_subscription": true,
+    "category": "clarification",
+    "cancel": false,
+    "missing_slot": "plan",
+    "read": false,
+    "plan": "flagship",
+    "followup": "改成月度·旗舰套餐",
+    "id": "dev-change-missing"
+  },
+  {
+    "read": false,
+    "message": "账户充值 50 元",
+    "tool": "recharge",
+    "category": "ready_preview",
+    "amount_money": 50,
+    "cancel": false,
+    "initial_subscription": false,
+    "id": "dev-recharge-ready"
+  },
+  {
+    "read": false,
+    "message": "开通月度标准套餐",
+    "tool": "subscribe_plan",
+    "category": "ready_preview",
+    "id": "dev-subscribe-ready",
+    "cancel": false,
+    "plan": "standard",
+    "initial_subscription": false
+  },
+  {
+    "tool": "recharge",
+    "amount_money": 500,
+    "category": "cancel",
+    "cancel": true,
+    "read": false,
+    "initial_subscription": false,
+    "message": "我要充 500 元",
+    "id": "dev-recharge-cancel"
+  },
+  {
+    "tool": "change_plan",
+    "category": "cancel",
+    "cancel": true,
+    "read": false,
+    "plan": "flagship",
+    "initial_subscription": true,
+    "message": "把月度标准改成月度旗舰",
+    "id": "dev-change-cancel"
+  },
+  {
+    "tool": "recharge",
+    "amount_money": 100,
+    "category": "repeat_confirmation",
+    "duplicate_confirm": true,
+    "read": false,
+    "initial_subscription": false,
+    "message": "充 100 元",
+    "id": "dev-recharge-repeat",
+    "cancel": false
+  },
+  {
+    "read": true,
+    "message": "查询余额",
+    "tool": "get_balance",
+    "category": "read",
+    "id": "dev-balance-read",
+    "cancel": false,
+    "initial_subscription": false
+  },
+  {
+    "id": "dev-subscription-read",
+    "message": "查看我的订阅状态",
+    "read": true,
+    "initial_subscription": true,
+    "category": "read",
+    "cancel": false,
+    "tool": "get_my_subscription"
+  },
+  {
+    "read": false,
+    "message": "我要取消套餐",
+    "tool": "cancel_subscription",
+    "category": "ready_preview",
+    "id": "dev-subscription-cancel",
+    "cancel": false,
+    "initial_subscription": true
+  }
+]

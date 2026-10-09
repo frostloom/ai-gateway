@@ -1,0 +1,86 @@
+[
+  {
+    "task_id": "dev-recharge-missing",
+    "source_text": "给账户充值",
+    "source_path": "eval/intent-suite/recharge.json",
+    "annotation": "Original first message retained; followup, branch and expected state are new development annotations.",
+    "source_case_id": "recharge-003"
+  },
+  {
+    "task_id": "dev-refund-missing",
+    "source_text": "帮我申请退款",
+    "source_path": "eval/intent-suite/refund.json",
+    "annotation": "Original first message retained; followup, branch and expected state are new development annotations.",
+    "source_case_id": "refund-013"
+  },
+  {
+    "task_id": "dev-subscribe-missing",
+    "source_text": "帮我订套餐",
+    "source_path": "eval/intent-suite/subscribe.json",
+    "annotation": "Original first message retained; followup, branch and expected state are new development annotations.",
+    "source_case_id": "subscribe-008"
+  },
+  {
+    "task_id": "dev-change-missing",
+    "source_text": "套餐变更",
+    "source_path": "eval/intent-suite/change_plan.json",
+    "annotation": "Original first message retained; followup, branch and expected state are new development annotations.",
+    "source_case_id": "change_plan-005"
+  },
+  {
+    "task_id": "dev-recharge-ready",
+    "source_text": "账户充值 50 元",
+    "source_path": "eval/intent-suite/recharge.json",
+    "annotation": "Original first message retained; followup, branch and expected state are new development annotations.",
+    "source_case_id": "recharge-007"
+  },
+  {
+    "task_id": "dev-subscribe-ready",
+    "source_text": "开通月度标准套餐",
+    "source_path": "eval/intent-suite/subscribe.json",
+    "annotation": "Original first message retained; followup, branch and expected state are new development annotations.",
+    "source_case_id": "subscribe-006"
+  },
+  {
+    "task_id": "dev-recharge-cancel",
+    "source_text": "我要充 500 元",
+    "source_path": "eval/intent-suite/recharge.json",
+    "annotation": "Original first message retained; followup, branch and expected state are new development annotations.",
+    "source_case_id": "recharge-010"
+  },
+  {
+    "task_id": "dev-change-cancel",
+    "source_text": "把月度标准改成月度旗舰",
+    "source_path": "eval/intent-suite/change_plan.json",
+    "annotation": "Original first message retained; followup, branch and expected state are new development annotations.",
+    "source_case_id": "change_plan-008"
+  },
+  {
+    "task_id": "dev-recharge-repeat",
+    "source_text": "充 100 元",
+    "source_path": "eval/intent-suite/recharge.json",
+    "annotation": "Original first message retained; followup, branch and expected state are new development annotations.",
+    "source_case_id": "recharge-099"
+  },
+  {
+    "task_id": "dev-balance-read",
+    "source_text": "查询余额",
+    "source_path": "eval/intent-suite/balance.json",
+    "annotation": "Original first message retained; followup, branch and expected state are new development annotations.",
+    "source_case_id": "balance-001"
+  },
+  {
+    "task_id": "dev-subscription-read",
+    "source_text": "查看我的订阅状态",
+    "source_path": "eval/intent-suite/subscription.json",
+    "annotation": "Original first message retained; followup, branch and expected state are new development annotations.",
+    "source_case_id": "subscription-002"
+  },
+  {
+    "task_id": "dev-subscription-cancel",
+    "source_text": "我要取消套餐",
+    "source_path": "eval/intent-suite/cancel_subscription.json",
+    "annotation": "Original first message retained; followup, branch and expected state are new development annotations.",
+    "source_case_id": "cancel_subscription-005"
+  }
+]
