@@ -158,7 +158,7 @@ func TestRunnerFixtureErrorCountsAsFailure(t *testing.T) {
 	if report.Metrics.Total != 1 || report.Metrics.FixtureFailures != 1 || report.Results[0].Success {
 		t.Fatalf("%+v", report)
 	}
-	if report.Schema != "taskbench.v2" {
+	if report.Schema != "taskbench.v3" {
 		t.Fatalf("schema=%s", report.Schema)
 	}
 }

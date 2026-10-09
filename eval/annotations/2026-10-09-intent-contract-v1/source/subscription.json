@@ -1,0 +1,802 @@
+[
+  {
+    "id": "subscription-065",
+    "text": "我的额度刷新了吗",
+    "intent": "get_my_subscription",
+    "dimension": "indirect",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-074",
+    "text": "我的 subscription 状态",
+    "intent": "get_my_subscription",
+    "dimension": "mixed_en",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-016",
+    "text": "我的套餐还有效吗",
+    "intent": "get_my_subscription",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-063",
+    "text": "我的会员还有效吗",
+    "intent": "get_my_subscription",
+    "dimension": "indirect",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-092",
+    "text": "马上查套餐",
+    "intent": "get_my_subscription",
+    "dimension": "command",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-049",
+    "text": "查顶阅",
+    "intent": "get_my_subscription",
+    "dimension": "typo",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-059",
+    "text": "我需要知道我现在的套餐订阅还剩多少天到期",
+    "intent": "get_my_subscription",
+    "dimension": "verbose",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-004",
+    "text": "查询订阅详情",
+    "intent": "get_my_subscription",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-078",
+    "text": "我的 quota 刷新了吗",
+    "intent": "get_my_subscription",
+    "dimension": "mixed_en",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-060",
+    "text": "帮我查下我的订阅信息，我想看看这个周期用了多少额度",
+    "intent": "get_my_subscription",
+    "dimension": "verbose",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-098",
+    "text": "给我查我的订阅",
+    "intent": "get_my_subscription",
+    "dimension": "command",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-088",
+    "text": "请问我的订阅还有效吗",
+    "intent": "get_my_subscription",
+    "dimension": "polite",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-057",
+    "text": "我想了解一下我这个套餐的额度刷新时间是多久，以及现在还剩多少",
+    "intent": "get_my_subscription",
+    "dimension": "verbose",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-040",
+    "text": "剩余额度",
+    "intent": "get_my_subscription",
+    "dimension": "terse",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-091",
+    "text": "立刻查我的订阅",
+    "intent": "get_my_subscription",
+    "dimension": "command",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-019",
+    "text": "我买的套餐还能用多久",
+    "intent": "get_my_subscription",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-076",
+    "text": "我的 plan 什么时候到期",
+    "intent": "get_my_subscription",
+    "dimension": "mixed_en",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-037",
+    "text": "套餐剩余",
+    "intent": "get_my_subscription",
+    "dimension": "terse",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-099",
+    "text": "套餐剩余发我",
+    "intent": "get_my_subscription",
+    "dimension": "command",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-055",
+    "text": "帮我查一下我当前订阅的套餐名称和这一期的额度使用情况",
+    "intent": "get_my_subscription",
+    "dimension": "verbose",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-090",
+    "text": "把订阅状态给我",
+    "intent": "get_my_subscription",
+    "dimension": "command",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-079",
+    "text": "请问可以帮我查一下我的订阅吗",
+    "intent": "get_my_subscription",
+    "dimension": "polite",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-039",
+    "text": "订阅周期",
+    "intent": "get_my_subscription",
+    "dimension": "terse",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-006",
+    "text": "查我的套餐订阅",
+    "intent": "get_my_subscription",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-075",
+    "text": "查我的 allowance",
+    "intent": "get_my_subscription",
+    "dimension": "mixed_en",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-026",
+    "text": "我订的套餐还剩多少",
+    "intent": "get_my_subscription",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-034",
+    "text": "我的套餐",
+    "intent": "get_my_subscription",
+    "dimension": "terse",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-013",
+    "text": "看下我的订阅详情",
+    "intent": "get_my_subscription",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-097",
+    "text": "订阅状态亮出来",
+    "intent": "get_my_subscription",
+    "dimension": "command",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-100",
+    "text": "快速查下我的订阅",
+    "intent": "get_my_subscription",
+    "dimension": "command",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-024",
+    "text": "我这包月还有几天",
+    "intent": "get_my_subscription",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-071",
+    "text": "查下我的 subscription",
+    "intent": "get_my_subscription",
+    "dimension": "mixed_en",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-048",
+    "text": "我的订阋还剩多久",
+    "intent": "get_my_subscription",
+    "dimension": "typo",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-080",
+    "text": "麻烦帮我看看订阅状态好吗",
+    "intent": "get_my_subscription",
+    "dimension": "polite",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-042",
+    "text": "我的订阋",
+    "intent": "get_my_subscription",
+    "dimension": "typo",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-036",
+    "text": "订阅详情",
+    "intent": "get_my_subscription",
+    "dimension": "terse",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-009",
+    "text": "查看我的套餐",
+    "intent": "get_my_subscription",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-021",
+    "text": "我这订阅啥情况",
+    "intent": "get_my_subscription",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-027",
+    "text": "我现在的套餐是哪个",
+    "intent": "get_my_subscription",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-032",
+    "text": "查订阅",
+    "intent": "get_my_subscription",
+    "dimension": "terse",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-082",
+    "text": "可以帮忙查询一下我的订阅详情吗",
+    "intent": "get_my_subscription",
+    "dimension": "polite",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-030",
+    "text": "我套餐啥时候刷新",
+    "intent": "get_my_subscription",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-070",
+    "text": "我的额度还有多少没用",
+    "intent": "get_my_subscription",
+    "dimension": "indirect",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-012",
+    "text": "查询订阅周期",
+    "intent": "get_my_subscription",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-083",
+    "text": "劳驾帮我查下我的订阅",
+    "intent": "get_my_subscription",
+    "dimension": "polite",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-003",
+    "text": "我的订阅情况",
+    "intent": "get_my_subscription",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-002",
+    "text": "查看我的订阅状态",
+    "intent": "get_my_subscription",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-067",
+    "text": "我这期用超了吗",
+    "intent": "get_my_subscription",
+    "dimension": "indirect",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-052",
+    "text": "你好，我之前订了一个套餐，想查一下它现在的状态和到期时间",
+    "intent": "get_my_subscription",
+    "dimension": "verbose",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-023",
+    "text": "我现在是啥套餐",
+    "intent": "get_my_subscription",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-062",
+    "text": "我是不是该续费了",
+    "intent": "get_my_subscription",
+    "dimension": "indirect",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-053",
+    "text": "麻烦帮我看看我的订阅详情，包括周期起止时间和剩余额度",
+    "intent": "get_my_subscription",
+    "dimension": "verbose",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-061",
+    "text": "我这个月额度还有吗",
+    "intent": "get_my_subscription",
+    "dimension": "indirect",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-020",
+    "text": "我订了啥来着",
+    "intent": "get_my_subscription",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-025",
+    "text": "我的订阅到啥时候",
+    "intent": "get_my_subscription",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-022",
+    "text": "我的套餐过期了没",
+    "intent": "get_my_subscription",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-068",
+    "text": "套餐什么时候重置",
+    "intent": "get_my_subscription",
+    "dimension": "indirect",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-005",
+    "text": "看下我的订阅",
+    "intent": "get_my_subscription",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-073",
+    "text": "看下我的 quota 剩余",
+    "intent": "get_my_subscription",
+    "dimension": "mixed_en",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-066",
+    "text": "我还剩几天",
+    "intent": "get_my_subscription",
+    "dimension": "indirect",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-044",
+    "text": "查下订越",
+    "intent": "get_my_subscription",
+    "dimension": "typo",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-064",
+    "text": "我需不需要重新订",
+    "intent": "get_my_subscription",
+    "dimension": "indirect",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-093",
+    "text": "订阅详情给我",
+    "intent": "get_my_subscription",
+    "dimension": "command",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-017",
+    "text": "我订阅的东西还在吗",
+    "intent": "get_my_subscription",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-041",
+    "text": "查订阪",
+    "intent": "get_my_subscription",
+    "dimension": "typo",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-084",
+    "text": "请问我的套餐还剩多少额度呢",
+    "intent": "get_my_subscription",
+    "dimension": "polite",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-086",
+    "text": "能否告知我的订阅到期时间",
+    "intent": "get_my_subscription",
+    "dimension": "polite",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-038",
+    "text": "我的额度",
+    "intent": "get_my_subscription",
+    "dimension": "terse",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-096",
+    "text": "直接告诉我套餐名",
+    "intent": "get_my_subscription",
+    "dimension": "command",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-056",
+    "text": "我不太确定我的订阅有没有自动续费，麻烦帮我查一下订阅状态",
+    "intent": "get_my_subscription",
+    "dimension": "verbose",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-008",
+    "text": "查询当前订阅",
+    "intent": "get_my_subscription",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-089",
+    "text": "我的订阅报一下",
+    "intent": "get_my_subscription",
+    "dimension": "command",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-015",
+    "text": "我订的是哪个套餐",
+    "intent": "get_my_subscription",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-046",
+    "text": "订阅详请",
+    "intent": "get_my_subscription",
+    "dimension": "typo",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-033",
+    "text": "订阅状态",
+    "intent": "get_my_subscription",
+    "dimension": "terse",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-047",
+    "text": "订阅读状态",
+    "intent": "get_my_subscription",
+    "dimension": "typo",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-045",
+    "text": "我的套惨",
+    "intent": "get_my_subscription",
+    "dimension": "typo",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-095",
+    "text": "查订阅，快点",
+    "intent": "get_my_subscription",
+    "dimension": "command",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-029",
+    "text": "我的订阅续费了吗",
+    "intent": "get_my_subscription",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-010",
+    "text": "查下我的订阅",
+    "intent": "get_my_subscription",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-014",
+    "text": "我的订阅状态查询",
+    "intent": "get_my_subscription",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-011",
+    "text": "我的订阅还有多久",
+    "intent": "get_my_subscription",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-081",
+    "text": "能不能帮我查下我的套餐",
+    "intent": "get_my_subscription",
+    "dimension": "polite",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-054",
+    "text": "我想知道我的套餐订阅是否还在有效期内，以及什么时候需要续费",
+    "intent": "get_my_subscription",
+    "dimension": "verbose",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-058",
+    "text": "请帮我确认当前的订阅情况，我要决定是继续订还是改套餐",
+    "intent": "get_my_subscription",
+    "dimension": "verbose",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-035",
+    "text": "看订阅",
+    "intent": "get_my_subscription",
+    "dimension": "terse",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-094",
+    "text": "报一下我的套餐",
+    "intent": "get_my_subscription",
+    "dimension": "command",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-043",
+    "text": "订阋状态",
+    "intent": "get_my_subscription",
+    "dimension": "typo",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-087",
+    "text": "麻烦您帮我查下我的订阅",
+    "intent": "get_my_subscription",
+    "dimension": "polite",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-031",
+    "text": "我的订阅",
+    "intent": "get_my_subscription",
+    "dimension": "terse",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-050",
+    "text": "套惨剩余",
+    "intent": "get_my_subscription",
+    "dimension": "typo",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-028",
+    "text": "我这期额度还有吗",
+    "intent": "get_my_subscription",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-069",
+    "text": "我还在订阅中吗",
+    "intent": "get_my_subscription",
+    "dimension": "indirect",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-051",
+    "text": "我想确认一下我当前的订阅套餐是什么，以及这一期的额度还剩下多少可以用",
+    "intent": "get_my_subscription",
+    "dimension": "verbose",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-077",
+    "text": "看下 subscription 详情",
+    "intent": "get_my_subscription",
+    "dimension": "mixed_en",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-001",
+    "text": "查询我的订阅",
+    "intent": "get_my_subscription",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-072",
+    "text": "我的 plan 还有效吗",
+    "intent": "get_my_subscription",
+    "dimension": "mixed_en",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-018",
+    "text": "我这套餐什么时候到期",
+    "intent": "get_my_subscription",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-085",
+    "text": "方便的话帮我查一下订阅情况",
+    "intent": "get_my_subscription",
+    "dimension": "polite",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "subscription-007",
+    "text": "我的订阅信息",
+    "intent": "get_my_subscription",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  }
+]

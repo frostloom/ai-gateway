@@ -99,25 +99,31 @@ func main() {
 	tb := agent.NewToolbox(agent.NewAdminClient(adminBase))
 	llm := agent.NewLLMClient(llmBase, llmKey, llmModel)
 	h := agent.NewHandler(bc, tb, llm, st, rdb, log)
+	routingMode := config.Getenv("AGENT_ROUTING_MODE", string(agent.RoutingJevSelective))
 	fastPathEnabled := config.Getenv("JEV_FAST_PATH", "0") == "1"
 	fastPathMin := config.GetenvFloat("JEV_FAST_PATH_MIN", 0.90)
-	if err := h.SetJevFastPath(fastPathEnabled, fastPathMin); err != nil {
-		log.Error("invalid fast path configuration", "err", err)
+	// Legacy flags remain available for historical runs. The primary selective
+	// mode always enables read routing; model/hint never execute it.
+	if err := configureRouting(h, routingMode, fastPathEnabled, fastPathMin); err != nil {
+		log.Error("invalid routing configuration", "err", err)
 		os.Exit(1)
 	}
-	log.Info("jev read fast path policy", "enabled", fastPathEnabled, "confidence_min", fastPathMin)
+	log.Info("agent routing policy", "mode", h.RoutingMode(), "confidence_min", fastPathMin,
+		"legacy_fast_path", fastPathEnabled)
 
-	// P3 Jev 判断引擎：JEV_API_KEY 配置即启用（端点/模型有默认值）。
+	// JEV 只在非 model 路由模式下启用（端点/模型有默认值）。
 	//
-	// 三层判定与阈值（每轮对话先过一道 JEV，再按置信度分层处置）：
+	// 以下安全/意图阈值仅用于显式 legacy；jev_hint 仅使用 intentMin。
 	//	JEV_BLOCK_MIN  合法性低于此值 → 直接拦截，不调 LLM（默认 0.30）
 	//	JEV_WARN_MIN   合法性低于此值 → 放行但警告 + 强制确认（默认 0.60）
 	//	JEV_INTENT_MIN 意图置信度高于此值 → 注入意图预判提示（默认 0.75）
 	//	JEV_GUARD_MIN  写操作执行前的二次守门阈值（默认 0.80）
 	//
-	// 未配置时全部静默停用，行为回退到未接入 JEV 的状态。
+	// 未配置时显式记录模型回退，不把这类运行当作正常分流实验。
 	jevKey := config.Getenv("JEV_API_KEY", "")
-	if jevKey != "" {
+	if h.RoutingMode() == agent.RoutingModel {
+		log.Info("model routing: JEV disabled regardless of configured API key")
+	} else if jevKey != "" {
 		jevEndpoint := config.Getenv("JEV_ENDPOINT", jev.DefaultEndpoint)
 		jevModel := config.Getenv("JEV_MODEL", jev.DefaultModel)
 
@@ -131,11 +137,12 @@ func main() {
 		h.SetJevGuardMin(guardMin)
 
 		log.Info("jev engine enabled",
-			"endpoint", jevEndpoint, "model", jevModel,
+			"endpoint", jevEndpoint, "model", jevModel, "routing_mode", h.RoutingMode(),
 			"block_min", blockMin, "warn_min", warnMin,
 			"intent_min", intentMin, "guard_min", guardMin)
 	} else {
-		log.Warn("JEV 未配置（JEV_API_KEY）：每轮判定、写操作守门与意图预判全部停用")
+		log.Warn("JEV 未配置（JEV_API_KEY）：回退模型；此运行不能作为正常 JEV 分流效果证据",
+			"routing_mode", h.RoutingMode(), "fallback_reason", "judge_unconfigured")
 	}
 
 	// 管理面板代操作：gateway 校验管理员登录态后带内部共享密钥头转发；
@@ -163,4 +170,13 @@ func main() {
 		log.Error("agent serve", "err", err)
 		os.Exit(1)
 	}
+}
+
+func configureRouting(h *agent.Handler, mode string, fastPathEnabled bool, fastPathMin float64) error {
+	// Select the requested mode before validating its threshold, because the
+	// production constructor starts in selective mode, including for legacy runs.
+	if err := h.SetRoutingMode(mode); err != nil {
+		return err
+	}
+	return h.SetJevFastPath(fastPathEnabled || h.RoutingMode() == agent.RoutingJevSelective, fastPathMin)
 }

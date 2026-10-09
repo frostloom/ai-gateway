@@ -88,9 +88,18 @@ func run() int {
 	}
 	defer backend.Close()
 	fmt.Printf("Task suite: %d cases; model=%s; JEV=%s; isolated simulation tenants\n", len(cases), c.Model, c.JevMode)
+	contract, contractErr := os.ReadFile("docs/customer-service-evaluation-contract-2026-10-09.md")
+	fixtureDefinition, fixtureErr := os.ReadFile("internal/taskbench/live.go")
+	contractHash, fixtureHash := "", ""
+	if contractErr == nil {
+		contractHash = fmt.Sprintf("%x", sha256.Sum256(contract))
+	}
+	if fixtureErr == nil {
+		fixtureHash = fmt.Sprintf("%x", sha256.Sum256(fixtureDefinition))
+	}
 	report := taskbench.Run(context.Background(), taskbench.Options{
 		BaseURL: c.Base, Backend: backend, Cases: cases,
-		Metadata:   taskbench.Metadata{Version: c.Version, JevMode: c.JevMode, Model: c.Model, SourceGit: c.Source, BinarySHA256: hex.EncodeToString(sha[:]), EvaluatorSHA256: hex.EncodeToString(evaluatorSHA[:])},
+		Metadata:   taskbench.Metadata{EvaluationContractSHA256: contractHash, FixtureDefinitionSHA256: fixtureHash, Version: c.Version, JevMode: c.JevMode, Model: c.Model, SourceGit: c.Source, BinarySHA256: hex.EncodeToString(sha[:]), EvaluatorSHA256: hex.EncodeToString(evaluatorSHA[:])},
 		OnProgress: func(done, total int) { fmt.Printf("Verified task attempts: %d/%d\n", done, total) },
 	})
 	if err := taskbench.WriteReport(c.Out, report); err != nil {

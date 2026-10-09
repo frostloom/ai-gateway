@@ -1,0 +1,6 @@
+[
+  {"id":"synthetic-balance","http_code":200,"err":"","trace":[{"tool":"get_balance","phase":"read"}],"pending":null,"reply":"余额100元。","assertions":{"answer":{"balance_yuan":100},"state":{"balance_yuan":100,"forbidden_side_effects":0},"terminal":true,"evidence_ref":"synthetic-static-read"}},
+  {"id":"synthetic-clarify","http_code":200,"err":"","trace":[{"tool":"get_balance","phase":"read"}],"pending":null,"reply":"请问充值多少元？","assertions":{"action":{"kind":"clarify","slot":"amount_yuan","reply_span":"充值多少元"},"terminal":false}},
+  {"id":"synthetic-preview","http_code":200,"err":"","trace":[{"tool":"get_recent_bills","phase":"read"},{"tool":"refund_recharge","phase":"preview"}],"pending":{"tool":"refund_recharge","params":{"order_id":2,"amount_yuan":50}},"reply":"申请退款50元，确认后办理。","assertions":{"answer":{"requested_refund_yuan":50},"state":{"balance_yuan":100,"forbidden_side_effects":0},"terminal":false,"evidence_ref":"synthetic-static-preview"}},
+  {"id":"synthetic-service-failure","http_code":451,"err":"region unavailable","trace":[],"pending":null,"reply":"","assertions":{}}
+]

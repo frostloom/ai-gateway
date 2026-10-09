@@ -1,0 +1,4 @@
+[
+  {"id":"synthetic-balance","independent":true,"initial_state_valid":true,"source":"synthetic_regression","evidence_ref":"locally-authored-static-account","expected_answer":{"balance_yuan":100},"expected_state":{"balance_yuan":100,"forbidden_side_effects":0}},
+  {"id":"synthetic-preview","independent":true,"initial_state_valid":true,"source":"synthetic_regression","evidence_ref":"locally-authored-static-refund","expected_answer":{"requested_refund_yuan":50},"expected_state":{"balance_yuan":100,"forbidden_side_effects":0},"expected_pending":{"tool":"refund_recharge","params":{"order_id":2,"amount_yuan":50}}}
+]

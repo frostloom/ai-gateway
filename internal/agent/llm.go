@@ -43,9 +43,10 @@ type Tool struct {
 }
 
 type chatRequest struct {
-	Model    string    `json:"model"`
-	Messages []Message `json:"messages"`
-	Tools    []Tool    `json:"tools,omitempty"`
+	Model     string    `json:"model"`
+	MaxTokens int       `json:"max_tokens,omitempty"`
+	Messages  []Message `json:"messages"`
+	Tools     []Tool    `json:"tools,omitempty"`
 }
 
 type chatResponse struct {
@@ -227,7 +228,7 @@ func isBudgetExhausted(err error) bool {
 
 // chatOpenAI 走 OpenAI 兼容的 chat/completions。
 func (c *LLMClient) chatOpenAI(ctx context.Context, messages []Message, tools []Tool) (*Message, error) {
-	body, err := json.Marshal(chatRequest{Model: c.model, Messages: messages, Tools: tools})
+	body, err := json.Marshal(chatRequest{Model: c.model, MaxTokens: c.maxTokens, Messages: messages, Tools: tools})
 	if err != nil {
 		return nil, err
 	}
@@ -252,6 +253,7 @@ func (c *LLMClient) chatOpenAI(ctx context.Context, messages []Message, tools []
 	}
 	var out chatResponse
 	parseErr := json.Unmarshal(raw, &out)
+	recordProviderUsage(ctx, raw)
 	if parseErr == nil && out.Usage != nil {
 		u := out.Usage
 		recordLLMUsage(ctx, u.PromptTokens, u.CompletionTokens, u.PromptCacheHitTokens, u.PromptCacheMissTokens, nil)

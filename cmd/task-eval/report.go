@@ -14,6 +14,11 @@ func renderReport(report taskbench.Report) string {
 	fmt.Fprintf(&b, "评分规则：`%s`。\n\n", report.Schema)
 	fmt.Fprintf(&b, "# 客服多轮任务评测\n\n这是固定任务回归集，不是对所有用户说法的泛化准确率估计。真实模型与真实本地模拟账务服务参与；每个任务使用独立租户。成功必须通过参数、确认流程和独立最终状态核验，必要追问属于正常流程。\n\n版本：%s；JEV：%s；模型：%s；源码：%s。\n\n数据集 SHA256：`%s`\n\n", report.Metadata.Version, report.Metadata.JevMode, report.Metadata.Model, report.Metadata.SourceGit, report.DatasetSHA256)
 	fmt.Fprintf(&b, "| 指标 | 结果 |\n|---|---:|\n| 任务完成率（全部尝试，含失败） | %d/%d · %.2f%% |\n| fixture失败 | %d |\n| HTTP失败 | %d |\n| 必要追问提供数/应追问任务数 | %d/%d |\n| 参数充分时冗余追问候选 | %d |\n| 参数正确预览/观测到的预览 | %d/%d |\n| 确认前写入违规任务 | %d |\n| 取消无写入/取消任务 | %d/%d |\n| 实测LLM请求总数/有遥测轮数 | %d/%d |\n\n", m.Completed, m.Total, m.CompletionRate*100, m.FixtureFailures, m.FailedHTTP, m.ClarificationOffered, m.ClarificationRequired, m.RedundantClarifications, m.PreviewCorrect, m.PreviewObserved, m.PrematureWrites, m.CancelNoWrite, m.CancelCases, m.LLMCalls, m.TelemetryTurns)
+	fmt.Fprintf(&b, "新主口径：有效初始状态任务 %d，完整通过 %d，完成率 %.2f%%；HTTP失败保留在有效分母中，初始化失败另列。\n\n", m.ValidTasks, m.Completed, m.ValidTaskCompletionRate*100)
+	fmt.Fprintf(&b, "用量状态：%s；缺telemetry轮次 %d；LLM缺usage尝试 %d，JEV缺usage尝试 %d。费用状态：%s（无适用单价，不按零计算）。\n\n", m.UsageStatus, m.TelemetryMissingTurns, m.Usage.LLMUsageMissing, m.Usage.JevUsageMissing, m.CostStatus)
+	if len(report.ConfigurationErrors) > 0 {
+		fmt.Fprintf(&b, "配置证据不完整：%s。不能作为已核验主对照实验。\n\n", strings.Join(report.ConfigurationErrors, "; "))
+	}
 	fmt.Fprintf(&b, "追问后任务完成：%d/%d；重复确认任务通过：%d/%d。提供追问与完成缺槽任务分别统计；重复确认需要核验没有第二次账务变更。\n\n", m.ClarificationCompleted, m.ClarificationRequired, m.DuplicateConfirmPassed, m.DuplicateConfirmCases)
 	fmt.Fprintf(&b, "取消后的账务状态未变观测：%d/%d；成功取消且无写入（同时要求清除挂起）：%d/%d。状态未变不能替代取消成功，仍挂起的操作以后可能被确认。\n\n", m.CancelNoWriteObserved, m.CancelCases, m.CancelNoWrite, m.CancelCases)
 	b.WriteString("未观测到预览时，参数正确率不可评估；不能把未观测误称为100%或0%的参数能力。追问文本判定仍有语言规则限制，须结合原始轮次复核。\n\n")

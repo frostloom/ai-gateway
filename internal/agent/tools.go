@@ -187,7 +187,7 @@ func argStr(args map[string]any, key string) (string, error) {
 func (tb *Toolbox) readBalance() *execTool {
 	return &execTool{
 		name:        "get_balance",
-		description: "查询当前账户可用余额（元 ¥，附 token 数）。",
+		description: "查询当前现金余额及账本余额（元 ¥）；不提供token数或可调用次数。",
 		parameters:  obj(nil, nil),
 		run: func(ctx context.Context, args map[string]any, tenantID uint64, _ string) (string, error) {
 			v, err := tb.me(ctx, tenantID)
@@ -207,7 +207,7 @@ func (tb *Toolbox) readBalance() *execTool {
 func (tb *Toolbox) readConsumption() *execTool {
 	return &execTool{
 		name:        "get_consumption",
-		description: "查询近 7 天每日消耗量（token，并附约合金额 ¥）。",
+		description: "查询近7天逐日扣费金额及合计（元 ¥）；不提供token用量、模型分布或预算，零扣费不等于零token。",
 		parameters:  obj(nil, nil),
 		run: func(ctx context.Context, args map[string]any, tenantID uint64, _ string) (string, error) {
 			v, err := tb.me(ctx, tenantID)
@@ -233,9 +233,9 @@ func (tb *Toolbox) readConsumption() *execTool {
 func (tb *Toolbox) readRecentBills() *execTool {
 	return &execTool{
 		name:        "get_recent_bills",
-		description: "查询最近几笔消费明细（默认最近 3 笔，含发生时间/模型/token/约合金额 ¥）。",
+		description: "查询最近消费明细（默认3笔，最多10笔，含时间/模型/token/扣费元）；不支持完整月份、导出或发票。",
 		parameters: obj(map[string]any{
-			"limit": map[string]any{"type": "number", "description": "查询笔数，默认 3"},
+			"limit": map[string]any{"type": "number", "description": "查询笔数，默认3，最多10", "minimum": 1, "maximum": 10},
 		}, nil),
 		run: func(ctx context.Context, args map[string]any, tenantID uint64, _ string) (string, error) {
 			limit := int64(3)
@@ -698,6 +698,23 @@ func (tb *Toolbox) findPlan(ctx context.Context, tenantID uint64, args map[strin
 		matches := exact
 		if len(matches) == 0 {
 			matches = partial
+		}
+		// Common spoken suffixes describe a tier, but are not part of its
+		// catalog name. Try them only after the original exact/partial lookup;
+		// retain all matches so monthly/yearly ambiguity still requires asking.
+		if len(matches) == 0 {
+			alias := name
+			for _, suffix := range []string{"套餐", "档位", "档"} {
+				alias = strings.TrimSuffix(alias, suffix)
+			}
+			if alias != "" && alias != name {
+				for i := range v.Plans {
+					p := &v.Plans[i]
+					if p.Status == 0 && p.PlanType == store.PlanTypeRecurring && strings.Contains(normalizePlanName(p.Name), alias) {
+						matches = append(matches, p)
+					}
+				}
+			}
 		}
 		if len(matches) == 0 {
 			return nil, fmt.Errorf("未找到名称为「%s」的在售定期套餐，请查询套餐目录", name)

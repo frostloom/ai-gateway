@@ -1,0 +1,89 @@
+{
+  "counts": {
+    "answer": {
+      "fail": 0,
+      "pass": 2,
+      "service_failure": 1,
+      "unverifiable": 1
+    },
+    "full_task": {
+      "fail": 0,
+      "pass": 1,
+      "service_failure": 1,
+      "unverifiable": 2
+    },
+    "next_action": {
+      "fail": 0,
+      "pass": 3,
+      "service_failure": 1,
+      "unverifiable": 0
+    },
+    "numeric_truth": {
+      "fail": 0,
+      "pass": 2,
+      "service_failure": 1,
+      "unverifiable": 1
+    },
+    "preview_parameters": {
+      "fail": 0,
+      "pass": 1,
+      "service_failure": 1,
+      "unverifiable": 2
+    }
+  },
+  "denominator": 4,
+  "limitations": [
+    "Posthoc AI labels are not independent gold.",
+    "First tool is diagnostic only. Read-then-clarify is allowed with focused evidence.",
+    "Missing truth remains unverifiable; service failures stay in denominator.",
+    "Measured assertions must come from a trusted runner/extractor, never model self-report.",
+    "No rate is reported as task accuracy unless all fixtures are independent and complete."
+  ],
+  "rows": [
+    {
+      "answer": "pass",
+      "full_task": "pass",
+      "id": "synthetic-balance",
+      "next_action": "pass",
+      "numeric_truth": "pass",
+      "preview_parameters": "unverifiable",
+      "reasons": [],
+      "source_case_id": "synthetic-balance"
+    },
+    {
+      "answer": "unverifiable",
+      "full_task": "unverifiable",
+      "id": "synthetic-clarify",
+      "next_action": "pass",
+      "numeric_truth": "unverifiable",
+      "preview_parameters": "unverifiable",
+      "reasons": [
+        "Independent fixture and measured assertion evidence absent"
+      ],
+      "source_case_id": "synthetic-clarify"
+    },
+    {
+      "answer": "pass",
+      "full_task": "unverifiable",
+      "id": "synthetic-preview",
+      "next_action": "pass",
+      "numeric_truth": "pass",
+      "preview_parameters": "pass",
+      "reasons": [],
+      "source_case_id": "synthetic-preview"
+    },
+    {
+      "answer": "service_failure",
+      "full_task": "service_failure",
+      "id": "synthetic-service-failure",
+      "next_action": "service_failure",
+      "numeric_truth": "service_failure",
+      "preview_parameters": "service_failure",
+      "reasons": [
+        "HTTP/error failure; not classified as intent error"
+      ],
+      "source_case_id": "synthetic-service-failure"
+    }
+  ],
+  "schema_version": 1
+}

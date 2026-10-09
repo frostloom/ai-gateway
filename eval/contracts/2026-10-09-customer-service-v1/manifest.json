@@ -1,0 +1,31 @@
+{
+  "action_counts": {
+    "clarify": 273,
+    "consult": 55,
+    "limited": 49,
+    "preview": 250,
+    "read": 481,
+    "reject": 18,
+    "respond": 94
+  },
+  "annotation_status": "ai_posthoc_not_independent_gold",
+  "archive_manifest": "archive-manifest.json",
+  "artifacts": {
+    "cases.json": "1563c8677b2b9bf8720833f6bf5ea5bfd30af67f0c6b1b07b2b61d8afe190af7",
+    "evaluation-inputs.json": "c4b6a52c8c5be1e3c48bc1728f57ee6b1508f9adafad1cca7822caa9409531aa",
+    "normalization-proof.json": "caa5742293c2c27dd2024dd75547ca9949f86c6187cbfa7470b25c615a5c6e03"
+  },
+  "count": 1220,
+  "exporter_sha256": "2a84136c988d757500d3477c2101786fb8e34d1377a9d16c457a8928c140e3e7",
+  "fixture_count": 0,
+  "human_independent_review_count": 0,
+  "normalization_count": 19,
+  "schema_version": 1,
+  "sources": {
+    "eval/intent-suite/manifest.json": "13ae828e4dd8f77ced4941e38422963ac4b8749121aec0ec40b8db11056671df",
+    "eval/reviews/2026-10-09-intent-offline-audit/draft-cases.json": "641261f9eca556de63156f33755f126986843fc981cb94f73442df540d254c88",
+    "eval/reviews/2026-10-09-intent-offline-audit/reviews.json": "89458b2f7a66721b910fc7678921511ee3558352b958f93fae056bdabec089ee",
+    "web/scripts/gen-intent-suite.mjs": "d022837db922b9eb35cb9a9f586f12238b0990d90dd4b35ac98c39605d63516c"
+  },
+  "version": "customer-service-contract-v1"
+}

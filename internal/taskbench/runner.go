@@ -8,6 +8,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"github.com/frostloom/ai-gateway/internal/agent"
 	"io"
 	"net/http"
 	"strings"
@@ -24,7 +25,7 @@ func randomID() string {
 func Run(ctx context.Context, o Options) Report {
 	data, _ := json.Marshal(o.Cases)
 	hash := sha256.Sum256(data)
-	report := Report{Schema: "taskbench.v2", RunID: randomID(), StartedAt: time.Now().UTC(), Metadata: o.Metadata, DatasetSHA256: hex.EncodeToString(hash[:]), Limitations: []string{"Small frozen billing regression suite; not general model accuracy.", "Clarification is a slot-oriented text rubric, not semantic understanding proof.", "Subscription read identity accepts the exact observed plan ID or canonical catalogue name; contradictory IDs/names fail. The v1 oracle was overly strict about the 套餐# prefix and its historical reports remain unchanged.", "Synthetic followups have zero user think time; fixture setup excluded, final state verification included.", "Completion requires authoritative state, confirmation timing and parameter evidence; tool selection alone earns no credit.", "Cancellation no-write observation is separate from successful cancellation, which also requires no pending action.", "Fixture tenants, credentials hashes, business records and sessions retained for historical verification."}}
+	report := Report{Schema: "taskbench.v3", RunID: randomID(), StartedAt: time.Now().UTC(), Metadata: o.Metadata, DatasetSHA256: hex.EncodeToString(hash[:]), Limitations: []string{"Small frozen billing regression suite; not general model accuracy.", "Clarification is a slot-oriented text rubric, not semantic understanding proof.", "Write reply/preview rubric rejects explicit contradictory operation amounts; it does not prove all required natural-language facts or detect all paraphrased monetary/plan contradictions. Review raw responses before declaring full contract acceptance.", "Subscription read identity accepts the exact observed plan ID or canonical catalogue name; contradictory IDs/names fail. The v1 oracle was overly strict about the 套餐# prefix and its historical reports remain unchanged.", "Synthetic followups have zero user think time; fixture setup excluded, final state verification included.", "Completion requires authoritative state, confirmation timing and parameter evidence; tool selection alone earns no credit.", "Cancellation no-write observation is separate from successful cancellation, which also requires no pending action.", "Fixture tenants, credentials hashes, business records and sessions retained for historical verification.", "Provider usage is retained when supplied; missing required usage and telemetry are explicit. Optional cache/reasoning fields may be unavailable and default counters must not be interpreted as attested zero usage. Prices are unavailable; cost is not evaluable.", "Legacy completion_rate includes setup failures; valid_task_completion_rate excludes invalid initial states and retains HTTP failures."}}
 	if o.Client == nil {
 		o.Client = &http.Client{Timeout: 120 * time.Second}
 	}
@@ -33,6 +34,28 @@ func Run(ctx context.Context, o Options) Report {
 		if o.OnProgress != nil {
 			o.OnProgress(i+1, len(o.Cases))
 		}
+	}
+	var evidence []agent.IntentPrediction
+	for _, r := range report.Results {
+		for i, t := range r.Turns {
+			evidence = append(evidence, agent.IntentPrediction{Sample: agent.IntentSample{ID: fmt.Sprintf("%s/turn-%d", r.Case.ID, i+1)}, TelemetryRaw: t.TelemetryRaw})
+		}
+	}
+	report.Runtime, report.ConfigurationErrors = agent.IntentRuntimeEvidence(evidence)
+	if len(report.Runtime) == 0 {
+		report.ConfigurationErrors = append(report.ConfigurationErrors, "no observed runtime metadata")
+	}
+	if report.Metadata.EvaluationContractSHA256 == "" {
+		report.ConfigurationErrors = append(report.ConfigurationErrors, "missing evaluation contract SHA")
+	}
+	if report.Metadata.FixtureDefinitionSHA256 == "" {
+		report.ConfigurationErrors = append(report.ConfigurationErrors, "missing fixture definition SHA")
+	}
+	var observed struct {
+		Model string `json:"model"`
+	}
+	if json.Unmarshal(report.Runtime, &observed) == nil && report.Metadata.Model != "" && observed.Model != report.Metadata.Model {
+		report.ConfigurationErrors = append(report.ConfigurationErrors, "observed model differs from declared model")
 	}
 	report.Metrics = Summarize(report.Results)
 	return report
@@ -74,9 +97,14 @@ func runCase(ctx context.Context, o Options, runID string, c Case) Result {
 			resp, err = o.Client.Do(req)
 			if err == nil {
 				t.Status = resp.StatusCode
-				body, readErr := io.ReadAll(io.LimitReader(resp.Body, 4<<20))
+				body, readErr := io.ReadAll(resp.Body)
 				resp.Body.Close()
 				t.RawBody = string(body)
+				var envelope map[string]json.RawMessage
+				if json.Unmarshal(body, &envelope) == nil {
+					t.TelemetryRaw = envelope["telemetry"]
+					t.TraceRaw = envelope["trace"]
+				}
 				err = readErr
 				if err == nil {
 					err = json.Unmarshal(body, &t.Response)
@@ -84,6 +112,9 @@ func runCase(ctx context.Context, o Options, runID string, c Case) Result {
 			}
 		}
 		t.LatencyMS = float64(time.Since(begun)) / float64(time.Millisecond)
+		if err == nil && t.Status != http.StatusOK {
+			err = fmt.Errorf("HTTP %d: %s", t.Status, t.Response.HTTPError)
+		}
 		if err != nil {
 			t.Error = err.Error()
 			fail(fmt.Errorf("%s request: %w", stage, err))

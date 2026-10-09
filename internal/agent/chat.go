@@ -39,11 +39,15 @@ type session struct {
 
 // traceItem 单次工具执行的审计可见结果（回给前端渲染 trace）。
 type traceItem struct {
-	Tool      string `json:"tool"`
-	Args      string `json:"args"`
-	Confirmed bool   `json:"confirmed"`
-	Preview   string `json:"preview"`
-	Result    string `json:"result"`
+	Tool         string  `json:"tool"`
+	Args         string  `json:"args"`
+	Confirmed    bool    `json:"confirmed"`
+	Preview      string  `json:"preview"`
+	Result       string  `json:"result"`
+	ResolvedArgs string  `json:"resolved_args,omitempty"`
+	Phase        string  `json:"phase,omitempty"`
+	Outcome      string  `json:"outcome,omitempty"`
+	DurationMS   float64 `json:"duration_ms"`
 }
 
 // llmChat LLM 调用面：生产是真实 DeepSeek（LLMClient），单测注入脚本化假 LLM（无网络）。
@@ -58,12 +62,13 @@ type billingAuth interface {
 
 // Handler AI 客服运行时：鉴权（key→tenant）→ 会话 → 意图路由（LLM）→ 工具执行 / 确认挂起。
 type Handler struct {
-	billing billingAuth // 用 ValidateAPIKey 鉴权，tenant 只从这里来
-	tb      *Toolbox
-	llm     llmChat
-	st      *store.Store // 会话落库 + 审计
-	rdb     *goredis.Client
-	log     *slog.Logger
+	routingMode RoutingMode
+	billing     billingAuth // 用 ValidateAPIKey 鉴权，tenant 只从这里来
+	tb          *Toolbox
+	llm         llmChat
+	st          *store.Store // 会话落库 + 审计
+	rdb         *goredis.Client
+	log         *slog.Logger
 
 	/*** P3 Jev 判断引擎（nil = 停用，行为与未接入时一致） ***/
 	jev                   jevEvaluator
@@ -88,6 +93,7 @@ func (h *Handler) SetAdminAccess(internalToken string, defaultTenant uint64) {
 
 func NewHandler(b *client.Billing, tb *Toolbox, llm *LLMClient, st *store.Store, rdb *goredis.Client, log *slog.Logger) *Handler {
 	return &Handler{billing: b, tb: tb, llm: llm, st: st, rdb: rdb, log: log,
+		routingMode: RoutingJevSelective, jevFastPathConfigured: true, jevFastPathEnabled: true, jevFastPathMin: .90,
 		jevGuardMin: 0.8, jevBlockMin: 0.30, jevWarnMin: 0.60, jevIntentMin: 0.75}
 }
 
@@ -99,7 +105,8 @@ func NewHandler(b *client.Billing, tb *Toolbox, llm *LLMClient, st *store.Store,
 //     X-Agent-Internal + X-Agent-Tenant（管理员以某个租户身份代为操作，默认租户由 gateway 决定）。
 //     内部头必须匹配 AGENT_INTERNAL_TOKEN，否则一律按未授权处理——防止直接打 :9105 伪造管理员。
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	stats := &TurnTelemetry{JevEnabled: h.jev != nil}
+	stats := &TurnTelemetry{JevEnabled: h.jev != nil && h.usesJevTurn(), Runtime: h.runtimeMetadata(), TurnStage: "request"}
+	w = &telemetryWriter{ResponseWriter: w, stats: stats, started: time.Now()}
 	ctx := context.WithValue(r.Context(), telemetryKey{}, stats)
 
 	var req struct {
@@ -125,6 +132,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if req.SessionID == "" {
 		req.SessionID = newSessionID()
 	}
+	stats.TurnStage = "session"
 	if err := h.st.RecordSession(ctx, req.SessionID, tenantID, apiKeyID); err != nil {
 		h.log.Error("record session", "err", err)
 		if errors.Is(err, store.ErrSessionTenantMismatch) {
@@ -141,11 +149,15 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	stats.TurnStage = "process"
 	reply, trace, err := h.process(ctx, req.SessionID, tenantID, req.Message, ses)
 	// 成功也必须落盘：写工具挂起的 pending_action、多轮历史都在这。
 	// 只在错误时保存会导致确认流程在下一请求丢失（挂起状态没了）。
-	if err := h.saveSession(ctx, req.SessionID, ses); err != nil {
-		h.log.Error("save session", "err", err)
+	if saveErr := h.saveSession(ctx, req.SessionID, ses); saveErr != nil {
+		h.log.Error("save session", "err", saveErr)
+		if err == nil {
+			err = fmt.Errorf("会话状态保存失败：%w", saveErr)
+		}
 	}
 	if err != nil {
 		// 必须记日志：这条路径把内部错误直接透出成 500，
@@ -259,15 +271,18 @@ func (h *Handler) process(ctx context.Context, sessionID string, tenantID uint64
 		case 1: // 确认 → 执行
 			pa := ses.PendingAction
 			ses.PendingAction = nil
+			started := time.Now()
 			result, err := h.runTimedTool(ctx, pa.Tool, pa.Args, pa.TenantID, pa.IdemKey)
+			outcome := "success"
 			reply := result
 			if err != nil {
 				reply = "执行失败：" + err.Error()
+				outcome = "failure"
 			}
 			reply = sanitizeReply(reply)
 			h.audit(sessionID, tenantID, pa.Tool, pa.Args, true, pa.Preview, reply)
 			ses.History = append(ses.History, Message{Role: "assistant", Content: reply})
-			return reply, []traceItem{{Tool: pa.Tool, Args: jsonString(pa.Args), Confirmed: true, Preview: pa.Preview, Result: reply}}, nil
+			return reply, []traceItem{{Tool: pa.Tool, Args: jsonString(pa.Args), ResolvedArgs: jsonString(pa.Args), Confirmed: true, Preview: pa.Preview, Result: reply, Phase: "execute", Outcome: outcome, DurationMS: float64(time.Since(started)) / float64(time.Millisecond)}}, nil
 		}
 		// other：保留挂起状态，继续正常对话（LLM 会提醒还有待确认操作）
 	}
@@ -347,9 +362,14 @@ func (h *Handler) llmLoop(ctx context.Context, sessionID string, tenantID uint64
 	// Request-local only: current-balance queries in a later turn must hit billing again.
 	readResults := map[string]string{}
 	readReuses := map[string]int{}
+	repair := ""
+	repaired := false
 
 	for iter := 0; iter < 5; iter++ {
 		messages := buildMessages(ses, pending, v)
+		if repair != "" {
+			messages[0].Content += "\n【纠正】" + repair
+		}
 		// 计时：多轮 loop 的耗时排查全靠这个（"总耗时 300s 但上游每次只要 2s"，
 		// 没有每轮计时就只能猜）。
 		t0 := time.Now()
@@ -363,6 +383,16 @@ func (h *Handler) llmLoop(ctx context.Context, sessionID string, tenantID uint64
 			return "", trace, err
 		}
 		if len(msg.ToolCalls) == 0 {
+			if reason := replyRepairReason(msg.Content, lastUserMsg(ses), ses.PendingAction); reason != "" {
+				if !repaired && iter < 4 {
+					repaired, repair = true, reason
+					if stats := turnTelemetry(ctx); stats != nil {
+						stats.ReplyRepairs++
+					}
+					continue
+				}
+				msg.Content = "目前没有生成可确认的操作，也没有执行改动。请核对办理事项及参数后重试。"
+			}
 			ses.History = append(ses.History, *msg)
 			return msg.Content, trace, nil
 		}
@@ -421,27 +451,40 @@ func (h *Handler) llmLoop(ctx context.Context, sessionID string, tenantID uint64
 					ses.History = append(ses.History, Message{Role: "assistant", Content: reply})
 					return reply, trace, nil
 				}
+				started := time.Now()
 				result, err := h.runTimedTool(ctx, name, args, tenantID, "")
+				outcome := "success"
 				if err != nil {
 					result = "错误：" + err.Error()
+					outcome = "failure"
 				}
 				h.audit(sessionID, tenantID, name, args, false, "", result)
-				trace = append(trace, traceItem{Tool: name, Args: tc.Function.Arguments, Confirmed: false, Result: result})
+				trace = append(trace, traceItem{Tool: name, Args: tc.Function.Arguments, ResolvedArgs: jsonString(args), Confirmed: false, Result: result, Phase: "read", Outcome: outcome, DurationMS: float64(time.Since(started)) / float64(time.Millisecond)})
 				readResults[readKey] = result
 				toolResults = append(toolResults, Message{Role: "tool", ToolCallID: tc.ID, Content: result})
 				continue
 			}
 
 			// 写操作：先过 Jev 守门（P3，nil 时直接放行）→ 算预览 + 挂起，回确认文案，本轮结束。
+			if ses.PendingAction != nil {
+				reply := "已有待确认操作：" + ses.PendingAction.Preview + "\n请先回复「确认」或「取消」，再办理其他操作。"
+				ses.History = append(ses.History, Message{Role: "assistant", Content: reply})
+				return reply, trace, nil
+			}
+			if clarification := writeProposalClarification(name, lastUserMsg(ses)); clarification != "" {
+				ses.History = append(ses.History, Message{Role: "assistant", Content: clarification})
+				return clarification, trace, nil
+			}
+			started := time.Now()
 			preview, err := h.previewTimedTool(ctx, name, args, tenantID)
 			if err != nil {
 				result := "操作不可执行：" + err.Error()
 				h.audit(sessionID, tenantID, name, args, false, "", result)
-				trace = append(trace, traceItem{Tool: name, Args: tc.Function.Arguments, Confirmed: false, Preview: preview, Result: result})
+				trace = append(trace, traceItem{Tool: name, Args: tc.Function.Arguments, ResolvedArgs: jsonString(args), Confirmed: false, Preview: preview, Result: result, Phase: "preview", Outcome: "failure", DurationMS: float64(time.Since(started)) / float64(time.Millisecond)})
 				toolResults = append(toolResults, Message{Role: "tool", ToolCallID: tc.ID, Content: result})
 				continue
 			}
-			if h.jev != nil {
+			if h.jev != nil && h.usesJevWriteGuard() {
 				allowed, reason := h.guardWrite(ctx, tenantID, name, args, lastUserMsg(ses))
 				if !allowed {
 					if stats := turnTelemetry(ctx); stats != nil {
@@ -464,10 +507,20 @@ func (h *Handler) llmLoop(ctx context.Context, sessionID string, tenantID uint64
 			}
 			ses.PendingAction = pa
 			h.audit(sessionID, tenantID, name, args, false, preview, "pending_confirmation")
-			trace = append(trace, traceItem{Tool: name, Args: tc.Function.Arguments, Confirmed: false, Preview: preview, Result: "等待确认"})
+			trace = append(trace, traceItem{Tool: name, Args: tc.Function.Arguments, ResolvedArgs: jsonString(args), Confirmed: false, Preview: preview, Result: "等待确认", Phase: "preview", Outcome: "pending", DurationMS: float64(time.Since(started)) / float64(time.Millisecond)})
 			// 写操作挂起：不把含 tool_calls 的 assistant 消息写入历史（否则该消息的
 			// tool_call_id 没有完整配对，下一轮 LLM 校验会 400）。等确认时单独处理。
 			pendingReply = preview + "\n\n请回复「确认」执行，或「取消」放弃。"
+			explanation := sanitizeReply(msg.Content)
+			// The shared preview renderer must not drop an accompanying refund
+			// question just because the model emitted only a cancel tool call.
+			if name == "cancel_subscription" && consultationPatterns["refund_recharge"].MatchString(strings.TrimRight(strings.ToLower(lastUserMsg(ses)), "。？?!！. ")) &&
+				(!strings.Contains(explanation, "订单") || !strings.Contains(explanation, "金额")) {
+				explanation = "余额退款需提供本人充值订单号或退款金额（元），实际最多退到当前余额；退订不退当期费用。"
+			}
+			if explanation != "" && !confirmationInvitation.MatchString(explanation) {
+				pendingReply = explanation + "\n" + pendingReply
+			}
 			break
 		}
 
@@ -676,9 +729,21 @@ func jsonString(v any) string {
 }
 
 func writeJSON(w http.ResponseWriter, code int, v any) {
+	if tw, ok := w.(*telemetryWriter); ok {
+		tw.stats.TotalLatencyMS = float64(time.Since(tw.started)) / float64(time.Millisecond)
+		if body, ok := v.(map[string]any); ok {
+			body["telemetry"] = tw.stats
+		}
+	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
 	_ = json.NewEncoder(w).Encode(v)
+}
+
+type telemetryWriter struct {
+	http.ResponseWriter
+	stats   *TurnTelemetry
+	started time.Time
 }
 
 func writeErr(w http.ResponseWriter, code int, msg string) {

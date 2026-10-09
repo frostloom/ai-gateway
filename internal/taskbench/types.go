@@ -4,6 +4,8 @@ package taskbench
 
 import (
 	"context"
+	"encoding/json"
+	"github.com/frostloom/ai-gateway/internal/agent"
 	"github.com/frostloom/ai-gateway/internal/billing/store"
 	"net/http"
 	"time"
@@ -26,13 +28,17 @@ type Case struct {
 	OrderRefund          bool   `json:"order_refund,omitempty"`
 	RequireBalanceAnswer bool   `json:"require_balance_answer,omitempty"`
 }
+type UsageMetrics = agent.EvaluationUsage
+
 type Metadata struct {
-	Version         string `json:"version"`
-	JevMode         string `json:"jev_mode"`
-	Model           string `json:"model"`
-	SourceGit       string `json:"source_git"`
-	BinarySHA256    string `json:"binary_sha256"`
-	EvaluatorSHA256 string `json:"evaluator_binary_sha256"`
+	EvaluationContractSHA256 string `json:"evaluation_contract_sha256"`
+	FixtureDefinitionSHA256  string `json:"fixture_definition_sha256"`
+	Version                  string `json:"version"`
+	JevMode                  string `json:"jev_mode"`
+	Model                    string `json:"model"`
+	SourceGit                string `json:"source_git"`
+	BinarySHA256             string `json:"binary_sha256"`
+	EvaluatorSHA256          string `json:"evaluator_binary_sha256"`
 }
 type Fixture struct {
 	TenantID   uint64     `json:"tenant_id"`
@@ -70,34 +76,42 @@ type Options struct {
 	OnProgress func(done, total int)
 }
 type Trace struct {
-	Tool      string `json:"tool"`
-	Args      string `json:"args"`
-	Confirmed bool   `json:"confirmed"`
-	Result    string `json:"result"`
+	Tool         string  `json:"tool"`
+	Args         string  `json:"args"`
+	Confirmed    bool    `json:"confirmed"`
+	Preview      string  `json:"preview"`
+	Result       string  `json:"result"`
+	ResolvedArgs string  `json:"resolved_args,omitempty"`
+	Phase        string  `json:"phase,omitempty"`
+	Outcome      string  `json:"outcome,omitempty"`
+	DurationMS   float64 `json:"duration_ms"`
+}
+type Telemetry struct {
+	agent.TurnTelemetry
+	JevEnabled *bool `json:"jev_enabled"`
 }
 type Response struct {
-	SessionID   string  `json:"session_id"`
-	Reply       string  `json:"reply"`
-	Trace       []Trace `json:"trace"`
-	Pending     bool    `json:"pending_confirm"`
-	PendingTool string  `json:"pending_tool"`
-	Preview     string  `json:"pending_preview"`
-	Telemetry   *struct {
-		LLMCalls   int   `json:"llm_calls"`
-		JevCalls   int   `json:"jev_calls"`
-		JevEnabled *bool `json:"jev_enabled"`
-	} `json:"telemetry,omitempty"`
+	SessionID   string     `json:"session_id"`
+	Reply       string     `json:"reply"`
+	Trace       []Trace    `json:"trace"`
+	Pending     bool       `json:"pending_confirm"`
+	PendingTool string     `json:"pending_tool"`
+	Preview     string     `json:"pending_preview"`
+	Telemetry   *Telemetry `json:"telemetry,omitempty"`
+	HTTPError   string     `json:"error,omitempty"`
 }
 type Turn struct {
-	Message   string   `json:"message"`
-	Stage     string   `json:"stage"`
-	Status    int      `json:"status"`
-	LatencyMS float64  `json:"latency_ms"`
-	RawBody   string   `json:"raw_body"`
-	Response  Response `json:"response"`
-	Pending   *Pending `json:"pending,omitempty"`
-	Snapshot  Snapshot `json:"snapshot"`
-	Error     string   `json:"error,omitempty"`
+	TraceRaw     json.RawMessage `json:"trace_raw,omitempty"`
+	Message      string          `json:"message"`
+	Stage        string          `json:"stage"`
+	Status       int             `json:"status"`
+	LatencyMS    float64         `json:"latency_ms"`
+	RawBody      string          `json:"raw_body"`
+	TelemetryRaw json.RawMessage `json:"telemetry_raw,omitempty"`
+	Response     Response        `json:"response"`
+	Pending      *Pending        `json:"pending,omitempty"`
+	Snapshot     Snapshot        `json:"snapshot"`
+	Error        string          `json:"error,omitempty"`
 }
 type Result struct {
 	Case                   Case     `json:"case"`
@@ -129,6 +143,13 @@ type CategoryMetrics struct {
 	CompletionRate float64 `json:"completion_rate"`
 }
 type Metrics struct {
+	StageLatency            map[string]Latencies `json:"stage_latency"`
+	ValidTasks              int                  `json:"valid_tasks"`
+	ValidTaskCompletionRate float64              `json:"valid_task_completion_rate"`
+	Usage                   UsageMetrics         `json:"usage"`
+	TelemetryMissingTurns   int                  `json:"telemetry_missing_turns"`
+	UsageStatus             string               `json:"usage_status"`
+	CostStatus              string               `json:"cost_status"`
 	CategoryMetrics
 	ByCategory               map[string]CategoryMetrics `json:"by_category"`
 	FailedHTTP               int                        `json:"failed_http"`
@@ -154,12 +175,14 @@ type Metrics struct {
 	TimeToPreview            Latencies                  `json:"time_to_preview"`
 }
 type Report struct {
-	Schema        string    `json:"schema"`
-	RunID         string    `json:"run_id"`
-	StartedAt     time.Time `json:"started_at"`
-	Metadata      Metadata  `json:"metadata"`
-	DatasetSHA256 string    `json:"dataset_sha256"`
-	Limitations   []string  `json:"limitations"`
-	Results       []Result  `json:"results"`
-	Metrics       Metrics   `json:"metrics"`
+	Runtime             json.RawMessage `json:"runtime,omitempty"`
+	ConfigurationErrors []string        `json:"configuration_errors"`
+	Schema              string          `json:"schema"`
+	RunID               string          `json:"run_id"`
+	StartedAt           time.Time       `json:"started_at"`
+	Metadata            Metadata        `json:"metadata"`
+	DatasetSHA256       string          `json:"dataset_sha256"`
+	Limitations         []string        `json:"limitations"`
+	Results             []Result        `json:"results"`
+	Metrics             Metrics         `json:"metrics"`
 }
