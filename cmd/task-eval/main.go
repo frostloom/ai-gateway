@@ -27,6 +27,10 @@ func run() int {
 	flag.StringVar(&c.AgentBinary, "agent-binary", "", "running agent binary to hash")
 	flag.StringVar(&c.CasesFile, "cases", "", "frozen task cases JSON; default uses built-in v1 cases")
 	flag.BoolVar(&c.AllowWrites, "allow-simulated-writes", false, "allow confirmations in newly created isolated simulation tenants")
+	flag.BoolVar(&c.PrepareOnly, "prepare-only", false, "offline preparation only: no service calls or fixture writes")
+	flag.StringVar(&c.PreparedFile, "prepared", "", "verify a prior offline preparation before starting")
+	flag.StringVar(&c.RoutingMode, "routing-mode", "", "planned routing: off=model, on=jev_selective")
+	flag.IntVar(&c.MaxTasks, "max-tasks", 12, "positive limit on selected tasks; not a monetary budget")
 	flag.Parse()
 	if err := validateRun(c); err != nil {
 		fmt.Fprintln(os.Stderr, err)
@@ -66,6 +70,25 @@ func run() int {
 		}
 		seen[scenario.ID] = true
 	}
+	preparation, err := buildPreparation(c, cases, evaluatorPath)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		return 2
+	}
+	if c.PreparedFile != "" {
+		if err := verifyPreparation(c.PreparedFile, preparation); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			return 2
+		}
+	}
+	if c.PrepareOnly {
+		if err := writePreparation(c.Out, preparation); err != nil {
+			fmt.Fprintln(os.Stderr, "cannot preserve offline preparation:", err)
+			return 2
+		}
+		fmt.Printf("Offline preparation: %d tasks; model/JEV calls=0; manifest=%s\n", len(cases), c.Out)
+		return 0
+	}
 	if err := os.MkdirAll(filepath.Dir(c.Out), 0755); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		return 2
@@ -88,20 +111,13 @@ func run() int {
 	}
 	defer backend.Close()
 	fmt.Printf("Task suite: %d cases; model=%s; JEV=%s; isolated simulation tenants\n", len(cases), c.Model, c.JevMode)
-	contract, contractErr := os.ReadFile("docs/customer-service-evaluation-contract-2026-10-09.md")
-	fixtureDefinition, fixtureErr := os.ReadFile("internal/taskbench/live.go")
-	contractHash, fixtureHash := "", ""
-	if contractErr == nil {
-		contractHash = fmt.Sprintf("%x", sha256.Sum256(contract))
-	}
-	if fixtureErr == nil {
-		fixtureHash = fmt.Sprintf("%x", sha256.Sum256(fixtureDefinition))
-	}
+	contractHash, fixtureHash := preparation.Hashes["evaluation_contract"], preparation.Hashes["fixture_definition"]
 	report := taskbench.Run(context.Background(), taskbench.Options{
 		BaseURL: c.Base, Backend: backend, Cases: cases,
 		Metadata:   taskbench.Metadata{EvaluationContractSHA256: contractHash, FixtureDefinitionSHA256: fixtureHash, Version: c.Version, JevMode: c.JevMode, Model: c.Model, SourceGit: c.Source, BinarySHA256: hex.EncodeToString(sha[:]), EvaluatorSHA256: hex.EncodeToString(evaluatorSHA[:])},
 		OnProgress: func(done, total int) { fmt.Printf("Verified task attempts: %d/%d\n", done, total) },
 	})
+	validateReportRouting(&report, preparation.RoutingMode)
 	if err := taskbench.WriteReport(c.Out, report); err != nil {
 		fmt.Fprintln(os.Stderr, "cannot preserve report:", err)
 		return 2
@@ -118,8 +134,8 @@ func run() int {
 		return 2
 	}
 	fmt.Printf("Verified tasks: %d/%d (%.2f%%); report=%s; finished=%s\n", report.Metrics.Completed, report.Metrics.Total, report.Metrics.CompletionRate*100, c.Out, time.Now().Format(time.RFC3339))
-	if report.Metrics.Completed != report.Metrics.Total {
-		return 1
+	if len(report.ConfigurationErrors) > 0 {
+		fmt.Fprintln(os.Stderr, "evaluation configuration invalid:", report.ConfigurationErrors)
 	}
-	return 0
+	return reportExitCode(report)
 }

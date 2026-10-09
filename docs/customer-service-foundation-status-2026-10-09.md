@@ -59,4 +59,16 @@ python scripts/archive-intent-contract.py verify
 python scripts/summarize-offline-intent-audit.py verify
 ```
 
-这些验证证明本地实现和证据完整性，不是最新模型的在线成绩。下一阶段才是补独立任务fixture、预冻结运行配置、先验证边界小集再决定是否完整在线评测。
+这些验证证明本地实现和证据完整性，不是最新模型的在线成绩。
+
+## 后续离线准备（2026-10-10）
+
+新增[12条开发边界任务](../eval/task-suites/2026-10-09-boundary-dev-v1/README.md)，保留原始来源ID和原文，为补参、确认、取消、重复确认及两类查询规定独立合成租户和权威状态核验。此为开发材料，不能当作独立盲测金标；独立1220条账户fixture仍未补齐。
+
+task-eval新增prepare-only、prepared、routing-mode和max-tasks。本地准备绑定案例、规范、fixture代码、源码、agent及评测器二进制的SHA；准备结果不包含成绩和费用，不连接数据库或发送HTTP。未来运行前重新核对准备清单，已修改的案例/二进制/配置不能沿用旧清单。声明的源码commit不等于已证明二进制构建来源，实际运行配置仍需从telemetry核验。
+
+[实验脚本](customer-service-experiment-launcher-2026-10-09.md)默认只准备，显式RunEvaluation才载入环境和启动agent；V1=model，V2=jev_selective，默认最多12任务。任务上限不是费用上限：每个任务可能包含多轮、工具循环和重试。退出时恢复进程环境并保存退出证据。本轮只使用本地替身测试，不开启在线运行。
+
+独立盲测、真实模型提示词A/B、JEV阈值校准、三轮配对在线实验与最终成本报告继续后移。用户明确余额有限；[官方JEV价格核对](jev-pricing-check-2026-10-10.md)也未证明该账号可以无限免费调用。
+
+本阶段验证：go test ./...完整通过；Python离线测试61/61通过，含9项真实PowerShell与本机替身流程测试；go vet ./cmd/task-eval及三项既有归档校验通过。用新构建的二进制实际运行默认准备脚本，生成12任务清单，模型/JEV调用均为0，未创建任务租户。独立审查后补充实际路由校验：即使任务全部完成，只要配置证据存在错误也保存报告并返回基础设施失败，不报成功。

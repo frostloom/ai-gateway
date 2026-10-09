@@ -10,10 +10,13 @@ import (
 type runConfig struct {
 	Base, Out, Version, JevMode, Model, Source, AgentBinary, CasesFile string
 	AllowWrites                                                        bool
+	PrepareOnly                                                        bool
+	PreparedFile, RoutingMode                                          string
+	MaxTasks                                                           int
 }
 
 func validateRun(c runConfig) error {
-	if !c.AllowWrites {
+	if !c.PrepareOnly && !c.AllowWrites {
 		return fmt.Errorf("pass -allow-simulated-writes to permit writes to newly created simulation tenants")
 	}
 	u, err := url.Parse(c.Base)
@@ -30,6 +33,9 @@ func validateRun(c runConfig) error {
 	}
 	if c.JevMode != "off" && c.JevMode != "on" {
 		return fmt.Errorf("jev must be off or on")
+	}
+	if c.RoutingMode != "" && c.RoutingMode != plannedRouting(c.JevMode) {
+		return fmt.Errorf("routing-mode must match jev: off=model, on=jev_selective")
 	}
 	for _, path := range []string{c.Out, c.Out + ".md", c.Out + ".running"} {
 		if _, err := os.Stat(path); err == nil {
