@@ -1,4 +1,6 @@
-// guard.go JEV 集成（P3）：系统一判断引擎给系统二（LLM 客服）上保险。
+// guard.go JEV 前置判定与历史守门。以下分层拦截/警告/写守门仅用于
+// legacy 模式；model 完全跳过 JEV，jev_selective 仅作只读分流排除条件，
+// jev_hint 仅提供意图提示。主实验共享确定性的执行校验和确认状态机。
 //
 // 设计：每轮对话先过一道 JEV，拿到「意图 + 合法性 + 风险」三类判定及各自置信度，
 // 再按分层策略决定后续怎么走（而不是让 LLM 直接开跑）：
@@ -137,7 +139,7 @@ var intentChoices = map[string]string{
 // 让它能判断「用户这句话是不是在确认/取消那个操作」。
 func (h *Handler) evaluateTurn(ctx context.Context, userMsg string, ses *session) jevVerdict {
 	v := jevVerdict{}
-	if h.jev == nil || strings.TrimSpace(userMsg) == "" {
+	if !h.usesJevTurn() || h.jev == nil || strings.TrimSpace(userMsg) == "" {
 		return v
 	}
 
@@ -183,7 +185,7 @@ func (h *Handler) evaluateTurn(ctx context.Context, userMsg string, ses *session
 		stats.JevCalls++
 		stats.JevUsageMissing++
 	}
-	if h.jevFastPathConfigured {
+	if h.RoutingMode() == RoutingJevSelective || (h.RoutingMode() == RoutingLegacy && h.jevFastPathConfigured) {
 		questions["route_shape"] = jev.Question{
 			Type:         jev.QChoice,
 			Instructions: "用户是否仅要求一个可直接返回完整结果、无需提取参数、无需之前对话上下文的查询？single_read只能是查询当前本人余额、默认近7天消耗、全部套餐目录、当前本人订阅。充值/退款/订购/改套餐/退订、已满足目标状态判断、复合步骤、解释比较推荐、缺参数、否定指令、其他账户、自定义时间/筛选/笔数均属于complex；不要因为需要先查询信息而把办理任务判成single_read。",
@@ -236,7 +238,7 @@ func (h *Handler) evaluateTurn(ctx context.Context, userMsg string, ses *session
 		v.RiskConf = a.Conf()
 	}
 
-	h.decideVerdict(&v)
+	h.decideRoutingVerdict(&v)
 	if stats := turnTelemetry(ctx); stats != nil {
 		stats.JevIntent = v.Intent
 		stats.JevIntentConfidence = v.IntentConf
@@ -310,7 +312,7 @@ func (h *Handler) decideVerdict(v *jevVerdict) {
 // 与每轮判定的区别：这里能看到**实际参数**（金额、目标租户），
 // 因此能抓住「话术正常但参数异常」的情况（如充 -999、退款给他人）。
 func (h *Handler) guardWrite(ctx context.Context, tenantID uint64, tool string, args map[string]any, userMsg string) (bool, string) {
-	if h.jev == nil {
+	if !h.usesJevWriteGuard() || h.jev == nil {
 		return true, ""
 	}
 	argsJSON, _ := json.Marshal(args)

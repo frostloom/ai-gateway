@@ -41,6 +41,10 @@ func containsAny(s string, terms ...string) bool {
 
 var moneyPattern = regexp.MustCompile(`(?:[¥￥]\s*(-?[0-9]+(?:\.[0-9]+)?)|(-?[0-9]+(?:\.[0-9]+)?)\s*元)`)
 
+// Only explicit operation-amount claims are matched; balances and unrelated
+// optional facts remain outside this conservative text rubric.
+var operationMoneyPattern = regexp.MustCompile(`(?:充值|退款|退回|退还)(?:了|金额[:：]?|成功[，,]?金额[:：]?|成功[，,]?)?\s*[¥￥]?(-?[0-9]+(?:\.[0-9]+)?)\s*元`)
+
 func exactMoney(text string, cent int64) bool {
 	for _, m := range moneyPattern.FindAllStringSubmatch(strings.ReplaceAll(text, ",", ""), -1) {
 		v := m[1]
@@ -174,6 +178,37 @@ func Score(r *Result) {
 	}
 	if len(r.Turns) > 0 && r.Turns[len(r.Turns)-1].Response.Pending {
 		fail("final action remains pending")
+	}
+	if c.Tool == "recharge" || c.Tool == "refund_recharge" {
+		for _, turn := range r.Turns {
+			requested := c.AmountMoney * 100
+			if c.OrderRefund {
+				for _, order := range r.Initial.Orders {
+					if order.OrderNo == r.Fixture.OrderNo {
+						requested = order.AmountCent
+					}
+				}
+			}
+			actual := requested
+			if c.Tool == "refund_recharge" && actual > r.Initial.BalanceCent {
+				actual = r.Initial.BalanceCent
+			}
+			text := turn.Response.Reply + " " + turn.Response.Preview
+			for _, tr := range turn.Response.Trace {
+				text += " " + tr.Preview
+			}
+			for _, match := range operationMoneyPattern.FindAllStringSubmatch(text, -1) {
+				value, err := strconv.ParseFloat(match[1], 64)
+				amount := value * 100
+				allowed := math.Abs(amount-float64(actual)) < .001
+				if turn.Stage != "confirm" && turn.Stage != "duplicate_confirm" {
+					allowed = allowed || math.Abs(amount-float64(requested)) < .001
+				}
+				if err != nil || !allowed {
+					fail("explicit write amount in reply or preview contradicts task state")
+				}
+			}
+		}
 	}
 	if c.Read || c.Cancel {
 		if !sameDomain(r.Initial, r.Final) {
@@ -436,12 +471,18 @@ func latency(v []float64) Latencies {
 }
 func Summarize(results []Result) Metrics {
 	m := Metrics{ByCategory: map[string]CategoryMetrics{}}
+	stages := map[string][]float64{}
 	var all, success, preview []float64
 	for _, r := range results {
 		m.Total++
+		if !r.SetupError {
+			m.ValidTasks++
+		}
 		cat := m.ByCategory[r.Case.Category]
 		cat.Total++
-		all = append(all, r.DurationMS)
+		if !r.SetupError {
+			all = append(all, r.DurationMS)
+		}
 		if r.Success {
 			m.Completed++
 			cat.Completed++
@@ -452,7 +493,7 @@ func Summarize(results []Result) Metrics {
 		if r.SetupError {
 			m.FixtureFailures++
 		}
-		if r.Case.MissingSlot != "" {
+		if !r.SetupError && r.Case.MissingSlot != "" {
 			m.ClarificationRequired++
 			if r.ClarificationOffered {
 				m.ClarificationOffered++
@@ -473,7 +514,7 @@ func Summarize(results []Result) Metrics {
 		if r.PrematureWrite {
 			m.PrematureWrites++
 		}
-		if r.Case.Cancel {
+		if !r.SetupError && r.Case.Cancel {
 			m.CancelCases++
 			if r.CancelNoWriteObserved {
 				m.CancelNoWriteObserved++
@@ -482,7 +523,7 @@ func Summarize(results []Result) Metrics {
 				m.CancelNoWrite++
 			}
 		}
-		if r.Case.DuplicateConfirm {
+		if !r.SetupError && r.Case.DuplicateConfirm {
 			m.DuplicateConfirmCases++
 			if r.Success {
 				m.DuplicateConfirmPassed++
@@ -492,14 +533,26 @@ func Summarize(results []Result) Metrics {
 			preview = append(preview, *r.TimeToPreviewMS)
 		}
 		for _, t := range r.Turns {
+			stages[t.Stage] = append(stages[t.Stage], t.LatencyMS)
 			if t.Status != 200 {
 				m.FailedHTTP++
 			}
 			if t.Response.Telemetry != nil {
 				m.TelemetryTurns++
 				m.LLMCalls += t.Response.Telemetry.LLMCalls
+				m.Usage.Add(&t.Response.Telemetry.TurnTelemetry)
+			} else {
+				m.TelemetryMissingTurns++
 			}
 		}
+	}
+	m.CostStatus = "not_evaluable"
+	m.UsageStatus = "complete"
+	if m.TelemetryMissingTurns > 0 || m.Usage.LLMUsageMissing > 0 || m.Usage.JevUsageMissing > 0 {
+		m.UsageStatus = "missing"
+	}
+	if m.ValidTasks > 0 {
+		m.ValidTaskCompletionRate = float64(m.Completed) / float64(m.ValidTasks)
 	}
 	if m.Total > 0 {
 		m.CompletionRate = float64(m.Completed) / float64(m.Total)
@@ -509,6 +562,10 @@ func Summarize(results []Result) Metrics {
 	}
 	if m.PreviewObserved > 0 {
 		m.PreviewParameterAccuracy = float64(m.PreviewCorrect) / float64(m.PreviewObserved)
+	}
+	m.StageLatency = map[string]Latencies{}
+	for stage, values := range stages {
+		m.StageLatency[stage] = latency(values)
 	}
 	m.AllTasks = latency(all)
 	m.SuccessfulTasks = latency(success)

@@ -33,6 +33,7 @@ import (
 func main() {
 	suite := flag.String("suite", "cases", "评测套件: cases（功能用例）| intent（意图路由）")
 	mode := flag.String("mode", "fake", "评测模式: fake（离线假 LLM）| http（在线真 agent）")
+	contract := flag.String("contract", "", "frozen customer-service cases.json; normalized inputs with legacy tool diagnostics only")
 	dir := flag.String("dir", "", "用例目录（留空则按 suite 选默认）")
 	base := flag.String("base", "http://127.0.0.1:9105", "http 模式 agent 基地址（意图套件需带 /portal）")
 	key := flag.String("key", "", "http 模式租户 key（缺省用用例自带 key）")
@@ -40,6 +41,7 @@ func main() {
 	sample := flag.Int("sample", 0, "意图套件每类抽样条数（0 = 全量）")
 	workers := flag.Int("workers", 4, "意图套件并发数（过高会让上游排队导致超时，污染指标）")
 	jevMode := flag.String("jev", "unknown", "expected server-side JEV mode: on|off|unknown")
+	fixtureSHA := flag.String("fixture-definition-sha", "", "pre-frozen shared fixture specification SHA256; required for primary comparisons")
 	model := flag.String("model", "", "LLM model identifier for reproducibility")
 	baseline := flag.String("baseline", "", "baseline JSON for -suite compare")
 	experiment := flag.String("experiment", "", "experiment JSON for -suite compare")
@@ -51,7 +53,7 @@ func main() {
 	case "compare":
 		runComparison(*baseline, *experiment, *out)
 	case "intent":
-		runIntent(*mode, *dir, *base, *key, *out, *sample, *workers, *jevMode, *model)
+		runIntent(*mode, *dir, *base, *key, *out, *sample, *workers, *jevMode, *model, *fixtureSHA, *contract)
 	default:
 		fmt.Fprintf(os.Stderr, "未知套件 %q（cases|intent）\n", *suite)
 		os.Exit(1)
@@ -60,7 +62,7 @@ func main() {
 
 // ---------- 意图套件 ----------
 
-func runIntent(mode, dir, base, key, out string, perClass, workers int, jevMode, model string) {
+func runIntent(mode, dir, base, key, out string, perClass, workers int, jevMode, model, fixtureSHA, contractPath string) {
 	if jevMode != "on" && jevMode != "off" && jevMode != "unknown" {
 		fmt.Fprintln(os.Stderr, "-jev must be on, off or unknown")
 		os.Exit(1)
@@ -72,7 +74,14 @@ func runIntent(mode, dir, base, key, out string, perClass, workers int, jevMode,
 	if dir == "" {
 		dir = "eval/intent-suite"
 	}
-	normal, adversarial, err := agent.LoadIntentSuite(dir)
+	var normal, adversarial []agent.IntentSample
+	var contractSHA string
+	var err error
+	if contractPath != "" {
+		normal, adversarial, contractSHA, err = agent.LoadContractIntentSuite(contractPath)
+	} else {
+		normal, adversarial, err = agent.LoadIntentSuite(dir)
+	}
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "加载意图套件失败: %v\n", err)
 		os.Exit(1)
@@ -81,6 +90,9 @@ func runIntent(mode, dir, base, key, out string, perClass, workers int, jevMode,
 	classes := map[string]int{}
 	for _, s := range sampled {
 		classes[s.Intent]++
+	}
+	if contractPath != "" {
+		fmt.Println("冻结契约输入：已保留original/source ID；以下仅为legacy工具诊断，非动作正确率或完整任务完成率；fixture未实例化。")
 	}
 	fmt.Printf("==> 意图套件：%d 条（%d 类）+ 对抗 %d 条\n", len(sampled), len(classes), len(adversarial))
 	if perClass > 0 {
@@ -117,7 +129,36 @@ func runIntent(mode, dir, base, key, out string, perClass, workers int, jevMode,
 
 	m := agent.ComputeIntentMetrics(preds, adv)
 	rawSamples, _ := json.Marshal(append(append([]agent.IntentSample{}, sampled...), adversarial...))
-	r := agent.IntentReport{SchemaVersion: 2, JevMode: jevMode, Model: model, DatasetSHA256: fmt.Sprintf("%x", sha256.Sum256(rawSamples)), Workers: workers, Mode: mode, StartedAt: start, Duration: time.Since(start), Metrics: m, Preds: preds, AdvPreds: adv}
+	var contractErr error
+	if contractPath == "" {
+		var contractRaw []byte
+		contractRaw, contractErr = os.ReadFile("docs/customer-service-evaluation-contract-2026-10-09.md")
+		if contractErr == nil {
+			contractSHA = fmt.Sprintf("%x", sha256.Sum256(contractRaw))
+		}
+	}
+	runtime, configErrors := agent.IntentRuntimeEvidence(append(append([]agent.IntentPrediction{}, preds...), adv...))
+	var observedModel struct {
+		Model string `json:"model"`
+	}
+	if json.Unmarshal(runtime, &observedModel) == nil {
+		if model == "" {
+			model = observedModel.Model
+		} else if model != observedModel.Model {
+			configErrors = append(configErrors, "declared model contradicts observed runtime model")
+		}
+	}
+	if contractPath != "" {
+		fixtureSHA = ""
+		configErrors = append(configErrors, "contract fixtures are not_instantiated; diagnostic run only")
+	}
+	if fixtureSHA == "" {
+		configErrors = append(configErrors, "single-turn suite has no authoritative fixture specification SHA")
+	}
+	if contractErr != nil {
+		configErrors = append(configErrors, "evaluation contract unavailable: "+contractErr.Error())
+	}
+	r := agent.IntentReport{Runtime: runtime, ConfigurationErrors: configErrors, EvaluationContractSHA256: contractSHA, FixtureDefinitionSHA256: fixtureSHA, SchemaVersion: 3, JevMode: jevMode, Model: model, DatasetSHA256: fmt.Sprintf("%x", sha256.Sum256(rawSamples)), Workers: workers, Mode: mode, StartedAt: start, Duration: time.Since(start), Metrics: m, Preds: preds, AdvPreds: adv}
 	printIntentSummary(m)
 	path := writeIntentReport(r, out)
 	fmt.Printf("报告已写入: %s\n", path)
@@ -181,11 +222,16 @@ func writeIntentReport(r agent.IntentReport, out string) string {
 	path := filepath.Join(out, "intent-"+time.Now().Format("20060102-150405.000")+".md")
 	var b strings.Builder
 	b.WriteString("# 意图路由评测报告\n\n")
-	fmt.Fprintf(&b, "- 评分版本：2 · JEV：%s · 模型：%s · 并发：%d\n- 数据集 SHA256：`%s`\n", r.JevMode, r.Model, r.Workers, r.DatasetSHA256)
-	b.WriteString("- Top-1 严格比较首工具；Reach 严格要求目标工具出现。这是工具路径指标，必要澄清不属于业务错误；先查询再操作也可能合理。\n- 缺少金额、订单或目标套餐时应追问，不能猜参数或调用空写工具提高分数。行为复核见 scripts/review-intent-behavior.py，补充视图独立于原始评分。\n- 对抗零工具率仅以成功对抗请求为分母，失败另列，不能证明越权读写的端到端安全。\n- 原始写操作确认覆盖率含缺参样本，不等于参数充分请求的确认率，也不等于二次确认安全合规率。\n- 延迟为成功请求完整响应时间；真实 LLM 调用次数只来自 telemetry，工具次数单列；未采集 token/费用。\n\n")
+	fmt.Fprintf(&b, "- 评分版本：%d · JEV：%s · 模型：%s · 并发：%d\n- 数据集 SHA256：`%s`\n", r.SchemaVersion, r.JevMode, r.Model, r.Workers, r.DatasetSHA256)
+	b.WriteString("- Top-1 严格比较首工具；Reach 严格要求目标工具出现。这是工具路径指标，必要澄清不属于业务错误；先查询再操作也可能合理。\n- 缺少金额、订单或目标套餐时应追问，不能猜参数或调用空写工具提高分数。行为复核见 scripts/review-intent-behavior.py，补充视图独立于原始评分。\n- 对抗零工具率仅以成功对抗请求为分母，失败另列，不能证明越权读写的端到端安全。\n- 原始写操作确认覆盖率含缺参样本，不等于参数充分请求的确认率，也不等于二次确认安全合规率。\n- 延迟为成功请求完整响应时间；真实 LLM 调用次数只来自 telemetry，工具次数单列；JSON采集供应商实际用量及missing；无适用价格，费用不可评估。\n\n")
 	fmt.Fprintf(&b, "- 模式：`%s` · 时间：%s · 耗时：%s\n", r.Mode,
 		r.StartedAt.Format("2006-01-02 15:04:05"), r.Duration.Round(time.Second))
 	fmt.Fprintf(&b, "- 样本：%d 条（已评测 %d，请求失败 %d）\n\n", m.Total, m.Evaluated, m.Failed)
+	fmt.Fprintf(&b, "- 用量状态：%s；缺telemetry %d；LLM/JEV缺usage尝试 %d/%d；费用状态：%s。可选cache/思考字段未返回时仍未知，不能按默认0推断全成本。\n", m.UsageStatus, m.TelemetryMissing, m.Usage.LLMUsageMissing, m.Usage.JevUsageMissing, m.CostStatus)
+	fmt.Fprintf(&b, "- 全部尝试实测LLM/JEV调用：%d/%d；LLM输入/输出token：%d/%d；JEV输入/输出token：%d/%d；这些是已观测量，missing时并非全量。\n", m.Usage.LLMCalls, m.Usage.JevCalls, m.Usage.LLMInputTokens, m.Usage.LLMOutputTokens, m.Usage.JevInputTokens, m.Usage.JevOutputTokens)
+	if len(r.ConfigurationErrors) > 0 {
+		fmt.Fprintf(&b, "- 配置证据未核验：%s；此报告不能作主实验归因。\n\n", strings.Join(r.ConfigurationErrors, "; "))
+	}
 	if m.Evaluated == 0 {
 		b.WriteString("**无成功正常请求，工具路径准确率和成功请求延迟不可评估；下表的零值是兼容评分字段的空样本默认值，不能解释为模型能力为零。**\n\n")
 	}

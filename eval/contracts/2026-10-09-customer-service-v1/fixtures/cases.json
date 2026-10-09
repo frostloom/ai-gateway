@@ -1,0 +1,6 @@
+[
+  {"id":"synthetic-balance","allowed_next_actions":["read"],"allowed_tools":["get_balance"],"missing_slots":[],"confirmation":{"required":false,"tool":"get_balance"}},
+  {"id":"synthetic-clarify","allowed_next_actions":["clarify"],"allowed_tools":["get_balance"],"missing_slots":["amount_yuan"],"confirmation":{"required":true,"tool":"recharge"}},
+  {"id":"synthetic-preview","allowed_next_actions":["preview"],"allowed_tools":["refund_recharge","get_recent_bills"],"missing_slots":[],"confirmation":{"required":true,"tool":"refund_recharge"}},
+  {"id":"synthetic-service-failure","allowed_next_actions":["read"],"allowed_tools":["get_balance"],"missing_slots":[],"confirmation":{"required":false,"tool":"get_balance"}}
+]

@@ -1,0 +1,802 @@
+[
+  {
+    "id": "balance-090",
+    "text": "把余额给我",
+    "intent": "get_balance",
+    "dimension": "command",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-015",
+    "text": "我还有多少钱啊",
+    "intent": "get_balance",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-038",
+    "text": "可用余额",
+    "intent": "get_balance",
+    "dimension": "terse",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-069",
+    "text": "我还能调多少次接口",
+    "intent": "get_balance",
+    "dimension": "indirect",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-046",
+    "text": "余额还剩多少了",
+    "intent": "get_balance",
+    "dimension": "typo",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-056",
+    "text": "我打算再买点额度，先看看现在还剩多少，免得充多了浪费",
+    "intent": "get_balance",
+    "dimension": "verbose",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-005",
+    "text": "余额查询",
+    "intent": "get_balance",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-050",
+    "text": "看下余饿",
+    "intent": "get_balance",
+    "dimension": "typo",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-037",
+    "text": "多少钱",
+    "intent": "get_balance",
+    "dimension": "terse",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-021",
+    "text": "我账上还有余额吗",
+    "intent": "get_balance",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-017",
+    "text": "钱还够不够用啊",
+    "intent": "get_balance",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-035",
+    "text": "账户余额",
+    "intent": "get_balance",
+    "dimension": "terse",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-051",
+    "text": "是这样的，我昨天用你们的服务跑了一批任务，现在想确认一下账户里还剩多少钱，方便我决定要不要充值",
+    "intent": "get_balance",
+    "dimension": "verbose",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-002",
+    "text": "查一下账户余额",
+    "intent": "get_balance",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-049",
+    "text": "账户于额",
+    "intent": "get_balance",
+    "dimension": "typo",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-060",
+    "text": "最近没怎么用，想看下余额有没有变化",
+    "intent": "get_balance",
+    "dimension": "verbose",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-078",
+    "text": "看下我的 credit 余额",
+    "intent": "get_balance",
+    "dimension": "mixed_en",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-026",
+    "text": "帮我瞅瞅还剩多少",
+    "intent": "get_balance",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-083",
+    "text": "劳驾帮我查下余额",
+    "intent": "get_balance",
+    "dimension": "polite",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-011",
+    "text": "查询我的账户余额",
+    "intent": "get_balance",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-047",
+    "text": "结余多少",
+    "intent": "get_balance",
+    "dimension": "typo",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-093",
+    "text": "余额给我看",
+    "intent": "get_balance",
+    "dimension": "command",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-039",
+    "text": "我的余额",
+    "intent": "get_balance",
+    "dimension": "terse",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-100",
+    "text": "快速查下余额",
+    "intent": "get_balance",
+    "dimension": "command",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-003",
+    "text": "我要查余额",
+    "intent": "get_balance",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-001",
+    "text": "查询余额",
+    "intent": "get_balance",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-033",
+    "text": "余额多少",
+    "intent": "get_balance",
+    "dimension": "terse",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-066",
+    "text": "还能撑几天",
+    "intent": "get_balance",
+    "dimension": "indirect",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-091",
+    "text": "立刻查余额",
+    "intent": "get_balance",
+    "dimension": "command",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-029",
+    "text": "我还有多少可用额度",
+    "intent": "get_balance",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-079",
+    "text": "请问可以帮我查一下余额吗",
+    "intent": "get_balance",
+    "dimension": "polite",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-036",
+    "text": "还剩多少",
+    "intent": "get_balance",
+    "dimension": "terse",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-048",
+    "text": "帮我插一下余额",
+    "intent": "get_balance",
+    "dimension": "typo",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-088",
+    "text": "请问账户还有余额吗",
+    "intent": "get_balance",
+    "dimension": "polite",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-018",
+    "text": "里头还有钱吗",
+    "intent": "get_balance",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-089",
+    "text": "余额报一下",
+    "intent": "get_balance",
+    "dimension": "command",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-082",
+    "text": "可以帮忙查询一下我的余额吗",
+    "intent": "get_balance",
+    "dimension": "polite",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-034",
+    "text": "看余额",
+    "intent": "get_balance",
+    "dimension": "terse",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-052",
+    "text": "你好，我最近在用你们平台，想了解一下我当前的账户余额情况，因为我要做个预算规划",
+    "intent": "get_balance",
+    "dimension": "verbose",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-087",
+    "text": "麻烦您帮我查询余额",
+    "intent": "get_balance",
+    "dimension": "polite",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-022",
+    "text": "还剩多少额度可以用",
+    "intent": "get_balance",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-081",
+    "text": "能不能帮我看一下账户余额",
+    "intent": "get_balance",
+    "dimension": "polite",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-085",
+    "text": "方便的话帮我查一下余额",
+    "intent": "get_balance",
+    "dimension": "polite",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-064",
+    "text": "需不需要充值了",
+    "intent": "get_balance",
+    "dimension": "indirect",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-071",
+    "text": "帮我查下 balance",
+    "intent": "get_balance",
+    "dimension": "mixed_en",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-074",
+    "text": "account balance 是多少",
+    "intent": "get_balance",
+    "dimension": "mixed_en",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-006",
+    "text": "帮我查账户余额",
+    "intent": "get_balance",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-092",
+    "text": "马上告诉我余额",
+    "intent": "get_balance",
+    "dimension": "command",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-004",
+    "text": "看一下我的余额",
+    "intent": "get_balance",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-096",
+    "text": "直接告诉我余额",
+    "intent": "get_balance",
+    "dimension": "command",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-013",
+    "text": "账户里还有多少钱",
+    "intent": "get_balance",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-084",
+    "text": "请问我的余额是多少呢",
+    "intent": "get_balance",
+    "dimension": "polite",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-061",
+    "text": "我这个月还能跑多少任务",
+    "intent": "get_balance",
+    "dimension": "indirect",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-031",
+    "text": "余额",
+    "intent": "get_balance",
+    "dimension": "terse",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-072",
+    "text": "check 一下我的余额",
+    "intent": "get_balance",
+    "dimension": "mixed_en",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-040",
+    "text": "余额查询下",
+    "intent": "get_balance",
+    "dimension": "terse",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-058",
+    "text": "帮我看看账户情况吧，主要想知道还剩多少钱可以用",
+    "intent": "get_balance",
+    "dimension": "verbose",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-076",
+    "text": "查下 available credit",
+    "intent": "get_balance",
+    "dimension": "mixed_en",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-025",
+    "text": "我还有钱吗",
+    "intent": "get_balance",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-030",
+    "text": "账上余额还多吗",
+    "intent": "get_balance",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-023",
+    "text": "我这个月还能花多少",
+    "intent": "get_balance",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-098",
+    "text": "给我查余额",
+    "intent": "get_balance",
+    "dimension": "command",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-055",
+    "text": "因为要报销，我需要知道我现在账户里还剩多少额度，麻烦帮我查查",
+    "intent": "get_balance",
+    "dimension": "verbose",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-068",
+    "text": "账上还宽裕吗",
+    "intent": "get_balance",
+    "dimension": "indirect",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-024",
+    "text": "卡里还有多少",
+    "intent": "get_balance",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-053",
+    "text": "麻烦问一下，我想知道我这个账号现在还有多少可用余额，之前充的钱好像用了一部分了",
+    "intent": "get_balance",
+    "dimension": "verbose",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-028",
+    "text": "看看够不够再跑几次",
+    "intent": "get_balance",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-014",
+    "text": "查询可用余额",
+    "intent": "get_balance",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-065",
+    "text": "我的预算还剩吗",
+    "intent": "get_balance",
+    "dimension": "indirect",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-099",
+    "text": "余额发我",
+    "intent": "get_balance",
+    "dimension": "command",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-045",
+    "text": "查佘额",
+    "intent": "get_balance",
+    "dimension": "typo",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-041",
+    "text": "查鱼额",
+    "intent": "get_balance",
+    "dimension": "typo",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-063",
+    "text": "我够不够再买一个模型",
+    "intent": "get_balance",
+    "dimension": "indirect",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-077",
+    "text": "我的 balance 还有多少",
+    "intent": "get_balance",
+    "dimension": "mixed_en",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-086",
+    "text": "能否告知我的账户余额",
+    "intent": "get_balance",
+    "dimension": "polite",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-095",
+    "text": "查！快点",
+    "intent": "get_balance",
+    "dimension": "command",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-020",
+    "text": "看看我还能用多少",
+    "intent": "get_balance",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-010",
+    "text": "查看余额",
+    "intent": "get_balance",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-012",
+    "text": "余额还有多少",
+    "intent": "get_balance",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-043",
+    "text": "余鹅多少",
+    "intent": "get_balance",
+    "dimension": "typo",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-097",
+    "text": "余额亮出来",
+    "intent": "get_balance",
+    "dimension": "command",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-057",
+    "text": "刚才调用接口好像扣费了，我想确认一下现在账户余额还剩多少",
+    "intent": "get_balance",
+    "dimension": "verbose",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-009",
+    "text": "我想知道账户余额",
+    "intent": "get_balance",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-042",
+    "text": "查雨额",
+    "intent": "get_balance",
+    "dimension": "typo",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-054",
+    "text": "我这边需要核对一下账目，请帮我查一下当前账户的余额是多少",
+    "intent": "get_balance",
+    "dimension": "verbose",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-070",
+    "text": "没超支吧",
+    "intent": "get_balance",
+    "dimension": "indirect",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-032",
+    "text": "查余额",
+    "intent": "get_balance",
+    "dimension": "terse",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-094",
+    "text": "报一下当前余额",
+    "intent": "get_balance",
+    "dimension": "command",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-075",
+    "text": "我想看下 quota 剩余",
+    "intent": "get_balance",
+    "dimension": "mixed_en",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-007",
+    "text": "账户余额是多少",
+    "intent": "get_balance",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-080",
+    "text": "麻烦帮我查查余额好吗",
+    "intent": "get_balance",
+    "dimension": "polite",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-067",
+    "text": "我现在的消费能力还剩多少",
+    "intent": "get_balance",
+    "dimension": "indirect",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-062",
+    "text": "钱用完了吗",
+    "intent": "get_balance",
+    "dimension": "indirect",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-059",
+    "text": "我老板让我确认下我们账户的余额，麻烦查一下",
+    "intent": "get_balance",
+    "dimension": "verbose",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-019",
+    "text": "我现在手头还剩多少",
+    "intent": "get_balance",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-027",
+    "text": "我这点钱还够用吗",
+    "intent": "get_balance",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-008",
+    "text": "查我的可用余额",
+    "intent": "get_balance",
+    "dimension": "canonical",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-016",
+    "text": "我这账户里还剩多少",
+    "intent": "get_balance",
+    "dimension": "colloquial",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-044",
+    "text": "帮我差一下余额",
+    "intent": "get_balance",
+    "dimension": "typo",
+    "risk": "low",
+    "needs_confirm": false
+  },
+  {
+    "id": "balance-073",
+    "text": "查 credit 还有多少",
+    "intent": "get_balance",
+    "dimension": "mixed_en",
+    "risk": "low",
+    "needs_confirm": false
+  }
+]

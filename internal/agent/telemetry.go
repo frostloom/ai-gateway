@@ -9,41 +9,61 @@ import (
 // TurnTelemetry is request-local; never shared between concurrent conversations.
 // LLMCalls counts actual upstream attempts (including retries), not tool traces.
 type TurnTelemetry struct {
-	JevEnabled             bool    `json:"jev_enabled"`
-	JevCalls               int     `json:"jev_calls"`
-	JevErrors              int     `json:"jev_errors"`
-	JevBlocked             bool    `json:"jev_blocked"`
-	JevShortCircuit        bool    `json:"jev_short_circuit"`
-	LLMCalls               int     `json:"llm_calls"`
-	JevLatencyMS           float64 `json:"jev_latency_ms"`
-	LLMLatencyMS           float64 `json:"llm_latency_ms"`
-	ToolLatencyMS          float64 `json:"tool_latency_ms"`
-	JevIntent              string  `json:"jev_intent,omitempty"`
-	JevIntentConfidence    float64 `json:"jev_intent_confidence"`
-	JevRouteShape          string  `json:"jev_route_shape,omitempty"`
-	JevShapeConfidence     float64 `json:"jev_shape_confidence"`
-	JevLegitProbability    float64 `json:"jev_legit_probability"`
-	JevRiskScore           float64 `json:"jev_risk_score"`
-	JevRiskConfidence      float64 `json:"jev_risk_confidence"`
-	JevFastPathEligible    bool    `json:"jev_fast_path_eligible"`
-	JevFastPath            bool    `json:"jev_fast_path"`
-	JevFastPathTool        string  `json:"jev_fast_path_tool,omitempty"`
-	JevFastPathReason      string  `json:"jev_fast_path_reason,omitempty"`
-	JevInputTokens         int64   `json:"jev_input_tokens"`
-	JevOutputTokens        int64   `json:"jev_output_tokens"`
-	JevUsageResponses      int     `json:"jev_usage_responses"`
-	JevUsageMissing        int     `json:"jev_usage_missing"`
-	LLMUsageResponses      int     `json:"llm_usage_responses"`
-	LLMInputTokens         int64   `json:"llm_input_tokens"`
-	LLMOutputTokens        int64   `json:"llm_output_tokens"`
-	LLMCacheHitTokens      int64   `json:"llm_cache_hit_tokens"`
-	LLMCacheMissTokens     int64   `json:"llm_cache_miss_tokens"`
-	LLMCacheCreationTokens int64   `json:"llm_cache_creation_tokens"`
-	LLMUsageProtocol       string  `json:"llm_usage_protocol,omitempty"`
-	LLMUsageMissing        int     `json:"llm_usage_missing"`
+	Runtime                *RuntimeMetadata  `json:"runtime,omitempty"`
+	TotalLatencyMS         float64           `json:"total_latency_ms"`
+	ReplyRepairs           int               `json:"reply_repairs"`
+	TurnStage              string            `json:"turn_stage,omitempty"`
+	LLMUsageRaw            []json.RawMessage `json:"llm_usage_raw,omitempty"`
+	JevEnabled             bool              `json:"jev_enabled"`
+	JevCalls               int               `json:"jev_calls"`
+	JevErrors              int               `json:"jev_errors"`
+	JevBlocked             bool              `json:"jev_blocked"`
+	JevShortCircuit        bool              `json:"jev_short_circuit"`
+	LLMCalls               int               `json:"llm_calls"`
+	JevLatencyMS           float64           `json:"jev_latency_ms"`
+	LLMLatencyMS           float64           `json:"llm_latency_ms"`
+	ToolLatencyMS          float64           `json:"tool_latency_ms"`
+	JevIntent              string            `json:"jev_intent,omitempty"`
+	JevIntentConfidence    float64           `json:"jev_intent_confidence"`
+	JevRouteShape          string            `json:"jev_route_shape,omitempty"`
+	JevShapeConfidence     float64           `json:"jev_shape_confidence"`
+	JevLegitProbability    float64           `json:"jev_legit_probability"`
+	JevRiskScore           float64           `json:"jev_risk_score"`
+	JevRiskConfidence      float64           `json:"jev_risk_confidence"`
+	JevFastPathEligible    bool              `json:"jev_fast_path_eligible"`
+	JevFastPath            bool              `json:"jev_fast_path"`
+	JevFastPathTool        string            `json:"jev_fast_path_tool,omitempty"`
+	JevFastPathReason      string            `json:"jev_fast_path_reason,omitempty"`
+	JevInputTokens         int64             `json:"jev_input_tokens"`
+	JevOutputTokens        int64             `json:"jev_output_tokens"`
+	JevUsageResponses      int               `json:"jev_usage_responses"`
+	JevUsageMissing        int               `json:"jev_usage_missing"`
+	LLMUsageResponses      int               `json:"llm_usage_responses"`
+	LLMInputTokens         int64             `json:"llm_input_tokens"`
+	LLMOutputTokens        int64             `json:"llm_output_tokens"`
+	LLMCacheHitTokens      int64             `json:"llm_cache_hit_tokens"`
+	LLMCacheMissTokens     int64             `json:"llm_cache_miss_tokens"`
+	LLMCacheCreationTokens int64             `json:"llm_cache_creation_tokens"`
+	LLMUsageProtocol       string            `json:"llm_usage_protocol,omitempty"`
+	LLMUsageMissing        int               `json:"llm_usage_missing"`
 }
 
 type telemetryKey struct{}
+
+// Preserve optional cache/reasoning fields exactly as supplied. Missing is not
+// explicit zero. Only the usage object is retained, never provider credentials.
+func recordProviderUsage(ctx context.Context, raw []byte) {
+	stats := turnTelemetry(ctx)
+	if stats == nil {
+		return
+	}
+	var body struct {
+		Usage json.RawMessage `json:"usage"`
+	}
+	if json.Unmarshal(raw, &body) == nil && len(body.Usage) > 0 && string(body.Usage) != "null" {
+		stats.LLMUsageRaw = append(stats.LLMUsageRaw, append(json.RawMessage(nil), body.Usage...))
+	}
+}
 
 func turnTelemetry(ctx context.Context) *TurnTelemetry {
 	v, _ := ctx.Value(telemetryKey{}).(*TurnTelemetry)

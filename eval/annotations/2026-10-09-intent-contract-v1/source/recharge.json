@@ -1,0 +1,802 @@
+[
+  {
+    "id": "recharge-059",
+    "text": "麻烦给账户充值 50 元，我先试用一下",
+    "intent": "recharge",
+    "dimension": "verbose",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-003",
+    "text": "给账户充值",
+    "intent": "recharge",
+    "dimension": "canonical",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-099",
+    "text": "充 100 元",
+    "intent": "recharge",
+    "dimension": "command",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-045",
+    "text": "充只 50 块",
+    "intent": "recharge",
+    "dimension": "typo",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-075",
+    "text": "top up 我的账户",
+    "intent": "recharge",
+    "dimension": "mixed_en",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-086",
+    "text": "能否帮我给账户充值 100 元",
+    "intent": "recharge",
+    "dimension": "polite",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-013",
+    "text": "帮我账户充值",
+    "intent": "recharge",
+    "dimension": "canonical",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-052",
+    "text": "你好，我需要给账户充值，金额是 200 元，麻烦帮我操作一下",
+    "intent": "recharge",
+    "dimension": "verbose",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-064",
+    "text": "没钱了怎么办",
+    "intent": "recharge",
+    "dimension": "indirect",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-078",
+    "text": "帮我 deposit 100",
+    "intent": "recharge",
+    "dimension": "mixed_en",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-098",
+    "text": "立即充值 100 元",
+    "intent": "recharge",
+    "dimension": "command",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-051",
+    "text": "我账户里的余额不太够了，麻烦帮我充值 100 元进去",
+    "intent": "recharge",
+    "dimension": "verbose",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-087",
+    "text": "麻烦您帮我充值 500 元",
+    "intent": "recharge",
+    "dimension": "polite",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-054",
+    "text": "麻烦帮我充值 100 元，我要用来跑一批模型调用",
+    "intent": "recharge",
+    "dimension": "verbose",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-044",
+    "text": "帮我冲 100",
+    "intent": "recharge",
+    "dimension": "typo",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-037",
+    "text": "充值 100",
+    "intent": "recharge",
+    "dimension": "terse",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-005",
+    "text": "帮我充值",
+    "intent": "recharge",
+    "dimension": "canonical",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-006",
+    "text": "我要充钱",
+    "intent": "recharge",
+    "dimension": "canonical",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-067",
+    "text": "我想增加额度",
+    "intent": "recharge",
+    "dimension": "indirect",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-010",
+    "text": "我要充 500 元",
+    "intent": "recharge",
+    "dimension": "canonical",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-049",
+    "text": "充zhi 100",
+    "intent": "recharge",
+    "dimension": "typo",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-076",
+    "text": "我要 recharge 账户",
+    "intent": "recharge",
+    "dimension": "mixed_en",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-084",
+    "text": "请问可以充值吗",
+    "intent": "recharge",
+    "dimension": "polite",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-062",
+    "text": "怎么往里加钱",
+    "intent": "recharge",
+    "dimension": "indirect",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-069",
+    "text": "我要买额度",
+    "intent": "recharge",
+    "dimension": "indirect",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-017",
+    "text": "给我加点额度",
+    "intent": "recharge",
+    "dimension": "colloquial",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-095",
+    "text": "直接充 100 进去",
+    "intent": "recharge",
+    "dimension": "command",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-050",
+    "text": "冲直 100",
+    "intent": "recharge",
+    "dimension": "typo",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-035",
+    "text": "充 50",
+    "intent": "recharge",
+    "dimension": "terse",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-094",
+    "text": "给我账户充 300",
+    "intent": "recharge",
+    "dimension": "command",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-034",
+    "text": "冲值",
+    "intent": "recharge",
+    "dimension": "terse",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-093",
+    "text": "充值 100，快点",
+    "intent": "recharge",
+    "dimension": "command",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-029",
+    "text": "充个三五百",
+    "intent": "recharge",
+    "dimension": "colloquial",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-082",
+    "text": "可以帮忙充值 50 元吗",
+    "intent": "recharge",
+    "dimension": "polite",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-007",
+    "text": "账户充值 50 元",
+    "intent": "recharge",
+    "dimension": "canonical",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-033",
+    "text": "充 100",
+    "intent": "recharge",
+    "dimension": "terse",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-073",
+    "text": "充 100 credit",
+    "intent": "recharge",
+    "dimension": "mixed_en",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-058",
+    "text": "我需要补充额度，请帮我充值 200 元",
+    "intent": "recharge",
+    "dimension": "verbose",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-065",
+    "text": "余额不够跑任务了",
+    "intent": "recharge",
+    "dimension": "indirect",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-079",
+    "text": "请问可以帮我充值 100 元吗",
+    "intent": "recharge",
+    "dimension": "polite",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-042",
+    "text": "冲值 100 元",
+    "intent": "recharge",
+    "dimension": "typo",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-020",
+    "text": "帮我充 100 呗",
+    "intent": "recharge",
+    "dimension": "colloquial",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-090",
+    "text": "给我充 200",
+    "intent": "recharge",
+    "dimension": "command",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-022",
+    "text": "我得多充点",
+    "intent": "recharge",
+    "dimension": "colloquial",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-061",
+    "text": "我额度不够了",
+    "intent": "recharge",
+    "dimension": "indirect",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-008",
+    "text": "帮我充 200 块",
+    "intent": "recharge",
+    "dimension": "canonical",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-043",
+    "text": "我要充直",
+    "intent": "recharge",
+    "dimension": "typo",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-053",
+    "text": "我准备继续使用你们的服务，先给账户充 500 块钱",
+    "intent": "recharge",
+    "dimension": "verbose",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-096",
+    "text": "充钱，快点",
+    "intent": "recharge",
+    "dimension": "command",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-091",
+    "text": "立刻充值 100",
+    "intent": "recharge",
+    "dimension": "command",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-056",
+    "text": "我要给这个账户充值 1000 元，方便后续使用",
+    "intent": "recharge",
+    "dimension": "verbose",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-032",
+    "text": "充钱",
+    "intent": "recharge",
+    "dimension": "terse",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-048",
+    "text": "给账户冲点钱",
+    "intent": "recharge",
+    "dimension": "typo",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-018",
+    "text": "卡里没钱了，充一下",
+    "intent": "recharge",
+    "dimension": "colloquial",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-088",
+    "text": "请问充值怎么操作",
+    "intent": "recharge",
+    "dimension": "polite",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-014",
+    "text": "我要充值额度",
+    "intent": "recharge",
+    "dimension": "canonical",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-068",
+    "text": "能不能加点钱进去",
+    "intent": "recharge",
+    "dimension": "indirect",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-066",
+    "text": "怎么补充额度",
+    "intent": "recharge",
+    "dimension": "indirect",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-092",
+    "text": "马上充 500",
+    "intent": "recharge",
+    "dimension": "command",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-011",
+    "text": "给这个账户充 100 元",
+    "intent": "recharge",
+    "dimension": "canonical",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-039",
+    "text": "充 200",
+    "intent": "recharge",
+    "dimension": "terse",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-004",
+    "text": "查询充值入口",
+    "intent": "recharge",
+    "dimension": "canonical",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-019",
+    "text": "我想充个一百块",
+    "intent": "recharge",
+    "dimension": "colloquial",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-027",
+    "text": "钱用光了，得充了",
+    "intent": "recharge",
+    "dimension": "colloquial",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-081",
+    "text": "能不能帮我充值 200 元",
+    "intent": "recharge",
+    "dimension": "polite",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-083",
+    "text": "劳驾帮我充 100 块",
+    "intent": "recharge",
+    "dimension": "polite",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-030",
+    "text": "我想往里充点钱",
+    "intent": "recharge",
+    "dimension": "colloquial",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-046",
+    "text": "冲值 200",
+    "intent": "recharge",
+    "dimension": "typo",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-024",
+    "text": "给我账户充点",
+    "intent": "recharge",
+    "dimension": "colloquial",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-060",
+    "text": "我想预充 500 元进去，这样比较方便",
+    "intent": "recharge",
+    "dimension": "verbose",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-089",
+    "text": "充 100 #2",
+    "intent": "recharge",
+    "dimension": "command",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-057",
+    "text": "帮我充 100 块钱吧，之前的额度用光了",
+    "intent": "recharge",
+    "dimension": "verbose",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-025",
+    "text": "充 50 进去",
+    "intent": "recharge",
+    "dimension": "colloquial",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-026",
+    "text": "我先充 200",
+    "intent": "recharge",
+    "dimension": "colloquial",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-047",
+    "text": "充植一百块",
+    "intent": "recharge",
+    "dimension": "typo",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-070",
+    "text": "额度用完了",
+    "intent": "recharge",
+    "dimension": "indirect",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-009",
+    "text": "充值操作",
+    "intent": "recharge",
+    "dimension": "canonical",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-085",
+    "text": "方便的话帮我充 300 元",
+    "intent": "recharge",
+    "dimension": "polite",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-016",
+    "text": "帮我充点钱",
+    "intent": "recharge",
+    "dimension": "colloquial",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-097",
+    "text": "给我充 50",
+    "intent": "recharge",
+    "dimension": "command",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-041",
+    "text": "充植 100",
+    "intent": "recharge",
+    "dimension": "typo",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-015",
+    "text": "我钱不够了，充点",
+    "intent": "recharge",
+    "dimension": "colloquial",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-040",
+    "text": "来 100",
+    "intent": "recharge",
+    "dimension": "terse",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-028",
+    "text": "帮我搞点额度",
+    "intent": "recharge",
+    "dimension": "colloquial",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-055",
+    "text": "我的额度用完了，想充值 300 元，请帮我办理",
+    "intent": "recharge",
+    "dimension": "verbose",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-100",
+    "text": "快给我充 200",
+    "intent": "recharge",
+    "dimension": "command",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-071",
+    "text": "帮我 top up 100",
+    "intent": "recharge",
+    "dimension": "mixed_en",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-038",
+    "text": "充额度",
+    "intent": "recharge",
+    "dimension": "terse",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-077",
+    "text": "充 100 块到 account",
+    "intent": "recharge",
+    "dimension": "mixed_en",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-012",
+    "text": "充值 1000 元",
+    "intent": "recharge",
+    "dimension": "canonical",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-074",
+    "text": "帮我充值 100 CNY",
+    "intent": "recharge",
+    "dimension": "mixed_en",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-023",
+    "text": "帮我账户加点钱",
+    "intent": "recharge",
+    "dimension": "colloquial",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-063",
+    "text": "我想多买点额度",
+    "intent": "recharge",
+    "dimension": "indirect",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-001",
+    "text": "我要充值",
+    "intent": "recharge",
+    "dimension": "canonical",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-031",
+    "text": "充值",
+    "intent": "recharge",
+    "dimension": "terse",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-002",
+    "text": "充值 100 元",
+    "intent": "recharge",
+    "dimension": "canonical",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-021",
+    "text": "充点钱进去",
+    "intent": "recharge",
+    "dimension": "colloquial",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-036",
+    "text": "加钱",
+    "intent": "recharge",
+    "dimension": "terse",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-072",
+    "text": "我要 recharge 200",
+    "intent": "recharge",
+    "dimension": "mixed_en",
+    "risk": "medium",
+    "needs_confirm": true
+  },
+  {
+    "id": "recharge-080",
+    "text": "麻烦帮我充一下值好吗",
+    "intent": "recharge",
+    "dimension": "polite",
+    "risk": "medium",
+    "needs_confirm": true
+  }
+]

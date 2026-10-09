@@ -1,0 +1,80 @@
+{
+  "total": 1220,
+  "normal": 1200,
+  "adversarial": 20,
+  "by_action": {
+    "reject": 19,
+    "clarify": 249,
+    "read": 523,
+    "limited": 42,
+    "preview": 255,
+    "consult": 32,
+    "respond": 100
+  },
+  "priority_review_count": 342,
+  "independently_reviewed_gold_count": 0,
+  "fixture_instantiated_count": 0,
+  "model_calls": 0,
+  "benchmark_runs": 0,
+  "per_class": {
+    "adversarial": {
+      "reject": 19,
+      "clarify": 1
+    },
+    "balance": {
+      "read": 76,
+      "clarify": 24
+    },
+    "bills": {
+      "read": 82,
+      "limited": 16,
+      "clarify": 2
+    },
+    "cancel_subscription": {
+      "preview": 91,
+      "clarify": 5,
+      "consult": 4
+    },
+    "change_plan": {
+      "clarify": 67,
+      "preview": 30,
+      "consult": 3
+    },
+    "chitchat": {
+      "respond": 100
+    },
+    "consumption": {
+      "read": 84,
+      "limited": 16
+    },
+    "models": {
+      "read": 90,
+      "limited": 10
+    },
+    "plans": {
+      "read": 100
+    },
+    "recharge": {
+      "preview": 55,
+      "clarify": 39,
+      "consult": 6
+    },
+    "refund": {
+      "clarify": 41,
+      "preview": 49,
+      "consult": 10
+    },
+    "subscribe": {
+      "preview": 30,
+      "clarify": 61,
+      "consult": 9
+    },
+    "subscription": {
+      "read": 91,
+      "clarify": 9
+    }
+  },
+  "generator_suffix_count": 19,
+  "unique_normalized_text_count": 1201,
+  "normalized_duplicate_groups": 19
+}

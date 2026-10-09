@@ -13,11 +13,14 @@ import (
 	"github.com/frostloom/ai-gateway/internal/jev"
 )
 
-// Configure a shadow decision in both modes so hint/fast experiments submit
-// identical JEV questions. Disabling changes execution, not the judge inputs.
+// SetJevFastPath retains the legacy shadow/execute flag. Selective routing uses
+// the confidence threshold but always enables eligible reads; model/hint do not.
 func (h *Handler) SetJevFastPath(enabled bool, minConfidence float64) error {
 	if math.IsNaN(minConfidence) || math.IsInf(minConfidence, 0) || minConfidence < .8 || minConfidence > 1 {
 		return fmt.Errorf("JEV_FAST_PATH_MIN must be finite and between 0.80 and 1.00")
+	}
+	if h.RoutingMode() == RoutingJevSelective && minConfidence < .90 {
+		return fmt.Errorf("jev_selective requires JEV_FAST_PATH_MIN at least 0.90")
 	}
 	h.jevFastPathConfigured = true
 	h.jevFastPathEnabled = enabled
@@ -30,6 +33,9 @@ func boundedProbability(p float64) bool {
 }
 
 func (h *Handler) fastPathReason(userMsg string, ses *session, v jevVerdict) string {
+	if h.RoutingMode() == RoutingModel || h.RoutingMode() == RoutingJevHint {
+		return "routing_mode_disabled"
+	}
 	if h.jev == nil || !v.Available {
 		return "judge_unavailable"
 	}
@@ -39,10 +45,14 @@ func (h *Handler) fastPathReason(userMsg string, ses *session, v jevVerdict) str
 	if v.Block || v.Warn || !boundedProbability(v.LegitProb) || v.LegitProb < .85 || !boundedProbability(v.RiskConf) || v.RiskConf < .8 || math.IsNaN(v.RiskScore) || math.IsInf(v.RiskScore, 0) || v.RiskScore < 0 || v.RiskScore >= .5 {
 		return "safety_not_clear"
 	}
-	if !boundedProbability(v.IntentConf) || v.IntentConf < h.jevFastPathMin {
+	min := h.jevFastPathMin
+	if min == 0 && h.RoutingMode() == RoutingJevSelective {
+		min = .90
+	}
+	if !boundedProbability(v.IntentConf) || v.IntentConf < min {
 		return "intent_uncertain"
 	}
-	if !v.SingleRead || !boundedProbability(v.ShapeConf) || v.ShapeConf < h.jevFastPathMin {
+	if !v.SingleRead || !boundedProbability(v.ShapeConf) || v.ShapeConf < min {
 		return "not_single_parameterless_read"
 	}
 	if ses == nil || ses.PendingAction != nil || len(ses.History) != 1 {
@@ -150,7 +160,7 @@ func (h *Handler) tryJevFastPath(ctx context.Context, sid string, tenant uint64,
 		stats.JevFastPathEligible = reason == "eligible"
 		stats.JevFastPathReason = reason
 	}
-	if !h.jevFastPathEnabled {
+	if !h.usesJevFastPath() {
 		if stats != nil && reason == "eligible" {
 			stats.JevFastPathReason = "shadow_only"
 		}
@@ -165,16 +175,19 @@ func (h *Handler) tryJevFastPath(ctx context.Context, sid string, tenant uint64,
 		stats.JevFastPathTool = v.Intent
 		stats.JevFastPathReason = "direct_read"
 	}
+	started := time.Now()
 	result, err := h.runTimedTool(ctx, v.Intent, args, tenant, "")
 	outcome := result
+	status := "success"
 	if err != nil {
+		status = "failure"
 		outcome = "查询失败：" + err.Error()
 		if stats != nil {
 			stats.JevFastPathReason = "tool_error"
 		}
 	}
 	h.audit(sid, tenant, v.Intent, args, false, "", outcome, guardJSON("jev", "fast_read", "", map[string]any{"intent_confidence": v.IntentConf, "shape_confidence": v.ShapeConf, "threshold": h.jevFastPathMin}))
-	trace := []traceItem{{Tool: v.Intent, Args: "{}", Result: outcome}}
+	trace := []traceItem{{Tool: v.Intent, Args: "{}", ResolvedArgs: "{}", Result: outcome, Phase: "read", Outcome: status, DurationMS: float64(time.Since(started)) / float64(time.Millisecond)}}
 	if err != nil {
 		return "", trace, true, err
 	}

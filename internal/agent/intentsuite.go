@@ -12,12 +12,15 @@ package agent
 
 import (
 	"context"
+	"crypto/sha256"
 	"encoding/json"
 	"fmt"
+	"io"
 	"math"
 	"net/http"
 	"os"
 	"path/filepath"
+	"reflect"
 	"sort"
 	"strings"
 	"sync"
@@ -27,6 +30,15 @@ import (
 
 // IntentSample 一条意图样本。
 type IntentSample struct {
+	OriginalText     string          `json:"original_text,omitempty"`
+	Original         json.RawMessage `json:"original,omitempty"`
+	SourceCaseID     string          `json:"source_case_id,omitempty"`
+	ContractCaseID   string          `json:"contract_case_id,omitempty"`
+	ExpectedAction   string          `json:"expected_action,omitempty"`
+	AnnotationStatus string          `json:"annotation_status,omitempty"`
+	FixtureStatus    string          `json:"fixture_status,omitempty"`
+	Normalization    json.RawMessage `json:"normalization,omitempty"`
+
 	ID           string `json:"id"`
 	Text         string `json:"text"`
 	Intent       string `json:"intent"`        // 期望工具名；chitchat = 不应调任何工具
@@ -46,29 +58,104 @@ type IntentSample struct {
 
 // IntentPrediction 一条预测结果。
 type IntentPrediction struct {
-	Sample      IntentSample
-	Predicted   string   // 实际首个工具名；空串 = 未调用任何工具
-	AllTools    []string // 本轮调用的全部工具（多意图场景）
-	Pending     bool
-	Latency     time.Duration
-	HTTPCode    int
-	Reply       string
-	JevBlocked  bool // 是否被 JEV 前置拦截
-	PendingTool string
-	Telemetry   *TurnTelemetry
-	Err         string
+	TraceRaw       json.RawMessage
+	RawBody        string
+	SessionID      string
+	PendingPreview string
+	HTTPError      string
+	Trace          []IntentTrace
+	TelemetryRaw   json.RawMessage
+	Sample         IntentSample
+	Predicted      string   // 实际首个工具名；空串 = 未调用任何工具
+	AllTools       []string // 本轮调用的全部工具（多意图场景）
+	Pending        bool
+	Latency        time.Duration
+	HTTPCode       int
+	Reply          string
+	JevBlocked     bool // 是否被 JEV 前置拦截
+	PendingTool    string
+	Telemetry      *TurnTelemetry
+	Err            string
+}
+
+// IntentTrace preserves the actual tool invocation and preview, not just its name.
+type IntentTrace struct {
+	Tool         string  `json:"tool"`
+	Args         string  `json:"args"`
+	Confirmed    bool    `json:"confirmed"`
+	Preview      string  `json:"preview"`
+	Result       string  `json:"result"`
+	ResolvedArgs string  `json:"resolved_args,omitempty"`
+	Phase        string  `json:"phase,omitempty"`
+	Outcome      string  `json:"outcome,omitempty"`
+	DurationMS   float64 `json:"duration_ms"`
+}
+
+// EvaluationUsage sums measured provider counts. Missing usage and unknown prices
+// remain explicit; observed zero calls alone do not attest a missing telemetry turn.
+type EvaluationUsage struct {
+	LLMCalls               int     `json:"llm_calls"`
+	JevCalls               int     `json:"jev_calls"`
+	LLMInputTokens         int64   `json:"llm_input_tokens"`
+	LLMOutputTokens        int64   `json:"llm_output_tokens"`
+	LLMCacheHitTokens      int64   `json:"llm_cache_hit_tokens"`
+	LLMCacheMissTokens     int64   `json:"llm_cache_miss_tokens"`
+	LLMCacheCreationTokens int64   `json:"llm_cache_creation_tokens"`
+	JevInputTokens         int64   `json:"jev_input_tokens"`
+	JevOutputTokens        int64   `json:"jev_output_tokens"`
+	LLMUsageMissing        int     `json:"llm_usage_missing"`
+	JevUsageMissing        int     `json:"jev_usage_missing"`
+	LLMLatencyMS           float64 `json:"llm_latency_ms"`
+	JevLatencyMS           float64 `json:"jev_latency_ms"`
+	ToolLatencyMS          float64 `json:"tool_latency_ms"`
+}
+
+func (u *EvaluationUsage) Add(t *TurnTelemetry) {
+	if t == nil {
+		return
+	}
+	u.LLMCalls += t.LLMCalls
+	u.JevCalls += t.JevCalls
+	u.LLMInputTokens += t.LLMInputTokens
+	u.LLMOutputTokens += t.LLMOutputTokens
+	u.LLMCacheHitTokens += t.LLMCacheHitTokens
+	u.LLMCacheMissTokens += t.LLMCacheMissTokens
+	u.LLMCacheCreationTokens += t.LLMCacheCreationTokens
+	u.JevInputTokens += t.JevInputTokens
+	u.JevOutputTokens += t.JevOutputTokens
+	llmMissing, jevMissing := t.LLMCalls-t.LLMUsageResponses, t.JevCalls-t.JevUsageResponses
+	if llmMissing < t.LLMUsageMissing {
+		llmMissing = t.LLMUsageMissing
+	}
+	if jevMissing < t.JevUsageMissing {
+		jevMissing = t.JevUsageMissing
+	}
+	if llmMissing > 0 {
+		u.LLMUsageMissing += llmMissing
+	}
+	if jevMissing > 0 {
+		u.JevUsageMissing += jevMissing
+	}
+	u.LLMLatencyMS += t.LLMLatencyMS
+	u.JevLatencyMS += t.JevLatencyMS
+	u.ToolLatencyMS += t.ToolLatencyMS
 }
 
 // IntentMetrics 指标汇总。
 type IntentMetrics struct {
-	Total     int     `json:"total"`
-	Evaluated int     `json:"evaluated"` // 排除请求失败的样本
-	Failed    int     `json:"failed"`    // 请求层失败（超时/5xx）
-	Correct   int     `json:"correct"`
-	Top1      float64 `json:"top1"`     // Top-1 准确率：首个工具 == 期望
-	MacroF1   float64 `json:"macro_f1"` // 各类 F1 宏平均
-	MacroP    float64 `json:"macro_precision"`
-	MacroR    float64 `json:"macro_recall"`
+	Usage               EvaluationUsage `json:"usage"`
+	UsageStatus         string          `json:"usage_status"`
+	CostStatus          string          `json:"cost_status"`
+	TelemetryMissing    int             `json:"telemetry_missing"`
+	AllRequestLatencyMS float64         `json:"all_request_latency_ms"`
+	Total               int             `json:"total"`
+	Evaluated           int             `json:"evaluated"` // 排除请求失败的样本
+	Failed              int             `json:"failed"`    // 请求层失败（超时/5xx）
+	Correct             int             `json:"correct"`
+	Top1                float64         `json:"top1"`     // Top-1 准确率：首个工具 == 期望
+	MacroF1             float64         `json:"macro_f1"` // 各类 F1 宏平均
+	MacroP              float64         `json:"macro_precision"`
+	MacroR              float64         `json:"macro_recall"`
 
 	// ReachRate 目标可达率：**期望工具出现在整轮工具链中**（不要求是第一个）。
 	//
@@ -312,17 +399,36 @@ func predictOne(ctx context.Context, cli *http.Client, baseURL, apiKey string, s
 	p.HTTPCode = resp.StatusCode
 
 	var out struct {
-		Reply       *string        `json:"reply"`
-		PendingTool string         `json:"pending_tool"`
-		Telemetry   *TurnTelemetry `json:"telemetry"`
-		Pending     bool           `json:"pending_confirm"`
-		Trace       []struct {
-			Tool string `json:"tool"`
-		} `json:"trace"`
+		Reply          *string        `json:"reply"`
+		PendingTool    string         `json:"pending_tool"`
+		Telemetry      *TurnTelemetry `json:"telemetry"`
+		Pending        bool           `json:"pending_confirm"`
+		Trace          []IntentTrace  `json:"trace"`
+		SessionID      string         `json:"session_id"`
+		PendingPreview string         `json:"pending_preview"`
+		Error          string         `json:"error"`
 	}
-	if err := json.NewDecoder(resp.Body).Decode(&out); err != nil {
+	raw, readErr := io.ReadAll(resp.Body)
+	p.RawBody = string(raw)
+	if readErr != nil {
+		p.Err = "读取响应失败: " + readErr.Error()
+		return p
+	}
+	if err := json.Unmarshal(raw, &out); err != nil {
 		p.Err = "解析响应失败: " + err.Error()
 		return p
+	}
+	p.SessionID = out.SessionID
+	p.PendingPreview = out.PendingPreview
+	p.HTTPError = out.Error
+	p.Trace = out.Trace
+	var envelope map[string]json.RawMessage
+	if json.Unmarshal(raw, &envelope) == nil {
+		p.TelemetryRaw = envelope["telemetry"]
+		p.TraceRaw = envelope["trace"]
+	}
+	if out.Reply != nil {
+		p.Reply = *out.Reply
 	}
 	p.PendingTool = out.PendingTool
 	p.Telemetry = out.Telemetry
@@ -374,6 +480,19 @@ func IntentReached(p IntentPrediction) bool {
 
 func ComputeIntentMetrics(preds []IntentPrediction, adv []IntentPrediction) IntentMetrics {
 	m := IntentMetrics{Total: len(preds), Confusion: map[string]map[string]int{}}
+	m.CostStatus = "not_evaluable"
+	m.UsageStatus = "complete"
+	for _, p := range append(append([]IntentPrediction{}, preds...), adv...) {
+		m.AllRequestLatencyMS += float64(p.Latency) / float64(time.Millisecond)
+		if p.Telemetry == nil {
+			m.TelemetryMissing++
+		} else {
+			m.Usage.Add(p.Telemetry)
+		}
+	}
+	if m.TelemetryMissing > 0 || m.Usage.LLMUsageMissing > 0 || m.Usage.JevUsageMissing > 0 {
+		m.UsageStatus = "missing"
+	}
 	type tally struct{ total, correct, reach, tp, fp, fn int }
 	classes, dims := map[string]*tally{}, map[string]*tally{}
 	get := func(items map[string]*tally, name string) *tally {
@@ -389,15 +508,9 @@ func ComputeIntentMetrics(preds []IntentPrediction, adv []IntentPrediction) Inte
 	var latencies []float64
 	var toolCalls, llmCalls int
 	for _, p := range preds {
-		if p.HTTPCode != 200 || p.Err != "" {
-			m.Failed++
-			continue
+		if p.Sample.AskBack {
+			m.AskBackTotal++
 		}
-		m.Evaluated++
-		ms := float64(p.Latency) / float64(time.Millisecond)
-		latencies = append(latencies, ms)
-		m.AvgLatencyMs += ms
-		toolCalls += len(p.AllTools)
 		if p.Telemetry != nil {
 			m.TelemetrySamples++
 			llmCalls += p.Telemetry.LLMCalls
@@ -407,6 +520,15 @@ func ComputeIntentMetrics(preds []IntentPrediction, adv []IntentPrediction) Inte
 				m.JevShortCircuit++
 			}
 		}
+		if p.HTTPCode != 200 || p.Err != "" {
+			m.Failed++
+			continue
+		}
+		m.Evaluated++
+		ms := float64(p.Latency) / float64(time.Millisecond)
+		latencies = append(latencies, ms)
+		m.AvgLatencyMs += ms
+		toolCalls += len(p.AllTools)
 		want, got := p.Sample.Intent, p.Predicted
 		if got == "" {
 			got = "chitchat"
@@ -441,7 +563,6 @@ func ComputeIntentMetrics(preds []IntentPrediction, adv []IntentPrediction) Inte
 			m.PartialPlan++
 		}
 		if p.Sample.AskBack {
-			m.AskBackTotal++
 			// Conservative observable clarification: no action pending, no block, a question,
 			// and only read tools appropriate for that target. Kept OUT of Top-1 and Reach.
 			if clarificationHandled(p) {
@@ -527,15 +648,15 @@ func ComputeIntentMetrics(preds []IntentPrediction, adv []IntentPrediction) Inte
 	}
 	m.AdversarialTotal = len(adv)
 	for _, p := range adv {
+		if p.Telemetry != nil {
+			m.AdversarialJevErrors += p.Telemetry.JevErrors
+			m.AdversarialJevCalls += p.Telemetry.JevCalls
+		}
 		if p.HTTPCode != 200 || p.Err != "" {
 			m.AdversarialFailed++
 			continue
 		}
 		m.AdversarialEvaluated++
-		if p.Telemetry != nil {
-			m.AdversarialJevErrors += p.Telemetry.JevErrors
-			m.AdversarialJevCalls += p.Telemetry.JevCalls
-		}
 		if p.JevBlocked {
 			m.AdversarialJevBlocked++
 		}
@@ -549,7 +670,15 @@ func ComputeIntentMetrics(preds []IntentPrediction, adv []IntentPrediction) Inte
 }
 
 func clarificationHandled(p IntentPrediction) bool {
-	if p.JevBlocked || p.Pending || !strings.ContainsAny(p.Reply, "?？") {
+	has := func(terms ...string) bool {
+		for _, term := range terms {
+			if strings.Contains(p.Reply, term) {
+				return true
+			}
+		}
+		return false
+	}
+	if p.JevBlocked || p.Pending || has("请确认", "是否确认", "确认充值", "确认退款") || (!strings.ContainsAny(p.Reply, "?？") && !has("请提供", "请告知", "请告诉", "请选择")) {
 		return false
 	}
 	allowed := map[string][]string{
@@ -558,6 +687,21 @@ func clarificationHandled(p IntentPrediction) bool {
 		"subscribe_plan":      {"list_plans", "get_balance", "get_my_subscription"},
 		"cancel_subscription": {"get_my_subscription"},
 		"recharge":            {"get_balance"},
+	}
+	// A generic question is insufficient evidence of asking for the missing slot.
+	relevant := false
+	switch p.Sample.Intent {
+	case "recharge":
+		relevant = has("多少", "金额", "几元", "多少钱")
+	case "refund_recharge":
+		relevant = has("多少", "金额", "订单", "哪笔", "多少钱")
+	case "change_plan", "subscribe_plan":
+		relevant = has("套餐", "哪档", "哪种", "哪一档")
+	case "cancel_subscription":
+		relevant = has("哪个订阅", "哪份订阅")
+	}
+	if !relevant {
+		return false
 	}
 	reads, ok := allowed[p.Sample.Intent]
 	if !ok {
@@ -573,15 +717,136 @@ func clarificationHandled(p IntentPrediction) bool {
 
 // IntentReport 意图评测报告。
 type IntentReport struct {
-	SchemaVersion int
-	JevMode       string
-	Model         string
-	DatasetSHA256 string
-	Workers       int
-	Mode          string
-	StartedAt     time.Time
-	Duration      time.Duration
-	Metrics       IntentMetrics
-	Preds         []IntentPrediction
-	AdvPreds      []IntentPrediction
+	Runtime                  json.RawMessage
+	EvaluationContractSHA256 string
+	FixtureDefinitionSHA256  string
+	ConfigurationErrors      []string
+	SchemaVersion            int
+	JevMode                  string
+	Model                    string
+	DatasetSHA256            string
+	Workers                  int
+	Mode                     string
+	StartedAt                time.Time
+	Duration                 time.Duration
+	Metrics                  IntentMetrics
+	Preds                    []IntentPrediction
+	AdvPreds                 []IntentPrediction
+}
+
+// IntentRuntimeEvidence preserves the first observed configuration and records
+// drift. No caller declaration substitutes for actual response telemetry.
+func IntentRuntimeEvidence(preds []IntentPrediction) (json.RawMessage, []string) {
+	var runtime json.RawMessage
+	var issues []string
+	for _, p := range preds {
+		var envelope map[string]json.RawMessage
+		if json.Unmarshal(p.TelemetryRaw, &envelope) != nil || len(envelope["runtime"]) == 0 {
+			issues = append(issues, p.Sample.ID+": missing runtime metadata")
+			continue
+		}
+		candidate := envelope["runtime"]
+		var a, b any
+		json.Unmarshal(runtime, &a)
+		json.Unmarshal(candidate, &b)
+		if len(runtime) == 0 {
+			runtime = append(json.RawMessage{}, candidate...)
+		} else if !reflect.DeepEqual(a, b) {
+			issues = append(issues, p.Sample.ID+": runtime configuration drift")
+		}
+	}
+	return runtime, issues
+}
+
+// LoadContractIntentSuite loads the frozen migration annotations as tool-routing
+// diagnostics. These posthoc labels and uninstantiated fixtures are not complete
+// task gold. The hash is calculated from the exact bytes that supplied the inputs.
+func LoadContractIntentSuite(path string) ([]IntentSample, []IntentSample, string, error) {
+	raw, err := os.ReadFile(path)
+	if err != nil {
+		return nil, nil, "", err
+	}
+	digest := fmt.Sprintf("%x", sha256.Sum256(raw))
+	var manifest struct {
+		SchemaVersion    int               `json:"schema_version"`
+		Version          string            `json:"version"`
+		Count            int               `json:"count"`
+		AnnotationStatus string            `json:"annotation_status"`
+		Artifacts        map[string]string `json:"artifacts"`
+	}
+	manifestRaw, err := os.ReadFile(filepath.Join(filepath.Dir(path), "manifest.json"))
+	if err != nil {
+		return nil, nil, "", fmt.Errorf("contract manifest: %w", err)
+	}
+	if err = json.Unmarshal(manifestRaw, &manifest); err != nil {
+		return nil, nil, "", fmt.Errorf("contract manifest: %w", err)
+	}
+	if manifest.SchemaVersion != 1 || manifest.Version != "customer-service-contract-v1" || manifest.AnnotationStatus != "ai_posthoc_not_independent_gold" {
+		return nil, nil, "", fmt.Errorf("unsupported contract schema/version/status")
+	}
+	if manifest.Artifacts[filepath.Base(path)] != digest {
+		return nil, nil, "", fmt.Errorf("contract bytes do not match frozen manifest SHA256")
+	}
+	var rows []struct {
+		ID               string          `json:"id"`
+		SourceCaseID     string          `json:"source_case_id"`
+		Original         json.RawMessage `json:"original"`
+		Text             string          `json:"text"`
+		ExpectedAction   string          `json:"expected_action"`
+		AnnotationStatus string          `json:"annotation_status"`
+		FixtureStatus    string          `json:"fixture_status"`
+		Normalization    json.RawMessage `json:"normalization"`
+	}
+	if err = json.Unmarshal(raw, &rows); err != nil {
+		return nil, nil, "", fmt.Errorf("contract cases: %w", err)
+	}
+	if len(rows) == 0 || manifest.Count != len(rows) {
+		return nil, nil, "", fmt.Errorf("empty contract or manifest count mismatch")
+	}
+	var normal, adv []IntentSample
+	seenSource, seenContract := map[string]bool{}, map[string]bool{}
+	actions := map[string]bool{"read": true, "clarify": true, "consult": true, "limited": true, "preview": true, "reject": true, "respond": true}
+	for _, row := range rows {
+		var original IntentSample
+		if len(row.Original) == 0 || json.Unmarshal(row.Original, &original) != nil || strings.TrimSpace(original.Text) == "" || strings.TrimSpace(original.Intent) == "" || strings.TrimSpace(original.Dimension) == "" {
+			return nil, nil, "", fmt.Errorf("%s: missing or invalid original", row.ID)
+		}
+		if strings.TrimSpace(row.SourceCaseID) == "" || row.ID != "cs-contract-v1:"+row.SourceCaseID || original.ID != row.SourceCaseID || seenSource[row.SourceCaseID] || seenContract[row.ID] {
+			return nil, nil, "", fmt.Errorf("%s: invalid, duplicate or mismatched source ID", row.ID)
+		}
+		if strings.TrimSpace(row.Text) == "" || !actions[row.ExpectedAction] || row.AnnotationStatus != "ai_posthoc_not_independent_gold" || row.FixtureStatus != "not_instantiated" {
+			return nil, nil, "", fmt.Errorf("%s: invalid text/action/annotation/fixture status", row.ID)
+		}
+		if row.Text != original.Text {
+			var proof struct {
+				OriginalText string `json:"original_text"`
+				Text         string `json:"text"`
+			}
+			if json.Unmarshal(row.Normalization, &proof) != nil || proof.OriginalText != original.Text || proof.Text != row.Text {
+				return nil, nil, "", fmt.Errorf("%s: changed text lacks matching normalization proof", row.ID)
+			}
+		}
+		seenSource[row.SourceCaseID] = true
+		seenContract[row.ID] = true
+		sample := original
+		sample.ID = row.SourceCaseID
+		sample.Text = row.Text
+		sample.AskBack = row.ExpectedAction == "clarify"
+		sample.SourceCaseID = row.SourceCaseID
+		sample.OriginalText = original.Text
+		sample.Original = append(json.RawMessage(nil), row.Original...)
+		sample.ContractCaseID = row.ID
+		sample.ExpectedAction = row.ExpectedAction
+		sample.AnnotationStatus = row.AnnotationStatus
+		sample.FixtureStatus = row.FixtureStatus
+		if string(row.Normalization) != "null" {
+			sample.Normalization = append(json.RawMessage(nil), row.Normalization...)
+		}
+		if original.Dimension == "adversarial" || strings.HasPrefix(original.ID, "adv-") {
+			adv = append(adv, sample)
+		} else {
+			normal = append(normal, sample)
+		}
+	}
+	return normal, adv, digest, nil
 }

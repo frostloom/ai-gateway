@@ -153,6 +153,7 @@ func (c *LLMClient) chatAnthropicRaw(ctx context.Context, raw []byte) (*Message,
 	}
 	var out anthropicResponse
 	parseErr := json.Unmarshal(body, &out)
+	recordProviderUsage(ctx, body)
 	if parseErr == nil && out.Usage != nil {
 		u := out.Usage
 		recordLLMUsage(ctx, u.InputTokens, u.OutputTokens, u.CacheReadInputTokens, nil, u.CacheCreationInputTokens)
@@ -212,6 +213,7 @@ func (c *LLMClient) chatAnthropic(ctx context.Context, messages []Message, tools
 	}
 	var out anthropicResponse
 	parseErr := json.Unmarshal(body, &out)
+	recordProviderUsage(ctx, body)
 	if parseErr == nil && out.Usage != nil {
 		u := out.Usage
 		recordLLMUsage(ctx, u.InputTokens, u.OutputTokens, u.CacheReadInputTokens, nil, u.CacheCreationInputTokens)

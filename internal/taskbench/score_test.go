@@ -8,7 +8,7 @@ import (
 
 // Losing the exact ledger/order/confirmation checks would accept a plausible tool trace.
 func TestRechargeRequiresActualExactStateAndConfirmation(t *testing.T) {
-	for _, variant := range []string{"valid", "wrong amount", "no confirmation", "premature", "duplicate order", "http failure"} {
+	for _, variant := range []string{"valid", "wrong amount", "no confirmation", "premature", "duplicate order", "http failure", "wrong reply amount", "wrong preview amount"} {
 		t.Run(variant, func(t *testing.T) {
 			now := time.Now()
 			r := Result{Case: Case{Tool: "recharge", AmountMoney: 100}, Fixture: Fixture{TenantID: 7}, Initial: Snapshot{BalanceCent: 500000, LedgerBalance: 500000, Consistent: true}, Final: Snapshot{BalanceCent: 510000, LedgerBalance: 510000, Consistent: true, Orders: []store.RechargeOrder{{TenantID: 7, OrderNo: "new", AmountMoney: 100, AmountCent: 10000, Status: store.RechargePaid, PaidAt: &now}}, Topups: []store.Topup{{TenantID: 7, Amount: 10000, Source: store.TopupRecharge, RefType: store.TopupRecharge, RefID: "new"}}, Audits: []store.AgentAuditLog{{TenantID: 7, Tool: "recharge", Confirmed: true, Args: `{"amount_money":100}`, Result: "成功"}}}, PreviewObserved: true, PreviewCorrect: true, Turns: []Turn{{Stage: "request", Status: 200}, {Stage: "confirm", Status: 200, Response: Response{Trace: []Trace{{Tool: "recharge", Args: `{"amount_money":100}`, Confirmed: true, Result: "成功"}}}}}}
@@ -23,6 +23,10 @@ func TestRechargeRequiresActualExactStateAndConfirmation(t *testing.T) {
 				r.Final.Orders = append(r.Final.Orders, r.Final.Orders[0])
 			case "http failure":
 				r.Turns[1].Status = 500
+			case "wrong reply amount":
+				r.Turns[1].Response.Reply = "已充值999元。"
+			case "wrong preview amount":
+				r.Turns[0].Response.Preview = "充值999元，是否确认？"
 			}
 			Score(&r)
 			if r.Success != (variant == "valid") {
@@ -129,7 +133,7 @@ func TestClarificationRequiresSlotQuestion(t *testing.T) {
 }
 func TestMetricsIncludesFixtureFailuresInDenominator(t *testing.T) {
 	m := Summarize([]Result{{Case: Case{Category: "recharge"}, Success: true, DurationMS: 100}, {Case: Case{Category: "recharge", MissingSlot: "amount"}, SetupError: true, DurationMS: 0}})
-	if m.Total != 2 || m.Completed != 1 || m.CompletionRate != 0.5 || m.FixtureFailures != 1 || m.ClarificationRequired != 1 || m.AllTasks.Count != 2 || m.SuccessfulTasks.Count != 1 {
+	if m.Total != 2 || m.Completed != 1 || m.CompletionRate != 0.5 || m.FixtureFailures != 1 || m.ClarificationRequired != 0 || m.AllTasks.Count != 1 || m.SuccessfulTasks.Count != 1 {
 		t.Fatalf("%+v", m)
 	}
 }

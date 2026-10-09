@@ -1,5 +1,9 @@
 # 客服意图路由：JEV A/B 评测
 
+> 本轮结果见[历史1220条离线审核](../reviews/2026-10-09-intent-offline-audit/README.md)。直接验证归档即可，不需执行下面的在线实验命令。
+
+> 以下命令仍使用历史评分口径。2026-10-09 的[1220条逐条整理归档](../annotations/2026-10-09-intent-contract-v1/README.md)尚未接入CLI，先完成标注审核和评分器对齐，再做新的正式评测。本轮仅整理文档，没有执行下面的模型实验。
+
 ## 一键运行（Windows）
 
 先启动 MySQL、Redis、billing，并在 `.env` 配置 `AGENT_LLM_API_KEY`、`AGENT_LLM_MODEL` 和 `JEV_API_KEY`：

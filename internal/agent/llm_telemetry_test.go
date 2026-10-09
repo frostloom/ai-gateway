@@ -10,6 +10,27 @@ import (
 	"time"
 )
 
+func TestOpenAIAppliesRecordedOutputBudget(t *testing.T) {
+	observedBudget := 0
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var body struct {
+			MaxTokens int `json:"max_tokens"`
+		}
+		json.NewDecoder(r.Body).Decode(&body)
+		observedBudget = body.MaxTokens
+		io.WriteString(w, `{"choices":[{"message":{"role":"assistant","content":"ok"}}]}`)
+	}))
+	defer srv.Close()
+	client := NewLLMClient(srv.URL, "test", "test-model")
+	client.maxTokens = 777
+	if _, err := client.Chat(context.Background(), []Message{{Role: "user", Content: "hello"}}, nil); err != nil {
+		t.Fatal(err)
+	}
+	if observedBudget != 777 {
+		t.Fatalf("recorded budget was not sent: %d", observedBudget)
+	}
+}
+
 func assertLLMTelemetry(t *testing.T, stats *TurnTelemetry, want map[string]float64) {
 	t.Helper()
 	raw, err := json.Marshal(stats)
