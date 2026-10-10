@@ -40,7 +40,8 @@ func TestPublicAccountHTTP(t *testing.T) {
 	if err := st.AutoMigrate(); err != nil {
 		t.Fatal(err)
 	}
-	h := Handler(st, slog.Default())
+	const controlToken = "test-control-token"
+	h := Handler(st, slog.Default(), controlToken)
 	name := fmt.Sprintf("http%d", time.Now().UnixNano())
 	request := func(path string, body any, ck *http.Cookie) *httptest.ResponseRecorder {
 		method := "GET"
@@ -50,6 +51,7 @@ func TestPublicAccountHTTP(t *testing.T) {
 			raw, _ = json.Marshal(body)
 		}
 		r := httptest.NewRequest(method, path, bytes.NewReader(raw))
+		r.Header.Set("X-Control-Token", controlToken)
 		if ck != nil {
 			r.AddCookie(ck)
 		}

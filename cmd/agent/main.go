@@ -21,12 +21,14 @@ import (
 	"github.com/frostloom/ai-gateway/internal/gateway/client"
 	"github.com/frostloom/ai-gateway/internal/jev"
 	"github.com/frostloom/ai-gateway/internal/pkg/config"
+	"github.com/frostloom/ai-gateway/internal/pkg/controlplane"
 	"github.com/frostloom/ai-gateway/internal/pkg/logger"
 	"github.com/frostloom/ai-gateway/internal/pkg/redisx"
 )
 
 func main() {
 	log := logger.New(config.Getenv("LOG_LEVEL", "info"))
+	controlToken := controlplane.Require(log)
 
 	port := config.Getenv("AGENT_PORT", "9105")
 	llmBase := config.Getenv("AGENT_LLM_BASE_URL", "https://api.deepseek.com")
@@ -89,7 +91,7 @@ func main() {
 	}
 	st := store.NewStore(db, rdb)
 
-	bc, err := client.NewBilling(billingAddr)
+	bc, err := client.NewBilling(billingAddr, controlToken)
 	if err != nil {
 		log.Error("connect billing gRPC", "err", err)
 		os.Exit(1)
@@ -166,7 +168,7 @@ func main() {
 	log.Info("agent service listening",
 		"port", port, "model", llm.Model(), "protocol", llm.Protocol(),
 		"llm_base", llmBase, "billing", billingAddr, "admin", adminBase)
-	if err := http.ListenAndServe(":"+port, mux); err != nil {
+	if err := http.ListenAndServe(config.ListenAddr(port), mux); err != nil {
 		log.Error("agent serve", "err", err)
 		os.Exit(1)
 	}

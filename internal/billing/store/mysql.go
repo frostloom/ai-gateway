@@ -27,8 +27,15 @@ import (
 //go:embed lua/reserve.lua
 var reserveLua string
 
+//go:embed lua/compensate.lua
+var compensateLua string
+
 //go:embed lua/settle.lua
 var settleLua string
+
+// reserveInsertHook 是测试缝：非 nil 时在余额路径插入 reserve 行之前调用。
+// 用来模拟「Lua 已扣减、MySQL 插入失败」。生产环境保持 nil。
+var reserveInsertHook func() error
 
 // 账单状态机。
 const (
@@ -151,8 +158,8 @@ func (s *Store) AutoMigrate() error {
 //  3. 落 reserve 行：唯一索引 uk_request_phase 兜底并发；插入失败且非重复 → 返回错误，
 //     调用方重试时 guard 让 Lua 变 no-op，insert 会成功 → 自愈。
 //
-// 残留风险：第 2 步成功但第 3 步永久失败且调用方永不重试 → Redis 余额少记无行。
-// 该孤儿由 M4 的「从账本重建 balance」job 收敛（以 DB 为权威，重算投影）。
+// 插入失败（且不是唯一键冲突）时跑补偿 Lua：guard 值等于本次 request_id 才
+// DEL guard 并 INCRBY 预扣额。账本无行，不能靠对账扫描发现这笔扣款。
 func (s *Store) Reserve(ctx context.Context, req *billingv1.ReserveRequest) (*billingv1.ReserveResponse, error) {
 	// 目录是计费权威：未上架/不存在的模型直接拒绝（gateway 映射为 400「模型未上架/已下架」）。
 	model, err := s.GetModelByModelID(ctx, req.Model)
@@ -238,6 +245,13 @@ func (s *Store) Reserve(ctx context.Context, req *billingv1.ReserveRequest) (*bi
 		return &billingv1.ReserveResponse{Code: billingv1.ReserveCode_RESERVE_OK, BillId: int64(row.ID), BalanceAfter: bal}, nil
 	}
 
+	// 有标价但整数除法把预扣打成 0 时，至少预扣 1 分。
+	// 否则 0 余额也能预扣成功，事后补扣又可能把账单卡在 pending。
+	// 两边价格都是 0 的免费模型保持 0，不凭空收费。
+	if pre == 0 && (inC > 0 || outC > 0) {
+		pre = 1
+	}
+
 	// 2) Redis Lua 原子扣减（余额路径）
 	script := goredis.NewScript(reserveLua)
 	res, err := script.Run(ctx, s.rdb, []string{BalanceKey(tenantID), ReqGuardKey(req.RequestId)}, pre, req.RequestId).Result()
@@ -268,6 +282,11 @@ func (s *Store) Reserve(ctx context.Context, req *billingv1.ReserveRequest) (*bi
 		row.ProviderID = &pid
 	}
 	if err := s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		if reserveInsertHook != nil {
+			if err := reserveInsertHook(); err != nil {
+				return err
+			}
+		}
 		if err := tx.Create(row).Error; err != nil {
 			return err
 		}
@@ -278,9 +297,23 @@ func (s *Store) Reserve(ctx context.Context, req *billingv1.ReserveRequest) (*bi
 				return &billingv1.ReserveResponse{Code: billingv1.ReserveCode_RESERVE_OK, BillId: int64(r2.ID), BalanceAfter: bal}, nil
 			}
 		}
+		// 事务已回滚，账本无行。把 Redis 预扣补回去，否则对账扫不到这笔孤儿扣款。
+		if _, cErr := s.compensateReserve(ctx, tenantID, req.RequestId, pre); cErr != nil {
+			return nil, status.Errorf(codes.Unavailable, "reserve insert: %v; compensate: %v", err, cErr)
+		}
 		return nil, status.Errorf(codes.Unavailable, "reserve insert: %v", err)
 	}
 	return &billingv1.ReserveResponse{Code: billingv1.ReserveCode_RESERVE_OK, BillId: int64(row.ID), BalanceAfter: bal}, nil
+}
+
+// compensateReserve 在 reserve 行插入失败后恢复 Redis。guard 不匹配时不动余额。
+func (s *Store) compensateReserve(ctx context.Context, tenantID uint64, requestID string, pre int64) (bool, error) {
+	script := goredis.NewScript(compensateLua)
+	res, err := script.Run(ctx, s.rdb, []string{BalanceKey(tenantID), ReqGuardKey(requestID)}, pre, requestID).Result()
+	if err != nil {
+		return false, err
+	}
+	return toInt64(res) == 1, nil
 }
 
 // subscriptionAllowancePath 判定请求是否走订阅额度（M9）。返回 isSub=true 时 refreshHours/tier/quota
@@ -402,7 +435,7 @@ func (s *Store) Settle(ctx context.Context, req *billingv1.SettleRequest) (*bill
 	// actual=0/delta=0 → applyDelta(0) 是 no-op（settle.lua 既不改余额也不退回）。
 	if row.Funding == FundingSubscription {
 		actual, delta := int64(0), int64(0)
-		bal, err := s.applyDelta(ctx, row.TenantID, req.RequestId, 0)
+		bal, _, err := s.applyDelta(ctx, row.TenantID, req.RequestId, 0)
 		if err != nil {
 			return nil, err
 		}
@@ -449,10 +482,22 @@ func (s *Store) Settle(ctx context.Context, req *billingv1.SettleRequest) (*bill
 	actual := quota.CostCent(*row.PromptTokens, *row.CompletionTokens, inC, outC)
 	delta := actual - row.PreQuota
 
-	bal, err := s.applyDelta(ctx, row.TenantID, req.RequestId, delta)
+	bal, applied, err := s.applyDelta(ctx, row.TenantID, req.RequestId, delta)
 	if err != nil {
 		return nil, err
 	}
+	// 账本 actual 记实际从钱包收走的金额（预扣 + 本次 Redis 变动），与投影一致。
+	// 标价高于能收的部分记在 error_code，账单仍结清，对账不会反复撞同一条 pending。
+	collected := row.PreQuota + applied
+	if collected < 0 {
+		collected = 0
+	}
+	shortfall := actual - collected
+	if shortfall < 0 {
+		shortfall = 0
+	}
+	actual = collected
+	delta = applied
 
 	settleRow := &Bill{
 		RequestID:        req.RequestId,
@@ -471,6 +516,9 @@ func (s *Store) Settle(ctx context.Context, req *billingv1.SettleRequest) (*bill
 		InPriceCent:      &inC,
 		OutPriceCent:     &outC,
 		CreatedAt:        time.Now(),
+	}
+	if shortfall > 0 {
+		settleRow.ErrorCode = fmt.Sprintf("shortfall:%d", shortfall)
 	}
 	if err := s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		if err := tx.Create(settleRow).Error; err != nil && !isDupKey(err) {
@@ -510,7 +558,7 @@ func (s *Store) Reverse(ctx context.Context, req *billingv1.ReverseRequest) (*bi
 	}
 
 	// 退回全部预扣：delta 语义「新余额 = 旧余额 - delta」，退款用负 delta（-pre）。
-	if _, err := s.applyDelta(ctx, row.TenantID, req.RequestId, -row.PreQuota); err != nil {
+	if _, _, err := s.applyDelta(ctx, row.TenantID, req.RequestId, -row.PreQuota); err != nil {
 		return nil, err
 	}
 	// 状态推进 + 同事务 outbox reverse 事件（M10：amount = -pre 退款）。
@@ -707,17 +755,18 @@ func (s *Store) OverviewStats(ctx context.Context) (*Overview, error) {
 }
 
 // applyDelta 在 Redis 上恰好应用一次 delta（Settle 与 Reverse 共用，互斥）。
-func (s *Store) applyDelta(ctx context.Context, tenantID uint64, requestID string, delta int64) (int64, error) {
+// applied 是实际改动的金额：补扣不足时小于请求的 delta，且余额不会变成负数。
+func (s *Store) applyDelta(ctx context.Context, tenantID uint64, requestID string, delta int64) (int64, int64, error) {
 	script := goredis.NewScript(settleLua)
 	res, err := script.Run(ctx, s.rdb, []string{BalanceKey(tenantID), DeltaGuardKey(requestID)}, delta).Result()
 	if err != nil {
-		return 0, status.Errorf(codes.Unavailable, "delta lua: %v", err)
+		return 0, 0, status.Errorf(codes.Unavailable, "delta lua: %v", err)
 	}
-	code, bal := parseReserveResult(res)
+	code, bal, applied := parseLuaTriple(res)
 	if code == -1 {
-		return 0, status.Errorf(codes.FailedPrecondition, "balance would go negative: tenant=%d delta=%d", tenantID, delta)
+		return 0, 0, status.Errorf(codes.FailedPrecondition, "balance would go negative: tenant=%d delta=%d", tenantID, delta)
 	}
-	return bal, nil
+	return bal, applied, nil
 }
 
 // ---------- 内部 helpers ----------
@@ -761,11 +810,21 @@ func (s *Store) getBalance(ctx context.Context, tenantID uint64) (int64, error) 
 
 // parseReserveResult 解析 Lua 返回 {code, balance}。
 func parseReserveResult(res any) (int64, int64) {
+	code, bal, _ := parseLuaTriple(res)
+	return code, bal
+}
+
+// parseLuaTriple 解析 Lua 返回 {code, balance} 或 {code, balance, extra}。
+func parseLuaTriple(res any) (int64, int64, int64) {
 	arr, ok := res.([]any)
 	if !ok || len(arr) < 2 {
-		return 0, 0
+		return 0, 0, 0
 	}
-	return toInt64(arr[0]), toInt64(arr[1])
+	extra := int64(0)
+	if len(arr) > 2 {
+		extra = toInt64(arr[2])
+	}
+	return toInt64(arr[0]), toInt64(arr[1]), extra
 }
 
 func toInt64(v any) int64 {

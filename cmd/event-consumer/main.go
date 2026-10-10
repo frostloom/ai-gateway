@@ -79,7 +79,7 @@ func main() {
 	httpPort := config.Getenv("EVENT_CONSUMER_PORT", "9107")
 	go func() {
 		log.Info("event-consumer http listening", "port", httpPort)
-		if err := http.ListenAndServe(":"+httpPort, c.HTTPHandler()); err != nil {
+		if err := http.ListenAndServe(config.ListenAddr(httpPort), c.HTTPHandler()); err != nil {
 			log.Error("event-consumer http serve", "err", err)
 		}
 	}()

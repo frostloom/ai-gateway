@@ -7,6 +7,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+
+	"github.com/frostloom/ai-gateway/internal/pkg/controlplane"
 )
 
 // AdminSession 校验面板 admin 请求的登录态（HttpOnly cookie agw_admin，newapi 式登录）。
@@ -14,7 +16,7 @@ import (
 // 优先级：cookie（浏览器登录后的 HttpOnly）→ X-Admin-Token 头（脚本/curl 传已拿到的 token，
 // 未来可去掉）→ ADMIN_TOKEN 环境变量兜底（仅本机演示；前端不使用）。
 // 有 token 时转发到 billing /admin/auth/me 校验，401 则引导前端跳登录页。
-func AdminSession(billingAdminBase, svcToken string, log *slog.Logger) gin.HandlerFunc {
+func AdminSession(billingAdminBase, svcToken, controlToken string, log *slog.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		tok := requestToken(c)
 		if tok == "" {
@@ -26,7 +28,7 @@ func AdminSession(billingAdminBase, svcToken string, log *slog.Logger) gin.Handl
 			c.Next()
 			return
 		}
-		if !verifySession(billingAdminBase+"/admin/auth/me", tok) {
+		if !verifySession(billingAdminBase+"/admin/auth/me", tok, controlToken) {
 			abortAdmin(c, http.StatusUnauthorized, "session invalid")
 			return
 		}
@@ -44,12 +46,15 @@ func requestToken(c *gin.Context) string {
 
 // verifySession 调 billing /admin/auth/me 校验 token，成功返回 true。
 // 命中 401/无效即失败。用独立 client 避免与面板聚合 proxy 的 client 互相干扰。
-func verifySession(target, token string) bool {
+func verifySession(target, token, controlToken string) bool {
 	req, err := http.NewRequest(http.MethodGet, target, nil)
 	if err != nil {
 		return false
 	}
 	req.Header.Set("X-Admin-Token", token)
+	if controlToken != "" {
+		req.Header.Set(controlplane.Header, controlToken)
+	}
 	client := &http.Client{Timeout: 3 * time.Second}
 	resp, err := client.Do(req)
 	if err != nil {
