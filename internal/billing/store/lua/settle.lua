@@ -1,30 +1,38 @@
 -- 结算/退款：把 delta 恰好在 Redis 余额上应用一次（幂等）。
--- 与 reserve.lua 的区别：这里不是「预占扣减」，而是对预占结果的修正——
---   delta 统一语义：新余额 = 旧余额 - delta
---     settle 正 delta 补扣（实际>预扣，再扣差额）、负 delta 退回（实际<预扣，退差额）
---     reverse 用负 delta（-pre）全退（预扣的 pre 原路退回）
--- 应用「恰好一次」靠 billing:delta:{request_id} guard（Settle 与 Reverse 共用，
--- 二者互斥：谁先拿到 guard，另一个就变 no-op）。
+-- delta 语义：新余额 = 旧余额 - delta
+--   settle 正 delta 补扣；负 delta 退回
+--   reverse 用负 delta（-pre）全退
+-- 补扣超过当前余额时只扣到 0，不把余额打成负数。调用方据此结清账单并记下短欠，
+-- 避免「补扣被拒绝 → 账单永远 pending → 对账反复失败」。
 --
--- KEYS[1] = billing:balance:{tenant_id}   Int
--- KEYS[2] = billing:delta:{request_id}    String delta guard（NX 写入，TTL 24h）
--- ARGV[1] = delta（正=补扣，负=退回）
+-- KEYS[1] = billing:balance:{tenant_id}
+-- KEYS[2] = billing:delta:{request_id}  值 = 实际应用的 delta
+-- ARGV[1] = 请求的 delta
 --
--- return {code, balance}
---   code: 1=已应用, 0=已应用过（幂等重放）, -1=透支拒绝（仅补扣时检查）
---   balance: 应用后的余额
+-- return {code, balance, applied}
+--   code: 1=按请求额应用, 2=补扣不足只扣到 0, 0=已应用过
+--   applied: 本次（或首次）实际应用的 delta
 local bal = tonumber(redis.call('GET', KEYS[1]) or '0')
-if redis.call('EXISTS', KEYS[2]) == 1 then
-  return {0, bal}
+local existing = redis.call('GET', KEYS[2])
+if existing then
+  return {0, bal, tonumber(existing)}
 end
--- 只有「补扣」才可能透支：余额必须 ≥ 本次补扣额。退回（负 delta）只会增加，无需检查。
-if tonumber(ARGV[1]) > 0 and bal < tonumber(ARGV[1]) then
-  return {-1, bal}
+local delta = tonumber(ARGV[1])
+local applied = delta
+if delta > 0 and bal < delta then
+  applied = bal
+  if applied < 0 then
+    applied = 0
+  end
 end
-redis.call('SET', KEYS[2], '1', 'EX', 86400)
-if tonumber(ARGV[1]) > 0 then
-  redis.call('DECRBY', KEYS[1], ARGV[1])
-elseif tonumber(ARGV[1]) < 0 then
-  redis.call('INCRBY', KEYS[1], -tonumber(ARGV[1]))
+redis.call('SET', KEYS[2], tostring(applied), 'EX', 86400)
+if applied > 0 then
+  redis.call('DECRBY', KEYS[1], applied)
+elseif applied < 0 then
+  redis.call('INCRBY', KEYS[1], -applied)
 end
-return {1, bal - tonumber(ARGV[1])}
+local code = 1
+if delta > 0 and applied < delta then
+  code = 2
+end
+return {code, bal - applied, applied}
