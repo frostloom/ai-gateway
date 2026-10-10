@@ -8,6 +8,8 @@
 # 自动做：docker 起 MySQL/Redis/Kafka(+建topic) → 载入 .env → 起 billing/router/mock×3/
 #         gateway/reconciler/event-consumer/agent → 等端口就绪 → 打印状态。
 # agent 需要 .env 里的 AGENT_LLM_API_KEY，否则 /portal/chat 会返回明确错误。
+# Full restarts can share a fresh random control token. Configure a stable
+# CONTROL_PLANE_TOKEN in .env/environment before partial restarts or M5.
 set -uo pipefail
 cd "$(dirname "$0")/.."
 mkdir -p logs bin

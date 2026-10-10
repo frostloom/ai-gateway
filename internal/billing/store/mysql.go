@@ -6,14 +6,20 @@ package store
 
 import (
 	"context"
+	"crypto/rand"
+	"crypto/sha256"
+	"database/sql"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/go-sql-driver/mysql"
 	goredis "github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -32,10 +38,6 @@ var compensateLua string
 
 //go:embed lua/settle.lua
 var settleLua string
-
-// reserveInsertHook 是测试缝：非 nil 时在余额路径插入 reserve 行之前调用。
-// 用来模拟「Lua 已扣减、MySQL 插入失败」。生产环境保持 nil。
-var reserveInsertHook func() error
 
 // 账单状态机。
 const (
@@ -152,17 +154,66 @@ func (s *Store) AutoMigrate() error {
 
 // Reserve 预占额度。幂等：同一 request_id 只扣一次、只落一行。
 //
-// 顺序设计（为什么这样安全）：
+// 同一 request 使用 MySQL 会话锁跨进程串行化 Lua、SQL 与失败补偿。
+// request guard 只能证明请求曾扣款，不能证明失败的调用拥有该次扣款。
+// 顺序设计：
 //  1. DB 快速查重：已存在该 request_id 的 reserve 行 → 幂等重放，直接返回；
 //  2. Redis Lua 原子扣减：guard 幂等——若本 request 已扣过则返回 ALREADY 不重复扣；
 //  3. 落 reserve 行：唯一索引 uk_request_phase 兜底并发；插入失败且非重复 → 返回错误，
-//     调用方重试时 guard 让 Lua 变 no-op，insert 会成功 → 自愈。
+//     失败后释放原会话并重锁查账本，只有账本仍无行才补偿 Redis。
 //
-// 插入失败（且不是唯一键冲突）时跑补偿 Lua：guard 值等于本次 request_id 才
-// DEL guard 并 INCRBY 预扣额。账本无行，不能靠对账扫描发现这笔扣款。
+// 插入失败时重锁查询账本，无行才跑补偿 Lua：guard 值等于本次唯一 owner 才
+// DEL guard 并 INCRBY 预扣额。重放会接管 owner，失联的旧调用不能退掉新调用的扣款。
 func (s *Store) Reserve(ctx context.Context, req *billingv1.ReserveRequest) (*billingv1.ReserveResponse, error) {
+	return s.reserveLocked(ctx, req)
+}
+
+// lockReserveRequest pins the connection for the entire reserve operation.
+// SQL inside that operation uses a detached context: driver cancellation would
+// close this connection and release the lock before Redis compensation.
+// Caller cancellation is still checked before Lua and before the insert.
+// The lock name is fixed-length and shared by all billing processes.
+func (s *Store) lockReserveRequest(ctx context.Context, requestID string) (*sql.Conn, func(), error) {
+	db, err := s.db.DB()
+	if err != nil {
+		return nil, nil, err
+	}
+	conn, err := db.Conn(ctx)
+	if err != nil {
+		return nil, nil, err
+	}
+	name := fmt.Sprintf("billing:reserve:%x", sha256.Sum256([]byte(requestID)))[:64]
+	var acquired sql.NullInt64
+	if err := conn.QueryRowContext(ctx, "SELECT GET_LOCK(?, 5)", name).Scan(&acquired); err != nil {
+		// A canceled query may have acquired the server lock before its result
+		// was lost. Never return that connection to the pool.
+		_ = conn.Raw(func(any) error { return driver.ErrBadConn })
+		_ = conn.Close()
+		return nil, nil, err
+	}
+	if !acquired.Valid || acquired.Int64 != 1 {
+		_ = conn.Close()
+		return nil, nil, errors.New("request lock timed out")
+	}
+	var releaseOnce sync.Once
+	return conn, func() {
+		releaseOnce.Do(func() {
+			cleanup, cancel := context.WithTimeout(context.WithoutCancel(ctx), 3*time.Second)
+			defer cancel()
+			var released sql.NullInt64
+			if err := conn.QueryRowContext(cleanup, "SELECT RELEASE_LOCK(?)", name).Scan(&released); err != nil || !released.Valid || released.Int64 != 1 {
+				// A connection with an unreleased session lock cannot be pooled.
+				_ = conn.Raw(func(any) error { return driver.ErrBadConn })
+			}
+			_ = conn.Close()
+		})
+	}, nil
+}
+
+func (s *Store) reserveLocked(ctx context.Context, req *billingv1.ReserveRequest) (*billingv1.ReserveResponse, error) {
+	dbctx := ctx
 	// 目录是计费权威：未上架/不存在的模型直接拒绝（gateway 映射为 400「模型未上架/已下架」）。
-	model, err := s.GetModelByModelID(ctx, req.Model)
+	model, err := s.GetModelByModelID(dbctx, req.Model)
 	if err != nil {
 		return nil, status.Errorf(codes.Unavailable, "model lookup: %v", err)
 	}
@@ -184,20 +235,20 @@ func (s *Store) Reserve(ctx context.Context, req *billingv1.ReserveRequest) (*bi
 
 	// M9 订阅额度路径判定：有活跃订阅 + 该模型档次在套餐额度内 → 走订阅额度（token 计额度、不碰钱）。
 	// 免费档/无标签模型、无订阅 → 余额路径（原逻辑不变）。
-	isSub, refreshHours, tier, quota, err := s.subscriptionAllowancePath(ctx, model, tenantID)
+	isSub, refreshHours, tier, quota, err := s.subscriptionAllowancePath(dbctx, model, tenantID)
 	if err != nil {
 		return nil, status.Errorf(codes.Unavailable, "subscription path: %v", err)
 	}
 
 	// 1) DB 快速查重（幂等重放，两种路径共用）
-	if row, err := s.getReserve(ctx, req.RequestId); err == nil && row != nil {
+	if row, err := s.getReserve(dbctx, req.RequestId); err == nil && row != nil {
 		bal, _ := s.getBalance(ctx, tenantID)
 		return &billingv1.ReserveResponse{Code: billingv1.ReserveCode_RESERVE_OK, BillId: int64(row.ID), BalanceAfter: bal}, nil
 	}
 
 	if isSub {
 		// 窗口额度检查：consumed[本档]（滚动窗口内已用 token）+ 本次估算 ≤ 窗口额度，否则超限拒绝。
-		consumed, err := s.subscriptionConsumed(ctx, tenantID, refreshHours)
+		consumed, err := s.subscriptionConsumed(dbctx, tenantID, refreshHours)
 		if err != nil {
 			return nil, status.Errorf(codes.Unavailable, "subscription consumed: %v", err)
 		}
@@ -227,20 +278,44 @@ func (s *Store) Reserve(ctx context.Context, req *billingv1.ReserveRequest) (*bi
 			row.ProviderID = &pid
 		}
 		// 落订阅额度 reserve 行 + 同事务 outbox 事件（M10：金额 0、funding=subscription）。
-		if err := s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		if err := s.db.WithContext(dbctx).Transaction(func(tx *gorm.DB) error {
+			if err := ctx.Err(); err != nil {
+				return err
+			}
 			if err := tx.Create(row).Error; err != nil {
 				return err
 			}
 			return insertOutbox(tx, newBillingEvent(row, 0, PhaseReserve))
 		}); err != nil {
 			if isDupKey(err) {
-				if r2, e2 := s.getReserve(ctx, req.RequestId); e2 == nil && r2 != nil {
+				if r2, e2 := s.getReserve(dbctx, req.RequestId); e2 == nil && r2 != nil {
 					bal, _ := s.getBalance(ctx, tenantID)
 					return &billingv1.ReserveResponse{Code: billingv1.ReserveCode_RESERVE_OK, BillId: int64(r2.ID), BalanceAfter: bal}, nil
 				}
 			}
 			return nil, status.Errorf(codes.Unavailable, "reserve insert: %v", err)
 		}
+		bal, _ := s.getBalance(ctx, tenantID)
+		return &billingv1.ReserveResponse{Code: billingv1.ReserveCode_RESERVE_OK, BillId: int64(row.ID), BalanceAfter: bal}, nil
+	}
+
+	// Subscription reserves do not debit Redis and need no compensation lock.
+	// Acquire only for the balance path, then recheck the authoritative row.
+	conn, unlock, err := s.lockReserveRequest(ctx, req.RequestId)
+	if err != nil {
+		return nil, status.Errorf(codes.Unavailable, "reserve lock: %v", err)
+	}
+	defer unlock()
+	originalDB := s.db
+	dbctx, cancelSQL := context.WithTimeout(context.WithoutCancel(ctx), 15*time.Second)
+	defer cancelSQL()
+	locked := *s
+	locked.db = s.db.Session(&gorm.Session{NewDB: true}).WithContext(dbctx)
+	locked.db.Statement.ConnPool = conn
+	s = &locked
+	if row, err := s.getReserve(dbctx, req.RequestId); err != nil {
+		return nil, status.Errorf(codes.Unavailable, "reserve lookup: %v", err)
+	} else if row != nil {
 		bal, _ := s.getBalance(ctx, tenantID)
 		return &billingv1.ReserveResponse{Code: billingv1.ReserveCode_RESERVE_OK, BillId: int64(row.ID), BalanceAfter: bal}, nil
 	}
@@ -253,8 +328,9 @@ func (s *Store) Reserve(ctx context.Context, req *billingv1.ReserveRequest) (*bi
 	}
 
 	// 2) Redis Lua 原子扣减（余额路径）
+	owner := rand.Text()
 	script := goredis.NewScript(reserveLua)
-	res, err := script.Run(ctx, s.rdb, []string{BalanceKey(tenantID), ReqGuardKey(req.RequestId)}, pre, req.RequestId).Result()
+	res, err := script.Run(ctx, s.rdb, []string{BalanceKey(tenantID), ReqGuardKey(req.RequestId)}, pre, owner).Result()
 	if err != nil {
 		return nil, status.Errorf(codes.Unavailable, "reserve lua: %v", err)
 	}
@@ -281,11 +357,9 @@ func (s *Store) Reserve(ctx context.Context, req *billingv1.ReserveRequest) (*bi
 		pid := uint64(req.ProviderId)
 		row.ProviderID = &pid
 	}
-	if err := s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		if reserveInsertHook != nil {
-			if err := reserveInsertHook(); err != nil {
-				return err
-			}
+	if err := s.db.WithContext(dbctx).Transaction(func(tx *gorm.DB) error {
+		if err := ctx.Err(); err != nil {
+			return err
 		}
 		if err := tx.Create(row).Error; err != nil {
 			return err
@@ -293,12 +367,32 @@ func (s *Store) Reserve(ctx context.Context, req *billingv1.ReserveRequest) (*bi
 		return insertOutbox(tx, newBillingEvent(row, pre, PhaseReserve))
 	}); err != nil {
 		if isDupKey(err) {
-			if r2, e2 := s.getReserve(ctx, req.RequestId); e2 == nil && r2 != nil {
+			if r2, e2 := s.getReserve(dbctx, req.RequestId); e2 == nil && r2 != nil {
 				return &billingv1.ReserveResponse{Code: billingv1.ReserveCode_RESERVE_OK, BillId: int64(r2.ID), BalanceAfter: bal}, nil
 			}
 		}
-		// 事务已回滚，账本无行。把 Redis 预扣补回去，否则对账扫不到这笔孤儿扣款。
-		if _, cErr := s.compensateReserve(ctx, tenantID, req.RequestId, pre); cErr != nil {
+		// Even a failed COMMIT may have reached MySQL. A broken connection also
+		// loses its session lock, allowing a replay to commit. Reacquire on a
+		// healthy connection and inspect the ledger before refunding anything.
+		unlock()
+		cleanup, cancel := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
+		defer cancel()
+		recovery := NewStore(originalDB, s.rdb)
+		recoveryConn, recoveryUnlock, lockErr := recovery.lockReserveRequest(cleanup, req.RequestId)
+		if lockErr != nil {
+			return nil, status.Errorf(codes.Unavailable, "reserve insert: %v; recovery lock: %v", err, lockErr)
+		}
+		defer recoveryUnlock()
+		recovery.db = originalDB.Session(&gorm.Session{NewDB: true}).WithContext(cleanup)
+		recovery.db.Statement.ConnPool = recoveryConn
+		persisted, lookupErr := recovery.getReserve(cleanup, req.RequestId)
+		if lookupErr != nil {
+			return nil, status.Errorf(codes.Unavailable, "reserve insert: %v; recovery lookup: %v", err, lookupErr)
+		}
+		if persisted != nil {
+			return nil, status.Errorf(codes.Unavailable, "reserve insert: %v", err)
+		}
+		if _, cErr := recovery.compensateReserve(cleanup, tenantID, req.RequestId, pre, owner); cErr != nil {
 			return nil, status.Errorf(codes.Unavailable, "reserve insert: %v; compensate: %v", err, cErr)
 		}
 		return nil, status.Errorf(codes.Unavailable, "reserve insert: %v", err)
@@ -307,9 +401,9 @@ func (s *Store) Reserve(ctx context.Context, req *billingv1.ReserveRequest) (*bi
 }
 
 // compensateReserve 在 reserve 行插入失败后恢复 Redis。guard 不匹配时不动余额。
-func (s *Store) compensateReserve(ctx context.Context, tenantID uint64, requestID string, pre int64) (bool, error) {
+func (s *Store) compensateReserve(ctx context.Context, tenantID uint64, requestID string, pre int64, owner string) (bool, error) {
 	script := goredis.NewScript(compensateLua)
-	res, err := script.Run(ctx, s.rdb, []string{BalanceKey(tenantID), ReqGuardKey(requestID)}, pre, requestID).Result()
+	res, err := script.Run(ctx, s.rdb, []string{BalanceKey(tenantID), ReqGuardKey(requestID)}, pre, owner).Result()
 	if err != nil {
 		return false, err
 	}
@@ -370,48 +464,61 @@ func (s *Store) EnsureBalanceKeys(ctx context.Context) error {
 // ---------- 用量上报 / 结算 / 退款 / 密钥校验 ----------
 
 // ReportUsage 上报实际用量：把 usage_reported_at（持久 marker）+ token 数写进 reserve 行。
-// 幂等：marker 用 COALESCE 只写一次；token 数重复写同值无副作用。
+// 幂等：锁定 reserve 行，重复同值无副作用；首次写入后拒绝覆盖用量和上游。
 // 这个 marker 是对账的「分水岭」：无 marker = 流没跑完（应全退）；有 marker = 跑完了（只差 settle）。
 // M10：UPDATE 与 outbox usage 事件同一事务提交。
 func (s *Store) ReportUsage(ctx context.Context, req *billingv1.ReportUsageRequest) error {
-	row, err := s.getReserve(ctx, req.RequestId)
-	if err != nil {
-		return status.Errorf(codes.Unavailable, "report usage lookup: %v", err)
+	if req.ProviderId < 0 || req.PromptTokens < 0 || req.CompletionTokens < 0 {
+		return status.Error(codes.InvalidArgument, "negative provider or token count")
 	}
-	if row == nil {
-		return status.Errorf(codes.NotFound, "reserve row not found: %s", req.RequestId)
-	}
-	err = s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		res := tx.Model(&Bill{}).
-			Where("request_id = ? AND phase = ?", req.RequestId, PhaseReserve).
-			Updates(map[string]any{
-				"prompt_tokens":     req.PromptTokens,
-				"completion_tokens": req.CompletionTokens,
-				"usage_reported_at": gorm.Expr("COALESCE(usage_reported_at, ?)", time.Now()),
-			})
-		if res.Error != nil {
-			return res.Error
+	err := s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		var row Bill
+		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).Where("request_id = ? AND phase = ?", req.RequestId, PhaseReserve).First(&row).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return status.Errorf(codes.NotFound, "reserve row not found: %s", req.RequestId)
+			}
+			return err
 		}
-		if res.RowsAffected == 0 {
-			return errReportUsageNotFound
+		providerMatches := req.ProviderId == 0 || (row.ProviderID != nil && *row.ProviderID == uint64(req.ProviderId))
+		if row.UsageReportedAt != nil {
+			if providerMatches && row.PromptTokens != nil && *row.PromptTokens == req.PromptTokens && row.CompletionTokens != nil && *row.CompletionTokens == req.CompletionTokens {
+				return nil
+			}
+			return status.Error(codes.FailedPrecondition, "usage already recorded with different values")
+		}
+		if row.Status != StatusPending {
+			return status.Error(codes.FailedPrecondition, "reserve is no longer pending")
+		}
+		updates := map[string]any{"prompt_tokens": req.PromptTokens, "completion_tokens": req.CompletionTokens, "usage_reported_at": time.Now()}
+		if req.ProviderId > 0 {
+			var provider Provider
+			if err := tx.First(&provider, uint64(req.ProviderId)).Error; err != nil {
+				if errors.Is(err, gorm.ErrRecordNotFound) {
+					return status.Error(codes.InvalidArgument, "unknown provider")
+				}
+				return err
+			}
+			id := provider.ID
+			row.ProviderID = &id
+			updates["provider_id"] = id
+		}
+		if err := tx.Model(&row).Updates(updates).Error; err != nil {
+			return err
 		}
 		// 同事务 outbox usage 事件（M10）：金额 0，token 用上报值。
-		ev := newBillingEvent(row, 0, PhaseUsage)
+		ev := newBillingEvent(&row, 0, PhaseUsage)
 		ev.PromptTokens = &req.PromptTokens
 		ev.CompletionTokens = &req.CompletionTokens
 		return insertOutbox(tx, ev)
 	})
 	if err != nil {
-		if errors.Is(err, errReportUsageNotFound) {
-			return status.Errorf(codes.NotFound, "reserve row not found: %s", req.RequestId)
+		if status.Code(err) != codes.Unknown {
+			return err
 		}
 		return status.Errorf(codes.Unavailable, "report usage: %v", err)
 	}
 	return nil
 }
-
-// errReportUsageNotFound 区分「reserve 行不存在」与「落库失败」的内部哨兵。
-var errReportUsageNotFound = errors.New("reserve row not found")
 
 // Settle 结算：pending → settled。按实际用量与预扣算 delta，Redis 恰好冲正一次，落 settle 行。
 // 幂等：settle 行撞唯一索引 no-op；delta guard 保证 Redis 只应用一次。

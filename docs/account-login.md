@@ -20,4 +20,6 @@
 
 启动：`./scripts/start-all.ps1 -Rebuild`。已有开发数据库由 billing 的 AutoMigrate 补建 `portal_users`、`portal_sessions`，保留已有账号和业务数据；新库完整结构在 `scripts/schema.sql`。
 
+部分重启（`-Only agent` 等）和 M5 场景脚本需要与运行中服务相同的 `CONTROL_PLANE_TOKEN`。先在本机 `.env` 配置稳定令牌并完整重启一次，之后再部分重启；缺少令牌时脚本提前失败。完整启动仍支持临时共享令牌，但新终端无法自动恢复上一次临时值。
+
 回归测试覆盖注册事务、重复用户名、密码错误、角色越权、退出与过期、禁用账号、跨站请求、旧 API Key 与网页登录身份冲突，以及客服会话的跨租户拒绝。

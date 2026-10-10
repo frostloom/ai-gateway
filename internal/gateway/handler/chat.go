@@ -216,7 +216,7 @@ func forwardNonStream(c *gin.Context, b billingAPI, r routingAPI, log *slog.Logg
 			prompt = int64(pr.Usage.PromptTokens)
 			completion = int64(pr.Usage.CompletionTokens)
 		}
-		settleAndLog(c, b, log, requestID, billID, prompt, completion)
+		settleAndLog(c, b, log, requestID, billID, prompt, completion, int64(prov.ProviderID))
 		c.Data(http.StatusOK, "application/json", body)
 		return
 	}
@@ -272,7 +272,8 @@ func relayStream(c *gin.Context, b billingAPI, r routingAPI, log *slog.Logger, p
 			break
 		}
 		if resp.StatusCode >= 500 {
-			io.Copy(io.Discard, resp.Body)
+			// An error body may never reach EOF. Close it immediately so failover
+			// and refund do not wait on an unbounded stream read.
 			resp.Body.Close()
 			log.Warn("upstream 5xx, failover", "provider", prov.Name, "status", resp.StatusCode, "attempt", attempt+1)
 			if failover(prov.ProviderID) {
@@ -344,7 +345,7 @@ func relayStream(c *gin.Context, b billingAPI, r routingAPI, log *slog.Logger, p
 	}
 
 	if usageSeen != nil {
-		settleAndLog(c, b, log, requestID, billID, int64(usageSeen.PromptTokens), int64(usageSeen.CompletionTokens))
+		settleAndLog(c, b, log, requestID, billID, int64(usageSeen.PromptTokens), int64(usageSeen.CompletionTokens), int64(prov.ProviderID))
 		return
 	}
 	if text := strings.TrimSpace(forwarded.String()); text != "" {
@@ -353,7 +354,7 @@ func relayStream(c *gin.Context, b billingAPI, r routingAPI, log *slog.Logger, p
 			completion = 1
 		}
 		log.Info("stream ended without usage, settling estimate", "request_id", requestID, "completion_tokens", completion)
-		settleAndLog(c, b, log, requestID, billID, estPrompt, completion)
+		settleAndLog(c, b, log, requestID, billID, estPrompt, completion, int64(prov.ProviderID))
 		return
 	}
 	log.Info("stream incomplete, bill left pending", "request_id", requestID, "done", doneSeen)
@@ -425,14 +426,20 @@ func triedSlice(tried map[uint64]bool) []uint64 {
 }
 
 // settleAndLog ReportUsage + Settle（独立后台 ctx）。
-func settleAndLog(c *gin.Context, b billingAPI, log *slog.Logger, requestID string, billID, prompt, completion int64) {
+func settleAndLog(c *gin.Context, b billingAPI, log *slog.Logger, requestID string, billID, prompt, completion, providerID int64) {
 	settleCtx, settleCancel := client.BackgroundCtx(10 * time.Second)
 	defer settleCancel()
 	_, errU := b.ReportUsage(settleCtx, &billingv1.ReportUsageRequest{
 		RequestId: requestID, BillId: billID, PromptTokens: prompt, CompletionTokens: completion,
+		ProviderId: providerID,
 	})
+	if errU != nil {
+		// Settle must only consume durably recorded usage and provider attribution.
+		log.Error("usage report failed, bill left pending for reconciliation", "request_id", requestID, "err_report", errU)
+		return
+	}
 	sResp, errS := b.Settle(settleCtx, &billingv1.SettleRequest{RequestId: requestID, BillId: billID})
-	if errU != nil || errS != nil || sResp == nil || !sResp.Settled {
+	if errS != nil || sResp == nil || !sResp.Settled {
 		// 返回给客户端已成功，但结算没落 → 交给 M4 对账补结算
 		log.Error("settle failed, reconciliation will catch up",
 			"request_id", requestID, "err_report", errU, "err_settle", errS)

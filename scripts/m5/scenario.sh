@@ -18,6 +18,11 @@
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 
+# This script restarts only router; use the same stable token as the live stack.
+# Never generate a replacement token while gateway/billing keep running.
+: "${CONTROL_PLANE_TOKEN:?Set CONTROL_PLANE_TOKEN to the stable token used by all running services before running M5}"
+export CONTROL_PLANE_TOKEN
+
 GATEWAY="http://127.0.0.1:18080"
 ROUTER="http://127.0.0.1:9102"
 KEY="sk-demo-8f3a2b1c9d4e5f60"
@@ -104,7 +109,7 @@ echo "  治愈后 state=$(p1_state) fails=$(p1_fails)"
 check "探测成功 → recover → CLOSED 且连败清零" "$([ "$(p1_state)" = "closed" ] && [ "$(p1_fails)" -eq 0 ] && echo ok)"
 a_picks=0
 for i in $(seq 1 20); do
-  pid=$(curl -s "$ROUTER/route?model=deepseek-v4-flash" | python -c "import sys,json;print(json.load(sys.stdin).get('provider_id',''))" 2>/dev/null)
+  pid=$(curl -s -H "X-Control-Token: $CONTROL_PLANE_TOKEN" "$ROUTER/route?model=deepseek-v4-flash" | python -c "import sys,json;print(json.load(sys.stdin).get('provider_id',''))" 2>/dev/null)
   [ "$pid" = "1" ] && a_picks=$((a_picks+1))
 done
 echo "  /route 20 次选中 mock-a: $a_picks"
@@ -126,7 +131,7 @@ check "AutoBan：providers.status=2 持久化" "$([ "$banned" -eq 1 ] && echo ok
 check "AutoBan：熔断连败累计≥6" "$([ "$cf" -ge 6 ] && echo ok)"
 b_picks=0
 for i in $(seq 1 20); do
-  pid=$(curl -s "$ROUTER/route?model=deepseek-v4-flash" | python -c "import sys,json;print(json.load(sys.stdin).get('provider_id',''))" 2>/dev/null)
+  pid=$(curl -s -H "X-Control-Token: $CONTROL_PLANE_TOKEN" "$ROUTER/route?model=deepseek-v4-flash" | python -c "import sys,json;print(json.load(sys.stdin).get('provider_id',''))" 2>/dev/null)
   [ "$pid" = "1" ] && b_picks=$((b_picks+1))
 done
 check "AutoBan 后 mock-a 完全移出候选集（20/20 无选中）" "$([ "$b_picks" -eq 0 ] && echo ok)"
@@ -139,7 +144,7 @@ restart_router
 c=$(call)
 c_picks=0
 for i in $(seq 1 20); do
-  pid=$(curl -s "$ROUTER/route?model=deepseek-v4-flash" | python -c "import sys,json;print(json.load(sys.stdin).get('provider_id',''))" 2>/dev/null)
+  pid=$(curl -s -H "X-Control-Token: $CONTROL_PLANE_TOKEN" "$ROUTER/route?model=deepseek-v4-flash" | python -c "import sys,json;print(json.load(sys.stdin).get('provider_id',''))" 2>/dev/null)
   [ "$pid" = "1" ] && c_picks=$((c_picks+1))
 done
 echo "  解除后请求=$c, mock-a 选中 $c_picks/20"

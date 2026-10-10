@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"errors"
 	"io"
 	"log/slog"
 	"net"
@@ -9,6 +10,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
@@ -17,17 +19,42 @@ import (
 )
 
 type fakeBilling struct {
-	reports  []*billingv1.ReportUsageRequest
-	settles  []*billingv1.SettleRequest
-	reverses []*billingv1.ReverseRequest
+	reserves  []*billingv1.ReserveRequest
+	reportErr error
+	reports   []*billingv1.ReportUsageRequest
+	settles   []*billingv1.SettleRequest
+	reverses  []*billingv1.ReverseRequest
 }
 
-func (f *fakeBilling) Reserve(context.Context, *billingv1.ReserveRequest) (*billingv1.ReserveResponse, error) {
+func (f *fakeBilling) Reserve(_ context.Context, req *billingv1.ReserveRequest) (*billingv1.ReserveResponse, error) {
+	f.reserves = append(f.reserves, req)
 	return &billingv1.ReserveResponse{Code: billingv1.ReserveCode_RESERVE_OK, BillId: 1}, nil
 }
 func (f *fakeBilling) ReportUsage(_ context.Context, req *billingv1.ReportUsageRequest) (*billingv1.ReportUsageResponse, error) {
 	f.reports = append(f.reports, req)
-	return &billingv1.ReportUsageResponse{}, nil
+	return &billingv1.ReportUsageResponse{Accepted: f.reportErr == nil}, f.reportErr
+}
+
+func TestChatLeavesPendingWhenActualUsageCannotBeRecorded(t *testing.T) {
+	good := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = io.WriteString(w, `{"choices":[],"usage":{"prompt_tokens":4,"completion_tokens":2}}`)
+	}))
+	defer good.Close()
+	bill := &fakeBilling{reportErr: errors.New("usage persistence unavailable")}
+	router := &fakeRouter{next: []*client.RouteResult{{ProviderID: 2, BaseURL: good.URL}}}
+	c, w := newGinCtx()
+	c.Request = httptest.NewRequest(http.MethodPost, "/v1/chat/completions", strings.NewReader(`{"model":"m","messages":[{"role":"user","content":"hi"}]}`))
+	c.Set("request_id", "rid-report-failed")
+	Chat(bill, router, slog.New(slog.DiscardHandler), time.Second)(c)
+	if w.Code != http.StatusOK || !strings.Contains(w.Body.String(), "completion_tokens") {
+		t.Fatalf("delivered response: status=%d body=%q", w.Code, w.Body.String())
+	}
+	if len(bill.reports) != 1 || bill.reports[0].ProviderId != 2 {
+		t.Fatalf("usage report = %+v", bill.reports)
+	}
+	if len(bill.settles) != 0 || len(bill.reverses) != 0 {
+		t.Fatalf("usage failure must retain pending reserve: settles=%d reverses=%d", len(bill.settles), len(bill.reverses))
+	}
 }
 func (f *fakeBilling) Settle(_ context.Context, req *billingv1.SettleRequest) (*billingv1.SettleResponse, error) {
 	f.settles = append(f.settles, req)
@@ -134,5 +161,103 @@ func TestRelayStreamFailoverThen502Reverses(t *testing.T) {
 	}
 	if len(router.failed) != 2 || router.failed[0] != 1 || router.failed[1] != 2 {
 		t.Fatalf("failed providers = %v, want [1 2]", router.failed)
+	}
+}
+
+func TestChatReportsSuccessfulFallbackProvider(t *testing.T) {
+	for _, tc := range []struct {
+		name           string
+		stream         bool
+		body           string
+		wantCompletion int64
+	}{
+		{"nonstream", false, `{"choices":[],"usage":{"prompt_tokens":4,"completion_tokens":2}}`, 2},
+		{"stream_usage", true, "data: {\"choices\":[],\"usage\":{\"prompt_tokens\":4,\"completion_tokens\":2}}\n\ndata: [DONE]\n\n", 2},
+		{"stream_estimate", true, "data: {\"choices\":[{\"delta\":{\"content\":\"你好世界\"}}]}\n\ndata: [DONE]\n\n", 2},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			bad := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(http.StatusServiceUnavailable)
+			}))
+			defer bad.Close()
+			good := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				_, _ = io.WriteString(w, tc.body)
+			}))
+			defer good.Close()
+			bill := &fakeBilling{}
+			router := &fakeRouter{next: []*client.RouteResult{
+				{ProviderID: 1, BaseURL: bad.URL}, {ProviderID: 2, BaseURL: good.URL},
+			}}
+			c, w := newGinCtx()
+			stream := "false"
+			if tc.stream {
+				stream = "true"
+			}
+			c.Request = httptest.NewRequest(http.MethodPost, "/v1/chat/completions", strings.NewReader(`{"model":"m","messages":[{"role":"user","content":"hi"}],"stream":`+stream+`}`))
+			c.Set("request_id", "rid-fallback")
+			Chat(bill, router, slog.New(slog.DiscardHandler), time.Second)(c)
+			if w.Code != http.StatusOK {
+				t.Fatalf("status = %d, body=%q", w.Code, w.Body.String())
+			}
+			if len(bill.reserves) != 1 || bill.reserves[0].ProviderId != 1 {
+				t.Fatalf("initial reserve = %+v", bill.reserves)
+			}
+			if len(bill.reports) != 1 {
+				t.Fatalf("reports = %+v", bill.reports)
+			}
+			if got := bill.reports[0]; got.ProviderId != 2 || got.CompletionTokens != tc.wantCompletion {
+				t.Fatalf("actual usage = %+v, want provider 2 completion %d", got, tc.wantCompletion)
+			}
+			if len(bill.settles) != 1 || len(bill.reverses) != 0 {
+				t.Fatalf("settles=%d reverses=%d", len(bill.settles), len(bill.reverses))
+			}
+		})
+	}
+}
+
+func TestRelayStreamDoesNotWaitForFailedResponseBody(t *testing.T) {
+	for _, fallback := range []bool{false, true} {
+		t.Run(map[bool]string{false: "refund", true: "failover"}[fallback], func(t *testing.T) {
+			bad := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(http.StatusServiceUnavailable)
+				w.(http.Flusher).Flush()
+				<-r.Context().Done() // Headers arrive, but the error body never finishes.
+			}))
+			defer bad.Close()
+			bill := &fakeBilling{}
+			router := &fakeRouter{}
+			if fallback {
+				good := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					_, _ = io.WriteString(w, "data: {\"choices\":[],\"usage\":{\"prompt_tokens\":4,\"completion_tokens\":2}}\n\ndata: [DONE]\n\n")
+				}))
+				defer good.Close()
+				router.next = []*client.RouteResult{{ProviderID: 2, BaseURL: good.URL}}
+			}
+			c, w := newGinCtx()
+			ctx, cancel := context.WithCancel(c.Request.Context())
+			defer cancel()
+			c.Request = c.Request.WithContext(ctx)
+			done := make(chan struct{})
+			go func() {
+				defer close(done)
+				relayStream(c, bill, router, slog.New(slog.DiscardHandler),
+					&client.RouteResult{ProviderID: 1, BaseURL: bad.URL},
+					&chatRequest{Model: "m", Stream: true}, "rid-open-error", 9, 4)
+			}()
+			select {
+			case <-done:
+			case <-time.After(time.Second):
+				cancel()
+				<-done
+				t.Fatal("stream waited for a 503 body instead of failing over or refunding")
+			}
+			if fallback {
+				if w.Code != http.StatusOK || !strings.Contains(w.Body.String(), "[DONE]") || len(bill.settles) != 1 || len(bill.reverses) != 0 {
+					t.Fatalf("fallback result: status=%d body=%q settles=%d reverses=%d", w.Code, w.Body.String(), len(bill.settles), len(bill.reverses))
+				}
+			} else if w.Code != http.StatusBadGateway || len(bill.reverses) != 1 || len(bill.reports) != 0 {
+				t.Fatalf("refund result: status=%d reverses=%d reports=%d", w.Code, len(bill.reverses), len(bill.reports))
+			}
+		})
 	}
 }

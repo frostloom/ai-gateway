@@ -60,6 +60,7 @@ message ReportUsageRequest {
   int64 bill_id = 2;
   int64 prompt_tokens = 3;
   int64 completion_tokens = 4;
+  int64 provider_id = 5;           // 实际交付响应的 provider（含 failover）；0 保留预占归属
 }
 
 message ReportUsageResponse {

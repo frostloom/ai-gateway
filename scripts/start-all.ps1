@@ -49,6 +49,11 @@ function Import-DotEnv {
 }
 Import-DotEnv (Join-Path $Root '.env')
 if (-not $env:CONTROL_PLANE_TOKEN) {
+    # A fresh shell cannot recover the random token used by surviving services.
+    # Reject partial restarts before stopping anything instead of splitting auth.
+    if ($Only) {
+        throw 'Partial restart requires a stable CONTROL_PLANE_TOKEN shared by all services. Configure it in the environment or .env and perform one full restart first.'
+    }
     $bytes = New-Object byte[] 16
     [System.Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($bytes)
     $env:CONTROL_PLANE_TOKEN = ([System.BitConverter]::ToString($bytes) -replace '-', '').ToLower()

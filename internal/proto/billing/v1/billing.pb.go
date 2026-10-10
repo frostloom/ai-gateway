@@ -240,6 +240,7 @@ type ReportUsageRequest struct {
 	BillId           int64                  `protobuf:"varint,2,opt,name=bill_id,json=billId,proto3" json:"bill_id,omitempty"`
 	PromptTokens     int64                  `protobuf:"varint,3,opt,name=prompt_tokens,json=promptTokens,proto3" json:"prompt_tokens,omitempty"`
 	CompletionTokens int64                  `protobuf:"varint,4,opt,name=completion_tokens,json=completionTokens,proto3" json:"completion_tokens,omitempty"`
+	ProviderId       int64                  `protobuf:"varint,5,opt,name=provider_id,json=providerId,proto3" json:"provider_id,omitempty"` // 实际交付响应的 provider（含 failover）；0 保留预占归属
 	unknownFields    protoimpl.UnknownFields
 	sizeCache        protoimpl.SizeCache
 }
@@ -298,6 +299,13 @@ func (x *ReportUsageRequest) GetPromptTokens() int64 {
 func (x *ReportUsageRequest) GetCompletionTokens() int64 {
 	if x != nil {
 		return x.CompletionTokens
+	}
+	return 0
+}
+
+func (x *ReportUsageRequest) GetProviderId() int64 {
+	if x != nil {
+		return x.ProviderId
 	}
 	return 0
 }
@@ -870,13 +878,15 @@ const file_billing_v1_billing_proto_rawDesc = "" +
 	"\x0fReserveResponse\x12+\n" +
 	"\x04code\x18\x01 \x01(\x0e2\x17.billing.v1.ReserveCodeR\x04code\x12\x17\n" +
 	"\abill_id\x18\x02 \x01(\x03R\x06billId\x12#\n" +
-	"\rbalance_after\x18\x03 \x01(\x03R\fbalanceAfter\"\x9e\x01\n" +
+	"\rbalance_after\x18\x03 \x01(\x03R\fbalanceAfter\"\xbf\x01\n" +
 	"\x12ReportUsageRequest\x12\x1d\n" +
 	"\n" +
 	"request_id\x18\x01 \x01(\tR\trequestId\x12\x17\n" +
 	"\abill_id\x18\x02 \x01(\x03R\x06billId\x12#\n" +
 	"\rprompt_tokens\x18\x03 \x01(\x03R\fpromptTokens\x12+\n" +
-	"\x11completion_tokens\x18\x04 \x01(\x03R\x10completionTokens\"1\n" +
+	"\x11completion_tokens\x18\x04 \x01(\x03R\x10completionTokens\x12\x1f\n" +
+	"\vprovider_id\x18\x05 \x01(\x03R\n" +
+	"providerId\"1\n" +
 	"\x13ReportUsageResponse\x12\x1a\n" +
 	"\baccepted\x18\x01 \x01(\bR\baccepted\"G\n" +
 	"\rSettleRequest\x12\x1d\n" +

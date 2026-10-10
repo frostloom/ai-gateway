@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	billingv1 "github.com/frostloom/ai-gateway/internal/proto/billing/v1"
+	"gorm.io/gorm"
 )
 
 // Lua 扣减成功后插入失败：余额回到原值，guard 被删掉，同一 request 可以重新预扣。
@@ -18,8 +19,14 @@ func TestReserveInsertFailureCompensatesRedis(t *testing.T) {
 	tenantID := seedTenant(t, s, 1000)
 	req := reserveReq("rid-compensate", tenantID, 84) // pre=100
 
-	reserveInsertHook = func() error { return errors.New("injected insert failure") }
-	t.Cleanup(func() { reserveInsertHook = nil })
+	if err := s.db.Callback().Create().Before("gorm:create").Register("test:insert_failure", func(tx *gorm.DB) {
+		if tx.Statement.Table == "bills" {
+			tx.AddError(errors.New("injected insert failure"))
+		}
+	}); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { s.db.Callback().Create().Remove("test:insert_failure") })
 
 	if _, err := s.Reserve(ctx, req); err == nil {
 		t.Fatal("injected insert failure was ignored")
@@ -34,7 +41,7 @@ func TestReserveInsertFailureCompensatesRedis(t *testing.T) {
 		t.Fatalf("guard exists = %d err=%v, want deleted", n, err)
 	}
 
-	reserveInsertHook = nil
+	s.db.Callback().Create().Remove("test:insert_failure")
 	resp, err := s.Reserve(ctx, req)
 	if err != nil || resp.Code != billingv1.ReserveCode_RESERVE_OK {
 		t.Fatalf("retry reserve: code=%v err=%v", resp.GetCode(), err)
@@ -44,7 +51,7 @@ func TestReserveInsertFailureCompensatesRedis(t *testing.T) {
 	}
 }
 
-// guard 值不属于本次 request 时，补偿不能改余额。
+// guard 值不属于本次调用 owner 时，补偿不能改余额。
 func TestCompensateReserveIgnoresMismatchedGuard(t *testing.T) {
 	s, done := newTestStore(t)
 	defer done()
@@ -54,7 +61,7 @@ func TestCompensateReserveIgnoresMismatchedGuard(t *testing.T) {
 	if err := s.rdb.Set(ctx, ReqGuardKey("rid-other"), "someone-else", 0).Err(); err != nil {
 		t.Fatal(err)
 	}
-	ok, err := s.compensateReserve(ctx, tenantID, "rid-other", 10)
+	ok, err := s.compensateReserve(ctx, tenantID, "rid-other", 10, "attempt-other")
 	if err != nil || ok {
 		t.Fatalf("compensate = %v err=%v, want false", ok, err)
 	}
@@ -62,10 +69,10 @@ func TestCompensateReserveIgnoresMismatchedGuard(t *testing.T) {
 		t.Fatalf("balance = %d, want 50", bal)
 	}
 
-	if err := s.rdb.Set(ctx, ReqGuardKey("rid-mine"), "rid-mine", 0).Err(); err != nil {
+	if err := s.rdb.Set(ctx, ReqGuardKey("rid-mine"), "attempt-mine", 0).Err(); err != nil {
 		t.Fatal(err)
 	}
-	ok, err = s.compensateReserve(ctx, tenantID, "rid-mine", 10)
+	ok, err = s.compensateReserve(ctx, tenantID, "rid-mine", 10, "attempt-mine")
 	if err != nil || !ok {
 		t.Fatalf("compensate matching guard = %v err=%v", ok, err)
 	}

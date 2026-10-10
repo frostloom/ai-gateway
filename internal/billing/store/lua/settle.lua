@@ -6,7 +6,7 @@
 -- 避免「补扣被拒绝 → 账单永远 pending → 对账反复失败」。
 --
 -- KEYS[1] = billing:balance:{tenant_id}
--- KEYS[2] = billing:delta:{request_id}  值 = 实际应用的 delta
+-- KEYS[2] = billing:delta:{request_id}  值 = v2:实际应用的 delta
 -- ARGV[1] = 请求的 delta
 --
 -- return {code, balance, applied}
@@ -15,6 +15,17 @@
 local bal = tonumber(redis.call('GET', KEYS[1]) or '0')
 local existing = redis.call('GET', KEYS[2])
 if existing then
+  -- Original Lua wrote '1' as a sentinel and either applied the entire
+  -- requested delta or rejected it. It never recorded a partial charge.
+  -- New markers must be versioned so a genuine one-cent charge is distinct.
+  if existing == '1' then
+    return {0, bal, tonumber(ARGV[1])}
+  end
+  if string.sub(existing, 1, 3) == 'v2:' then
+    return {0, bal, tonumber(string.sub(existing, 4))}
+  end
+  -- Preserve unversioned numeric amounts from the interim deployment,
+  -- including a reverse refund that differs from a retried settle delta.
   return {0, bal, tonumber(existing)}
 end
 local delta = tonumber(ARGV[1])
@@ -25,7 +36,7 @@ if delta > 0 and bal < delta then
     applied = 0
   end
 end
-redis.call('SET', KEYS[2], tostring(applied), 'EX', 86400)
+redis.call('SET', KEYS[2], 'v2:' .. tostring(applied), 'EX', 86400)
 if applied > 0 then
   redis.call('DECRBY', KEYS[1], applied)
 elseif applied < 0 then
