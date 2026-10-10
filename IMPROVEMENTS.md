@@ -1,22 +1,38 @@
 # 改进清单
 
-日期：2026-10-10。范围：只读复核 `main`（`b857a95`），没有改运行时代码。
+日期：2026-10-10。范围：先只读复核 `main`（`b857a95`），随后在同一分支实现下面标成「已实现」的项。
 
 结论先说：余额路径的 Lua 预扣、幂等结算和「有 usage marker 才补结算」这套骨架是成立的。下面列的是对照代码、测试和 README「已知边界」之后，仍然值得下一轮动手的具体缺口。已在 README 里明确接受的限制会标成「文档已声明」，避免当成未发现的新缺陷。
 
+## 实现状态（2026-10-10）
+
+已落地：
+
+- P0-1 / P0-2：已转发正文但没有 usage 时按文本估算并结算；首字节前失败最多换 2 个 provider，全部失败立即 Reverse 并返回 502。
+- P0-3：reserve 行插入失败时，仅当 guard 等于本次 request_id 才 `DEL` 并 `INCRBY`。
+- P0-4：余额路径有标价时预扣至少 1 分；补扣超过余额时扣到 0，账单记 `shortfall:N` 并结清。订阅路径和免费模型仍是预扣 0。Redis 不为负，账本 actual 等于实际收到的金额。
+- P0-5：默认监听 `127.0.0.1`。`CONTROL_PLANE_TOKEN` 未设置时 billing、router、gateway、agent、reconciler 拒绝启动。`/route`、`/report`、billing admin 写接口和 billing gRPC 都要这个令牌。`/healthz` 与 `/metrics` 仍开放。
+- P1-1：限流 member 是「毫秒:序号」。
+- P1-2：`RouteExclude` 在同一把锁里完成过滤、选择和 HALF-OPEN 占位。
+- P1-7 的 CI 部分：`.github/workflows/ci.yml` 在 push/PR 到 `main` 时跑 `go vet`、带 MySQL/Redis 的 `go test ./...`，以及 `web/` 的 `npm run verify`。Kafka 端到端测试在 CI 里跳过。
+
+未做，仍按原文下一步：P1-3、P1-4、P1-5、P1-6、P1-8，P1-7 里的 reconciler 分类单测，以及全部 P2。
+
 ## 下一轮最值得做的 5 件
 
-按「改动面小到中等、杠杆高、能单独合并」排序。
+这五项已经实现，保留原文是为了对照当时的缺口。下一轮从 P1-3 起。
 
-1. **流式断连不要全额退款，首字节前失败要立刻失败。** 见 P0-1、P0-2。先加 `httptest` 假上游，再改 `relayStream`。
-2. **Reserve 在 MySQL 插入失败时补偿 Redis。** 见 P0-3。README 已写成有补偿，代码没有。补一条 Lua 和一条失败注入测试即可。
-3. **预扣被取整成 0，或补扣会把余额打穿时，不要把账单永远留在 pending。** 见 P0-4。先写一条 store 测试锁住现状，再定「最小预扣 / 记短欠并结清」策略。
-4. **控制面默认只听本机，并给 router / billing admin 加内部令牌。** 见 P0-5。`/route` 现在会把上游 key 明文返回。
-5. **限流同一毫秒只算一次，HALF-OPEN 探测要在同一把锁里占位。** 见 P1-1、P1-2。两处都是十几行加竞态测试。
+1. **流式断连不要全额退款，首字节前失败要立刻失败。** 已实现。见 P0-1、P0-2。
+2. **Reserve 在 MySQL 插入失败时补偿 Redis。** 已实现。见 P0-3。
+3. **预扣被取整成 0，或补扣会把余额打穿时，不要把账单永远留在 pending。** 已实现。见 P0-4。两边都做了：有标价时最少预扣 1 分，并且短欠结清。
+4. **控制面默认只听本机，并给 router / billing admin 加内部令牌。** 已实现。见 P0-5。
+5. **限流同一毫秒只算一次，HALF-OPEN 探测要在同一把锁里占位。** 已实现。见 P1-1、P1-2。
 
 ## P0
 
 ### P0-1 已转发的流式内容在 usage 帧之前断连，对账会全额退款
+
+**状态：已实现。** 已转发正文走 `tokens.Estimate`（至少 1）后 `ReportUsage` + `Settle`。没有正文仍保持 pending。
 
 **为什么重要：** 计费正确性是这个仓库的核心。OpenAI 兼容 SSE 的 usage 在最后一帧。客户端可以把正文读完再断开，此时 `usageSeen == nil`，账单保持 pending；宽限期过后 reconciler 因没有 `usage_reported_at` 执行 Reverse。README 写的是「结算按上游实际产出算，与请求是否断连无关」，代码只在解析到 usage 帧时成立。
 
@@ -30,6 +46,8 @@
 
 ### P0-2 流式在首字节前失败仍可能返回 200，且不 failover、不立即 Reverse
 
+**状态：已实现。** 拨号失败和 5xx 最多再换 2 次；SSE 头在 2xx 之后才写。全部失败立即 Reverse 并返回 502。4xx 透传上游状态并 Reverse。
+
 **为什么重要：** 非流式在拨号失败或 5xx 时会换 provider，全部失败则 `reverseWithBackground` 并返回 502。流式在 `streamClient.Do` 失败时只 `Report(false)` 然后 `return`。函数开头已经设置了 `Content-Type: text/event-stream`，没有写状态码，gin 默认 200 空体。额度要锁到对账宽限期（启动示例是 600 秒）才退回。
 
 **位置：** `internal/gateway/handler/chat.go` 的 `relayStream`（约 226–258 行）对比 `forwardNonStream`（约 159–214 行）。
@@ -37,6 +55,8 @@
 **下一步：** 首字节前的拨号失败 / 5xx：与非流式一样最多换 2 次 provider；仍然失败则立即 Reverse，并写 502 JSON，不要先承诺 SSE。流已经开始之后保持「不重试上游」的现有规则。
 
 ### P0-3 Lua 扣减成功但 reserve 行没落下时，没有补偿
+
+**状态：已实现。** `lua/compensate.lua` 只在 guard 值等于 request_id 时删除 guard 并加回预扣。插入失败注入测试覆盖余额恢复和同一请求重试。
 
 **为什么重要：** README 和 M1 里程碑写的是「Lua 扣减成功 → 插 reserve 行失败 → 反向 Lua 补偿」。`Reserve` 在非重复键插入失败时直接返回 `Unavailable`，不退 Redis、不删 `billing:req:{request_id}`。`SweepOnce` 只扫已有的 pending 行，看不见这笔孤儿扣款。唯一兜底是 `RebuildBalance`，而 `Reconciler.Run` 自己写明 rebuild 与在途 Reserve 竞态，压测期间必须 `-no-rebuild`。调用方若不重试，投影会一直少这块钱。
 
@@ -49,6 +69,8 @@
 **下一步：** 插入失败且不是 1062 时，跑一条补偿 Lua：仅当 `billing:req:{id}` 的值等于本次 request_id 时 `DEL` guard 并 `INCRBY` 预扣额。补一条「Lua 已成功、插入返回错误、余额回到原值、同一 request 可以重新预扣」的测试。然后把 README 的表述改成与代码一致。
 
 ### P0-4 预扣取整为 0，或结算补扣被拒绝时，账单会永久 pending
+
+**状态：已实现。** 余额路径在 `inC>0 || outC>0` 且预扣取整为 0 时改为 1 分，余额不足则 `RESERVE_INSUFFICIENT`。免费模型和订阅路径保持预扣 0。`settle.lua` 在补扣超过余额时只扣到 0，账单记 `shortfall:N` 并以实际收到的金额结清。账本 actual 与 Redis 变动一致，余额不为负。
 
 **为什么重要：** 两段逻辑叠在一起会白嫖，并且对账修不好。
 
@@ -70,6 +92,8 @@
 
 ### P0-5 控制面监听所有网卡，且没有鉴权
 
+**状态：已实现。** `LISTEN_HOST` 默认 `127.0.0.1`。`CONTROL_PLANE_TOKEN` 通过 `X-Control-Token` / gRPC `x-control-token` 校验。未配置令牌的进程直接退出。未带令牌的 `/route` 返回 401，响应里没有上游 key。`/healthz` 与 `/metrics` 不校验。明文 key 和明文 admin session 仍留在 P2-4。
+
 **为什么重要：** 这不是「公网已经暴露」的断言。`docker-compose.yml` 目前只发布 MySQL、Redis、Kafka。但进程默认 `Listen` / `ListenAndServe(":"+port)`，绑的是 `0.0.0.0`。注释写「本端口仅本机/内网可达」，代码没有强制这一点。
 
 可达之后的具体能力：
@@ -88,6 +112,8 @@
 
 ### P1-1 租户限流在同一毫秒只计一次
 
+**状态：已实现。** member 为 `now:seq`，序号来自 `INCR`。Redis 故障仍返回 500。
+
 **为什么重要：** 滑动窗口用 `ZADD key now now`，member 就是毫秒时间戳。同一毫秒的第二个请求覆盖同一个 member，`ZCARD` 不增加。突发流量会低于 `RATE_LIMIT_PER_MIN`（默认 600）仍被放行。Redis 故障时中间件返回 500，这一侧是失败关闭，应保持。
 
 **位置：** `internal/gateway/middleware/ratelimit.go`。没有单测。
@@ -95,6 +121,8 @@
 **下一步：** member 改成「毫秒 + 单调序号」或 `INCR`。用 miniredis 在同一毫秒打入 `limit+1` 个请求，断言只有 `limit` 个通过。
 
 ### P1-2 单进程里 HALF-OPEN 可以放出多个探测
+
+**状态：已实现。** `availableLocked`、选择和 `markProbeLocked` 持有同一把 `r.mu`。并发 `Route` 测试要求冷却后只有一个探测成功。
 
 **为什么重要：** 设计是 HALF-OPEN 只放一个探测。`available` 和 `markProbe` 各拿一次锁，中间释放。两个并发 `RouteExclude` 都能看到 `probeInFlight == false` 并选中同一 provider。多实例内存态不共享是 README 已声明的边界；这个是单进程竞态，现有 `circuit_test.go` 没盖住。
 
@@ -137,6 +165,8 @@
 **下一步：** 若下一轮要让门户价格和真实调用对齐，把内部账本改成「毫分」或「micro-cent」，展示层再换算成元。这一项比 P0-4 大，不要和「pending 卡死」混在同一个提交里。
 
 ### P1-7 没有 CI，对账包和网关编排几乎没有测试
+
+**状态：CI 已实现，对账分类单测未做。** `.github/workflows/ci.yml` 提供 MySQL 8（宿主 `3307`）和 Redis 7（宿主 `6381`），然后 `go vet ./...` 与 `go test ./...`。`web/` 另跑 `npm ci` 和 `npm run verify`。Kafka 不在 CI 里，`TestConsumerKafkaE2E` 在 broker 不可达时跳过。reconciler 仍没有把「扫描结果」注入 `SweepOnce` 的分类单测。
 
 **为什么重要：** 仓库没有 `.github/workflows`，也没有 `Dockerfile`（`docker-compose.yml` 里引用 Dockerfile 的服务段是注释）。`go test ./...` 依赖本机 MySQL/Redis，不能作为每次推送的门禁。`internal/billing/reconciler` 没有任何 `_test.go`。网关聊天测试只有 SSE 帧解析。限流、熔断并发、结算透支都没有回归。
 
