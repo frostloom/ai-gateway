@@ -9,6 +9,8 @@ on:
 jobs:
   go:
     runs-on: ubuntu-latest
+    env:
+      AGENT_LIVE_JEV: "0"
     services:
       mysql:
         image: mysql:8.0
@@ -41,6 +43,31 @@ jobs:
         run: go vet ./...
       - name: test
         run: go test ./... -count=1
+
+  offline-evaluation:
+    runs-on: windows-latest
+    env:
+      AGENT_LIVE_JEV: "0"
+      PYTHONIOENCODING: utf-8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Offline contracts and local script doubles only
+        run: python -m unittest discover -s scripts/tests
+      - name: Preserve historical evidence
+        run: |
+          python scripts/customer-service-contract.py verify
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python scripts/archive-intent-contract.py verify
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python scripts/summarize-offline-intent-audit.py verify
+          exit $LASTEXITCODE
 
   web:
     runs-on: ubuntu-latest
