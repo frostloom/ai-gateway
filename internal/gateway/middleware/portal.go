@@ -8,12 +8,13 @@ import (
 	"time"
 
 	"github.com/frostloom/ai-gateway/internal/gateway/client"
+	"github.com/frostloom/ai-gateway/internal/pkg/controlplane"
 	"github.com/gin-gonic/gin"
 )
 
 // Browser sessions take precedence over legacy API keys, so an old browser key
 // cannot silently switch a newly signed-in user to another tenant.
-func PortalSession(base string, billing *client.Billing) gin.HandlerFunc {
+func PortalSession(base string, billing *client.Billing, controlToken string) gin.HandlerFunc {
 	legacy := APIKey(billing)
 	hc := &http.Client{Timeout: 3 * time.Second}
 	return func(c *gin.Context) {
@@ -28,6 +29,9 @@ func PortalSession(base string, billing *client.Billing) gin.HandlerFunc {
 			return
 		}
 		req.AddCookie(&http.Cookie{Name: "agw_user", Value: token})
+		if controlToken != "" {
+			req.Header.Set(controlplane.Header, controlToken)
+		}
 		resp, err := hc.Do(req)
 		if err != nil {
 			abort(c, 503, "authentication unavailable")

@@ -25,13 +25,13 @@ func TestPortalSessionBoundary(t *testing.T) {
 	defer upstream.Close()
 	g := gin.New()
 	g.Use(BrowserSameOrigin())
-	g.POST("/portal/test", PortalSession(upstream.URL, nil), func(c *gin.Context) {
+	g.POST("/portal/test", PortalSession(upstream.URL, nil, ""), func(c *gin.Context) {
 		if c.GetInt64("tenant_id") != 42 || c.GetHeader("Authorization") != "Bearer valid" {
 			t.Error("identity not derived from session")
 		}
 		c.Status(204)
 	})
-	g.GET("/admin/test", AdminSession(upstream.URL, "", slog.Default()), func(c *gin.Context) { c.Status(204) })
+	g.GET("/admin/test", AdminSession(upstream.URL, "", "", slog.Default()), func(c *gin.Context) { c.Status(204) })
 	for _, tc := range []struct {
 		path, method, cookie, origin string
 		code                         int

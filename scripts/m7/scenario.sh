@@ -14,6 +14,11 @@ cd "$(dirname "$0")/../.."
 
 GATEWAY="http://127.0.0.1:18080"
 ADMIN="http://127.0.0.1:9103"
+if [ -z "${CONTROL_PLANE_TOKEN:-}" ]; then
+  echo "!! CONTROL_PLANE_TOKEN 未设置，billing admin 会拒绝直连"
+  exit 1
+fi
+admin() { curl -s -H "X-Control-Token: $CONTROL_PLANE_TOKEN" "$@"; }
 MYSQL="docker exec ai-gateway-mysql mysql -uroot -proot -N"
 REDIS="docker exec ai-gateway-redis redis-cli"
 # 写库 SQL 经 stdin 传：Windows 下 -e 的中文 argv 会被打乱成 ??，且 JSON path 对非 ASCII 键必须加引号 $."文本"
@@ -53,36 +58,36 @@ call_gw() {
 }
 # /admin/subscription 里某档次的 consumed（token；窗口内已用）
 allowance_consumed() {
-  curl -s "$ADMIN/admin/subscription?tenant_id=$TID" | jq -r --arg t "$1" '.allowance[] | select(.tier==$t) | .consumed' 2>/dev/null || echo 0
+  admin "$ADMIN/admin/subscription?tenant_id=$TID" | jq -r --arg t "$1" '.allowance[] | select(.tier==$t) | .consumed' 2>/dev/null || echo 0
 }
 
 echo
 echo "==> ① 订阅定期套餐 REC1=$REC1 → active、余额不变（无入账）、重复订阅被拒"
-R=$(curl -s -X POST $ADMIN/admin/subscribe -d "{\"tenant_id\":$TID,\"plan_id\":$REC1}")
+R=$(admin -X POST $ADMIN/admin/subscribe -d "{\"tenant_id\":$TID,\"plan_id\":$REC1}")
 echo "  subscribe: $R"
 check "① 订阅成功（active）" "$(echo "$R" | jq -e '.Status=="active"' >/dev/null && echo ok)"
 check "① 订阅不入账钱（topups 合计仍 0）" "$([ "$(topup_sum)" = "0" ] && echo ok)"
 assert_balance 0
-R=$(curl -s -X POST $ADMIN/admin/subscribe -d "{\"tenant_id\":$TID,\"plan_id\":$REC1}")
+R=$(admin -X POST $ADMIN/admin/subscribe -d "{\"tenant_id\":$TID,\"plan_id\":$REC1}")
 echo "  重复订阅: $R"
 check "① 重复订阅被拒（已有生效中的定期订阅）" "$(echo "$R" | jq -e 'has("error")' >/dev/null && echo ok)"
 
 echo
 echo "==> ② 充值 ¥100 → 10000 分；重复支付幂等；退款 10000 分幂等（元口径照旧）"
-R=$(curl -s -X POST $ADMIN/admin/recharge -d "{\"tenant_id\":$TID,\"amount_money\":100}")
+R=$(admin -X POST $ADMIN/admin/recharge -d "{\"tenant_id\":$TID,\"amount_money\":100}")
 ORDER=$(echo "$R" | jq -r '.OrderNo')
 echo "  建单: $R"
-R=$(curl -s -X POST $ADMIN/admin/recharge/pay -d "{\"order_no\":\"$ORDER\"}")
+R=$(admin -X POST $ADMIN/admin/recharge/pay -d "{\"order_no\":\"$ORDER\"}")
 echo "  支付: $R"
 check "② 支付后订单 paid" "$(echo "$R" | jq -e '.Status=="paid"' >/dev/null && echo ok)"
 assert_balance 10000
-R=$(curl -s -X POST $ADMIN/admin/recharge/pay -d "{\"order_no\":\"$ORDER\"}")
+R=$(admin -X POST $ADMIN/admin/recharge/pay -d "{\"order_no\":\"$ORDER\"}")
 check "② 重复支付幂等（余额不变）" "$([ "$(bal)" = "10000" ] && echo ok)"
-R=$(curl -s -X POST $ADMIN/admin/recharge/refund -d "{\"tenant_id\":$TID,\"order_no\":\"$ORDER\"}")
+R=$(admin -X POST $ADMIN/admin/recharge/refund -d "{\"tenant_id\":$TID,\"order_no\":\"$ORDER\"}")
 echo "  退款: $R"
 check "② 退款量 = 10000 分" "$(echo "$R" | jq -e '.refund_cent==10000' >/dev/null && echo ok)"
 assert_balance 0
-R=$(curl -s -X POST $ADMIN/admin/recharge/refund -d "{\"tenant_id\":$TID,\"order_no\":\"$ORDER\"}")
+R=$(admin -X POST $ADMIN/admin/recharge/refund -d "{\"tenant_id\":$TID,\"order_no\":\"$ORDER\"}")
 check "② 重复退款幂等（余额不变）" "$([ "$(bal)" = "0" ] && echo ok)"
 
 echo
@@ -116,12 +121,12 @@ echo "UPDATE plans SET tier_quota = JSON_SET(tier_quota, '\$.\"文本\"', 100000
 
 echo
 echo "==> ⑥ 改套餐 REC1→REC2 → pending_plan_id 下期生效；退订 → cancelled/auto_renew=0、余额不变"
-R=$(curl -s -X POST $ADMIN/admin/change-plan -d "{\"tenant_id\":$TID,\"plan_id\":$REC2}")
+R=$(admin -X POST $ADMIN/admin/change-plan -d "{\"tenant_id\":$TID,\"plan_id\":$REC2}")
 echo "  change: $R"
 PP=$($MYSQL -e "USE ai_gateway; SELECT pending_plan_id FROM subscriptions WHERE tenant_id=$TID AND status='active';" 2>/dev/null)
 echo "  pending_plan_id=$PP（期望 $REC2）"
 check "⑥ pending_plan_id 记为 $REC2 且余额不变" "$([ "$PP" = "$REC2" ] && [ "$(bal)" = "0" ] && echo ok)"
-R=$(curl -s -X POST $ADMIN/admin/cancel-subscription -d "{\"tenant_id\":$TID}")
+R=$(admin -X POST $ADMIN/admin/cancel-subscription -d "{\"tenant_id\":$TID}")
 echo "  退订: $R"
 SUB_ST=$($MYSQL -e "USE ai_gateway; SELECT CONCAT(status,'/',auto_renew) FROM subscriptions WHERE tenant_id=$TID ORDER BY id DESC LIMIT 1;" 2>/dev/null)
 echo "  订阅状态: $SUB_ST（期望 cancelled/0）"

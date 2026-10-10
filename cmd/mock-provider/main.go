@@ -128,7 +128,7 @@ func main() {
 		_ = json.NewEncoder(w).Encode(resp)
 	})
 
-	addr := ":" + port
+	addr := config.ListenAddr(port)
 	log.Info("mock provider listening", "name", name, "addr", addr, "completion_tokens", completionTokens)
 	if err := http.ListenAndServe(addr, mux); err != nil {
 		log.Error("serve", "err", err)

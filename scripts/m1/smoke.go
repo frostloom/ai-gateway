@@ -8,9 +8,7 @@ import (
 	"os"
 	"time"
 
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
-
+	"github.com/frostloom/ai-gateway/internal/pkg/controlplane"
 	billingv1 "github.com/frostloom/ai-gateway/internal/proto/billing/v1"
 )
 
@@ -19,7 +17,11 @@ func main() {
 	if len(os.Args) > 1 {
 		addr = os.Args[1]
 	}
-	conn, err := grpc.NewClient(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	token := os.Getenv(controlplane.Env)
+	if token == "" {
+		panic("CONTROL_PLANE_TOKEN is required")
+	}
+	conn, err := controlplane.Dial(addr, token)
 	if err != nil {
 		panic(err)
 	}

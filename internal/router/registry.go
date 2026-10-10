@@ -95,7 +95,11 @@ func (r *Registry) RouteExclude(model string, exclude map[uint64]bool) (*Provide
 	if err != nil {
 		return nil, err
 	}
-	avail := r.available(ps)
+	// 选择和占住探测位必须在同一把锁里。否则两个并发 Route 都会看到
+	// probeInFlight=false，HALF-OPEN 会放出多个探测。
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	avail := r.availableLocked(ps)
 	filtered := make([]Provider, 0, len(avail))
 	for _, p := range avail {
 		if !exclude[p.ID] {
@@ -106,16 +110,20 @@ func (r *Registry) RouteExclude(model string, exclude map[uint64]bool) (*Provide
 		return nil, nil
 	}
 	pick := pickWeighted(filtered)
-	r.markProbe(pick)
+	r.markProbeLocked(pick)
 	return pick, nil
 }
 
-// markProbe 选中的 provider 若是 HALF-OPEN，则这次选择就是「探测」：占住探测位，
-// 等 gateway 的 Report 回报后释放。只在实际选中时占位，避免「候选里有但没被选中」
-// 就把探测位永久卡死（选不中就一直排除，静默下线）。
+// markProbe 同 markProbeLocked，自己拿锁。测试和锁外调用用这个。
 func (r *Registry) markProbe(pick *Provider) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
+	r.markProbeLocked(pick)
+}
+
+// markProbeLocked 选中的 provider 若是 HALF-OPEN，则这次选择就是「探测」。
+// 调用方必须已持有 r.mu。
+func (r *Registry) markProbeLocked(pick *Provider) {
 	if b, ok := r.bk[pick.ID]; ok && b.state == breakerHalfOpen {
 		b.probeInFlight = true
 		b.probeSince = time.Now()
@@ -164,6 +172,11 @@ func (r *Registry) Report(providerID uint64, ok bool) {
 func (r *Registry) available(ps []Provider) []Provider {
 	r.mu.Lock()
 	defer r.mu.Unlock()
+	return r.availableLocked(ps)
+}
+
+// availableLocked 同 available，调用方必须已持有 r.mu。
+func (r *Registry) availableLocked(ps []Provider) []Provider {
 	out := make([]Provider, 0, len(ps))
 	now := time.Now()
 	for _, p := range ps {

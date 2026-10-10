@@ -11,10 +11,13 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/frostloom/ai-gateway/internal/pkg/controlplane"
 )
 
 type Router struct {
 	baseURL string
+	token   string
 	cli     *http.Client
 }
 
@@ -25,11 +28,12 @@ type RouteResult struct {
 	APIKey     string `json:"api_key"` // 上游 API key（真实渠道鉴权；空 = mock 透传租户 key）
 }
 
-func NewRouter(baseURL string) *Router {
+func NewRouter(baseURL, token string) *Router {
 	// 必须显式给大连接池：默认 transport 的 MaxIdleConnsPerHost=2，高并发下每个 /route
 	// 请求都会新建 TCP 连接，TIME_WAIT 堆积打爆 Windows 临时端口（压测 300 并发复现）。
 	return &Router{
 		baseURL: baseURL,
+		token:   token,
 		cli: &http.Client{
 			Timeout: 3 * time.Second,
 			Transport: &http.Transport{
@@ -54,6 +58,9 @@ func (r *Router) Route(ctx context.Context, model string, exclude ...uint64) (*R
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
 	if err != nil {
 		return nil, err
+	}
+	if r.token != "" {
+		req.Header.Set(controlplane.Header, r.token)
 	}
 	resp, err := r.cli.Do(req)
 	if err != nil {
@@ -84,6 +91,9 @@ func (r *Router) Report(ctx context.Context, providerID uint64, ok bool) {
 		return
 	}
 	req.Header.Set("Content-Type", "application/json")
+	if r.token != "" {
+		req.Header.Set(controlplane.Header, r.token)
+	}
 	resp, err := r.cli.Do(req)
 	if err != nil {
 		return
