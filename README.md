@@ -52,7 +52,7 @@ renewer（续费器，billing 内）: 扫到期 auto_renew 订阅 → 延下一�
 ```
 
 **两个数据面**：gateway↔billing 走 gRPC（控制面，计费），gateway↔router→mock-provider 走
-HTTP/SSE（数据面，流式）。结算按上游实际产出算，与请求是否断连无关。
+HTTP/SSE（数据面，流式）。读到 usage 帧时按上游实际产出结算；正文已转发但没有 usage 时，按已转发文本估算后结算。
 **AI 客服是网关的「一个用户」**：agent 用租户 API key 鉴权、按租户隔离、写操作走同一套计费核心——
 它自身的安全不靠 LLM 判断，靠执行层强制（见 [07-m7.md](docs/interview/07-m7.md)）。
 
@@ -239,6 +239,9 @@ GOPROXY=https://goproxy.cn,direct go build -o bin/ ./cmd/...
 cd web && npm install && npm run build && cd ..
 
 # 2) 启动（billing/router 先于 gateway；mock-provider 用环境变量配置）
+# 控制面令牌必填，billing/router/gateway/agent/reconciler 未设置会退出。
+# 默认只监听 127.0.0.1；要对所有网卡开放时再设 LISTEN_HOST=0.0.0.0。
+export CONTROL_PLANE_TOKEN=$(openssl rand -hex 16)
 BILLING_PORT=9101 BILLING_ADMIN_PORT=9103 ./bin/billing.exe &   # :9101 gRPC + :9103 admin
 ./bin/router.exe       &   # :9102
 MOCK_PROVIDER_PORT=9201 MOCK_PROVIDER_NAME=mock-a MOCK_FAIL_RATE=0 ./bin/mock-provider.exe &
@@ -413,7 +416,7 @@ docs/api-reference.md                 前端对接 API 契约（portal/admin/age
 |---|---|---|
 | M1 | 骨架 + 原子预占（Reserve Lua + 微 Saga 补偿） | 并发 100 余额恰好归零从不负 |
 | M2 | 非流式全链路（鉴权/幂等/限流 + 编排 + router + mock） | curl 一发产生 reserve+settle 两行 |
-| M3 | SSE 流式（透传 + Estimator + 断连退款） | 按实际扣费，kill 客户端保持 pending |
+| M3 | SSE 流式（透传 + Estimator） | 有 usage 按实际上报；已转发正文但无 usage 按文本估算结算；首字节前失败立即 502 并退款 |
 | M4 | 对账收敛（三分类 + 幂等冲正/补结算 + 重建投影） | kill -9 后账单全收敛 |
 | M5 | 路由熔断 + AutoBan + Prometheus + 压测 | 熔断全状态机验证 + P99 压测报告 |
 | M6 | Web 面板 + 造数据 + 压测教学（本仓库新增） | 面板可看数据 · seed 造 4 租户千条账单 · 200/300 并发三断言 PASS |
