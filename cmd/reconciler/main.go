@@ -15,14 +15,13 @@ import (
 	"syscall"
 	"time"
 
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	gormlogger "gorm.io/gorm/logger"
 
 	"github.com/frostloom/ai-gateway/internal/billing/reconciler"
 	"github.com/frostloom/ai-gateway/internal/pkg/config"
+	"github.com/frostloom/ai-gateway/internal/pkg/controlplane"
 	"github.com/frostloom/ai-gateway/internal/pkg/logger"
 	billingv1 "github.com/frostloom/ai-gateway/internal/proto/billing/v1"
 )
@@ -38,6 +37,7 @@ func main() {
 	flag.Parse()
 
 	log := logger.New(config.Getenv("LOG_LEVEL", "info"))
+	controlToken := controlplane.Require(log)
 	dsn := config.Getenv("MYSQL_DSN", "root:root@tcp(127.0.0.1:3307)/ai_gateway?charset=utf8mb4&parseTime=True&loc=Local")
 	billingAddr := config.Getenv("BILLING_ADDR", "127.0.0.1:9101")
 
@@ -51,7 +51,7 @@ func main() {
 		sqlDB.SetMaxOpenConns(10)
 		sqlDB.SetMaxIdleConns(5)
 	}
-	conn, err := grpc.NewClient(billingAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := controlplane.Dial(billingAddr, controlToken)
 	if err != nil {
 		log.Error("connect billing", "err", err)
 		os.Exit(1)
@@ -64,7 +64,7 @@ func main() {
 	httpPort := config.Getenv("RECONCILER_PORT", "9106")
 	go func() {
 		log.Info("reconciler http listening", "port", httpPort)
-		if err := http.ListenAndServe(":"+httpPort, r.HTTPHandler()); err != nil {
+		if err := http.ListenAndServe(config.ListenAddr(httpPort), r.HTTPHandler()); err != nil {
 			log.Error("reconciler http serve", "err", err)
 		}
 	}()

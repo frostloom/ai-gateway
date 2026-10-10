@@ -18,6 +18,7 @@ import (
 	"github.com/frostloom/ai-gateway/internal/gateway/middleware"
 	"github.com/frostloom/ai-gateway/internal/gateway/web"
 	"github.com/frostloom/ai-gateway/internal/pkg/config"
+	"github.com/frostloom/ai-gateway/internal/pkg/controlplane"
 	"github.com/frostloom/ai-gateway/internal/pkg/logger"
 	"github.com/frostloom/ai-gateway/internal/pkg/metrics"
 	"github.com/frostloom/ai-gateway/internal/pkg/redisx"
@@ -35,19 +36,21 @@ func main() {
 	redisPwd := config.Getenv("REDIS_PASSWORD", "")
 	ratePerMin := config.GetenvInt("RATE_LIMIT_PER_MIN", 600)
 	adminToken := config.Getenv("ADMIN_TOKEN", "")
+	controlToken := controlplane.Require(log)
+	handler.SetControlToken(controlToken)
 
 	rdb := redisx.New(redisAddr, redisPwd)
 	if err := redisx.Ping(context.Background(), rdb); err != nil {
 		log.Error("connect redis", "err", err)
 		os.Exit(1)
 	}
-	bc, err := client.NewBilling(billingAddr)
+	bc, err := client.NewBilling(billingAddr, controlToken)
 	if err != nil {
 		log.Error("connect billing", "err", err)
 		os.Exit(1)
 	}
 	defer bc.Close()
-	rc := client.NewRouter(routerAddr)
+	rc := client.NewRouter(routerAddr, controlToken)
 
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
@@ -81,7 +84,7 @@ func main() {
 	r.GET("/portal", serveHTML("portal.html"))
 	r.Any("/assets/*filepath", gin.WrapH(http.FileServer(http.FS(webFS))))
 	portal := r.Group("/portal")
-	portal.Use(middleware.PortalSession(billingAdminAddr, bc))
+	portal.Use(middleware.PortalSession(billingAdminAddr, bc, controlToken))
 	handler.RegisterPortal(portal, billingAdminAddr, agentAddr, log)
 	portal.POST("/completions", middleware.Idempotency(rdb), middleware.RateLimit(rdb, time.Minute, ratePerMin), handler.Chat(bc, rc, log, 2*time.Minute))
 	userAuth := r.Group("/auth")
@@ -96,7 +99,7 @@ func main() {
 
 	// /admin/*：面板数据接口，需登录态（cookie/token/admin-demo 兜底）。
 	admin := r.Group("/admin")
-	admin.Use(middleware.AdminSession(billingAdminAddr, adminToken, log))
+	admin.Use(middleware.AdminSession(billingAdminAddr, adminToken, controlToken, log))
 	handler.RegisterAdmin(admin, billingAdminAddr, routerAddr, reconcilerAddr, agentAddr, log)
 	// 管理面板 AI 客服：管理员没有租户 key，由 gateway 换发内部凭证（含目标租户）给 agent。
 	handler.RegisterAdminChat(admin, agentAddr,
@@ -104,7 +107,7 @@ func main() {
 		uint64(config.GetenvInt64("ADMIN_DEFAULT_TENANT", 1)), log)
 
 	log.Info("gateway listening", "port", port, "billing", billingAddr, "router", routerAddr)
-	srv := &http.Server{Addr: ":" + port, Handler: r}
+	srv := &http.Server{Addr: config.ListenAddr(port), Handler: r}
 	if err := srv.ListenAndServe(); err != nil {
 		log.Error("serve", "err", err)
 		os.Exit(1)

@@ -26,6 +26,15 @@ if [ -f .env ]; then
   echo "==> 载入 .env"
   set -a; source .env; set +a
 fi
+if [ -z "${CONTROL_PLANE_TOKEN:-}" ]; then
+  if command -v openssl >/dev/null 2>&1; then
+    CONTROL_PLANE_TOKEN=$(openssl rand -hex 16)
+  else
+    CONTROL_PLANE_TOKEN=$(od -An -N16 -tx1 /dev/urandom | tr -d ' \n')
+  fi
+  export CONTROL_PLANE_TOKEN
+  echo "==> 未设置 CONTROL_PLANE_TOKEN，已生成本次启动用的随机令牌"
+fi
 
 # 1) 基础设施：MySQL :3307 / Redis :6381 / Kafka :9092（首次会经 initdb.d 自动应用 schema.sql；
 #    kafka-init 一次性幂等建 billing.events + billing.events.dlq）

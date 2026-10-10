@@ -1,6 +1,6 @@
 // Package admin billing 的观测 + 自服务 HTTP 端点（Web 面板数据源 / agent 与 portal 的操作面）。
 // 与 gRPC 控制面解耦：gRPC 管计费 Saga（Reserve/Settle），这里管自服务领域（充值/订阅）。
-// 鉴权由 gateway/agent 统一把关；本端口仅本机/内网可达，租户隔离由调用方强制。
+// 除 /healthz、/metrics 外，请求必须带控制面令牌。租户隔离仍由调用方强制。
 package admin
 
 import (
@@ -13,6 +13,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"github.com/frostloom/ai-gateway/internal/billing/store"
+	"github.com/frostloom/ai-gateway/internal/pkg/controlplane"
 )
 
 // maskKey 渠道 key 脱敏：列表/响应只标记「已配置」，不回显明文。
@@ -25,7 +26,8 @@ func maskKey(k string) string {
 }
 
 // Handler 返回 billing 观测 + 自服务端点的 http.Handler。
-func Handler(st *store.Store, log *slog.Logger) http.Handler {
+// token 是控制面共享令牌。除 /healthz 和 /metrics 外，请求必须带 X-Control-Token。
+func Handler(st *store.Store, log *slog.Logger, token string) http.Handler {
 	mux := http.NewServeMux()
 
 	// 管理员认证（newapi 式初始登录，HttpOnly cookie 保持会话）。
@@ -500,7 +502,10 @@ func Handler(st *store.Store, log *slog.Logger) http.Handler {
 		writeJSON(w, http.StatusOK, map[string]any{"ok": true, "svc": "billing"})
 	})
 
-	return mux
+	return controlplane.WrapHTTP(token, map[string]struct{}{
+		"/healthz": {},
+		"/metrics": {},
+	}, mux)
 }
 
 // enabledStatus 上架状态（status=0），portal 买家目录只列上架。
