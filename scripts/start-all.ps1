@@ -48,6 +48,12 @@ function Import-DotEnv {
     }
 }
 Import-DotEnv (Join-Path $Root '.env')
+if (-not $env:CONTROL_PLANE_TOKEN) {
+    $bytes = New-Object byte[] 16
+    [System.Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($bytes)
+    $env:CONTROL_PLANE_TOKEN = ([System.BitConverter]::ToString($bytes) -replace '-', '').ToLower()
+    Write-Host "==> 未设置 CONTROL_PLANE_TOKEN，已生成本次启动用的随机令牌"
+}
 
 # ---------- 工具函数 ----------
 function Stop-Port {

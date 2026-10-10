@@ -2,9 +2,16 @@
 package config
 
 import (
+	"net"
 	"os"
 	"strconv"
 )
+
+// ListenAddr 返回服务监听地址。默认只绑 127.0.0.1。
+// LISTEN_HOST=0.0.0.0 时才对外。
+func ListenAddr(port string) string {
+	return net.JoinHostPort(Getenv("LISTEN_HOST", "127.0.0.1"), port)
+}
 
 // Getenv 读字符串环境变量，缺省返回 def。
 func Getenv(key, def string) string {

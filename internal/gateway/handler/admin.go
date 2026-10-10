@@ -16,10 +16,18 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+
+	"github.com/frostloom/ai-gateway/internal/pkg/controlplane"
 )
 
 // adminHTTP 面板聚合转发共用 client（复用连接池，别每请求新建）。
 var adminHTTP = &http.Client{Timeout: 5 * time.Second}
+
+// controlToken 是 gateway 访问 billing admin 时附带的控制面令牌。
+var controlToken string
+
+// SetControlToken 由 gateway 启动时注入。proxy 转发到 billing admin 时带上。
+func SetControlToken(token string) { controlToken = token }
 
 // RegisterAdmin 注册面板聚合路由。
 //
@@ -244,6 +252,9 @@ func proxy(c *gin.Context, method, target string, body []byte, log *slog.Logger)
 	}
 	if h := c.GetHeader("X-Admin-Token"); h != "" {
 		req.Header.Set("X-Admin-Token", h)
+	}
+	if controlToken != "" {
+		req.Header.Set(controlplane.Header, controlToken)
 	}
 	resp, err := adminHTTP.Do(req)
 	if err != nil {

@@ -10,6 +10,8 @@ import (
 	"time"
 
 	"google.golang.org/grpc"
+
+	"github.com/frostloom/ai-gateway/internal/pkg/controlplane"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	gormlogger "gorm.io/gorm/logger"
@@ -44,6 +46,7 @@ func brokers() []string {
 func main() {
 	log := logger.New(config.Getenv("LOG_LEVEL", "info"))
 	port := config.Getenv("BILLING_PORT", "9101")
+	controlToken := controlplane.Require(log)
 	dsn := config.Getenv("MYSQL_DSN", "root:root@tcp(127.0.0.1:3307)/ai_gateway?charset=utf8mb4&parseTime=True&loc=Local")
 	redisAddr := config.Getenv("REDIS_ADDR", "127.0.0.1:6381")
 	redisPwd := config.Getenv("REDIS_PASSWORD", "")
@@ -86,19 +89,19 @@ func main() {
 		os.Exit(1)
 	}
 
-	lis, err := net.Listen("tcp", ":"+port)
+	lis, err := net.Listen("tcp", config.ListenAddr(port))
 	if err != nil {
 		log.Error("listen", "port", port, "err", err)
 		os.Exit(1)
 	}
-	gs := grpc.NewServer()
+	gs := grpc.NewServer(grpc.UnaryInterceptor(controlplane.UnaryServer(controlToken)))
 	billingv1.RegisterBillingServiceServer(gs, server.NewService(st, log))
 
 	// 观测 HTTP 端点（面板数据源，只读）。独立端口，不干扰 gRPC 控制面。
 	adminPort := config.Getenv("BILLING_ADMIN_PORT", "9103")
 	go func() {
 		log.Info("billing admin listening", "port", adminPort)
-		if err := http.ListenAndServe(":"+adminPort, admin.Handler(st, log)); err != nil {
+		if err := http.ListenAndServe(config.ListenAddr(adminPort), admin.Handler(st, log, controlToken)); err != nil {
 			log.Error("billing admin serve", "err", err)
 		}
 	}()

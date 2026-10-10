@@ -9,24 +9,28 @@ import (
 	"math"
 	"net/http"
 	"net/url"
+	"os"
 	"sort"
 	"strings"
 	"time"
 	"unicode"
 
 	"github.com/frostloom/ai-gateway/internal/billing/store"
+	"github.com/frostloom/ai-gateway/internal/pkg/controlplane"
 )
 
 // ---------- billing admin HTTP 客户端（agent 的工具操作面） ----------
 
 type AdminClient struct {
 	baseURL string
+	token   string
 	cli     *http.Client
 }
 
 func NewAdminClient(baseURL string) *AdminClient {
 	return &AdminClient{
 		baseURL: baseURL,
+		token:   os.Getenv(controlplane.Env),
 		cli:     &http.Client{Timeout: 5 * time.Second},
 	}
 }
@@ -56,6 +60,9 @@ func (c *AdminClient) post(ctx context.Context, path string, body any) ([]byte, 
 }
 
 func (c *AdminClient) do(req *http.Request) ([]byte, error) {
+	if c.token != "" {
+		req.Header.Set(controlplane.Header, c.token)
+	}
 	resp, err := c.cli.Do(req)
 	if err != nil {
 		return nil, err

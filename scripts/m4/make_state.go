@@ -14,12 +14,11 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 	"time"
 
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
-
 	"github.com/frostloom/ai-gateway/internal/pkg/config"
+	"github.com/frostloom/ai-gateway/internal/pkg/controlplane"
 	billingv1 "github.com/frostloom/ai-gateway/internal/proto/billing/v1"
 )
 
@@ -30,7 +29,11 @@ const (
 
 func main() {
 	addr := config.Getenv("BILLING_ADDR", "127.0.0.1:9101")
-	conn, err := grpc.NewClient(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	token := os.Getenv(controlplane.Env)
+	if token == "" {
+		log.Fatal("CONTROL_PLANE_TOKEN is required")
+	}
+	conn, err := controlplane.Dial(addr, token)
 	if err != nil {
 		log.Fatalf("connect billing: %v", err)
 	}

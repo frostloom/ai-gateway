@@ -12,6 +12,10 @@ cd "$(dirname "$0")/../.."
 
 GATEWAY="http://127.0.0.1:18080"
 ADMIN="http://127.0.0.1:9103"
+if [ -z "${CONTROL_PLANE_TOKEN:-}" ]; then
+  echo "!! CONTROL_PLANE_TOKEN 未设置，billing admin 会拒绝直连"
+  exit 1
+fi
 
 # 1) 真实 DeepSeek key（先看环境变量，再读 .env）
 KEY="${AGENT_LLM_API_KEY:-}"
@@ -36,7 +40,7 @@ SQL
 # 3) 注册真实渠道 deepseek-official（权重 1000 压倒 mock 通配渠道，让 deepseek-chat 走真实上游）
 #    上游成本示例：in=27 / out=110 分每百万（以 DeepSeek 官方当前价为准，可改；仅影响毛利展示）
 echo "==> 注册真实渠道 deepseek-official -> https://api.deepseek.com"
-curl -s -X POST "$ADMIN/admin/providers" -H 'Content-Type: application/json' -d "{
+curl -s -X POST "$ADMIN/admin/providers" -H "X-Control-Token: $CONTROL_PLANE_TOKEN" -H 'Content-Type: application/json' -d "{
   \"name\": \"deepseek-official\",
   \"base_url\": \"https://api.deepseek.com\",
   \"upstream_key\": \"$KEY\",
@@ -78,4 +82,4 @@ SQL
 
 # 6) 渠道列表 + 累计售价/成本/毛利（单位：分；分=0.01 元，几十 token 的调用不足 1 分，毛利随用量累积）
 echo "==> 渠道列表 + 累计售价/成本/毛利（单位：分）"
-curl -s "$ADMIN/admin/providers" | jq '.items[] | {id, name, status, models, cost_in_cent, cost_out_cent, selling_cent, cost_cent, margin_cent}'
+curl -s -H "X-Control-Token: $CONTROL_PLANE_TOKEN" "$ADMIN/admin/providers" | jq '.items[] | {id, name, status, models, cost_in_cent, cost_out_cent, selling_cent, cost_cent, margin_cent}'

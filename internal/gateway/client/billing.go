@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 
+	"github.com/frostloom/ai-gateway/internal/pkg/controlplane"
 	billingv1 "github.com/frostloom/ai-gateway/internal/proto/billing/v1"
 )
 
@@ -16,8 +16,8 @@ type Billing struct {
 	cli  billingv1.BillingServiceClient
 }
 
-func NewBilling(addr string) (*Billing, error) {
-	conn, err := grpc.NewClient(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+func NewBilling(addr, token string) (*Billing, error) {
+	conn, err := controlplane.Dial(addr, token)
 	if err != nil {
 		return nil, err
 	}
