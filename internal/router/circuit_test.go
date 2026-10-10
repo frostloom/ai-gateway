@@ -2,6 +2,7 @@ package router
 
 import (
 	"log/slog"
+	"sync"
 	"testing"
 	"time"
 )
@@ -111,6 +112,42 @@ func TestHalfOpenProbeOnlyConsumedOnPick(t *testing.T) {
 	r.Report(1, false)
 	if got := r.available(ps); len(got) != 0 {
 		t.Fatalf("探测失败应回 OPEN 被排除，got %d", len(got))
+	}
+}
+
+func TestHalfOpenRouteAllowsOneProbe(t *testing.T) {
+	r := newTestRegistry()
+	r.cache["m"] = &cachedRoute{
+		providers: []Provider{{ID: 1, Name: "p1", BaseURL: "http://x", Weight: 1}},
+		expireAt:  time.Now().Add(time.Hour),
+	}
+	for i := 0; i < 5; i++ {
+		r.Report(1, false)
+	}
+	time.Sleep(r.Cooldown + 10*time.Millisecond)
+
+	var mu sync.Mutex
+	var n int
+	var wg sync.WaitGroup
+	wg.Add(20)
+	for i := 0; i < 20; i++ {
+		go func() {
+			defer wg.Done()
+			p, err := r.Route("m")
+			if err != nil {
+				t.Errorf("route: %v", err)
+				return
+			}
+			if p != nil {
+				mu.Lock()
+				n++
+				mu.Unlock()
+			}
+		}()
+	}
+	wg.Wait()
+	if n != 1 {
+		t.Fatalf("half-open probes = %d, want 1", n)
 	}
 }
 
