@@ -67,6 +67,8 @@ jobs:
           python scripts/archive-intent-contract.py verify
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python scripts/summarize-offline-intent-audit.py verify
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python scripts/prepare-customer-fixtures.py verify
           exit $LASTEXITCODE
 
   web:
