@@ -1,0 +1,5088 @@
+[
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-001",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-001",
+    "task_id": "future-balance-001-cash",
+    "unreviewed_required_facts": [
+      "针对原话“查询余额”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-002",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "calibration_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-002",
+    "task_id": "future-balance-002-cash",
+    "unreviewed_required_facts": [
+      "针对原话“查一下账户余额”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-003",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-003",
+    "task_id": "future-balance-003-cash",
+    "unreviewed_required_facts": [
+      "针对原话“我要查余额”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-004",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "calibration_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-004",
+    "task_id": "future-balance-004-cash",
+    "unreviewed_required_facts": [
+      "针对原话“看一下我的余额”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-005",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "calibration_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-005",
+    "task_id": "future-balance-005-cash",
+    "unreviewed_required_facts": [
+      "针对原话“余额查询”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-006",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "reserved_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-006",
+    "task_id": "future-balance-006-cash",
+    "unreviewed_required_facts": [
+      "针对原话“帮我查账户余额”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-007",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-007",
+    "task_id": "future-balance-007-cash",
+    "unreviewed_required_facts": [
+      "针对原话“账户余额是多少”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-008",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "calibration_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-008",
+    "task_id": "future-balance-008-cash",
+    "unreviewed_required_facts": [
+      "针对原话“查我的可用余额”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-009",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-009",
+    "task_id": "future-balance-009-cash",
+    "unreviewed_required_facts": [
+      "针对原话“我想知道账户余额”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-010",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-010",
+    "task_id": "future-balance-010-cash",
+    "unreviewed_required_facts": [
+      "针对原话“查看余额”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-011",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "reserved_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-011",
+    "task_id": "future-balance-011-cash",
+    "unreviewed_required_facts": [
+      "针对原话“查询我的账户余额”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-012",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-012",
+    "task_id": "future-balance-012-cash",
+    "unreviewed_required_facts": [
+      "针对原话“余额还有多少”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-013",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-013",
+    "task_id": "future-balance-013-cash",
+    "unreviewed_required_facts": [
+      "针对原话“账户里还有多少钱”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-014",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-014",
+    "task_id": "future-balance-014-cash",
+    "unreviewed_required_facts": [
+      "针对原话“查询可用余额”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-015",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "calibration_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-015",
+    "task_id": "future-balance-015-cash",
+    "unreviewed_required_facts": [
+      "针对原话“我还有多少钱啊”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-016",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-016",
+    "task_id": "future-balance-016-cash",
+    "unreviewed_required_facts": [
+      "针对原话“我这账户里还剩多少”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-018",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "calibration_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-018",
+    "task_id": "future-balance-018-cash",
+    "unreviewed_required_facts": [
+      "针对原话“里头还有钱吗”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-021",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-021",
+    "task_id": "future-balance-021-cash",
+    "unreviewed_required_facts": [
+      "针对原话“我账上还有余额吗”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-025",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-025",
+    "task_id": "future-balance-025-cash",
+    "unreviewed_required_facts": [
+      "针对原话“我还有钱吗”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-030",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "reserved_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-030",
+    "task_id": "future-balance-030-cash",
+    "unreviewed_required_facts": [
+      "针对原话“账上余额还多吗”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-031",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-031",
+    "task_id": "future-balance-031-cash",
+    "unreviewed_required_facts": [
+      "针对原话“余额”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-032",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-032",
+    "task_id": "future-balance-032-cash",
+    "unreviewed_required_facts": [
+      "针对原话“查余额”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-033",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-033",
+    "task_id": "future-balance-033-cash",
+    "unreviewed_required_facts": [
+      "针对原话“余额多少”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-034",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-034",
+    "task_id": "future-balance-034-cash",
+    "unreviewed_required_facts": [
+      "针对原话“看余额”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-035",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-035",
+    "task_id": "future-balance-035-cash",
+    "unreviewed_required_facts": [
+      "针对原话“账户余额”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-038",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "calibration_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-038",
+    "task_id": "future-balance-038-cash",
+    "unreviewed_required_facts": [
+      "针对原话“可用余额”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-039",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-039",
+    "task_id": "future-balance-039-cash",
+    "unreviewed_required_facts": [
+      "针对原话“我的余额”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-040",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-040",
+    "task_id": "future-balance-040-cash",
+    "unreviewed_required_facts": [
+      "针对原话“余额查询下”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-041",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-041",
+    "task_id": "future-balance-041-cash",
+    "unreviewed_required_facts": [
+      "针对原话“查鱼额”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-042",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "reserved_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-042",
+    "task_id": "future-balance-042-cash",
+    "unreviewed_required_facts": [
+      "针对原话“查雨额”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-043",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-043",
+    "task_id": "future-balance-043-cash",
+    "unreviewed_required_facts": [
+      "针对原话“余鹅多少”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-044",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "reserved_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-044",
+    "task_id": "future-balance-044-cash",
+    "unreviewed_required_facts": [
+      "针对原话“帮我差一下余额”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-045",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "calibration_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-045",
+    "task_id": "future-balance-045-cash",
+    "unreviewed_required_facts": [
+      "针对原话“查佘额”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-046",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-046",
+    "task_id": "future-balance-046-cash",
+    "unreviewed_required_facts": [
+      "针对原话“余额还剩多少了”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-047",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-047",
+    "task_id": "future-balance-047-cash",
+    "unreviewed_required_facts": [
+      "针对原话“结余多少”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-048",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-048",
+    "task_id": "future-balance-048-cash",
+    "unreviewed_required_facts": [
+      "针对原话“帮我插一下余额”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-049",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "calibration_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-049",
+    "task_id": "future-balance-049-cash",
+    "unreviewed_required_facts": [
+      "针对原话“账户于额”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-050",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "reserved_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-050",
+    "task_id": "future-balance-050-cash",
+    "unreviewed_required_facts": [
+      "针对原话“看下余饿”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-051",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-051",
+    "task_id": "future-balance-051-cash",
+    "unreviewed_required_facts": [
+      "针对原话“是这样的，我昨天用你们的服务跑了一批任务，现在想确认一下账户里还剩多少钱，方便我决定要不要充值”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-053",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-053",
+    "task_id": "future-balance-053-cash",
+    "unreviewed_required_facts": [
+      "针对原话“麻烦问一下，我想知道我这个账号现在还有多少可用余额，之前充的钱好像用了一部分了”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-054",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-054",
+    "task_id": "future-balance-054-cash",
+    "unreviewed_required_facts": [
+      "针对原话“我这边需要核对一下账目，请帮我查一下当前账户的余额是多少”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-057",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-057",
+    "task_id": "future-balance-057-cash",
+    "unreviewed_required_facts": [
+      "针对原话“刚才调用接口好像扣费了，我想确认一下现在账户余额还剩多少”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-058",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-058",
+    "task_id": "future-balance-058-cash",
+    "unreviewed_required_facts": [
+      "针对原话“帮我看看账户情况吧，主要想知道还剩多少钱可以用”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-059",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-059",
+    "task_id": "future-balance-059-cash",
+    "unreviewed_required_facts": [
+      "针对原话“我老板让我确认下我们账户的余额，麻烦查一下”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-062",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-062",
+    "task_id": "future-balance-062-cash",
+    "unreviewed_required_facts": [
+      "针对原话“钱用完了吗”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-071",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "calibration_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-071",
+    "task_id": "future-balance-071-cash",
+    "unreviewed_required_facts": [
+      "针对原话“帮我查下 balance”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-072",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-072",
+    "task_id": "future-balance-072-cash",
+    "unreviewed_required_facts": [
+      "针对原话“check 一下我的余额”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-074",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "reserved_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-074",
+    "task_id": "future-balance-074-cash",
+    "unreviewed_required_facts": [
+      "针对原话“account balance 是多少”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-077",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-077",
+    "task_id": "future-balance-077-cash",
+    "unreviewed_required_facts": [
+      "针对原话“我的 balance 还有多少”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-079",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-079",
+    "task_id": "future-balance-079-cash",
+    "unreviewed_required_facts": [
+      "针对原话“请问可以帮我查一下余额吗”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-080",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "calibration_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-080",
+    "task_id": "future-balance-080-cash",
+    "unreviewed_required_facts": [
+      "针对原话“麻烦帮我查查余额好吗”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-081",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-081",
+    "task_id": "future-balance-081-cash",
+    "unreviewed_required_facts": [
+      "针对原话“能不能帮我看一下账户余额”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-082",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-082",
+    "task_id": "future-balance-082-cash",
+    "unreviewed_required_facts": [
+      "针对原话“可以帮忙查询一下我的余额吗”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-083",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "calibration_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-083",
+    "task_id": "future-balance-083-cash",
+    "unreviewed_required_facts": [
+      "针对原话“劳驾帮我查下余额”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-084",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-084",
+    "task_id": "future-balance-084-cash",
+    "unreviewed_required_facts": [
+      "针对原话“请问我的余额是多少呢”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-085",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-085",
+    "task_id": "future-balance-085-cash",
+    "unreviewed_required_facts": [
+      "针对原话“方便的话帮我查一下余额”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-086",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "calibration_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-086",
+    "task_id": "future-balance-086-cash",
+    "unreviewed_required_facts": [
+      "针对原话“能否告知我的账户余额”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-087",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-087",
+    "task_id": "future-balance-087-cash",
+    "unreviewed_required_facts": [
+      "针对原话“麻烦您帮我查询余额”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-088",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-088",
+    "task_id": "future-balance-088-cash",
+    "unreviewed_required_facts": [
+      "针对原话“请问账户还有余额吗”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-089",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "calibration_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-089",
+    "task_id": "future-balance-089-cash",
+    "unreviewed_required_facts": [
+      "针对原话“余额报一下”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-090",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "calibration_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-090",
+    "task_id": "future-balance-090-cash",
+    "unreviewed_required_facts": [
+      "针对原话“把余额给我”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-091",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "reserved_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-091",
+    "task_id": "future-balance-091-cash",
+    "unreviewed_required_facts": [
+      "针对原话“立刻查余额”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-092",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-092",
+    "task_id": "future-balance-092-cash",
+    "unreviewed_required_facts": [
+      "针对原话“马上告诉我余额”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-093",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-093",
+    "task_id": "future-balance-093-cash",
+    "unreviewed_required_facts": [
+      "针对原话“余额给我看”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-094",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "calibration_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-094",
+    "task_id": "future-balance-094-cash",
+    "unreviewed_required_facts": [
+      "针对原话“报一下当前余额”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-096",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-096",
+    "task_id": "future-balance-096-cash",
+    "unreviewed_required_facts": [
+      "针对原话“直接告诉我余额”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-097",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-097",
+    "task_id": "future-balance-097-cash",
+    "unreviewed_required_facts": [
+      "针对原话“余额亮出来”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-098",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "reserved_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-098",
+    "task_id": "future-balance-098-cash",
+    "unreviewed_required_facts": [
+      "针对原话“给我查余额”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-099",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "calibration_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-099",
+    "task_id": "future-balance-099-cash",
+    "unreviewed_required_facts": [
+      "针对原话“余额发我”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:balance-100",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_balance"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "balance-100",
+    "task_id": "future-balance-100-cash",
+    "unreviewed_required_facts": [
+      "针对原话“快速查下余额”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-001",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-001",
+    "task_id": "future-subscription-001-active",
+    "unreviewed_required_facts": [
+      "针对原话“查询我的订阅”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“查询我的订阅”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-001",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-001",
+    "task_id": "future-subscription-001-absent",
+    "unreviewed_required_facts": [
+      "针对原话“查询我的订阅”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“查询我的订阅”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-002",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-002",
+    "task_id": "future-subscription-002-active",
+    "unreviewed_required_facts": [
+      "针对原话“查看我的订阅状态”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“查看我的订阅状态”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-002",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-002",
+    "task_id": "future-subscription-002-absent",
+    "unreviewed_required_facts": [
+      "针对原话“查看我的订阅状态”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“查看我的订阅状态”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-003",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-003",
+    "task_id": "future-subscription-003-active",
+    "unreviewed_required_facts": [
+      "针对原话“我的订阅情况”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“我的订阅情况”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-003",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-003",
+    "task_id": "future-subscription-003-absent",
+    "unreviewed_required_facts": [
+      "针对原话“我的订阅情况”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“我的订阅情况”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-004",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-004",
+    "task_id": "future-subscription-004-active",
+    "unreviewed_required_facts": [
+      "针对原话“查询订阅详情”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“查询订阅详情”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-004",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-004",
+    "task_id": "future-subscription-004-absent",
+    "unreviewed_required_facts": [
+      "针对原话“查询订阅详情”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“查询订阅详情”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-005",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "reserved_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-005",
+    "task_id": "future-subscription-005-active",
+    "unreviewed_required_facts": [
+      "针对原话“看下我的订阅”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“看下我的订阅”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-005",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "reserved_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-005",
+    "task_id": "future-subscription-005-absent",
+    "unreviewed_required_facts": [
+      "针对原话“看下我的订阅”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“看下我的订阅”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-006",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "calibration_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-006",
+    "task_id": "future-subscription-006-active",
+    "unreviewed_required_facts": [
+      "针对原话“查我的套餐订阅”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“查我的套餐订阅”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-006",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "calibration_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-006",
+    "task_id": "future-subscription-006-absent",
+    "unreviewed_required_facts": [
+      "针对原话“查我的套餐订阅”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“查我的套餐订阅”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-007",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-007",
+    "task_id": "future-subscription-007-active",
+    "unreviewed_required_facts": [
+      "针对原话“我的订阅信息”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“我的订阅信息”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-007",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-007",
+    "task_id": "future-subscription-007-absent",
+    "unreviewed_required_facts": [
+      "针对原话“我的订阅信息”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“我的订阅信息”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-008",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-008",
+    "task_id": "future-subscription-008-active",
+    "unreviewed_required_facts": [
+      "针对原话“查询当前订阅”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“查询当前订阅”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-008",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-008",
+    "task_id": "future-subscription-008-absent",
+    "unreviewed_required_facts": [
+      "针对原话“查询当前订阅”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“查询当前订阅”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-009",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "calibration_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-009",
+    "task_id": "future-subscription-009-active",
+    "unreviewed_required_facts": [
+      "针对原话“查看我的套餐”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“查看我的套餐”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-009",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "calibration_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-009",
+    "task_id": "future-subscription-009-absent",
+    "unreviewed_required_facts": [
+      "针对原话“查看我的套餐”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“查看我的套餐”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-010",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-010",
+    "task_id": "future-subscription-010-active",
+    "unreviewed_required_facts": [
+      "针对原话“查下我的订阅”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“查下我的订阅”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-010",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-010",
+    "task_id": "future-subscription-010-absent",
+    "unreviewed_required_facts": [
+      "针对原话“查下我的订阅”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“查下我的订阅”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-012",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-012",
+    "task_id": "future-subscription-012-active",
+    "unreviewed_required_facts": [
+      "针对原话“查询订阅周期”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“查询订阅周期”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。",
+      "针对原话“查询订阅周期”：区分月度计费有效期与滚动额度刷新周期；开始日期字段未输出则说明。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-012",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-012",
+    "task_id": "future-subscription-012-absent",
+    "unreviewed_required_facts": [
+      "针对原话“查询订阅周期”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“查询订阅周期”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。",
+      "针对原话“查询订阅周期”：区分月度计费有效期与滚动额度刷新周期；开始日期字段未输出则说明。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-013",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-013",
+    "task_id": "future-subscription-013-active",
+    "unreviewed_required_facts": [
+      "针对原话“看下我的订阅详情”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“看下我的订阅详情”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-013",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-013",
+    "task_id": "future-subscription-013-absent",
+    "unreviewed_required_facts": [
+      "针对原话“看下我的订阅详情”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“看下我的订阅详情”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-014",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "calibration_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-014",
+    "task_id": "future-subscription-014-active",
+    "unreviewed_required_facts": [
+      "针对原话“我的订阅状态查询”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“我的订阅状态查询”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-014",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "calibration_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-014",
+    "task_id": "future-subscription-014-absent",
+    "unreviewed_required_facts": [
+      "针对原话“我的订阅状态查询”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“我的订阅状态查询”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-015",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-015",
+    "task_id": "future-subscription-015-active",
+    "unreviewed_required_facts": [
+      "针对原话“我订的是哪个套餐”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“我订的是哪个套餐”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。",
+      "针对原话“我订的是哪个套餐”：套餐ID足以标识当前套餐；如承诺具体名称需查询目录匹配，不猜名称。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-015",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-015",
+    "task_id": "future-subscription-015-absent",
+    "unreviewed_required_facts": [
+      "针对原话“我订的是哪个套餐”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“我订的是哪个套餐”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。",
+      "针对原话“我订的是哪个套餐”：套餐ID足以标识当前套餐；如承诺具体名称需查询目录匹配，不猜名称。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-016",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-016",
+    "task_id": "future-subscription-016-active",
+    "unreviewed_required_facts": [
+      "针对原话“我的套餐还有效吗”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“我的套餐还有效吗”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-016",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-016",
+    "task_id": "future-subscription-016-absent",
+    "unreviewed_required_facts": [
+      "针对原话“我的套餐还有效吗”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“我的套餐还有效吗”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-017",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-017",
+    "task_id": "future-subscription-017-active",
+    "unreviewed_required_facts": [
+      "针对原话“我订阅的东西还在吗”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“我订阅的东西还在吗”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-017",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-017",
+    "task_id": "future-subscription-017-absent",
+    "unreviewed_required_facts": [
+      "针对原话“我订阅的东西还在吗”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“我订阅的东西还在吗”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-020",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-020",
+    "task_id": "future-subscription-020-active",
+    "unreviewed_required_facts": [
+      "针对原话“我订了啥来着”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“我订了啥来着”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。",
+      "针对原话“我订了啥来着”：套餐ID足以标识当前套餐；如承诺具体名称需查询目录匹配，不猜名称。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-020",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-020",
+    "task_id": "future-subscription-020-absent",
+    "unreviewed_required_facts": [
+      "针对原话“我订了啥来着”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“我订了啥来着”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。",
+      "针对原话“我订了啥来着”：套餐ID足以标识当前套餐；如承诺具体名称需查询目录匹配，不猜名称。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-021",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "calibration_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-021",
+    "task_id": "future-subscription-021-active",
+    "unreviewed_required_facts": [
+      "针对原话“我这订阅啥情况”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“我这订阅啥情况”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-021",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "calibration_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-021",
+    "task_id": "future-subscription-021-absent",
+    "unreviewed_required_facts": [
+      "针对原话“我这订阅啥情况”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“我这订阅啥情况”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-022",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-022",
+    "task_id": "future-subscription-022-active",
+    "unreviewed_required_facts": [
+      "针对原话“我的套餐过期了没”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“我的套餐过期了没”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-022",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-022",
+    "task_id": "future-subscription-022-absent",
+    "unreviewed_required_facts": [
+      "针对原话“我的套餐过期了没”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“我的套餐过期了没”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-023",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "calibration_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-023",
+    "task_id": "future-subscription-023-active",
+    "unreviewed_required_facts": [
+      "针对原话“我现在是啥套餐”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“我现在是啥套餐”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。",
+      "针对原话“我现在是啥套餐”：套餐ID足以标识当前套餐；如承诺具体名称需查询目录匹配，不猜名称。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-023",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "calibration_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-023",
+    "task_id": "future-subscription-023-absent",
+    "unreviewed_required_facts": [
+      "针对原话“我现在是啥套餐”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“我现在是啥套餐”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。",
+      "针对原话“我现在是啥套餐”：套餐ID足以标识当前套餐；如承诺具体名称需查询目录匹配，不猜名称。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-026",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "reserved_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-026",
+    "task_id": "future-subscription-026-active",
+    "unreviewed_required_facts": [
+      "针对原话“我订的套餐还剩多少”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“我订的套餐还剩多少”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-026",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "reserved_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-026",
+    "task_id": "future-subscription-026-absent",
+    "unreviewed_required_facts": [
+      "针对原话“我订的套餐还剩多少”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“我订的套餐还剩多少”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-027",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-027",
+    "task_id": "future-subscription-027-active",
+    "unreviewed_required_facts": [
+      "针对原话“我现在的套餐是哪个”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“我现在的套餐是哪个”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。",
+      "针对原话“我现在的套餐是哪个”：套餐ID足以标识当前套餐；如承诺具体名称需查询目录匹配，不猜名称。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-027",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-027",
+    "task_id": "future-subscription-027-absent",
+    "unreviewed_required_facts": [
+      "针对原话“我现在的套餐是哪个”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“我现在的套餐是哪个”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。",
+      "针对原话“我现在的套餐是哪个”：套餐ID足以标识当前套餐；如承诺具体名称需查询目录匹配，不猜名称。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-028",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "calibration_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-028",
+    "task_id": "future-subscription-028-active",
+    "unreviewed_required_facts": [
+      "针对原话“我这期额度还有吗”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“我这期额度还有吗”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。",
+      "针对原话“我这期额度还有吗”：确认所说本期是否当前滚动窗口，不以当前余量证明整月历史没有超额。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-028",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "calibration_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-028",
+    "task_id": "future-subscription-028-absent",
+    "unreviewed_required_facts": [
+      "针对原话“我这期额度还有吗”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“我这期额度还有吗”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。",
+      "针对原话“我这期额度还有吗”：确认所说本期是否当前滚动窗口，不以当前余量证明整月历史没有超额。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-031",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-031",
+    "task_id": "future-subscription-031-active",
+    "unreviewed_required_facts": [
+      "针对原话“我的订阅”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“我的订阅”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-031",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-031",
+    "task_id": "future-subscription-031-absent",
+    "unreviewed_required_facts": [
+      "针对原话“我的订阅”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“我的订阅”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-032",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "calibration_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-032",
+    "task_id": "future-subscription-032-active",
+    "unreviewed_required_facts": [
+      "针对原话“查订阅”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“查订阅”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-032",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "calibration_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-032",
+    "task_id": "future-subscription-032-absent",
+    "unreviewed_required_facts": [
+      "针对原话“查订阅”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“查订阅”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-033",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "reserved_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-033",
+    "task_id": "future-subscription-033-active",
+    "unreviewed_required_facts": [
+      "针对原话“订阅状态”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“订阅状态”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-033",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "reserved_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-033",
+    "task_id": "future-subscription-033-absent",
+    "unreviewed_required_facts": [
+      "针对原话“订阅状态”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“订阅状态”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-034",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-034",
+    "task_id": "future-subscription-034-active",
+    "unreviewed_required_facts": [
+      "针对原话“我的套餐”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“我的套餐”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。",
+      "针对原话“我的套餐”：套餐ID足以标识当前套餐；如承诺具体名称需查询目录匹配，不猜名称。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-034",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-034",
+    "task_id": "future-subscription-034-absent",
+    "unreviewed_required_facts": [
+      "针对原话“我的套餐”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“我的套餐”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。",
+      "针对原话“我的套餐”：套餐ID足以标识当前套餐；如承诺具体名称需查询目录匹配，不猜名称。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-035",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-035",
+    "task_id": "future-subscription-035-active",
+    "unreviewed_required_facts": [
+      "针对原话“看订阅”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“看订阅”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-035",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-035",
+    "task_id": "future-subscription-035-absent",
+    "unreviewed_required_facts": [
+      "针对原话“看订阅”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“看订阅”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-036",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-036",
+    "task_id": "future-subscription-036-active",
+    "unreviewed_required_facts": [
+      "针对原话“订阅详情”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“订阅详情”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-036",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-036",
+    "task_id": "future-subscription-036-absent",
+    "unreviewed_required_facts": [
+      "针对原话“订阅详情”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“订阅详情”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-039",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-039",
+    "task_id": "future-subscription-039-active",
+    "unreviewed_required_facts": [
+      "针对原话“订阅周期”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“订阅周期”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。",
+      "针对原话“订阅周期”：区分月度计费有效期与滚动额度刷新周期；开始日期字段未输出则说明。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-039",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-039",
+    "task_id": "future-subscription-039-absent",
+    "unreviewed_required_facts": [
+      "针对原话“订阅周期”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“订阅周期”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。",
+      "针对原话“订阅周期”：区分月度计费有效期与滚动额度刷新周期；开始日期字段未输出则说明。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-041",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-041",
+    "task_id": "future-subscription-041-active",
+    "unreviewed_required_facts": [
+      "针对原话“查订阪”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“查订阪”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-041",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-041",
+    "task_id": "future-subscription-041-absent",
+    "unreviewed_required_facts": [
+      "针对原话“查订阪”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“查订阪”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-042",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "reserved_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-042",
+    "task_id": "future-subscription-042-active",
+    "unreviewed_required_facts": [
+      "针对原话“我的订阋”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“我的订阋”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-042",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "reserved_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-042",
+    "task_id": "future-subscription-042-absent",
+    "unreviewed_required_facts": [
+      "针对原话“我的订阋”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“我的订阋”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-043",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "calibration_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-043",
+    "task_id": "future-subscription-043-active",
+    "unreviewed_required_facts": [
+      "针对原话“订阋状态”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“订阋状态”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-043",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "calibration_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-043",
+    "task_id": "future-subscription-043-absent",
+    "unreviewed_required_facts": [
+      "针对原话“订阋状态”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“订阋状态”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-044",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-044",
+    "task_id": "future-subscription-044-active",
+    "unreviewed_required_facts": [
+      "针对原话“查下订越”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“查下订越”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-044",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-044",
+    "task_id": "future-subscription-044-absent",
+    "unreviewed_required_facts": [
+      "针对原话“查下订越”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“查下订越”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-045",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-045",
+    "task_id": "future-subscription-045-active",
+    "unreviewed_required_facts": [
+      "针对原话“我的套惨”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“我的套惨”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。",
+      "针对原话“我的套惨”：套餐ID足以标识当前套餐；如承诺具体名称需查询目录匹配，不猜名称。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-045",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-045",
+    "task_id": "future-subscription-045-absent",
+    "unreviewed_required_facts": [
+      "针对原话“我的套惨”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“我的套惨”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。",
+      "针对原话“我的套惨”：套餐ID足以标识当前套餐；如承诺具体名称需查询目录匹配，不猜名称。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-046",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "reserved_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-046",
+    "task_id": "future-subscription-046-active",
+    "unreviewed_required_facts": [
+      "针对原话“订阅详请”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“订阅详请”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-046",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "reserved_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-046",
+    "task_id": "future-subscription-046-absent",
+    "unreviewed_required_facts": [
+      "针对原话“订阅详请”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“订阅详请”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-047",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-047",
+    "task_id": "future-subscription-047-active",
+    "unreviewed_required_facts": [
+      "针对原话“订阅读状态”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“订阅读状态”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-047",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-047",
+    "task_id": "future-subscription-047-absent",
+    "unreviewed_required_facts": [
+      "针对原话“订阅读状态”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“订阅读状态”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-049",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-049",
+    "task_id": "future-subscription-049-active",
+    "unreviewed_required_facts": [
+      "针对原话“查顶阅”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“查顶阅”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-049",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-049",
+    "task_id": "future-subscription-049-absent",
+    "unreviewed_required_facts": [
+      "针对原话“查顶阅”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“查顶阅”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-050",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "calibration_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-050",
+    "task_id": "future-subscription-050-active",
+    "unreviewed_required_facts": [
+      "针对原话“套惨剩余”：查询本人套餐当前滚动窗口剩余各档token量及总额度，说明刷新规则；不以现金余额替代。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-050",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "calibration_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-050",
+    "task_id": "future-subscription-050-absent",
+    "unreviewed_required_facts": [
+      "针对原话“套惨剩余”：查询本人套餐当前滚动窗口剩余各档token量及总额度，说明刷新规则；不以现金余额替代。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-051",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "calibration_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-051",
+    "task_id": "future-subscription-051-active",
+    "unreviewed_required_facts": [
+      "针对原话“我想确认一下我当前的订阅套餐是什么，以及这一期的额度还剩下多少可以用”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“我想确认一下我当前的订阅套餐是什么，以及这一期的额度还剩下多少可以用”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-051",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "calibration_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-051",
+    "task_id": "future-subscription-051-absent",
+    "unreviewed_required_facts": [
+      "针对原话“我想确认一下我当前的订阅套餐是什么，以及这一期的额度还剩下多少可以用”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“我想确认一下我当前的订阅套餐是什么，以及这一期的额度还剩下多少可以用”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-052",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-052",
+    "task_id": "future-subscription-052-active",
+    "unreviewed_required_facts": [
+      "针对原话“你好，我之前订了一个套餐，想查一下它现在的状态和到期时间”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“你好，我之前订了一个套餐，想查一下它现在的状态和到期时间”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-052",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-052",
+    "task_id": "future-subscription-052-absent",
+    "unreviewed_required_facts": [
+      "针对原话“你好，我之前订了一个套餐，想查一下它现在的状态和到期时间”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“你好，我之前订了一个套餐，想查一下它现在的状态和到期时间”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-054",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "calibration_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-054",
+    "task_id": "future-subscription-054-active",
+    "unreviewed_required_facts": [
+      "针对原话“我想知道我的套餐订阅是否还在有效期内，以及什么时候需要续费”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“我想知道我的套餐订阅是否还在有效期内，以及什么时候需要续费”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-054",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "calibration_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-054",
+    "task_id": "future-subscription-054-absent",
+    "unreviewed_required_facts": [
+      "针对原话“我想知道我的套餐订阅是否还在有效期内，以及什么时候需要续费”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“我想知道我的套餐订阅是否还在有效期内，以及什么时候需要续费”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-057",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "reserved_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-057",
+    "task_id": "future-subscription-057-active",
+    "unreviewed_required_facts": [
+      "针对原话“我想了解一下我这个套餐的额度刷新时间是多久，以及现在还剩多少”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“我想了解一下我这个套餐的额度刷新时间是多久，以及现在还剩多少”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-057",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "reserved_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-057",
+    "task_id": "future-subscription-057-absent",
+    "unreviewed_required_facts": [
+      "针对原话“我想了解一下我这个套餐的额度刷新时间是多久，以及现在还剩多少”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“我想了解一下我这个套餐的额度刷新时间是多久，以及现在还剩多少”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-058",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-058",
+    "task_id": "future-subscription-058-active",
+    "unreviewed_required_facts": [
+      "针对原话“请帮我确认当前的订阅情况，我要决定是继续订还是改套餐”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“请帮我确认当前的订阅情况，我要决定是继续订还是改套餐”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-058",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-058",
+    "task_id": "future-subscription-058-absent",
+    "unreviewed_required_facts": [
+      "针对原话“请帮我确认当前的订阅情况，我要决定是继续订还是改套餐”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“请帮我确认当前的订阅情况，我要决定是继续订还是改套餐”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-062",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-062",
+    "task_id": "future-subscription-062-active",
+    "unreviewed_required_facts": [
+      "针对原话“我是不是该续费了”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“我是不是该续费了”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-062",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-062",
+    "task_id": "future-subscription-062-absent",
+    "unreviewed_required_facts": [
+      "针对原话“我是不是该续费了”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“我是不是该续费了”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-063",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-063",
+    "task_id": "future-subscription-063-active",
+    "unreviewed_required_facts": [
+      "针对原话“我的会员还有效吗”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“我的会员还有效吗”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-063",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-063",
+    "task_id": "future-subscription-063-absent",
+    "unreviewed_required_facts": [
+      "针对原话“我的会员还有效吗”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“我的会员还有效吗”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-064",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-064",
+    "task_id": "future-subscription-064-active",
+    "unreviewed_required_facts": [
+      "针对原话“我需不需要重新订”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“我需不需要重新订”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-064",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-064",
+    "task_id": "future-subscription-064-absent",
+    "unreviewed_required_facts": [
+      "针对原话“我需不需要重新订”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“我需不需要重新订”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-067",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "calibration_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-067",
+    "task_id": "future-subscription-067-active",
+    "unreviewed_required_facts": [
+      "针对原话“我这期用超了吗”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“我这期用超了吗”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。",
+      "针对原话“我这期用超了吗”：确认所说本期是否当前滚动窗口，不以当前余量证明整月历史没有超额。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-067",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "calibration_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-067",
+    "task_id": "future-subscription-067-absent",
+    "unreviewed_required_facts": [
+      "针对原话“我这期用超了吗”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“我这期用超了吗”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。",
+      "针对原话“我这期用超了吗”：确认所说本期是否当前滚动窗口，不以当前余量证明整月历史没有超额。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-069",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-069",
+    "task_id": "future-subscription-069-active",
+    "unreviewed_required_facts": [
+      "针对原话“我还在订阅中吗”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“我还在订阅中吗”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-069",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-069",
+    "task_id": "future-subscription-069-absent",
+    "unreviewed_required_facts": [
+      "针对原话“我还在订阅中吗”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“我还在订阅中吗”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-071",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "reserved_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-071",
+    "task_id": "future-subscription-071-active",
+    "unreviewed_required_facts": [
+      "针对原话“查下我的 subscription”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“查下我的 subscription”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-071",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "reserved_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-071",
+    "task_id": "future-subscription-071-absent",
+    "unreviewed_required_facts": [
+      "针对原话“查下我的 subscription”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“查下我的 subscription”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-072",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "calibration_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-072",
+    "task_id": "future-subscription-072-active",
+    "unreviewed_required_facts": [
+      "针对原话“我的 plan 还有效吗”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“我的 plan 还有效吗”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-072",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "calibration_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-072",
+    "task_id": "future-subscription-072-absent",
+    "unreviewed_required_facts": [
+      "针对原话“我的 plan 还有效吗”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“我的 plan 还有效吗”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-074",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "calibration_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-074",
+    "task_id": "future-subscription-074-active",
+    "unreviewed_required_facts": [
+      "针对原话“我的 subscription 状态”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“我的 subscription 状态”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-074",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "calibration_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-074",
+    "task_id": "future-subscription-074-absent",
+    "unreviewed_required_facts": [
+      "针对原话“我的 subscription 状态”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“我的 subscription 状态”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-077",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-077",
+    "task_id": "future-subscription-077-active",
+    "unreviewed_required_facts": [
+      "针对原话“看下 subscription 详情”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“看下 subscription 详情”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-077",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-077",
+    "task_id": "future-subscription-077-absent",
+    "unreviewed_required_facts": [
+      "针对原话“看下 subscription 详情”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“看下 subscription 详情”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-079",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-079",
+    "task_id": "future-subscription-079-active",
+    "unreviewed_required_facts": [
+      "针对原话“请问可以帮我查一下我的订阅吗”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“请问可以帮我查一下我的订阅吗”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-079",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-079",
+    "task_id": "future-subscription-079-absent",
+    "unreviewed_required_facts": [
+      "针对原话“请问可以帮我查一下我的订阅吗”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“请问可以帮我查一下我的订阅吗”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-080",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "reserved_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-080",
+    "task_id": "future-subscription-080-active",
+    "unreviewed_required_facts": [
+      "针对原话“麻烦帮我看看订阅状态好吗”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“麻烦帮我看看订阅状态好吗”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-080",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "reserved_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-080",
+    "task_id": "future-subscription-080-absent",
+    "unreviewed_required_facts": [
+      "针对原话“麻烦帮我看看订阅状态好吗”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“麻烦帮我看看订阅状态好吗”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-081",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "reserved_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-081",
+    "task_id": "future-subscription-081-active",
+    "unreviewed_required_facts": [
+      "针对原话“能不能帮我查下我的套餐”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“能不能帮我查下我的套餐”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。",
+      "针对原话“能不能帮我查下我的套餐”：套餐ID足以标识当前套餐；如承诺具体名称需查询目录匹配，不猜名称。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-081",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "reserved_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-081",
+    "task_id": "future-subscription-081-absent",
+    "unreviewed_required_facts": [
+      "针对原话“能不能帮我查下我的套餐”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“能不能帮我查下我的套餐”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。",
+      "针对原话“能不能帮我查下我的套餐”：套餐ID足以标识当前套餐；如承诺具体名称需查询目录匹配，不猜名称。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-082",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-082",
+    "task_id": "future-subscription-082-active",
+    "unreviewed_required_facts": [
+      "针对原话“可以帮忙查询一下我的订阅详情吗”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“可以帮忙查询一下我的订阅详情吗”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-082",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-082",
+    "task_id": "future-subscription-082-absent",
+    "unreviewed_required_facts": [
+      "针对原话“可以帮忙查询一下我的订阅详情吗”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“可以帮忙查询一下我的订阅详情吗”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-083",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-083",
+    "task_id": "future-subscription-083-active",
+    "unreviewed_required_facts": [
+      "针对原话“劳驾帮我查下我的订阅”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“劳驾帮我查下我的订阅”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-083",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-083",
+    "task_id": "future-subscription-083-absent",
+    "unreviewed_required_facts": [
+      "针对原话“劳驾帮我查下我的订阅”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“劳驾帮我查下我的订阅”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-084",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "calibration_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-084",
+    "task_id": "future-subscription-084-active",
+    "unreviewed_required_facts": [
+      "针对原话“请问我的套餐还剩多少额度呢”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“请问我的套餐还剩多少额度呢”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-084",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "calibration_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-084",
+    "task_id": "future-subscription-084-absent",
+    "unreviewed_required_facts": [
+      "针对原话“请问我的套餐还剩多少额度呢”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“请问我的套餐还剩多少额度呢”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-085",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "calibration_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-085",
+    "task_id": "future-subscription-085-active",
+    "unreviewed_required_facts": [
+      "针对原话“方便的话帮我查一下订阅情况”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“方便的话帮我查一下订阅情况”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-085",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "calibration_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-085",
+    "task_id": "future-subscription-085-absent",
+    "unreviewed_required_facts": [
+      "针对原话“方便的话帮我查一下订阅情况”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“方便的话帮我查一下订阅情况”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-087",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "calibration_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-087",
+    "task_id": "future-subscription-087-active",
+    "unreviewed_required_facts": [
+      "针对原话“麻烦您帮我查下我的订阅”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“麻烦您帮我查下我的订阅”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-087",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "calibration_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-087",
+    "task_id": "future-subscription-087-absent",
+    "unreviewed_required_facts": [
+      "针对原话“麻烦您帮我查下我的订阅”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“麻烦您帮我查下我的订阅”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-088",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-088",
+    "task_id": "future-subscription-088-active",
+    "unreviewed_required_facts": [
+      "针对原话“请问我的订阅还有效吗”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“请问我的订阅还有效吗”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-088",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-088",
+    "task_id": "future-subscription-088-absent",
+    "unreviewed_required_facts": [
+      "针对原话“请问我的订阅还有效吗”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“请问我的订阅还有效吗”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-089",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "reserved_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-089",
+    "task_id": "future-subscription-089-active",
+    "unreviewed_required_facts": [
+      "针对原话“我的订阅报一下”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“我的订阅报一下”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-089",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "reserved_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-089",
+    "task_id": "future-subscription-089-absent",
+    "unreviewed_required_facts": [
+      "针对原话“我的订阅报一下”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“我的订阅报一下”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-090",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-090",
+    "task_id": "future-subscription-090-active",
+    "unreviewed_required_facts": [
+      "针对原话“把订阅状态给我”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“把订阅状态给我”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-090",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-090",
+    "task_id": "future-subscription-090-absent",
+    "unreviewed_required_facts": [
+      "针对原话“把订阅状态给我”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“把订阅状态给我”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-091",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-091",
+    "task_id": "future-subscription-091-active",
+    "unreviewed_required_facts": [
+      "针对原话“立刻查我的订阅”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“立刻查我的订阅”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-091",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-091",
+    "task_id": "future-subscription-091-absent",
+    "unreviewed_required_facts": [
+      "针对原话“立刻查我的订阅”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“立刻查我的订阅”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-093",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-093",
+    "task_id": "future-subscription-093-active",
+    "unreviewed_required_facts": [
+      "针对原话“订阅详情给我”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“订阅详情给我”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-093",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-093",
+    "task_id": "future-subscription-093-absent",
+    "unreviewed_required_facts": [
+      "针对原话“订阅详情给我”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“订阅详情给我”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-094",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-094",
+    "task_id": "future-subscription-094-active",
+    "unreviewed_required_facts": [
+      "针对原话“报一下我的套餐”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“报一下我的套餐”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。",
+      "针对原话“报一下我的套餐”：套餐ID足以标识当前套餐；如承诺具体名称需查询目录匹配，不猜名称。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-094",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-094",
+    "task_id": "future-subscription-094-absent",
+    "unreviewed_required_facts": [
+      "针对原话“报一下我的套餐”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“报一下我的套餐”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。",
+      "针对原话“报一下我的套餐”：套餐ID足以标识当前套餐；如承诺具体名称需查询目录匹配，不猜名称。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-095",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "reserved_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-095",
+    "task_id": "future-subscription-095-active",
+    "unreviewed_required_facts": [
+      "针对原话“查订阅，快点”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“查订阅，快点”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-095",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "reserved_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-095",
+    "task_id": "future-subscription-095-absent",
+    "unreviewed_required_facts": [
+      "针对原话“查订阅，快点”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“查订阅，快点”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-097",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "calibration_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-097",
+    "task_id": "future-subscription-097-active",
+    "unreviewed_required_facts": [
+      "针对原话“订阅状态亮出来”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“订阅状态亮出来”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-097",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "calibration_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-097",
+    "task_id": "future-subscription-097-absent",
+    "unreviewed_required_facts": [
+      "针对原话“订阅状态亮出来”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“订阅状态亮出来”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-098",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-098",
+    "task_id": "future-subscription-098-active",
+    "unreviewed_required_facts": [
+      "针对原话“给我查我的订阅”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“给我查我的订阅”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-098",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "development",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-098",
+    "task_id": "future-subscription-098-absent",
+    "unreviewed_required_facts": [
+      "针对原话“给我查我的订阅”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“给我查我的订阅”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-099",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "calibration_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-099",
+    "task_id": "future-subscription-099-active",
+    "unreviewed_required_facts": [
+      "针对原话“套餐剩余发我”：查询本人套餐当前滚动窗口剩余各档token量及总额度，说明刷新规则；不以现金余额替代。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-099",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "calibration_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-099",
+    "task_id": "future-subscription-099-absent",
+    "unreviewed_required_facts": [
+      "针对原话“套餐剩余发我”：查询本人套餐当前滚动窗口剩余各档token量及总额度，说明刷新规则；不以现金余额替代。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-100",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "reserved_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": "standard"
+    },
+    "source_case_id": "subscription-100",
+    "task_id": "future-subscription-100-active",
+    "unreviewed_required_facts": [
+      "针对原话“快速查下我的订阅”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“快速查下我的订阅”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  },
+  {
+    "backend": "internal/taskbench/live.go:LiveBackend.Setup",
+    "contract_id": "cs-contract-v1:subscription-100",
+    "expected_checks": {
+      "answer_truth_source": "pre_run_snapshot_and_resolved_catalogue",
+      "business_state_unchanged": true,
+      "ledger_consistent": true,
+      "query_tool": "get_my_subscription"
+    },
+    "fixture_kind": "future_synthetic_development",
+    "full_answer_gold_ready": false,
+    "historical_truth_recovered": false,
+    "partition": "reserved_candidate",
+    "seed": {
+      "paid_recharge_yuan": 5000,
+      "subscription_plan": null
+    },
+    "source_case_id": "subscription-100",
+    "task_id": "future-subscription-100-absent",
+    "unreviewed_required_facts": [
+      "针对原话“快速查下我的订阅”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。",
+      "针对原话“快速查下我的订阅”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+    ]
+  }
+]

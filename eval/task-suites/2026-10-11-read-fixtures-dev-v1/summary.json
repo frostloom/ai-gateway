@@ -1,0 +1,39 @@
+{
+  "blocked_source_cases": 1078,
+  "database_instantiated": 0,
+  "full_answer_gold_cases": 0,
+  "historical_truth_recovered": 0,
+  "independent_blind_cases": 0,
+  "jev_calls": 0,
+  "limitations": [
+    "Future synthetic development definitions, not recovered historical account truth.",
+    "No database fixtures instantiated, no model or JEV calls performed.",
+    "Labels are posthoc AI annotations; all partitions have zero independent blind cases.",
+    "Existing read scorer checks money/subscription identity and unchanged business state; other required answer facts still need review. This is not complete answer gold.",
+    "No semantic near-duplicate detector: only identical normalized texts stay grouped.",
+    "Original 12-task default and paid-run opt-in are unchanged; task count is not a cost cap."
+  ],
+  "model_calls": 0,
+  "prepared_source_cases": 142,
+  "source_actions": {
+    "clarify": 273,
+    "consult": 55,
+    "limited": 49,
+    "preview": 250,
+    "read": 481,
+    "reject": 18,
+    "respond": 94
+  },
+  "source_cases": 1220,
+  "source_partitions": {
+    "calibration_candidate": 224,
+    "development": 750,
+    "reserved_candidate": 246
+  },
+  "synthetic_task_variants": 214,
+  "task_partitions": {
+    "calibration_candidate": 55,
+    "development": 126,
+    "reserved_candidate": 33
+  }
+}
