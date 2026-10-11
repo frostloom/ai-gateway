@@ -50,6 +50,14 @@ type SalesSummary struct {
 	ActiveTenants int64 `json:"active_tenants"` // 有消耗的活跃买家
 }
 
+// salesDayShiftSeconds 把按 time.Local 墙钟写入的 DATETIME 拨到 queryAt 所在时区。
+// 返回值可正可负，交给 DATE_ADD。
+func salesDayShiftSeconds(queryAt time.Time) int {
+	_, queryOffset := queryAt.Zone()
+	_, storedOffset := queryAt.In(time.Local).Zone()
+	return queryOffset - storedOffset
+}
+
 // SalesStats 按时间窗统计。from/to 为空则近 30 天。
 func (s *Store) SalesStats(ctx context.Context, from, to time.Time) (*SalesStats, error) {
 	if to.IsZero() {
@@ -104,20 +112,20 @@ func (s *Store) SalesStats(ctx context.Context, from, to time.Time) (*SalesStats
 
 	// 按天（消耗）
 	//
-	// 关键：分桶必须用「应用侧时区」而不是 MySQL 会话时区。
-	// DATE_FORMAT(created_at) 用的是数据库服务器时区（本地 compose 的 MySQL 容器
-	// 跑在 UTC），而写入时 DSN 带 loc=Local，值是本地时间字面量。两者错开 8 小时后，
-	// 分桶键会比补齐循环生成的本地日期早一天，真实数据全部匹配不上 —— 前端趋势恒为 0。
-	// 这里把 created_at 先减去连接时区偏移再格式化，使分桶键与 from/to 同一口径。
+	// created_at 是 DATETIME：驱动按 loc=Local 写入进程本地时区的墙钟，
+	// DATE_FORMAT 不会再按时区换算。查询窗口 from/to 用的是调用方时区。
+	// CI 跑在 UTC、窗口用东八区时，直接格式化或只减去查询偏移都会把桶键错到另一天，
+	// 补齐循环对不上，趋势只剩 0。加上（查询偏移 − 写入时区偏移）后，桶键与下面
+	// 按 from 所在时区生成的日期一致。
 	type dayRow struct {
 		Day    string
 		Amount int64
 	}
 	byDay := map[string]*SalesDay{}
-	_, offsetSec := from.Zone()
-	dayExpr := "DATE_FORMAT(DATE_SUB(created_at, INTERVAL ? SECOND), '%Y-%m-%d')"
+	shiftSec := salesDayShiftSeconds(from)
+	dayExpr := "DATE_FORMAT(DATE_ADD(created_at, INTERVAL ? SECOND), '%Y-%m-%d')"
 	rows, err := s.db.WithContext(ctx).Model(&Bill{}).
-		Select(dayExpr+" AS day, COALESCE(SUM(actual_quota),0) AS amount", offsetSec).
+		Select(dayExpr+" AS day, COALESCE(SUM(actual_quota),0) AS amount", shiftSec).
 		Where("phase = ? AND status = ? AND created_at >= ? AND created_at <= ?",
 			PhaseSettle, StatusSettled, from, to).
 		Group("day").Order("day ASC").Rows()
@@ -136,7 +144,7 @@ func (s *Store) SalesStats(ctx context.Context, from, to time.Time) (*SalesStats
 
 	// 按天（充值）叠加
 	rows, err = s.db.WithContext(ctx).Model(&Topup{}).
-		Select(dayExpr+" AS day, COALESCE(SUM(amount),0) AS amount", offsetSec).
+		Select(dayExpr+" AS day, COALESCE(SUM(amount),0) AS amount", shiftSec).
 		Where("amount > 0 AND created_at >= ? AND created_at <= ?", from, to).
 		Group("day").Order("day ASC").Rows()
 	if err != nil {

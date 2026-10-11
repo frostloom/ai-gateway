@@ -173,14 +173,13 @@ func TestSalesStats(t *testing.T) {
 	}
 }
 
-// 回归：by_day 的补齐键必须与 MySQL 侧 DATE_FORMAT 的日期口径一致。
+// 回归：by_day 的补齐键必须与 MySQL 侧日期口径一致。
 //
-// 历史缺陷：补齐循环用了 from.Truncate(24*time.Hour)，那是按 UTC 绝对时间截断；
-// 在东八区会把「今天 00:30」截到「昨天 00:30」，生成的 key 比 DATE_FORMAT 返回的
-// 日期早一天，于是真实桶全部匹配不上、只剩补零占位 —— 前端销售趋势恒为 0，
-// 而旧断言只看 ByDay[0]，恰好被这个占位符骗过。
+// 写入用进程本地时区（DSN loc=Local），查询窗口可以是另一个时区。
+// CI 的 runner 是 UTC、本测试窗口是东八区；若分桶只减查询偏移，UTC 凌晨写入的
+// 墙钟会被拨到前一天，真实桶对不上补齐键，结果只剩 0。
 //
-// 这里直接构造一个非 UTC 时区的窗口，断言窗口起始那天的桶里能拿到真实数据。
+// 这里直接构造一个与进程时区不同的窗口，断言窗口起始那天的桶里能拿到真实数据。
 func TestSalesStatsByDayUsesLocalDay(t *testing.T) {
 	s, done := newTestStore(t)
 	defer done()
@@ -204,7 +203,7 @@ func TestSalesStatsByDayUsesLocalDay(t *testing.T) {
 		t.Fatalf("settle: %v", err)
 	}
 
-	// 东八区窗口：这会让 UTC 截断与本地自然日错开一天，正是缺陷的触发条件。
+	// 东八区窗口，与进程本地时区（CI 为 UTC）错开，正是缺陷的触发条件。
 	loc := time.FixedZone("CST", 8*3600)
 	now := time.Now().In(loc)
 	from := now.Add(-time.Hour)
@@ -236,5 +235,28 @@ func TestSalesStatsByDayUsesLocalDay(t *testing.T) {
 	}
 	if got.ConsumedCent != 20 || got.TopupCent != 10_000 {
 		t.Fatalf("by_day[%s] = %+v, want 消耗 20 / 充值 10000", wantKey, *got)
+	}
+}
+
+func TestSalesDayShiftSeconds(t *testing.T) {
+	orig := time.Local
+	t.Cleanup(func() { time.Local = orig })
+
+	cst := time.FixedZone("CST", 8*3600)
+	query := time.Date(2026, 10, 11, 8, 9, 0, 0, cst)
+
+	time.Local = time.UTC
+	if got := salesDayShiftSeconds(query); got != 8*3600 {
+		t.Fatalf("UTC stored, CST query = %d, want 28800", got)
+	}
+
+	time.Local = cst
+	if got := salesDayShiftSeconds(query); got != 0 {
+		t.Fatalf("CST stored, CST query = %d, want 0", got)
+	}
+
+	time.Local = time.FixedZone("EST", -5*3600)
+	if got := salesDayShiftSeconds(time.Date(2026, 10, 11, 3, 0, 0, 0, time.UTC)); got != 5*3600 {
+		t.Fatalf("EST stored, UTC query = %d, want 18000", got)
 	}
 }
