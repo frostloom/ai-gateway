@@ -20,6 +20,9 @@ def read(path):
 def sha(raw):
     return hashlib.sha256(raw).hexdigest()
 
+def evidence_path(relative):
+    return ROOT / str(relative).replace('\\', '/')
+
 def save(path, value):
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(value, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
@@ -149,7 +152,7 @@ def verify():
     assert (OUT/'draft-cases.json').read_bytes() == DRAFT.read_bytes()
     for arm, source in read(OUT/'sources.json').items():
         raw = (OUT/'raw'/(arm+'.json.gz')).read_bytes()
-        assert raw == (ROOT/source['path']).read_bytes()
+        assert raw == evidence_path(source['path']).read_bytes()
         assert sha(raw) == source['compressed_sha256'] and sha(gzip.decompress(raw)) == source['original_sha256']
         report = json.loads(gzip.decompress(raw))
         assert {p['Sample']['id']: p for p in report['Preds']+report['AdvPreds']} == {r['id']: r['historical'][arm] for r in rows}
