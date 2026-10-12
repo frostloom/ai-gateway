@@ -69,6 +69,8 @@ jobs:
           python scripts/summarize-offline-intent-audit.py verify
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python scripts/prepare-customer-fixtures.py verify
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python scripts/define-customer-tasks.py verify
           exit $LASTEXITCODE
 
   web:

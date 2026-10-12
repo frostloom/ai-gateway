@@ -1,0 +1,55 @@
+{
+  "complete_task_scenario_definitions": 3071,
+  "database_instantiated": 0,
+  "first_turn_diagnostic_definitions": 1220,
+  "historical_truth_recovered": 0,
+  "independent_blind_cases": 0,
+  "jev_calls": 0,
+  "limitations": [
+    "Definitions only; no runtime execution or new model score.",
+    "Synthetic states cannot prove old historical account answers.",
+    "Source-specific semantic predicates need independent review and scorer implementation.",
+    "Exact normalized text groups only, no semantic near-duplicate guarantee.",
+    "Not accepted by cmd/task-eval; default 12-task and paid-run opt-in unchanged."
+  ],
+  "model_calls": 0,
+  "new_source_actions": {
+    "clarify": 273,
+    "consult": 55,
+    "limited": 49,
+    "preview": 250,
+    "read": 339,
+    "reject": 18,
+    "respond": 94
+  },
+  "newly_defined_source_cases": 1078,
+  "previously_prepared_source_cases": 142,
+  "runtime_adapter_ready_cases": 0,
+  "scenario_kinds": {
+    "answer_complete": 696,
+    "balance_cap": 90,
+    "cancel": 468,
+    "cancel_then_confirm": 468,
+    "confirm": 250,
+    "duplicate_confirm": 468,
+    "explicit_scope_followup": 56,
+    "first_turn": 1220,
+    "invalid_amount_followup": 81,
+    "no_subscription": 180,
+    "owned_order_then_confirm": 40,
+    "supplement_then_confirm": 218,
+    "user_withdraws": 56
+  },
+  "scenarios": 4291,
+  "schema": "customer-task-definitions.v1",
+  "source_actions": {
+    "clarify": 273,
+    "consult": 55,
+    "limited": 49,
+    "preview": 250,
+    "read": 481,
+    "reject": 18,
+    "respond": 94
+  },
+  "source_cases": 1220
+}
