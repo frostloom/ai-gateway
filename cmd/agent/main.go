@@ -4,16 +4,21 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
+	"os/signal"
 	"path/filepath"
+	"syscall"
 	"time"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	gormlogger "gorm.io/gorm/logger"
 
+	"github.com/frostloom/ai-gateway/internal/observability"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"github.com/frostloom/ai-gateway/internal/agent"
@@ -156,20 +161,53 @@ func main() {
 		log.Warn("AGENT_INTERNAL_TOKEN 未配置：管理面板暂不能用 AI 客服（仅租户 key 可用）")
 	}
 
+	observer, observeErr := configureObservability(context.Background(), os.Getenv)
+	if observeErr != nil {
+		log.Warn("Langfuse disabled: invalid observability configuration")
+	} else if observer != nil {
+		h.SetObserver(observer)
+		log.Info("Langfuse observability enabled", "content_capture", config.Getenv("AGENT_LANGFUSE_CAPTURE_CONTENT", "false"))
+	}
+
 	// /healthz 存活探针（网关 /admin/health 聚合用）；/metrics Prometheus（含 jev 决策指标）。
 	mux := http.NewServeMux()
 	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		_, _ = w.Write([]byte(`{"ok":true,"svc":"agent"}`))
 	})
-	mux.Handle("/metrics", promhttp.Handler())
+	metrics := promhttp.Handler()
+	if observer != nil {
+		metrics = promhttp.HandlerFor(prometheus.Gatherers{prometheus.DefaultGatherer, observer.Gatherer()}, promhttp.HandlerOpts{})
+	}
+	mux.Handle("/metrics", metrics)
 	mux.Handle("/", h)
 
 	log.Info("agent service listening",
 		"port", port, "model", llm.Model(), "protocol", llm.Protocol(),
 		"llm_base", llmBase, "billing", billingAddr, "admin", adminBase)
-	if err := http.ListenAndServe(config.ListenAddr(port), mux); err != nil {
-		log.Error("agent serve", "err", err)
+	stopCtx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+	server := &http.Server{Addr: config.ListenAddr(port), Handler: mux, ReadHeaderTimeout: 5 * time.Second}
+	served := make(chan error, 1)
+	go func() { served <- server.ListenAndServe() }()
+	var serveErr error
+	select {
+	case serveErr = <-served:
+	case <-stopCtx.Done():
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		if err := server.Shutdown(shutdownCtx); err != nil {
+			_ = server.Close()
+		}
+		cancel()
+		serveErr = <-served
+	}
+	flushCtx, cancelFlush := context.WithTimeout(context.Background(), 5*time.Second)
+	if err := observer.Shutdown(flushCtx); err != nil {
+		log.Warn("Langfuse shutdown incomplete", "stats", observer.Stats())
+	}
+	cancelFlush()
+	if serveErr != nil && !errors.Is(serveErr, http.ErrServerClosed) {
+		log.Error("agent serve", "err", serveErr)
 		os.Exit(1)
 	}
 }
@@ -181,4 +219,12 @@ func configureRouting(h *agent.Handler, mode string, fastPathEnabled bool, fastP
 		return err
 	}
 	return h.SetJevFastPath(fastPathEnabled || h.RoutingMode() == agent.RoutingJevSelective, fastPathMin)
+}
+
+func configureObservability(ctx context.Context, get func(string) string) (*observability.Observer, error) {
+	cfg, err := observability.ConfigFromEnv(get)
+	if err != nil {
+		return nil, err
+	}
+	return observability.New(ctx, cfg)
 }

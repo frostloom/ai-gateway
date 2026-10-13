@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"testing"
 
 	"github.com/frostloom/ai-gateway/internal/agent"
@@ -28,5 +29,21 @@ func TestExecutableRoutingConfiguration(t *testing.T) {
 				t.Fatalf("configured mode=%s", h.RoutingMode())
 			}
 		})
+	}
+}
+
+func TestExecutableObservabilityDefaultsOffAndValidatesEnabled(t *testing.T) {
+	observer, err := configureObservability(context.Background(), func(string) string { return "" })
+	if observer != nil || err != nil {
+		t.Fatal("observability not default-off")
+	}
+	observer, err = configureObservability(context.Background(), func(key string) string {
+		if key == "AGENT_LANGFUSE_ENABLED" {
+			return "true"
+		}
+		return ""
+	})
+	if observer != nil || err == nil {
+		t.Fatal("enabled configuration not validated")
 	}
 }

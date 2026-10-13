@@ -78,7 +78,7 @@ JEV fast-path覆盖率=实际走fast path轮次/适用轮次，另报全部轮�
 5. 实际起独立Docker栈后用合成span核验界面/session/usage，确认down不删卷。该步骤尚未执行，静态config检查不是服务健康或摄入成功证据。
 6. 在相同本地负载下比较开关前后延迟/错误/丢弃率，再决定采样率。未实测前不给出开销百分比承诺。
 
-## 本轮验证与来源
+## 配置评估阶段验证与来源（运行时追加见文末）
 
 Docker Compose config --format json使用临时假密钥成功渲染：六服务、项目隔离、loopback端口、内部依赖无端口、无固定容器名、无模型密钥、AI/自身遥测关闭。清空部署密钥后渲染按预期拒绝。真实key未创建；没有容器启动或生产服务重启。Go生产代码未改，前一轮agent基线43.503秒通过。
 
@@ -97,3 +97,38 @@ Docker Compose config --format json使用临时假密钥成功渲染：六服务
 在进程内部由受控span processor复制允许字段，跨会话context不共享，不自动把身份baggage发往供应商。合成span验收新增：所有子span均可按同一session/版本/模式检索，production与evaluation互不混入，跨租户/并发请求标签不串写。最终字段仍需按锁定部署版本实际摄入验证，不把文档映射当作已接通。
 
 独立审查无配置阻塞；以上字段传播与fast-path命名建议已纳入设计。Compose中S3内部地址/桶名固定，部署密码和本机端口仅使用LF_变量，避免项目其他环境变量改变隔离栈。
+
+
+## 2026-10-13 运行时实现与 E 盘存储追加
+
+工作树已迁至 `E:\github项目\ai-gateway\.worktrees\langfuse-observability`，分支仍为 `codex/langfuse-observability`。下面记录本次实际实现，覆盖上文尚处于设计阶段的描述。
+
+已接入独立 OTel SDK 1.44：每轮 agent root、真实 JEV intent/guard evaluator、每次模型 HTTP generation（含失败/重试）、工具 preview/read/execute。不开进程全局 tracer，不向模型供应商传播身份头。子 span 继承匿名租户/会话、release、environment、routing_mode；实际可过滤元数据前缀为 `langfuse.observation.metadata.*`。会话 HMAC 包含租户，跨租户相同 session 不相同。确认前后有单独轮次及工具 phase，通过 session 关联；尚未实现跨轮 operation_id，不能声称已有完整业务操作链。
+
+默认 `AGENT_LANGFUSE_ENABLED=false`。启用配置见 `deploy/langfuse/.env.agent.example`，必须使用独立 Langfuse 项目 public/secret key 和至少32字节 HASH_KEY。evaluation/production 是标签隔离，不是权限隔离；需要权限隔离时创建不同项目并使用各自密钥。AGENT_RELEASE应填写部署的Git提交。示例文件不会自动加载：本机agent需将变量显式注入进程；容器agent的localhost指向自身，需使用可达的宿主地址，不能照搬本机端点。无效配置仅关闭遥测并日志提示，不中断客服。
+
+### 为什么内容默认不传，怎样开启
+
+此前默认metadata-only是保护密钥/个人信息的保守配置，并不是Langfuse不支持内容。设置 `AGENT_LANGFUSE_CAPTURE_CONTENT=true` 可采集已认证会话的本轮用户输入/最终回复、已知工具参数/结果，以及失败的错误摘要。金额等正常业务参数可保留。密码、secret/token/API key（含camelCase及分隔符变体）、Cookie、Bearer及常见邮箱/手机号/身份证会过滤；结构化租户/用户/会话/订单/请求标识做HMAC。字符串最多2048字节，属性最多4096字节，限制嵌套深度和条目数量。
+
+不是无加工的原文上传：原始认证头、供应商key和完整错误堆栈不上传；JEV原始state也不上传。自由文本脱敏是规则覆盖，无法保证识别所有个人信息或无标签的任意凭据；真实生产开启前需结合自身数据规则。模型完整system prompt/历史上下文未采集，当前重点是每轮行为、工具和token，避免无意义存储增长。
+
+### 指标和故障边界
+
+每轮记录HTTP状态、stage、pending_confirm、实际LLM/JEV调用数、fast-path和缺失usage。pending_confirm和必要追问不是错误，也没有被赋予“完整任务成功”分数。真实任务成功率仍由后续终态/回答审核定义。在线流量时延差不等于JEV因果收益。
+
+usage缺失与显式零分开；OpenAI缓存读取从总input拆出，Anthropic输入与缓存读取/创建分开；DeepSeek缓存miss仅作为提供方元数据，避免重复计费。标准OpenAI `prompt_tokens_details.cached_tokens`也已兼容。只记录供应商实报，不估算缺失token。费用仍需Langfuse中正确配置实际模型价格，未知模型/免费JEV不能凭空填写费用或声称已经认证账单。
+
+队列默认256 span、批次64、250ms触发、单次网络最多2秒且不重试、不跟随重定向。请求结束不等待网络。关机限时flush；`ForceFlush`报告自启动起的累计导出失败（后续成功不会抹去历史失败）。`/metrics`暴露accepted/dropped/exported/failed/batches/turns/sampled_turns及queue_depth；抽样、丢弃、失败须一起看，不能将缺失数据当完整流量。导出成功指OTLP接口接受，不保证Langfuse异步处理已落库。
+
+### E 盘位置
+
+Compose所有持久化挂载均为工作树 `deploy/langfuse/data/{postgres,clickhouse,clickhouse-logs,minio,redis}`，不是Docker默认命名卷。配置及运行文档在该工作树内；Go构建缓存、模块缓存和临时文件在项目 `.gocache`、`.gomodcache`、`.gopath`、`.tmp`。真实 `.env`、`.env.agent`和data均忽略Git。Compose渲染已核对持久路径全部落E。
+
+Docker Desktop全局镜像/WSL虚拟磁盘和平台自身日志未迁移；这不属于本次项目产物，迁移会影响另一会话服务。镜像仍需后续部署时锁定digest。
+
+### 验收证据和仍未完成部分
+
+新增测试均只使用本地HTTP替身及随机独立MySQL库/私有miniredis，无外部模型/JEV调用。已覆盖默认关闭、OTLP授权/字段/并发身份、JEV-only无generation、预览确认、真实客户端本地HTTP、缺失/零/部分usage、采样0、内容脱敏/长度、503/部分拒绝、重定向、队列满和限时关机。审查另发现凭据键变体漏过滤、整批flush误报成功、标准OpenAI缓存漏统计；三项先新增失败回归后修复通过。
+
+本轮未拉Docker镜像、创建真实Langfuse项目密钥、起Langfuse栈或重启现有agent。服务界面/真实摄入、持久化可用性、运行负载开销和模型价格配置仍需独立部署验收，不能把HTTP替身与Compose渲染称为已经上线。1220旧输出/金标/历史指标未改，不产生新V2成绩。
