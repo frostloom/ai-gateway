@@ -131,3 +131,19 @@ TDD与审查：初始7测试因导出器不存在失败，实现后通过。独�
 最终验证：全项目go test ./... -count=1通过（taskbench65.201秒、billing/store87.797秒、新CLI3.522秒）；go vet ./...通过；Python96项通过（76.413秒）。六项旧归档verify通过，新增冻结30分支记录重放回归通过；git diff确认旧生产runner/score/live、旧1220数据与分数无改动。远程CI状态尚未核验。
 
 收尾补强：新增现金写操作同时暗改额度的失败回归，确认旧判定会错误接受后修复；非订阅购买操作必须保持额度不变，新购买则核验套餐额度且初始用量为零。改动后完整重跑受影响的taskbench与conversation-eval包，通过（62.199秒、4.527秒），对应go vet通过；独立审查和冻结30分支重放再次通过，原归档字节未改。
+
+## 2026-10-13：真实客服链路、有限事实核验与V1/V2可比契约
+
+用户授权继续免费准备，不启动真实模型/JEV评测。新增in-process HTTP driver+独立oracle；真实agent会话、billing admin、工具执行与随机临时MySQL/私有Redis贯通，本地LLM HTTP和JEV脚本替身。身份采用真实内部管理员令牌路径，租户API key/gRPC鉴权不在本次smoke覆盖内。15分支覆盖高/低置信读取和双方充值确认、追问、取消、重复确认、取消后确认、退款上限。
+
+测试先行：HTTP/facts/comparison缺接口时编译失败；无工具缺标注原本被当行为错误，新增失败回归后改为待审且保留状态安全检查。比较重放真实观测、不信任Success/Status/DurationMS，固定模型、协议、prompt/tools/profile/hash/预算/执行版本与顺序；缺runtime不发布效率，V1出现JEV调用拒绝比较。已独立审核的错误余额仍由事实核验否决。
+
+真实缺陷：冻结“取消操作，不要执行”未被完整句取消分类接受，实际HTTP取消会走模型并保留pending，后续确认可执行。分类回归先失败；只补完整目标“操作”，保留业务退订/否定/混合请求/疑问句边界。真实数据库15分支随后通过（本体15.24秒，包级19.441秒），跨请求测试扩展到五种写工具。冻结定义不改文案规避失败。
+
+接入调试错误分开记账：脚本最初未包含冻结案例首轮追问；订单号实际包含冒号，新事实核验截断导致误判，失败回归修正。这些不是模型路由质量下降。独立审查另发现退款完成回复的“退回”金额漏检，以及未知/外部订单拒绝被当归属声明；两个P2均先失败再修复（TestConversationFactsProductionRefundCompletionAmount、TestConversationFactsForeignOrMissingOrderRefusalIsNotFalseClaim）。不支持的自然语言保留语义审核，事实match不自动通过回答。
+
+追加证据：eval/conversation-regressions/2026-10-13-agent-local-v1保存原始Go事件、摘要和固定SHA清单；15结构通过、15语义待审、completion_rate=null；30本地模型HTTP请求、外部模型/JEV请求0，token未知。归档是测试事件，不含逐轮原始oracle快照；不能据此独立审核回答，更不能发布真实JEV准确率/提速/成本收益。采集包级22.313秒，新归档完整性和旧30条重放通过。
+
+最终验证：审查修复后全项目Go通过（agent47.544秒、billing/store146.650秒、taskbench162.517秒）及go vet通过。新增证据固定测试和事实/对照/旧归档纯离线回归通过（5.811秒）。Python首次沙箱运行失败（6 failures、3 errors，包含Git Bash NtCreateDirectoryObject访问被拒绝）；同一96项在授权环境复跑全部通过（46.723秒）。六项历史verify全部通过，未修改1220原始数据、分数、账户模板或既有30条归档。远程CI尚未核验。
+
+本轮范围决定：旧ReplayConversations保留历史口径，新事实入口与比较器另行调用；不自动把新评分覆盖旧成绩。下一阶段仍是补权威账单/目录/额度语义规则与独立审核，再经预算授权做小规模真实配对评测。
