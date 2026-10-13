@@ -129,7 +129,7 @@ func SetDebugDumpFile(f func(raw []byte)) { dumpFileFn = f }
 // chatAnthropicRaw 用**原始 JSON body** 发一次 Anthropic 请求。
 //
 // 仅用于诊断：把服务实际发出的 payload 原样重放，排除手工构造带来的差异。
-func (c *LLMClient) chatAnthropicRaw(ctx context.Context, raw []byte) (*Message, error) {
+func (c *LLMClient) chatAnthropicRaw(ctx context.Context, raw []byte) (result *Message, err error) {
 	url := strings.TrimRight(c.baseURL, "/") + "/v1/messages"
 	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(raw))
 	if err != nil {
@@ -139,8 +139,8 @@ func (c *LLMClient) chatAnthropicRaw(ctx context.Context, raw []byte) (*Message,
 	httpReq.Header.Set("x-api-key", c.apiKey)
 	httpReq.Header.Set("anthropic-version", "2023-06-01")
 
-	finishAttempt := beginLLMAttempt(ctx, protoAnthropic)
-	defer finishAttempt()
+	ctx, finishAttempt := beginLLMAttempt(ctx, protoAnthropic)
+	defer func() { finishAttempt(err) }()
 	resp, err := c.cli.Do(httpReq)
 	if err != nil {
 		return nil, fmt.Errorf("LLM 请求失败: %v", err)
@@ -168,7 +168,7 @@ func (c *LLMClient) chatAnthropicRaw(ctx context.Context, raw []byte) (*Message,
 }
 
 // chatAnthropic 走 Anthropic Messages 协议。
-func (c *LLMClient) chatAnthropic(ctx context.Context, messages []Message, tools []Tool, maxTokens int) (*Message, error) {
+func (c *LLMClient) chatAnthropic(ctx context.Context, messages []Message, tools []Tool, maxTokens int) (result *Message, err error) {
 	req, err := buildAnthropicRequest(c.model, messages, tools, maxTokens)
 	if err != nil {
 		return nil, err
@@ -199,8 +199,8 @@ func (c *LLMClient) chatAnthropic(ctx context.Context, messages []Message, tools
 	httpReq.Header.Set("x-api-key", c.apiKey)
 	httpReq.Header.Set("anthropic-version", "2023-06-01")
 
-	finishAttempt := beginLLMAttempt(ctx, protoAnthropic)
-	defer finishAttempt()
+	ctx, finishAttempt := beginLLMAttempt(ctx, protoAnthropic)
+	defer func() { finishAttempt(err) }()
 	resp, err := c.cli.Do(httpReq)
 	if err != nil {
 		return nil, fmt.Errorf("LLM 请求失败: %v", err)

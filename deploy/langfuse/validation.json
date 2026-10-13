@@ -1,7 +1,7 @@
 {
   "date": "2026-10-13",
   "branch": "codex/langfuse-observability",
-  "compose_sha256": "97ff31f79dae69a6d81f904668dcd4e7e526ec0898809ca10f57ab2720e95762",
+  "compose_sha256": "976b867b13f909cb548cfdb2d4cbbcdf21155a5056a64155cae4707ea00dbe6f",
   "checks": [
     "docker-compose JSON render",
     "six dedicated services/project",
@@ -11,12 +11,20 @@
     "LF variables only",
     "internal S3 endpoint fixed",
     "AI features disabled/no model keys",
-    "missing secrets rejected"
+    "missing secrets rejected",
+    "all persistent bind mounts resolve under E project worktree"
   ],
   "status": "PASS",
   "containers_started": 0,
   "model_calls": 0,
   "jev_calls": 0,
   "ingestion_verified": false,
-  "credentials": "temporary synthetic values removed"
+  "credentials": "temporary synthetic values removed",
+  "persistent_paths": [
+    "E:\\github项目\\ai-gateway\\.worktrees\\langfuse-observability\\deploy\\langfuse\\data\\clickhouse",
+    "E:\\github项目\\ai-gateway\\.worktrees\\langfuse-observability\\deploy\\langfuse\\data\\clickhouse-logs",
+    "E:\\github项目\\ai-gateway\\.worktrees\\langfuse-observability\\deploy\\langfuse\\data\\minio",
+    "E:\\github项目\\ai-gateway\\.worktrees\\langfuse-observability\\deploy\\langfuse\\data\\postgres",
+    "E:\\github项目\\ai-gateway\\.worktrees\\langfuse-observability\\deploy\\langfuse\\data\\redis"
+  ]
 }

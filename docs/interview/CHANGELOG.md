@@ -119,3 +119,20 @@ TDD与审查：初始7测试因导出器不存在失败，实现后通过。独�
 另一会话开发完整会话runner，本分支codex/langfuse-observability不改其目录。复用现有每轮遥测评估Go OTel接入，记录逐调用span仍需实际边界埋点、JEV-only不可漏记、必要追问和业务终态分开、生产审核不回填旧1220真值。独立六服务Compose使用官方固定来源提交，镜像目前仍为官方版本标签，生产需digest；临时假密钥渲染与隔离/缺密钥拒绝检查通过。未创建真实key、拉镜像、启动容器、接入导出器、上传内容或调用模型/JEV，不声称上线或产生新准确率。配置和详细验收项见Langfuse可行性文档。
 
 独立配置审查无阻塞；每span字段传播验收及JEV调用/fast-path覆盖率命名已补齐。最终Compose复验通过，验证结果与配置SHA存于deploy/langfuse/validation.json。
+
+
+## 2026-10-13：Langfuse运行时监控与E盘隔离
+
+目标：在1220历史归档之外，记录真实客服每轮路由、JEV高置信度跳过模型、模型调用token/延迟和工具预览确认，便于后续面试解释收益和排查线上行为。本分支不改另一会话的runner，也不回填历史成绩。
+
+实现：独立OTel SDK/OTLP HTTP provider；真实JEV/模型/工具边界span，包含失败尝试；租户及租户限定会话HMAC，字段逐span传播。默认关闭，配置异常禁用遥测但继续客服。每轮pending_confirm/必要追问不自动当错误或完整任务成功。有界异步队列/单次限时无重试、不跟随重定向、关机限时flush，Prometheus统计采样/丢弃/失败。可选限长脱敏用户输入/最终回复、工具参数/结果、错误摘要，仍不上传认证头和key。
+
+取舍：模型prompt/完整历史不采集；自由文本规则脱敏不能保证全部PII识别。确认用session/phase关联，跨轮operation_id尚未实现。费用只能基于实报usage及正确模型定价，JEV缺失usage不编造0。OpenAI缓存读取从总input拆出，Anthropic缓存独立；历史provider原始usage保留不改变冻结归档。
+
+审查/失败证据：新增用例先复现凭据key camelCase漏过滤、64-span flush失败误报成功、标准OpenAI cached_tokens未识别，三项修复后通过，独立复查无阻塞。redirect测试先复现默认HTTP重定向后补禁用；部分拒绝SDK原本已正确报错，不能虚构为修复。开发过程中两次测试文件/脚本编译或编码失误修正，不列为产品问题。离线96测试首次受沙箱本地HTTP/Git Bash权限影响出现6项失败；同条件授权重跑96项通过44.546秒，不修改业务以迎合环境。
+
+实际验证：监控包完整单测2.874秒通过；agent新监控场景9.307秒、cmd接入3.508秒通过；原LLM/JEV usage和runtime本地回归4.711秒通过。全项目编译（不运行共享数据库测试）及go vet通过，避免与另一会话固定测试库相撞；本次新业务流程使用随机独立MySQL库和私有Redis并清理。未执行race（机器无GCC）。六项历史verify通过。Compose假凭据渲染核对六服务隔离、loopback端口、缺凭据拒绝和E盘持久化挂载。
+
+存储：工作树移至E项目 `.worktrees/langfuse-observability`；配置/data在deploy/langfuse，缓存和临时文件在E项目隐藏目录。C盘原工作树逐文件hash一致后删除；Docker Desktop全局镜像磁盘未迁移以保护其他服务。
+
+边界：外部模型/JEV调用0，未拉镜像/起Langfuse/重启客服、未上传生产数据。真实摄入界面、镜像digest锁定、负载开销、模型价格配置仍待独立部署验收。不能声称已上线、新V2正确率或JEV已产生因果提速收益。

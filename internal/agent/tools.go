@@ -16,6 +16,7 @@ import (
 	"unicode"
 
 	"github.com/frostloom/ai-gateway/internal/billing/store"
+	"github.com/frostloom/ai-gateway/internal/observability"
 	"github.com/frostloom/ai-gateway/internal/pkg/controlplane"
 )
 
@@ -135,7 +136,7 @@ func (tb *Toolbox) All() []Tool {
 }
 
 // Preview 写工具执行前算确认文案；读工具无预览。
-func (tb *Toolbox) Preview(ctx context.Context, name string, args map[string]any, tenantID uint64) (string, error) {
+func (tb *Toolbox) Preview(ctx context.Context, name string, args map[string]any, tenantID uint64) (result string, err error) {
 	t, ok := tb.tools[name]
 	if !ok {
 		return "", fmt.Errorf("未知工具: %s", name)
@@ -146,11 +147,15 @@ func (tb *Toolbox) Preview(ctx context.Context, name string, args map[string]any
 	if t.preview == nil {
 		return "", fmt.Errorf("工具 %s 缺少预览实现", name)
 	}
+	ctx, op := observability.Start(ctx, "tool.preview."+name, "tool")
+	op.Phase("preview")
+	op.Input(args)
+	defer func() { op.Output(result); op.End(err) }()
 	return t.preview(ctx, args, tenantID)
 }
 
 // Run 执行工具（读即时 / 写由确认状态机调用）。返回给用户/LLM 的说明文本。
-func (tb *Toolbox) Run(ctx context.Context, name string, args map[string]any, tenantID uint64, idemKey string) (string, error) {
+func (tb *Toolbox) Run(ctx context.Context, name string, args map[string]any, tenantID uint64, idemKey string) (result string, err error) {
 	t, ok := tb.tools[name]
 	if !ok {
 		return "", fmt.Errorf("未知工具: %s", name)
@@ -158,6 +163,14 @@ func (tb *Toolbox) Run(ctx context.Context, name string, args map[string]any, te
 	if t.run == nil {
 		return "", fmt.Errorf("工具 %s 缺少执行实现", name)
 	}
+	ctx, op := observability.Start(ctx, "tool."+name, "tool")
+	phase := "read"
+	if t.confirm {
+		phase = "execute"
+	}
+	op.Phase(phase)
+	op.Input(args)
+	defer func() { op.Output(result); op.End(err) }()
 	return t.run(ctx, args, tenantID, idemKey)
 }
 

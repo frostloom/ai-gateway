@@ -1,0 +1,35 @@
+{
+  "date": "2026-10-13",
+  "branch": "codex/langfuse-observability",
+  "go_build_all": "PASS; go test ./... -run ^$ -count=1",
+  "go_vet_all": "PASS",
+  "observability_tests": "PASS; 2.874s",
+  "agent_observed_tests": "PASS; 9.307s",
+  "cmd_observability_test": "PASS; 3.508s",
+  "existing_usage_protocol_regressions": "PASS; 4.711s",
+  "python_offline_tests": {
+    "count": 96,
+    "status": "PASS",
+    "seconds": 44.546,
+    "initial_environment_failure": "sandbox local HTTP/Git Bash denied; authorized rerun passed"
+  },
+  "historical_archive_verifiers": {
+    "count": 6,
+    "status": "PASS"
+  },
+  "review": "three regression findings fixed; no remaining blocking code findings",
+  "full_go_integration_suite_executed": false,
+  "reason": "avoid shared fixed test database used by concurrent conversation; new flow tests use random isolated databases",
+  "race_executed": false,
+  "model_calls": 0,
+  "jev_calls": 0,
+  "containers_started": 0,
+  "real_langfuse_ingestion_verified": false,
+  "persistent_storage": "E project worktree deploy/langfuse/data",
+  "limitations": [
+    "Actual Docker deployment and UI ingestion pending",
+    "No measured runtime overhead",
+    "Pricing configuration pending",
+    "No complete-task score or new V2 benchmark"
+  ]
+}

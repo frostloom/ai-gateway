@@ -193,7 +193,9 @@ func (h *Handler) evaluateTurn(ctx context.Context, userMsg string, ses *session
 		}
 	}
 	started := time.Now()
+	ctx, observedJudge := beginJevObservation(ctx, "jev.intent")
 	r, err := h.jev.Evaluate(ctx, state, questions)
+	defer func() { endJevObservation(observedJudge, r, err) }()
 	if err == nil && r == nil {
 		err = fmt.Errorf("jev returned no result")
 	}
@@ -321,6 +323,7 @@ func (h *Handler) guardWrite(ctx context.Context, tenantID uint64, tool string, 
 		stats.JevUsageMissing++
 	}
 	started := time.Now()
+	ctx, observedJudge := beginJevObservation(ctx, "jev.guard")
 	r, err := h.jev.Evaluate(ctx, map[string]any{
 		"tenant_id":    tenantID,
 		"tool":         tool,
@@ -337,6 +340,7 @@ func (h *Handler) guardWrite(ctx context.Context, tenantID uint64, tool string, 
 			},
 		},
 	})
+	defer func() { endJevObservation(observedJudge, r, err) }()
 	if err == nil && r == nil {
 		err = fmt.Errorf("jev returned no result")
 	}

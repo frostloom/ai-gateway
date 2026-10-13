@@ -3,6 +3,7 @@ package agent
 import (
 	"context"
 	"encoding/json"
+	"github.com/frostloom/ai-gateway/internal/observability"
 	"time"
 )
 
@@ -106,26 +107,45 @@ func recordJevResultUsage(ctx context.Context, raw string) {
 
 // beginLLMAttempt includes failed HTTP attempts and response reading in latency.
 // Usage starts as missing until a response supplies both input and output counts.
-func beginLLMAttempt(ctx context.Context, protocol llmProtocol) func() {
+type llmObservationKey struct{}
+type llmObservation struct {
+	op       *observability.Operation
+	protocol string
+}
+
+func beginLLMAttempt(ctx context.Context, protocol llmProtocol) (context.Context, func(error)) {
+	ctx, op := observability.Start(ctx, "llm.attempt", "generation")
+	ctx = context.WithValue(ctx, llmObservationKey{}, llmObservation{op: op, protocol: string(protocol)})
 	stats := turnTelemetry(ctx)
-	if stats == nil {
-		return func() {}
+	if stats != nil {
+		stats.LLMCalls++
+		stats.LLMUsageMissing++
+		if stats.Runtime != nil {
+			op.Model(stats.Runtime.Model)
+		}
+		if stats.LLMUsageProtocol == "" {
+			stats.LLMUsageProtocol = string(protocol)
+		} else if stats.LLMUsageProtocol != string(protocol) {
+			stats.LLMUsageProtocol = "mixed"
+		}
 	}
-	stats.LLMCalls++
-	stats.LLMUsageMissing++
-	if stats.LLMUsageProtocol == "" {
-		stats.LLMUsageProtocol = string(protocol)
-	} else if stats.LLMUsageProtocol != string(protocol) {
-		stats.LLMUsageProtocol = "mixed"
-	}
+	op.Usage(observability.Usage{Protocol: string(protocol)})
 	started := time.Now()
-	return func() { stats.LLMLatencyMS += float64(time.Since(started)) / float64(time.Millisecond) }
+	return ctx, func(err error) {
+		if stats != nil {
+			stats.LLMLatencyMS += float64(time.Since(started)) / float64(time.Millisecond)
+		}
+		op.End(err)
+	}
 }
 
 // recordLLMUsage preserves supplied counts, including explicit zeroes and partial
 // usage. Cache counts remain separate: Anthropic input excludes cache reads and
 // creation; cache creation is not equivalent to an OpenAI provider's cache miss.
 func recordLLMUsage(ctx context.Context, input, output, hit, miss, creation *int64) {
+	observation, _ := ctx.Value(llmObservationKey{}).(llmObservation)
+	observation.op.Usage(observability.Usage{Protocol: observation.protocol, Input: input, Output: output, CacheRead: hit, CacheMiss: miss, CacheCreation: creation})
+
 	stats := turnTelemetry(ctx)
 	if stats == nil {
 		return
