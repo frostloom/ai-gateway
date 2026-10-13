@@ -179,7 +179,7 @@ func TestSalesStats(t *testing.T) {
 // CI 的 runner 是 UTC、本测试窗口是东八区；若分桶只减查询偏移，UTC 凌晨写入的
 // 墙钟会被拨到前一天，真实桶对不上补齐键，结果只剩 0。
 //
-// 这里直接构造一个与进程时区不同的窗口，断言窗口起始那天的桶里能拿到真实数据。
+// 构造跨午夜且与进程时区不同的窗口，数据应归入实际发生日，前一天补零。
 func TestSalesStatsByDayUsesLocalDay(t *testing.T) {
 	s, done := newTestStore(t)
 	defer done()
@@ -205,7 +205,14 @@ func TestSalesStatsByDayUsesLocalDay(t *testing.T) {
 
 	// 东八区窗口，与进程本地时区（CI 为 UTC）错开，正是缺陷的触发条件。
 	loc := time.FixedZone("CST", 8*3600)
-	now := time.Now().In(loc)
+	// 固定数据发生时间，避免 midnight 附近误把窗口起始日当成发生日。
+	now := time.Date(2026, 10, 14, 0, 30, 0, 0, loc)
+	for _, model := range []any{&Bill{}, &Topup{}} {
+		if err := s.db.WithContext(ctx).Model(model).Where("tenant_id = ?", tid).
+			Update("created_at", now.In(time.Local)).Error; err != nil {
+			t.Fatalf("fix fixture time: %v", err)
+		}
+	}
 	from := now.Add(-time.Hour)
 	to := now.Add(time.Hour)
 
@@ -217,8 +224,8 @@ func TestSalesStatsByDayUsesLocalDay(t *testing.T) {
 		t.Fatal("by_day 为空")
 	}
 
-	// 窗口起始的本地自然日必须出现在结果里，并且带上真实数据。
-	wantKey := from.Format("2006-01-02")
+	// 当前发生日有真实数据，跨日窗口的起始日只补零。
+	wantKey := now.Format("2006-01-02")
 	var got *SalesDay
 	var sum int64
 	for i := range st.ByDay {
@@ -228,13 +235,16 @@ func TestSalesStatsByDayUsesLocalDay(t *testing.T) {
 		sum += st.ByDay[i].ConsumedCent + st.ByDay[i].TopupCent
 	}
 	if got == nil {
-		t.Fatalf("by_day 缺少窗口起始日 %s（桶: %+v）", wantKey, st.ByDay)
+		t.Fatalf("by_day 缺少数据发生日 %s（桶: %+v）", wantKey, st.ByDay)
 	}
 	if sum == 0 {
 		t.Fatalf("所有桶都是 0，说明真实数据被补零占位覆盖（键口径不一致）: %+v", st.ByDay)
 	}
 	if got.ConsumedCent != 20 || got.TopupCent != 10_000 {
 		t.Fatalf("by_day[%s] = %+v, want 消耗 20 / 充值 10000", wantKey, *got)
+	}
+	if len(st.ByDay) != 2 || st.ByDay[0].Day != from.Format("2006-01-02") || st.ByDay[0].ConsumedCent != 0 || st.ByDay[0].TopupCent != 0 {
+		t.Fatalf("prior day must remain a zero bucket: %+v", st.ByDay)
 	}
 }
 
