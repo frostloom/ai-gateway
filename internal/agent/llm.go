@@ -146,6 +146,23 @@ func NewLLMClient(baseURL, apiKey, model string) *LLMClient {
 
 func (c *LLMClient) Model() string { return c.model }
 
+// ConfigureEvaluationClient is explicit per-client dependency injection for a
+// budgeted evaluator. Configure before serving; ordinary service defaults stay
+// unchanged. The supplied transport must guard every upstream attempt.
+func (c *LLMClient) ConfigureEvaluationClient(client *http.Client, maxOutput int) error {
+	if client == nil || client.Transport == nil || maxOutput < 1 || maxOutput > 512 {
+		return fmt.Errorf("explicit bounded evaluation HTTP client required")
+	}
+	copyClient := *client
+	copyClient.CheckRedirect = func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }
+	if copyClient.Timeout <= 0 || copyClient.Timeout > 90*time.Second {
+		copyClient.Timeout = 90 * time.Second
+	}
+	c.cli = &copyClient
+	c.maxTokens = maxOutput
+	return nil
+}
+
 // Protocol 当前生效的协议（启动日志用，便于排查路径配错）。
 func (c *LLMClient) Protocol() string { return string(c.proto) }
 

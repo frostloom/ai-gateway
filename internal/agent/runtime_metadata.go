@@ -25,6 +25,11 @@ type RuntimeMetadata struct {
 
 const runtimeContract = "customer-contract-v2;tenant-auth;read-only-four-first-independent-no-params;intent-shape>=0.90;legit>=0.85;risk<0.5;risk_conf>=0.8;shared-preview-confirm;no-pending-overwrite;reply-repair-max-one;no-numeric-inference;one-tool-per-iteration;loop-max-five"
 
+// EvaluationRuntimeMetadata captures configured hashes and bounds before an
+// evaluation sends any model request. It performs no network/environment access
+// and returns a fresh metadata value without provider credentials.
+func (h *Handler) EvaluationRuntimeMetadata() *RuntimeMetadata { return h.runtimeMetadata() }
+
 func contentSHA(raw []byte) string {
 	sum := sha256.Sum256(raw)
 	return hex.EncodeToString(sum[:])
