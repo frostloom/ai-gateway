@@ -54,3 +54,6 @@ python -m unittest discover -s scripts/tests -p test_define_customer_tasks.py
 导出只能选不存在的新目录，拒绝覆盖。15项新增回归覆盖来源与1078/142归属、断言保留、追问后原业务目标、退款/退订/换套餐终态、账本与账单真值、真实档位、占位符、首轮不冒充整任务、覆盖/篡改拒绝。独立审查发现的缺陷先加入失败回归再修复；验证结果见[面试记录](interview/CHANGELOG.md)。
 
 下一步是适配完整会话runner与逐事实评分，对新profile进行隔离数据库初始化测试；先使用本地替身。真实模型/JEV成绩、费用与独立盲测另行记录。
+
+
+2026-10-13修复后复核：生产订阅/客服代码已变更，旧全量定义保留修复前绑定及代码快照。现在使用 `python scripts/verify-task-definition-archive.py verify` 核验历史版本；原命令用于代码仍匹配的导出版本。详情见账户初始化文档追加记录，不意味着旧定义或新运行时已获完整任务认证。

@@ -345,9 +345,11 @@ func (tb *Toolbox) readMySubscription() *execTool {
 				line += fmt.Sprintf("，本期到 %s", s.CycleEnd.Format("2006-01-02"))
 				if s.AutoRenew {
 					line += "，到期自动续费"
+				} else {
+					line += "，已停止续费，本期到期前可继续使用"
 				}
 			}
-			if s.PendingPlanID != nil {
+			if s.AutoRenew && s.PendingPlanID != nil {
 				line += fmt.Sprintf("，下期将切换为套餐#%d", *s.PendingPlanID)
 			}
 			// M9：各档次每窗口剩余额度（token），不再显示「累计已授予 ¥」。
