@@ -7,6 +7,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/frostloom/ai-gateway/internal/billing/store"
 )
@@ -167,5 +168,21 @@ func TestPlanToolsRunRejectsUnresolvedName(t *testing.T) {
 			t.Errorf("%s unresolved run contacted billing", tool)
 		}
 		server.Close()
+	}
+}
+
+func TestCancelledSubscriptionReadPreservesCurrentCycle(t *testing.T) {
+	end := time.Now().Add(24 * time.Hour)
+	pending := uint64(99)
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_ = json.NewEncoder(w).Encode(store.MeView{Subscription: &store.Subscription{PlanID: 47, Status: store.SubCancelled, CycleEnd: &end, AutoRenew: false, PendingPlanID: &pending}})
+	}))
+	defer server.Close()
+	reply, err := NewToolbox(NewAdminClient(server.URL)).Run(context.Background(), "get_my_subscription", map[string]any{}, 19, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(reply, "已停止续费") || !strings.Contains(reply, "到期前可继续使用") || strings.Contains(reply, "下期将切换") {
+		t.Fatalf("misleading cancelled subscription reply: %s", reply)
 	}
 }

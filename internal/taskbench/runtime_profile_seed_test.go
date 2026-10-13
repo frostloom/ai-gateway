@@ -329,18 +329,8 @@ func verifyRuntimeReads(t *testing.T, ctx context.Context, db *gorm.DB, st *stor
 	plan := plans[p.Subscription.Plan]
 	quotas := plan.TierQuotaMap()
 	allowance := view.Allowance
-	if p.Subscription.Status == store.SubCancelled {
-		// Record the real projection gap; this is NOT a passing full customer task.
-		if view.Subscription != nil || len(view.Allowance) != 0 {
-			t.Fatal("cancelled projection changed; re-audit the known limitation")
-		}
-		allowance, err = st.SubscriptionAllowance(ctx, s)
-		if err != nil {
-			t.Fatal(err)
-		}
-		t.Log("KNOWN CONTRACT GAP: cancelled subscription persists with future cycle end but MeOverview hides subscription/allowance; current-cycle access is not certified")
-	} else if view.Subscription == nil || view.Subscription.ID != s.ID {
-		t.Fatal("active subscription missing from real read projection")
+	if view.Subscription == nil || view.Subscription.ID != s.ID {
+		t.Fatal("current-cycle subscription missing from real read projection")
 	}
 	seen := map[string]bool{}
 	for _, a := range allowance {
@@ -353,7 +343,7 @@ func verifyRuntimeReads(t *testing.T, ctx context.Context, db *gorm.DB, st *stor
 		}
 		seen[a.Tier] = true
 	}
-	if len(seen) != len(quotas) || (p.Subscription.Status == store.SubActive && view.RefreshHours != 5) {
+	if len(seen) != len(quotas) || view.RefreshHours != 5 {
 		t.Fatal("missing tier allowance")
 	}
 }

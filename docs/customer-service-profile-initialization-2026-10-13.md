@@ -48,3 +48,18 @@ go test ./internal/taskbench -run TestSixRuntimeProfiles -v -count=1
 本地本次六profile集成测试非skip通过（测试本体3.40秒），包含真实清理确认。无MySQL环境会显式skip，不能将CI的skip当成真实初始化证据。所有导出清单的database_instantiated_during_export=0只描述纯文件导出；上述数据库测试另外记录。
 
 模型/JEV调用为0，未更新历史1220条输出或分数。完整会话runner适配和独立语义评分仍待完成。最终回归证据见[面试记录](interview/CHANGELOG.md)。
+
+
+## 2026-10-13追加：未到期退订权益已修复
+
+前述KNOWN CONTRACT GAP记录保留为修复前证据。本轮将本期权益读取与可退订/换套餐/续费的active查询分离：cancelled且cycle_end严格晚于当前时间仍展示、计算额度并走订阅资金来源；已过期、等于到期边界、缺到期时间均不恢复权益。现有active订阅优先级及续费器行为保留。
+
+未到期退订期间拒绝第二份定期订阅，到期后允许重新订购；不会重新打开自动续费或换套餐。客服说明“已停止续费，本期到期前可继续使用”，停止续费时不再承诺旧pending_plan下期切换。无需迁移，现存符合条件的退订记录使用相同规则。
+
+真实隔离数据库测试验证四种时间边界的MeOverview、Reserve资金来源、现金余额、重复订购及续费/换套餐拒绝；原额度测试证明已消费100、剩余200在退订后不丢失。六模板读取测试改为直接核验真实接口，不再绕过接口计算额度。测试只是后端业务回归，完整对话runner和独立语义评分仍待完成，不形成新版V2成功率。
+
+全项目go test ./... -count=1和go vet ./...通过；Python全套95项通过后新增审查防篡改测试，归档四项通过。无模型/JEV调用，旧1220条输出和分数不变。
+
+旧任务定义绑定修复前代码。完整原字节快照保存于eval/code-snapshots/2026-10-12-full-dev-v1（.snapshot扩展名防止Go编译归档）。当前复核使用python scripts/verify-task-definition-archive.py verify，独立固定旧manifest的SHA并逐一检查快照、未改脚本和所有产物。旧define-customer-tasks.py verify仍要求当前生产代码匹配，不改写旧清单使其适配新代码；归档通过仅证明历史版本可复现。
+
+最终离线Python套件96项通过（47.462秒），六项归档verify通过，最终独立审查无阻塞发现。

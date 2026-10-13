@@ -48,5 +48,5 @@ func TestSixRuntimeProfilesInstantiateRealIsolatedAccounts(t *testing.T) {
 	if t.Failed() {
 		return
 	}
-	t.Log("Verified persistence for six runtime profiles and six foreign controls; cancelled read-projection gap separately recorded; zero model/JEV calls; disposable database cleanup registered")
+	t.Log("Verified persistence for six runtime profiles and six foreign controls; cancelled current-cycle read projection verified; zero model/JEV calls; disposable database cleanup registered")
 }

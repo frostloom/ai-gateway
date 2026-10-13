@@ -201,10 +201,10 @@ func (s *Store) GetPlan(ctx context.Context, id uint64) (*Plan, error) {
 	return &p, nil
 }
 
-// GetActiveSubscription 当前生效中的订阅（展示口径）：优先定期订阅（退订/改套餐的对象），
+// GetActiveSubscription 当前生效中的订阅（展示口径）：优先仍有本期权益的定期订阅，
 // 否则最近一次的一次性购买。
 func (s *Store) GetActiveSubscription(ctx context.Context, tenantID uint64) (*Subscription, error) {
-	sub, err := s.GetActiveRecurring(ctx, tenantID)
+	sub, err := s.getEntitledRecurring(ctx, tenantID)
 	if err != nil {
 		return nil, err
 	}
@@ -224,7 +224,7 @@ func (s *Store) GetActiveSubscription(ctx context.Context, tenantID uint64) (*Su
 	return &last, nil
 }
 
-// GetActiveRecurring 生效中的定期订阅（每租户至多一条）——退订/改套餐/防重复订购的判定对象。
+// GetActiveRecurring 生效中的定期订阅（每租户至多一条）——退订/改套餐的判定对象，不包含已停止续费的本期权益。
 func (s *Store) GetActiveRecurring(ctx context.Context, tenantID uint64) (*Subscription, error) {
 	var sub Subscription
 	err := s.db.WithContext(ctx).
@@ -673,12 +673,16 @@ func (s *Store) SubscribePlan(ctx context.Context, tenantID uint64, planID uint6
 	if p.PlanType != PlanTypeRecurring {
 		return nil, fmt.Errorf("该套餐已不支持订购（仅定期订阅在售）: %s", p.Name)
 	}
-	if sub, _ := s.GetActiveRecurring(ctx, tenantID); sub != nil {
-		return nil, fmt.Errorf("已有生效中的定期订阅（套餐#%d），请先退订或改套餐", sub.PlanID)
+	sub, err := s.getEntitledRecurring(ctx, tenantID)
+	if err != nil {
+		return nil, err
+	}
+	if sub != nil {
+		return nil, fmt.Errorf("已有本期权益中的定期订阅（套餐#%d），请等待本期到期；续费中的订阅可改套餐", sub.PlanID)
 	}
 	now := time.Now()
 	end := now.Add(time.Duration(p.ValidityDays) * 24 * time.Hour)
-	sub := &Subscription{
+	sub = &Subscription{
 		TenantID: tenantID, PlanID: p.ID, PlanType: p.PlanType,
 		Status: SubActive, AutoRenew: true,
 		CycleStart: &now, CycleEnd: &end,

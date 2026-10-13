@@ -155,7 +155,7 @@ func TestReserveSubscriptionAllowance(t *testing.T) {
 	}
 }
 
-// MeView 活跃订阅的各档次剩余额度（token）实时推导；无订阅/退订后为 nil。
+// MeView 活跃订阅的各档次剩余额度（token）实时推导；无订阅时为 nil，退订后保留本期额度。
 func TestMeViewSubscriptionAllowance(t *testing.T) {
 	s, done := newTestStore(t)
 	defer done()
@@ -206,12 +206,95 @@ func TestMeViewSubscriptionAllowance(t *testing.T) {
 		t.Fatalf("旗舰 allowance = %+v, want quota100/consumed0/remaining100", a)
 	}
 
-	// 退订 → 无 active 订阅 → allowance 回到 nil
+	// 退订停止续费，但本期未到期的额度保持不变。
 	if _, err := s.CancelSubscription(ctx, tid); err != nil {
 		t.Fatalf("cancel: %v", err)
 	}
 	mv2, _ := s.MeOverview(ctx, tid)
-	if mv2.Allowance != nil {
-		t.Fatalf("退订后 allowance = %+v, want nil", mv2.Allowance)
+	if mv2.Subscription == nil || mv2.Subscription.Status != SubCancelled || mv2.Subscription.AutoRenew || len(mv2.Allowance) != 2 || mv2.Allowance[1].Remaining != 200 {
+		t.Fatalf("cancelled current cycle must retain subscription and allowance: %+v", mv2)
+	}
+}
+
+func TestCancelledEntitlementBoundaries(t *testing.T) {
+	for _, state := range []string{"future", "expired", "boundary", "missing"} {
+		t.Run(state, func(t *testing.T) {
+			s, done := newTestStore(t)
+			defer done()
+			ctx := context.Background()
+			tid := seedTenant(t, s, 1000)
+			seedTierModel(t, s, "cancel-text", `["文本"]`)
+			plan := subscribeTestPlan(t, s, ctx, tid, `{"文本":300}`, 5)
+			if _, err := s.CancelSubscription(ctx, tid); err != nil {
+				t.Fatal(err)
+			}
+			var row Subscription
+			if err := s.db.Where("tenant_id = ?", tid).First(&row).Error; err != nil {
+				t.Fatal(err)
+			}
+			now := time.Now()
+			var end *time.Time
+			switch state {
+			case "future":
+				v := now.Add(time.Hour)
+				end = &v
+			case "expired":
+				v := now.Add(-time.Hour)
+				end = &v
+			case "boundary":
+				end = &now
+			}
+			if err := s.db.Model(&row).Updates(map[string]any{"cycle_end": end, "pending_plan_id": plan.ID}).Error; err != nil {
+				t.Fatal(err)
+			}
+			view, err := s.MeOverview(ctx, tid)
+			if err != nil {
+				t.Fatal(err)
+			}
+			entitled := state == "future"
+			if (view.Subscription != nil) != entitled {
+				t.Fatalf("%s subscription=%+v", state, view.Subscription)
+			}
+			if _, err = s.Reserve(ctx, reserveTierReq("cancel-"+state, tid, "cancel-text", 100)); err != nil {
+				t.Fatal(err)
+			}
+			var bill Bill
+			if err = s.db.Where("request_id = ? AND phase = ?", "cancel-"+state, PhaseReserve).First(&bill).Error; err != nil {
+				t.Fatal(err)
+			}
+			wantFunding := FundingBalance
+			wantBalance := int64(1000) - bill.PreQuota
+			if entitled {
+				wantFunding = FundingSubscription
+				wantBalance = 1000
+			}
+			if bill.Funding != wantFunding {
+				t.Fatalf("funding=%s want %s", bill.Funding, wantFunding)
+			}
+			if balance, _ := s.getBalance(ctx, tid); balance != wantBalance {
+				t.Fatalf("balance=%d want %d", balance, wantBalance)
+			}
+			if err = s.ChangePlan(ctx, tid, plan.ID); err == nil {
+				t.Fatal("cancelled subscription can change plan")
+			}
+			if _, err = s.CancelSubscription(ctx, tid); err == nil {
+				t.Fatal("cancelled subscription is mutable again")
+			}
+			if n, err := s.RenewDueSubscriptions(ctx); err != nil || n != 0 {
+				t.Fatalf("cancelled subscription renewed: %d %v", n, err)
+			}
+			if _, err = s.SubscribePlan(ctx, tid, plan.ID); (err != nil) != entitled {
+				t.Fatalf("resubscribe entitled=%v err=%v", entitled, err)
+			}
+			if entitled {
+				fresh, err := s.MeOverview(ctx, tid)
+				if err != nil {
+					t.Fatal(err)
+				}
+				if fresh.Subscription.ID != row.ID || fresh.Subscription.AutoRenew {
+					t.Fatal("cancelled identity/renewal changed")
+				}
+			}
+		})
 	}
 }
