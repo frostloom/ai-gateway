@@ -136,3 +136,16 @@ TDD与审查：初始7测试因导出器不存在失败，实现后通过。独�
 存储：工作树移至E项目 `.worktrees/langfuse-observability`；配置/data在deploy/langfuse，缓存和临时文件在E项目隐藏目录。C盘原工作树逐文件hash一致后删除；Docker Desktop全局镜像磁盘未迁移以保护其他服务。
 
 边界：外部模型/JEV调用0，未拉镜像/起Langfuse/重启客服、未上传生产数据。真实摄入界面、镜像digest锁定、负载开销、模型价格配置仍待独立部署验收。不能声称已上线、新V2正确率或JEV已产生因果提速收益。
+
+
+## 2026-10-13：Langfuse六容器实际部署与v4摄入
+
+用户授权起Docker并允许默认Docker存储。持久化从E bind挂载改为ai-gateway-langfuse独立命名卷，现有客服/MySQL/Redis等未重启；E工作树保留配置与私有凭据。生成独立数据库密码、加密key、管理员密码及evaluation项目API key；三份凭据文件均忽略Git且未打印。部署不使用模型key。
+
+拉取失败与处理：Docker Hub首次EOF，现有代理对Postgres17/ClickHouse返回502；Postgres17 Alpine代理成功、Redis7 Alpine复用本地，ClickHouse直连成功，Langfuse/MinIO官方仓库成功。全部固定实际下载digest，代理来源明确记录，不声称供应链已独立审计。依赖健康后web/worker完成迁移，实测v4.58.0；worker绑定容器HOSTNAME，127.0.0.1健康访问ECONNREFUSED，改用实际监听主机名。六服务均有健康探针，最终up --wait成功、全部healthy。
+
+验收：真实GoSDK发送2条明确synthetic/evaluation追踪，共7个observation；JEV-only无GENERATION，合成模型路径1个GENERATION input7/output2/total9，匿名身份/session/environment/version在子span保留。旧traces API在events_only模式404，误用旧接口初次等待失败；查官方迁移文档后用v2 Observations确认摄入。这是验收接口纠正，不是产品丢数据。web/worker重建后数据仍保留，随机管理员密码本地登录通过。一次资源观测六服务约3.1GiB，非负载基准。
+
+配置验收脚本初次误将Compose逻辑volume source当实际卷名而断言失败，检查top-level volumes.name映射后修正并通过；不是业务故障。独立只读审查无阻塞/泄露，运行态由主代理实测（审查者Docker管道受权限限制）。当前配置SHA、digest和摄入证据在deploy/langfuse/deployment-validation.json。
+
+边界：未将生产客服切到分支代码或启用导出，未跑真实模型/JEV，未重跑1220或改金标；页面只有合成验收。真实流量接入、业务成功率审核、费用模型及并发负载仍待后续。Langfuse服务可供用户浏览，密码在本地忽略文件.local-login.txt。

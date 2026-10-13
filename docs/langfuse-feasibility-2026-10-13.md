@@ -132,3 +132,8 @@ Docker Desktop全局镜像/WSL虚拟磁盘和平台自身日志未迁移；这�
 新增测试均只使用本地HTTP替身及随机独立MySQL库/私有miniredis，无外部模型/JEV调用。已覆盖默认关闭、OTLP授权/字段/并发身份、JEV-only无generation、预览确认、真实客户端本地HTTP、缺失/零/部分usage、采样0、内容脱敏/长度、503/部分拒绝、重定向、队列满和限时关机。审查另发现凭据键变体漏过滤、整批flush误报成功、标准OpenAI缓存漏统计；三项先新增失败回归后修复通过。
 
 本轮未拉Docker镜像、创建真实Langfuse项目密钥、起Langfuse栈或重启现有agent。服务界面/真实摄入、持久化可用性、运行负载开销和模型价格配置仍需独立部署验收，不能把HTTP替身与Compose渲染称为已经上线。1220旧输出/金标/历史指标未改，不产生新V2成绩。
+
+
+## Docker实际部署追加
+
+用户随后授权启动容器并同意与现有Docker存储一起放置，持久化已改独立命名卷；上文E盘bind挂载及“尚未起容器”是上一阶段状态，不再是当前状态。实际部署步骤与证据见[部署文档](langfuse-deployment-2026-10-13.md)及deploy/langfuse/deployment-validation.json。真实客服服务仍未重启接入，合成摄入不得当作生产流量或新准确率。
