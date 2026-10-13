@@ -16,7 +16,7 @@ func TestAgentNaturalCancellationAcrossRequests(t *testing.T) {
 	defer done()
 	ctx := context.Background()
 	for _, tool := range []string{"recharge", "refund_recharge", "subscribe_plan", "change_plan", "cancel_subscription"} {
-		for i, phrase := range []string{"取消，不执行这次操作。", "取消这次操作", "不执行了", " 取消， 不执行本次操作！ ", "算了，不充值了"} {
+		for i, phrase := range []string{"取消，不执行这次操作。", "取消这次操作", "不执行了", " 取消， 不执行本次操作！ ", "算了，不充值了", "取消操作，不要执行"} {
 			t.Run(fmt.Sprintf("%s/%d", tool, i), func(t *testing.T) {
 				sid := fmt.Sprintf("sid-natural-cancel-%s-%d", tool, i)
 				if err := h.saveSession(ctx, sid, &session{PendingAction: &pendingAction{
@@ -84,6 +84,10 @@ func TestConfirmationNaturalCancellationBoundaries(t *testing.T) {
 	}{
 		{"取消，不执行这次操作。", -1},
 		{"取消这次操作", -1},
+		{"取消操作，不要执行", -1},
+		{"取消操作", -1},
+		{"取消操作，改充200元", 0},
+		{"取消操作订阅", 0},
 		{"算了，不充值了", -1},
 		{"不执行了", -1},
 		{"取消;不执行本次操作!", -1},

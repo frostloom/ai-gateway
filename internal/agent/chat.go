@@ -677,7 +677,7 @@ func isPendingCancellation(text string) bool {
 				continue
 			}
 			target := strings.TrimPrefix(clause, verb)
-			abort = abort || target == "这次操作" || target == "本次操作" || target == "当前操作"
+			abort = abort || target == "操作" || target == "这次操作" || target == "本次操作" || target == "当前操作"
 			if verb == "不执行" || verb == "不要执行" || verb == "不用执行" {
 				abort = abort || target == "" || target == "了"
 			}

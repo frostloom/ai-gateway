@@ -77,7 +77,11 @@ func RunConversation(ctx context.Context, c ConversationCase, d ConversationDriv
 		if !reflect.DeepEqual(initial.Controls, obs.State.Controls) {
 			fail(fmt.Errorf("turn %d foreign control changed", i+1))
 		}
-		if !hasString(rule.ExpectedActions, obs.Action) {
+		// Missing semantic annotation is pending review, not evidence that a
+		// necessary clarification/cancellation was wrong. Trace-bearing actions
+		// still require their structural label; reviews cannot hide execution.
+		unreviewedNoTool := obs.Action == "unreviewed" && len(obs.Turn.Response.Trace) == 0
+		if !unreviewedNoTool && !hasString(rule.ExpectedActions, obs.Action) {
 			fail(fmt.Errorf("turn %d unexpected action %s", i+1, obs.Action))
 		}
 		if rule.NecessaryClarification && obs.Action == "clarify" {

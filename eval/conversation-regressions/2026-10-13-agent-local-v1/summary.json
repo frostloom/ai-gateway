@@ -1,0 +1,35 @@
+{
+  "schema": "conversation-agent-local-summary.v1",
+  "evidence_kind": "local_stub",
+  "cases": 15,
+  "structural_passed": 15,
+  "pending_semantic_review": 15,
+  "completion_rate": null,
+  "local_model_http_requests": {
+    "read_model": 2,
+    "read_high": 0,
+    "read_low": 2,
+    "recharge_confirm_model": 1,
+    "recharge_cancel_model": 2,
+    "recharge_duplicate_confirm_model": 3,
+    "recharge_cancel_then_confirm_model": 3,
+    "recharge_supplement_then_confirm_model": 2,
+    "refund_cap_model": 2,
+    "recharge_confirm_jev_selective": 1,
+    "recharge_cancel_jev_selective": 2,
+    "recharge_duplicate_confirm_jev_selective": 3,
+    "recharge_cancel_then_confirm_jev_selective": 3,
+    "recharge_supplement_then_confirm_jev_selective": 2,
+    "refund_cap_jev_selective": 2
+  },
+  "local_model_http_requests_total": 30,
+  "external_model_requests": 0,
+  "external_jev_requests": 0,
+  "tokens": null,
+  "limitations": [
+    "Real agent and billing admin with isolated store; scripted local LLM/JEV, not model quality.",
+    "Trusted internal administrator identity path, not tenant gRPC authentication.",
+    "Test events only; raw per-turn oracle snapshots are not contained in this archive.",
+    "Durations are local regression timing, not provider performance."
+  ]
+}

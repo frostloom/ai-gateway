@@ -60,3 +60,5 @@ python -m unittest discover -s scripts/tests -p test_define_customer_tasks.py
 
 
 2026-10-13会话框架追加：全部4291定义可通过独立conversation loader加载，3071完整任务和1220首轮诊断分离；30个代表性完整分支完成真实store结构测试，不代表全部定义获认证。详见[执行与审核边界](customer-service-conversation-runner-2026-10-13.md)。冻结JSON中的defined_not_run与runtime_adapter_ready=false保留导出时状态，不改写旧文件冒充新进度。
+
+2026-10-13接入追加：真实客服handler与独立数据库oracle已有接口，15代表分支通过免费本地依赖回归；事实核验与对照配置门禁另有新增入口。原定义JSON、历史评分及30条store归档不改写。详见[本轮覆盖与限制](customer-service-agent-integration-2026-10-13.md)，不代表3071分支全部执行或答案独立审核完成。
