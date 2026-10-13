@@ -1,0 +1,1057 @@
+{
+  "accounts": {
+    "active_flagship": {
+      "balance_cent": 500000,
+      "bill_seed_rule": "Create tenant with initial_quota=50cent and project it to private Redis; create/pay integer-yuan recharge via real store methods; stage declared synthetic settled bills and project authoritative ledger balance.",
+      "cash_bill_fixture": [
+        {
+          "age_hours": 60,
+          "amount_cent": 120,
+          "funding": "balance",
+          "input_tokens": 800000,
+          "model": "model-a",
+          "output_tokens": 200000,
+          "request_id": "cash-old"
+        },
+        {
+          "age_hours": 28,
+          "amount_cent": 80,
+          "funding": "balance",
+          "input_tokens": 200000,
+          "model": "model-b",
+          "output_tokens": 33333,
+          "request_id": "cash-yesterday"
+        },
+        {
+          "age_hours": 2,
+          "amount_cent": 50,
+          "funding": "balance",
+          "input_tokens": 300000,
+          "model": "model-a",
+          "output_tokens": 100000,
+          "request_id": "cash-recent"
+        }
+      ],
+      "clock": "One captured run clock in Asia/Shanghai; resolve all relative times from it before execution.",
+      "foreign_tenant": {
+        "balance_cent": 123400,
+        "paid_order": "foreign_order_generated_at_setup"
+      },
+      "initial_quota_cent": 50,
+      "instantiated": false,
+      "ledger_balance_cent": 500000,
+      "paid_order": {
+        "amount_cent": 500200,
+        "amount_money": 5002,
+        "order_no": "owned_order_generated_at_setup",
+        "status": "paid"
+      },
+      "settle_bill_insertion_order": [
+        "cash-old",
+        "cash-yesterday",
+        "cash-recent",
+        "subscription-recent"
+      ],
+      "snapshot_required": [
+        "cash_balance",
+        "ledger",
+        "orders",
+        "subscriptions",
+        "bills",
+        "catalogue",
+        "tier_remain",
+        "clock"
+      ],
+      "subscription": {
+        "auto_renew": true,
+        "cycle_end": "cycle_start_plus_30_days",
+        "cycle_start": "run_clock_minus_1_day",
+        "pending_plan": null,
+        "plan": "flagship",
+        "status": "active"
+      },
+      "subscription_usage_fixture": {
+        "age_minutes": 30,
+        "amount_cent": 0,
+        "funding": "subscription",
+        "input_tokens": 1000,
+        "model": "model-a",
+        "output_tokens": 2000,
+        "request_id": "subscription-recent",
+        "required_when_subscribed": true,
+        "reserve_phase": "reserve",
+        "reserve_status": "settled",
+        "settle_phase": "settle",
+        "settle_status": "settled",
+        "tier": "文本"
+      },
+      "tenant": "fresh_authenticated_tenant_per_scenario",
+      "tool_expected": {
+        "get_balance": {
+          "cash_cent": 500000,
+          "ledger_cent": 500000
+        },
+        "get_consumption": {
+          "seven_day_total_cent": 250
+        },
+        "get_recent_bills": {
+          "latest_10": [
+            {
+              "amount_cent": 0,
+              "funding": "subscription",
+              "input_tokens": 1000,
+              "model": "model-a",
+              "output_tokens": 2000,
+              "request_id": "subscription-recent"
+            },
+            {
+              "age_hours": 2,
+              "amount_cent": 50,
+              "funding": "balance",
+              "input_tokens": 300000,
+              "model": "model-a",
+              "output_tokens": 100000,
+              "request_id": "cash-recent"
+            },
+            {
+              "age_hours": 28,
+              "amount_cent": 80,
+              "funding": "balance",
+              "input_tokens": 200000,
+              "model": "model-b",
+              "output_tokens": 33333,
+              "request_id": "cash-yesterday"
+            },
+            {
+              "age_hours": 60,
+              "amount_cent": 120,
+              "funding": "balance",
+              "input_tokens": 800000,
+              "model": "model-a",
+              "output_tokens": 200000,
+              "request_id": "cash-old"
+            }
+          ],
+          "latest_3": [
+            {
+              "amount_cent": 0,
+              "funding": "subscription",
+              "input_tokens": 1000,
+              "model": "model-a",
+              "output_tokens": 2000,
+              "request_id": "subscription-recent"
+            },
+            {
+              "age_hours": 2,
+              "amount_cent": 50,
+              "funding": "balance",
+              "input_tokens": 300000,
+              "model": "model-a",
+              "output_tokens": 100000,
+              "request_id": "cash-recent"
+            },
+            {
+              "age_hours": 28,
+              "amount_cent": 80,
+              "funding": "balance",
+              "input_tokens": 200000,
+              "model": "model-b",
+              "output_tokens": 33333,
+              "request_id": "cash-yesterday"
+            }
+          ]
+        }
+      }
+    },
+    "active_standard": {
+      "balance_cent": 500000,
+      "bill_seed_rule": "Create tenant with initial_quota=50cent and project it to private Redis; create/pay integer-yuan recharge via real store methods; stage declared synthetic settled bills and project authoritative ledger balance.",
+      "cash_bill_fixture": [
+        {
+          "age_hours": 60,
+          "amount_cent": 120,
+          "funding": "balance",
+          "input_tokens": 800000,
+          "model": "model-a",
+          "output_tokens": 200000,
+          "request_id": "cash-old"
+        },
+        {
+          "age_hours": 28,
+          "amount_cent": 80,
+          "funding": "balance",
+          "input_tokens": 200000,
+          "model": "model-b",
+          "output_tokens": 33333,
+          "request_id": "cash-yesterday"
+        },
+        {
+          "age_hours": 2,
+          "amount_cent": 50,
+          "funding": "balance",
+          "input_tokens": 300000,
+          "model": "model-a",
+          "output_tokens": 100000,
+          "request_id": "cash-recent"
+        }
+      ],
+      "clock": "One captured run clock in Asia/Shanghai; resolve all relative times from it before execution.",
+      "foreign_tenant": {
+        "balance_cent": 123400,
+        "paid_order": "foreign_order_generated_at_setup"
+      },
+      "initial_quota_cent": 50,
+      "instantiated": false,
+      "ledger_balance_cent": 500000,
+      "paid_order": {
+        "amount_cent": 500200,
+        "amount_money": 5002,
+        "order_no": "owned_order_generated_at_setup",
+        "status": "paid"
+      },
+      "settle_bill_insertion_order": [
+        "cash-old",
+        "cash-yesterday",
+        "cash-recent",
+        "subscription-recent"
+      ],
+      "snapshot_required": [
+        "cash_balance",
+        "ledger",
+        "orders",
+        "subscriptions",
+        "bills",
+        "catalogue",
+        "tier_remain",
+        "clock"
+      ],
+      "subscription": {
+        "auto_renew": true,
+        "cycle_end": "cycle_start_plus_30_days",
+        "cycle_start": "run_clock_minus_1_day",
+        "pending_plan": null,
+        "plan": "standard",
+        "status": "active"
+      },
+      "subscription_usage_fixture": {
+        "age_minutes": 30,
+        "amount_cent": 0,
+        "funding": "subscription",
+        "input_tokens": 1000,
+        "model": "model-a",
+        "output_tokens": 2000,
+        "request_id": "subscription-recent",
+        "required_when_subscribed": true,
+        "reserve_phase": "reserve",
+        "reserve_status": "settled",
+        "settle_phase": "settle",
+        "settle_status": "settled",
+        "tier": "文本"
+      },
+      "tenant": "fresh_authenticated_tenant_per_scenario",
+      "tool_expected": {
+        "get_balance": {
+          "cash_cent": 500000,
+          "ledger_cent": 500000
+        },
+        "get_consumption": {
+          "seven_day_total_cent": 250
+        },
+        "get_recent_bills": {
+          "latest_10": [
+            {
+              "amount_cent": 0,
+              "funding": "subscription",
+              "input_tokens": 1000,
+              "model": "model-a",
+              "output_tokens": 2000,
+              "request_id": "subscription-recent"
+            },
+            {
+              "age_hours": 2,
+              "amount_cent": 50,
+              "funding": "balance",
+              "input_tokens": 300000,
+              "model": "model-a",
+              "output_tokens": 100000,
+              "request_id": "cash-recent"
+            },
+            {
+              "age_hours": 28,
+              "amount_cent": 80,
+              "funding": "balance",
+              "input_tokens": 200000,
+              "model": "model-b",
+              "output_tokens": 33333,
+              "request_id": "cash-yesterday"
+            },
+            {
+              "age_hours": 60,
+              "amount_cent": 120,
+              "funding": "balance",
+              "input_tokens": 800000,
+              "model": "model-a",
+              "output_tokens": 200000,
+              "request_id": "cash-old"
+            }
+          ],
+          "latest_3": [
+            {
+              "amount_cent": 0,
+              "funding": "subscription",
+              "input_tokens": 1000,
+              "model": "model-a",
+              "output_tokens": 2000,
+              "request_id": "subscription-recent"
+            },
+            {
+              "age_hours": 2,
+              "amount_cent": 50,
+              "funding": "balance",
+              "input_tokens": 300000,
+              "model": "model-a",
+              "output_tokens": 100000,
+              "request_id": "cash-recent"
+            },
+            {
+              "age_hours": 28,
+              "amount_cent": 80,
+              "funding": "balance",
+              "input_tokens": 200000,
+              "model": "model-b",
+              "output_tokens": 33333,
+              "request_id": "cash-yesterday"
+            }
+          ]
+        }
+      }
+    },
+    "cancelled_standard": {
+      "balance_cent": 500000,
+      "bill_seed_rule": "Create tenant with initial_quota=50cent and project it to private Redis; create/pay integer-yuan recharge via real store methods; stage declared synthetic settled bills and project authoritative ledger balance.",
+      "cash_bill_fixture": [
+        {
+          "age_hours": 60,
+          "amount_cent": 120,
+          "funding": "balance",
+          "input_tokens": 800000,
+          "model": "model-a",
+          "output_tokens": 200000,
+          "request_id": "cash-old"
+        },
+        {
+          "age_hours": 28,
+          "amount_cent": 80,
+          "funding": "balance",
+          "input_tokens": 200000,
+          "model": "model-b",
+          "output_tokens": 33333,
+          "request_id": "cash-yesterday"
+        },
+        {
+          "age_hours": 2,
+          "amount_cent": 50,
+          "funding": "balance",
+          "input_tokens": 300000,
+          "model": "model-a",
+          "output_tokens": 100000,
+          "request_id": "cash-recent"
+        }
+      ],
+      "clock": "One captured run clock in Asia/Shanghai; resolve all relative times from it before execution.",
+      "foreign_tenant": {
+        "balance_cent": 123400,
+        "paid_order": "foreign_order_generated_at_setup"
+      },
+      "initial_quota_cent": 50,
+      "instantiated": false,
+      "ledger_balance_cent": 500000,
+      "paid_order": {
+        "amount_cent": 500200,
+        "amount_money": 5002,
+        "order_no": "owned_order_generated_at_setup",
+        "status": "paid"
+      },
+      "settle_bill_insertion_order": [
+        "cash-old",
+        "cash-yesterday",
+        "cash-recent",
+        "subscription-recent"
+      ],
+      "snapshot_required": [
+        "cash_balance",
+        "ledger",
+        "orders",
+        "subscriptions",
+        "bills",
+        "catalogue",
+        "tier_remain",
+        "clock"
+      ],
+      "subscription": {
+        "auto_renew": false,
+        "cycle_end": "cycle_start_plus_30_days",
+        "cycle_start": "run_clock_minus_1_day",
+        "pending_plan": null,
+        "plan": "standard",
+        "status": "cancelled"
+      },
+      "subscription_usage_fixture": {
+        "age_minutes": 30,
+        "amount_cent": 0,
+        "funding": "subscription",
+        "input_tokens": 1000,
+        "model": "model-a",
+        "output_tokens": 2000,
+        "request_id": "subscription-recent",
+        "required_when_subscribed": true,
+        "reserve_phase": "reserve",
+        "reserve_status": "settled",
+        "settle_phase": "settle",
+        "settle_status": "settled",
+        "tier": "文本"
+      },
+      "tenant": "fresh_authenticated_tenant_per_scenario",
+      "tool_expected": {
+        "get_balance": {
+          "cash_cent": 500000,
+          "ledger_cent": 500000
+        },
+        "get_consumption": {
+          "seven_day_total_cent": 250
+        },
+        "get_recent_bills": {
+          "latest_10": [
+            {
+              "amount_cent": 0,
+              "funding": "subscription",
+              "input_tokens": 1000,
+              "model": "model-a",
+              "output_tokens": 2000,
+              "request_id": "subscription-recent"
+            },
+            {
+              "age_hours": 2,
+              "amount_cent": 50,
+              "funding": "balance",
+              "input_tokens": 300000,
+              "model": "model-a",
+              "output_tokens": 100000,
+              "request_id": "cash-recent"
+            },
+            {
+              "age_hours": 28,
+              "amount_cent": 80,
+              "funding": "balance",
+              "input_tokens": 200000,
+              "model": "model-b",
+              "output_tokens": 33333,
+              "request_id": "cash-yesterday"
+            },
+            {
+              "age_hours": 60,
+              "amount_cent": 120,
+              "funding": "balance",
+              "input_tokens": 800000,
+              "model": "model-a",
+              "output_tokens": 200000,
+              "request_id": "cash-old"
+            }
+          ],
+          "latest_3": [
+            {
+              "amount_cent": 0,
+              "funding": "subscription",
+              "input_tokens": 1000,
+              "model": "model-a",
+              "output_tokens": 2000,
+              "request_id": "subscription-recent"
+            },
+            {
+              "age_hours": 2,
+              "amount_cent": 50,
+              "funding": "balance",
+              "input_tokens": 300000,
+              "model": "model-a",
+              "output_tokens": 100000,
+              "request_id": "cash-recent"
+            },
+            {
+              "age_hours": 28,
+              "amount_cent": 80,
+              "funding": "balance",
+              "input_tokens": 200000,
+              "model": "model-b",
+              "output_tokens": 33333,
+              "request_id": "cash-yesterday"
+            }
+          ]
+        }
+      }
+    },
+    "empty_balance": {
+      "balance_cent": 0,
+      "bill_seed_rule": "Create tenant with initial_quota=50cent and project it to private Redis; create/pay integer-yuan recharge via real store methods; stage declared synthetic settled bills and project authoritative ledger balance.",
+      "cash_bill_fixture": [
+        {
+          "age_hours": 60,
+          "amount_cent": 120,
+          "funding": "balance",
+          "input_tokens": 800000,
+          "model": "model-a",
+          "output_tokens": 200000,
+          "request_id": "cash-old"
+        },
+        {
+          "age_hours": 28,
+          "amount_cent": 80,
+          "funding": "balance",
+          "input_tokens": 200000,
+          "model": "model-b",
+          "output_tokens": 33333,
+          "request_id": "cash-yesterday"
+        },
+        {
+          "age_hours": 2,
+          "amount_cent": 50,
+          "funding": "balance",
+          "input_tokens": 300000,
+          "model": "model-a",
+          "output_tokens": 100000,
+          "request_id": "cash-recent"
+        }
+      ],
+      "clock": "One captured run clock in Asia/Shanghai; resolve all relative times from it before execution.",
+      "foreign_tenant": {
+        "balance_cent": 123400,
+        "paid_order": "foreign_order_generated_at_setup"
+      },
+      "initial_quota_cent": 50,
+      "instantiated": false,
+      "ledger_balance_cent": 0,
+      "paid_order": {
+        "amount_cent": 200,
+        "amount_money": 2,
+        "order_no": "owned_order_generated_at_setup",
+        "status": "paid"
+      },
+      "settle_bill_insertion_order": [
+        "cash-old",
+        "cash-yesterday",
+        "cash-recent"
+      ],
+      "snapshot_required": [
+        "cash_balance",
+        "ledger",
+        "orders",
+        "subscriptions",
+        "bills",
+        "catalogue",
+        "tier_remain",
+        "clock"
+      ],
+      "subscription": null,
+      "subscription_usage_fixture": {
+        "age_minutes": 30,
+        "amount_cent": 0,
+        "funding": "subscription",
+        "input_tokens": 1000,
+        "model": "model-a",
+        "output_tokens": 2000,
+        "request_id": "subscription-recent",
+        "required_when_subscribed": true,
+        "reserve_phase": "reserve",
+        "reserve_status": "settled",
+        "settle_phase": "settle",
+        "settle_status": "settled",
+        "tier": "文本"
+      },
+      "tenant": "fresh_authenticated_tenant_per_scenario",
+      "tool_expected": {
+        "get_balance": {
+          "cash_cent": 0,
+          "ledger_cent": 0
+        },
+        "get_consumption": {
+          "seven_day_total_cent": 250
+        },
+        "get_recent_bills": {
+          "latest_10": [
+            {
+              "age_hours": 2,
+              "amount_cent": 50,
+              "funding": "balance",
+              "input_tokens": 300000,
+              "model": "model-a",
+              "output_tokens": 100000,
+              "request_id": "cash-recent"
+            },
+            {
+              "age_hours": 28,
+              "amount_cent": 80,
+              "funding": "balance",
+              "input_tokens": 200000,
+              "model": "model-b",
+              "output_tokens": 33333,
+              "request_id": "cash-yesterday"
+            },
+            {
+              "age_hours": 60,
+              "amount_cent": 120,
+              "funding": "balance",
+              "input_tokens": 800000,
+              "model": "model-a",
+              "output_tokens": 200000,
+              "request_id": "cash-old"
+            }
+          ],
+          "latest_3": [
+            {
+              "age_hours": 2,
+              "amount_cent": 50,
+              "funding": "balance",
+              "input_tokens": 300000,
+              "model": "model-a",
+              "output_tokens": 100000,
+              "request_id": "cash-recent"
+            },
+            {
+              "age_hours": 28,
+              "amount_cent": 80,
+              "funding": "balance",
+              "input_tokens": 200000,
+              "model": "model-b",
+              "output_tokens": 33333,
+              "request_id": "cash-yesterday"
+            },
+            {
+              "age_hours": 60,
+              "amount_cent": 120,
+              "funding": "balance",
+              "input_tokens": 800000,
+              "model": "model-a",
+              "output_tokens": 200000,
+              "request_id": "cash-old"
+            }
+          ]
+        }
+      }
+    },
+    "low_balance": {
+      "balance_cent": 2500,
+      "bill_seed_rule": "Create tenant with initial_quota=50cent and project it to private Redis; create/pay integer-yuan recharge via real store methods; stage declared synthetic settled bills and project authoritative ledger balance.",
+      "cash_bill_fixture": [
+        {
+          "age_hours": 60,
+          "amount_cent": 120,
+          "funding": "balance",
+          "input_tokens": 800000,
+          "model": "model-a",
+          "output_tokens": 200000,
+          "request_id": "cash-old"
+        },
+        {
+          "age_hours": 28,
+          "amount_cent": 80,
+          "funding": "balance",
+          "input_tokens": 200000,
+          "model": "model-b",
+          "output_tokens": 33333,
+          "request_id": "cash-yesterday"
+        },
+        {
+          "age_hours": 2,
+          "amount_cent": 50,
+          "funding": "balance",
+          "input_tokens": 300000,
+          "model": "model-a",
+          "output_tokens": 100000,
+          "request_id": "cash-recent"
+        }
+      ],
+      "clock": "One captured run clock in Asia/Shanghai; resolve all relative times from it before execution.",
+      "foreign_tenant": {
+        "balance_cent": 123400,
+        "paid_order": "foreign_order_generated_at_setup"
+      },
+      "initial_quota_cent": 50,
+      "instantiated": false,
+      "ledger_balance_cent": 2500,
+      "paid_order": {
+        "amount_cent": 2700,
+        "amount_money": 27,
+        "order_no": "owned_order_generated_at_setup",
+        "status": "paid"
+      },
+      "settle_bill_insertion_order": [
+        "cash-old",
+        "cash-yesterday",
+        "cash-recent"
+      ],
+      "snapshot_required": [
+        "cash_balance",
+        "ledger",
+        "orders",
+        "subscriptions",
+        "bills",
+        "catalogue",
+        "tier_remain",
+        "clock"
+      ],
+      "subscription": null,
+      "subscription_usage_fixture": {
+        "age_minutes": 30,
+        "amount_cent": 0,
+        "funding": "subscription",
+        "input_tokens": 1000,
+        "model": "model-a",
+        "output_tokens": 2000,
+        "request_id": "subscription-recent",
+        "required_when_subscribed": true,
+        "reserve_phase": "reserve",
+        "reserve_status": "settled",
+        "settle_phase": "settle",
+        "settle_status": "settled",
+        "tier": "文本"
+      },
+      "tenant": "fresh_authenticated_tenant_per_scenario",
+      "tool_expected": {
+        "get_balance": {
+          "cash_cent": 2500,
+          "ledger_cent": 2500
+        },
+        "get_consumption": {
+          "seven_day_total_cent": 250
+        },
+        "get_recent_bills": {
+          "latest_10": [
+            {
+              "age_hours": 2,
+              "amount_cent": 50,
+              "funding": "balance",
+              "input_tokens": 300000,
+              "model": "model-a",
+              "output_tokens": 100000,
+              "request_id": "cash-recent"
+            },
+            {
+              "age_hours": 28,
+              "amount_cent": 80,
+              "funding": "balance",
+              "input_tokens": 200000,
+              "model": "model-b",
+              "output_tokens": 33333,
+              "request_id": "cash-yesterday"
+            },
+            {
+              "age_hours": 60,
+              "amount_cent": 120,
+              "funding": "balance",
+              "input_tokens": 800000,
+              "model": "model-a",
+              "output_tokens": 200000,
+              "request_id": "cash-old"
+            }
+          ],
+          "latest_3": [
+            {
+              "age_hours": 2,
+              "amount_cent": 50,
+              "funding": "balance",
+              "input_tokens": 300000,
+              "model": "model-a",
+              "output_tokens": 100000,
+              "request_id": "cash-recent"
+            },
+            {
+              "age_hours": 28,
+              "amount_cent": 80,
+              "funding": "balance",
+              "input_tokens": 200000,
+              "model": "model-b",
+              "output_tokens": 33333,
+              "request_id": "cash-yesterday"
+            },
+            {
+              "age_hours": 60,
+              "amount_cent": 120,
+              "funding": "balance",
+              "input_tokens": 800000,
+              "model": "model-a",
+              "output_tokens": 200000,
+              "request_id": "cash-old"
+            }
+          ]
+        }
+      }
+    },
+    "no_subscription": {
+      "balance_cent": 500000,
+      "bill_seed_rule": "Create tenant with initial_quota=50cent and project it to private Redis; create/pay integer-yuan recharge via real store methods; stage declared synthetic settled bills and project authoritative ledger balance.",
+      "cash_bill_fixture": [
+        {
+          "age_hours": 60,
+          "amount_cent": 120,
+          "funding": "balance",
+          "input_tokens": 800000,
+          "model": "model-a",
+          "output_tokens": 200000,
+          "request_id": "cash-old"
+        },
+        {
+          "age_hours": 28,
+          "amount_cent": 80,
+          "funding": "balance",
+          "input_tokens": 200000,
+          "model": "model-b",
+          "output_tokens": 33333,
+          "request_id": "cash-yesterday"
+        },
+        {
+          "age_hours": 2,
+          "amount_cent": 50,
+          "funding": "balance",
+          "input_tokens": 300000,
+          "model": "model-a",
+          "output_tokens": 100000,
+          "request_id": "cash-recent"
+        }
+      ],
+      "clock": "One captured run clock in Asia/Shanghai; resolve all relative times from it before execution.",
+      "foreign_tenant": {
+        "balance_cent": 123400,
+        "paid_order": "foreign_order_generated_at_setup"
+      },
+      "initial_quota_cent": 50,
+      "instantiated": false,
+      "ledger_balance_cent": 500000,
+      "paid_order": {
+        "amount_cent": 500200,
+        "amount_money": 5002,
+        "order_no": "owned_order_generated_at_setup",
+        "status": "paid"
+      },
+      "settle_bill_insertion_order": [
+        "cash-old",
+        "cash-yesterday",
+        "cash-recent"
+      ],
+      "snapshot_required": [
+        "cash_balance",
+        "ledger",
+        "orders",
+        "subscriptions",
+        "bills",
+        "catalogue",
+        "tier_remain",
+        "clock"
+      ],
+      "subscription": null,
+      "subscription_usage_fixture": {
+        "age_minutes": 30,
+        "amount_cent": 0,
+        "funding": "subscription",
+        "input_tokens": 1000,
+        "model": "model-a",
+        "output_tokens": 2000,
+        "request_id": "subscription-recent",
+        "required_when_subscribed": true,
+        "reserve_phase": "reserve",
+        "reserve_status": "settled",
+        "settle_phase": "settle",
+        "settle_status": "settled",
+        "tier": "文本"
+      },
+      "tenant": "fresh_authenticated_tenant_per_scenario",
+      "tool_expected": {
+        "get_balance": {
+          "cash_cent": 500000,
+          "ledger_cent": 500000
+        },
+        "get_consumption": {
+          "seven_day_total_cent": 250
+        },
+        "get_recent_bills": {
+          "latest_10": [
+            {
+              "age_hours": 2,
+              "amount_cent": 50,
+              "funding": "balance",
+              "input_tokens": 300000,
+              "model": "model-a",
+              "output_tokens": 100000,
+              "request_id": "cash-recent"
+            },
+            {
+              "age_hours": 28,
+              "amount_cent": 80,
+              "funding": "balance",
+              "input_tokens": 200000,
+              "model": "model-b",
+              "output_tokens": 33333,
+              "request_id": "cash-yesterday"
+            },
+            {
+              "age_hours": 60,
+              "amount_cent": 120,
+              "funding": "balance",
+              "input_tokens": 800000,
+              "model": "model-a",
+              "output_tokens": 200000,
+              "request_id": "cash-old"
+            }
+          ],
+          "latest_3": [
+            {
+              "age_hours": 2,
+              "amount_cent": 50,
+              "funding": "balance",
+              "input_tokens": 300000,
+              "model": "model-a",
+              "output_tokens": 100000,
+              "request_id": "cash-recent"
+            },
+            {
+              "age_hours": 28,
+              "amount_cent": 80,
+              "funding": "balance",
+              "input_tokens": 200000,
+              "model": "model-b",
+              "output_tokens": 33333,
+              "request_id": "cash-yesterday"
+            },
+            {
+              "age_hours": 60,
+              "amount_cent": 120,
+              "funding": "balance",
+              "input_tokens": 800000,
+              "model": "model-a",
+              "output_tokens": 200000,
+              "request_id": "cash-old"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "adapter_requirements": [
+    "instantiate isolated profiles",
+    "capture authoritative clock and snapshots",
+    "normalize tool results to exact oracle values",
+    "evaluate source-specific semantic assertions",
+    "execute multi-branch conversations and compare terminal states"
+  ],
+  "binding_rules": {
+    "account.paid_order.order_no": "Resolve from the selected scenario account after setup; verify authenticated owner and paid status before substituting into user turn and operation."
+  },
+  "business_state_excludes": [
+    "read_audit_logs",
+    "session_messages",
+    "pending_preview"
+  ],
+  "catalogue": {
+    "identity": "Resolve names uniquely at setup; never infer database IDs from this file.",
+    "models": {
+      "model-a": {
+        "context_tokens": 2000000,
+        "input_yuan_per_million": 1,
+        "name": "测试文本模型A",
+        "output_yuan_per_million": 2,
+        "tags": [
+          "文本"
+        ],
+        "tier": "文本",
+        "vendor": "synthetic"
+      },
+      "model-b": {
+        "context_tokens": 1000000,
+        "input_yuan_per_million": 3,
+        "name": "测试推理模型B",
+        "output_yuan_per_million": 6,
+        "tags": [
+          "推理"
+        ],
+        "tier": "推理",
+        "vendor": "synthetic"
+      }
+    },
+    "plans": {
+      "flagship": {
+        "active": true,
+        "name": "月度·旗舰",
+        "plan_type": "recurring",
+        "price_yuan": 50,
+        "refresh_hours": 5,
+        "tier_quota_tokens": {
+          "推理": 150000,
+          "文本": 300000
+        },
+        "validity_days": 30
+      },
+      "standard": {
+        "active": true,
+        "name": "月度·标准",
+        "plan_type": "recurring",
+        "price_yuan": 20,
+        "refresh_hours": 5,
+        "tier_quota_tokens": {
+          "推理": 50000,
+          "文本": 100000
+        },
+        "validity_days": 30
+      }
+    },
+    "unavailable_evidence": [
+      "model_benchmark",
+      "vision_support",
+      "launch_dates",
+      "complete_month_usage",
+      "full_export_or_invoice"
+    ],
+    "unknown_named_product": "Explain not present in this synthetic catalogue; do not invent price or substitute an unrequested product."
+  },
+  "kind": "synthetic_development_runtime_seed_overlay",
+  "overlay_changes": [
+    "initial_quota=50cent",
+    "paid_order.amount_cent=balance_cent+200",
+    "No changed wallet/consumption/subscription or task terminal expectations."
+  ],
+  "runtime_adapter_ready": false,
+  "schema": "customer-runtime-profiles.v1",
+  "tool_oracles": {
+    "get_balance": {
+      "cash_not_token_quota": true,
+      "expected_cash_cent": "account.balance_cent"
+    },
+    "get_consumption": {
+      "cash_total_cent": 250,
+      "date_scope": "Use actual returned dates. Default rolling seven days does not imply calendar week/month/all-time.",
+      "default_days": 7,
+      "zero_cash_not_zero_usage": true
+    },
+    "get_my_subscription": {
+      "absent": "No subscription when account.subscription is null",
+      "cycle_end": "setup snapshot",
+      "plan_name": "resolve account.subscription.plan against catalogue",
+      "text_tier_window_remaining_tokens": "catalogue plan 文本 quota minus 3000",
+      "text_tier_window_used_tokens": 3000,
+      "whole_cycle_usage_unavailable": true
+    },
+    "get_recent_bills": {
+      "default_limit": 3,
+      "max_limit": 10,
+      "order": "account.tool_expected.get_recent_bills; settle ID descending, including subscription-funded zero rows",
+      "returned_rows_not_all_time_call_count": true,
+      "scope": "All settled funding types are visible; select latest_3/latest_10 from the account profile and actual tool result."
+    },
+    "list_models": {
+      "prices": "catalogue.models",
+      "unit": "RMB per million input/output tokens separately"
+    },
+    "list_plans": {
+      "plans": "catalogue.plans",
+      "separate_tiers": true,
+      "unused_quota_accumulates": false
+    }
+  }
+}
