@@ -57,3 +57,6 @@ python -m unittest discover -s scripts/tests -p test_define_customer_tasks.py
 
 
 2026-10-13修复后复核：生产订阅/客服代码已变更，旧全量定义保留修复前绑定及代码快照。现在使用 `python scripts/verify-task-definition-archive.py verify` 核验历史版本；原命令用于代码仍匹配的导出版本。详情见账户初始化文档追加记录，不意味着旧定义或新运行时已获完整任务认证。
+
+
+2026-10-13会话框架追加：全部4291定义可通过独立conversation loader加载，3071完整任务和1220首轮诊断分离；30个代表性完整分支完成真实store结构测试，不代表全部定义获认证。详见[执行与审核边界](customer-service-conversation-runner-2026-10-13.md)。冻结JSON中的defined_not_run与runtime_adapter_ready=false保留导出时状态，不改写旧文件冒充新进度。

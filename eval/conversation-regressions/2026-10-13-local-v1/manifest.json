@@ -1,0 +1,35 @@
+{
+  "actual_jev_calls": 0,
+  "actual_model_calls": 0,
+  "answers_pending_review": 30,
+  "base_git": "7ae4ad9e9d4b3aed17ae72b21a3269befa1ddcb5",
+  "definition_sha256": "50848e347b985669e3424688f5f1e57b369d6c5577f3aa7e5de25e03144b7ebd",
+  "evaluator_worktree_canonical_sha256": {
+    "cmd/conversation-eval/main.go": "a7e4f70fcf2541490f9e5da69626880f13cec1c3ecfddc897faf2ef1c7760433",
+    "cmd/conversation-eval/main_test.go": "73b6685d0574600ec6d8a9a25b8aadc0a555cf3a6016ea7f9b1c5d1211de6e01",
+    "internal/taskbench/conversation_load.go": "6d9010405219c86d59ac19643e64ed3565e5a4c2f90235ece965be5eba30d518",
+    "internal/taskbench/conversation_replay.go": "2707b4d02ecd54382c42b0d33a8eff00f441265cb7d54776bb0d46a57c7b6638",
+    "internal/taskbench/conversation_replay_test.go": "d563a801f88bf88f4666b0c26f74578b4903ca725d73daa04439eee8f7f0d752",
+    "internal/taskbench/conversation_runner.go": "e70b7cbaaea3ed6ce848f27a049b6216cad842193e93a1d89d8c48707f27c0b0",
+    "internal/taskbench/conversation_state.go": "9ffc9c2799a706aee06121c14c1fb4818e17f151896846cb41fc66eb36aa68da",
+    "internal/taskbench/conversation_store_test.go": "5aae8cebd5a262acba7555c0158ef4ef9bf6a61927f56f9c80fe61427619d126",
+    "internal/taskbench/conversation_test.go": "f1cd085e1030a0ae1d030b7cad66ca93f8496e239c01a0f041aeee884cbf2dec",
+    "internal/taskbench/conversation_types.go": "08c4dc81cfcf9f2b98bbb80e23083c6095f0b0aeb94d9d9b6ddb79c288b0385f"
+  },
+  "evidence_kind": "local_stub",
+  "files": {
+    "report.json": "e28636843824270ece0d81ba57b6ccca87f75399032804ca564c324db0d2a048",
+    "transcript.json": "5cb0357db390735265064af11d6bbc54d10003dc42403f908f4272121f23dfa4"
+  },
+  "new_model_quality_score": false,
+  "notes": [
+    "Dialogue is a deterministic double; account, ledger, order and subscription operations use isolated real MySQL/private Redis.",
+    "Temporary databases and keys were cleaned; this archive contains snapshots, not retained runnable accounts.",
+    "Replay time is evaluator processing time; it is not model latency.",
+    "Historical 1220 outputs/scores unchanged; 30 selected branches do not imply 1220 full-task successes.",
+    "Evaluator worktree hashes describe capture provenance, not a demand that future production code remain unchanged."
+  ],
+  "runtime_profile_sha256": "83a78d7492c75e0d153cbb9ca4a1a87aa2f15714ad1e855534a084f4848e257d",
+  "schema": "conversation-local-regression.v1",
+  "structural_passed": 30
+}
