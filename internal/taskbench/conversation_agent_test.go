@@ -22,8 +22,27 @@ import (
 
 type agentConversationOracle struct{ *storeConversationDouble }
 
+func (o *agentConversationOracle) capture(ctx context.Context) (ConversationState, error) {
+	s, err := o.snapshot(ctx)
+	if err != nil {
+		return s, err
+	}
+	s.AnswerAuthority, err = CaptureConversationAnswerAuthority(ctx, o.st, o.f.TenantID, s.CapturedAt)
+	return s, err
+}
+func (o *agentConversationOracle) Setup(ctx context.Context, c ConversationCase) (Fixture, ConversationState, error) {
+	f, _, err := o.storeConversationDouble.Setup(ctx, c)
+	if err != nil {
+		return f, ConversationState{}, err
+	}
+	s, err := o.capture(ctx)
+	return f, s, err
+}
 func (o *agentConversationOracle) State(ctx context.Context, _ Fixture, _ string) (ConversationState, error) {
-	return o.snapshot(ctx)
+	return o.capture(ctx)
+}
+func (o *agentConversationOracle) Final(ctx context.Context, _ Fixture, _ string) (ConversationState, error) {
+	return o.capture(ctx)
 }
 func (o *agentConversationOracle) Pending(ctx context.Context, _ Fixture, session string) (*Pending, error) {
 	if session == "" {

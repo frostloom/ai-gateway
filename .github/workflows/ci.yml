@@ -73,6 +73,8 @@ jobs:
           python scripts/verify-task-definition-archive.py verify
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python scripts/prepare-runtime-customer-profiles.py verify
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python scripts/audit-historical-answer-evidence.py verify
           exit $LASTEXITCODE
 
   web:

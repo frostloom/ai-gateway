@@ -206,7 +206,7 @@ func CheckConversationFacts(r ConversationResult) []ConversationFactCheck {
 		}
 		previous = obs.State
 	}
-	return checks
+	return append(checks, checkAdditionalConversationFacts(r)...)
 }
 
 // Kept separate from the frozen replay path: old archives retain their evaluator
