@@ -55,10 +55,11 @@ type ConversationSuite struct {
 	Cases            []ConversationCase `json:"cases"`
 }
 type ConversationState struct {
-	Own        Snapshot            `json:"own"`
-	Allowance  []store.TierRemain  `json:"allowance"`
-	Controls   map[uint64]Snapshot `json:"controls"`
-	CapturedAt time.Time           `json:"captured_at"`
+	AnswerAuthority *ConversationAnswerAuthority `json:"answer_authority,omitempty"`
+	Own             Snapshot                     `json:"own"`
+	Allowance       []store.TierRemain           `json:"allowance"`
+	Controls        map[uint64]Snapshot          `json:"controls"`
+	CapturedAt      time.Time                    `json:"captured_at"`
 }
 type ConversationReview struct {
 	ID                string `json:"id"`
