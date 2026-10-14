@@ -4,10 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"time"
+
+	"github.com/frostloom/ai-gateway/internal/jev"
 )
 
 // TurnTelemetry is request-local; never shared between concurrent conversations.
-// LLMCalls counts actual upstream attempts (including retries), not tool traces.
+// LLMCalls counts client attempts, including transport-local budget rejections.
+// Guard journals distinguish reserved provider attempts from local rejections.
 type TurnTelemetry struct {
 	Runtime                *RuntimeMetadata  `json:"runtime,omitempty"`
 	TotalLatencyMS         float64           `json:"total_latency_ms"`
@@ -17,6 +20,7 @@ type TurnTelemetry struct {
 	JevEnabled             bool              `json:"jev_enabled"`
 	JevCalls               int               `json:"jev_calls"`
 	JevErrors              int               `json:"jev_errors"`
+	JevFailures            []jev.Failure     `json:"jev_failures,omitempty"`
 	JevBlocked             bool              `json:"jev_blocked"`
 	JevShortCircuit        bool              `json:"jev_short_circuit"`
 	LLMCalls               int               `json:"llm_calls"`
