@@ -20,6 +20,7 @@ type RuntimeMetadata struct {
 	RoutingMode      string             `json:"routing_mode"`
 	Thresholds       map[string]float64 `json:"thresholds"`
 	MaxOutputTokens  int                `json:"max_output_tokens"`
+	ThinkingMode     string             `json:"thinking_mode,omitempty"`
 	ReplyRepairLimit int                `json:"reply_repair_limit"`
 }
 
@@ -51,6 +52,9 @@ func (h *Handler) runtimeMetadata() *RuntimeMetadata {
 	if model, ok := h.llm.(*LLMClient); ok {
 		metadata.Model, metadata.Protocol, metadata.MaxOutputTokens = model.Model(), model.Protocol(), model.maxTokens
 		metadata.EndpointSHA256 = endpointSHA(model.baseURL)
+		if model.strictEvaluation && model.proto == protoAnthropic {
+			metadata.ThinkingMode = "disabled"
+		}
 	}
 	return metadata
 }

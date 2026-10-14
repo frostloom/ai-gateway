@@ -61,6 +61,11 @@ type anthropicRequest struct {
 	Messages    []anthropicMessage `json:"messages"`
 	Tools       []anthropicTool    `json:"tools,omitempty"`
 	Temperature *float64           `json:"temperature,omitempty"`
+	Thinking    *anthropicThinking `json:"thinking,omitempty"`
+}
+
+type anthropicThinking struct {
+	Type string `json:"type"`
 }
 
 type anthropicMessage struct {
@@ -172,6 +177,9 @@ func (c *LLMClient) chatAnthropic(ctx context.Context, messages []Message, tools
 	req, err := buildAnthropicRequest(c.model, messages, tools, maxTokens)
 	if err != nil {
 		return nil, err
+	}
+	if c.strictEvaluation {
+		req.Thinking = &anthropicThinking{Type: "disabled"}
 	}
 	if DebugDumpRequest {
 		// 日志与落盘是两个独立出口：只设了其中一个也要生效

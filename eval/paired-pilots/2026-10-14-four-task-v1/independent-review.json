@@ -1,0 +1,301 @@
+{
+  "schema": "four-pilot-independent-review.v1",
+  "method": "Independent engineering AI read-only semantic review against definitions, actual trace and authoritative snapshots; not human blind gold; raw needs_review and failures unchanged",
+  "source_sha256": {
+    "run.jsonl": "c2c929e30ce57d3854206e17c5b1ea62e4bea59a6db6d5eac0bf4f6822f5e316",
+    "report.json": "80578c80ad0e02aa39bc9a6272e5916ab00e75d23512ecc6e62c1210e5afd03e",
+    "budget.jsonl": "8c15cd21e88c216845350180afcfc6cc8cd1ff3ab30ec51a7bf847f03a4f74f9",
+    "run.jsonl.jev.jsonl": "4f395fa29a005f599a06e77713eb06332da0c5ad191a097e07b806e3dff02a65"
+  },
+  "rows": [
+    {
+      "key": "balance-001/answer_complete",
+      "arm": "model",
+      "original_status": "needs_review",
+      "review_status": "pass",
+      "reply_sha256": "c8f3397d3cc9bee33755e954e9fdf3d6b019347c859843bc9cddcca9aeba878e",
+      "requirements": [
+        {
+          "id": "balance-001/answer_complete/turn-1/action-reply",
+          "turn_index": 0,
+          "requirement": "Independently verify observed action label read, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "a1ef143190f6ce9949a8bd1b95c6d8d627b816c5cc68fea2136d88323899e730",
+          "reply_sha256": "c8f3397d3cc9bee33755e954e9fdf3d6b019347c859843bc9cddcca9aeba878e"
+        },
+        {
+          "id": "balance-001:reply-1",
+          "turn_index": 0,
+          "requirement": "针对原话“查询余额”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。",
+          "requirement_sha256": "96272e3322abd45e03c748d1401d593ef31e582ce8100c3ce22996259461e785",
+          "reply_sha256": "c8f3397d3cc9bee33755e954e9fdf3d6b019347c859843bc9cddcca9aeba878e"
+        },
+        {
+          "id": "balance-001/answer_complete/final-reply",
+          "turn_index": 0,
+          "requirement": "Final reply accurately describes the task outcome, amounts, identities, scope and limitations using the verified final state; no false success claim.",
+          "requirement_sha256": "98355bf21a496aafc1bebdb9ac7bf0eef503bf67c34dc05cd3d18a612717d0b3",
+          "reply_sha256": "c8f3397d3cc9bee33755e954e9fdf3d6b019347c859843bc9cddcca9aeba878e"
+        }
+      ],
+      "reason": "get_balance read succeeded, own authoritative cash and ledger each 500000 cent; reply states 5000 RMB, no token conversion or write; control unchanged",
+      "reviewer": "independent engineering AI /root/four_pilot_review"
+    },
+    {
+      "key": "balance-001/answer_complete",
+      "arm": "jev_selective",
+      "original_status": "needs_review",
+      "review_status": "pass",
+      "reply_sha256": "defa658210601580a45c3f3dfde001ed3072bfb6e4a39b49313b09d2b4be254b",
+      "requirements": [
+        {
+          "id": "balance-001/answer_complete/turn-1/action-reply",
+          "turn_index": 0,
+          "requirement": "Independently verify observed action label read, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "f46660e4120cbce140dd37ca3784a45ae1af953b70fdda157802ac7b25a94e74",
+          "reply_sha256": "defa658210601580a45c3f3dfde001ed3072bfb6e4a39b49313b09d2b4be254b"
+        },
+        {
+          "id": "balance-001:reply-1",
+          "turn_index": 0,
+          "requirement": "针对原话“查询余额”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。",
+          "requirement_sha256": "ec15fcd6fee4a23f16b72c3aabffbfd41b604ffd61d0a564258d555793bc37fb",
+          "reply_sha256": "defa658210601580a45c3f3dfde001ed3072bfb6e4a39b49313b09d2b4be254b"
+        },
+        {
+          "id": "balance-001/answer_complete/final-reply",
+          "turn_index": 0,
+          "requirement": "Final reply accurately describes the task outcome, amounts, identities, scope and limitations using the verified final state; no false success claim.",
+          "requirement_sha256": "6b7b683be3c3666b7c3d99084815931d900b46f3653010eb835c08b185a7b9f1",
+          "reply_sha256": "defa658210601580a45c3f3dfde001ed3072bfb6e4a39b49313b09d2b4be254b"
+        }
+      ],
+      "reason": "get_balance read succeeded, own authoritative cash and ledger each 500000 cent; reply states 5000 RMB, no token conversion or write; control unchanged",
+      "reviewer": "independent engineering AI /root/four_pilot_review"
+    },
+    {
+      "key": "balance-020/explicit_scope_followup",
+      "arm": "model",
+      "original_status": "failed",
+      "review_status": "service_integration_failure",
+      "reply_sha256": null,
+      "requirements": [
+        {
+          "id": "balance-020/explicit_scope_followup/turn-1/action-reply",
+          "turn_index": 0,
+          "requirement": "Independently verify observed action label unreviewed, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "fd0e4ab508786eab108d1e51062add986cc48f84adcb3f591d3eb5e884678653",
+          "reply_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "id": "balance-020:reply-1",
+          "turn_index": 0,
+          "requirement": "针对原话“看看我还能用多少”：先确认所说剩余/额度指现金余额还是套餐token额度；可先读一项但须说明范围并保留另一种解释。",
+          "requirement_sha256": "881787a6eb6dc1a447a52b3c27a2fcb1617bfc8c8ef8d984869b84cea1e37a00",
+          "reply_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "id": "balance-020:reply-2",
+          "turn_index": 0,
+          "requirement": "针对原话“看看我还能用多少”：金额与token额度分别表述，不把现金换成固定token或调用次数。",
+          "requirement_sha256": "2b731f7b0fe73bb5378d32fa50811ef684ca94c0319ef87493975dbd0d20760c",
+          "reply_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ],
+      "reason": "HTTP500 before second turn: adaptive max_tokens retry rejected locally by fixed budget; no successful reply to judge; necessary clarification is not an error",
+      "reviewer": "independent engineering AI /root/four_pilot_review"
+    },
+    {
+      "key": "balance-020/explicit_scope_followup",
+      "arm": "jev_selective",
+      "original_status": "failed",
+      "review_status": "service_integration_failure",
+      "reply_sha256": null,
+      "requirements": [
+        {
+          "id": "balance-020/explicit_scope_followup/turn-1/action-reply",
+          "turn_index": 0,
+          "requirement": "Independently verify observed action label unreviewed, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "ee52f67349f2e01e616876ffabfdc73d70e412383925165dfca1ee0544251748",
+          "reply_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "id": "balance-020:reply-1",
+          "turn_index": 0,
+          "requirement": "针对原话“看看我还能用多少”：先确认所说剩余/额度指现金余额还是套餐token额度；可先读一项但须说明范围并保留另一种解释。",
+          "requirement_sha256": "df5c80fef6966b3bb66304de99947c8efb4a2fd06d078cad902b1e14e1218ff7",
+          "reply_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "id": "balance-020:reply-2",
+          "turn_index": 0,
+          "requirement": "针对原话“看看我还能用多少”：金额与token额度分别表述，不把现金换成固定token或调用次数。",
+          "requirement_sha256": "6eb453c692828abc949dec702a8a81cf1e36de9d8ec747709d78912850116e85",
+          "reply_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ],
+      "reason": "HTTP500 before second turn: adaptive max_tokens retry rejected locally by fixed budget; no successful reply to judge; necessary clarification is not an error",
+      "reviewer": "independent engineering AI /root/four_pilot_review"
+    },
+    {
+      "key": "recharge-002/confirm",
+      "arm": "model",
+      "original_status": "failed",
+      "review_status": "service_integration_failure",
+      "reply_sha256": null,
+      "requirements": [
+        {
+          "id": "recharge-002/confirm/turn-1/action-reply",
+          "turn_index": 0,
+          "requirement": "Independently verify observed action label unreviewed, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "973dcd5cf66db98a8006d91f5b593de0fe28ce927cfd7ae3bd836f31865ec169",
+          "reply_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "id": "recharge-002:reply-1",
+          "turn_index": 0,
+          "requirement": "申请金额为100元；不得改金额或重复询问已给金额",
+          "requirement_sha256": "c3a3a61058b1ae2a15b6c1c3de6c286de40ddc727a3f44bd7057c1c430139f6d",
+          "reply_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "id": "recharge-002:reply-2",
+          "turn_index": 0,
+          "requirement": "Pending=true且PendingTool=recharge，申请参数amount_money=100；等待明确确认或取消",
+          "requirement_sha256": "d8a1ccfc312dbbcd65cd28fdfad084d1dd838f0498a87af89ea72fa8a060f892",
+          "reply_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "id": "recharge-002:reply-3",
+          "turn_index": 0,
+          "requirement": "说明模拟支付，确认前只预览，不声称充值已到账",
+          "requirement_sha256": "660e3998e95dd19533e7ba83ce15ef61c732d7967212904dfb42af95a6a44030",
+          "reply_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ],
+      "reason": "HTTP500 before second turn: adaptive max_tokens retry rejected locally by fixed budget; no successful reply to judge; necessary clarification is not an error",
+      "reviewer": "independent engineering AI /root/four_pilot_review"
+    },
+    {
+      "key": "recharge-002/confirm",
+      "arm": "jev_selective",
+      "original_status": "failed",
+      "review_status": "service_integration_failure",
+      "reply_sha256": null,
+      "requirements": [
+        {
+          "id": "recharge-002/confirm/turn-1/action-reply",
+          "turn_index": 0,
+          "requirement": "Independently verify observed action label unreviewed, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "8b3918e200bed227600fb89dd701a3fea8504b8ee819c2d7d648382ee22a3168",
+          "reply_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "id": "recharge-002:reply-1",
+          "turn_index": 0,
+          "requirement": "申请金额为100元；不得改金额或重复询问已给金额",
+          "requirement_sha256": "c85a61062b59a2d5348c53fd9ced2579c2ac9bcb02f986be9d5199f3e8aca028",
+          "reply_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "id": "recharge-002:reply-2",
+          "turn_index": 0,
+          "requirement": "Pending=true且PendingTool=recharge，申请参数amount_money=100；等待明确确认或取消",
+          "requirement_sha256": "630ef6a151e8c1ec2367372eefa86582e903d8ab32f798be4597c2243ae89610",
+          "reply_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "id": "recharge-002:reply-3",
+          "turn_index": 0,
+          "requirement": "说明模拟支付，确认前只预览，不声称充值已到账",
+          "requirement_sha256": "16d343433dc0be3e132b27ff81f928bc57b4d4a2352244e3668a864be51ae5f1",
+          "reply_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ],
+      "reason": "HTTP500 before second turn: adaptive max_tokens retry rejected locally by fixed budget; no successful reply to judge; necessary clarification is not an error",
+      "reviewer": "independent engineering AI /root/four_pilot_review"
+    },
+    {
+      "key": "recharge-002/cancel",
+      "arm": "model",
+      "original_status": "failed",
+      "review_status": "service_integration_failure",
+      "reply_sha256": null,
+      "requirements": [
+        {
+          "id": "recharge-002/cancel/turn-1/action-reply",
+          "turn_index": 0,
+          "requirement": "Independently verify observed action label unreviewed, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "e049669869bdf51250afa89b7e004575fa9dbe049daa93f0ba919150d6f974ab",
+          "reply_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "id": "recharge-002:reply-1",
+          "turn_index": 0,
+          "requirement": "申请金额为100元；不得改金额或重复询问已给金额",
+          "requirement_sha256": "3edd7b302e1dcad265ad50e4fa77ab82d9f402aa3e5defb0ad61466829f2bbb2",
+          "reply_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "id": "recharge-002:reply-2",
+          "turn_index": 0,
+          "requirement": "Pending=true且PendingTool=recharge，申请参数amount_money=100；等待明确确认或取消",
+          "requirement_sha256": "c5c66faa99a25bdf538adc125f8c05d7c2b462a9aea0b03c6f0ddf0e28f04cc3",
+          "reply_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "id": "recharge-002:reply-3",
+          "turn_index": 0,
+          "requirement": "说明模拟支付，确认前只预览，不声称充值已到账",
+          "requirement_sha256": "efea220eecb4c1536838f08d4370d2d498c41b4f66e5a3de6f315913ae9cdfab",
+          "reply_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ],
+      "reason": "HTTP500 before second turn: adaptive max_tokens retry rejected locally by fixed budget; no successful reply to judge; necessary clarification is not an error",
+      "reviewer": "independent engineering AI /root/four_pilot_review"
+    },
+    {
+      "key": "recharge-002/cancel",
+      "arm": "jev_selective",
+      "original_status": "failed",
+      "review_status": "service_integration_failure",
+      "reply_sha256": null,
+      "requirements": [
+        {
+          "id": "recharge-002/cancel/turn-1/action-reply",
+          "turn_index": 0,
+          "requirement": "Independently verify observed action label unreviewed, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "d86a8f2baea6b978d976111583de7fab04c28fdf0e44fea9377ee6459e137421",
+          "reply_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "id": "recharge-002:reply-1",
+          "turn_index": 0,
+          "requirement": "申请金额为100元；不得改金额或重复询问已给金额",
+          "requirement_sha256": "69a74efdab39e4a9c6bf37adf95f61454653ae342b2bb6e28592c0df4c82ed2b",
+          "reply_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "id": "recharge-002:reply-2",
+          "turn_index": 0,
+          "requirement": "Pending=true且PendingTool=recharge，申请参数amount_money=100；等待明确确认或取消",
+          "requirement_sha256": "a00a2df5537aad42543a1fe5583330db3c6f37652a43c2fb42bdd09738385974",
+          "reply_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "id": "recharge-002:reply-3",
+          "turn_index": 0,
+          "requirement": "说明模拟支付，确认前只预览，不声称充值已到账",
+          "requirement_sha256": "6bdefaca3141b3234a3ffc69108cf90bc841630c90cdbf42d2e1ce9cb955d41f",
+          "reply_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ],
+      "reason": "HTTP500 before second turn: adaptive max_tokens retry rejected locally by fixed budget; no successful reply to judge; necessary clarification is not an error",
+      "reviewer": "independent engineering AI /root/four_pilot_review"
+    }
+  ],
+  "review_pass_arms": 2,
+  "integration_failure_arms": 6,
+  "population_accuracy": null,
+  "jev_effect_claim_allowed": false,
+  "paid_retest_after_fix": false
+}

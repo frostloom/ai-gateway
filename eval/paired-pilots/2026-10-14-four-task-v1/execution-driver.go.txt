@@ -1,0 +1,58 @@
+package main
+
+import (
+ "context"
+ "encoding/json"
+ "errors"
+ "fmt"
+ "net/http"
+ "os"
+ "path/filepath"
+ "strings"
+ "time"
+
+ "github.com/frostloom/ai-gateway/internal/jev"
+ "github.com/frostloom/ai-gateway/internal/taskbench"
+)
+
+type pinnedTransport struct{ statuses []int }
+func (p *pinnedTransport) RoundTrip(r *http.Request)(*http.Response,error){
+ if r.URL.Scheme!="https" || r.URL.Host!="maas.qianwenaiapi.com" || r.URL.Path!="/apps/anthropic/v1/messages" {return nil,fmt.Errorf("provider host/path mismatch")}
+ response,err:=http.DefaultTransport.RoundTrip(r)
+ if response!=nil {p.statuses=append(p.statuses,response.StatusCode);fmt.Printf("model_attempt_http_status=%d\n",response.StatusCode)}
+ return response,err
+}
+func writeNew(path string,v any) error {
+ raw,err:=json.MarshalIndent(v,"","  ");if err!=nil{return err}
+ f,err:=os.OpenFile(path,os.O_CREATE|os.O_EXCL|os.O_WRONLY,0600);if err!=nil{return err};defer f.Close()
+ if _,err=f.Write(append(raw,'\n'));err!=nil{return err};return f.Sync()
+}
+func main(){if err:=run();err!=nil {fmt.Fprintln(os.Stderr,err);os.Exit(1)}}
+func run()(runErr error){
+ if len(os.Args)!=2 || os.Args[1]!="execute-user-authorized-four" {return fmt.Errorf("explicit four-task authorization invocation required")}
+ raw,err:=os.ReadFile(".env");if err!=nil{return fmt.Errorf("local credentials unavailable")}
+ values:=map[string]string{}
+ for _,line:=range strings.Split(string(raw),"\n") {line=strings.TrimSpace(line);if line==""||strings.HasPrefix(line,"#"){continue};k,v,ok:=strings.Cut(line,"=");if ok {values[strings.TrimSpace(k)]=strings.Trim(strings.TrimSpace(v),"\"'")}}
+ if values["AGENT_LLM_API_KEY"]==""||values["JEV_API_KEY"]=="" {return fmt.Errorf("explicit model/JEV keys unavailable")}
+ raw,err=os.ReadFile("eval/paired-pilots/2026-10-14-four-task-v1/preparation.json");if err!=nil{return err}
+ var proposal struct{Configuration taskbench.PairRunConfig `json:"configuration"`;Limits taskbench.PairBudgetLimits `json:"model_budget"`;MaxJEV int `json:"max_jev_attempts"`}
+ if err=json.Unmarshal(raw,&proposal);err!=nil{return err}
+ if len(proposal.Configuration.Suite.Cases)!=4 || proposal.Limits.MaxCalls!=14 || proposal.Limits.MaxMicroCNY!=500000 || proposal.MaxJEV!=8 {return fmt.Errorf("four-task budget differs")}
+ proposal.Configuration.AllowPaid=true
+ dir:="eval/paired-pilots/2026-10-14-four-task-v1/attempt-01"
+ if err=os.Mkdir(dir,0700);err!=nil{return err}
+ if err=writeNew(filepath.Join(dir,"configuration.json"),proposal.Configuration);err!=nil{return err}
+ ctx,cancel:=context.WithTimeout(context.Background(),8*time.Minute);defer cancel()
+ env,err:=taskbench.OpenPairedFixtureEnvironment(ctx,taskbench.PairedFixtureOptions{AllowFixtureCreation:true,AdminDSN:"root:root@tcp(127.0.0.1:3307)/",ProfilesDir:"eval/runtime-profiles/2026-10-13-six-profiles-v1"});if err!=nil{return err}
+ defer func(){runErr=errors.Join(runErr,env.Close())}()
+ upstream:=&pinnedTransport{}
+ budget,err:=taskbench.OpenPairBudget(filepath.Join(dir,"budget.jsonl"),taskbench.PairRunContract(proposal.Configuration),proposal.Limits,upstream);if err!=nil{return err}
+ defer func(){runErr=errors.Join(runErr,budget.Close())}()
+ runErr=taskbench.RunAgentPair(ctx,filepath.Join(dir,"run.jsonl"),taskbench.AgentPairOptions{AllowExecution:true,RatesVerified:true,AllowJEVCalls:true,MaxJEVCalls:proposal.MaxJEV,DefinitionsDir:"eval/task-definitions/2026-10-12-full-dev-v1",Config:proposal.Configuration,Environment:env,Budget:budget,Model:taskbench.PairModelSettings{BaseURL:"https://maas.qianwenaiapi.com/apps/anthropic",APIKey:values["AGENT_LLM_API_KEY"],Model:"deepseek-v4.1-flash",Protocol:"anthropic"},JEVFactory:func()jev.Evaluator{return jev.NewClient(jev.DefaultEndpoint,values["JEV_API_KEY"],"jev-1.13.0")}})
+ report,reportErr:=taskbench.ReportPreparedPair(filepath.Join(dir,"run.jsonl"));runErr=errors.Join(runErr,reportErr)
+ if reportErr==nil {runErr=errors.Join(runErr,writeNew(filepath.Join(dir,"report.json"),report))}
+ receipt:=struct{ModelHTTPStatuses []int `json:"model_http_statuses"`;ModelBudget taskbench.PairBudgetState `json:"model_budget"`;Complete bool `json:"runner_completed"`;AccountInvoiceKnown bool `json:"account_invoice_known"`}{upstream.statuses,budget.Snapshot(),runErr==nil,false}
+ runErr=errors.Join(runErr,writeNew(filepath.Join(dir,"execution-receipt.json"),receipt))
+ fmt.Printf("planned_arms=%d recorded_arms=%d unrun_arms=%d runner_completed=%t\n",report.PlannedArms,report.FinishedArms,report.UnrunArms,runErr==nil)
+ return runErr
+}

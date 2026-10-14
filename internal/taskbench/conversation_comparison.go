@@ -24,6 +24,7 @@ type ConversationComparisonConfig struct {
 	PromptSHA256      string            `json:"prompt_sha256"`
 	ToolSchemaSHA256  string            `json:"tool_schema_sha256"`
 	OutputBudget      int               `json:"output_budget"`
+	ThinkingMode      string            `json:"thinking_mode,omitempty"`
 	ExecutionRevision string            `json:"execution_revision"`
 }
 
@@ -208,7 +209,7 @@ func comparisonRuntime(cfg ConversationComparisonConfig, telemetry json.RawMessa
 		return false, nil
 	}
 	var runtime agent.RuntimeMetadata
-	if json.Unmarshal(value, &runtime) != nil || runtime.Model != cfg.Model || runtime.Protocol != cfg.ProviderProtocol || runtime.RoutingMode != cfg.RoutingMode || runtime.PromptSHA256 != cfg.PromptSHA256 || runtime.ToolsSHA256 != cfg.ToolSchemaSHA256 || runtime.MaxOutputTokens != cfg.OutputBudget || !comparisonDigest(runtime.EndpointSHA256) || !comparisonDigest(runtime.ContractSHA256) || runtime.ReplyRepairLimit < 0 || len(runtime.Thresholds) == 0 {
+	if json.Unmarshal(value, &runtime) != nil || runtime.Model != cfg.Model || runtime.Protocol != cfg.ProviderProtocol || runtime.RoutingMode != cfg.RoutingMode || runtime.PromptSHA256 != cfg.PromptSHA256 || runtime.ToolsSHA256 != cfg.ToolSchemaSHA256 || runtime.MaxOutputTokens != cfg.OutputBudget || (cfg.ThinkingMode != "" && runtime.ThinkingMode != cfg.ThinkingMode) || !comparisonDigest(runtime.EndpointSHA256) || !comparisonDigest(runtime.ContractSHA256) || runtime.ReplyRepairLimit < 0 || len(runtime.Thresholds) == 0 {
 		return false, fmt.Errorf("runtime telemetry differs from comparison configuration or is incomplete")
 	}
 	for _, threshold := range runtime.Thresholds {

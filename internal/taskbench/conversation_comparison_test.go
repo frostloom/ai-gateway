@@ -58,6 +58,15 @@ func TestConversationComparisonRejectsRuntimeMismatchAndImpossibleModelJEV(t *te
 	}
 }
 
+func TestConversationComparisonRejectsMissingDeclaredThinkingMode(t *testing.T) {
+	s, a, b := comparisonInput()
+	a.Config.ThinkingMode = "disabled"
+	b.Config.ThinkingMode = "disabled"
+	if _, err := CompareConversations(s, a, b); err == nil {
+		t.Fatal("accepted absent thinking mode against declared disabled mode")
+	}
+}
+
 func TestConversationComparisonMissingRuntimeDisablesEfficiency(t *testing.T) {
 	s, a, b := comparisonInput()
 	a.Results[0].Observations[0].Turn.TelemetryRaw = json.RawMessage(`{"total_latency_ms":12,"llm_calls":1,"jev_calls":0}`)

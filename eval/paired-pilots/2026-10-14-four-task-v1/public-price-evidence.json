@@ -1,0 +1,62 @@
+{
+  "schema": "pilot-public-price-evidence.v1",
+  "checked_at": "2026-10-14T14:23:19.260566+00:00",
+  "page": "https://www.qianwenai.com/models/deepseek-v4.1-flash",
+  "page_sha256": "8055775a12dedfcf818c225eb5d0f224e156bd09939885d2ba124c8fd73e6493",
+  "referenced_public_entry": "https://q.alyasset.com/lowcode/entry/prod/10e6274c39186c9d53b07631bdf0987e.js",
+  "entry_sha256": "2d7f946b7aafc0795d5735590b42b13ed1a3dfcf9d54ff844c9def42f3ee4d02",
+  "model": "deepseek-v4.1-flash",
+  "provider": "deepseek",
+  "prices": [
+    {
+      "Price": "1",
+      "PriceName": "输入",
+      "PriceUnit": "每百万tokens",
+      "TimeBand": "offpeak",
+      "Type": "input_token"
+    },
+    {
+      "Price": "2",
+      "PriceName": "输入",
+      "PriceUnit": "每百万tokens",
+      "TimeBand": "peak",
+      "Type": "input_token"
+    },
+    {
+      "Price": "4",
+      "PriceName": "输出",
+      "PriceUnit": "每百万tokens",
+      "TimeBand": "offpeak",
+      "Type": "output_token"
+    },
+    {
+      "Price": "8",
+      "PriceName": "输出",
+      "PriceUnit": "每百万tokens",
+      "TimeBand": "peak",
+      "Type": "output_token"
+    },
+    {
+      "Price": "0.1",
+      "PriceName": "输入（缓存命中）",
+      "PriceUnit": "每百万tokens",
+      "TimeBand": "offpeak",
+      "Type": "input_token_cache"
+    },
+    {
+      "Price": "0.2",
+      "PriceName": "输入（缓存命中）",
+      "PriceUnit": "每百万tokens",
+      "TimeBand": "peak",
+      "Type": "input_token_cache"
+    }
+  ],
+  "jev_model": "jev-1.13.0",
+  "jev_price_source": "https://docs.typesafe.ai/models",
+  "jev_input_usd_per_million": "0.042",
+  "jev_output_free": true,
+  "jev_models_readonly_http_status": 200,
+  "jev_account_free_credit_verified": false,
+  "gateway_key_ownership": "user confirmed existing AGENT_LLM_API_KEY belongs to selected Qianwen gateway",
+  "account_invoice_known": false
+}
