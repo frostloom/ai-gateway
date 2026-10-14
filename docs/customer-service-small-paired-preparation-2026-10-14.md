@@ -53,7 +53,7 @@ V1 使用 `model`：模型判断工具与回答。V2 使用 `jev_selective`：�
 - 时间：保存遥测和 `runner_elapsed_ms`。后者包含初始化、工具、状态核验和清理，不是纯模型延迟，也不含用户思考时间。
 - 比较：只有完整、契约一致的记录可进入现有比较器；未审核不发布质量收益，本准备报告始终不自动宣称真实 JEV 收益。
 
-CLI 只提供离线准备和报告，拒绝在线参数、未知模式及覆盖已有输出：
+本准备阶段 CLI 提供离线准备和报告，拒绝在线参数、未知模式及覆盖已有输出；后续增加的离线 `preflight` 见下面的适配器文档：
 
 ```powershell
 go run ./cmd/paired-eval -mode prepare -out .paired-plan.json
@@ -69,3 +69,5 @@ go run ./cmd/paired-eval -mode report -journal .paired-run.jsonl -out .paired-re
 回归覆盖预算恢复、未知 usage、缓存 token、金额/请求/输出越界、失败记录、密钥脱敏、模拟审核混入和独占输出。独立审查发现的问题均先复现失败后修复。
 
 下一阶段需先核定真实价格、最小预算及账户适配器，独立审核 12 个标准，然后经明确授权做少量真实配对调用。无需重新跑 1220 条；现阶段没有新增真实 V1/V2 成绩。
+
+同日后续：[12任务标准工程复核](customer-service-pilot-standard-audit-2026-10-14.md)与[真实处理器隔离适配](customer-service-paired-runtime-adapter-2026-10-14.md)已补齐，新增离线配置预检查；[渠道价格证据](customer-service-pilot-pricing-2026-10-14.md)仍有忙时最高价/账户收费缺口。冻结归档保持原样，尚未启动真实配对调用。

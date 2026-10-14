@@ -14,11 +14,13 @@ import (
 )
 
 type PairRunConfig struct {
-	Schema    string                       `json:"schema"`
-	Suite     ConversationSuite            `json:"suite"`
-	Model     ConversationComparisonConfig `json:"model"`
-	Selective ConversationComparisonConfig `json:"selective"`
-	AllowPaid bool                         `json:"allow_paid"`
+	Schema                 string                       `json:"schema"`
+	Suite                  ConversationSuite            `json:"suite"`
+	Model                  ConversationComparisonConfig `json:"model"`
+	Selective              ConversationComparisonConfig `json:"selective"`
+	AllowPaid              bool                         `json:"allow_paid"`
+	ProviderEndpointSHA256 string                       `json:"provider_endpoint_sha256,omitempty"`
+	JEVModel               string                       `json:"jev_model,omitempty"`
 }
 type pairRunEvent struct {
 	Kind              string                 `json:"kind"`

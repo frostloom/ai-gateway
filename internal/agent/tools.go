@@ -28,9 +28,14 @@ type AdminClient struct {
 }
 
 func NewAdminClient(baseURL string) *AdminClient {
+	return NewAdminClientWithToken(baseURL, os.Getenv(controlplane.Env))
+}
+
+// NewAdminClientWithToken avoids reading process credentials for evaluation.
+func NewAdminClientWithToken(baseURL, token string) *AdminClient {
 	return &AdminClient{
 		baseURL: baseURL,
-		token:   os.Getenv(controlplane.Env),
+		token:   token,
 		cli:     &http.Client{Timeout: 5 * time.Second},
 	}
 }

@@ -25,12 +25,13 @@ type PairBudgetLimits struct {
 	OutputMicroCNYPerMillion int64 `json:"output_micro_cny_per_million"`
 }
 type PairBudgetState struct {
-	Calls            int    `json:"attempts"`
-	ReservedMicroCNY int64  `json:"reserved_micro_cny"`
-	CostMicroCNY     *int64 `json:"priced_usage_micro_cny"`
-	InputTokens      int64  `json:"input_tokens"`
-	OutputTokens     int64  `json:"output_tokens"`
-	Stopped          string `json:"stopped,omitempty"`
+	CompanionJEV     *PairJEVBudgetState `json:"companion_jev,omitempty"`
+	Calls            int                 `json:"attempts"`
+	ReservedMicroCNY int64               `json:"reserved_micro_cny"`
+	CostMicroCNY     *int64              `json:"priced_usage_micro_cny"`
+	InputTokens      int64               `json:"input_tokens"`
+	OutputTokens     int64               `json:"output_tokens"`
+	Stopped          string              `json:"stopped,omitempty"`
 }
 type pairBudgetEvent struct {
 	Kind          string            `json:"kind"`
@@ -42,16 +43,17 @@ type pairBudgetEvent struct {
 	Stop          string `json:"stop,omitempty"`
 }
 type PairBudgetTransport struct {
-	mu       sync.Mutex
-	file     *os.File
-	lock     *os.File
-	path     string
-	contract string
-	limits   PairBudgetLimits
-	upstream http.RoundTripper
-	state    PairBudgetState
-	inflight bool
-	closed   bool
+	companion func() PairJEVBudgetState
+	mu        sync.Mutex
+	file      *os.File
+	lock      *os.File
+	path      string
+	contract  string
+	limits    PairBudgetLimits
+	upstream  http.RoundTripper
+	state     PairBudgetState
+	inflight  bool
+	closed    bool
 }
 
 func (b *PairBudgetTransport) identity() string {
@@ -167,11 +169,21 @@ func (b *PairBudgetTransport) Snapshot() PairBudgetState {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 	s := b.state
+	if b.companion != nil {
+		v := b.companion()
+		s.CompanionJEV = &v
+	}
 	if s.CostMicroCNY != nil {
 		v := *s.CostMicroCNY
 		s.CostMicroCNY = &v
 	}
 	return s
+}
+
+func (b *PairBudgetTransport) setCompanion(f func() PairJEVBudgetState) {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	b.companion = f
 }
 func (b *PairBudgetTransport) Close() error {
 	b.mu.Lock()

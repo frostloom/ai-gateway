@@ -19,61 +19,6 @@ import (
 	"gorm.io/gorm/logger"
 )
 
-type runtimeBill struct {
-	Request  string `json:"request_id"`
-	AgeHours int    `json:"age_hours"`
-	Model    string `json:"model"`
-	Amount   int64  `json:"amount_cent"`
-	Funding  string `json:"funding"`
-	Input    int64  `json:"input_tokens"`
-	Output   int64  `json:"output_tokens"`
-}
-type runtimeAccount struct {
-	Balance int64 `json:"balance_cent"`
-	Initial int64 `json:"initial_quota_cent"`
-	Order   struct {
-		AmountMoney int64 `json:"amount_money"`
-		AmountCent  int64 `json:"amount_cent"`
-	} `json:"paid_order"`
-	Subscription *struct {
-		Plan      string `json:"plan"`
-		Status    string `json:"status"`
-		AutoRenew bool   `json:"auto_renew"`
-	} `json:"subscription"`
-	Bills []runtimeBill `json:"cash_bill_fixture"`
-	Usage struct {
-		runtimeBill
-		AgeMinutes int `json:"age_minutes"`
-	} `json:"subscription_usage_fixture"`
-	Expected struct {
-		Bills struct {
-			Latest3  []runtimeBill `json:"latest_3"`
-			Latest10 []runtimeBill `json:"latest_10"`
-		} `json:"get_recent_bills"`
-	} `json:"tool_expected"`
-}
-type runtimeProfileArchive struct {
-	Schema    string                    `json:"schema"`
-	Accounts  map[string]runtimeAccount `json:"accounts"`
-	Catalogue struct {
-		Plans map[string]struct {
-			Name  string           `json:"name"`
-			Price int64            `json:"price_yuan"`
-			Days  int              `json:"validity_days"`
-			Hours int              `json:"refresh_hours"`
-			Quota map[string]int64 `json:"tier_quota_tokens"`
-		} `json:"plans"`
-		Models map[string]struct {
-			Name    string   `json:"name"`
-			Vendor  string   `json:"vendor"`
-			Tags    []string `json:"tags"`
-			Context int      `json:"context_tokens"`
-			In      int64    `json:"input_yuan_per_million"`
-			Out     int64    `json:"output_yuan_per_million"`
-		} `json:"models"`
-	} `json:"catalogue"`
-}
-
 func loadRuntimeProfileArchive(t *testing.T) runtimeProfileArchive {
 	t.Helper()
 	base := "../../eval/runtime-profiles/2026-10-13-six-profiles-v1/"
@@ -165,107 +110,19 @@ func runtimeProfileTestDatabase(t *testing.T) (*gorm.DB, *redis.Client, *store.S
 
 func seedRuntimeCatalogue(t *testing.T, db *gorm.DB, p runtimeProfileArchive) map[string]store.Plan {
 	t.Helper()
-	plans := map[string]store.Plan{}
-	for _, name := range []string{"standard", "flagship"} {
-		c := p.Catalogue.Plans[name]
-		quota, _ := json.Marshal(c.Quota)
-		plan := store.Plan{Name: c.Name, PriceMoney: c.Price, ValidityDays: c.Days, RefreshHours: c.Hours, TierQuota: string(quota), PlanType: store.PlanTypeRecurring}
-		if err := db.Create(&plan).Error; err != nil {
-			t.Fatal(err)
-		}
-		plans[name] = plan
-	}
-	for _, name := range []string{"model-a", "model-b"} {
-		c := p.Catalogue.Models[name]
-		tags, _ := json.Marshal(c.Tags)
-		m := store.Model{ModelID: name, Name: c.Name, Vendor: c.Vendor, Tags: string(tags), ContextLen: c.Context, InputPriceCent: c.In * 100, OutputPriceCent: c.Out * 100}
-		if err := db.Create(&m).Error; err != nil {
-			t.Fatal(err)
-		}
+	plans, err := seedPairedCatalogue(context.Background(), db, p)
+	if err != nil {
+		t.Fatal(err)
 	}
 	return plans
 }
-
 func instantiateRuntimeAccount(t *testing.T, ctx context.Context, db *gorm.DB, rdb *redis.Client, st *store.Store, name string, p runtimeAccount, plans map[string]store.Plan, clock time.Time) (Fixture, uint64) {
 	t.Helper()
-	tenant := store.Tenant{Name: "runtime-" + randomID(), InitialQuota: p.Initial}
-	if err := db.WithContext(ctx).Create(&tenant).Error; err != nil {
-		t.Fatal(err)
-	}
-	key := "sk-runtime-" + randomID() + randomID()
-	h := sha256.Sum256([]byte(key))
-	expiry := clock.Add(time.Hour)
-	api := store.APIKey{TenantID: tenant.ID, KeyHash: hex.EncodeToString(h[:]), KeyPrefix: key[:8], Name: "isolated runtime fixture", ExpiresAt: &expiry}
-	if err := db.WithContext(ctx).Create(&api).Error; err != nil {
-		t.Fatal(err)
-	}
-	if err := rdb.Set(ctx, store.BalanceKey(tenant.ID), p.Initial, 0).Err(); err != nil {
-		t.Fatal(err)
-	}
-	order, err := st.CreateRechargeOrder(ctx, tenant.ID, p.Order.AmountMoney, "runtime-"+randomID())
+	f, foreign, err := instantiatePairedAccount(ctx, db, rdb, st, p, plans, clock)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := st.PayRecharge(ctx, order.OrderNo); err != nil {
-		t.Fatal(err)
-	}
-	if p.Subscription != nil {
-		sub, err := st.SubscribePlan(ctx, tenant.ID, plans[p.Subscription.Plan].ID)
-		if err != nil {
-			t.Fatal(err)
-		}
-		start := clock.Add(-24 * time.Hour)
-		end := start.Add(30 * 24 * time.Hour)
-		if err := db.Model(sub).Updates(map[string]any{"cycle_start": start, "cycle_end": end}).Error; err != nil {
-			t.Fatal(err)
-		}
-		if p.Subscription.Status == store.SubCancelled {
-			if _, err := st.CancelSubscription(ctx, tenant.ID); err != nil {
-				t.Fatal(err)
-			}
-		}
-	}
-	insertBill := func(b runtimeBill, created time.Time, phase string) {
-		req := "rt-" + tenant.Name[len("runtime-"):] + "-" + b.Request
-		row := store.Bill{TenantID: tenant.ID, APIKeyID: api.ID, RequestID: req, Phase: phase, Status: store.StatusSettled, Model: b.Model, Funding: b.Funding, ActualQuota: &b.Amount, PromptTokens: &b.Input, CompletionTokens: &b.Output, CreatedAt: created}
-		if err := db.WithContext(ctx).Create(&row).Error; err != nil {
-			t.Fatal(err)
-		}
-	}
-	for _, b := range p.Bills {
-		insertBill(b, clock.Add(-time.Duration(b.AgeHours)*time.Hour), store.PhaseSettle)
-	}
-	if p.Subscription != nil {
-		u := p.Usage
-		created := clock.Add(-time.Duration(u.AgeMinutes) * time.Minute)
-		insertBill(u.runtimeBill, created, store.PhaseReserve)
-		insertBill(u.runtimeBill, created, store.PhaseSettle)
-	}
-	ledger, err := store.LedgerBalance(ctx, db, tenant.ID)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if ledger != p.Balance {
-		t.Fatalf("seed ledger=%d want%d", ledger, p.Balance)
-	}
-	if err := rdb.Set(ctx, store.BalanceKey(tenant.ID), ledger, 0).Err(); err != nil {
-		t.Fatal(err)
-	}
-	foreign := store.Tenant{Name: "foreign-" + randomID(), InitialQuota: 113400}
-	if err := db.Create(&foreign).Error; err != nil {
-		t.Fatal(err)
-	}
-	if err := rdb.Set(ctx, store.BalanceKey(foreign.ID), 113400, 0).Err(); err != nil {
-		t.Fatal(err)
-	}
-	foreignOrder, err := st.CreateRechargeOrder(ctx, foreign.ID, 100, "foreign-"+randomID())
-	if err != nil {
-		t.Fatal(err)
-	}
-	if _, err := st.PayRecharge(ctx, foreignOrder.OrderNo); err != nil {
-		t.Fatal(err)
-	}
-	return Fixture{TenantID: tenant.ID, TenantName: tenant.Name, APIKey: key, OrderNo: order.OrderNo, Standard: plans["standard"], Flagship: plans["flagship"]}, foreign.ID
+	return f, foreign
 }
 
 func verifyRuntimeReads(t *testing.T, ctx context.Context, db *gorm.DB, st *store.Store, f Fixture, p runtimeAccount, plans map[string]store.Plan, clock time.Time) {

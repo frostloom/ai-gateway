@@ -6,6 +6,7 @@ import shutil
 import socket
 import subprocess
 import tempfile
+import time
 import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -15,6 +16,22 @@ PS = shutil.which('pwsh') or shutil.which('powershell')
 
 def quote(value):
     return "'" + str(value).replace("'", "''") + "'"
+
+
+def cleanup_temp(folder):
+    # Child processes may release their working-directory handle shortly after
+    # exit on Windows. Retry only sharing violations, never suppress cleanup.
+    target = Path(folder.name).resolve()
+    if target == ROOT or not target.is_relative_to(ROOT):
+        raise ValueError('test cleanup must remain inside its workspace')
+    for attempt in range(20):
+        try:
+            folder.cleanup()
+            return
+        except PermissionError as error:
+            if getattr(error, 'winerror', None) != 32 or attempt == 19:
+                raise
+            time.sleep(0.1)
 
 
 @unittest.skipUnless(PS and Path(GO).exists(), 'requires local PowerShell and Go')
@@ -42,11 +59,11 @@ func main(){
 
     @classmethod
     def tearDownClass(cls):
-        cls.build.cleanup()
+        cleanup_temp(cls.build)
 
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory(dir=ROOT)
-        self.addCleanup(self.temp.cleanup)
+        self.addCleanup(cleanup_temp, self.temp)
         self.root = Path(self.temp.name)
         scripts = self.root / 'scripts'
         scripts.mkdir()
