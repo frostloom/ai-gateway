@@ -146,6 +146,18 @@ func NewLLMClient(baseURL, apiKey, model string) *LLMClient {
 
 func (c *LLMClient) Model() string { return c.model }
 
+// NewEvaluationLLMClient uses explicit inputs only, bypassing global readers.
+func NewEvaluationLLMClient(baseURL, apiKey, model, protocol string, client *http.Client, maxOutput int) (*LLMClient, error) {
+	if baseURL == "" || model == "" || (protocol != "openai" && protocol != "anthropic") {
+		return nil, fmt.Errorf("explicit evaluation endpoint/model/protocol required")
+	}
+	c := &LLMClient{baseURL: baseURL, apiKey: apiKey, model: model, proto: llmProtocol(protocol)}
+	if err := c.ConfigureEvaluationClient(client, maxOutput); err != nil {
+		return nil, err
+	}
+	return c, nil
+}
+
 // ConfigureEvaluationClient is explicit per-client dependency injection for a
 // budgeted evaluator. Configure before serving; ordinary service defaults stay
 // unchanged. The supplied transport must guard every upstream attempt.

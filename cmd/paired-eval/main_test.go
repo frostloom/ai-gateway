@@ -34,6 +34,26 @@ func TestPairedCLIDoesNotAcceptLiveFlags(t *testing.T) {
 	}
 }
 
+func TestPairedCLIExplicitPreflightIsOfflineAndNotPaidReady(t *testing.T) {
+	p := filepath.Join(t.TempDir(), "preflight.json")
+	args := []string{"-mode", "preflight", "-definitions", "../../eval/task-definitions/2026-10-12-full-dev-v1", "-profiles", "../../eval/runtime-profiles/2026-10-13-six-profiles-v1", "-model-base", "https://maas.qianwenaiapi.com/apps/anthropic", "-model-name", "deepseek-v4.1-flash", "-protocol", "anthropic", "-revision", "reviewed-revision", "-jev-model", "jev-1.13.0", "-out", p}
+	if n := run(args); n != 0 {
+		t.Fatalf("preflight exit %d", n)
+	}
+	raw, e := os.ReadFile(p)
+	if e != nil {
+		t.Fatal(e)
+	}
+	var v struct {
+		Ready         bool                    `json:"ready_for_paid_run"`
+		Calls         int                     `json:"provider_calls"`
+		Configuration taskbench.PairRunConfig `json:"configuration"`
+	}
+	if json.Unmarshal(raw, &v) != nil || v.Ready || v.Calls != 0 || v.Configuration.AllowPaid || len(v.Configuration.Suite.Cases) != 12 || v.Configuration.ProviderEndpointSHA256 == "" {
+		t.Fatal("preflight authorized or missing bindings")
+	}
+}
+
 func TestPairedCLIReportsFailedArmsWithoutDroppingThem(t *testing.T) {
 	s, e := taskbench.LoadConversations("../../eval/task-definitions/2026-10-12-full-dev-v1")
 	if e != nil {

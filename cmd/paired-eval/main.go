@@ -26,15 +26,23 @@ func writeExclusive(path string, raw []byte) error {
 }
 func run(args []string) int {
 	flags := flag.NewFlagSet("paired-eval", flag.ContinueOnError)
-	mode := flags.String("mode", "prepare", "prepare or report; never live")
+	mode := flags.String("mode", "prepare", "prepare, preflight or report; never live")
+	profiles := flags.String("profiles", "", "pinned runtime profile directory for preflight")
+	base := flags.String("model-base", "", "public model base URL for offline preflight")
+	model := flags.String("model-name", "", "explicit model name for offline preflight")
+	protocol := flags.String("protocol", "", "openai or anthropic for offline preflight")
+	revision := flags.String("revision", "", "reviewed execution revision for offline preflight")
+	jevModel := flags.String("jev-model", "", "pinned JEV model for offline preflight")
 	defs := flags.String("definitions", "eval/task-definitions/2026-10-12-full-dev-v1", "frozen definition directory")
 	journal := flags.String("journal", "", "local paired run journal for offline report")
 	out := flags.String("out", "", "new output JSON path; report also creates .md")
 	if flags.Parse(args) != nil {
 		return 2
 	}
-	if flags.NArg() != 0 || *out == "" || (*mode != "prepare" && *mode != "report") || (*mode == "report" && *journal == "") || (*mode == "prepare" && *journal != "") {
-		fmt.Fprintln(os.Stderr, "prepare/report and new -out required; no live mode")
+	preflight := *mode == "preflight"
+	publicArgs := *profiles != "" || *base != "" || *model != "" || *protocol != "" || *revision != "" || *jevModel != ""
+	if flags.NArg() != 0 || *out == "" || (*mode != "prepare" && *mode != "report" && !preflight) || (*mode == "report" && *journal == "") || (*mode != "report" && *journal != "") || (!preflight && publicArgs) || (preflight && (*profiles == "" || *base == "" || *model == "" || *protocol == "" || *revision == "" || *jevModel == "")) {
+		fmt.Fprintln(os.Stderr, "offline prepare/preflight/report and new -out required; no live mode")
 		return 2
 	}
 	paths := []string{*out}
@@ -49,7 +57,7 @@ func run(args []string) int {
 	}
 	var value any
 	var md string
-	if *mode == "prepare" {
+	if *mode == "prepare" || preflight {
 		s, err := taskbench.LoadConversations(*defs)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
@@ -61,6 +69,24 @@ func run(args []string) int {
 			return 2
 		}
 		value = p
+		if preflight {
+			profiles, err := taskbench.LoadPairedProfiles(*profiles)
+			if err != nil {
+				fmt.Fprintln(os.Stderr, err)
+				return 2
+			}
+			cfg, err := taskbench.PrepareAgentPairConfig(p.Suite, profiles, taskbench.PairModelSettings{BaseURL: *base, Model: *model, Protocol: *protocol}, "recorded_run", *revision, *jevModel)
+			if err != nil {
+				fmt.Fprintln(os.Stderr, err)
+				return 2
+			}
+			value = struct {
+				Ready         bool                    `json:"ready_for_paid_run"`
+				Calls         int                     `json:"provider_calls"`
+				Configuration taskbench.PairRunConfig `json:"configuration"`
+				Limitations   []string                `json:"limitations"`
+			}{false, 0, cfg, []string{"Offline configuration proposal only; no database or provider calls.", "Channel prices, account charges and execution authorization remain unverified."}}
+		}
 	} else {
 		r, err := taskbench.ReportPreparedPair(*journal)
 		if err != nil {
