@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"sync"
+	"time"
 
 	"github.com/frostloom/ai-gateway/internal/jev"
 )
@@ -17,6 +18,8 @@ type pairJEVEvent struct {
 	Kind, Contract, Version string
 	Limit, ID               int
 	Failed                  bool
+	Failure                 *jev.Failure `json:"failure,omitempty"`
+	LatencyMS               float64      `json:"latency_ms,omitempty"`
 }
 
 type PairJEVBudgetState struct {
@@ -109,7 +112,7 @@ func (b *boundedPairJEV) Evaluate(ctx context.Context, state any, q map[string]j
 	b.mu.Lock()
 	defer b.mu.Unlock()
 	if b.closed || b.stopped || b.calls >= b.max {
-		return nil, fmt.Errorf("JEV stopped or attempt limit exhausted")
+		return nil, jev.NewFailure("local_stop", 0, false)
 	}
 	if b.evaluator == nil {
 		b.evaluator = b.factory()
@@ -122,17 +125,25 @@ func (b *boundedPairJEV) Evaluate(ctx context.Context, state any, q map[string]j
 		return nil, fmt.Errorf("JEV reservation unavailable")
 	}
 	b.calls++
+	started := time.Now()
 	r, err := b.evaluator.Evaluate(ctx, state, q)
+	elapsed := float64(time.Since(started)) / float64(time.Millisecond)
 	if err == nil && (r == nil || (b.version != "" && r.Model != b.version)) {
-		err = fmt.Errorf("JEV version/result differs")
+		err = &jev.Failure{Kind: "result_mismatch"}
 	}
-	if e := b.write(pairJEVEvent{Kind: "settle", ID: b.calls, Failed: err != nil}); e != nil {
+	var failure *jev.Failure
+	if err != nil {
+		details := jev.FailureDetails(err)
+		details.LatencyMS = elapsed
+		failure = &details
+	}
+	if e := b.write(pairJEVEvent{Kind: "settle", ID: b.calls, Failed: err != nil, Failure: failure, LatencyMS: elapsed}); e != nil {
 		b.stopped = true
 		return nil, fmt.Errorf("JEV settlement unavailable")
 	}
 	if err != nil {
 		b.stopped = true
-		return nil, fmt.Errorf("JEV execution failed; unknown charge")
+		return nil, failure
 	}
 	return r, nil
 }

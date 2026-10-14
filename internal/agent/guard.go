@@ -206,6 +206,9 @@ func (h *Handler) evaluateTurn(ctx context.Context, userMsg string, ses *session
 	if err != nil {
 		if stats := turnTelemetry(ctx); stats != nil {
 			stats.JevErrors++
+			details := jev.FailureDetails(err)
+			details.LatencyMS = float64(time.Since(started)) / float64(time.Millisecond)
+			stats.JevFailures = append(stats.JevFailures, details)
 		}
 		// JEV 不可用：不阻塞业务，退回原行为（仅记录）
 		v.Err = err
@@ -349,6 +352,9 @@ func (h *Handler) guardWrite(ctx context.Context, tenantID uint64, tool string, 
 	if err != nil {
 		if stats := turnTelemetry(ctx); stats != nil {
 			stats.JevErrors++
+			details := jev.FailureDetails(err)
+			details.LatencyMS = float64(time.Since(started)) / float64(time.Millisecond)
+			stats.JevFailures = append(stats.JevFailures, details)
 		}
 		// Jev 不可用：默认放行（不因判断引擎故障阻塞业务），记 skip。
 		jevDecisions.WithLabelValues("guard", "skip").Inc()

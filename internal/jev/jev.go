@@ -24,6 +24,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -72,7 +73,7 @@ type Answer struct {
 	Probabilities map[string]float64 `json:"probabilities,omitempty"`
 
 	// score
-	Score float64            `json:"score,omitempty"`
+	Score  float64           `json:"score,omitempty"`
 	Legend map[string]string `json:"legend,omitempty"`
 }
 
@@ -139,10 +140,17 @@ func NewClient(endpoint, apiKey, model string) *Client {
 // Evaluate 发一次判定：state + questions → 类型化答案。
 func (c *Client) Evaluate(ctx context.Context, state any, questions map[string]Question) (*Result, error) {
 	if c.apiKey == "" {
-		return nil, fmt.Errorf("JEV_API_KEY 未配置，判定不可用")
+		return nil, NewFailure("configuration", 0, false)
 	}
 	if len(questions) == 0 {
-		return nil, fmt.Errorf("questions 为空")
+		return nil, NewFailure("configuration", 0, false)
+	}
+	if err := ctx.Err(); err != nil {
+		kind := "canceled"
+		if errors.Is(err, context.DeadlineExceeded) {
+			kind = "timeout"
+		}
+		return nil, NewFailure(kind, 0, false)
 	}
 	body, err := json.Marshal(map[string]any{
 		"model":     c.model,
@@ -150,28 +158,43 @@ func (c *Client) Evaluate(ctx context.Context, state any, questions map[string]Q
 		"questions": questions,
 	})
 	if err != nil {
-		return nil, err
+		return nil, NewFailure("request_encoding", 0, false)
 	}
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.endpoint, bytes.NewReader(body))
 	if err != nil {
-		return nil, err
+		return nil, NewFailure("configuration", 0, false)
+	}
+	if (req.URL.Scheme != "http" && req.URL.Scheme != "https") || req.URL.Host == "" {
+		return nil, NewFailure("configuration", 0, false)
 	}
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+c.apiKey)
 
 	resp, err := c.cli.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("jev 请求失败: %w", err)
+		kind := "transport"
+		if errors.Is(err, context.DeadlineExceeded) {
+			kind = "timeout"
+		} else if errors.Is(err, context.Canceled) {
+			kind = "canceled"
+		}
+		// Do may fail before sending or after a partial/complete write. Without
+		// response evidence, neither a sent request nor zero spend is known.
+		return nil, &Failure{Kind: kind}
 	}
 	defer func() { io.Copy(io.Discard, resp.Body); resp.Body.Close() }()
 	raw, err := io.ReadAll(io.LimitReader(resp.Body, 1<<20))
 	if err != nil {
-		return nil, err
+		return nil, NewFailure("response_read", resp.StatusCode, true)
 	}
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("jev HTTP %d: %s", resp.StatusCode, truncate(string(raw), 200))
+		return nil, NewFailure("http", resp.StatusCode, true)
 	}
-	return decodeResult(raw)
+	result, err := decodeResult(raw)
+	if err != nil {
+		return nil, NewFailure("decode", resp.StatusCode, true)
+	}
+	return result, nil
 }
 
 // decodeResult 解码 SystemOneResponse。
