@@ -72,12 +72,13 @@ type chatResponse struct {
 //
 // 协议差异全部收敛在 llm_protocol.go，本文件只负责分派与超时。
 type LLMClient struct {
-	baseURL   string
-	apiKey    string
-	model     string
-	proto     llmProtocol
-	maxTokens int
-	cli       *http.Client
+	baseURL          string
+	apiKey           string
+	model            string
+	proto            llmProtocol
+	maxTokens        int
+	cli              *http.Client
+	strictEvaluation bool
 }
 
 // protoFromEnv 读取 AGENT_LLM_PROTOCOL（空则由 URL 推断）。
@@ -172,6 +173,7 @@ func (c *LLMClient) ConfigureEvaluationClient(client *http.Client, maxOutput int
 	}
 	c.cli = &copyClient
 	c.maxTokens = maxOutput
+	c.strictEvaluation = true
 	return nil
 }
 
@@ -200,6 +202,9 @@ func (c *LLMClient) Chat(ctx context.Context, messages []Message, tools []Tool) 
 	}
 	if c.proto != protoAnthropic {
 		return c.chatOpenAI(ctx, messages, tools)
+	}
+	if c.strictEvaluation {
+		return c.chatAnthropic(ctx, messages, tools, c.maxTokens)
 	}
 
 	budget := c.maxTokens

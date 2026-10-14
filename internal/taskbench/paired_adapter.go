@@ -60,6 +60,8 @@ func PrepareAgentPairConfig(s ConversationSuite, p PairedProfiles, m PairModelSe
 	}
 	a := ConversationComparisonConfig{RoutingMode: "model", EvidenceKind: evidence, DefinitionSHA256: s.DefinitionSHA256, ManifestSHA256: s.ManifestSHA256, ProfileSHA256: profiles, Model: m.Model, ProviderProtocol: m.Protocol, PromptSHA256: r.PromptSHA256, ToolSchemaSHA256: r.ToolsSHA256, OutputBudget: 128, ExecutionRevision: revision}
 	b := a
+	a.ThinkingMode = r.ThinkingMode
+	b.ThinkingMode = r.ThinkingMode
 	b.RoutingMode = "jev_selective"
 	cfg = PairRunConfig{Schema: "paired-run.v1", Suite: s, Model: a, Selective: b, ProviderEndpointSHA256: r.EndpointSHA256, JEVModel: jevModel}
 	return cfg, validatePairRun(cfg)
