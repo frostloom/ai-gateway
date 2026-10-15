@@ -1,0 +1,22 @@
+{
+  "date": "2026-10-13",
+  "branch": "codex/langfuse-observability",
+  "compose_sha256": "d03460f0c736d9e283f78bfa73b655d41840319030d4db3265cf7267b4e6a95d",
+  "checks": [
+    "six dedicated services/project",
+    "loopback exposed ports only",
+    "dependencies not exposed",
+    "no fixed container names",
+    "independent Docker named volumes",
+    "all images pinned to downloaded digests",
+    "all six services have healthcheck",
+    "AI features disabled/no model keys",
+    "missing secrets rejected"
+  ],
+  "status": "PASS",
+  "containers_started": 6,
+  "model_calls": 0,
+  "jev_calls": 0,
+  "ingestion_verified": true,
+  "credentials": "local independent generated credentials ignored by Git"
+}

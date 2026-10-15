@@ -1,0 +1,175 @@
+{
+  "endpoint": "http://localhost:13000",
+  "evidence_kind": "local_stub",
+  "paid_calls": 0,
+  "query": "GET /api/public/v2/observations?traceId=...&fields=core,basic,metadata,usage",
+  "rows": [
+    {
+      "arm": "model",
+      "case_key": "balance-001/answer_complete",
+      "generation_count": 2,
+      "local_input_tokens": 200,
+      "local_output_tokens": 16,
+      "necessary_clarifications": 0,
+      "observation_count": 5,
+      "observation_names": {
+        "agent.turn": 1,
+        "evaluation.task": 1,
+        "llm.attempt": 2,
+        "tool.get_balance": 1
+      },
+      "status": "needs_review",
+      "structural_pass": true,
+      "task_success": "unknown",
+      "trace_id": "0130e207f97d22eb9dfbe06cfcb4f114",
+      "turn_count": 1
+    },
+    {
+      "arm": "jev_selective",
+      "case_key": "balance-001/answer_complete",
+      "generation_count": 0,
+      "local_input_tokens": 0,
+      "local_output_tokens": 0,
+      "necessary_clarifications": 0,
+      "observation_count": 4,
+      "observation_names": {
+        "agent.turn": 1,
+        "evaluation.task": 1,
+        "jev.intent": 1,
+        "tool.get_balance": 1
+      },
+      "status": "needs_review",
+      "structural_pass": true,
+      "task_success": "unknown",
+      "trace_id": "34821ba759ffd3956575cf955d6ccd3f",
+      "turn_count": 1
+    },
+    {
+      "arm": "model",
+      "case_key": "balance-020/explicit_scope_followup",
+      "generation_count": 3,
+      "local_input_tokens": 300,
+      "local_output_tokens": 24,
+      "necessary_clarifications": 0,
+      "observation_count": 7,
+      "observation_names": {
+        "agent.turn": 2,
+        "evaluation.task": 1,
+        "llm.attempt": 3,
+        "tool.get_balance": 1
+      },
+      "status": "needs_review",
+      "structural_pass": true,
+      "task_success": "unknown",
+      "trace_id": "dd4da4407f45c40cfe70edb074df1298",
+      "turn_count": 2
+    },
+    {
+      "arm": "jev_selective",
+      "case_key": "balance-020/explicit_scope_followup",
+      "generation_count": 3,
+      "local_input_tokens": 300,
+      "local_output_tokens": 24,
+      "necessary_clarifications": 0,
+      "observation_count": 9,
+      "observation_names": {
+        "agent.turn": 2,
+        "evaluation.task": 1,
+        "jev.intent": 2,
+        "llm.attempt": 3,
+        "tool.get_balance": 1
+      },
+      "status": "needs_review",
+      "structural_pass": true,
+      "task_success": "unknown",
+      "trace_id": "41c32eca95d831fd00b6ac082cb52edd",
+      "turn_count": 2
+    },
+    {
+      "arm": "model",
+      "case_key": "recharge-002/confirm",
+      "generation_count": 1,
+      "local_input_tokens": 100,
+      "local_output_tokens": 8,
+      "necessary_clarifications": 0,
+      "observation_count": 6,
+      "observation_names": {
+        "agent.turn": 2,
+        "evaluation.task": 1,
+        "llm.attempt": 1,
+        "tool.preview.recharge": 1,
+        "tool.recharge": 1
+      },
+      "status": "needs_review",
+      "structural_pass": true,
+      "task_success": "unknown",
+      "trace_id": "504c6a9eb223f0e718c90c4b78c2dd1e",
+      "turn_count": 2
+    },
+    {
+      "arm": "jev_selective",
+      "case_key": "recharge-002/confirm",
+      "generation_count": 1,
+      "local_input_tokens": 100,
+      "local_output_tokens": 8,
+      "necessary_clarifications": 0,
+      "observation_count": 7,
+      "observation_names": {
+        "agent.turn": 2,
+        "evaluation.task": 1,
+        "jev.intent": 1,
+        "llm.attempt": 1,
+        "tool.preview.recharge": 1,
+        "tool.recharge": 1
+      },
+      "status": "needs_review",
+      "structural_pass": true,
+      "task_success": "unknown",
+      "trace_id": "f867c42d9871509ea78b62007352418a",
+      "turn_count": 2
+    },
+    {
+      "arm": "model",
+      "case_key": "recharge-002/cancel",
+      "generation_count": 1,
+      "local_input_tokens": 100,
+      "local_output_tokens": 8,
+      "necessary_clarifications": 0,
+      "observation_count": 5,
+      "observation_names": {
+        "agent.turn": 2,
+        "evaluation.task": 1,
+        "llm.attempt": 1,
+        "tool.preview.recharge": 1
+      },
+      "status": "needs_review",
+      "structural_pass": true,
+      "task_success": "unknown",
+      "trace_id": "e26e6fba8399edab7d1c7a68774a303b",
+      "turn_count": 2
+    },
+    {
+      "arm": "jev_selective",
+      "case_key": "recharge-002/cancel",
+      "generation_count": 1,
+      "local_input_tokens": 100,
+      "local_output_tokens": 8,
+      "necessary_clarifications": 0,
+      "observation_count": 6,
+      "observation_names": {
+        "agent.turn": 2,
+        "evaluation.task": 1,
+        "jev.intent": 1,
+        "llm.attempt": 1,
+        "tool.preview.recharge": 1
+      },
+      "status": "needs_review",
+      "structural_pass": true,
+      "task_success": "unknown",
+      "trace_id": "e1629b63f8af42a2a80e01272791a1b3",
+      "turn_count": 2
+    }
+  ],
+  "schema": "langfuse-local-paired-verification.v1",
+  "scores_api_used": false
+}

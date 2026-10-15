@@ -18,6 +18,7 @@ import (
 
 	"github.com/frostloom/ai-gateway/internal/billing/store"
 	"github.com/frostloom/ai-gateway/internal/gateway/client"
+	"github.com/frostloom/ai-gateway/internal/observability"
 	billingv1 "github.com/frostloom/ai-gateway/internal/proto/billing/v1"
 )
 
@@ -62,6 +63,7 @@ type billingAuth interface {
 
 // Handler AI 客服运行时：鉴权（key→tenant）→ 会话 → 意图路由（LLM）→ 工具执行 / 确认挂起。
 type Handler struct {
+	observer    *observability.Observer
 	routingMode RoutingMode
 	billing     billingAuth // 用 ValidateAPIKey 鉴权，tenant 只从这里来
 	tb          *Toolbox
@@ -85,6 +87,9 @@ type Handler struct {
 	defaultTenant uint64 // ADMIN_DEFAULT_TENANT：管理员未指定租户时的默认作用域
 }
 
+// SetObserver installs an independent optional telemetry sink before serving requests.
+func (h *Handler) SetObserver(observer *observability.Observer) { h.observer = observer }
+
 // SetAdminAccess 配置管理面板代操作能力（internalToken 为空 = 关闭该路径）。
 func (h *Handler) SetAdminAccess(internalToken string, defaultTenant uint64) {
 	h.internalToken = internalToken
@@ -106,8 +111,14 @@ func NewHandler(b *client.Billing, tb *Toolbox, llm *LLMClient, st *store.Store,
 //     内部头必须匹配 AGENT_INTERNAL_TOKEN，否则一律按未授权处理——防止直接打 :9105 伪造管理员。
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	stats := &TurnTelemetry{JevEnabled: h.jev != nil && h.usesJevTurn(), Runtime: h.runtimeMetadata(), TurnStage: "request"}
-	w = &telemetryWriter{ResponseWriter: w, stats: stats, started: time.Now()}
+	tw := &telemetryWriter{ResponseWriter: w, stats: stats, started: time.Now(), status: 200}
+	w = tw
 	ctx := context.WithValue(r.Context(), telemetryKey{}, stats)
+	ctx, observedTurn := h.observer.StartTurn(ctx, string(h.RoutingMode()))
+	stats.LangfuseTraceID = observedTurn.TraceID()
+	defer func() {
+		observedTurn.End(tw.status, observability.Summary{Stage: stats.TurnStage, LLMCalls: stats.LLMCalls, JevCalls: stats.JevCalls, JevErrors: stats.JevErrors, LLMUsageMissing: stats.LLMUsageMissing, JevUsageMissing: stats.JevUsageMissing, FastPath: stats.JevFastPath, FastReason: stats.JevFastPathReason, Intent: stats.JevIntent, IntentConfidence: stats.JevIntentConfidence, Pending: tw.pending})
+	}()
 
 	var req struct {
 		SessionID string `json:"session_id"`
@@ -132,6 +143,8 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if req.SessionID == "" {
 		req.SessionID = newSessionID()
 	}
+	observedTurn.BindIdentity(tenantID, req.SessionID)
+	observedTurn.Input(req.Message)
 	stats.TurnStage = "session"
 	if err := h.st.RecordSession(ctx, req.SessionID, tenantID, apiKeyID); err != nil {
 		h.log.Error("record session", "err", err)
@@ -151,6 +164,8 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	stats.TurnStage = "process"
 	reply, trace, err := h.process(ctx, req.SessionID, tenantID, req.Message, ses)
+	observedTurn.Output(reply)
+	observedTurn.Error(err)
 	// 成功也必须落盘：写工具挂起的 pending_action、多轮历史都在这。
 	// 只在错误时保存会导致确认流程在下一请求丢失（挂起状态没了）。
 	if saveErr := h.saveSession(ctx, req.SessionID, ses); saveErr != nil {
@@ -730,6 +745,10 @@ func jsonString(v any) string {
 
 func writeJSON(w http.ResponseWriter, code int, v any) {
 	if tw, ok := w.(*telemetryWriter); ok {
+		tw.status = code
+		if body, ok := v.(map[string]any); ok {
+			tw.pending, _ = body["pending_confirm"].(bool)
+		}
 		tw.stats.TotalLatencyMS = float64(time.Since(tw.started)) / float64(time.Millisecond)
 		if body, ok := v.(map[string]any); ok {
 			body["telemetry"] = tw.stats
@@ -741,6 +760,8 @@ func writeJSON(w http.ResponseWriter, code int, v any) {
 }
 
 type telemetryWriter struct {
+	status  int
+	pending bool
 	http.ResponseWriter
 	stats   *TurnTelemetry
 	started time.Time

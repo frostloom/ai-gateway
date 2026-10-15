@@ -1,0 +1,82 @@
+{
+  "verified_at": "2026-10-13T22:22:20.364239+08:00",
+  "langfuse_version": "4.58.0",
+  "compose_sha256": "d03460f0c736d9e283f78bfa73b655d41840319030d4db3265cf7267b4e6a95d",
+  "services": [
+    {
+      "service": "clickhouse",
+      "state": "running",
+      "health": "healthy",
+      "image": "clickhouse/clickhouse-server@sha256:8a790dd3468db22b1d4e7b18a176f378ff5ff6053b9c48dd4ea1fa71a24c5ba6"
+    },
+    {
+      "service": "langfuse-web",
+      "state": "running",
+      "health": "healthy",
+      "image": "docker.langfuse.com/langfuse/langfuse@sha256:b5f4306480d844b2bce43ecd82960cefc0b219e5164ea588ea45ed806a41a4c9"
+    },
+    {
+      "service": "langfuse-worker",
+      "state": "running",
+      "health": "healthy",
+      "image": "docker.langfuse.com/langfuse/langfuse-worker@sha256:5f0e9e0da70b0c5d91ad9158941ca042c25c936d371524a1454226ebc5f12093"
+    },
+    {
+      "service": "minio",
+      "state": "running",
+      "health": "healthy",
+      "image": "cgr.dev/chainguard/minio@sha256:dc455cdd4db6e390b1b26514f15ff37681a777bf8dab41aac445a0259f751e56"
+    },
+    {
+      "service": "postgres",
+      "state": "running",
+      "health": "healthy",
+      "image": "docker.m.daocloud.io/library/postgres@sha256:b0f9560a2de083e2cc7382e75f808c7381a32852a7ec49117deedb300e552b24"
+    },
+    {
+      "service": "redis",
+      "state": "running",
+      "health": "healthy",
+      "image": "redis@sha256:ff02b58f971e7d7d156a1267e283fcbbeee91773b6aa36c49dac28ecfe28eadf"
+    }
+  ],
+  "synthetic_ingestion": {
+    "synthetic-jev-only": {
+      "trace_id": "dfd26619519c436f26d44cd7320e3040",
+      "observations": 3,
+      "types": [
+        "TOOL",
+        "EVALUATOR",
+        "AGENT"
+      ],
+      "identity_propagated": true,
+      "usage_verified": false
+    },
+    "synthetic-model": {
+      "trace_id": "ab020947e8fa15693dd052b9a61eac56",
+      "observations": 4,
+      "types": [
+        "AGENT",
+        "EVALUATOR",
+        "GENERATION",
+        "TOOL"
+      ],
+      "identity_propagated": true,
+      "usage_verified": true
+    }
+  },
+  "api": "/api/public/v2/observations",
+  "persisted_after_web_worker_recreation": true,
+  "administrator_login_verified": true,
+  "model_calls": 0,
+  "jev_calls": 0,
+  "production_agent_restarted": false,
+  "historical_1220_modified": false,
+  "storage": "Docker named volumes",
+  "local_config_directory": "E:\\github项目\\ai-gateway\\.worktrees\\langfuse-observability\\deploy\\langfuse",
+  "limitations": [
+    "Synthetic telemetry only, production agent not enabled",
+    "No load benchmark or validated model pricing",
+    "Image proxy origin noted in deployment document"
+  ]
+}
