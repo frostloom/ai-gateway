@@ -1,0 +1,75 @@
+{
+  "annotation_queue_id": "cmv9qd9w70005t3507i2mks10",
+  "dashboard_id": "cmv9qprul001dt3507gkqxd33",
+  "dataset_id": "cmv9q5l6p0003t350aw1dtfxx",
+  "dataset_items": 1220,
+  "dataset_name": "客服开发任务-1220-v1",
+  "existing_rule_scores": 56,
+  "jev_calls": 0,
+  "kind": "verified",
+  "model_calls": 0,
+  "plan_sha256": "bf1e21831afec0874b646cfcdd57a01a32e0f8240c7b57f71ea0fcfb65eb4bee",
+  "prompt_name": "customer-service/system/731344ccef1bfc40456b6797e9c7cb5c5c3d628799d3e5ee8ab05f3142c6f7fa",
+  "prompt_version": 1,
+  "queued_tasks": 8,
+  "score_config_count": 10,
+  "widget_count": 6,
+  "widget_data": [
+    {
+      "data": [
+        {
+          "count_count": 4,
+          "stringValue": "unknown"
+        }
+      ],
+      "name": "本机替身 V1 模型 任务审核状态-v1"
+    },
+    {
+      "data": [
+        {
+          "name": "evaluation.task",
+          "p50_latency": 1033,
+          "p95_latency": 1194.7499999999998
+        }
+      ],
+      "name": "本机替身 V1 模型 任务跨度耗时毫秒-v1"
+    },
+    {
+      "data": [
+        {
+          "count_count": 7,
+          "name": "llm.attempt"
+        }
+      ],
+      "name": "本机替身 V1 模型 本机假模型调用数-v1"
+    },
+    {
+      "data": [
+        {
+          "count_count": 4,
+          "stringValue": "unknown"
+        }
+      ],
+      "name": "本机替身 V2 JEV 分流 任务审核状态-v1"
+    },
+    {
+      "data": [
+        {
+          "name": "evaluation.task",
+          "p50_latency": 1068.5,
+          "p95_latency": 1181.05
+        }
+      ],
+      "name": "本机替身 V2 JEV 分流 任务跨度耗时毫秒-v1"
+    },
+    {
+      "data": [
+        {
+          "count_count": 5,
+          "name": "llm.attempt"
+        }
+      ],
+      "name": "本机替身 V2 JEV 分流 本机假模型调用数-v1"
+    }
+  ]
+}

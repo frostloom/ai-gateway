@@ -29,3 +29,6 @@ scripts/langfuse-eval.py -text
 scripts/prepare-observed-customer-pilot.py -text
 eval/paired-pilots/2026-10-15-observed-preflight-v2/** -text
 eval/paired-pilots/2026-10-15-langfuse-content-scores-v1/** -text
+eval/langfuse-workbench/2026-10-15-v1/** -text whitespace=cr-at-eol
+eval/paired-pilots/2026-10-16-langfuse-workbench-preflight-v3/** -text whitespace=cr-at-eol
+scripts/langfuse-workbench.py -text whitespace=cr-at-eol

@@ -1,0 +1,26 @@
+package main
+import (
+ "bufio"
+ "context"
+ "encoding/json"
+ "os"
+ "strings"
+ "github.com/frostloom/ai-gateway/internal/observability"
+)
+func main() {
+ f,err:=os.Open(".worktrees/langfuse-observability/deploy/langfuse/.env.agent");if err!=nil {panic("private local config unavailable")};defer f.Close()
+ values:=map[string]string{};s:=bufio.NewScanner(f)
+ for s.Scan(){k,v,ok:=strings.Cut(strings.TrimPrefix(s.Text(),"\ufeff"),"=");if ok {values[strings.TrimSpace(k)]=strings.Trim(strings.TrimSpace(v),"\"'")}}
+ if s.Err()!=nil {panic("config read failed")}
+ values["OTEL_EXPORTER_OTLP_TRACES_ENDPOINT"]="http://127.0.0.1:13000/api/public/otel/v1/traces"
+ values["AGENT_RELEASE"]="workbench-prompt-link-local-stub-2026-10-16"
+ cfg,err:=observability.ConfigFromEnv(func(k string)string{return values[k]});if err!=nil {panic("invalid local config")}
+ if cfg.Environment!="evaluation" {panic("evaluation only")}
+ o,err:=observability.New(context.Background(),cfg);if err!=nil {panic("observer unavailable")}
+ ctx,run:=o.StartEvaluation(context.Background(),observability.Evaluation{RunID:"prompt-link-local-stub-v1",CaseKey:"prompt-link-engineering-only",Arm:"model",EvidenceKind:"local_stub"})
+ ctx,turn:=o.StartTurn(ctx,"model");_,op:=observability.Start(ctx,"prompt-link.local_stub","generation")
+ op.BasePrompt("731344ccef1bfc40456b6797e9c7cb5c5c3d628799d3e5ee8ab05f3142c6f7fa");op.End(nil);turn.End(200,observability.Summary{});run.End(observability.EvaluationResult{Status:"needs_review",StructuralPass:true})
+ if err=o.Shutdown(context.Background());err!=nil {panic("local export failed")}
+ result:=map[string]any{"evidence_kind":"local_stub","purpose":"prompt linkage only; no inference or task result","trace_id":run.TraceID(),"model_calls":0,"jev_calls":0,"stats":o.Stats()}
+ out,err:=os.OpenFile("eval/langfuse-workbench/2026-10-15-v1/prompt-link-probe.json",os.O_WRONLY|os.O_CREATE|os.O_EXCL,0600);if err!=nil {panic("new receipt required")};defer out.Close();if json.NewEncoder(out).Encode(result)!=nil {panic("receipt failed")}
+}

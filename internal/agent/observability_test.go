@@ -211,6 +211,9 @@ func TestObservedRealModelAttemptsPreserveUsage(t *testing.T) {
 	for _, span := range c.spans {
 		if observedAttr(span, "langfuse.observation.type") == "generation" {
 			generations++
+			if observedAttr(span, "langfuse.observation.prompt.name") != "customer-service/system/"+contentSHA([]byte(systemPrompt)) {
+				t.Fatal("actual generation is not linked to its base prompt")
+			}
 			if observedAttr(span, "langfuse.observation.usage_details") != `{"input":7,"output":2}` {
 				t.Fatal("provider usage lost")
 			}

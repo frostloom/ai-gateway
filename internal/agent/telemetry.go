@@ -127,6 +127,7 @@ func beginLLMAttempt(ctx context.Context, protocol llmProtocol) (context.Context
 		stats.LLMUsageMissing++
 		if stats.Runtime != nil {
 			op.Model(stats.Runtime.Model)
+			op.BasePrompt(stats.Runtime.PromptSHA256)
 		}
 		if stats.LLMUsageProtocol == "" {
 			stats.LLMUsageProtocol = string(protocol)

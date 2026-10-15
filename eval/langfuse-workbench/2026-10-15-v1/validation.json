@@ -1,0 +1,70 @@
+{
+  "browser": {
+    "automatic_judge_started": false,
+    "checks": {
+      "dataset_detail_loaded": true,
+      "dataset_list_1220": true,
+      "prompt_detail_loaded": true,
+      "queue_visible": true,
+      "six_widgets_without_query_errors": true
+    },
+    "external_jev_calls": 0,
+    "external_model_calls": 0,
+    "page_errors": [],
+    "playground_executed": false,
+    "schema": "langfuse-workbench-browser.v1"
+  },
+  "external_jev_calls": 0,
+  "external_model_calls": 0,
+  "independent_engineering_review": {
+    "fixes": [
+      "GET placements unsupported; use dashboard detail",
+      "global dashboard filters checked",
+      "run_id is contract hash; validate complete release trace set",
+      "metrics query and browser errors cannot pass"
+    ],
+    "remaining_p1_p2": 0,
+    "reviewer_limits": "Final review read code and saved API/browser evidence, ran 10 read-only Python tests; did not rerun Go or operate browser."
+  },
+  "limitations": [
+    "Definitions are AI posthoc development labels, not independent gold.",
+    "Eight queued local_stub arms remain unreviewed; success unknown.",
+    "This is not 1220 new executions or real V1/V2 accuracy/cost/latency evidence.",
+    "Release must not be reused; verification is not continuous monitoring.",
+    "Correct profile fields do not prove remote key validity."
+  ],
+  "paid_run_authorized": false,
+  "prompt_association": "3 observability-only spans; promptId/name/version read back; no inference",
+  "schema": "langfuse-workbench-validation.v1",
+  "tests": {
+    "go_test_all": {
+      "command": "go test ./...",
+      "exit_code": 0
+    },
+    "go_vet_all": {
+      "command": "go vet ./...",
+      "exit_code": 0
+    },
+    "historical_archive_chain": "1220 source cases / 3660 first-turn outputs rederived unchanged",
+    "python_all": {
+      "command": "python -m unittest discover -s scripts/tests -v",
+      "exit_code": 0,
+      "tests": 137
+    }
+  },
+  "verified_date": "2026-10-16",
+  "workbench": {
+    "dataset_items": 1220,
+    "existing_rule_scores": 56,
+    "full_release_trace_ids_equal_frozen_eight": true,
+    "idempotent_new_posts": 0,
+    "prompt_versions": 1,
+    "queue_statuses": {
+      "PENDING": 8
+    },
+    "queued_tasks": 8,
+    "score_configs": 10,
+    "widget_metric_queries": 6,
+    "widgets": 6
+  }
+}

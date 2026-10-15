@@ -157,6 +157,24 @@ func (o *Operation) Model(name string) {
 		o.span.SetAttributes(attribute.String("langfuse.observation.model.name", name))
 	}
 }
+
+// BasePrompt links evaluation generations to the immutable base template only.
+// Dynamic hints and conversation history remain part of the application input.
+func (o *Operation) BasePrompt(hash string) {
+	if o == nil || o.observer == nil || o.observer.cfg.Environment != "evaluation" {
+		return
+	}
+	decoded, err := hex.DecodeString(hash)
+	if err != nil || len(decoded) != sha256.Size || hex.EncodeToString(decoded) != hash {
+		return
+	}
+	o.span.SetAttributes(
+		attribute.String("langfuse.observation.prompt.name", "customer-service/system/"+hash),
+		attribute.Int("langfuse.observation.prompt.version", 1),
+		meta("prompt_scope", "base_system_only"),
+		meta("base_prompt_sha256", hash),
+	)
+}
 func (o *Operation) Usage(u Usage) {
 	if o == nil {
 		return
