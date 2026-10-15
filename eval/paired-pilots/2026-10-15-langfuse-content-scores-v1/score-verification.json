@@ -1,0 +1,89 @@
+{
+  "jev_calls": 0,
+  "kind": "verified",
+  "model_calls": 0,
+  "plan_sha256": "733efa0afa93c7c5fc47a08aa4cc1cf720a1c42ca6c864dc044178fb3d334b33",
+  "score_count": 56,
+  "trace_summaries": [
+    {
+      "arm": "model",
+      "case_key": "balance-001/answer_complete",
+      "content_turns": 1,
+      "evidence_kind": "local_stub",
+      "expected_turns": 1,
+      "require_answers": true,
+      "trace_id": "456c410c67136da3bd008c66f35576d1",
+      "turns": 1
+    },
+    {
+      "arm": "jev_selective",
+      "case_key": "balance-001/answer_complete",
+      "content_turns": 1,
+      "evidence_kind": "local_stub",
+      "expected_turns": 1,
+      "require_answers": true,
+      "trace_id": "51faabbc38512d7428756d6407b9e421",
+      "turns": 1
+    },
+    {
+      "arm": "model",
+      "case_key": "balance-020/explicit_scope_followup",
+      "content_turns": 2,
+      "evidence_kind": "local_stub",
+      "expected_turns": 2,
+      "require_answers": true,
+      "trace_id": "eaca8f48f932111192630b61c25c7a98",
+      "turns": 2
+    },
+    {
+      "arm": "jev_selective",
+      "case_key": "balance-020/explicit_scope_followup",
+      "content_turns": 2,
+      "evidence_kind": "local_stub",
+      "expected_turns": 2,
+      "require_answers": true,
+      "trace_id": "3c31dbcb75966f0aa11e2c74bb3d354f",
+      "turns": 2
+    },
+    {
+      "arm": "model",
+      "case_key": "recharge-002/confirm",
+      "content_turns": 2,
+      "evidence_kind": "local_stub",
+      "expected_turns": 2,
+      "require_answers": true,
+      "trace_id": "7dabd9a9567da73823b38ec951c17aff",
+      "turns": 2
+    },
+    {
+      "arm": "jev_selective",
+      "case_key": "recharge-002/confirm",
+      "content_turns": 2,
+      "evidence_kind": "local_stub",
+      "expected_turns": 2,
+      "require_answers": true,
+      "trace_id": "860c5732b7cc23ec796f49ba396d3ac1",
+      "turns": 2
+    },
+    {
+      "arm": "model",
+      "case_key": "recharge-002/cancel",
+      "content_turns": 2,
+      "evidence_kind": "local_stub",
+      "expected_turns": 2,
+      "require_answers": true,
+      "trace_id": "0f44503f3d5fa6ebdddf50252041fc63",
+      "turns": 2
+    },
+    {
+      "arm": "jev_selective",
+      "case_key": "recharge-002/cancel",
+      "content_turns": 2,
+      "evidence_kind": "local_stub",
+      "expected_turns": 2,
+      "require_answers": true,
+      "trace_id": "6d17ef5034d26d43f6af584971786414",
+      "turns": 2
+    }
+  ]
+}

@@ -13,6 +13,7 @@ type PairClarification struct {
 	SemanticReview string `json:"semantic_review"`
 }
 type PairReportRow struct {
+	ObservedTurns           int                           `json:"observed_turns"`
 	LangfuseTraceID         string                        `json:"langfuse_trace_id,omitempty"`
 	Key                     string                        `json:"key"`
 	Arm                     string                        `json:"arm"`
@@ -85,6 +86,7 @@ func ReportPreparedPair(path string) (SmallPairReport, error) {
 				continue
 			}
 			r.FinishedArms++
+			row.ObservedTurns = len(e.Result.Observations)
 			row.LangfuseTraceID = e.LangfuseTraceID
 			result := *e.Result
 			for _, obs := range result.Observations {
