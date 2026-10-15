@@ -2,7 +2,7 @@
 # Only the web image changes; database, worker, API data and storage are retained.
 services:
   langfuse-web:
-    image: ai-gateway-langfuse-zh:4.58.0-local-v1
+    image: ai-gateway-langfuse-zh:4.58.0-local-v2
     build:
       context: ./zh
       dockerfile: Dockerfile

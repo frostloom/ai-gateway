@@ -16,6 +16,12 @@ function translate(source, dictionary) {
     if (value?.type !== 'Literal' || typeof value.value !== 'string' || !Object.hasOwn(dictionary, value.value)) return;
     edits.set(value.start, {end: value.end, text: JSON.stringify(dictionary[value.value]), original: value.value});
   };
+  const displayText = value => {
+    if (value?.type === 'ConditionalExpression') {
+      displayText(value.consequent);
+      displayText(value.alternate);
+    } else put(value);
+  };
   function displayProps(object) {
     if (object?.type !== 'ObjectExpression') return;
     const fields=object.properties.filter(p=>p.type==='Property'&&!p.computed);
@@ -27,8 +33,8 @@ function translate(source, dictionary) {
       if (['title','placeholder','aria-label','tooltip'].includes(key)) put(p.value);
       if (key==='label' && ioPanel) put(p.value);
       if (key === 'children') {
-        put(p.value);
-        if (p.value.type === 'ArrayExpression') p.value.elements.forEach(put);
+        displayText(p.value);
+        if (p.value.type === 'ArrayExpression') p.value.elements.forEach(displayText);
       }
       if (key === 'headerProps') displayProps(p.value);
     }
@@ -68,6 +74,7 @@ function translate(source, dictionary) {
       }
       // accessorFn-only columns derive their ID from header; leave those unchanged.
       if (get('accessorKey') || get('id')) put(get('header'));
+      if (get('slug')?.type === 'Literal' && get('content') && get('cmdKKeywords')) put(get('title'));
     }
     for (const [key, value] of Object.entries(node)) {
       if (key === 'range' || key === 'loc') continue;
@@ -105,7 +112,8 @@ function install(root, dictionary) {
   }
   for (const directory of ['.next/static/chunks','.next/server/chunks','.next/server/pages']) walk(path.join(root,directory));
   if (!changed.some(x=>x.file.startsWith('.next/static/')) || !changed.some(x=>x.file.startsWith('.next/server/'))) throw Error('Both client and server UI translations required');
-  const manifest = {schema:'langfuse-local-zh.v1',version,changed_files:changed,translated_terms:[...terms].sort()};
+  const assetPrefix = require('./assets.cjs').installAssetPrefix(root);
+  const manifest = {schema:'langfuse-local-zh.v2',version,asset_prefix:assetPrefix,changed_files:changed,translated_terms:[...terms].sort()};
   fs.writeFileSync(path.join(root,'public/local-zh-manifest.json'),JSON.stringify(manifest,null,2)+'\n');
   console.log(JSON.stringify({version,changed_files:changed.length,replacements:changed.reduce((n,x)=>n+x.replacements,0),translated_terms:terms.size}));
 }

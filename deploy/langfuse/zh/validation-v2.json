@@ -1,0 +1,59 @@
+{
+  "schema": "langfuse-zh-deployment-validation.v2",
+  "checked_at": "2026-10-15T08:32:21.360563+00:00",
+  "base_image_digest": "sha256:b5f4306480d844b2bce43ecd82960cefc0b219e5164ea588ea45ed806a41a4c9",
+  "deployed_image_id": "sha256:9b5abc246a5cfca5ea8295d2e3cac878a1044de8e9f9077eafc7f368dcb7382c",
+  "source_canonical_sha256": {
+    "Dockerfile": "d311c43932aab2f71527ecba90e6a57a18b49fcf041b0c97e3f6a4510df19e58",
+    "translate.cjs": "c0ab047779ec3d0594582a09e660bb26dd1826ea74b2af8d9767b28748daa18b",
+    "translate.test.cjs": "345c81f724727ae8cc6476a8e3dc87f7a939bd7a5ef82a5ed9112ab618999cf2",
+    "assets.cjs": "e23b7ee69553a510367b72f74b11dcd27f08790f8fb0ecb8b3a0b1257eda0f40",
+    "assets.test.cjs": "e9e2d5ae3ff61d97aaff730a2d174a6d226acb887df9c5af33e83d5ac6817f4c",
+    "zh-CN.json": "63ff5bd381fcc7d7f14551749fe028cc7595f67b95f399835d9e55c2581f8a51"
+  },
+  "local_manifest_sha256": "b473398e584ba03bf2f6ea0b57c30acda01cd9db755a126d7b257af8086e5b0d",
+  "asset_prefix": "/local-zh-b11247fab443",
+  "changed_bundle_files": 232,
+  "ui_replacements": 2277,
+  "regression_tests_passed": 17,
+  "browser": {
+    "client_side_navigation": true,
+    "settings_headings": true,
+    "all_js_use_chinese_asset_prefix": true,
+    "page_errors": 0,
+    "schema": "langfuse-zh-browser.v1",
+    "login": true,
+    "existing_browser_cache_cleared": false,
+    "traces_heading": true,
+    "chinese_table_headers": true,
+    "trace_input_output_labels": true,
+    "scores_heading": true,
+    "original_score_name_present_in_dom": true,
+    "external_model_calls": 0,
+    "external_jev_calls": 0
+  },
+  "warm_cache_normal_reload": {
+    "cache_cleared": false,
+    "script_count": 116,
+    "all_scripts_use_new_prefix": true
+  },
+  "browser_javascript_request_count": 563,
+  "other_five_containers_unchanged": true,
+  "external_model_calls": 0,
+  "external_jev_calls": 0,
+  "limits": [
+    "Partial local UI translation; some group titles, filter labels and help text remain English.",
+    "UI validation is separate from customer-service accuracy or cost savings."
+  ],
+  "supersedes": "validation.json (preserved original v1 receipt)",
+  "preserved_evaluation": {
+    "verification_kind": "verified",
+    "score_count": 56,
+    "trace_count": 8,
+    "qa_turn_count": 14,
+    "plan_sha256": "733efa0afa93c7c5fc47a08aa4cc1cf720a1c42ca6c864dc044178fb3d334b33",
+    "model_calls": 0,
+    "jev_calls": 0,
+    "verification_receipt_sha256": "9ee0fa20ea69b0eb529118486b78c1b6d6a3241fc2cc75228c9ac0a949905456"
+  }
+}
