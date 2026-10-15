@@ -1,0 +1,38 @@
+{
+  "schema": "langfuse-zh-deployment-validation.v1",
+  "checked_at": "2026-10-15T08:09:22.074433+00:00",
+  "base_image_digest": "sha256:b5f4306480d844b2bce43ecd82960cefc0b219e5164ea588ea45ed806a41a4c9",
+  "deployed_image_id": "sha256:f97ea6f9b12d08af476e4d1a3c5839879bf7c4cb77d054c59334352a7f177e35",
+  "source_canonical_sha256": {
+    "Dockerfile": "db04a30bd24a2011ae1c11756fe66298c381f1f807100d7eeadd040bbbbe6eed",
+    "translate.cjs": "728bcbb917bd3a5b65d8d3ad4f0bb1d7ffc254a579ee9c86df4ddb6777a182f7",
+    "translate.test.cjs": "9ad51ae93746b19d6695c586e34563194e02e0524dc5fda883e9cae5e9a6cfb4",
+    "zh-CN.json": "e03f4acef0cf3a5b12430734096f4b1df8bb5d13f12360c0d886cf82e51c0248"
+  },
+  "local_manifest_sha256": "a822ea79c963cd622ad2eedd47e1b31427a6937ae9772445a99103350468a35d",
+  "changed_bundle_files": 231,
+  "ui_replacements": 2052,
+  "regression_tests_passed": 13,
+  "browser": {
+    "schema": "langfuse-zh-browser.v1",
+    "login": true,
+    "existing_browser_cache_cleared": true,
+    "traces_heading": true,
+    "chinese_table_headers": true,
+    "trace_input_output_labels": true,
+    "scores_heading": true,
+    "original_score_name_present_in_dom": true,
+    "external_model_calls": 0,
+    "external_jev_calls": 0
+  },
+  "other_five_containers_unchanged": true,
+  "existing_scores_read_back": 56,
+  "existing_qa_turns_read_back": 14,
+  "original_score_plan_sha256": "733efa0afa93c7c5fc47a08aa4cc1cf720a1c42ca6c864dc044178fb3d334b33",
+  "limitations": [
+    "Partial local Chinese UI; some filter labels, tabs and help remain English",
+    "First Ctrl+F5 required for cached upstream chunk URLs"
+  ],
+  "external_model_calls": 0,
+  "external_jev_calls": 0
+}
