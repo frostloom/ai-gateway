@@ -1,0 +1,1018 @@
+{
+  "jev_calls": 0,
+  "model_calls": 0,
+  "schema": "langfuse-score-plan.v1",
+  "scores": [
+    {
+      "comment": "Local deterministic assessment; supported facts are not whole-answer correctness. Independent review may remain pending.",
+      "dataType": "CATEGORICAL",
+      "environment": "evaluation",
+      "id": "56d37ac9c927a1def05566cb422ecf72e196489a53c4cd51ade91dc8e74993d2",
+      "metadata": {
+        "arm": "model",
+        "case_key": "balance-001/answer_complete",
+        "evidence_kind": "local_stub",
+        "expected_turns": 1,
+        "journal_sha256": "ce0db845eb894d8e43949b001bd5f712a722224478eb57a56bb7c3dca3060c7e",
+        "require_answers": true
+      },
+      "name": "evaluation_status",
+      "traceId": "456c410c67136da3bd008c66f35576d1",
+      "value": "needs_review"
+    },
+    {
+      "comment": "Local deterministic assessment; supported facts are not whole-answer correctness. Independent review may remain pending.",
+      "dataType": "BOOLEAN",
+      "environment": "evaluation",
+      "id": "2282d216b74a2f91c3915534f42f466e1d67ad24e3b4458da6842d94d4340dbd",
+      "metadata": {
+        "arm": "model",
+        "case_key": "balance-001/answer_complete",
+        "evidence_kind": "local_stub",
+        "expected_turns": 1,
+        "journal_sha256": "ce0db845eb894d8e43949b001bd5f712a722224478eb57a56bb7c3dca3060c7e",
+        "require_answers": true
+      },
+      "name": "structural_pass",
+      "traceId": "456c410c67136da3bd008c66f35576d1",
+      "value": 1
+    },
+    {
+      "comment": "Local deterministic assessment; supported facts are not whole-answer correctness. Independent review may remain pending.",
+      "dataType": "CATEGORICAL",
+      "environment": "evaluation",
+      "id": "5bfcee6a2c1a7a8900cdb7772747fb80dd8bea367042cf44b9c79ac96dbf4a00",
+      "metadata": {
+        "arm": "model",
+        "case_key": "balance-001/answer_complete",
+        "evidence_kind": "local_stub",
+        "expected_turns": 1,
+        "journal_sha256": "ce0db845eb894d8e43949b001bd5f712a722224478eb57a56bb7c3dca3060c7e",
+        "require_answers": true
+      },
+      "name": "task_success",
+      "traceId": "456c410c67136da3bd008c66f35576d1",
+      "value": "unknown"
+    },
+    {
+      "comment": "Local deterministic assessment; supported facts are not whole-answer correctness. Independent review may remain pending.",
+      "dataType": "CATEGORICAL",
+      "environment": "evaluation",
+      "id": "d5b34e0221351b4d81a4c6bd7564cf9f8a411752174f547ebeebf957df10a102",
+      "metadata": {
+        "arm": "model",
+        "case_key": "balance-001/answer_complete",
+        "evidence_kind": "local_stub",
+        "expected_turns": 1,
+        "journal_sha256": "ce0db845eb894d8e43949b001bd5f712a722224478eb57a56bb7c3dca3060c7e",
+        "require_answers": true
+      },
+      "name": "answer_review_status",
+      "traceId": "456c410c67136da3bd008c66f35576d1",
+      "value": "pending_independent_review"
+    },
+    {
+      "comment": "Local deterministic assessment; supported facts are not whole-answer correctness. Independent review may remain pending.",
+      "dataType": "CATEGORICAL",
+      "environment": "evaluation",
+      "id": "ed8910b1fcdd116792473528a341db3c3dcce365881cd433952aa0154e1007db",
+      "metadata": {
+        "arm": "model",
+        "case_key": "balance-001/answer_complete",
+        "evidence_kind": "local_stub",
+        "expected_turns": 1,
+        "journal_sha256": "ce0db845eb894d8e43949b001bd5f712a722224478eb57a56bb7c3dca3060c7e",
+        "require_answers": true
+      },
+      "name": "fact_check_status",
+      "traceId": "456c410c67136da3bd008c66f35576d1",
+      "value": "supported_claims_match"
+    },
+    {
+      "comment": "Local deterministic assessment; supported facts are not whole-answer correctness. Independent review may remain pending.",
+      "dataType": "CATEGORICAL",
+      "environment": "evaluation",
+      "id": "cdabd22c7cd910a3736e25b5a8247a197768b9512c49c5d8874c0eb7b566b630",
+      "metadata": {
+        "arm": "model",
+        "case_key": "balance-001/answer_complete",
+        "evidence_kind": "local_stub",
+        "expected_turns": 1,
+        "journal_sha256": "ce0db845eb894d8e43949b001bd5f712a722224478eb57a56bb7c3dca3060c7e",
+        "require_answers": true
+      },
+      "name": "necessary_clarification_status",
+      "traceId": "456c410c67136da3bd008c66f35576d1",
+      "value": "not_required"
+    },
+    {
+      "comment": "Local deterministic assessment; supported facts are not whole-answer correctness. Independent review may remain pending.",
+      "dataType": "NUMERIC",
+      "environment": "evaluation",
+      "id": "b0e633a3d60c5e0941bf2955a19eb29f0745a9c34b7a9868f7416b8d00895ce5",
+      "metadata": {
+        "arm": "model",
+        "case_key": "balance-001/answer_complete",
+        "evidence_kind": "local_stub",
+        "expected_turns": 1,
+        "journal_sha256": "ce0db845eb894d8e43949b001bd5f712a722224478eb57a56bb7c3dca3060c7e",
+        "require_answers": true
+      },
+      "name": "http_failures",
+      "traceId": "456c410c67136da3bd008c66f35576d1",
+      "value": 0
+    },
+    {
+      "comment": "Local deterministic assessment; supported facts are not whole-answer correctness. Independent review may remain pending.",
+      "dataType": "CATEGORICAL",
+      "environment": "evaluation",
+      "id": "d779655c38ed29ee6d255a06b602c934e1711e9308769306fe890d4c9c525c18",
+      "metadata": {
+        "arm": "jev_selective",
+        "case_key": "balance-001/answer_complete",
+        "evidence_kind": "local_stub",
+        "expected_turns": 1,
+        "journal_sha256": "ce0db845eb894d8e43949b001bd5f712a722224478eb57a56bb7c3dca3060c7e",
+        "require_answers": true
+      },
+      "name": "evaluation_status",
+      "traceId": "51faabbc38512d7428756d6407b9e421",
+      "value": "needs_review"
+    },
+    {
+      "comment": "Local deterministic assessment; supported facts are not whole-answer correctness. Independent review may remain pending.",
+      "dataType": "BOOLEAN",
+      "environment": "evaluation",
+      "id": "de0297170849fb71b4cc78290793cb1debba8fb72d9d82ef4609254b9b0a6da4",
+      "metadata": {
+        "arm": "jev_selective",
+        "case_key": "balance-001/answer_complete",
+        "evidence_kind": "local_stub",
+        "expected_turns": 1,
+        "journal_sha256": "ce0db845eb894d8e43949b001bd5f712a722224478eb57a56bb7c3dca3060c7e",
+        "require_answers": true
+      },
+      "name": "structural_pass",
+      "traceId": "51faabbc38512d7428756d6407b9e421",
+      "value": 1
+    },
+    {
+      "comment": "Local deterministic assessment; supported facts are not whole-answer correctness. Independent review may remain pending.",
+      "dataType": "CATEGORICAL",
+      "environment": "evaluation",
+      "id": "c1de8bd75c9a7f34deb417dcc002f1b6b91949027179b94c84136a186659bd0a",
+      "metadata": {
+        "arm": "jev_selective",
+        "case_key": "balance-001/answer_complete",
+        "evidence_kind": "local_stub",
+        "expected_turns": 1,
+        "journal_sha256": "ce0db845eb894d8e43949b001bd5f712a722224478eb57a56bb7c3dca3060c7e",
+        "require_answers": true
+      },
+      "name": "task_success",
+      "traceId": "51faabbc38512d7428756d6407b9e421",
+      "value": "unknown"
+    },
+    {
+      "comment": "Local deterministic assessment; supported facts are not whole-answer correctness. Independent review may remain pending.",
+      "dataType": "CATEGORICAL",
+      "environment": "evaluation",
+      "id": "b0fbc59ef4996b456f15a936fbac7326e7174aeb867b93c0ff9ee18685f0cb8e",
+      "metadata": {
+        "arm": "jev_selective",
+        "case_key": "balance-001/answer_complete",
+        "evidence_kind": "local_stub",
+        "expected_turns": 1,
+        "journal_sha256": "ce0db845eb894d8e43949b001bd5f712a722224478eb57a56bb7c3dca3060c7e",
+        "require_answers": true
+      },
+      "name": "answer_review_status",
+      "traceId": "51faabbc38512d7428756d6407b9e421",
+      "value": "pending_independent_review"
+    },
+    {
+      "comment": "Local deterministic assessment; supported facts are not whole-answer correctness. Independent review may remain pending.",
+      "dataType": "CATEGORICAL",
+      "environment": "evaluation",
+      "id": "e315bbde779b75080060c8132a6f684f95d20c96c315b4c29f737c623d041469",
+      "metadata": {
+        "arm": "jev_selective",
+        "case_key": "balance-001/answer_complete",
+        "evidence_kind": "local_stub",
+        "expected_turns": 1,
+        "journal_sha256": "ce0db845eb894d8e43949b001bd5f712a722224478eb57a56bb7c3dca3060c7e",
+        "require_answers": true
+      },
+      "name": "fact_check_status",
+      "traceId": "51faabbc38512d7428756d6407b9e421",
+      "value": "supported_claims_match"
+    },
+    {
+      "comment": "Local deterministic assessment; supported facts are not whole-answer correctness. Independent review may remain pending.",
+      "dataType": "CATEGORICAL",
+      "environment": "evaluation",
+      "id": "60a44289dd1c3a65610abe7c4c26de3bdce3ca7058912291d68e6c223124ee30",
+      "metadata": {
+        "arm": "jev_selective",
+        "case_key": "balance-001/answer_complete",
+        "evidence_kind": "local_stub",
+        "expected_turns": 1,
+        "journal_sha256": "ce0db845eb894d8e43949b001bd5f712a722224478eb57a56bb7c3dca3060c7e",
+        "require_answers": true
+      },
+      "name": "necessary_clarification_status",
+      "traceId": "51faabbc38512d7428756d6407b9e421",
+      "value": "not_required"
+    },
+    {
+      "comment": "Local deterministic assessment; supported facts are not whole-answer correctness. Independent review may remain pending.",
+      "dataType": "NUMERIC",
+      "environment": "evaluation",
+      "id": "1e2557a59ebebfa4214f8251b882c2cc9f3767530e2ed29ad4b53671fa915f5f",
+      "metadata": {
+        "arm": "jev_selective",
+        "case_key": "balance-001/answer_complete",
+        "evidence_kind": "local_stub",
+        "expected_turns": 1,
+        "journal_sha256": "ce0db845eb894d8e43949b001bd5f712a722224478eb57a56bb7c3dca3060c7e",
+        "require_answers": true
+      },
+      "name": "http_failures",
+      "traceId": "51faabbc38512d7428756d6407b9e421",
+      "value": 0
+    },
+    {
+      "comment": "Local deterministic assessment; supported facts are not whole-answer correctness. Independent review may remain pending.",
+      "dataType": "CATEGORICAL",
+      "environment": "evaluation",
+      "id": "042a25fd174cfd86051c6eac724995e2c2af05efd81056a079370925950c2d6b",
+      "metadata": {
+        "arm": "model",
+        "case_key": "balance-020/explicit_scope_followup",
+        "evidence_kind": "local_stub",
+        "expected_turns": 2,
+        "journal_sha256": "6b7d11b7d219c9fa42c9793b95755db5b41c17c91db2e649840f5d4e773bd971",
+        "require_answers": true
+      },
+      "name": "evaluation_status",
+      "traceId": "eaca8f48f932111192630b61c25c7a98",
+      "value": "needs_review"
+    },
+    {
+      "comment": "Local deterministic assessment; supported facts are not whole-answer correctness. Independent review may remain pending.",
+      "dataType": "BOOLEAN",
+      "environment": "evaluation",
+      "id": "f91c0d6bd556e9cc37c6d5ccda943b421e6f2404ba378cd5761bd0e8618ec66a",
+      "metadata": {
+        "arm": "model",
+        "case_key": "balance-020/explicit_scope_followup",
+        "evidence_kind": "local_stub",
+        "expected_turns": 2,
+        "journal_sha256": "6b7d11b7d219c9fa42c9793b95755db5b41c17c91db2e649840f5d4e773bd971",
+        "require_answers": true
+      },
+      "name": "structural_pass",
+      "traceId": "eaca8f48f932111192630b61c25c7a98",
+      "value": 1
+    },
+    {
+      "comment": "Local deterministic assessment; supported facts are not whole-answer correctness. Independent review may remain pending.",
+      "dataType": "CATEGORICAL",
+      "environment": "evaluation",
+      "id": "bb47e2cdf6551a18a9951d45073182a1169ef3c418966672277ac04373ea47ab",
+      "metadata": {
+        "arm": "model",
+        "case_key": "balance-020/explicit_scope_followup",
+        "evidence_kind": "local_stub",
+        "expected_turns": 2,
+        "journal_sha256": "6b7d11b7d219c9fa42c9793b95755db5b41c17c91db2e649840f5d4e773bd971",
+        "require_answers": true
+      },
+      "name": "task_success",
+      "traceId": "eaca8f48f932111192630b61c25c7a98",
+      "value": "unknown"
+    },
+    {
+      "comment": "Local deterministic assessment; supported facts are not whole-answer correctness. Independent review may remain pending.",
+      "dataType": "CATEGORICAL",
+      "environment": "evaluation",
+      "id": "d518b4bcd81d813091d3fd022ca028d5b033877c8079ae05ad32f55a955cf6f9",
+      "metadata": {
+        "arm": "model",
+        "case_key": "balance-020/explicit_scope_followup",
+        "evidence_kind": "local_stub",
+        "expected_turns": 2,
+        "journal_sha256": "6b7d11b7d219c9fa42c9793b95755db5b41c17c91db2e649840f5d4e773bd971",
+        "require_answers": true
+      },
+      "name": "answer_review_status",
+      "traceId": "eaca8f48f932111192630b61c25c7a98",
+      "value": "pending_independent_review"
+    },
+    {
+      "comment": "Local deterministic assessment; supported facts are not whole-answer correctness. Independent review may remain pending.",
+      "dataType": "CATEGORICAL",
+      "environment": "evaluation",
+      "id": "9a24d85e5f40a54b1afe95e442b737100349a2673152d77551f2f1bab8124b04",
+      "metadata": {
+        "arm": "model",
+        "case_key": "balance-020/explicit_scope_followup",
+        "evidence_kind": "local_stub",
+        "expected_turns": 2,
+        "journal_sha256": "6b7d11b7d219c9fa42c9793b95755db5b41c17c91db2e649840f5d4e773bd971",
+        "require_answers": true
+      },
+      "name": "fact_check_status",
+      "traceId": "eaca8f48f932111192630b61c25c7a98",
+      "value": "partial"
+    },
+    {
+      "comment": "Local deterministic assessment; supported facts are not whole-answer correctness. Independent review may remain pending.",
+      "dataType": "CATEGORICAL",
+      "environment": "evaluation",
+      "id": "0e40f29bb409d8606a56d541300560514abfc4805a82bd6743009a6ac29c24f9",
+      "metadata": {
+        "arm": "model",
+        "case_key": "balance-020/explicit_scope_followup",
+        "evidence_kind": "local_stub",
+        "expected_turns": 2,
+        "journal_sha256": "6b7d11b7d219c9fa42c9793b95755db5b41c17c91db2e649840f5d4e773bd971",
+        "require_answers": true
+      },
+      "name": "necessary_clarification_status",
+      "traceId": "eaca8f48f932111192630b61c25c7a98",
+      "value": "pending_independent_review"
+    },
+    {
+      "comment": "Local deterministic assessment; supported facts are not whole-answer correctness. Independent review may remain pending.",
+      "dataType": "NUMERIC",
+      "environment": "evaluation",
+      "id": "61b7c12a7e418301c4684dcef8b18050296b1739f100ea48dc24fe71abb572c4",
+      "metadata": {
+        "arm": "model",
+        "case_key": "balance-020/explicit_scope_followup",
+        "evidence_kind": "local_stub",
+        "expected_turns": 2,
+        "journal_sha256": "6b7d11b7d219c9fa42c9793b95755db5b41c17c91db2e649840f5d4e773bd971",
+        "require_answers": true
+      },
+      "name": "http_failures",
+      "traceId": "eaca8f48f932111192630b61c25c7a98",
+      "value": 0
+    },
+    {
+      "comment": "Local deterministic assessment; supported facts are not whole-answer correctness. Independent review may remain pending.",
+      "dataType": "CATEGORICAL",
+      "environment": "evaluation",
+      "id": "aeffd53e08d11fabc409d45c686951917ef4f749e2b1617ccbfba535d3694563",
+      "metadata": {
+        "arm": "jev_selective",
+        "case_key": "balance-020/explicit_scope_followup",
+        "evidence_kind": "local_stub",
+        "expected_turns": 2,
+        "journal_sha256": "6b7d11b7d219c9fa42c9793b95755db5b41c17c91db2e649840f5d4e773bd971",
+        "require_answers": true
+      },
+      "name": "evaluation_status",
+      "traceId": "3c31dbcb75966f0aa11e2c74bb3d354f",
+      "value": "needs_review"
+    },
+    {
+      "comment": "Local deterministic assessment; supported facts are not whole-answer correctness. Independent review may remain pending.",
+      "dataType": "BOOLEAN",
+      "environment": "evaluation",
+      "id": "c755fdcf19c8744571c1e187bbd29a392927af4b14ce2c890bb98195c4f7d0e2",
+      "metadata": {
+        "arm": "jev_selective",
+        "case_key": "balance-020/explicit_scope_followup",
+        "evidence_kind": "local_stub",
+        "expected_turns": 2,
+        "journal_sha256": "6b7d11b7d219c9fa42c9793b95755db5b41c17c91db2e649840f5d4e773bd971",
+        "require_answers": true
+      },
+      "name": "structural_pass",
+      "traceId": "3c31dbcb75966f0aa11e2c74bb3d354f",
+      "value": 1
+    },
+    {
+      "comment": "Local deterministic assessment; supported facts are not whole-answer correctness. Independent review may remain pending.",
+      "dataType": "CATEGORICAL",
+      "environment": "evaluation",
+      "id": "d8643e52e76fed656b5bdf098bd05061ed077fc48b599b135c2d8e11b37fd421",
+      "metadata": {
+        "arm": "jev_selective",
+        "case_key": "balance-020/explicit_scope_followup",
+        "evidence_kind": "local_stub",
+        "expected_turns": 2,
+        "journal_sha256": "6b7d11b7d219c9fa42c9793b95755db5b41c17c91db2e649840f5d4e773bd971",
+        "require_answers": true
+      },
+      "name": "task_success",
+      "traceId": "3c31dbcb75966f0aa11e2c74bb3d354f",
+      "value": "unknown"
+    },
+    {
+      "comment": "Local deterministic assessment; supported facts are not whole-answer correctness. Independent review may remain pending.",
+      "dataType": "CATEGORICAL",
+      "environment": "evaluation",
+      "id": "df086934a2895e6d9620d83db5438b5c7d7ec8cb82737bd6be3d70e09341d68a",
+      "metadata": {
+        "arm": "jev_selective",
+        "case_key": "balance-020/explicit_scope_followup",
+        "evidence_kind": "local_stub",
+        "expected_turns": 2,
+        "journal_sha256": "6b7d11b7d219c9fa42c9793b95755db5b41c17c91db2e649840f5d4e773bd971",
+        "require_answers": true
+      },
+      "name": "answer_review_status",
+      "traceId": "3c31dbcb75966f0aa11e2c74bb3d354f",
+      "value": "pending_independent_review"
+    },
+    {
+      "comment": "Local deterministic assessment; supported facts are not whole-answer correctness. Independent review may remain pending.",
+      "dataType": "CATEGORICAL",
+      "environment": "evaluation",
+      "id": "b661f11167da1f93f1165d9999fdd521a149674ddc919f5f6ef0899bd9e9c16c",
+      "metadata": {
+        "arm": "jev_selective",
+        "case_key": "balance-020/explicit_scope_followup",
+        "evidence_kind": "local_stub",
+        "expected_turns": 2,
+        "journal_sha256": "6b7d11b7d219c9fa42c9793b95755db5b41c17c91db2e649840f5d4e773bd971",
+        "require_answers": true
+      },
+      "name": "fact_check_status",
+      "traceId": "3c31dbcb75966f0aa11e2c74bb3d354f",
+      "value": "partial"
+    },
+    {
+      "comment": "Local deterministic assessment; supported facts are not whole-answer correctness. Independent review may remain pending.",
+      "dataType": "CATEGORICAL",
+      "environment": "evaluation",
+      "id": "4eca684e3f4e53bd9792e25a9589b982b9c726e92e11a281e35db34aae3b4769",
+      "metadata": {
+        "arm": "jev_selective",
+        "case_key": "balance-020/explicit_scope_followup",
+        "evidence_kind": "local_stub",
+        "expected_turns": 2,
+        "journal_sha256": "6b7d11b7d219c9fa42c9793b95755db5b41c17c91db2e649840f5d4e773bd971",
+        "require_answers": true
+      },
+      "name": "necessary_clarification_status",
+      "traceId": "3c31dbcb75966f0aa11e2c74bb3d354f",
+      "value": "pending_independent_review"
+    },
+    {
+      "comment": "Local deterministic assessment; supported facts are not whole-answer correctness. Independent review may remain pending.",
+      "dataType": "NUMERIC",
+      "environment": "evaluation",
+      "id": "e3de5e282bf0ce1990fa23e12e6f584d0c9fe343efa80dedb28f46fd83322d12",
+      "metadata": {
+        "arm": "jev_selective",
+        "case_key": "balance-020/explicit_scope_followup",
+        "evidence_kind": "local_stub",
+        "expected_turns": 2,
+        "journal_sha256": "6b7d11b7d219c9fa42c9793b95755db5b41c17c91db2e649840f5d4e773bd971",
+        "require_answers": true
+      },
+      "name": "http_failures",
+      "traceId": "3c31dbcb75966f0aa11e2c74bb3d354f",
+      "value": 0
+    },
+    {
+      "comment": "Local deterministic assessment; supported facts are not whole-answer correctness. Independent review may remain pending.",
+      "dataType": "CATEGORICAL",
+      "environment": "evaluation",
+      "id": "833199049e2d31213c3aa223cc9a324a2287c920765d1df5555dc1868b104ec4",
+      "metadata": {
+        "arm": "model",
+        "case_key": "recharge-002/confirm",
+        "evidence_kind": "local_stub",
+        "expected_turns": 2,
+        "journal_sha256": "c4b002b28e74da86fccc596438c3c2d1f2029676761e95f7c2ddab0e111289f6",
+        "require_answers": true
+      },
+      "name": "evaluation_status",
+      "traceId": "7dabd9a9567da73823b38ec951c17aff",
+      "value": "needs_review"
+    },
+    {
+      "comment": "Local deterministic assessment; supported facts are not whole-answer correctness. Independent review may remain pending.",
+      "dataType": "BOOLEAN",
+      "environment": "evaluation",
+      "id": "1c985f3a6fc5752190ebed87a1702f3a214704cc225ea87568b0ae639571a01b",
+      "metadata": {
+        "arm": "model",
+        "case_key": "recharge-002/confirm",
+        "evidence_kind": "local_stub",
+        "expected_turns": 2,
+        "journal_sha256": "c4b002b28e74da86fccc596438c3c2d1f2029676761e95f7c2ddab0e111289f6",
+        "require_answers": true
+      },
+      "name": "structural_pass",
+      "traceId": "7dabd9a9567da73823b38ec951c17aff",
+      "value": 1
+    },
+    {
+      "comment": "Local deterministic assessment; supported facts are not whole-answer correctness. Independent review may remain pending.",
+      "dataType": "CATEGORICAL",
+      "environment": "evaluation",
+      "id": "225b150c156c3d98c081c5037af2179839faedf35033eb316977dfc6e258e4e1",
+      "metadata": {
+        "arm": "model",
+        "case_key": "recharge-002/confirm",
+        "evidence_kind": "local_stub",
+        "expected_turns": 2,
+        "journal_sha256": "c4b002b28e74da86fccc596438c3c2d1f2029676761e95f7c2ddab0e111289f6",
+        "require_answers": true
+      },
+      "name": "task_success",
+      "traceId": "7dabd9a9567da73823b38ec951c17aff",
+      "value": "unknown"
+    },
+    {
+      "comment": "Local deterministic assessment; supported facts are not whole-answer correctness. Independent review may remain pending.",
+      "dataType": "CATEGORICAL",
+      "environment": "evaluation",
+      "id": "6eb6d12a07fe9ac78226ecb81ab03fd00bf1e31ee1f2326410ed8115ea47937f",
+      "metadata": {
+        "arm": "model",
+        "case_key": "recharge-002/confirm",
+        "evidence_kind": "local_stub",
+        "expected_turns": 2,
+        "journal_sha256": "c4b002b28e74da86fccc596438c3c2d1f2029676761e95f7c2ddab0e111289f6",
+        "require_answers": true
+      },
+      "name": "answer_review_status",
+      "traceId": "7dabd9a9567da73823b38ec951c17aff",
+      "value": "pending_independent_review"
+    },
+    {
+      "comment": "Local deterministic assessment; supported facts are not whole-answer correctness. Independent review may remain pending.",
+      "dataType": "CATEGORICAL",
+      "environment": "evaluation",
+      "id": "287e0a42d9602b9219d0b9c8257de0f3fe80a4165a0d2e050e8e9a247fe0c126",
+      "metadata": {
+        "arm": "model",
+        "case_key": "recharge-002/confirm",
+        "evidence_kind": "local_stub",
+        "expected_turns": 2,
+        "journal_sha256": "c4b002b28e74da86fccc596438c3c2d1f2029676761e95f7c2ddab0e111289f6",
+        "require_answers": true
+      },
+      "name": "fact_check_status",
+      "traceId": "7dabd9a9567da73823b38ec951c17aff",
+      "value": "supported_claims_match"
+    },
+    {
+      "comment": "Local deterministic assessment; supported facts are not whole-answer correctness. Independent review may remain pending.",
+      "dataType": "CATEGORICAL",
+      "environment": "evaluation",
+      "id": "4c9fa5edb731c46aa2134f85aeafb8e271c78be38b60c9fc5f949fcb6fb574df",
+      "metadata": {
+        "arm": "model",
+        "case_key": "recharge-002/confirm",
+        "evidence_kind": "local_stub",
+        "expected_turns": 2,
+        "journal_sha256": "c4b002b28e74da86fccc596438c3c2d1f2029676761e95f7c2ddab0e111289f6",
+        "require_answers": true
+      },
+      "name": "necessary_clarification_status",
+      "traceId": "7dabd9a9567da73823b38ec951c17aff",
+      "value": "not_required"
+    },
+    {
+      "comment": "Local deterministic assessment; supported facts are not whole-answer correctness. Independent review may remain pending.",
+      "dataType": "NUMERIC",
+      "environment": "evaluation",
+      "id": "7c5c293cf10b29a4a543c8d9e82baabc56f2abb8dbc6cb5fc2c1c6a78ddbf166",
+      "metadata": {
+        "arm": "model",
+        "case_key": "recharge-002/confirm",
+        "evidence_kind": "local_stub",
+        "expected_turns": 2,
+        "journal_sha256": "c4b002b28e74da86fccc596438c3c2d1f2029676761e95f7c2ddab0e111289f6",
+        "require_answers": true
+      },
+      "name": "http_failures",
+      "traceId": "7dabd9a9567da73823b38ec951c17aff",
+      "value": 0
+    },
+    {
+      "comment": "Local deterministic assessment; supported facts are not whole-answer correctness. Independent review may remain pending.",
+      "dataType": "CATEGORICAL",
+      "environment": "evaluation",
+      "id": "6cdeee9cea1bc2678120fa4df2f090d9f66c8a0ec0581012da52b5b2585addf2",
+      "metadata": {
+        "arm": "jev_selective",
+        "case_key": "recharge-002/confirm",
+        "evidence_kind": "local_stub",
+        "expected_turns": 2,
+        "journal_sha256": "c4b002b28e74da86fccc596438c3c2d1f2029676761e95f7c2ddab0e111289f6",
+        "require_answers": true
+      },
+      "name": "evaluation_status",
+      "traceId": "860c5732b7cc23ec796f49ba396d3ac1",
+      "value": "needs_review"
+    },
+    {
+      "comment": "Local deterministic assessment; supported facts are not whole-answer correctness. Independent review may remain pending.",
+      "dataType": "BOOLEAN",
+      "environment": "evaluation",
+      "id": "73a2aa983a701b943516bf14ff973adc5c0c070e6d447c6084a703fb8d286277",
+      "metadata": {
+        "arm": "jev_selective",
+        "case_key": "recharge-002/confirm",
+        "evidence_kind": "local_stub",
+        "expected_turns": 2,
+        "journal_sha256": "c4b002b28e74da86fccc596438c3c2d1f2029676761e95f7c2ddab0e111289f6",
+        "require_answers": true
+      },
+      "name": "structural_pass",
+      "traceId": "860c5732b7cc23ec796f49ba396d3ac1",
+      "value": 1
+    },
+    {
+      "comment": "Local deterministic assessment; supported facts are not whole-answer correctness. Independent review may remain pending.",
+      "dataType": "CATEGORICAL",
+      "environment": "evaluation",
+      "id": "bad34f75ac2a13f52539323488d44fb807f9eac9aa8bea625b3fe17d8b0054b6",
+      "metadata": {
+        "arm": "jev_selective",
+        "case_key": "recharge-002/confirm",
+        "evidence_kind": "local_stub",
+        "expected_turns": 2,
+        "journal_sha256": "c4b002b28e74da86fccc596438c3c2d1f2029676761e95f7c2ddab0e111289f6",
+        "require_answers": true
+      },
+      "name": "task_success",
+      "traceId": "860c5732b7cc23ec796f49ba396d3ac1",
+      "value": "unknown"
+    },
+    {
+      "comment": "Local deterministic assessment; supported facts are not whole-answer correctness. Independent review may remain pending.",
+      "dataType": "CATEGORICAL",
+      "environment": "evaluation",
+      "id": "4842f5536894c52f12bd63b6b07e2154b2dbedc5a3bb9b6d37d7c0468a480991",
+      "metadata": {
+        "arm": "jev_selective",
+        "case_key": "recharge-002/confirm",
+        "evidence_kind": "local_stub",
+        "expected_turns": 2,
+        "journal_sha256": "c4b002b28e74da86fccc596438c3c2d1f2029676761e95f7c2ddab0e111289f6",
+        "require_answers": true
+      },
+      "name": "answer_review_status",
+      "traceId": "860c5732b7cc23ec796f49ba396d3ac1",
+      "value": "pending_independent_review"
+    },
+    {
+      "comment": "Local deterministic assessment; supported facts are not whole-answer correctness. Independent review may remain pending.",
+      "dataType": "CATEGORICAL",
+      "environment": "evaluation",
+      "id": "32c52d2a159a77959e4d7120cd3afebbfe94e4d0f6559928d520fd2f2195dcd8",
+      "metadata": {
+        "arm": "jev_selective",
+        "case_key": "recharge-002/confirm",
+        "evidence_kind": "local_stub",
+        "expected_turns": 2,
+        "journal_sha256": "c4b002b28e74da86fccc596438c3c2d1f2029676761e95f7c2ddab0e111289f6",
+        "require_answers": true
+      },
+      "name": "fact_check_status",
+      "traceId": "860c5732b7cc23ec796f49ba396d3ac1",
+      "value": "supported_claims_match"
+    },
+    {
+      "comment": "Local deterministic assessment; supported facts are not whole-answer correctness. Independent review may remain pending.",
+      "dataType": "CATEGORICAL",
+      "environment": "evaluation",
+      "id": "d6af3945180e806cbf28d921f1f3ca5ca898d325911d2e7287456b14476ed9c0",
+      "metadata": {
+        "arm": "jev_selective",
+        "case_key": "recharge-002/confirm",
+        "evidence_kind": "local_stub",
+        "expected_turns": 2,
+        "journal_sha256": "c4b002b28e74da86fccc596438c3c2d1f2029676761e95f7c2ddab0e111289f6",
+        "require_answers": true
+      },
+      "name": "necessary_clarification_status",
+      "traceId": "860c5732b7cc23ec796f49ba396d3ac1",
+      "value": "not_required"
+    },
+    {
+      "comment": "Local deterministic assessment; supported facts are not whole-answer correctness. Independent review may remain pending.",
+      "dataType": "NUMERIC",
+      "environment": "evaluation",
+      "id": "a5af90c3cc908233696e31f294dd8bd55354040cf6cd9a38be36f8ec3fe39503",
+      "metadata": {
+        "arm": "jev_selective",
+        "case_key": "recharge-002/confirm",
+        "evidence_kind": "local_stub",
+        "expected_turns": 2,
+        "journal_sha256": "c4b002b28e74da86fccc596438c3c2d1f2029676761e95f7c2ddab0e111289f6",
+        "require_answers": true
+      },
+      "name": "http_failures",
+      "traceId": "860c5732b7cc23ec796f49ba396d3ac1",
+      "value": 0
+    },
+    {
+      "comment": "Local deterministic assessment; supported facts are not whole-answer correctness. Independent review may remain pending.",
+      "dataType": "CATEGORICAL",
+      "environment": "evaluation",
+      "id": "e3a86ee8b7bb35fbb8257210320b33db5cac157b72b0f4bf4aba7619298b27da",
+      "metadata": {
+        "arm": "model",
+        "case_key": "recharge-002/cancel",
+        "evidence_kind": "local_stub",
+        "expected_turns": 2,
+        "journal_sha256": "df6e7fa7261658eec638db0c6c6f892354d73fa36d03d761f3e4080fc50dfcf7",
+        "require_answers": true
+      },
+      "name": "evaluation_status",
+      "traceId": "0f44503f3d5fa6ebdddf50252041fc63",
+      "value": "needs_review"
+    },
+    {
+      "comment": "Local deterministic assessment; supported facts are not whole-answer correctness. Independent review may remain pending.",
+      "dataType": "BOOLEAN",
+      "environment": "evaluation",
+      "id": "54ec3fafe84334a9f8c5c59ebaf6d80767a017433f387dfc6576cc21788a0a8b",
+      "metadata": {
+        "arm": "model",
+        "case_key": "recharge-002/cancel",
+        "evidence_kind": "local_stub",
+        "expected_turns": 2,
+        "journal_sha256": "df6e7fa7261658eec638db0c6c6f892354d73fa36d03d761f3e4080fc50dfcf7",
+        "require_answers": true
+      },
+      "name": "structural_pass",
+      "traceId": "0f44503f3d5fa6ebdddf50252041fc63",
+      "value": 1
+    },
+    {
+      "comment": "Local deterministic assessment; supported facts are not whole-answer correctness. Independent review may remain pending.",
+      "dataType": "CATEGORICAL",
+      "environment": "evaluation",
+      "id": "68b6e155a93c14999ae5dc631c2b711e6237183cdae7cf7257ed69d9c7a3c5c8",
+      "metadata": {
+        "arm": "model",
+        "case_key": "recharge-002/cancel",
+        "evidence_kind": "local_stub",
+        "expected_turns": 2,
+        "journal_sha256": "df6e7fa7261658eec638db0c6c6f892354d73fa36d03d761f3e4080fc50dfcf7",
+        "require_answers": true
+      },
+      "name": "task_success",
+      "traceId": "0f44503f3d5fa6ebdddf50252041fc63",
+      "value": "unknown"
+    },
+    {
+      "comment": "Local deterministic assessment; supported facts are not whole-answer correctness. Independent review may remain pending.",
+      "dataType": "CATEGORICAL",
+      "environment": "evaluation",
+      "id": "2ae65e9f119cb12c4ded4a608312331001681647c8f62bc69fc274242e8a73c3",
+      "metadata": {
+        "arm": "model",
+        "case_key": "recharge-002/cancel",
+        "evidence_kind": "local_stub",
+        "expected_turns": 2,
+        "journal_sha256": "df6e7fa7261658eec638db0c6c6f892354d73fa36d03d761f3e4080fc50dfcf7",
+        "require_answers": true
+      },
+      "name": "answer_review_status",
+      "traceId": "0f44503f3d5fa6ebdddf50252041fc63",
+      "value": "pending_independent_review"
+    },
+    {
+      "comment": "Local deterministic assessment; supported facts are not whole-answer correctness. Independent review may remain pending.",
+      "dataType": "CATEGORICAL",
+      "environment": "evaluation",
+      "id": "b2aebbf252a1e3ba7d49ee859bd1720230fdc941d9c553c216bb7893a67e49fc",
+      "metadata": {
+        "arm": "model",
+        "case_key": "recharge-002/cancel",
+        "evidence_kind": "local_stub",
+        "expected_turns": 2,
+        "journal_sha256": "df6e7fa7261658eec638db0c6c6f892354d73fa36d03d761f3e4080fc50dfcf7",
+        "require_answers": true
+      },
+      "name": "fact_check_status",
+      "traceId": "0f44503f3d5fa6ebdddf50252041fc63",
+      "value": "partial"
+    },
+    {
+      "comment": "Local deterministic assessment; supported facts are not whole-answer correctness. Independent review may remain pending.",
+      "dataType": "CATEGORICAL",
+      "environment": "evaluation",
+      "id": "2d6f2849db649b936e2d549e75ad1227df0fc5d32219bdda2897c2dca51e05b0",
+      "metadata": {
+        "arm": "model",
+        "case_key": "recharge-002/cancel",
+        "evidence_kind": "local_stub",
+        "expected_turns": 2,
+        "journal_sha256": "df6e7fa7261658eec638db0c6c6f892354d73fa36d03d761f3e4080fc50dfcf7",
+        "require_answers": true
+      },
+      "name": "necessary_clarification_status",
+      "traceId": "0f44503f3d5fa6ebdddf50252041fc63",
+      "value": "not_required"
+    },
+    {
+      "comment": "Local deterministic assessment; supported facts are not whole-answer correctness. Independent review may remain pending.",
+      "dataType": "NUMERIC",
+      "environment": "evaluation",
+      "id": "c34004c85b230bf61452063d27d80d7776404ecc7f1d887629d25d8b93b20269",
+      "metadata": {
+        "arm": "model",
+        "case_key": "recharge-002/cancel",
+        "evidence_kind": "local_stub",
+        "expected_turns": 2,
+        "journal_sha256": "df6e7fa7261658eec638db0c6c6f892354d73fa36d03d761f3e4080fc50dfcf7",
+        "require_answers": true
+      },
+      "name": "http_failures",
+      "traceId": "0f44503f3d5fa6ebdddf50252041fc63",
+      "value": 0
+    },
+    {
+      "comment": "Local deterministic assessment; supported facts are not whole-answer correctness. Independent review may remain pending.",
+      "dataType": "CATEGORICAL",
+      "environment": "evaluation",
+      "id": "908969bcaa22c8ff16dfe28fc0d74cc8da3b7ea66249345e6302b73d51aa51b9",
+      "metadata": {
+        "arm": "jev_selective",
+        "case_key": "recharge-002/cancel",
+        "evidence_kind": "local_stub",
+        "expected_turns": 2,
+        "journal_sha256": "df6e7fa7261658eec638db0c6c6f892354d73fa36d03d761f3e4080fc50dfcf7",
+        "require_answers": true
+      },
+      "name": "evaluation_status",
+      "traceId": "6d17ef5034d26d43f6af584971786414",
+      "value": "needs_review"
+    },
+    {
+      "comment": "Local deterministic assessment; supported facts are not whole-answer correctness. Independent review may remain pending.",
+      "dataType": "BOOLEAN",
+      "environment": "evaluation",
+      "id": "02951eb9c28399285538ab4c3ac000d12e3e661acc549ebf40509c5e9fcf9837",
+      "metadata": {
+        "arm": "jev_selective",
+        "case_key": "recharge-002/cancel",
+        "evidence_kind": "local_stub",
+        "expected_turns": 2,
+        "journal_sha256": "df6e7fa7261658eec638db0c6c6f892354d73fa36d03d761f3e4080fc50dfcf7",
+        "require_answers": true
+      },
+      "name": "structural_pass",
+      "traceId": "6d17ef5034d26d43f6af584971786414",
+      "value": 1
+    },
+    {
+      "comment": "Local deterministic assessment; supported facts are not whole-answer correctness. Independent review may remain pending.",
+      "dataType": "CATEGORICAL",
+      "environment": "evaluation",
+      "id": "cf7dcef1bed6054c3929659676f9511899a2486aca768234fd9b63c63fc4b0eb",
+      "metadata": {
+        "arm": "jev_selective",
+        "case_key": "recharge-002/cancel",
+        "evidence_kind": "local_stub",
+        "expected_turns": 2,
+        "journal_sha256": "df6e7fa7261658eec638db0c6c6f892354d73fa36d03d761f3e4080fc50dfcf7",
+        "require_answers": true
+      },
+      "name": "task_success",
+      "traceId": "6d17ef5034d26d43f6af584971786414",
+      "value": "unknown"
+    },
+    {
+      "comment": "Local deterministic assessment; supported facts are not whole-answer correctness. Independent review may remain pending.",
+      "dataType": "CATEGORICAL",
+      "environment": "evaluation",
+      "id": "25ee31174282b0dd6bca547f3d4fc4adc3da05da8dd2f997b77dae14da041a97",
+      "metadata": {
+        "arm": "jev_selective",
+        "case_key": "recharge-002/cancel",
+        "evidence_kind": "local_stub",
+        "expected_turns": 2,
+        "journal_sha256": "df6e7fa7261658eec638db0c6c6f892354d73fa36d03d761f3e4080fc50dfcf7",
+        "require_answers": true
+      },
+      "name": "answer_review_status",
+      "traceId": "6d17ef5034d26d43f6af584971786414",
+      "value": "pending_independent_review"
+    },
+    {
+      "comment": "Local deterministic assessment; supported facts are not whole-answer correctness. Independent review may remain pending.",
+      "dataType": "CATEGORICAL",
+      "environment": "evaluation",
+      "id": "ebf6eb4809dd9f678c3e46b95dd31a936fbfc1d800a2041cb33b9ff705bd763a",
+      "metadata": {
+        "arm": "jev_selective",
+        "case_key": "recharge-002/cancel",
+        "evidence_kind": "local_stub",
+        "expected_turns": 2,
+        "journal_sha256": "df6e7fa7261658eec638db0c6c6f892354d73fa36d03d761f3e4080fc50dfcf7",
+        "require_answers": true
+      },
+      "name": "fact_check_status",
+      "traceId": "6d17ef5034d26d43f6af584971786414",
+      "value": "partial"
+    },
+    {
+      "comment": "Local deterministic assessment; supported facts are not whole-answer correctness. Independent review may remain pending.",
+      "dataType": "CATEGORICAL",
+      "environment": "evaluation",
+      "id": "f7964ea7eea6e3bca2a050c02bdf64b9d06d44c2928d23ed2c06dc81a7c3619b",
+      "metadata": {
+        "arm": "jev_selective",
+        "case_key": "recharge-002/cancel",
+        "evidence_kind": "local_stub",
+        "expected_turns": 2,
+        "journal_sha256": "df6e7fa7261658eec638db0c6c6f892354d73fa36d03d761f3e4080fc50dfcf7",
+        "require_answers": true
+      },
+      "name": "necessary_clarification_status",
+      "traceId": "6d17ef5034d26d43f6af584971786414",
+      "value": "not_required"
+    },
+    {
+      "comment": "Local deterministic assessment; supported facts are not whole-answer correctness. Independent review may remain pending.",
+      "dataType": "NUMERIC",
+      "environment": "evaluation",
+      "id": "46cd6487893dbdb7602fae3635c40292a7539fc36cb5bf042400b897aa2ccec8",
+      "metadata": {
+        "arm": "jev_selective",
+        "case_key": "recharge-002/cancel",
+        "evidence_kind": "local_stub",
+        "expected_turns": 2,
+        "journal_sha256": "df6e7fa7261658eec638db0c6c6f892354d73fa36d03d761f3e4080fc50dfcf7",
+        "require_answers": true
+      },
+      "name": "http_failures",
+      "traceId": "6d17ef5034d26d43f6af584971786414",
+      "value": 0
+    }
+  ],
+  "trace_bindings": {
+    "0f44503f3d5fa6ebdddf50252041fc63": {
+      "arm": "model",
+      "case_key": "recharge-002/cancel",
+      "evidence_kind": "local_stub",
+      "expected_turns": 2,
+      "require_answers": true
+    },
+    "3c31dbcb75966f0aa11e2c74bb3d354f": {
+      "arm": "jev_selective",
+      "case_key": "balance-020/explicit_scope_followup",
+      "evidence_kind": "local_stub",
+      "expected_turns": 2,
+      "require_answers": true
+    },
+    "456c410c67136da3bd008c66f35576d1": {
+      "arm": "model",
+      "case_key": "balance-001/answer_complete",
+      "evidence_kind": "local_stub",
+      "expected_turns": 1,
+      "require_answers": true
+    },
+    "51faabbc38512d7428756d6407b9e421": {
+      "arm": "jev_selective",
+      "case_key": "balance-001/answer_complete",
+      "evidence_kind": "local_stub",
+      "expected_turns": 1,
+      "require_answers": true
+    },
+    "6d17ef5034d26d43f6af584971786414": {
+      "arm": "jev_selective",
+      "case_key": "recharge-002/cancel",
+      "evidence_kind": "local_stub",
+      "expected_turns": 2,
+      "require_answers": true
+    },
+    "7dabd9a9567da73823b38ec951c17aff": {
+      "arm": "model",
+      "case_key": "recharge-002/confirm",
+      "evidence_kind": "local_stub",
+      "expected_turns": 2,
+      "require_answers": true
+    },
+    "860c5732b7cc23ec796f49ba396d3ac1": {
+      "arm": "jev_selective",
+      "case_key": "recharge-002/confirm",
+      "evidence_kind": "local_stub",
+      "expected_turns": 2,
+      "require_answers": true
+    },
+    "eaca8f48f932111192630b61c25c7a98": {
+      "arm": "model",
+      "case_key": "balance-020/explicit_scope_followup",
+      "evidence_kind": "local_stub",
+      "expected_turns": 2,
+      "require_answers": true
+    }
+  },
+  "unlinked_rows": []
+}

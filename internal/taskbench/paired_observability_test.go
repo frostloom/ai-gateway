@@ -47,7 +47,7 @@ func pairedTestObserver(t *testing.T) (*observability.Observer, *pairedSpanCaptu
 		w.Header().Set("Content-Type", "application/x-protobuf")
 	}))
 	t.Cleanup(server.Close)
-	cfg := observability.Config{Enabled: true, Endpoint: server.URL + "/api/public/otel/v1/traces", PublicKey: "pk-local-test", SecretKey: "sk-local-test", HashKey: strings.Repeat("h", 32), Environment: "evaluation", Release: "local-paired-observation", SampleRate: 1, QueueSize: 256, ExportTimeout: 2 * time.Second}
+	cfg := observability.Config{CaptureContent: true, Enabled: true, Endpoint: server.URL + "/api/public/otel/v1/traces", PublicKey: "pk-local-test", SecretKey: "sk-local-test", HashKey: strings.Repeat("h", 32), Environment: "evaluation", Release: "local-paired-observation", SampleRate: 1, QueueSize: 256, ExportTimeout: 2 * time.Second}
 	if os.Getenv("TASKBENCH_LANGFUSE_SMOKE") == "1" {
 		var err error
 		cfg, err = observability.ConfigFromEnv(os.Getenv)
@@ -72,7 +72,7 @@ func pairedTestObserver(t *testing.T) (*observability.Observer, *pairedSpanCaptu
 	return observer, capture
 }
 
-func checkPairedObservations(t *testing.T, observer *observability.Observer, capture *pairedSpanCapture, traceIDs []string) {
+func checkPairedObservations(t *testing.T, observer *observability.Observer, capture *pairedSpanCapture, traceIDs []string, reports []SmallPairReport) {
 	t.Helper()
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -103,6 +103,9 @@ func checkPairedObservations(t *testing.T, observer *observability.Observer, cap
 				}
 			case "agent.turn":
 				turns++
+				if attrs["langfuse.observation.input"] == "" || attrs["langfuse.observation.output"] == "" {
+					t.Fatal("synthetic question/answer not captured")
+				}
 			case "llm.attempt":
 				generations++
 			}
@@ -112,7 +115,7 @@ func checkPairedObservations(t *testing.T, observer *observability.Observer, cap
 		}
 	}
 	if path := os.Getenv("TASKBENCH_LANGFUSE_SMOKE_RECEIPT"); path != "" && os.Getenv("TASKBENCH_LANGFUSE_SMOKE") == "1" {
-		raw, _ := json.MarshalIndent(map[string]any{"evidence_kind": "local_stub", "trace_ids": traceIDs, "stats": stats, "external_model_calls": 0, "external_jev_calls": 0, "semantic_review": "pending_independent_review"}, "", "  ")
+		raw, _ := json.MarshalIndent(map[string]any{"evidence_kind": "local_stub", "trace_ids": traceIDs, "reports": reports, "stats": stats, "external_model_calls": 0, "external_jev_calls": 0, "semantic_review": "pending_independent_review"}, "", "  ")
 		if err := os.WriteFile(path, append(raw, '\n'), 0600); err != nil {
 			t.Fatal(err)
 		}

@@ -17,6 +17,7 @@ import (
 func TestAgentPairOwnedEnvironmentLocalReadAndWrite(t *testing.T) {
 	observer, capture := pairedTestObserver(t)
 	var traceIDs []string
+	var reports []SmallPairReport
 	ctx, cancel := context.WithTimeout(context.Background(), 90*time.Second)
 	defer cancel()
 	env, e := OpenPairedFixtureEnvironment(ctx, PairedFixtureOptions{AllowFixtureCreation: true, AdminDSN: "root:root@tcp(127.0.0.1:3307)/", ProfilesDir: "../../eval/runtime-profiles/2026-10-13-six-profiles-v1"})
@@ -139,6 +140,7 @@ func TestAgentPairOwnedEnvironmentLocalReadAndWrite(t *testing.T) {
 				}
 				traceIDs = append(traceIDs, row.LangfuseTraceID)
 			}
+			reports = append(reports, r)
 			before := calls.Load()
 			if e = RunCampaignBatch(ctx, lease, opts); e == nil || calls.Load() != before {
 				t.Fatal("campaign lease reused provider")
@@ -176,5 +178,5 @@ func TestAgentPairOwnedEnvironmentLocalReadAndWrite(t *testing.T) {
 	if e = env.Close(); e != nil {
 		t.Fatal(e)
 	}
-	checkPairedObservations(t, observer, capture, traceIDs)
+	checkPairedObservations(t, observer, capture, traceIDs, reports)
 }
