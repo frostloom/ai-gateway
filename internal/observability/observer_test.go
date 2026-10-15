@@ -344,3 +344,86 @@ func TestConcurrentIdentitiesAndZeroSampling(t *testing.T) {
 		t.Fatal("sampling zero not honored")
 	}
 }
+
+func TestEvaluationBasePromptReference(t *testing.T) {
+	s, c := receiver(t)
+	defer s.Close()
+	o, err := New(context.Background(), enabled(s.URL))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer o.Shutdown(context.Background())
+	ctx, turn := o.StartTurn(context.Background(), "model")
+	_, op := Start(ctx, "llm.attempt", "generation")
+	op.BasePrompt(strings.Repeat("a", 64))
+	op.End(nil)
+	turn.End(200, Summary{})
+	if err := o.ForceFlush(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	found := false
+	for _, span := range c.spans {
+		if span.Name == "llm.attempt" {
+			found = true
+			if attrs(span)["langfuse.observation.prompt.name"] != "customer-service/system/"+strings.Repeat("a", 64) {
+				t.Fatal("base prompt reference missing")
+			}
+			if attrs(span)["langfuse.observation.metadata.prompt_scope"] != "base_system_only" {
+				t.Fatal("dynamic prompt scope is ambiguous")
+			}
+			version := int64(0)
+			for _, a := range span.Attributes {
+				if a.Key == "langfuse.observation.prompt.version" {
+					version = a.Value.GetIntValue()
+				}
+			}
+			if version != 1 {
+				t.Fatal("content-addressed prompt must use immutable version 1")
+			}
+		}
+	}
+	if !found {
+		t.Fatal("missing generation")
+	}
+}
+
+func TestBasePromptRejectsInvalidHashesAndProduction(t *testing.T) {
+	var absent *Operation
+	absent.BasePrompt(strings.Repeat("a", 64))
+	for _, tc := range []struct{ environment, hash string }{
+		{"evaluation", "short"}, {"evaluation", strings.Repeat("g", 64)},
+		{"evaluation", strings.Repeat("A", 64)}, {"production", strings.Repeat("a", 64)},
+	} {
+		t.Run(tc.environment+tc.hash[:1], func(t *testing.T) {
+			s, capture := receiver(t)
+			defer s.Close()
+			cfg := enabled(s.URL)
+			cfg.Environment = tc.environment
+			o, err := New(context.Background(), cfg)
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer o.Shutdown(context.Background())
+			ctx, turn := o.StartTurn(context.Background(), "model")
+			_, op := Start(ctx, "llm.attempt", "generation")
+			op.BasePrompt(tc.hash)
+			op.End(nil)
+			turn.End(200, Summary{})
+			if err := o.ForceFlush(context.Background()); err != nil {
+				t.Fatal(err)
+			}
+			capture.mu.Lock()
+			defer capture.mu.Unlock()
+			if len(capture.spans) != 2 {
+				t.Fatal("missing captured generation")
+			}
+			for _, span := range capture.spans {
+				if attrs(span)["langfuse.observation.prompt.name"] != "" {
+					t.Fatal("unexpected prompt reference")
+				}
+			}
+		})
+	}
+}

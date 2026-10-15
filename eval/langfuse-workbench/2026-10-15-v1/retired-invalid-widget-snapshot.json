@@ -1,0 +1,442 @@
+{
+  "reason": "Browser found metadata categoryOptions unsupported by metrics; retire only seven resources created by publish-3, preserve datasets/queue/prompt/scores/traces.",
+  "resources": [
+    [
+      "/api/public/unstable/dashboards/cmv9qizo0000zt350hpgaa23q",
+      {
+        "createdAt": "2026-10-15T16:10:14.160Z",
+        "definition": {
+          "widgets": [
+            {
+              "height": 6,
+              "id": "8997bb1e-845a-4ce2-abea-b58a12df57ed",
+              "type": "widget",
+              "widgetId": "cmv9qizj8000nt3502zxh7jyk",
+              "width": 6,
+              "x": 0,
+              "y": 0
+            },
+            {
+              "height": 6,
+              "id": "04429cae-7387-4494-9227-3a8f52e2d646",
+              "type": "widget",
+              "widgetId": "cmv9qizk6000pt350pxoql35l",
+              "width": 6,
+              "x": 6,
+              "y": 0
+            },
+            {
+              "height": 6,
+              "id": "ace9c06f-62bf-4aa5-896e-e5f2077d4f07",
+              "type": "widget",
+              "widgetId": "cmv9qizl5000rt350f929ufb8",
+              "width": 6,
+              "x": 0,
+              "y": 6
+            },
+            {
+              "height": 6,
+              "id": "d24580c6-be08-4ed5-a2ed-120641cc1a9d",
+              "type": "widget",
+              "widgetId": "cmv9qizlp000tt3505zd9mn7c",
+              "width": 6,
+              "x": 6,
+              "y": 6
+            },
+            {
+              "height": 6,
+              "id": "5d0f8e42-af09-4784-b44f-bd2e370b9d06",
+              "type": "widget",
+              "widgetId": "cmv9qizm9000vt350i3vo3vtl",
+              "width": 6,
+              "x": 0,
+              "y": 12
+            },
+            {
+              "height": 6,
+              "id": "dc1de030-afd7-4fd7-9052-695fdddb8d06",
+              "type": "widget",
+              "widgetId": "cmv9qizmw000xt350l2t4w6o2",
+              "width": 6,
+              "x": 6,
+              "y": 12
+            }
+          ]
+        },
+        "description": "仅固定8条local_stub追踪，非真实模型成绩。任务成功待审核；无真实成本/节省证明。费用缺渠道价格与完整用量，保持unknown，不配置默认价格。",
+        "filters": [],
+        "id": "cmv9qizo0000zt350hpgaa23q",
+        "name": "客服本机替身验收-v1（非真实模型成绩）",
+        "updatedAt": "2026-10-15T16:10:14.353Z"
+      }
+    ],
+    [
+      "/api/public/unstable/dashboard-widgets/cmv9qizj8000nt3502zxh7jyk",
+      {
+        "chartConfig": {
+          "type": "HORIZONTAL_BAR"
+        },
+        "chartType": "HORIZONTAL_BAR",
+        "createdAt": "2026-10-15T16:10:13.987Z",
+        "description": "unknown 为待审核；不是失败，更不是成功率。仅固定8臂。",
+        "dimensions": [
+          {
+            "field": "stringValue"
+          }
+        ],
+        "filters": [
+          {
+            "column": "metadata",
+            "key": "run_id",
+            "operator": "any of",
+            "type": "categoryOptions",
+            "value": [
+              "a8607037119a60d466ad06e60b5ecce916fe6691efd91019ccc611e7fa2fd357",
+              "d45489f748666703d0780aafc11e117ead01c0cdae14287ca300185032fe0d00",
+              "d96216163b1fc71d58907683e095b376c29c60e9fc06af55ecc7de9208853857",
+              "ff57b731fe11137e98da79e2cadec4409b02a084fe9cb1288c37151fab90c42b"
+            ]
+          },
+          {
+            "column": "metadata",
+            "key": "evidence_kind",
+            "operator": "=",
+            "type": "stringObject",
+            "value": "local_stub"
+          },
+          {
+            "column": "metadata",
+            "key": "arm",
+            "operator": "=",
+            "type": "stringObject",
+            "value": "model"
+          },
+          {
+            "column": "name",
+            "operator": "=",
+            "type": "string",
+            "value": "task_success"
+          }
+        ],
+        "id": "cmv9qizj8000nt3502zxh7jyk",
+        "metrics": [
+          {
+            "agg": "count",
+            "measure": "count"
+          }
+        ],
+        "name": "本机替身 V1 模型 任务审核状态-v1",
+        "updatedAt": "2026-10-15T16:10:13.987Z",
+        "view": "scores-categorical"
+      }
+    ],
+    [
+      "/api/public/unstable/dashboard-widgets/cmv9qizk6000pt350pxoql35l",
+      {
+        "chartConfig": {
+          "type": "PIVOT_TABLE"
+        },
+        "chartType": "PIVOT_TABLE",
+        "createdAt": "2026-10-15T16:10:14.022Z",
+        "description": "工程验证数据，不能证明真实延迟或节省；任务跨度含初始化及状态检查。",
+        "dimensions": [
+          {
+            "field": "name"
+          }
+        ],
+        "filters": [
+          {
+            "column": "metadata",
+            "key": "run_id",
+            "operator": "any of",
+            "type": "categoryOptions",
+            "value": [
+              "a8607037119a60d466ad06e60b5ecce916fe6691efd91019ccc611e7fa2fd357",
+              "d45489f748666703d0780aafc11e117ead01c0cdae14287ca300185032fe0d00",
+              "d96216163b1fc71d58907683e095b376c29c60e9fc06af55ecc7de9208853857",
+              "ff57b731fe11137e98da79e2cadec4409b02a084fe9cb1288c37151fab90c42b"
+            ]
+          },
+          {
+            "column": "metadata",
+            "key": "evidence_kind",
+            "operator": "=",
+            "type": "stringObject",
+            "value": "local_stub"
+          },
+          {
+            "column": "metadata",
+            "key": "arm",
+            "operator": "=",
+            "type": "stringObject",
+            "value": "model"
+          },
+          {
+            "column": "name",
+            "operator": "=",
+            "type": "string",
+            "value": "evaluation.task"
+          }
+        ],
+        "id": "cmv9qizk6000pt350pxoql35l",
+        "metrics": [
+          {
+            "agg": "p50",
+            "measure": "latency"
+          },
+          {
+            "agg": "p95",
+            "measure": "latency"
+          }
+        ],
+        "name": "本机替身 V1 模型 任务跨度耗时毫秒-v1",
+        "updatedAt": "2026-10-15T16:10:14.022Z",
+        "view": "observations"
+      }
+    ],
+    [
+      "/api/public/unstable/dashboard-widgets/cmv9qizl5000rt350f929ufb8",
+      {
+        "chartConfig": {
+          "type": "PIVOT_TABLE"
+        },
+        "chartType": "PIVOT_TABLE",
+        "createdAt": "2026-10-15T16:10:14.057Z",
+        "description": "工程验证数据，不能证明真实延迟或节省；任务跨度含初始化及状态检查。",
+        "dimensions": [
+          {
+            "field": "name"
+          }
+        ],
+        "filters": [
+          {
+            "column": "metadata",
+            "key": "run_id",
+            "operator": "any of",
+            "type": "categoryOptions",
+            "value": [
+              "a8607037119a60d466ad06e60b5ecce916fe6691efd91019ccc611e7fa2fd357",
+              "d45489f748666703d0780aafc11e117ead01c0cdae14287ca300185032fe0d00",
+              "d96216163b1fc71d58907683e095b376c29c60e9fc06af55ecc7de9208853857",
+              "ff57b731fe11137e98da79e2cadec4409b02a084fe9cb1288c37151fab90c42b"
+            ]
+          },
+          {
+            "column": "metadata",
+            "key": "evidence_kind",
+            "operator": "=",
+            "type": "stringObject",
+            "value": "local_stub"
+          },
+          {
+            "column": "metadata",
+            "key": "arm",
+            "operator": "=",
+            "type": "stringObject",
+            "value": "model"
+          },
+          {
+            "column": "name",
+            "operator": "=",
+            "type": "string",
+            "value": "llm.attempt"
+          }
+        ],
+        "id": "cmv9qizl5000rt350f929ufb8",
+        "metrics": [
+          {
+            "agg": "count",
+            "measure": "count"
+          }
+        ],
+        "name": "本机替身 V1 模型 本机假模型调用数-v1",
+        "updatedAt": "2026-10-15T16:10:14.057Z",
+        "view": "observations"
+      }
+    ],
+    [
+      "/api/public/unstable/dashboard-widgets/cmv9qizlp000tt3505zd9mn7c",
+      {
+        "chartConfig": {
+          "type": "HORIZONTAL_BAR"
+        },
+        "chartType": "HORIZONTAL_BAR",
+        "createdAt": "2026-10-15T16:10:14.077Z",
+        "description": "unknown 为待审核；不是失败，更不是成功率。仅固定8臂。",
+        "dimensions": [
+          {
+            "field": "stringValue"
+          }
+        ],
+        "filters": [
+          {
+            "column": "metadata",
+            "key": "run_id",
+            "operator": "any of",
+            "type": "categoryOptions",
+            "value": [
+              "a8607037119a60d466ad06e60b5ecce916fe6691efd91019ccc611e7fa2fd357",
+              "d45489f748666703d0780aafc11e117ead01c0cdae14287ca300185032fe0d00",
+              "d96216163b1fc71d58907683e095b376c29c60e9fc06af55ecc7de9208853857",
+              "ff57b731fe11137e98da79e2cadec4409b02a084fe9cb1288c37151fab90c42b"
+            ]
+          },
+          {
+            "column": "metadata",
+            "key": "evidence_kind",
+            "operator": "=",
+            "type": "stringObject",
+            "value": "local_stub"
+          },
+          {
+            "column": "metadata",
+            "key": "arm",
+            "operator": "=",
+            "type": "stringObject",
+            "value": "jev_selective"
+          },
+          {
+            "column": "name",
+            "operator": "=",
+            "type": "string",
+            "value": "task_success"
+          }
+        ],
+        "id": "cmv9qizlp000tt3505zd9mn7c",
+        "metrics": [
+          {
+            "agg": "count",
+            "measure": "count"
+          }
+        ],
+        "name": "本机替身 V2 JEV 分流 任务审核状态-v1",
+        "updatedAt": "2026-10-15T16:10:14.077Z",
+        "view": "scores-categorical"
+      }
+    ],
+    [
+      "/api/public/unstable/dashboard-widgets/cmv9qizm9000vt350i3vo3vtl",
+      {
+        "chartConfig": {
+          "type": "PIVOT_TABLE"
+        },
+        "chartType": "PIVOT_TABLE",
+        "createdAt": "2026-10-15T16:10:14.097Z",
+        "description": "工程验证数据，不能证明真实延迟或节省；任务跨度含初始化及状态检查。",
+        "dimensions": [
+          {
+            "field": "name"
+          }
+        ],
+        "filters": [
+          {
+            "column": "metadata",
+            "key": "run_id",
+            "operator": "any of",
+            "type": "categoryOptions",
+            "value": [
+              "a8607037119a60d466ad06e60b5ecce916fe6691efd91019ccc611e7fa2fd357",
+              "d45489f748666703d0780aafc11e117ead01c0cdae14287ca300185032fe0d00",
+              "d96216163b1fc71d58907683e095b376c29c60e9fc06af55ecc7de9208853857",
+              "ff57b731fe11137e98da79e2cadec4409b02a084fe9cb1288c37151fab90c42b"
+            ]
+          },
+          {
+            "column": "metadata",
+            "key": "evidence_kind",
+            "operator": "=",
+            "type": "stringObject",
+            "value": "local_stub"
+          },
+          {
+            "column": "metadata",
+            "key": "arm",
+            "operator": "=",
+            "type": "stringObject",
+            "value": "jev_selective"
+          },
+          {
+            "column": "name",
+            "operator": "=",
+            "type": "string",
+            "value": "evaluation.task"
+          }
+        ],
+        "id": "cmv9qizm9000vt350i3vo3vtl",
+        "metrics": [
+          {
+            "agg": "p50",
+            "measure": "latency"
+          },
+          {
+            "agg": "p95",
+            "measure": "latency"
+          }
+        ],
+        "name": "本机替身 V2 JEV 分流 任务跨度耗时毫秒-v1",
+        "updatedAt": "2026-10-15T16:10:14.097Z",
+        "view": "observations"
+      }
+    ],
+    [
+      "/api/public/unstable/dashboard-widgets/cmv9qizmw000xt350l2t4w6o2",
+      {
+        "chartConfig": {
+          "type": "PIVOT_TABLE"
+        },
+        "chartType": "PIVOT_TABLE",
+        "createdAt": "2026-10-15T16:10:14.120Z",
+        "description": "工程验证数据，不能证明真实延迟或节省；任务跨度含初始化及状态检查。",
+        "dimensions": [
+          {
+            "field": "name"
+          }
+        ],
+        "filters": [
+          {
+            "column": "metadata",
+            "key": "run_id",
+            "operator": "any of",
+            "type": "categoryOptions",
+            "value": [
+              "a8607037119a60d466ad06e60b5ecce916fe6691efd91019ccc611e7fa2fd357",
+              "d45489f748666703d0780aafc11e117ead01c0cdae14287ca300185032fe0d00",
+              "d96216163b1fc71d58907683e095b376c29c60e9fc06af55ecc7de9208853857",
+              "ff57b731fe11137e98da79e2cadec4409b02a084fe9cb1288c37151fab90c42b"
+            ]
+          },
+          {
+            "column": "metadata",
+            "key": "evidence_kind",
+            "operator": "=",
+            "type": "stringObject",
+            "value": "local_stub"
+          },
+          {
+            "column": "metadata",
+            "key": "arm",
+            "operator": "=",
+            "type": "stringObject",
+            "value": "jev_selective"
+          },
+          {
+            "column": "name",
+            "operator": "=",
+            "type": "string",
+            "value": "llm.attempt"
+          }
+        ],
+        "id": "cmv9qizmw000xt350l2t4w6o2",
+        "metrics": [
+          {
+            "agg": "count",
+            "measure": "count"
+          }
+        ],
+        "name": "本机替身 V2 JEV 分流 本机假模型调用数-v1",
+        "updatedAt": "2026-10-15T16:10:14.120Z",
+        "view": "observations"
+      }
+    ]
+  ]
+}
