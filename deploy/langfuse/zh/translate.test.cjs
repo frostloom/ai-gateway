@@ -76,3 +76,12 @@ test('non-render calls and different header/context receivers stay unchanged', (
   for(const source of ['submit(e.column.columnDef.header,e.getContext())',
     'flexRender(e.column.columnDef.header,other.getContext())']) assert.equal(translate(source,words).source,source);
 });
+
+test('translate conditional display branches, preserving the condition and non-UI data',()=>{
+ const source='r.jsx("button",{children:mode==="Save"?"Save":"Scores"});const request={children:mode?"Save":"Scores"};';
+ assert.equal(translate(source,words).source,'r.jsx("button",{children:mode==="Save"?"保存":"评分"});const request={children:mode?"Save":"Scores"};');
+});
+test('settings menu titles translate while slugs, keywords, and ordinary titles stay unchanged',()=>{
+ const source='const pages=[{title:"Scores",slug:"scores",cmdKKeywords:["Scores"],content:r.jsx(Page,{})}];const data={title:"Scores",slug:"scores"};';
+ assert.equal(translate(source,words).source,'const pages=[{title:"评分",slug:"scores",cmdKKeywords:["Scores"],content:r.jsx(Page,{})}];const data={title:"Scores",slug:"scores"};');
+});
