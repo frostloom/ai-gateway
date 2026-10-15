@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/frostloom/ai-gateway/internal/agent"
+	"github.com/frostloom/ai-gateway/internal/observability"
 )
 
 type PairRunConfig struct {
@@ -23,6 +24,7 @@ type PairRunConfig struct {
 	JEVModel               string                       `json:"jev_model,omitempty"`
 }
 type pairRunEvent struct {
+	LangfuseTraceID   string                 `json:"langfuse_trace_id,omitempty"`
 	Kind              string                 `json:"kind"`
 	Config            *PairRunConfig         `json:"config,omitempty"`
 	Key               string                 `json:"key,omitempty"`
@@ -195,6 +197,10 @@ func writePairEvent(f *os.File, e pairRunEvent) error {
 // model client; it is a trusted adapter, not a sandbox for arbitrary Go code.
 // Fixture construction must produce separate equivalent tenants per arm.
 func RunPreparedPair(ctx context.Context, path string, cfg PairRunConfig, budget *PairBudgetTransport, factory PairDriverFactory) error {
+	return runPreparedPair(ctx, path, cfg, budget, factory, nil)
+}
+
+func runPreparedPair(ctx context.Context, path string, cfg PairRunConfig, budget *PairBudgetTransport, factory PairDriverFactory, observer *observability.Observer) error {
 	if err := validatePairRun(cfg); err != nil {
 		return err
 	}
@@ -292,7 +298,9 @@ func RunPreparedPair(ctx context.Context, path string, cfg PairRunConfig, budget
 		}
 		begun := time.Now()
 		c := cfg.Suite.Cases[i/2]
-		driver, setupErr := factory(ctx, entry.Arm, c)
+		armCtx, observedTask := observer.StartEvaluation(ctx, observability.Evaluation{RunID: PairRunContract(cfg), CaseKey: c.Key(), Arm: entry.Arm, EvidenceKind: cfg.Model.EvidenceKind})
+		entry.LangfuseTraceID = observedTask.TraceID()
+		driver, setupErr := factory(armCtx, entry.Arm, c)
 		if driver == nil && setupErr == nil {
 			setupErr = fmt.Errorf("driver factory returned nil")
 		}
@@ -302,7 +310,7 @@ func RunPreparedPair(ctx context.Context, path string, cfg PairRunConfig, budget
 			entry.ExecutionFailures = append(entry.ExecutionFailures, PairExecutionFailure{Stage: "factory"})
 		} else {
 			tracked := &pairTrackingDriver{ConversationDriver: driver}
-			result, _ = RunFactCheckedConversation(ctx, c, tracked)
+			result, _ = RunFactCheckedConversation(armCtx, c, tracked)
 			entry.ExecutionFailures = append(entry.ExecutionFailures, tracked.failures...)
 		}
 		if closer, ok := driver.(interface{ Close() error }); ok {
@@ -320,6 +328,7 @@ func RunPreparedPair(ctx context.Context, path string, cfg PairRunConfig, budget
 		entry.Kind = "finish"
 		entry.Result = &result
 		entry.ElapsedMS = float64(time.Since(begun)) / float64(time.Millisecond)
+		observedTask.End(observability.EvaluationResult{Status: result.Status, StructuralPass: result.StructuralPass, NecessaryClarifications: result.NecessaryClarifications, HTTPFailures: result.HTTPFailures})
 		if budget != nil {
 			s := budget.Snapshot()
 			entry.After = &s

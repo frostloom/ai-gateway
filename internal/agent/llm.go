@@ -55,6 +55,9 @@ type chatResponse struct {
 		CompletionTokens      *int64 `json:"completion_tokens"`
 		PromptCacheHitTokens  *int64 `json:"prompt_cache_hit_tokens"`
 		PromptCacheMissTokens *int64 `json:"prompt_cache_miss_tokens"`
+		PromptTokensDetails   *struct {
+			CachedTokens *int64 `json:"cached_tokens"`
+		} `json:"prompt_tokens_details"`
 	} `json:"usage"`
 	Choices []struct {
 		Message Message `json:"message"`
@@ -261,7 +264,7 @@ func isBudgetExhausted(err error) bool {
 }
 
 // chatOpenAI 走 OpenAI 兼容的 chat/completions。
-func (c *LLMClient) chatOpenAI(ctx context.Context, messages []Message, tools []Tool) (*Message, error) {
+func (c *LLMClient) chatOpenAI(ctx context.Context, messages []Message, tools []Tool) (result *Message, err error) {
 	body, err := json.Marshal(chatRequest{Model: c.model, MaxTokens: c.maxTokens, Messages: messages, Tools: tools})
 	if err != nil {
 		return nil, err
@@ -273,8 +276,8 @@ func (c *LLMClient) chatOpenAI(ctx context.Context, messages []Message, tools []
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+c.apiKey)
 
-	finishAttempt := beginLLMAttempt(ctx, protoOpenAI)
-	defer finishAttempt()
+	ctx, finishAttempt := beginLLMAttempt(ctx, protoOpenAI)
+	defer func() { finishAttempt(err) }()
 	resp, err := c.cli.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("LLM 请求失败: %v", err)
@@ -290,7 +293,11 @@ func (c *LLMClient) chatOpenAI(ctx context.Context, messages []Message, tools []
 	recordProviderUsage(ctx, raw)
 	if parseErr == nil && out.Usage != nil {
 		u := out.Usage
-		recordLLMUsage(ctx, u.PromptTokens, u.CompletionTokens, u.PromptCacheHitTokens, u.PromptCacheMissTokens, nil)
+		hit := u.PromptCacheHitTokens
+		if hit == nil && u.PromptTokensDetails != nil {
+			hit = u.PromptTokensDetails.CachedTokens
+		}
+		recordLLMUsage(ctx, u.PromptTokens, u.CompletionTokens, hit, u.PromptCacheMissTokens, nil)
 	}
 	if resp.StatusCode != http.StatusOK {
 		var e chatResponse

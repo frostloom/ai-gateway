@@ -42,3 +42,10 @@ eval/reports/
 
 # 公开数据集调研的原始下载（web/scripts/survey-datasets.mjs 可重新拉取，几十 MB）
 web/.probe/
+
+# Isolated Langfuse deployment secrets
+deploy/langfuse/.env
+deploy/langfuse/data/
+deploy/langfuse/.env.agent
+
+deploy/langfuse/.local-login.txt

@@ -15,6 +15,8 @@ import (
 )
 
 func TestAgentPairOwnedEnvironmentLocalReadAndWrite(t *testing.T) {
+	observer, capture := pairedTestObserver(t)
+	var traceIDs []string
 	ctx, cancel := context.WithTimeout(context.Background(), 90*time.Second)
 	defer cancel()
 	env, e := OpenPairedFixtureEnvironment(ctx, PairedFixtureOptions{AllowFixtureCreation: true, AdminDSN: "root:root@tcp(127.0.0.1:3307)/", ProfilesDir: "../../eval/runtime-profiles/2026-10-13-six-profiles-v1"})
@@ -119,6 +121,7 @@ func TestAgentPairOwnedEnvironmentLocalReadAndWrite(t *testing.T) {
 				return jev.NewFake(localJevScript(tool, confidence), localJevScript(tool, confidence))
 			}}
 			path := filepath.Join(dir, "run.jsonl")
+			opts.Observer = observer
 			e = RunCampaignBatch(ctx, lease, opts)
 			if e != nil {
 				t.Fatal(e)
@@ -129,6 +132,12 @@ func TestAgentPairOwnedEnvironmentLocalReadAndWrite(t *testing.T) {
 			}
 			if r.FinishedArms != 2 || r.Rows[0].Status != "needs_review" || r.Rows[1].Status != "needs_review" {
 				t.Fatalf("wrong report: %+v", r)
+			}
+			for _, row := range r.Rows {
+				if len(row.LangfuseTraceID) != 32 {
+					t.Fatal("missing task trace ID")
+				}
+				traceIDs = append(traceIDs, row.LangfuseTraceID)
 			}
 			before := calls.Load()
 			if e = RunCampaignBatch(ctx, lease, opts); e == nil || calls.Load() != before {
@@ -167,4 +176,5 @@ func TestAgentPairOwnedEnvironmentLocalReadAndWrite(t *testing.T) {
 	if e = env.Close(); e != nil {
 		t.Fatal(e)
 	}
+	checkPairedObservations(t, observer, capture, traceIDs)
 }

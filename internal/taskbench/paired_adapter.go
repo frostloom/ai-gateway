@@ -16,12 +16,14 @@ import (
 	"github.com/frostloom/ai-gateway/internal/agent"
 	"github.com/frostloom/ai-gateway/internal/billing/admin"
 	"github.com/frostloom/ai-gateway/internal/jev"
+	"github.com/frostloom/ai-gateway/internal/observability"
 )
 
 type PairModelSettings struct{ BaseURL, APIKey, Model, Protocol string }
 type AgentPairOptions struct {
-	AllowExecution bool // false is always side-effect-free
-	RatesVerified  bool // recorded_run requires operator verification for this channel
+	Observer       *observability.Observer // explicit optional sink; caller owns flush/shutdown
+	AllowExecution bool                    // false is always side-effect-free
+	RatesVerified  bool                    // recorded_run requires operator verification for this channel
 	AllowJEVCalls  bool
 	MaxJEVCalls    int
 	DefinitionsDir string
@@ -133,6 +135,7 @@ func RunAgentPair(ctx context.Context, path string, o AgentPairOptions) (runErr 
 			return nil, err
 		}
 		h := agent.NewHandler(nil, agent.NewToolbox(agent.NewAdminClientWithToken(server.URL, token)), llm, o.Environment.st, o.Environment.rdb, log)
+		h.SetObserver(o.Observer)
 		if err = h.SetRoutingMode(arm); err != nil {
 			return nil, err
 		}
@@ -147,5 +150,5 @@ func RunAgentPair(ctx context.Context, path string, o AgentPairOptions) (runErr 
 		})
 		return NewHandlerConversationDriver(wrapper, oracle)
 	}
-	return RunPreparedPair(ctx, path, o.Config, o.Budget, factory)
+	return runPreparedPair(ctx, path, o.Config, o.Budget, factory, o.Observer)
 }

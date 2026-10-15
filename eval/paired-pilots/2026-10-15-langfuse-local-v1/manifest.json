@@ -1,0 +1,35 @@
+{
+  "baseline_main_revision": "c8bc4d1feabd4f28f11abe78e4b433a0d2eb9971",
+  "external_jev_calls": 0,
+  "external_model_calls": 0,
+  "files": {
+    "observations.json": "3a694daa14baaa431d1a347eb627ce35c463fd42169cbcf7c742e0f78dc02199",
+    "receipt.json": "d10694d4d073916de6087a3317dbca83656d7b933983b6328bee007ebb0623fa"
+  },
+  "full_preflight_runtime_binding": "historical c8bc4d1, regenerate new version before paid execution",
+  "full_preflight_v1_proposal_sha256": "1214e3076dfe26b96dfe186ed5113eb58a007e4e47d36b87e5d5b0195184cb0b",
+  "langfuse_branch_revision": "6153452",
+  "ready_for_paid_run": false,
+  "runtime_files_sha256": {
+    "internal/agent/chat.go": "4d18827a44a157286f8c1f410a9f14a2ed44713f34d25c711a0e470fede28690",
+    "internal/agent/guard.go": "844385417fb019d1d0e3997d6490c1455b8da7ff340549c8881efa2ed23887f8",
+    "internal/agent/llm.go": "dcc494905297c3f17c32c371456c7629a81f8bbe99e433842fd79154049c518b",
+    "internal/agent/llm_protocol.go": "78beb6894cecaac9ba1923a3b7c9cf8f2798633445f5b2e641c3e96a85dbf37b",
+    "internal/agent/observability.go": "bdfe917d3bcfc4b35c1822355764c3fdf09f07b0b6a1218d3c292217ac41abf3",
+    "internal/agent/telemetry.go": "281452738232cac896f27951244e0d72cd0747f33441ed97381e4463f1333dd1",
+    "internal/agent/tools.go": "4b72262f31ac285b6d8664228cb98435327ad8a6118f3d70bad625c7a3696b9d",
+    "internal/observability/config.go": "e7c47657645adf7f2533fa8c096709806354e4f58e545d3965c110ea467c2b9d",
+    "internal/observability/content.go": "1c2884a41724bcc116764eac61f807d7c7845bae92285009406580575ace5a73",
+    "internal/observability/evaluation.go": "5ea5cd603a090852b588aa75b10398004bfe947378f99c24b04598ac7eef9d67",
+    "internal/observability/observer.go": "ab10d9587186f00b77805db0d3b4cfc84172fd9de133bacf50bb163e63c038f2",
+    "internal/observability/processor.go": "bf6579e32654e515d5aba1757b0829da48f026f328b2193702ec16eefa1a69f6",
+    "internal/taskbench/campaign_runner.go": "3b6f62b298994a4f85f99cb661f73dec9ca49b3f16d9e6779c79e43ce3fb6f0b",
+    "internal/taskbench/paired_adapter.go": "d0b8f7b81140df1bfe3391ee581e27304b54e9798808208b2034f1b856746300",
+    "internal/taskbench/paired_budget.go": "39fe69ddd5a6f8c5c3403400080cfeeba5c2da9a53df5ff186fba62f332136de",
+    "internal/taskbench/paired_jev_budget.go": "88cba1da5dfd117478a01d85bb423cf44c7a4440e99e5e82ea16e56d090155c2",
+    "internal/taskbench/paired_report.go": "63ac6f39a95de674d2bc628d3aecdd736fc63bf06ff53b803bd75b98227a5822",
+    "internal/taskbench/paired_runner.go": "3cc8093d26ad6b622c95abce9f9334b81abdce763a49c84e725ae30d6ddb6778"
+  },
+  "runtime_normalization": "CRLF to LF only",
+  "schema": "langfuse-paired-evidence-manifest.v1"
+}

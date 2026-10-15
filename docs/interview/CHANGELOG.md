@@ -1,5 +1,13 @@
 # 开发与验证证据记录
 
+## 2026-10-15：Langfuse 分支合并与完整任务追踪
+
+目的：后续 1220 主任务的配对评测同时可追踪 JEV、模型和工具。合入 6153452，保留 c8bc4d1 的严格输出预算、thinking disabled、JEV 脱敏诊断及跨批次限额。补齐每实验臂根追踪、多轮子节点、配置合同/案例/实验臂/证据类型/轮次传播，日志和报告带 trace ID。必要追问、待确认不判错，needs_review 的任务成功为 unknown，无额外模型裁判。
+
+先以缺少评测追踪 API 的编译失败回归复现，再补实现；沙箱第一次禁止本地 HTTP 导出，授权本地网络后通过。随机隔离账户的四任务八臂集成验证通过，再使用同一本地假模型/Fake JEV 向真实本机 Langfuse 摄入，API 复核 8 任务/14 轮/49 节点/12 个本地 generation，导出失败与丢弃均 0。初次 v2 默认查询不带 metadata，显式 fields 查询后核验，不误报数据丢失。
+
+全项目 Go 测试、go vet、110 项 Python 测试通过，独立只读审查无 P1/P2。外部模型/JEV 调用 0，没有 1220 新成绩；未用假模型分流冒充真实 JEV 收益，未把 Langfuse 自动价格当渠道账单。原准备包绑定旧代码，后续正式运行需新的代码绑定及费用授权。证据见 eval/paired-pilots/2026-10-15-langfuse-local-v1，说明见 docs/langfuse-paired-evaluation-2026-10-15.md。原分支三条开发记录与 main 记录均保留。
+
 用途：面试材料的事实索引。每次实质改动追加日期、触发、机制、测试和局限；已归档的失败与旧指标不覆盖。这里记录工程过程，不把提交数、测试通过率或模型自述包装成线上准确率。
 
 ## 2026-10-14：零外部费用的诊断与全量预检查
@@ -209,3 +217,38 @@ TDD与审查：缺新类型/接口先编译失败，再补实现。开发计划�
 回归记录：首轮完整Go在00:12暴露原销售日期测试错误，窗口跨午夜却要求起始日有当前数据；仅固定该测试种子时间并核当日20/10000、前日补零，sales.go未改，focused通过5.419秒。Python首轮107项有1次Windows临时目录WinError32清理错误，授权串行复跑107项全部通过62.544秒。七项历史verify通过。模型/JEV外部请求0、未读.env，未改plate_sim.py。
 
 最终验证：修正日期测试后全项目Go重跑通过（agent45.309秒、store83.543秒、taskbench98.017秒），随后go vet通过；Python107项和七项verify如上均通过。归档plan独立SHA校验通过；只读复核也确认跨午夜测试和文档边界准确，无剩余重要问题。远程CI结果尚未核验。下一阶段需核定真实价格/预算、补生产工厂和独立语义审定后，再经明确授权少量真实配对调用。
+## 2026-10-13：Langfuse隔离分支配置评估
+
+另一会话开发完整会话runner，本分支codex/langfuse-observability不改其目录。复用现有每轮遥测评估Go OTel接入，记录逐调用span仍需实际边界埋点、JEV-only不可漏记、必要追问和业务终态分开、生产审核不回填旧1220真值。独立六服务Compose使用官方固定来源提交，镜像目前仍为官方版本标签，生产需digest；临时假密钥渲染与隔离/缺密钥拒绝检查通过。未创建真实key、拉镜像、启动容器、接入导出器、上传内容或调用模型/JEV，不声称上线或产生新准确率。配置和详细验收项见Langfuse可行性文档。
+
+独立配置审查无阻塞；每span字段传播验收及JEV调用/fast-path覆盖率命名已补齐。最终Compose复验通过，验证结果与配置SHA存于deploy/langfuse/validation.json。
+
+
+## 2026-10-13：Langfuse运行时监控与E盘隔离
+
+目标：在1220历史归档之外，记录真实客服每轮路由、JEV高置信度跳过模型、模型调用token/延迟和工具预览确认，便于后续面试解释收益和排查线上行为。本分支不改另一会话的runner，也不回填历史成绩。
+
+实现：独立OTel SDK/OTLP HTTP provider；真实JEV/模型/工具边界span，包含失败尝试；租户及租户限定会话HMAC，字段逐span传播。默认关闭，配置异常禁用遥测但继续客服。每轮pending_confirm/必要追问不自动当错误或完整任务成功。有界异步队列/单次限时无重试、不跟随重定向、关机限时flush，Prometheus统计采样/丢弃/失败。可选限长脱敏用户输入/最终回复、工具参数/结果、错误摘要，仍不上传认证头和key。
+
+取舍：模型prompt/完整历史不采集；自由文本规则脱敏不能保证全部PII识别。确认用session/phase关联，跨轮operation_id尚未实现。费用只能基于实报usage及正确模型定价，JEV缺失usage不编造0。OpenAI缓存读取从总input拆出，Anthropic缓存独立；历史provider原始usage保留不改变冻结归档。
+
+审查/失败证据：新增用例先复现凭据key camelCase漏过滤、64-span flush失败误报成功、标准OpenAI cached_tokens未识别，三项修复后通过，独立复查无阻塞。redirect测试先复现默认HTTP重定向后补禁用；部分拒绝SDK原本已正确报错，不能虚构为修复。开发过程中两次测试文件/脚本编译或编码失误修正，不列为产品问题。离线96测试首次受沙箱本地HTTP/Git Bash权限影响出现6项失败；同条件授权重跑96项通过44.546秒，不修改业务以迎合环境。
+
+实际验证：监控包完整单测2.874秒通过；agent新监控场景9.307秒、cmd接入3.508秒通过；原LLM/JEV usage和runtime本地回归4.711秒通过。全项目编译（不运行共享数据库测试）及go vet通过，避免与另一会话固定测试库相撞；本次新业务流程使用随机独立MySQL库和私有Redis并清理。未执行race（机器无GCC）。六项历史verify通过。Compose假凭据渲染核对六服务隔离、loopback端口、缺凭据拒绝和E盘持久化挂载。
+
+存储：工作树移至E项目 `.worktrees/langfuse-observability`；配置/data在deploy/langfuse，缓存和临时文件在E项目隐藏目录。C盘原工作树逐文件hash一致后删除；Docker Desktop全局镜像磁盘未迁移以保护其他服务。
+
+边界：外部模型/JEV调用0，未拉镜像/起Langfuse/重启客服、未上传生产数据。真实摄入界面、镜像digest锁定、负载开销、模型价格配置仍待独立部署验收。不能声称已上线、新V2正确率或JEV已产生因果提速收益。
+
+
+## 2026-10-13：Langfuse六容器实际部署与v4摄入
+
+用户授权起Docker并允许默认Docker存储。持久化从E bind挂载改为ai-gateway-langfuse独立命名卷，现有客服/MySQL/Redis等未重启；E工作树保留配置与私有凭据。生成独立数据库密码、加密key、管理员密码及evaluation项目API key；三份凭据文件均忽略Git且未打印。部署不使用模型key。
+
+拉取失败与处理：Docker Hub首次EOF，现有代理对Postgres17/ClickHouse返回502；Postgres17 Alpine代理成功、Redis7 Alpine复用本地，ClickHouse直连成功，Langfuse/MinIO官方仓库成功。全部固定实际下载digest，代理来源明确记录，不声称供应链已独立审计。依赖健康后web/worker完成迁移，实测v4.58.0；worker绑定容器HOSTNAME，127.0.0.1健康访问ECONNREFUSED，改用实际监听主机名。六服务均有健康探针，最终up --wait成功、全部healthy。
+
+验收：真实GoSDK发送2条明确synthetic/evaluation追踪，共7个observation；JEV-only无GENERATION，合成模型路径1个GENERATION input7/output2/total9，匿名身份/session/environment/version在子span保留。旧traces API在events_only模式404，误用旧接口初次等待失败；查官方迁移文档后用v2 Observations确认摄入。这是验收接口纠正，不是产品丢数据。web/worker重建后数据仍保留，随机管理员密码本地登录通过。一次资源观测六服务约3.1GiB，非负载基准。
+
+配置验收脚本初次误将Compose逻辑volume source当实际卷名而断言失败，检查top-level volumes.name映射后修正并通过；不是业务故障。独立只读审查无阻塞/泄露，运行态由主代理实测（审查者Docker管道受权限限制）。当前配置SHA、digest和摄入证据在deploy/langfuse/deployment-validation.json。
+
+边界：未将生产客服切到分支代码或启用导出，未跑真实模型/JEV，未重跑1220或改金标；页面只有合成验收。真实流量接入、业务成功率审核、费用模型及并发负载仍待后续。Langfuse服务可供用户浏览，密码在本地忽略文件.local-login.txt。
