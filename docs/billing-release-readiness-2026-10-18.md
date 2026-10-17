@@ -74,6 +74,10 @@ go test ./internal/billing/store -run '^TestCashLoad$' -count=2 -v -timeout 4m
 
 原始每轮测量：[修复版 JSONL](../eval/billing-readiness/2026-10-18/cash-load-fixed-02a226b.jsonl)、[基线 JSONL](../eval/billing-readiness/2026-10-18/cash-load-baseline-5054b58.jsonl)。已检查每个文件恰为 12 条，六种 case 每种两条，completed > 0，errors/invariant_errors/pending/duplicate_phases 全为 0。Redis 不可用时底层测试夹具可能 Skip，因此不能仅凭 `go test` 退出码判断压测已实际运行。`go vet ./internal/billing/store ./internal/billing/consumer` 已通过。独立审查重新核算全部表格及原始数据，未发现确认的 P1/P2 阻断。
 
-## 目标 3：待完成
+## 目标 3：上线与回退手册已完成
 
-上线与回滚运行手册待独立审查；当前性能结果不足以支持生产放量。
+[运行手册](billing-cash-rollout-runbook.md) 已完成独立源码对照审查，未发现确认的 P1/P2 阻断；核实了 CLI 参数、令牌鉴权、全部写入者、账本公式、活跃租户重建范围和 CLI 个别失败仍可能退出 0 的陷阱。管理接口 `checked` 需额外与全部租户数比较，不能只检查大于零。
+
+`go build -trimpath -o .tmp/billing-readiness-bin/ ./cmd/billing ./cmd/agent ./cmd/reconciler ./cmd/event-consumer` 退出码 0，四个本地可执行文件均已生成；只验证构建，没有启动它们或在业务库执行重建。另验证压测探针在未显式设置开关时立即 Skip，不附带压测或清理数据。文档本地链接及 `git diff --check` 通过。
+
+本轮三个验收目标完成，当前结论仍为**资金正确性证据通过、性能回退需处理、生产暂缓放量**。接下来应先剖析并最小化重复账本聚合及锁内耗时，保留全部资金保护和故障回归，再复测容量；真实模型/JEV预算与全量1220验收仍独立处理。
