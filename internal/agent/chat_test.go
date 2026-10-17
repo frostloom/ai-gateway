@@ -129,6 +129,7 @@ type fakeAdmin struct {
 	mu      sync.Mutex
 	meCalls []string // /admin/me 收到的 tenant_id
 	posts   []fakePost
+	failPay bool
 }
 
 func (f *fakeAdmin) handler() http.Handler {
@@ -154,6 +155,11 @@ func (f *fakeAdmin) handler() http.Handler {
 	})
 	mux.HandleFunc("/admin/recharge/pay", func(w http.ResponseWriter, r *http.Request) {
 		f.recordPost(r)
+		if f.failPay {
+			w.WriteHeader(http.StatusBadRequest)
+			_ = json.NewEncoder(w).Encode(map[string]any{"error": "账单不一致，充值已恢复为未支付"})
+			return
+		}
 		_ = json.NewEncoder(w).Encode(map[string]any{"status": store.RechargePaid})
 	})
 	return mux
@@ -300,6 +306,30 @@ func TestAgentWriteConfirmExecute(t *testing.T) {
 	}
 	if n := countAudit(t, db, "session_id = ? AND tool = ? AND confirmed = ?", "sid-write-1", "recharge", true); n != 1 {
 		t.Fatalf("audit recharge confirmed = %d, want 1", n)
+	}
+}
+
+func TestAgentWriteConfirmRestoresPendingWhenPayFails(t *testing.T) {
+	h, fa, _, done := newAgentHandler(t)
+	defer done()
+	fa.failPay = true
+	h.llm = &scriptedLLM{steps: []*Message{toolCallMsg("call_1", "recharge", `{"amount_money":100}`)}}
+	ses := &session{}
+	if _, _, err := h.process(context.Background(), "sid-pay-fail", 42, "帮我充 100 块", ses); err != nil || ses.PendingAction == nil {
+		t.Fatalf("preview err=%v pending=%+v", err, ses.PendingAction)
+	}
+	reply, trace, err := h.process(context.Background(), "sid-pay-fail", 42, "确认", ses)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if ses.PendingAction == nil || ses.PendingAction.Tool != "recharge" {
+		t.Fatalf("pending = %+v, want restored", ses.PendingAction)
+	}
+	if !strings.Contains(reply, "执行失败") || !strings.Contains(reply, "未处理") {
+		t.Fatalf("reply = %q", reply)
+	}
+	if len(trace) != 1 || trace[0].Outcome != "failure" {
+		t.Fatalf("trace = %+v", trace)
 	}
 }
 

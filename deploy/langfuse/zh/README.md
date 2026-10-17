@@ -10,7 +10,7 @@
 
 ```powershell
 docker build --network none --pull=false -t ai-gateway-langfuse-zh:4.58.0-local-v2 deploy/langfuse/zh
-docker compose --env-file .worktrees/langfuse-observability/deploy/langfuse/.env -f deploy/langfuse/compose.yml -f deploy/langfuse/compose.zh.yml up -d --no-deps --pull never --wait --wait-timeout 120 langfuse-web
+docker compose --env-file worktrees/langfuse-observability/deploy/langfuse/.env -f deploy/langfuse/compose.yml -f deploy/langfuse/compose.zh.yml up -d --no-deps --pull never --wait --wait-timeout 120 langfuse-web
 ```
 
 只更新 web，worker 和持久卷保持现状。后续管理中文部署时同时传两个 compose 文件；仅用原 compose 执行 up 会回到官方英文镜像。
@@ -24,7 +24,7 @@ docker compose --env-file .worktrees/langfuse-observability/deploy/langfuse/.env
 回退只重建 web，不执行 down 或删除卷：
 
 ```powershell
-docker compose --env-file .worktrees/langfuse-observability/deploy/langfuse/.env -f deploy/langfuse/compose.yml up -d --no-deps --pull never --wait --wait-timeout 120 langfuse-web
+docker compose --env-file worktrees/langfuse-observability/deploy/langfuse/.env -f deploy/langfuse/compose.yml up -d --no-deps --pull never --wait --wait-timeout 120 langfuse-web
 ```
 
 回退后也须 Ctrl+F5。正式升级 Langfuse 时应先更新并审查固定摘要、解析器路径、AST 匹配和浏览器测试；不能直接放宽版本校验。

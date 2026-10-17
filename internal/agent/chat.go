@@ -291,7 +291,8 @@ func (h *Handler) process(ctx context.Context, sessionID string, tenantID uint64
 			outcome := "success"
 			reply := result
 			if err != nil {
-				reply = "执行失败：" + err.Error()
+				ses.PendingAction = pa
+				reply = "执行失败：" + err.Error() + "账户已恢复到未处理状态。"
 				outcome = "failure"
 			}
 			reply = sanitizeReply(reply)

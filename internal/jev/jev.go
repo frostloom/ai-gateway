@@ -28,6 +28,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
+	"os"
 	"time"
 )
 
@@ -133,8 +135,28 @@ func NewClient(endpoint, apiKey, model string) *Client {
 		endpoint: endpoint,
 		apiKey:   apiKey,
 		model:    model,
-		cli:      &http.Client{Timeout: 10 * time.Second},
+		cli:      &http.Client{Timeout: 10 * time.Second, Transport: jevTransport()},
 	}
+}
+
+// jevTransport keeps JEV on the operator's explicit proxy. The process-wide
+// HTTPS_PROXY is left unset so local billing and Langfuse stay direct.
+func jevTransport() http.RoundTripper {
+	raw := os.Getenv("JEV_HTTPS_PROXY")
+	if raw == "" {
+		return http.DefaultTransport
+	}
+	u, err := url.Parse(raw)
+	if err != nil || u.Scheme == "" || u.Host == "" {
+		return http.DefaultTransport
+	}
+	base, ok := http.DefaultTransport.(*http.Transport)
+	if !ok {
+		return &http.Transport{Proxy: http.ProxyURL(u)}
+	}
+	clone := base.Clone()
+	clone.Proxy = http.ProxyURL(u)
+	return clone
 }
 
 // Evaluate 发一次判定：state + questions → 类型化答案。

@@ -133,6 +133,23 @@ func TestDefaultEndpoint(t *testing.T) {
 	}
 }
 
+func TestJEVProxyStaysOnJEVClient(t *testing.T) {
+	t.Setenv("JEV_HTTPS_PROXY", "http://127.0.0.1:7892")
+	c := NewClient("", "k", "")
+	transport, ok := c.cli.Transport.(*http.Transport)
+	if !ok || transport.Proxy == nil {
+		t.Fatal("explicit JEV proxy was not installed")
+	}
+	req, err := http.NewRequest(http.MethodPost, DefaultEndpoint, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got, err := transport.Proxy(req)
+	if err != nil || got == nil || got.Host != "127.0.0.1:7892" {
+		t.Fatalf("proxy = %v, %v", got, err)
+	}
+}
+
 func TestClientErrors(t *testing.T) {
 	c := NewClient("", "", "") // 无 key
 	if _, err := c.Evaluate(context.Background(), "s",

@@ -1,0 +1,62 @@
+{
+  "schema": "pilot-public-price-evidence.v1",
+  "checked_at": "2026-10-17T19:55:00+08:00",
+  "page": "https://www.qianwenai.com/models/deepseek-v4.1-flash",
+  "page_sha256": "ce0d519330c57a1741091a68d99c1fda2cf80ff7d8e7440c38b2a90695019171",
+  "referenced_public_entry": "https://q.alyasset.com/lowcode/entry/prod/59e7b7a90a79cce8c258b2e386804e0e.js",
+  "entry_sha256": "3bc48ef3189b19a24f517f99b829ad9a9e7958c1b45bb756e86915fb14874bed",
+  "model": "deepseek-v4.1-flash",
+  "provider": "deepseek",
+  "prices": [
+    {
+      "Price": "1",
+      "PriceName": "输入",
+      "PriceUnit": "每百万tokens",
+      "TimeBand": "offpeak",
+      "Type": "input_token"
+    },
+    {
+      "Price": "2",
+      "PriceName": "输入",
+      "PriceUnit": "每百万tokens",
+      "TimeBand": "peak",
+      "Type": "input_token"
+    },
+    {
+      "Price": "4",
+      "PriceName": "输出",
+      "PriceUnit": "每百万tokens",
+      "TimeBand": "offpeak",
+      "Type": "output_token"
+    },
+    {
+      "Price": "8",
+      "PriceName": "输出",
+      "PriceUnit": "每百万tokens",
+      "TimeBand": "peak",
+      "Type": "output_token"
+    },
+    {
+      "Price": "0.1",
+      "PriceName": "输入（缓存命中）",
+      "PriceUnit": "每百万tokens",
+      "TimeBand": "offpeak",
+      "Type": "input_token_cache"
+    },
+    {
+      "Price": "0.2",
+      "PriceName": "输入（缓存命中）",
+      "PriceUnit": "每百万tokens",
+      "TimeBand": "peak",
+      "Type": "input_token_cache"
+    }
+  ],
+  "budget_rate_used": "peak input ¥2/M and output ¥8/M; cache discount not used",
+  "jev_model": "jev-1.13.0",
+  "jev_price_source": "https://docs.typesafe.ai/models",
+  "jev_input_usd_per_million": "0.042",
+  "jev_output_free": true,
+  "jev_price_note": "Fetched 2026-10-17. Page says payment is per input token and output tokens are free. Same $0.042/M row for jev-1.13.0 and jev-1.14.0. Not an invoice.",
+  "account_invoice_known": false,
+  "authorized_1220_micro_cny": null
+}

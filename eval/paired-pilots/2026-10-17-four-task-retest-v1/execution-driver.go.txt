@@ -1,0 +1,203 @@
+package main
+
+import (
+	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"net/http"
+	"os"
+	"path/filepath"
+	"strings"
+	"time"
+
+	"github.com/frostloom/ai-gateway/internal/jev"
+	"github.com/frostloom/ai-gateway/internal/taskbench"
+)
+
+const (
+	revision = "58073a8af5318e08fef01197d4d708fc2f35b760"
+	outDir   = "eval/paired-pilots/2026-10-17-four-task-retest-v1/attempt-01"
+)
+
+var selectedKeys = []string{
+	"balance-001/answer_complete",
+	"balance-020/explicit_scope_followup",
+	"recharge-002/confirm",
+	"recharge-002/cancel",
+}
+
+type pinnedTransport struct{ statuses []int }
+
+func (p *pinnedTransport) RoundTrip(r *http.Request) (*http.Response, error) {
+	if r.URL.Scheme != "https" || r.URL.Host != "maas.qianwenaiapi.com" || r.URL.Path != "/apps/anthropic/v1/messages" {
+		return nil, fmt.Errorf("provider host/path mismatch")
+	}
+	response, err := http.DefaultTransport.RoundTrip(r)
+	if response != nil {
+		p.statuses = append(p.statuses, response.StatusCode)
+		fmt.Printf("model_attempt_http_status=%d\n", response.StatusCode)
+	}
+	return response, err
+}
+
+func writeNew(path string, v any) error {
+	raw, err := json.MarshalIndent(v, "", "  ")
+	if err != nil {
+		return err
+	}
+	f, err := os.OpenFile(path, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0o600)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	if _, err = f.Write(append(raw, '\n')); err != nil {
+		return err
+	}
+	return f.Sync()
+}
+
+func envValues() (map[string]string, error) {
+	raw, err := os.ReadFile(".env")
+	if err != nil {
+		return nil, fmt.Errorf("local credentials unavailable")
+	}
+	values := map[string]string{}
+	for _, line := range strings.Split(string(raw), "\n") {
+		line = strings.TrimSpace(line)
+		if line == "" || strings.HasPrefix(line, "#") {
+			continue
+		}
+		k, v, ok := strings.Cut(line, "=")
+		if ok {
+			values[strings.TrimSpace(k)] = strings.Trim(strings.TrimSpace(v), `"'`)
+		}
+	}
+	if values["AGENT_LLM_API_KEY"] == "" || values["JEV_API_KEY"] == "" {
+		return nil, fmt.Errorf("explicit model/JEV keys unavailable")
+	}
+	if values["AGENT_LLM_BASE_URL"] != "https://maas.qianwenaiapi.com/apps/anthropic" || values["AGENT_LLM_MODEL"] != "deepseek-v4.1-flash" || values["AGENT_LLM_PROTOCOL"] != "anthropic" {
+		return nil, fmt.Errorf("local model channel differs from the authorized qianwen profile")
+	}
+	return values, nil
+}
+
+func main() {
+	if err := run(); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+}
+
+func run() (runErr error) {
+	if len(os.Args) != 2 || os.Args[1] != "execute-authorized-four-retest" {
+		return fmt.Errorf("explicit four-task retest authorization invocation required")
+	}
+	values, err := envValues()
+	if err != nil {
+		return err
+	}
+	source, err := taskbench.LoadConversations("eval/task-definitions/2026-10-12-full-dev-v1")
+	if err != nil {
+		return err
+	}
+	plan, err := taskbench.PrepareSmallPair(source)
+	if err != nil {
+		return err
+	}
+	byKey := map[string]taskbench.ConversationCase{}
+	for _, c := range plan.Suite.Cases {
+		byKey[c.Key()] = c
+	}
+	suite := plan.Suite
+	suite.Cases = nil
+	for _, key := range selectedKeys {
+		c, ok := byKey[key]
+		if !ok {
+			return fmt.Errorf("selected case absent: %s", key)
+		}
+		suite.Cases = append(suite.Cases, c)
+	}
+	profiles, err := taskbench.LoadPairedProfiles("eval/runtime-profiles/2026-10-13-six-profiles-v1")
+	if err != nil {
+		return err
+	}
+	model := taskbench.PairModelSettings{
+		BaseURL:  "https://maas.qianwenaiapi.com/apps/anthropic",
+		APIKey:   values["AGENT_LLM_API_KEY"],
+		Model:    "deepseek-v4.1-flash",
+		Protocol: "anthropic",
+	}
+	cfg, err := taskbench.PrepareAgentPairConfig(suite, profiles, model, "recorded_run", revision, "jev-1.13.0")
+	if err != nil {
+		return err
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 12*time.Minute)
+	defer cancel()
+	env, err := taskbench.OpenPairedFixtureEnvironment(ctx, taskbench.PairedFixtureOptions{
+		AllowFixtureCreation: true,
+		AdminDSN:             "root:root@tcp(127.0.0.1:3307)/",
+		ProfilesDir:          "eval/runtime-profiles/2026-10-13-six-profiles-v1",
+	})
+	if err != nil {
+		return err
+	}
+	defer func() { runErr = errors.Join(runErr, env.Close()) }()
+	cfg.AllowPaid = true
+	limits := taskbench.PairBudgetLimits{
+		MaxCalls:                 14,
+		MaxOutputTokens:          128,
+		MaxRequestBytes:          16384,
+		InputTokenCeiling:        16384,
+		MaxMicroCNY:              500000,
+		InputMicroCNYPerMillion:  2000000,
+		OutputMicroCNYPerMillion: 8000000,
+	}
+	if err = os.MkdirAll(filepath.Dir(outDir), 0o700); err != nil {
+		return err
+	}
+	if err = os.Mkdir(outDir, 0o700); err != nil {
+		return err
+	}
+	if err = writeNew(filepath.Join(outDir, "configuration.json"), cfg); err != nil {
+		return err
+	}
+	upstream := &pinnedTransport{}
+	budget, err := taskbench.OpenPairBudget(filepath.Join(outDir, "budget.jsonl"), taskbench.PairRunContract(cfg), limits, upstream)
+	if err != nil {
+		return err
+	}
+	defer func() { runErr = errors.Join(runErr, budget.Close()) }()
+	runErr = taskbench.RunAgentPair(ctx, filepath.Join(outDir, "run.jsonl"), taskbench.AgentPairOptions{
+		AllowExecution: true,
+		RatesVerified:  true,
+		AllowJEVCalls:  true,
+		MaxJEVCalls:    8,
+		DefinitionsDir: "eval/task-definitions/2026-10-12-full-dev-v1",
+		Config:         cfg,
+		Environment:    env,
+		Budget:         budget,
+		Model:          model,
+		JEVFactory: func() jev.Evaluator {
+			return jev.NewClient(jev.DefaultEndpoint, values["JEV_API_KEY"], "jev-1.13.0")
+		},
+	})
+	report, reportErr := taskbench.ReportPreparedPair(filepath.Join(outDir, "run.jsonl"))
+	runErr = errors.Join(runErr, reportErr)
+	if reportErr == nil {
+		runErr = errors.Join(runErr, writeNew(filepath.Join(outDir, "report.json"), report))
+	}
+	receipt := struct {
+		ModelHTTPStatuses  []int                     `json:"model_http_statuses"`
+		ModelBudget        taskbench.PairBudgetState `json:"model_budget"`
+		Complete           bool                      `json:"runner_completed"`
+		AccountInvoiceKnown bool                     `json:"account_invoice_known"`
+		ExecutionRevision  string                    `json:"execution_revision"`
+	}{upstream.statuses, budget.Snapshot(), runErr == nil, false, revision}
+	runErr = errors.Join(runErr, writeNew(filepath.Join(outDir, "execution-receipt.json"), receipt))
+	fmt.Printf("planned_arms=%d finished_arms=%d unrun_arms=%d runner_completed=%t reserved_micro_cny=%d\n", report.PlannedArms, report.FinishedArms, report.UnrunArms, runErr == nil, budget.Snapshot().ReservedMicroCNY)
+	for _, row := range report.Rows {
+		fmt.Printf("arm=%s key=%s status=%s structural=%t http_failures=%d errors=%d\n", row.Arm, row.Key, row.Status, row.StructuralPass, row.HTTPFailures, len(row.Errors))
+	}
+	return runErr
+}

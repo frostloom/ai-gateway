@@ -302,6 +302,22 @@ func (s *Store) MeOverview(ctx context.Context, tenantID uint64) (*MeView, error
 	if err != nil {
 		return nil, err
 	}
+	if bal != ledger {
+		if _, err = s.RebuildBalance(ctx, tenantID); err != nil {
+			return nil, fmt.Errorf("账单不一致，已暂停：%w", err)
+		}
+		bal, err = s.getBalance(ctx, tenantID)
+		if err != nil {
+			return nil, err
+		}
+		ledger, err = LedgerBalance(ctx, s.db, tenantID)
+		if err != nil {
+			return nil, err
+		}
+		if bal != ledger {
+			return nil, fmt.Errorf("账单不一致，已暂停查询：可用 %d，账本 %d", bal, ledger)
+		}
+	}
 	sub, _ := s.GetActiveSubscription(ctx, tenantID)
 	plans, err := s.ListPlans(ctx)
 	if err != nil {
@@ -549,26 +565,39 @@ func (s *Store) PayRecharge(ctx context.Context, orderNo string) (*RechargeOrder
 		return nil, fmt.Errorf("充值订单不存在: %s", orderNo)
 	}
 	if o.Status == RechargePaid {
-		return o, nil // 幂等
+		if err := s.requireCashMatch(ctx, o.TenantID); err != nil {
+			return nil, fmt.Errorf("订单已支付，但余额投影未能对齐：%w", err)
+		}
+		return o, nil
 	}
 	if o.Status != RechargePending {
 		return nil, fmt.Errorf("订单 %s 状态 %s，不可支付", orderNo, o.Status)
 	}
-	// 1) topup 行是提交点（ref 唯一 → 重试/并发只入账一次）
-	if err := s.grantTokens(ctx, o.TenantID, TopupRecharge, TopupRecharge, o.OrderNo, o.AmountCent); err != nil {
-		return nil, err
-	}
-	// 2) 状态推进（守卫：只有 pending_payment 允许）
 	paidAt := time.Now()
-	if err := s.db.WithContext(ctx).Model(&RechargeOrder{}).
-		Where("id = ? AND status = ?", o.ID, RechargePending).
-		Updates(map[string]any{"status": RechargePaid, "paid_at": paidAt}).Error; err != nil {
+	if err := s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		if _, err := insertTopup(tx, &Topup{TenantID: o.TenantID, Source: TopupRecharge, Amount: o.AmountCent, RefType: TopupRecharge, RefID: o.OrderNo, CreatedAt: paidAt}); err != nil {
+			return err
+		}
+		res := tx.Model(&RechargeOrder{}).Where("id = ? AND status = ?", o.ID, RechargePending).
+			Updates(map[string]any{"status": RechargePaid, "paid_at": paidAt})
+		if res.Error != nil {
+			return res.Error
+		}
+		if res.RowsAffected != 1 {
+			return fmt.Errorf("订单 %s 状态已变化，未入账", o.OrderNo)
+		}
+		return nil
+	}); err != nil {
 		return nil, err
 	}
-	// 3) 返回权威行：o 是更新前读的，status 仍是 pending_payment——原地刷新，
-	//    否则响应里带旧状态会误导调用方（admin/agent/脚本都靠它判断）。
 	o.Status = RechargePaid
 	o.PaidAt = &paidAt
+	if err := s.requireCashMatch(ctx, o.TenantID); err != nil {
+		if rev := s.revertRechargePay(ctx, o); rev != nil {
+			return nil, fmt.Errorf("账单不一致且恢复失败：%v；%w", rev, err)
+		}
+		return nil, fmt.Errorf("账单不一致，充值已恢复为未支付：%w", err)
+	}
 	return o, nil
 }
 
@@ -599,7 +628,7 @@ func (s *Store) RefundRecharge(ctx context.Context, tenantID uint64, orderNo str
 	if o.Status != RechargePaid {
 		return nil, fmt.Errorf("订单 %s 状态 %s，不可退款（仅已支付可退）", orderNo, o.Status)
 	}
-	bal, err := s.getBalance(ctx, tenantID)
+	bal, err := LedgerBalance(ctx, s.db, tenantID)
 	if err != nil {
 		return nil, err
 	}
@@ -607,15 +636,27 @@ func (s *Store) RefundRecharge(ctx context.Context, tenantID uint64, orderNo str
 	if refund <= 0 {
 		return nil, fmt.Errorf("当前余额为 0，订单 %s 无可退额度", orderNo)
 	}
-	// 1) 负 topup 行是提交点（幂等：同 order_no 只退一次）
-	if err := s.grantTokens(ctx, tenantID, TopupRefund, TopupRefund, o.OrderNo, -refund); err != nil {
+	if err := s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		if _, err := insertTopup(tx, &Topup{TenantID: tenantID, Source: TopupRefund, Amount: -refund, RefType: TopupRefund, RefID: o.OrderNo, CreatedAt: time.Now()}); err != nil {
+			return err
+		}
+		res := tx.Model(&RechargeOrder{}).Where("id = ? AND status = ?", o.ID, RechargePaid).
+			Update("status", RechargeRefunded)
+		if res.Error != nil {
+			return res.Error
+		}
+		if res.RowsAffected != 1 {
+			return fmt.Errorf("订单 %s 状态已变化，未退款", o.OrderNo)
+		}
+		return nil
+	}); err != nil {
 		return nil, err
 	}
-	// 2) 状态推进（守卫：只有 paid 允许）
-	if err := s.db.WithContext(ctx).Model(&RechargeOrder{}).
-		Where("id = ? AND status = ?", o.ID, RechargePaid).
-		Updates(map[string]any{"status": RechargeRefunded}).Error; err != nil {
-		return nil, err
+	if err := s.requireCashMatch(ctx, tenantID); err != nil {
+		if rev := s.revertRefund(ctx, o, o.OrderNo); rev != nil {
+			return nil, fmt.Errorf("账单不一致且恢复失败：%v；%w", rev, err)
+		}
+		return nil, fmt.Errorf("账单不一致，退款已恢复为未处理：%w", err)
 	}
 	return &RefundResult{OrderNo: o.OrderNo, AmountCent: o.AmountCent, RefundCent: refund, BalanceAfter: bal - refund}, nil
 }
@@ -640,7 +681,7 @@ func (s *Store) RefundAmount(ctx context.Context, tenantID uint64, amountMoney i
 	if existed > 0 {
 		return &RefundResult{OrderNo: "", AmountCent: target, RefundCent: 0, BalanceAfter: mustBalance(s, ctx, tenantID)}, nil
 	}
-	bal, err := s.getBalance(ctx, tenantID)
+	bal, err := LedgerBalance(ctx, s.db, tenantID)
 	if err != nil {
 		return nil, err
 	}
@@ -648,9 +689,17 @@ func (s *Store) RefundAmount(ctx context.Context, tenantID uint64, amountMoney i
 	if refund <= 0 {
 		return nil, fmt.Errorf("当前余额为 0，无可退额度")
 	}
-	// 负 topup 行是提交点（幂等：同 idemKey 只退一次）
-	if err := s.grantTokens(ctx, tenantID, TopupRefund, TopupRefund, idemKey, -refund); err != nil {
+	if err := s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		_, err := insertTopup(tx, &Topup{TenantID: tenantID, Source: TopupRefund, Amount: -refund, RefType: TopupRefund, RefID: idemKey, CreatedAt: time.Now()})
+		return err
+	}); err != nil {
 		return nil, err
+	}
+	if err := s.requireCashMatch(ctx, tenantID); err != nil {
+		if rev := s.revertAmountRefund(ctx, tenantID, idemKey); rev != nil {
+			return nil, fmt.Errorf("账单不一致且恢复失败：%v；%w", rev, err)
+		}
+		return nil, fmt.Errorf("账单不一致，退款已恢复为未处理：%w", err)
 	}
 	return &RefundResult{OrderNo: "", AmountCent: target, RefundCent: refund, BalanceAfter: bal - refund}, nil
 }
@@ -867,22 +916,67 @@ func (s *Store) rechargeByOrderNo(ctx context.Context, orderNo string) (*Recharg
 	return &o, nil
 }
 
-// grantTokens 入账：topup 行是提交点（ref 唯一索引），插入成功才更新 Redis 投影。
-// 重复调用（重试/并发）由唯一索引拦下，不再动 Redis —— 与 bills.uk_request_phase 同理。
-// 投影更新失败不阻断：Redis 只是投影，M4 rebuild 以账本收敛。
-func (s *Store) grantTokens(ctx context.Context, tenantID uint64, source, refType, refID string, amount int64) error {
-	if amount == 0 {
-		return nil
-	}
-	row := &Topup{TenantID: tenantID, Source: source, Amount: amount, RefType: refType, RefID: refID, CreatedAt: time.Now()}
-	if err := s.db.WithContext(ctx).Create(row).Error; err != nil {
-		if isDupKey(err) {
-			return nil // 已入账过（幂等）
-		}
+// requireCashMatch 把 Redis 投影重建为账本，再读回核对。对不上就失败，调用方负责撤回刚提交的业务行。
+func (s *Store) requireCashMatch(ctx context.Context, tenantID uint64) error {
+	if _, err := s.RebuildBalance(ctx, tenantID); err != nil {
 		return err
 	}
-	_ = s.rdb.IncrBy(ctx, BalanceKey(tenantID), amount).Err()
+	live, err := s.getBalance(ctx, tenantID)
+	if err != nil {
+		return err
+	}
+	ledger, err := LedgerBalance(ctx, s.db, tenantID)
+	if err != nil {
+		return err
+	}
+	if live != ledger {
+		return fmt.Errorf("账单不一致：可用 %d，账本 %d", live, ledger)
+	}
 	return nil
+}
+
+func (s *Store) revertRechargePay(ctx context.Context, o *RechargeOrder) error {
+	if err := s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		if err := tx.Where("tenant_id = ? AND ref_type = ? AND ref_id = ?", o.TenantID, TopupRecharge, o.OrderNo).Delete(&Topup{}).Error; err != nil {
+			return err
+		}
+		return tx.Model(&RechargeOrder{}).Where("id = ?", o.ID).Updates(map[string]any{"status": RechargePending, "paid_at": nil}).Error
+	}); err != nil {
+		return err
+	}
+	_, err := s.RebuildBalance(ctx, o.TenantID)
+	return err
+}
+
+func (s *Store) revertRefund(ctx context.Context, o *RechargeOrder, ref string) error {
+	if err := s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		if err := tx.Where("tenant_id = ? AND ref_type = ? AND ref_id = ?", o.TenantID, TopupRefund, ref).Delete(&Topup{}).Error; err != nil {
+			return err
+		}
+		return tx.Model(&RechargeOrder{}).Where("id = ?", o.ID).Update("status", RechargePaid).Error
+	}); err != nil {
+		return err
+	}
+	_, err := s.RebuildBalance(ctx, o.TenantID)
+	return err
+}
+
+func (s *Store) revertAmountRefund(ctx context.Context, tenantID uint64, ref string) error {
+	if err := s.db.WithContext(ctx).Where("tenant_id = ? AND ref_type = ? AND ref_id = ?", tenantID, TopupRefund, ref).Delete(&Topup{}).Error; err != nil {
+		return err
+	}
+	_, err := s.RebuildBalance(ctx, tenantID)
+	return err
+}
+
+func insertTopup(tx *gorm.DB, row *Topup) (bool, error) {
+	if err := tx.Create(row).Error; err != nil {
+		if isDupKey(err) {
+			return false, nil
+		}
+		return false, err
+	}
+	return true, nil
 }
 
 func newOrderNo() string {

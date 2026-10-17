@@ -84,7 +84,7 @@ def check_settings(c):
               'pinned_jev_model': c.get('JEV_MODEL') == 'jev-1.13.0'}
     return {'settings_valid': all(checks.values()), 'checks': checks, 'ready_for_paid_run': False,
             'model_calls': 0, 'jev_calls': 0,
-            'remaining_gates': ['Small real paired acceptance', 'Independent semantic review', 'Fresh channel prices and explicit currency budgets', 'User paid-run authorization']}
+            'remaining_gates': ['Per-batch Observer injection, coverage and score readback', 'User authorization of an explicit 1220 currency cap', 'Account invoice unknown; public peak rates are not a bill']}
 
 
 def verify_bindings(directory):

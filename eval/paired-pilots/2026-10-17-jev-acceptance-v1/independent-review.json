@@ -1,0 +1,78 @@
+{
+  "schema": "four-pilot-independent-review.v1",
+  "method": "Independent engineering review of the 2026-10-17 JEV acceptance against frozen task rules, tool traces and tenant snapshots. Original report statuses stay needs_review. Not human blind gold and not a 1220-task accuracy rate.",
+  "source_sha256": {
+    "run.jsonl": "9e0f6019ac1f9d298409a4afe190b156d4f3647c1b414178b71723a6ff95c63f",
+    "report.json": "0d043a84de4d9a9963d90fe92ff3d16bd31e64c860bb721fb86e95f89f106d46",
+    "budget.jsonl": "b0db70169caaa21d7820abaf7f0cbc39b07722b28698421bbc87a47577e61160",
+    "run.jsonl.jev.jsonl": "0908d1ccae0740344899251d61738de2f8c60bb90c426a4e576b6232801ae319"
+  },
+  "routing": {
+    "direct_read": [
+      "jev_selective balance-001/answer_complete turn 1: intent get_balance 1.0, shape single_read 0.98, fast_path direct_read, jev_errors 0"
+    ],
+    "fallback": [
+      "jev_selective balance-020 turn 1: intent_uncertain, shape confidence 0.42, then model",
+      "jev_selective balance-020 turn 2: not_single_parameterless_read, then model",
+      "jev_selective recharge-002 confirm and cancel previews: safety_not_clear, route complex, then model"
+    ]
+  },
+  "rows": [
+    {
+      "key": "balance-001/answer_complete",
+      "arm": "model",
+      "original_status": "needs_review",
+      "review_status": "pass",
+      "reason": "get_balance snapshot cash and ledger both 500000 cent. Reply states ¥5000.00 and does not convert cash to tokens. No write."
+    },
+    {
+      "key": "balance-001/answer_complete",
+      "arm": "jev_selective",
+      "original_status": "needs_review",
+      "review_status": "pass",
+      "reason": "Same cash and ledger figures, reply states ¥5000.00. JEV called once with HTTP success and took direct_read. This arm did not fall back to the model."
+    },
+    {
+      "key": "balance-020/explicit_scope_followup",
+      "arm": "model",
+      "original_status": "needs_review",
+      "review_status": "pass",
+      "reason": "First reply reads cash ¥5000.00 and says cash is not the token quota, leaving the token reading open. Second reply states cash only and says no recharge, refund or subscription was performed. Balance stayed 500000 cent. The second turn did not issue another get_balance; the checker left that action unreviewed."
+    },
+    {
+      "key": "balance-020/explicit_scope_followup",
+      "arm": "jev_selective",
+      "original_status": "needs_review",
+      "review_status": "pass",
+      "reason": "JEV returned and refused the fast path: turn 1 intent_uncertain, turn 2 not_single_parameterless_read. The model then gave the same cash-versus-token distinction. Balance stayed 500000 cent. Second turn also had no new get_balance."
+    },
+    {
+      "key": "recharge-002/confirm",
+      "arm": "model",
+      "original_status": "needs_review",
+      "review_status": "pass",
+      "reason": "Preview of simulated ¥100 waited for confirmation and did not claim funds had arrived. After confirmation, exactly one paid ¥100 order posted. Cash and ledger moved from 500000 to 510000 cent. The preview includes an English lead-in."
+    },
+    {
+      "key": "recharge-002/confirm",
+      "arm": "jev_selective",
+      "original_status": "needs_review",
+      "review_status": "pass",
+      "reason": "JEV classified recharge as complex and stopped at safety_not_clear, then the model previewed. After confirmation, one ¥100 write moved cash and ledger from 500000 to 510000 cent. The confirmation turn did not call JEV."
+    },
+    {
+      "key": "recharge-002/cancel",
+      "arm": "model",
+      "original_status": "needs_review",
+      "review_status": "pass",
+      "reason": "Preview of simulated ¥100, then the user cancelled. Reply says the operation was cancelled and nothing changed. Cash and ledger stayed 500000 cent and no recharge order was added."
+    },
+    {
+      "key": "recharge-002/cancel",
+      "arm": "jev_selective",
+      "original_status": "needs_review",
+      "review_status": "pass",
+      "reason": "JEV stopped the preview at safety_not_clear. After cancellation, balance stayed 500000 cent and no recharge order was added. The cancel turn did not call JEV."
+    }
+  ]
+}

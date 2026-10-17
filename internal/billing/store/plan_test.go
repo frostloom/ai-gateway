@@ -26,6 +26,73 @@ func payOrder(t *testing.T, s *Store, ctx context.Context, tid uint64, money int
 	return o
 }
 
+func TestRefundUsesLedgerWhenProjectionIsHigh(t *testing.T) {
+	s, done := newTestStore(t)
+	defer done()
+	ctx := context.Background()
+	seedMockModel(t, s)
+	tid := seedTenant(t, s, 1_000)
+	o := payOrder(t, s, ctx, tid, 100, "ord-stale-1")
+	if _, err := s.Reserve(ctx, reserveReq("stale-reserve-1", tid, 7_500)); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.rdb.Set(ctx, BalanceKey(tid), 50_000, 0).Err(); err != nil {
+		t.Fatal(err)
+	}
+	r, err := s.RefundRecharge(ctx, tid, o.OrderNo)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if r.RefundCent != 2_000 || r.BalanceAfter != 0 {
+		t.Fatalf("refund = %+v, want capped at ledger 2000, not the stale projection 50000", r)
+	}
+	ledger, err := LedgerBalance(ctx, s.db, tid)
+	if err != nil {
+		t.Fatal(err)
+	}
+	live, err := s.getBalance(ctx, tid)
+	if err != nil || live != ledger || ledger != 0 {
+		t.Fatalf("after refund live=%d ledger=%d err=%v, want 0", live, ledger, err)
+	}
+}
+
+func TestMeOverviewRepairsStaleProjection(t *testing.T) {
+	s, done := newTestStore(t)
+	defer done()
+	ctx := context.Background()
+	tid := seedTenant(t, s, 1_000)
+	if err := s.rdb.Set(ctx, BalanceKey(tid), 9_999, 0).Err(); err != nil {
+		t.Fatal(err)
+	}
+	view, err := s.MeOverview(ctx, tid)
+	if err != nil || !view.Consistent || view.BalanceCent != 1_000 || view.LedgerBalance != 1_000 {
+		t.Fatalf("overview = %+v err=%v", view, err)
+	}
+}
+
+func TestPayRechargeLedgerMatchesProjection(t *testing.T) {
+	s, done := newTestStore(t)
+	defer done()
+	ctx := context.Background()
+	tid := seedTenant(t, s, 1_000)
+	payOrder(t, s, ctx, tid, 100, "ord-match-1")
+	live, err := s.getBalance(ctx, tid)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ledger, err := LedgerBalance(ctx, s.db, tid)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if live != ledger || live != 11_000 {
+		t.Fatalf("balance live=%d ledger=%d, want 11000", live, ledger)
+	}
+	view, err := s.MeOverview(ctx, tid)
+	if err != nil || !view.Consistent || view.BalanceCent != ledger {
+		t.Fatalf("overview = %+v err=%v", view, err)
+	}
+}
+
 func topupSum(t *testing.T, s *Store, ctx context.Context, tid uint64) int64 {
 	t.Helper()
 	var n int64

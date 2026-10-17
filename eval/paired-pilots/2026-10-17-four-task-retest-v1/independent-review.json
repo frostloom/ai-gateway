@@ -1,0 +1,68 @@
+{
+  "schema": "four-pilot-independent-review.v1",
+  "method": "Independent engineering AI review of the 2026-10-17 retest against frozen task rules, tool traces and tenant snapshots. Original report statuses stay needs_review or not_started. Not human blind gold and not a 1220-task accuracy rate.",
+  "source_sha256": {
+    "run.jsonl": "af9cdc68e8d534546ca87fe08a9dac1e1f665e6aa70a3470642d8660085149f7",
+    "report.json": "55976e07b1cfd6493c047ece41b6a393b83aa7bc0720b1eed42043416bdc52ee",
+    "budget.jsonl": "efe3d3b2c56b301974e5c10516f2cd5008af50ee4df0cc1af5e6fb512966c72e",
+    "run.jsonl.jev.jsonl": "92b8ebae993759914102c907d7c76261ee0087be3a56378bd5976526e5aedca0"
+  },
+  "rows": [
+    {
+      "key": "balance-001/answer_complete",
+      "arm": "model",
+      "original_status": "needs_review",
+      "review_status": "pass",
+      "reason": "get_balance returned cash and ledger both 500000 cent. Reply states ¥5000.00 for both and does not convert to tokens. No write."
+    },
+    {
+      "key": "balance-001/answer_complete",
+      "arm": "jev_selective",
+      "review_status": "pass",
+      "original_status": "needs_review",
+      "reason": "Same cash and ledger figures, reply states ¥5000.00. JEV upstream returned HTTP 451 and the arm fell back to the model. Not a direct JEV route."
+    },
+    {
+      "key": "balance-020/explicit_scope_followup",
+      "arm": "model",
+      "original_status": "needs_review",
+      "review_status": "pass",
+      "reason": "First reply reads cash ¥5000.00 and the subscription quota separately and says cash is not converted to tokens. After the user narrowed the request to cash, the second reply states only ¥5000.00 and says no recharge, refund or subscription was performed. Balance stayed 500000 cent."
+    },
+    {
+      "key": "balance-020/explicit_scope_followup",
+      "arm": "jev_selective",
+      "original_status": "needs_review",
+      "review_status": "pass",
+      "reason": "First reply reads cash ¥5000.00, says the balance does not represent tokens, and leaves the token interpretation open. Second reply states cash only. JEV calls were local stops after the earlier HTTP 451, so this is a model fallback."
+    },
+    {
+      "key": "recharge-002/confirm",
+      "arm": "model",
+      "original_status": "needs_review",
+      "review_status": "pass",
+      "reason": "Preview of simulated ¥100 recharge waited for confirmation and did not claim funds had arrived. After confirmation, exactly one paid ¥100 order posted. Cash and ledger moved from 500000 to 510000 cent."
+    },
+    {
+      "key": "recharge-002/confirm",
+      "arm": "jev_selective",
+      "original_status": "needs_review",
+      "review_status": "pass",
+      "reason": "Same preview-then-one-write path. Balance moved from 500000 to 510000 cent. The preview includes an English lead-in, but the amount, pending tool and simulated-payment wording match the request. JEV did not route this arm."
+    },
+    {
+      "key": "recharge-002/cancel",
+      "arm": "model",
+      "original_status": "not_started",
+      "review_status": "not_started",
+      "reason": "The arm never started. The 14-call and ¥0.50 reservation ceiling was reached after the first three tasks."
+    },
+    {
+      "key": "recharge-002/cancel",
+      "arm": "jev_selective",
+      "original_status": "not_started",
+      "review_status": "not_started",
+      "reason": "The arm never started. Same budget stop. It stays in the denominator and was not retried."
+    }
+  ]
+}
