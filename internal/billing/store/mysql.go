@@ -135,8 +135,9 @@ func UsageKey(requestID string) string      { return fmt.Sprintf("usage:%s", req
 // ---------- Store ----------
 
 type Store struct {
-	db  *gorm.DB
-	rdb *goredis.Client
+	db   *gorm.DB
+	rdb  *goredis.Client
+	cash *cashSession
 }
 
 func NewStore(db *gorm.DB, rdb *goredis.Client) *Store {
@@ -154,18 +155,23 @@ func (s *Store) AutoMigrate() error {
 
 // Reserve 预占额度。幂等：同一 request_id 只扣一次、只落一行。
 //
-// 同一 request 使用 MySQL 会话锁跨进程串行化 Lua、SQL 与失败补偿。
+// 先按 tenant、再按 request 使用同一 MySQL 会话串行化 Lua、SQL 与重建。
 // request guard 只能证明请求曾扣款，不能证明失败的调用拥有该次扣款。
 // 顺序设计：
 //  1. DB 快速查重：已存在该 request_id 的 reserve 行 → 幂等重放，直接返回；
 //  2. Redis Lua 原子扣减：guard 幂等——若本 request 已扣过则返回 ALREADY 不重复扣；
 //  3. 落 reserve 行：唯一索引 uk_request_phase 兜底并发；插入失败且非重复 → 返回错误，
-//     失败后释放原会话并重锁查账本，只有账本仍无行才补偿 Redis。
+//     失败后重锁查账本；无行时原子重建余额并清理属于该调用的 guard。
 //
-// 插入失败时重锁查询账本，无行才跑补偿 Lua：guard 值等于本次唯一 owner 才
-// DEL guard 并 INCRBY 预扣额。重放会接管 owner，失联的旧调用不能退掉新调用的扣款。
+// 恢复不用 INCRBY：释放会话期间其他重建可能已归还这笔预扣，不能再加一次。
+// Redis 写入同时核验租户 owner，失联的旧会话不能覆盖新持有者的余额。
 func (s *Store) Reserve(ctx context.Context, req *billingv1.ReserveRequest) (*billingv1.ReserveResponse, error) {
-	return s.reserveLocked(ctx, req)
+	locked, release, err := s.lockCash(ctx, uint64(req.TenantId))
+	if err != nil {
+		return nil, status.Errorf(codes.Unavailable, "cash lock: %v", err)
+	}
+	defer release()
+	return locked.reserveLocked(ctx, req)
 }
 
 // lockReserveRequest pins the connection for the entire reserve operation.
@@ -174,15 +180,25 @@ func (s *Store) Reserve(ctx context.Context, req *billingv1.ReserveRequest) (*bi
 // Caller cancellation is still checked before Lua and before the insert.
 // The lock name is fixed-length and shared by all billing processes.
 func (s *Store) lockReserveRequest(ctx context.Context, requestID string) (*sql.Conn, func(), error) {
-	db, err := s.db.DB()
-	if err != nil {
-		return nil, nil, err
-	}
-	conn, err := db.Conn(ctx)
-	if err != nil {
-		return nil, nil, err
-	}
 	name := fmt.Sprintf("billing:reserve:%x", sha256.Sum256([]byte(requestID)))[:64]
+	return s.lockNamed(ctx, name)
+}
+
+func (s *Store) lockNamed(ctx context.Context, name string) (*sql.Conn, func(), error) {
+	var conn *sql.Conn
+	owned := s.cash == nil
+	if !owned {
+		conn = s.cash.conn
+	} else {
+		db, err := s.db.DB()
+		if err != nil {
+			return nil, nil, err
+		}
+		conn, err = db.Conn(ctx)
+		if err != nil {
+			return nil, nil, err
+		}
+	}
 	var acquired sql.NullInt64
 	if err := conn.QueryRowContext(ctx, "SELECT GET_LOCK(?, 5)", name).Scan(&acquired); err != nil {
 		// A canceled query may have acquired the server lock before its result
@@ -192,7 +208,9 @@ func (s *Store) lockReserveRequest(ctx context.Context, requestID string) (*sql.
 		return nil, nil, err
 	}
 	if !acquired.Valid || acquired.Int64 != 1 {
-		_ = conn.Close()
+		if owned {
+			_ = conn.Close()
+		}
 		return nil, nil, errors.New("request lock timed out")
 	}
 	var releaseOnce sync.Once
@@ -205,7 +223,9 @@ func (s *Store) lockReserveRequest(ctx context.Context, requestID string) (*sql.
 				// A connection with an unreleased session lock cannot be pooled.
 				_ = conn.Raw(func(any) error { return driver.ErrBadConn })
 			}
-			_ = conn.Close()
+			if owned {
+				_ = conn.Close()
+			}
 		})
 	}, nil
 }
@@ -306,7 +326,7 @@ func (s *Store) reserveLocked(ctx context.Context, req *billingv1.ReserveRequest
 		return nil, status.Errorf(codes.Unavailable, "reserve lock: %v", err)
 	}
 	defer unlock()
-	originalDB := s.db
+	originalDB := s.cash.root
 	dbctx, cancelSQL := context.WithTimeout(context.WithoutCancel(ctx), 15*time.Second)
 	defer cancelSQL()
 	locked := *s
@@ -319,6 +339,16 @@ func (s *Store) reserveLocked(ctx context.Context, req *billingv1.ReserveRequest
 		bal, _ := s.getBalance(ctx, tenantID)
 		return &billingv1.ReserveResponse{Code: billingv1.ReserveCode_RESERVE_OK, BillId: int64(row.ID), BalanceAfter: bal}, nil
 	}
+	// No durable reserve exists. A remaining guard belongs to an interrupted
+	// attempt and may already have been refunded by a projection rebuild.
+	if err := s.repairOrphanGuard(dbctx, tenantID, ReqGuardKey(req.RequestId)); err != nil {
+		return nil, status.Errorf(codes.Unavailable, "reserve recovery: %v", err)
+	}
+	// Another committed refund may have failed to update Redis. Never spend
+	// that stale projection before restoring the authoritative ledger.
+	if err := s.requireCashMatch(dbctx, tenantID); err != nil {
+		return nil, status.Errorf(codes.Unavailable, "reserve cash projection: %v", err)
+	}
 
 	// 有标价但整数除法把预扣打成 0 时，至少预扣 1 分。
 	// 否则 0 余额也能预扣成功，事后补扣又可能把账单卡在 pending。
@@ -329,8 +359,7 @@ func (s *Store) reserveLocked(ctx context.Context, req *billingv1.ReserveRequest
 
 	// 2) Redis Lua 原子扣减（余额路径）
 	owner := rand.Text()
-	script := goredis.NewScript(reserveLua)
-	res, err := script.Run(ctx, s.rdb, []string{BalanceKey(tenantID), ReqGuardKey(req.RequestId)}, pre, owner).Result()
+	res, err := s.runCashLua(ctx, reserveLua, []string{BalanceKey(tenantID), ReqGuardKey(req.RequestId)}, pre, owner)
 	if err != nil {
 		return nil, status.Errorf(codes.Unavailable, "reserve lua: %v", err)
 	}
@@ -375,9 +404,14 @@ func (s *Store) reserveLocked(ctx context.Context, req *billingv1.ReserveRequest
 		// loses its session lock, allowing a replay to commit. Reacquire on a
 		// healthy connection and inspect the ledger before refunding anything.
 		unlock()
+		s.cash.release()
 		cleanup, cancel := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
 		defer cancel()
-		recovery := NewStore(originalDB, s.rdb)
+		recovery, cashRelease, cashErr := NewStore(originalDB, s.rdb).lockCash(cleanup, tenantID)
+		if cashErr != nil {
+			return nil, status.Errorf(codes.Unavailable, "reserve insert: %v; cash recovery: %v", err, cashErr)
+		}
+		defer cashRelease()
 		recoveryConn, recoveryUnlock, lockErr := recovery.lockReserveRequest(cleanup, req.RequestId)
 		if lockErr != nil {
 			return nil, status.Errorf(codes.Unavailable, "reserve insert: %v; recovery lock: %v", err, lockErr)
@@ -392,7 +426,7 @@ func (s *Store) reserveLocked(ctx context.Context, req *billingv1.ReserveRequest
 		if persisted != nil {
 			return nil, status.Errorf(codes.Unavailable, "reserve insert: %v", err)
 		}
-		if _, cErr := recovery.compensateReserve(cleanup, tenantID, req.RequestId, pre, owner); cErr != nil {
+		if _, cErr := recovery.rebuildCash(cleanup, tenantID, ReqGuardKey(req.RequestId), owner); cErr != nil {
 			return nil, status.Errorf(codes.Unavailable, "reserve insert: %v; compensate: %v", err, cErr)
 		}
 		return nil, status.Errorf(codes.Unavailable, "reserve insert: %v", err)
@@ -402,8 +436,7 @@ func (s *Store) reserveLocked(ctx context.Context, req *billingv1.ReserveRequest
 
 // compensateReserve 在 reserve 行插入失败后恢复 Redis。guard 不匹配时不动余额。
 func (s *Store) compensateReserve(ctx context.Context, tenantID uint64, requestID string, pre int64, owner string) (bool, error) {
-	script := goredis.NewScript(compensateLua)
-	res, err := script.Run(ctx, s.rdb, []string{BalanceKey(tenantID), ReqGuardKey(requestID)}, pre, owner).Result()
+	res, err := s.runCashLua(ctx, compensateLua, []string{BalanceKey(tenantID), ReqGuardKey(requestID)}, pre, owner)
 	if err != nil {
 		return false, err
 	}
@@ -437,8 +470,7 @@ func (s *Store) GetBalance(ctx context.Context, tenantID uint64) (int64, error) 
 	return s.getBalance(ctx, tenantID)
 }
 
-// EnsureBalanceKeys 启动时兜底：为每个活跃租户补建 balance key（缺失时用初始额度初始化）。
-// 后续 M4 的 rebuild job 才是「从账本重算投影」的完整版。
+// EnsureBalanceKeys 启动时为活跃租户补建缺失的余额投影。
 func (s *Store) EnsureBalanceKeys(ctx context.Context) error {
 	var tenants []Tenant
 	if err := s.db.WithContext(ctx).Find(&tenants).Error; err != nil {
@@ -453,12 +485,27 @@ func (s *Store) EnsureBalanceKeys(ctx context.Context) error {
 			return err
 		}
 		if n == 0 {
-			if err := s.rdb.Set(ctx, BalanceKey(t.ID), t.InitialQuota, 0).Err(); err != nil {
+			if err := s.ensureBalanceKey(ctx, t.ID); err != nil {
 				return err
 			}
 		}
 	}
 	return nil
+}
+
+func (s *Store) ensureBalanceKey(ctx context.Context, tenant uint64) error {
+	locked, release, err := s.lockCash(ctx, tenant)
+	if err != nil {
+		return err
+	}
+	defer release()
+	// A reserve or another startup may have restored it while we waited.
+	n, err := s.rdb.Exists(ctx, BalanceKey(tenant)).Result()
+	if err != nil || n != 0 {
+		return err
+	}
+	_, err = locked.rebuildCash(locked.cashSQLContext(), tenant, "", "")
+	return err
 }
 
 // ---------- 用量上报 / 结算 / 退款 / 密钥校验 ----------
@@ -530,12 +577,48 @@ func (s *Store) Settle(ctx context.Context, req *billingv1.SettleRequest) (*bill
 	if row == nil {
 		return nil, status.Errorf(codes.NotFound, "reserve row not found: %s", req.RequestId)
 	}
+	locked, release, err := s.lockCash(ctx, row.TenantID)
+	if err != nil {
+		return nil, err
+	}
+	defer release()
+	return locked.settleCash(locked.cashSQLContext(), req)
+}
+
+func (s *Store) settleCash(ctx context.Context, req *billingv1.SettleRequest) (*billingv1.SettleResponse, error) {
+	row, err := s.getReserve(ctx, req.RequestId)
+	if err != nil {
+		return nil, err
+	}
+	if row == nil {
+		return nil, status.Errorf(codes.NotFound, "reserve row not found: %s", req.RequestId)
+	}
 	if row.Status == StatusReversed {
 		// 已冲正：结算 no-op（账已退，不能再结）
 		return &billingv1.SettleResponse{Settled: false}, nil
 	}
+	if row.Status == StatusSettled {
+		var settled Bill
+		if err := s.db.WithContext(ctx).Where("request_id = ? AND phase = ?", req.RequestId, PhaseSettle).First(&settled).Error; err != nil {
+			return nil, err
+		}
+		bal, err := s.getBalance(ctx, row.TenantID)
+		if err != nil {
+			return nil, err
+		}
+		return &billingv1.SettleResponse{Settled: true, DeltaQuota: *settled.DeltaQuota, BalanceAfter: bal}, nil
+	}
 	if row.UsageReportedAt == nil || row.PromptTokens == nil || row.CompletionTokens == nil {
 		return nil, status.Errorf(codes.FailedPrecondition, "usage not reported: %s", req.RequestId)
+	}
+	if err := s.cashMutationAllowed(); err != nil {
+		return nil, err
+	}
+	if err := s.repairOrphanGuard(ctx, row.TenantID, DeltaGuardKey(req.RequestId)); err != nil {
+		return nil, err
+	}
+	if err := s.requireCashMatch(ctx, row.TenantID); err != nil {
+		return nil, err
 	}
 
 	// M9 订阅额度：token 已在 reserve 时消耗（额度按窗口涌现），settle 不产生任何钱。
@@ -655,6 +738,22 @@ func (s *Store) Reverse(ctx context.Context, req *billingv1.ReverseRequest) (*bi
 	if row == nil {
 		return nil, status.Errorf(codes.NotFound, "reserve row not found: %s", req.RequestId)
 	}
+	locked, release, err := s.lockCash(ctx, row.TenantID)
+	if err != nil {
+		return nil, err
+	}
+	defer release()
+	return locked.reverseCash(locked.cashSQLContext(), req)
+}
+
+func (s *Store) reverseCash(ctx context.Context, req *billingv1.ReverseRequest) (*billingv1.ReverseResponse, error) {
+	row, err := s.getReserve(ctx, req.RequestId)
+	if err != nil {
+		return nil, err
+	}
+	if row == nil {
+		return nil, status.Errorf(codes.NotFound, "reserve row not found: %s", req.RequestId)
+	}
 	if row.Status == StatusSettled {
 		// 已结算，钱按实际结清了，不再退
 		return &billingv1.ReverseResponse{Reversed: false, RefundQuota: 0}, nil
@@ -662,6 +761,15 @@ func (s *Store) Reverse(ctx context.Context, req *billingv1.ReverseRequest) (*bi
 	if row.Status == StatusReversed {
 		// 幂等重放
 		return &billingv1.ReverseResponse{Reversed: true, RefundQuota: row.PreQuota}, nil
+	}
+	if err := s.cashMutationAllowed(); err != nil {
+		return nil, err
+	}
+	if err := s.repairOrphanGuard(ctx, row.TenantID, DeltaGuardKey(req.RequestId)); err != nil {
+		return nil, err
+	}
+	if err := s.requireCashMatch(ctx, row.TenantID); err != nil {
+		return nil, err
 	}
 
 	// 退回全部预扣：delta 语义「新余额 = 旧余额 - delta」，退款用负 delta（-pre）。
@@ -695,23 +803,12 @@ func (s *Store) Reverse(ctx context.Context, req *billingv1.ReverseRequest) (*bi
 //
 // 用途：收敛「Lua 已扣但落库失败」这类 Redis 与账本不一致的脏投影。
 func (s *Store) RebuildBalance(ctx context.Context, tenantID uint64) (int64, error) {
-	var tenant Tenant
-	if err := s.db.WithContext(ctx).First(&tenant, tenantID).Error; err != nil {
-		return 0, status.Errorf(codes.Unavailable, "tenant not found: %v", err)
-	}
-	if tenant.Status != 0 {
-		return 0, status.Errorf(codes.FailedPrecondition, "tenant disabled: %d", tenantID)
-	}
-
-	// M7 起口径：initial + Σtopups − Σpending pre − Σsettled actual（单一权威公式，见 LedgerBalance）。
-	bal, err := LedgerBalance(ctx, s.db, tenantID)
+	locked, release, err := s.lockCash(ctx, tenantID)
 	if err != nil {
-		return 0, status.Errorf(codes.Unavailable, "ledger balance: %v", err)
+		return 0, err
 	}
-	if err := s.rdb.Set(ctx, BalanceKey(tenantID), bal, 0).Err(); err != nil {
-		return 0, status.Errorf(codes.Unavailable, "rebuild set balance: %v", err)
-	}
-	return bal, nil
+	defer release()
+	return locked.rebuildCash(locked.cashSQLContext(), tenantID, "", "")
 }
 
 // ValidateAPIKey 按 SHA-256 哈希查 key，校验状态与过期时间。
@@ -864,8 +961,7 @@ func (s *Store) OverviewStats(ctx context.Context) (*Overview, error) {
 // applyDelta 在 Redis 上恰好应用一次 delta（Settle 与 Reverse 共用，互斥）。
 // applied 是实际改动的金额：补扣不足时小于请求的 delta，且余额不会变成负数。
 func (s *Store) applyDelta(ctx context.Context, tenantID uint64, requestID string, delta int64) (int64, int64, error) {
-	script := goredis.NewScript(settleLua)
-	res, err := script.Run(ctx, s.rdb, []string{BalanceKey(tenantID), DeltaGuardKey(requestID)}, delta).Result()
+	res, err := s.runCashLua(ctx, settleLua, []string{BalanceKey(tenantID), DeltaGuardKey(requestID)}, delta)
 	if err != nil {
 		return 0, 0, status.Errorf(codes.Unavailable, "delta lua: %v", err)
 	}
