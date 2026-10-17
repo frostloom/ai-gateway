@@ -150,5 +150,17 @@ func RunAgentPair(ctx context.Context, path string, o AgentPairOptions) (runErr 
 		})
 		return NewHandlerConversationDriver(wrapper, oracle)
 	}
-	return runPreparedPair(ctx, path, o.Config, o.Budget, factory, o.Observer)
+	err = runPreparedPair(ctx, path, o.Config, o.Budget, factory, o.Observer)
+	if o.Observer == nil {
+		if o.Config.Model.EvidenceKind == "recorded_run" {
+			return errors.Join(err, fmt.Errorf("recorded run requires an explicit Langfuse observer"))
+		}
+		return err
+	}
+	flushErr := o.Observer.ForceFlush(ctx)
+	stats := o.Observer.Stats()
+	if flushErr != nil || stats.Dropped != 0 || stats.Failed != 0 {
+		return errors.Join(err, fmt.Errorf("langfuse export stopped the run: dropped=%d failed=%d: %v", stats.Dropped, stats.Failed, flushErr))
+	}
+	return err
 }

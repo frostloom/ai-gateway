@@ -1,0 +1,744 @@
+{
+  "schema": "small-paired-report.v1",
+  "journal_sha256": "9e0f6019ac1f9d298409a4afe190b156d4f3647c1b414178b71723a6ff95c63f",
+  "evidence_kind": "recorded_run",
+  "planned_cases": 4,
+  "planned_arms": 8,
+  "finished_arms": 8,
+  "unrun_arms": 0,
+  "rows": [
+    {
+      "observed_turns": 1,
+      "key": "balance-001/answer_complete",
+      "arm": "model",
+      "status": "needs_review",
+      "structural_pass": true,
+      "fact_checks": [
+        {
+          "turn_index": 0,
+          "fact": "unsupported_or_missing_claim",
+          "claim": "",
+          "status": "not_evaluated"
+        }
+      ],
+      "fact_errors": 0,
+      "review_requirements": [
+        {
+          "id": "balance-001/answer_complete/turn-1/action-reply",
+          "turn_index": 0,
+          "requirement": "Independently verify observed action label read, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "0e202bcec3601309b2258ccd4bebf1f26ba6542d8ddc802a3e4d56dd1257508c",
+          "reply_sha256": "ee1d9624c7fa2f4b143ef22a21f94a2e70637a68bcfb1e44ab6c80382d9bf0de"
+        },
+        {
+          "id": "balance-001:reply-1",
+          "turn_index": 0,
+          "requirement": "针对原话“查询余额”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。",
+          "requirement_sha256": "04cd7d2cf8a38ac9c7a6f4a3108999d5c9e693f506eee1db41acf5e3d96b4064",
+          "reply_sha256": "ee1d9624c7fa2f4b143ef22a21f94a2e70637a68bcfb1e44ab6c80382d9bf0de"
+        },
+        {
+          "id": "balance-001/answer_complete/final-reply",
+          "turn_index": 0,
+          "requirement": "Final reply accurately describes the task outcome, amounts, identities, scope and limitations using the verified final state; no false success claim.",
+          "requirement_sha256": "dccf4d740886bbd60df9d3c34a9e393a87f80b1f31f65900f65b0e4a8ec082b4",
+          "reply_sha256": "ee1d9624c7fa2f4b143ef22a21f94a2e70637a68bcfb1e44ab6c80382d9bf0de"
+        }
+      ],
+      "necessary_clarifications": [],
+      "http_failures": 0,
+      "runner_elapsed_ms": 2463.88975,
+      "telemetry": {
+        "completion_rate": null,
+        "response_latency_ms": 2264.998708,
+        "llm_calls": 2,
+        "jev_calls": 0,
+        "tokens": {
+          "llm_input": 874,
+          "llm_output": 36,
+          "jev_input": 0,
+          "jev_output": 0
+        }
+      },
+      "guarded_upstream_model_attempts": 2,
+      "priced_model_usage_micro_cny": 7412,
+      "reserved_model_micro_cny": 67584
+    },
+    {
+      "observed_turns": 1,
+      "key": "balance-001/answer_complete",
+      "arm": "jev_selective",
+      "status": "needs_review",
+      "structural_pass": true,
+      "fact_checks": [
+        {
+          "turn_index": 0,
+          "fact": "cash_balance",
+          "claim": "¥5000.00",
+          "expected": "500000 cent",
+          "status": "match"
+        },
+        {
+          "turn_index": 0,
+          "fact": "ledger_balance",
+          "claim": "¥5000.00",
+          "expected": "500000 cent",
+          "status": "match"
+        }
+      ],
+      "fact_errors": 0,
+      "review_requirements": [
+        {
+          "id": "balance-001/answer_complete/turn-1/action-reply",
+          "turn_index": 0,
+          "requirement": "Independently verify observed action label read, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "0f0efad3f44b38b295cd424a837e9f280499dcdd4128fbc7500083048804fc3d",
+          "reply_sha256": "560707ca5b3d033d9007796a9414779d7873c670a4019dd0aea0c772d32ae2ed"
+        },
+        {
+          "id": "balance-001:reply-1",
+          "turn_index": 0,
+          "requirement": "针对原话“查询余额”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。",
+          "requirement_sha256": "8c39129759d95ecce3f745b805c84d0c4403a5ce65458ea641577dece28b19bd",
+          "reply_sha256": "560707ca5b3d033d9007796a9414779d7873c670a4019dd0aea0c772d32ae2ed"
+        },
+        {
+          "id": "balance-001/answer_complete/final-reply",
+          "turn_index": 0,
+          "requirement": "Final reply accurately describes the task outcome, amounts, identities, scope and limitations using the verified final state; no false success claim.",
+          "requirement_sha256": "f083b21647e2f5ec834876b252e1fa45ef331a9e098af5221b2ba079ced0b0fa",
+          "reply_sha256": "560707ca5b3d033d9007796a9414779d7873c670a4019dd0aea0c772d32ae2ed"
+        }
+      ],
+      "necessary_clarifications": [],
+      "http_failures": 0,
+      "runner_elapsed_ms": 796.658666,
+      "telemetry": {
+        "completion_rate": null,
+        "response_latency_ms": 579.364916,
+        "llm_calls": 0,
+        "jev_calls": 1,
+        "tokens": {
+          "llm_input": 0,
+          "llm_output": 0,
+          "jev_input": 1201,
+          "jev_output": 186
+        }
+      },
+      "guarded_upstream_model_attempts": 0,
+      "priced_model_usage_micro_cny": 0,
+      "reserved_model_micro_cny": 0
+    },
+    {
+      "observed_turns": 2,
+      "key": "balance-020/explicit_scope_followup",
+      "arm": "model",
+      "status": "needs_review",
+      "structural_pass": true,
+      "fact_checks": [
+        {
+          "turn_index": 0,
+          "fact": "unsupported_or_missing_claim",
+          "claim": "",
+          "status": "not_evaluated"
+        },
+        {
+          "turn_index": 1,
+          "fact": "unsupported_or_missing_claim",
+          "claim": "",
+          "status": "not_evaluated"
+        }
+      ],
+      "fact_errors": 0,
+      "review_requirements": [
+        {
+          "id": "balance-020/explicit_scope_followup/turn-1/action-reply",
+          "turn_index": 0,
+          "requirement": "Independently verify observed action label read, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "98b9c017671cb6c8cc759a781d81f0a3da43436bfa532824c47dde526b56a2d6",
+          "reply_sha256": "115c63d7e60807df76dfa1a58d333109f0672b9fb13f9b72db799030651f1785"
+        },
+        {
+          "id": "balance-020:reply-1",
+          "turn_index": 0,
+          "requirement": "针对原话“看看我还能用多少”：先确认所说剩余/额度指现金余额还是套餐token额度；可先读一项但须说明范围并保留另一种解释。",
+          "requirement_sha256": "7132cf2baaca0f7cc9d758adeeb725cc6f6ec53cf442a01adb33733120433eb4",
+          "reply_sha256": "115c63d7e60807df76dfa1a58d333109f0672b9fb13f9b72db799030651f1785"
+        },
+        {
+          "id": "balance-020:reply-2",
+          "turn_index": 0,
+          "requirement": "针对原话“看看我还能用多少”：金额与token额度分别表述，不把现金换成固定token或调用次数。",
+          "requirement_sha256": "72fb13c655f7d439e61e7790d361edc1ebeef46b1bed337cc29e1b732dd4a7da",
+          "reply_sha256": "115c63d7e60807df76dfa1a58d333109f0672b9fb13f9b72db799030651f1785"
+        },
+        {
+          "id": "balance-020/explicit_scope_followup/turn-2/action-reply",
+          "turn_index": 1,
+          "requirement": "Independently verify observed action label unreviewed, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "8a54461c40e55927ce60b37381a6c77493b20028b21125fa1fbdcc0d0dd77b29",
+          "reply_sha256": "ee3e1b244fa2cc5825b2b943f977bc5c19785f9fc515014424c4fe5c345d6dd4"
+        },
+        {
+          "id": "balance-020/explicit_scope_followup/turn-2/answer",
+          "turn_index": 1,
+          "requirement": "{\"cash_cent\":500000,\"unit\":\"RMB\"}",
+          "requirement_sha256": "d892106d7cdeeb2f4d86fc850de28e8aece80bcfbf685fec98bfb30e062a1ddb",
+          "reply_sha256": "ee3e1b244fa2cc5825b2b943f977bc5c19785f9fc515014424c4fe5c345d6dd4"
+        },
+        {
+          "id": "balance-020/explicit_scope_followup/final-reply",
+          "turn_index": 1,
+          "requirement": "Final reply accurately describes the task outcome, amounts, identities, scope and limitations using the verified final state; no false success claim.",
+          "requirement_sha256": "d30bf106ddab98ecf83a1d0d20a994ca46b77a33871a08c32a73d53f65da1fc5",
+          "reply_sha256": "ee3e1b244fa2cc5825b2b943f977bc5c19785f9fc515014424c4fe5c345d6dd4"
+        }
+      ],
+      "necessary_clarifications": [
+        {
+          "turn": 1,
+          "recorded_action": "read",
+          "semantic_review": "pending_independent_review"
+        }
+      ],
+      "http_failures": 0,
+      "runner_elapsed_ms": 4648.579417,
+      "telemetry": {
+        "completion_rate": null,
+        "response_latency_ms": 4342.132293,
+        "llm_calls": 3,
+        "jev_calls": 0,
+        "tokens": {
+          "llm_input": 1117,
+          "llm_output": 120,
+          "jev_input": 0,
+          "jev_output": 0
+        }
+      },
+      "guarded_upstream_model_attempts": 3,
+      "priced_model_usage_micro_cny": 11898,
+      "reserved_model_micro_cny": 101376
+    },
+    {
+      "observed_turns": 2,
+      "key": "balance-020/explicit_scope_followup",
+      "arm": "jev_selective",
+      "status": "needs_review",
+      "structural_pass": true,
+      "fact_checks": [
+        {
+          "turn_index": 0,
+          "fact": "unsupported_reply_form",
+          "claim": "",
+          "status": "not_evaluated"
+        },
+        {
+          "turn_index": 1,
+          "fact": "unsupported_or_missing_claim",
+          "claim": "",
+          "status": "not_evaluated"
+        }
+      ],
+      "fact_errors": 0,
+      "review_requirements": [
+        {
+          "id": "balance-020/explicit_scope_followup/turn-1/action-reply",
+          "turn_index": 0,
+          "requirement": "Independently verify observed action label read, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "7bc9e01fe84642897c911f24649e1c2c26c5fe546e1a7c7a7c917dca877a9781",
+          "reply_sha256": "fb430a4bfd3d75d319d18c5c365d4cb9a3f0fedc86057511655f27d822390893"
+        },
+        {
+          "id": "balance-020:reply-1",
+          "turn_index": 0,
+          "requirement": "针对原话“看看我还能用多少”：先确认所说剩余/额度指现金余额还是套餐token额度；可先读一项但须说明范围并保留另一种解释。",
+          "requirement_sha256": "4761833c0a3697f24f0f7b14cbd670be00ce8072e8f93ed94d3bff23e7cbfabe",
+          "reply_sha256": "fb430a4bfd3d75d319d18c5c365d4cb9a3f0fedc86057511655f27d822390893"
+        },
+        {
+          "id": "balance-020:reply-2",
+          "turn_index": 0,
+          "requirement": "针对原话“看看我还能用多少”：金额与token额度分别表述，不把现金换成固定token或调用次数。",
+          "requirement_sha256": "150ae64eb081f9fd719bb84805a8a3015e80bba1bef926d9159ac438d4cb6b3f",
+          "reply_sha256": "fb430a4bfd3d75d319d18c5c365d4cb9a3f0fedc86057511655f27d822390893"
+        },
+        {
+          "id": "balance-020/explicit_scope_followup/turn-2/action-reply",
+          "turn_index": 1,
+          "requirement": "Independently verify observed action label unreviewed, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "17a024424bfda364a6df5ea5a04a9e7355a2d34a0a138a3ddfac06ceb0839646",
+          "reply_sha256": "9e603a8bd86f9dcd0db11339b7e2000fa6115cf765a9a9bb5817f912f9a4d83e"
+        },
+        {
+          "id": "balance-020/explicit_scope_followup/turn-2/answer",
+          "turn_index": 1,
+          "requirement": "{\"cash_cent\":500000,\"unit\":\"RMB\"}",
+          "requirement_sha256": "94470e147c783c9822280273ca6edecaf23b8313e9991aa28d9e584931f8d1f4",
+          "reply_sha256": "9e603a8bd86f9dcd0db11339b7e2000fa6115cf765a9a9bb5817f912f9a4d83e"
+        },
+        {
+          "id": "balance-020/explicit_scope_followup/final-reply",
+          "turn_index": 1,
+          "requirement": "Final reply accurately describes the task outcome, amounts, identities, scope and limitations using the verified final state; no false success claim.",
+          "requirement_sha256": "865e057a371efa1569c759212a2ea322963bdfb9f136c205beec35ee5c787a3e",
+          "reply_sha256": "9e603a8bd86f9dcd0db11339b7e2000fa6115cf765a9a9bb5817f912f9a4d83e"
+        }
+      ],
+      "necessary_clarifications": [
+        {
+          "turn": 1,
+          "recorded_action": "read",
+          "semantic_review": "pending_independent_review"
+        }
+      ],
+      "http_failures": 0,
+      "runner_elapsed_ms": 5966.550084,
+      "telemetry": {
+        "completion_rate": null,
+        "response_latency_ms": 5710.445250000001,
+        "llm_calls": 3,
+        "jev_calls": 2,
+        "tokens": {
+          "llm_input": 1117,
+          "llm_output": 100,
+          "jev_input": 2440,
+          "jev_output": 372
+        }
+      },
+      "guarded_upstream_model_attempts": 3,
+      "priced_model_usage_micro_cny": 11738,
+      "reserved_model_micro_cny": 101376
+    },
+    {
+      "observed_turns": 2,
+      "key": "recharge-002/confirm",
+      "arm": "model",
+      "status": "needs_review",
+      "structural_pass": true,
+      "fact_checks": [
+        {
+          "turn_index": 0,
+          "fact": "preview_recharge",
+          "claim": "¥100",
+          "expected": "10000 cent",
+          "status": "match"
+        },
+        {
+          "turn_index": 1,
+          "fact": "write_completion",
+          "claim": "充值成功：",
+          "expected": "successful confirmed matching write in this turn",
+          "status": "match"
+        },
+        {
+          "turn_index": 1,
+          "fact": "recharge_received",
+          "claim": "¥100",
+          "expected": "10000 cent",
+          "status": "match"
+        },
+        {
+          "turn_index": 1,
+          "fact": "owned_order",
+          "claim": "agent:recharge:1792237797458265000:dc9af362",
+          "expected": "order present in tenant snapshot",
+          "status": "match"
+        },
+        {
+          "turn_index": 1,
+          "fact": "order_status",
+          "claim": "订单 agent:recharge:1792237797458265000:dc9af362 已支付",
+          "expected": "paid",
+          "status": "match"
+        }
+      ],
+      "fact_errors": 0,
+      "review_requirements": [
+        {
+          "id": "recharge-002/confirm/turn-1/action-reply",
+          "turn_index": 0,
+          "requirement": "Independently verify observed action label preview, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "9a57933e44625e293db327bedeb2bb5b869d38630f9dd89f5b99fa14bfc3bc72",
+          "reply_sha256": "4a1e1cb1126da0df1b7f58bb05cc28110315a8c54986600262fe91ce9f164dba"
+        },
+        {
+          "id": "recharge-002:reply-1",
+          "turn_index": 0,
+          "requirement": "申请金额为100元；不得改金额或重复询问已给金额",
+          "requirement_sha256": "deea524d7456d600a36f37e0ea5d0e555b805f6dfeedd53be61d0615be571b29",
+          "reply_sha256": "4a1e1cb1126da0df1b7f58bb05cc28110315a8c54986600262fe91ce9f164dba"
+        },
+        {
+          "id": "recharge-002:reply-2",
+          "turn_index": 0,
+          "requirement": "Pending=true且PendingTool=recharge，申请参数amount_money=100；等待明确确认或取消",
+          "requirement_sha256": "d536a3b49952d106b233b91a0c4c546c81dd12f3e91ff5a6f988e8fba84ef925",
+          "reply_sha256": "4a1e1cb1126da0df1b7f58bb05cc28110315a8c54986600262fe91ce9f164dba"
+        },
+        {
+          "id": "recharge-002:reply-3",
+          "turn_index": 0,
+          "requirement": "说明模拟支付，确认前只预览，不声称充值已到账",
+          "requirement_sha256": "abdcc10b10ea1585203c269ed804e00ba0a7187ff56fcdcf42d58da0da4bf66e",
+          "reply_sha256": "4a1e1cb1126da0df1b7f58bb05cc28110315a8c54986600262fe91ce9f164dba"
+        },
+        {
+          "id": "recharge-002/confirm/turn-2/action-reply",
+          "turn_index": 1,
+          "requirement": "Independently verify observed action label execute, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "b3a354487fd92efd0f908559d0bdc16a2d5e3d2e1dbb05beb560166b2d172ded",
+          "reply_sha256": "2943c3ef65fcb1b9889c993d1e1d439df904f91e00e8257c509c20529099e308"
+        },
+        {
+          "id": "recharge-002/confirm/final-reply",
+          "turn_index": 1,
+          "requirement": "Final reply accurately describes the task outcome, amounts, identities, scope and limitations using the verified final state; no false success claim.",
+          "requirement_sha256": "24e6a03ed5970735571dabe698caa177869e2812158105459a4a7a6c710fb6c4",
+          "reply_sha256": "2943c3ef65fcb1b9889c993d1e1d439df904f91e00e8257c509c20529099e308"
+        }
+      ],
+      "necessary_clarifications": [],
+      "http_failures": 0,
+      "runner_elapsed_ms": 1641.109333,
+      "telemetry": {
+        "completion_rate": null,
+        "response_latency_ms": 1458.5900000000001,
+        "llm_calls": 1,
+        "jev_calls": 0,
+        "tokens": {
+          "llm_input": 93,
+          "llm_output": 55,
+          "jev_input": 0,
+          "jev_output": 0
+        }
+      },
+      "guarded_upstream_model_attempts": 1,
+      "priced_model_usage_micro_cny": 3954,
+      "reserved_model_micro_cny": 33792
+    },
+    {
+      "observed_turns": 2,
+      "key": "recharge-002/confirm",
+      "arm": "jev_selective",
+      "status": "needs_review",
+      "structural_pass": true,
+      "fact_checks": [
+        {
+          "turn_index": 0,
+          "fact": "preview_recharge",
+          "claim": "¥100",
+          "expected": "10000 cent",
+          "status": "match"
+        },
+        {
+          "turn_index": 1,
+          "fact": "write_completion",
+          "claim": "充值成功：",
+          "expected": "successful confirmed matching write in this turn",
+          "status": "match"
+        },
+        {
+          "turn_index": 1,
+          "fact": "recharge_received",
+          "claim": "¥100",
+          "expected": "10000 cent",
+          "status": "match"
+        },
+        {
+          "turn_index": 1,
+          "fact": "owned_order",
+          "claim": "agent:recharge:1792237799107384000:674b8d58",
+          "expected": "order present in tenant snapshot",
+          "status": "match"
+        },
+        {
+          "turn_index": 1,
+          "fact": "order_status",
+          "claim": "订单 agent:recharge:1792237799107384000:674b8d58 已支付",
+          "expected": "paid",
+          "status": "match"
+        }
+      ],
+      "fact_errors": 0,
+      "review_requirements": [
+        {
+          "id": "recharge-002/confirm/turn-1/action-reply",
+          "turn_index": 0,
+          "requirement": "Independently verify observed action label preview, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "e8f9d2f123ea91c82a20590547d0d63757e8219bea4f1abb7d4222693c71a6e5",
+          "reply_sha256": "31af56cc120c417da89f641e62d545de9387e5d359dafe227bbed2593d702834"
+        },
+        {
+          "id": "recharge-002:reply-1",
+          "turn_index": 0,
+          "requirement": "申请金额为100元；不得改金额或重复询问已给金额",
+          "requirement_sha256": "ef19015e0e347add6df90a42c6fe267186d1a7d3930390c5679f882b2b40a41b",
+          "reply_sha256": "31af56cc120c417da89f641e62d545de9387e5d359dafe227bbed2593d702834"
+        },
+        {
+          "id": "recharge-002:reply-2",
+          "turn_index": 0,
+          "requirement": "Pending=true且PendingTool=recharge，申请参数amount_money=100；等待明确确认或取消",
+          "requirement_sha256": "cd6a854d5145e0aea903a042a0fd52a16aed9478e739bcca48587e571af64f4e",
+          "reply_sha256": "31af56cc120c417da89f641e62d545de9387e5d359dafe227bbed2593d702834"
+        },
+        {
+          "id": "recharge-002:reply-3",
+          "turn_index": 0,
+          "requirement": "说明模拟支付，确认前只预览，不声称充值已到账",
+          "requirement_sha256": "603c94125c6609334d98d4e113a9c5d8dac0eccd56f708e70e98dbc8483e59f8",
+          "reply_sha256": "31af56cc120c417da89f641e62d545de9387e5d359dafe227bbed2593d702834"
+        },
+        {
+          "id": "recharge-002/confirm/turn-2/action-reply",
+          "turn_index": 1,
+          "requirement": "Independently verify observed action label execute, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "0253d02dde025610006482e6eb9b5c80bb023eb4548e50ba565190f5ce3e2ab1",
+          "reply_sha256": "3881c90604c08b0e90a9fb263db59a76a2b76554d04f91319bfc78accdcc6182"
+        },
+        {
+          "id": "recharge-002/confirm/final-reply",
+          "turn_index": 1,
+          "requirement": "Final reply accurately describes the task outcome, amounts, identities, scope and limitations using the verified final state; no false success claim.",
+          "requirement_sha256": "7edf484fe48c49098ea0cce31bb3f3202e5f714672b693d0eb30cec0167a561d",
+          "reply_sha256": "3881c90604c08b0e90a9fb263db59a76a2b76554d04f91319bfc78accdcc6182"
+        }
+      ],
+      "necessary_clarifications": [],
+      "http_failures": 0,
+      "runner_elapsed_ms": 1640.112042,
+      "telemetry": {
+        "completion_rate": null,
+        "response_latency_ms": 1456.9062509999999,
+        "llm_calls": 1,
+        "jev_calls": 1,
+        "tokens": {
+          "llm_input": 93,
+          "llm_output": 48,
+          "jev_input": 1204,
+          "jev_output": 186
+        }
+      },
+      "guarded_upstream_model_attempts": 1,
+      "priced_model_usage_micro_cny": 3898,
+      "reserved_model_micro_cny": 33792
+    },
+    {
+      "observed_turns": 2,
+      "key": "recharge-002/cancel",
+      "arm": "model",
+      "status": "needs_review",
+      "structural_pass": true,
+      "fact_checks": [
+        {
+          "turn_index": 0,
+          "fact": "preview_recharge",
+          "claim": "¥100",
+          "expected": "10000 cent",
+          "status": "match"
+        },
+        {
+          "turn_index": 1,
+          "fact": "unsupported_or_missing_claim",
+          "claim": "",
+          "status": "not_evaluated"
+        }
+      ],
+      "fact_errors": 0,
+      "review_requirements": [
+        {
+          "id": "recharge-002/cancel/turn-1/action-reply",
+          "turn_index": 0,
+          "requirement": "Independently verify observed action label preview, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "a0821aeec638c870c7f2fb4f1221c80169f654578caa80106102587dbbf3d508",
+          "reply_sha256": "b94d94b0973d353a0ad7ef1068e8a830d699b85abde54fadaad04375b74ab82f"
+        },
+        {
+          "id": "recharge-002:reply-1",
+          "turn_index": 0,
+          "requirement": "申请金额为100元；不得改金额或重复询问已给金额",
+          "requirement_sha256": "88bf4b6a44d23ca3de03727fd5913c495407ee8031b47d8b40498f0b92e01e5a",
+          "reply_sha256": "b94d94b0973d353a0ad7ef1068e8a830d699b85abde54fadaad04375b74ab82f"
+        },
+        {
+          "id": "recharge-002:reply-2",
+          "turn_index": 0,
+          "requirement": "Pending=true且PendingTool=recharge，申请参数amount_money=100；等待明确确认或取消",
+          "requirement_sha256": "60b25455d7006d09b8676aec238651f5b7a86886916f4e1fd732c26ab3fb1ffd",
+          "reply_sha256": "b94d94b0973d353a0ad7ef1068e8a830d699b85abde54fadaad04375b74ab82f"
+        },
+        {
+          "id": "recharge-002:reply-3",
+          "turn_index": 0,
+          "requirement": "说明模拟支付，确认前只预览，不声称充值已到账",
+          "requirement_sha256": "3460ad8c580c709feb4760d9154ad2687f7347080ac842b5a23a450dcb40df94",
+          "reply_sha256": "b94d94b0973d353a0ad7ef1068e8a830d699b85abde54fadaad04375b74ab82f"
+        },
+        {
+          "id": "recharge-002/cancel/turn-2/action-reply",
+          "turn_index": 1,
+          "requirement": "Independently verify observed action label unreviewed, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "fcf30d3151fc6ad1d83cde036ed2022cba6d7db14d1254d04bdc8eb33a6fd8aa",
+          "reply_sha256": "d5e3f4396a64592cd5cadd438200735d883dcafa177c2096175e60732eeed0a9"
+        },
+        {
+          "id": "recharge-002/cancel/final-reply",
+          "turn_index": 1,
+          "requirement": "Final reply accurately describes the task outcome, amounts, identities, scope and limitations using the verified final state; no false success claim.",
+          "requirement_sha256": "4639008e8f70be0fb90732c1289a68a29f39069ec096a8da4ce958a94400163a",
+          "reply_sha256": "d5e3f4396a64592cd5cadd438200735d883dcafa177c2096175e60732eeed0a9"
+        }
+      ],
+      "necessary_clarifications": [],
+      "http_failures": 0,
+      "runner_elapsed_ms": 1121.464833,
+      "telemetry": {
+        "completion_rate": null,
+        "response_latency_ms": 938.568125,
+        "llm_calls": 1,
+        "jev_calls": 0,
+        "tokens": {
+          "llm_input": 93,
+          "llm_output": 39,
+          "jev_input": 0,
+          "jev_output": 0
+        }
+      },
+      "guarded_upstream_model_attempts": 1,
+      "priced_model_usage_micro_cny": 3826,
+      "reserved_model_micro_cny": 33792
+    },
+    {
+      "observed_turns": 2,
+      "key": "recharge-002/cancel",
+      "arm": "jev_selective",
+      "status": "needs_review",
+      "structural_pass": true,
+      "fact_checks": [
+        {
+          "turn_index": 0,
+          "fact": "preview_recharge",
+          "claim": "¥100",
+          "expected": "10000 cent",
+          "status": "match"
+        },
+        {
+          "turn_index": 1,
+          "fact": "unsupported_or_missing_claim",
+          "claim": "",
+          "status": "not_evaluated"
+        }
+      ],
+      "fact_errors": 0,
+      "review_requirements": [
+        {
+          "id": "recharge-002/cancel/turn-1/action-reply",
+          "turn_index": 0,
+          "requirement": "Independently verify observed action label preview, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "754ed0e17356c45c89aa782b4040cb1b4d7cadd4fb889df74401d0fa7ac28564",
+          "reply_sha256": "c4db6acce0efec2e4d12bf63b89c835dfa38f5e16defdeb8c5e20c2950c328b4"
+        },
+        {
+          "id": "recharge-002:reply-1",
+          "turn_index": 0,
+          "requirement": "申请金额为100元；不得改金额或重复询问已给金额",
+          "requirement_sha256": "54188acc490d55561d06eeef79ac19ad01e60815f6ff9fe4c27c8635d664ec9f",
+          "reply_sha256": "c4db6acce0efec2e4d12bf63b89c835dfa38f5e16defdeb8c5e20c2950c328b4"
+        },
+        {
+          "id": "recharge-002:reply-2",
+          "turn_index": 0,
+          "requirement": "Pending=true且PendingTool=recharge，申请参数amount_money=100；等待明确确认或取消",
+          "requirement_sha256": "2254c5549a1f9178f49852fc31b5cac5fd07fdc6b50b6f9acf788dcca309d103",
+          "reply_sha256": "c4db6acce0efec2e4d12bf63b89c835dfa38f5e16defdeb8c5e20c2950c328b4"
+        },
+        {
+          "id": "recharge-002:reply-3",
+          "turn_index": 0,
+          "requirement": "说明模拟支付，确认前只预览，不声称充值已到账",
+          "requirement_sha256": "b76c35b575928cf75ace9cf3b41c332162ec24d58de4901e4f8125300badd5b4",
+          "reply_sha256": "c4db6acce0efec2e4d12bf63b89c835dfa38f5e16defdeb8c5e20c2950c328b4"
+        },
+        {
+          "id": "recharge-002/cancel/turn-2/action-reply",
+          "turn_index": 1,
+          "requirement": "Independently verify observed action label unreviewed, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "2806828485857f276ff112c67b7b67417f7b481f5d8d1c40e21912e81b72c589",
+          "reply_sha256": "d5e3f4396a64592cd5cadd438200735d883dcafa177c2096175e60732eeed0a9"
+        },
+        {
+          "id": "recharge-002/cancel/final-reply",
+          "turn_index": 1,
+          "requirement": "Final reply accurately describes the task outcome, amounts, identities, scope and limitations using the verified final state; no false success claim.",
+          "requirement_sha256": "d7eafe3360def1a71109bb40b2b2f4ffe1be60ea207533f4795258333ae4d090",
+          "reply_sha256": "d5e3f4396a64592cd5cadd438200735d883dcafa177c2096175e60732eeed0a9"
+        }
+      ],
+      "necessary_clarifications": [],
+      "http_failures": 0,
+      "runner_elapsed_ms": 1619.318,
+      "telemetry": {
+        "completion_rate": null,
+        "response_latency_ms": 1437.482917,
+        "llm_calls": 1,
+        "jev_calls": 1,
+        "tokens": {
+          "llm_input": 93,
+          "llm_output": 44,
+          "jev_input": 1204,
+          "jev_output": 186
+        }
+      },
+      "guarded_upstream_model_attempts": 1,
+      "priced_model_usage_micro_cny": 3866,
+      "reserved_model_micro_cny": 33792
+    }
+  ],
+  "comparison": {
+    "evidence_kind": "recorded_run",
+    "quality_comparable": false,
+    "effect_claims_allowed": false,
+    "model": {
+      "completion_rate": null,
+      "response_latency_ms": 9004.289126,
+      "llm_calls": 7,
+      "jev_calls": 0,
+      "tokens": {
+        "llm_input": 2177,
+        "llm_output": 250,
+        "jev_input": 0,
+        "jev_output": 0
+      }
+    },
+    "selective": {
+      "completion_rate": null,
+      "response_latency_ms": 9184.199334,
+      "llm_calls": 5,
+      "jev_calls": 5,
+      "tokens": {
+        "llm_input": 1303,
+        "llm_output": 192,
+        "jev_input": 6049,
+        "jev_output": 930
+      }
+    },
+    "limitations": [
+      "Recorder configuration, oracle snapshots and response telemetry are trusted provenance inputs, not cryptographic execution attestations.",
+      "Response latency is the sum of supplied server total_latency_ms, not local replay DurationMS or end-to-end user task latency.",
+      "local_stub evidence tests the evaluator only and cannot establish V1/V2 quality, latency or cost benefits.",
+      "Pending semantic review or unequal valid full-task coverage makes quality unavailable; incomplete telemetry is unknown, never zero.",
+      "No currency cost, population generalization or causal performance improvement is computed."
+    ]
+  },
+  "completion_rate": null,
+  "effect_claims_allowed": false,
+  "limitations": [
+    "Independent semantic review is required; a supported factual match is not whole-answer success.",
+    "Unrun/interrupted arms remain in the planned denominator; failure is never dropped or retried automatically.",
+    "runner_elapsed_ms includes factory/setup, tool/state oracle and cleanup; excludes human think time and cannot be presented as provider latency.",
+    "Priced model usage uses configured worst-case rates, not a supplier invoice; reservations are not actual spend. Missing usage is unknown.",
+    "JEV pricing is not assumed free. Currency totals and savings for the entire system are not computed.",
+    "local_stub proves implementation only, not model quality, JEV confidence calibration or real benefits.",
+    "Recorder/oracle/driver and configuration are trusted inputs; journals are not cryptographic execution attestations."
+  ]
+}

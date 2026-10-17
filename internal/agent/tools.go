@@ -219,12 +219,11 @@ func (tb *Toolbox) readBalance() *execTool {
 			if err != nil {
 				return "", err
 			}
-			consistent := "一致"
 			if !v.Consistent {
-				consistent = "不一致（对账收敛中）"
+				return "", fmt.Errorf("账单不一致，已暂停查询")
 			}
-			return fmt.Sprintf("当前可用余额 ¥%.2f；账本口径 ¥%.2f，两者%s。",
-				yuan(v.Balance), yuan(v.LedgerBalance), consistent), nil
+			return fmt.Sprintf("当前可用余额 ¥%.2f；账本口径 ¥%.2f，两者一致。",
+				yuan(v.Balance), yuan(v.LedgerBalance)), nil
 		},
 	}
 }

@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-OUT = ROOT / 'eval/paired-pilots/2026-10-15-observed-preflight-v2'
+OUT = ROOT / 'eval/paired-pilots/2026-10-17-jev-proxy-preflight-v4'
 spec = importlib.util.spec_from_file_location('full_pilot_base', ROOT / 'scripts/prepare-full-customer-pilot.py')
 base = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(base)
