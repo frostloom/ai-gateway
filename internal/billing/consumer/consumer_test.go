@@ -15,8 +15,8 @@ import (
 	gormlogger "gorm.io/gorm/logger"
 
 	"github.com/frostloom/ai-gateway/internal/billing/store"
-	"github.com/frostloom/ai-gateway/internal/pkg/logger"
 	appkafka "github.com/frostloom/ai-gateway/internal/pkg/kafka"
+	"github.com/frostloom/ai-gateway/internal/pkg/logger"
 )
 
 // 集成测试（真 MySQL + 真 Kafka，skip-if-unreachable）。
@@ -109,25 +109,51 @@ func waitConsumerProcessed(t *testing.T, c *EventConsumer, want int64, timeout t
 // 总数仍 3（uk_event_id 唯一索引 no-op）。
 func TestConsumerKafkaE2E(t *testing.T) {
 	db := openTestDB(t)
-	ensureTopics(t, store.TopicBillingEvents, store.TopicBillingDLQ)
+	runID := fmt.Sprintf("e2e-%d", time.Now().UnixNano())
+	topic, dlq := "billing.events."+runID, "billing.events.dlq."+runID
+	ensureTopics(t, topic, dlq)
+	t.Cleanup(func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		client := &kafka.Client{Addr: kafka.TCP(testKafkaAddr), Timeout: 3 * time.Second}
+		resp, err := client.DeleteTopics(ctx, &kafka.DeleteTopicsRequest{Topics: []string{topic, dlq}})
+		if err != nil {
+			t.Errorf("delete isolated topics: %v", err)
+			return
+		}
+		for name, err := range resp.Errors {
+			if err != nil {
+				t.Errorf("delete topic %s: %v", name, err)
+			}
+		}
+	})
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	st := store.NewStore(db, nil)
-	prod := appkafka.NewProducer([]string{testKafkaAddr}, store.TopicBillingEvents, logger.New("error"))
+	prod := appkafka.NewProducer([]string{testKafkaAddr}, topic, logger.New("error"))
 	defer prod.Close()
 
 	// 独立消费组：每次测试全新偏移，从最旧开始消费。
-	group := fmt.Sprintf("test-%d", time.Now().UnixNano())
-	kc := appkafka.NewConsumer([]string{testKafkaAddr}, group, []string{store.TopicBillingEvents, store.TopicBillingDLQ})
+	group := "test-" + runID
+	kc := appkafka.NewConsumer([]string{testKafkaAddr}, group, []string{topic, dlq})
 	defer kc.Close()
-	c := New(st, kc, Config{DLQTopic: store.TopicBillingDLQ}, logger.New("error"))
-	go c.Run(ctx)
+	c := New(st, kc, Config{DLQTopic: dlq}, logger.New("error"))
+	stopped := make(chan struct{})
+	go func() { defer close(stopped); c.Run(ctx) }()
+	defer func() {
+		cancel()
+		select {
+		case <-stopped:
+		case <-time.After(5 * time.Second):
+			t.Error("consumer did not stop after cancellation")
+		}
+	}()
 
 	publish := func(phase string) {
 		ev := store.BillingEvent{
-			EventID: "e2e:" + phase, TenantID: 7, RequestID: "e2e",
+			EventID: runID + ":" + phase, TenantID: 7, RequestID: runID,
 			Phase: phase, AmountCents: 100, Model: "mock-model", Funding: store.FundingBalance,
 			CreatedAt: time.Now(),
 		}
@@ -143,13 +169,13 @@ func TestConsumerKafkaE2E(t *testing.T) {
 	for _, phase := range []string{store.PhaseReserve, store.PhaseUsage, store.PhaseSettle} {
 		publish(phase)
 	}
-	waitAuditCount(t, db, "e2e", 3, 20*time.Second)
+	waitAuditCount(t, db, runID, 3, 20*time.Second)
 
 	// 重投同 event_key（reserve）：消费端应处理 4 条，但落库仍 3 行。
 	publish(store.PhaseReserve)
 	waitConsumerProcessed(t, c, 4, 20*time.Second)
 	var n int64
-	if err := db.Model(&store.AuditEvent{}).Where("request_id = ?", "e2e").Count(&n).Error; err != nil {
+	if err := db.Model(&store.AuditEvent{}).Where("request_id = ?", runID).Count(&n).Error; err != nil {
 		t.Fatalf("count audit: %v", err)
 	}
 	if n != 3 {
@@ -158,7 +184,7 @@ func TestConsumerKafkaE2E(t *testing.T) {
 
 	// 字段抽查：reserve 行 source=kafka、带上游 partition/offset、payload 自包含。
 	var row store.AuditEvent
-	if err := db.Where("event_id = ?", "e2e:reserve").First(&row).Error; err != nil {
+	if err := db.Where("event_id = ?", runID+":reserve").First(&row).Error; err != nil {
 		t.Fatalf("get audit row: %v", err)
 	}
 	if row.Source != "kafka" || row.KafkaPartition < 0 || row.KafkaOffset < 0 || row.Payload == "" {
