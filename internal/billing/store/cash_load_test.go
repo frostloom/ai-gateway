@@ -47,20 +47,37 @@ func runCashLoad(t *testing.T, tenantCount, workers int, duration time.Duration)
 	for i := range tenants {
 		tenants[i] = seedTenant(t, s, initial)
 	}
+	var profile *cashLoadProfile
+	if os.Getenv("BILLING_CASH_PROFILE") == "1" {
+		profile = attachCashLoadProfile(t, s)
+	}
 	cycle := func(tenant uint64, requestID string) error {
 		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 		defer cancel()
+		stage := time.Now()
 		r, err := s.Reserve(ctx, reserveReq(requestID, tenant, 84)) // reserve=100
+		if profile != nil {
+			profile.observe("stage.reserve", stage, err)
+		}
 		if err != nil {
 			return fmt.Errorf("reserve: %w", err)
 		}
 		if r.Code != billingv1.ReserveCode_RESERVE_OK {
 			return fmt.Errorf("reserve code: %v", r.Code)
 		}
-		if err := s.ReportUsage(ctx, &billingv1.ReportUsageRequest{RequestId: requestID, PromptTokens: 50}); err != nil {
+		stage = time.Now()
+		err = s.ReportUsage(ctx, &billingv1.ReportUsageRequest{RequestId: requestID, PromptTokens: 50})
+		if profile != nil {
+			profile.observe("stage.usage", stage, err)
+		}
+		if err != nil {
 			return fmt.Errorf("usage: %w", err)
 		}
+		stage = time.Now()
 		settled, err := s.Settle(ctx, &billingv1.SettleRequest{RequestId: requestID}) // actual=50
+		if profile != nil {
+			profile.observe("stage.settle", stage, err)
+		}
 		if err != nil {
 			return fmt.Errorf("settle: %w", err)
 		}
@@ -112,11 +129,18 @@ func runCashLoad(t *testing.T, tenantCount, workers int, duration time.Duration)
 		}(i)
 	}
 	ready.Wait()
+	if profile != nil {
+		profile.begin()
+	}
 	began := time.Now()
 	deadline = began.Add(duration)
 	close(start)
 	wg.Wait() // Include draining in throughput; never count uncompleted work.
 	elapsed := time.Since(began).Seconds()
+	var profileResult map[string]any
+	if profile != nil {
+		profileResult = profile.finish()
+	}
 	counts := make([]int64, tenantCount)
 	var latencies []float64
 	var completed, failures int64
@@ -172,6 +196,9 @@ func runCashLoad(t *testing.T, tenantCount, workers int, duration time.Duration)
 		"p50_ms": percentile(50), "p95_ms": percentile(95), "p99_ms": percentile(99),
 		"pending": pending, "duplicate_phases": duplicates, "invariant_errors": len(violations),
 		"error_samples": samples,
+	}
+	if profile != nil {
+		report["profile"] = profileResult
 	}
 	encoded, err := json.Marshal(report)
 	if err != nil {
