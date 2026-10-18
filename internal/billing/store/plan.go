@@ -964,14 +964,13 @@ func (s *Store) rechargeByOrderNo(ctx context.Context, orderNo string) (*Recharg
 
 // requireCashMatch 在租户锁内重建并核对投影；失败保留已提交的权威流水，重试负责恢复投影。
 func (s *Store) requireCashMatch(ctx context.Context, tenantID uint64) error {
-	if _, err := s.RebuildBalance(ctx, tenantID); err != nil {
-		return err
-	}
-	live, err := s.getBalance(ctx, tenantID)
+	// Callers hold the tenant lock, so the rebuilt ledger stays authoritative
+	// through the Redis read-back; avoid querying the same ledger twice.
+	ledger, err := s.RebuildBalance(ctx, tenantID)
 	if err != nil {
 		return err
 	}
-	ledger, err := LedgerBalance(ctx, s.db, tenantID)
+	live, err := s.getBalance(ctx, tenantID)
 	if err != nil {
 		return err
 	}

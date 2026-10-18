@@ -37,9 +37,9 @@
 
 **Files:** internal/billing/store/plan.go、cash_concurrency_test.go、cash_profile_test.go。
 
-- [ ] 新增回归，验证每次核验仅一次账本聚合，并继续拒绝 Redis 读回故障和不一致；先运行，观察重复查询断言失败。
-- [ ] requireCashMatch 使用 RebuildBalance 返回的 ledger；保留 getBalance 与比较。
-- [ ] 聚焦回归、完整 Go 回归、vet、独立审查；提交推送。
+- [x] 新增回归，验证每次核验仅一次账本聚合，并继续拒绝 Redis 读回故障和不一致；先运行，观察重复查询断言失败。
+- [x] requireCashMatch 使用 RebuildBalance 返回的 ledger；保留 getBalance 与比较。
+- [x] 聚焦回归、完整 Go 回归、vet、独立审查；提交推送。
 
 ## Task 3: 扩展性能验收
 
@@ -54,3 +54,4 @@
 - 基线 HEAD 39fd16d。Task 1 期间 Docker 无法启动；日志确定为残留 dockerInference/Secrets Engine socket。仅备份运行端点目录后重启，引擎恢复，三个测试依赖均 healthy，原容器和卷保留。
 - 第一轮 3s 采样：六场景完成，单租户32 worker 锁超时、15个 pending，SQL 与 Redis 相等但不满足‘全部生命周期完成’验收；原样保留。事务提交最长约5.8s，因此不得把全部回退归因于聚合查询。
 - 校准测试已通过。计时按并发累计，stage 包含其内部 SQL/Redis，禁止跨层相加。
+- Task 1 提交 1b3102d；HTTPS TLS EOF 后，以官方公钥严格验证的 SSH443 成功推送，不改全局配置。Task 2 新回归先红后绿；完整 Go 回归17包通过、0失败，vet通过，独立只读审查无新增 P1/P2。

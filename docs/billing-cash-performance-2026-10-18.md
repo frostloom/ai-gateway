@@ -43,6 +43,10 @@ go test ./internal/billing/store -run '^TestCashLoad$' -count=1 -v -timeout 180s
 
 禁止与另一 Store 测试进程并行；测试会清理专用夹具。普通回归前移除 BILLING_CASH_LOAD 与 BILLING_CASH_PROFILE，避免意外附带压测。
 
-## 下一步
+## 目标 2：最小优化
 
-复用同租户锁内 RebuildBalance 返回的账本余额，继续 Redis 读回核对。锁、fence、恢复与持久幂等均保留。原重复查询同时隐含一次后置 SQL 存活检查，去掉后极窄失联窗口的报错时点可能变化；不能宣称全部故障返回码等价，必须复跑失联/失败恢复回归。
+requireCashMatch 复用同租户锁内 RebuildBalance 返回的账本余额，继续 Redis 读回核对。锁、fence、恢复与持久幂等均保留。原重复查询同时隐含一次后置 SQL 存活检查，去掉后极窄失联窗口的报错时点可能变化；不能宣称全部故障返回码等价。
+
+新增查询预算回归实际先红后绿：原实现 aggregate=6、initial=2，修改后3和1；没有用易抖动的时间阈值。新增 Redis 读回失败/不一致两种用例，在修改前后均拒绝，并确认权威账本未改。独立审查核实全部调用者均持租户锁，未发现新增 P1/P2。
+
+`go test ./... -count=1 -json` 实际退出0，17个测试包通过、0失败；真实 Kafka E2E 已运行。付费 JEV 诊断、opt-in 压测与计时校准按开关跳过。`go vet ./...` 退出0。完整回归覆盖失联旧owner、SQL/Redis故障恢复与充值退款幂等。

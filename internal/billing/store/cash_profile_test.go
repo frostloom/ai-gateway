@@ -35,6 +35,30 @@ type cashLoadProfile struct {
 
 var cashProfileSequence atomic.Uint64
 
+// This query budget protects the measured performance bottleneck without a
+// flaky wall-clock threshold. Cash projection repair must read the ledger once.
+func TestCashMatchReadsLedgerOnce(t *testing.T) {
+	s, closeStore := newTestStore(t)
+	defer closeStore()
+	tenant := seedTenant(t, s, 1000)
+	p := attachCashLoadProfile(t, s)
+	locked, unlock, err := s.lockCash(context.Background(), tenant)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer unlock()
+	p.begin()
+	if err := locked.requireCashMatch(locked.cashSQLContext(), tenant); err != nil {
+		t.Fatal(err)
+	}
+	metrics := p.finish()["metrics"].(map[string]any)
+	aggregates := metrics["sql.ledger_aggregate"].(map[string]any)["count"]
+	initial := metrics["sql.ledger_initial"].(map[string]any)["count"]
+	if aggregates != 3 || initial != 1 {
+		t.Fatalf("ledger read twice: aggregate=%v initial=%v; want 3 and 1", aggregates, initial)
+	}
+}
+
 // Hold an actual result open to check that timing includes row lifetime and
 // counts the mysql prepared-statement fallback exactly once.
 func TestCashProfileRowTiming(t *testing.T) {

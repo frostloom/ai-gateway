@@ -18,6 +18,44 @@ type cashRedisHook struct {
 	before func(context.Context, redis.Cmder) error
 }
 
+func TestCashMatchRejectsRedisReadFailureAndMismatch(t *testing.T) {
+	for _, mode := range []string{"read_failure", "mismatch"} {
+		t.Run(mode, func(t *testing.T) {
+			s, done := newTestStore(t)
+			defer done()
+			ctx := context.Background()
+			tenant := seedTenant(t, s, 1000)
+			locked, unlock, err := s.lockCash(ctx, tenant)
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer unlock()
+			readFailure := errors.New("cash projection read failed")
+			var intercepted bool
+			s.rdb.AddHook(cashRedisHook{before: func(ctx context.Context, cmd redis.Cmder) error {
+				if cmd.Name() != "get" || fmt.Sprint(cmd.Args()[1]) != BalanceKey(tenant) {
+					return nil
+				}
+				intercepted = true
+				if mode == "read_failure" {
+					return readFailure
+				}
+				return s.rdb.Set(ctx, BalanceKey(tenant), 999, 0).Err()
+			}})
+			err = locked.requireCashMatch(locked.cashSQLContext(), tenant)
+			if !intercepted || err == nil {
+				t.Fatalf("intercepted=%v err=%v; want Redis read rejection", intercepted, err)
+			}
+			if mode == "read_failure" && !errors.Is(err, readFailure) {
+				t.Fatalf("read error lost: %v", err)
+			}
+			if ledger, ledgerErr := LedgerBalance(ctx, s.db, tenant); ledgerErr != nil || ledger != 1000 {
+				t.Fatalf("authoritative ledger=%d err=%v", ledger, ledgerErr)
+			}
+		})
+	}
+}
+
 func (h cashRedisHook) DialHook(next redis.DialHook) redis.DialHook { return next }
 func (h cashRedisHook) ProcessPipelineHook(next redis.ProcessPipelineHook) redis.ProcessPipelineHook {
 	return next
