@@ -7,6 +7,7 @@ import (
 	"os"
 	"runtime"
 	"sort"
+	"strconv"
 	"sync"
 	"sync/atomic"
 	"testing"
@@ -29,16 +30,24 @@ func TestCashLoad(t *testing.T) {
 			t.Fatal("BILLING_CASH_LOAD_DURATION must be between 2s and 30s")
 		}
 	}
+	history := 0
+	if raw := os.Getenv("BILLING_CASH_LOAD_HISTORY"); raw != "" {
+		var err error
+		history, err = strconv.Atoi(raw)
+		if err != nil || history < 0 || history > 10_000 {
+			t.Fatal("BILLING_CASH_LOAD_HISTORY must be between 0 and 10000 completed cycles per tenant")
+		}
+	}
 	for _, tenants := range []int{1, 8} {
 		for _, workers := range []int{1, 8, 32} {
 			t.Run(fmt.Sprintf("tenants%d_workers%d", tenants, workers), func(t *testing.T) {
-				runCashLoad(t, tenants, workers, duration)
+				runCashLoad(t, tenants, workers, history, duration)
 			})
 		}
 	}
 }
 
-func runCashLoad(t *testing.T, tenantCount, workers int, duration time.Duration) {
+func runCashLoad(t *testing.T, tenantCount, workers, history int, duration time.Duration) {
 	s, closeStore := newTestStore(t)
 	defer closeStore()
 	seedMockModel(t, s)
@@ -46,6 +55,24 @@ func runCashLoad(t *testing.T, tenantCount, workers int, duration time.Duration)
 	tenants := make([]uint64, tenantCount)
 	for i := range tenants {
 		tenants[i] = seedTenant(t, s, initial)
+		if history > 0 {
+			rows := make([]Bill, 0, 2*history)
+			actual := int64(50)
+			for j := 0; j < history; j++ {
+				request := fmt.Sprintf("cash-history-%d-%d", i, j)
+				for _, phase := range []string{PhaseReserve, PhaseSettle} {
+					rows = append(rows, Bill{RequestID: request, Phase: phase, Status: StatusSettled,
+						TenantID: tenants[i], Model: "mock-model", Funding: FundingBalance,
+						PreQuota: 100, ActualQuota: &actual, CreatedAt: time.Now().Add(-72 * time.Hour)})
+				}
+			}
+			if err := s.db.CreateInBatches(rows, 250).Error; err != nil {
+				t.Fatal(err)
+			}
+			if _, err := s.RebuildBalance(context.Background(), tenants[i]); err != nil {
+				t.Fatal(err)
+			}
+		}
 	}
 	var profile *cashLoadProfile
 	if os.Getenv("BILLING_CASH_PROFILE") == "1" {
@@ -168,7 +195,7 @@ func runCashLoad(t *testing.T, tenantCount, workers int, duration time.Duration)
 	ctx := context.Background()
 	var violations []string
 	for i, tenant := range tenants {
-		want := initial - (counts[i]+1)*50 // Includes warm-up, each lifecycle costs 50.
+		want := initial - (counts[i]+1+int64(history))*50 // History and warm-up each cost 50.
 		live, liveErr := s.getBalance(ctx, tenant)
 		ledger, ledgerErr := LedgerBalance(ctx, s.db, tenant)
 		if liveErr != nil || ledgerErr != nil || live != want || ledger != want || live < 0 {
@@ -185,12 +212,14 @@ func runCashLoad(t *testing.T, tenantCount, workers int, duration time.Duration)
 	if err := s.db.Raw("SELECT COUNT(*) FROM (SELECT request_id, phase FROM bills GROUP BY request_id, phase HAVING COUNT(*) > 1) AS duplicates").Scan(&duplicates).Error; err != nil {
 		t.Fatal(err)
 	}
-	if pending != 0 || duplicates != 0 || settled != completed+int64(tenantCount) {
-		violations = append(violations, fmt.Sprintf("pending=%d duplicates=%d settled=%d want=%d", pending, duplicates, settled, completed+int64(tenantCount)))
+	wantSettled := completed + int64(tenantCount)*int64(history+1)
+	if pending != 0 || duplicates != 0 || settled != wantSettled {
+		violations = append(violations, fmt.Sprintf("pending=%d duplicates=%d settled=%d want=%d", pending, duplicates, settled, wantSettled))
 	}
 	report := map[string]any{
 		"tag": os.Getenv("BILLING_CASH_LOAD_TAG"), "case": t.Name(),
 		"tenants": tenantCount, "workers": workers, "gomaxprocs": runtime.GOMAXPROCS(0),
+		"history_cycles_per_tenant": history, "history_bill_rows": 2 * history * tenantCount,
 		"requested_seconds": duration.Seconds(), "elapsed_seconds": elapsed,
 		"completed": completed, "errors": failures, "cycles_per_second": float64(completed) / elapsed,
 		"p50_ms": percentile(50), "p95_ms": percentile(95), "p99_ms": percentile(99),
