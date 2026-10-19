@@ -1,0 +1,16 @@
+{
+  "schema": "jev-gate-audit.v1",
+  "evidence_kind": "local_execution_gate_tests",
+  "source_revision": "04a0938",
+  "top_level_passed": 11,
+  "including_subtests_passed": 73,
+  "failed": 0,
+  "external_model_calls": 0,
+  "external_jev_calls": 0,
+  "raw_sha256": "9a11d01183524e39d9997c6af4e0eedaf09b3a64ddb819b2bbe140af313473dd",
+  "test_source_lf_sha256": "5dd1435136da1530d7911ebe2b21f05f500b8a44682d3b97b92087780bdb9f4b",
+  "limitations": [
+    "Synthetic decision inputs test the local gate, not JEV accuracy or confidence calibration.",
+    "No threshold or product behavior changed."
+  ]
+}
