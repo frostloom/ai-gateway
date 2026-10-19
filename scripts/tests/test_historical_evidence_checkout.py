@@ -10,6 +10,8 @@ SUMMARIZE = ROOT / 'scripts/summarize-offline-intent-audit.py'
 
 # Working-tree bytes compared with locked hashes by the CI verify commands.
 LOCKED_PATHS = (
+    'eval/paired-pilots/2026-10-17-jev-acceptance-v1/attempt-01/run.jsonl',
+    'eval/paired-pilots/2026-10-17-four-task-retest-v1/attempt-01/run.jsonl',
     'eval/intent-suite/manifest.json',
     'eval/intent-suite/balance.json',
     'web/scripts/gen-intent-suite.mjs',

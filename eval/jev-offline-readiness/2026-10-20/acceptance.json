@@ -1,0 +1,25 @@
+{
+  "schema": "jev-offline-readiness-acceptance.v1",
+  "python_tests": 151,
+  "python_exit": 0,
+  "new_efficiency_audit_tests": 14,
+  "checkout_regression_tests": 2,
+  "gate_top_level_tests": 11,
+  "gate_pass_events_with_subtests": 73,
+  "external_model_calls": 0,
+  "external_jev_calls": 0,
+  "review": {
+    "initial_blockers": [
+      "receipt counters were not all checked",
+      "per-call budget and snapshot continuity were not checked"
+    ],
+    "resolved": true,
+    "independent_recheck_tests_passed": 13,
+    "independent_tempfile_test": "blocked by reviewer sandbox; passed in parent full 151-test run"
+  },
+  "historical_sources_modified": false,
+  "original_manifest_findings_preserved": [
+    "manifest_priced_usage_mismatch"
+  ],
+  "total_system_cost_micro_cny": null
+}
