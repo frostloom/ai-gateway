@@ -1,0 +1,55 @@
+{
+  "schema": "main-integration-acceptance.v1",
+  "revision": "04ee794350ff349e7ac1e8d6cd8dc21cfef21a54",
+  "started_at": "2026-10-19T23:52:49.1847895+08:00",
+  "completed_at": "2026-10-20T00:01:00.3980509+08:00",
+  "go_test_exit": 0,
+  "go_vet_exit": 0,
+  "python_test_exit": 0,
+  "web_verify_exit": 0,
+  "go_package_counts": {
+    "pass": 17,
+    "skip": 27
+  },
+  "go_top_level_counts": {
+    "pass": 361,
+    "skip": 3
+  },
+  "go_counts_including_subtests": {
+    "pass": 774,
+    "skip": 3
+  },
+  "skipped_tests": [
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/agent",
+      "test": "TestLiveJevSemanticsDiagnostic"
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/billing/store",
+      "test": "TestCashLoad"
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/billing/store",
+      "test": "TestCashProfileRowTiming"
+    }
+  ],
+  "python_tests": 137,
+  "external_model_calls": 0,
+  "external_jev_calls": 0,
+  "full1220_paid_evaluation_started": false,
+  "kafka_e2e": [
+    {
+      "Time": "2026-10-19T23:55:08.7144853+08:00",
+      "Action": "pass",
+      "Package": "github.com/frostloom/ai-gateway/internal/billing/consumer",
+      "Test": "TestConsumerKafkaE2E",
+      "Elapsed": 10.74
+    }
+  ],
+  "limitations": [
+    "Local scripted model and JEV doubles; not full1220 quality or external provider availability.",
+    "Opt-in cash load/profiling disabled; no new capacity claim.",
+    "Langfuse observation tests use local captures; live Langfuse smoke disabled.",
+    "No destructive Docker volume operation; test fixtures clean their dedicated test databases."
+  ]
+}
