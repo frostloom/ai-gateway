@@ -1,0 +1,45 @@
+{
+  "date": "2026-10-21",
+  "reviewed_revision": "d35d98cfda8c9479747bdfee2e9302d4fe1bc0f4",
+  "allow_paid": false,
+  "ready_for_paid_run": false,
+  "external_model_calls": 0,
+  "external_jev_calls": 0,
+  "planned_cases": 12,
+  "planned_arms": 24,
+  "planned_user_turns_both_arms": 46,
+  "suite_definition_sha256": "50848e347b985669e3424688f5f1e57b369d6c5577f3aa7e5de25e03144b7ebd",
+  "suite_manifest_sha256": "afaf5fba49893d2c20e91dc8b0e84c998608b82194d6613a6b6549e289ac4181",
+  "preflight_sha256": "116c2b51e67adb40922c7907ea1b264aee9727ed0b0c6f7ae2ac383dd715a149",
+  "verification": {
+    "top_level": {
+      "pass": 369,
+      "skip": 3
+    },
+    "packages": {
+      "pass": 17,
+      "skip": 27
+    },
+    "skips": [
+      {
+        "package": "github.com/frostloom/ai-gateway/internal/agent",
+        "test": "TestLiveJevSemanticsDiagnostic"
+      },
+      {
+        "package": "github.com/frostloom/ai-gateway/internal/billing/store",
+        "test": "TestCashLoad"
+      },
+      {
+        "package": "github.com/frostloom/ai-gateway/internal/billing/store",
+        "test": "TestCashProfileRowTiming"
+      }
+    ],
+    "failures": [],
+    "go_vet_stderr_bytes": 0
+  },
+  "limitations": [
+    "Test doubles only; recorded_run authorization gate tested without real provider calls.",
+    "No account tariff verification or real model accuracy result.",
+    "Campaign currency reservations use declared envelopes, not guaranteed account invoices."
+  ]
+}

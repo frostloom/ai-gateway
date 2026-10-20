@@ -36,10 +36,12 @@
 - [x] 在 AllowExecution 检查之后、其他执行逻辑之前拒绝 recorded_run 的 nil observer；删除晚到的重复检查，local_stub 保留可选 observer。
 - [x] 同一测试通过；运行全部 Go 回归与 go vet（进程级 SDKROOT=MacOSX26.5.sdk），记录具体跳过项。
 - [x] 按 requesting-code-review 进行独立只读审查，处理实质问题。
-- [ ] 仅提交计划、入口和测试，普通推送 main，核对远程 SHA。
+- [x] 仅提交计划、入口和测试，普通推送 main，核对远程 SHA。
 
 ## 执行记录
 
 开始前 HEAD：073cf833acb7b9563839fead868f33e4c15b2e0b。用户明确禁止提问，因此沿用既有 Go 架构与 main，原地实施。
 
 2026-10-21 验证回执：RED 已复现旧实现的 2 次替身模型请求、1 次JEV构造和运行日志创建；修复后针对性测试通过。完整 `go test ./... -p 1 -count=1 -json -timeout 8m`：369 个顶层测试通过，3 个显式跳过，零失败；`go vet ./...` 通过。跳过项为 TestLiveJevSemanticsDiagnostic、TestCashLoad、TestCashProfileRowTiming。所有命令使用进程级 MacOSX26.5.sdk。独立只读审查未发现实质问题。
+
+目标1提交 `d35d98c` 已普通推送；GitHub main SHA 已与本地完整核对一致。后续仅追加测评准备说明和结构化验证摘要，保留所有历史数据及原有无关改动。
