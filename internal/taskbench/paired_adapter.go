@@ -21,7 +21,7 @@ import (
 
 type PairModelSettings struct{ BaseURL, APIKey, Model, Protocol string }
 type AgentPairOptions struct {
-	Observer       *observability.Observer // explicit optional sink; caller owns flush/shutdown
+	Observer       *observability.Observer // required for recorded_run; caller owns flush/shutdown
 	AllowExecution bool                    // false is always side-effect-free
 	RatesVerified  bool                    // recorded_run requires operator verification for this channel
 	AllowJEVCalls  bool
@@ -74,6 +74,9 @@ func PrepareAgentPairConfig(s ConversationSuite, p PairedProfiles, m PairModelSe
 func RunAgentPair(ctx context.Context, path string, o AgentPairOptions) (runErr error) {
 	if !o.AllowExecution {
 		return fmt.Errorf("agent pair execution disabled")
+	}
+	if o.Config.Model.EvidenceKind == "recorded_run" && o.Observer == nil {
+		return fmt.Errorf("recorded run requires an explicit Langfuse observer")
 	}
 	if o.Environment == nil || o.Environment.closed || o.Budget == nil || o.JEVFactory == nil || !o.AllowJEVCalls || o.MaxJEVCalls < 1 || o.MaxJEVCalls > 256 {
 		return fmt.Errorf("owned fixtures, budget and bounded explicit JEV authorization required")
@@ -152,9 +155,6 @@ func RunAgentPair(ctx context.Context, path string, o AgentPairOptions) (runErr 
 	}
 	err = runPreparedPair(ctx, path, o.Config, o.Budget, factory, o.Observer)
 	if o.Observer == nil {
-		if o.Config.Model.EvidenceKind == "recorded_run" {
-			return errors.Join(err, fmt.Errorf("recorded run requires an explicit Langfuse observer"))
-		}
 		return err
 	}
 	flushErr := o.Observer.ForceFlush(ctx)
