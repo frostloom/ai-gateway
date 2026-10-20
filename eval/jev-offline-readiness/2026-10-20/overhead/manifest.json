@@ -1,0 +1,23 @@
+{
+  "schema": "jev-overhead-evidence.v1",
+  "base_revision": "58f5a4e",
+  "external_model_calls": 0,
+  "external_jev_calls": 0,
+  "python_tests": 158,
+  "review": {
+    "important_found": 1,
+    "important_fixed": 1,
+    "regression": "post-audit manifest/journal substitution rejected; RED then GREEN",
+    "deferred_minors": []
+  },
+  "files": {
+    "analysis.json": "f1553d9cf6db03ce980027825618a6a90ec1be6ccd9049cc8a8f2b8a89eaa6ea",
+    "python-tests.log.gz": "1b58ca9edea428f8205ffe5d28229b6b2496020eb9b88ee87eae7c39062cb8d8"
+  },
+  "source_lf_sha256": {
+    "scripts/analyze-jev-overhead.py": "2f78e067d044856b7f5601d22eb22b735f0707c04e143a8c34c516bce342870a",
+    "scripts/tests/test_jev_overhead_analysis.py": "8bb6c737777c0e25f70fb73acebb525fd01a465d137739bed5b91bbb54378b5f",
+    "scripts/audit-jev-efficiency.py": "b3b35dc8b6f8afecafca32a86835810fad399a8f78af9b532112254342e0f4c8"
+  },
+  "test_log_raw_sha256": "818a75ce72294132218d2eeb5907907a617ddcfeb3c3bc6fb79f39b397d3cc03"
+}
