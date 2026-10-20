@@ -142,6 +142,9 @@ func (h *Handler) evaluateTurn(ctx context.Context, userMsg string, ses *session
 	if !h.usesJevTurn() || h.jev == nil || strings.TrimSpace(userMsg) == "" {
 		return v
 	}
+	if h.skipsJevForContext(ses) {
+		return v
+	}
 
 	state := map[string]any{
 		"user_message": userMsg,

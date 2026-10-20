@@ -36,6 +36,9 @@ func (h *Handler) fastPathReason(userMsg string, ses *session, v jevVerdict) str
 	if h.RoutingMode() == RoutingModel || h.RoutingMode() == RoutingJevHint {
 		return "routing_mode_disabled"
 	}
+	if h.skipsJevForContext(ses) {
+		return "conversation_context"
+	}
 	if h.jev == nil || !v.Available {
 		return "judge_unavailable"
 	}

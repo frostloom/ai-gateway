@@ -18,6 +18,7 @@ type RuntimeMetadata struct {
 	ToolsSHA256      string             `json:"tools_sha256"`
 	ContractSHA256   string             `json:"contract_sha256"`
 	RoutingMode      string             `json:"routing_mode"`
+	RoutingRevision  string             `json:"routing_revision"`
 	Thresholds       map[string]float64 `json:"thresholds"`
 	MaxOutputTokens  int                `json:"max_output_tokens"`
 	ThinkingMode     string             `json:"thinking_mode,omitempty"`
@@ -38,7 +39,8 @@ func contentSHA(raw []byte) string {
 
 func (h *Handler) runtimeMetadata() *RuntimeMetadata {
 	metadata := &RuntimeMetadata{Model: "unknown", Protocol: "unknown", RoutingMode: string(h.RoutingMode()),
-		PromptSHA256: contentSHA([]byte(systemPrompt)), ContractSHA256: contentSHA([]byte(runtimeContract)),
+		RoutingRevision: "selective-context-prefilter-v1",
+		PromptSHA256:    contentSHA([]byte(systemPrompt)), ContractSHA256: contentSHA([]byte(runtimeContract)),
 		ReplyRepairLimit: 1, Thresholds: map[string]float64{"intent_min": .90, "shape_min": .90,
 			"legit_min": .85, "risk_max_exclusive": .5, "risk_confidence_min": .8}}
 	if h.jevFastPathMin > 0 {

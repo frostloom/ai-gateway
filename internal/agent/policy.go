@@ -48,6 +48,14 @@ func (h *Handler) usesJevFastPath() bool {
 	return h.RoutingMode() == RoutingJevSelective || (h.RoutingMode() == RoutingLegacy && h.jevFastPathEnabled)
 }
 
+// Selective uses JEV only to qualify independent first-turn reads. A known
+// conversation/pending context already excludes that route, so judging it adds
+// no routing information. Hint and legacy still need their original verdicts.
+func (h *Handler) skipsJevForContext(ses *session) bool {
+	return h.RoutingMode() == RoutingJevSelective && ses != nil &&
+		(ses.PendingAction != nil || len(ses.History) > 1)
+}
+
 func (h *Handler) decideRoutingVerdict(v *jevVerdict) {
 	switch h.RoutingMode() {
 	case RoutingLegacy:

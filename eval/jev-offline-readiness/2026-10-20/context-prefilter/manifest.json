@@ -1,0 +1,34 @@
+{
+  "schema": "jev-context-prefilter-evidence.v1",
+  "base_revision": "6f51070",
+  "commands": [
+    "go test ./internal/agent ./internal/taskbench -p 1 -count=1 -json -timeout 5m",
+    "go vet ./internal/agent ./internal/taskbench"
+  ],
+  "external_model_calls": 0,
+  "external_jev_calls": 0,
+  "files": {
+    "review-green.log.gz": "f5a708522458dde6437fa82b6cb8b4b9b717bbe518bdd1893c4f683658557358",
+    "review-red.log.gz": "8c90a632957fd076218e33b66c92d84d9d5bdce98c70b7f7d7c2505fc942f5bb",
+    "summary.json": "2d6eb47a038b1a10b6cdfe63cdcd5c1032cace2448fb93657367d2233cb862c4",
+    "tdd-red.jsonl.gz": "d5508907ef4e76e635595c76a639d9e40a5ab5729bc2d942eae1419721392236",
+    "tests.jsonl.gz": "c188ea3fef6bbbd9b3d74038849baa087a3febab5de8fcc84beacef3668cc5f1",
+    "vet.log.gz": "46b50c321b39e89a491b6727a01628c34245605a30beb3e7414c5e01cff90e6e"
+  },
+  "raw_log_sha256": {
+    "tests.jsonl.gz": "72379e5463cff1147babc59f4d3bfc0ec727f90edd4cc9a932f731d0f9bc21bf",
+    "tdd-red.jsonl.gz": "0ea509893cb8cc3b5c8e64522edc482eb78ae74f45b71dcb709cc92dbb5f613f",
+    "review-red.log.gz": "1c6a895bd99a1e3908a455a73148099ce27696fbef96560f1804eba40082d597",
+    "review-green.log.gz": "9fe2473cb96a0059011c8095a6cebb3f9ec47b81cde981e5797f0f984f564fe0",
+    "vet.log.gz": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "source_lf_sha256": {
+    "internal/agent/policy.go": "bdc3e4cccefeaad9f662739c576587f6631acea7d13f798145b538d171c3362e",
+    "internal/agent/guard.go": "a1c770b0434a3021a9ec574ced4880b76695cd4252ee28d9287dd1321abfc20f",
+    "internal/agent/fast_path.go": "f962e2d7e3760f68f976a68354ebf14562212f91427b267fe6333d0aaf975ddb",
+    "internal/agent/runtime_metadata.go": "119e97ce10ff585786efbe562c02e9bfecc70ccfdb7948a3ebd6920b24773077",
+    "internal/agent/context_prefilter_test.go": "43b5cd61dc218994a4bf09d50faf83e5dad9a4aa16db50698f6ccf96a432a6a1",
+    "internal/taskbench/context_prefilter_comparison_test.go": "78e5931fa77cfabb9c19e98dd7a296b9549b603c4beb3bfa55dcf87d60480292",
+    "docs/jev-context-prefilter-2026-10-20.md": "a70304c88dbbac08d09f2f2870ca561f74b8a6da91c2450a1ae533d68932d6b9"
+  }
+}

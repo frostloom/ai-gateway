@@ -1,0 +1,37 @@
+{
+  "schema": "jev-context-prefilter-acceptance.v1",
+  "base_revision": "6f51070",
+  "routing_revision": "selective-context-prefilter-v1",
+  "external_model_calls": 0,
+  "external_jev_calls": 0,
+  "live_langfuse_writes": 0,
+  "packages": {
+    "github.com/frostloom/ai-gateway/internal/agent": {
+      "top_level_pass": 111,
+      "top_level_fail": 0,
+      "skips": [
+        "TestLiveJevSemanticsDiagnostic"
+      ],
+      "pass_events_including_subtests": 323,
+      "elapsed_seconds": 50.51
+    },
+    "github.com/frostloom/ai-gateway/internal/taskbench": {
+      "top_level_pass": 104,
+      "top_level_fail": 0,
+      "skips": [],
+      "pass_events_including_subtests": 251,
+      "elapsed_seconds": 129.119
+    }
+  },
+  "vet": "passed",
+  "review": {
+    "important_found": 1,
+    "important_fixed": 1,
+    "deferred_minors": []
+  },
+  "limits": [
+    "Local fake inference and isolated fixture accounts only; no provider performance or total cost claim.",
+    "Historical evaluation evidence unchanged; no paid 1220-run.",
+    "Shared routing revision rejects old/new mixtures; threshold, prompt and tool contracts unchanged."
+  ]
+}
