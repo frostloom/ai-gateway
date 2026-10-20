@@ -1,0 +1,42 @@
+{
+  "schema": "clarification-readiness-evidence.v1",
+  "date": "2026-10-20",
+  "production_revision": "f585547",
+  "expected_routing_revision": "selective-context-prefilter-v1",
+  "real_model_calls": 0,
+  "real_jev_calls": 0,
+  "paid_run_authorized": false,
+  "approved_amount": null,
+  "preflight_candidate_tasks": 12,
+  "local_scenarios": 6,
+  "local_arms": 12,
+  "local_arm_status": "needs_review",
+  "semantic_review": "pending_independent_review",
+  "effect_claims": false,
+  "actual_langfuse_project_ingestion_verified": false,
+  "local_otlp": {
+    "tasks": 12,
+    "turns": 26,
+    "generations": 20,
+    "drops": 0,
+    "export_failures": 0
+  },
+  "tests": {
+    "top_level_passes": {
+      "github.com/frostloom/ai-gateway/internal/taskbench": 104,
+      "github.com/frostloom/ai-gateway/cmd/paired-eval": 4
+    },
+    "failures": 0,
+    "skips": 0,
+    "package_elapsed_seconds": {
+      "github.com/frostloom/ai-gateway/internal/taskbench": 150,
+      "github.com/frostloom/ai-gateway/cmd/paired-eval": 6.536
+    },
+    "command": "go test ./internal/taskbench ./cmd/paired-eval -p 1 -count=1 -json -timeout 5m",
+    "vet_passed": true
+  },
+  "independent_review": {
+    "blocking_findings": 0,
+    "optional_followup": "Match OTLP spans per trace ID, case and arm; current counts are aggregate."
+  }
+}

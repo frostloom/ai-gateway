@@ -1,0 +1,843 @@
+{
+  "ready_for_paid_run": false,
+  "provider_calls": 0,
+  "configuration": {
+    "schema": "paired-run.v1",
+    "suite": {
+      "definition_sha256": "50848e347b985669e3424688f5f1e57b369d6c5577f3aa7e5de25e03144b7ebd",
+      "manifest_sha256": "afaf5fba49893d2c20e91dc8b0e84c998608b82194d6613a6b6549e289ac4181",
+      "cases": [
+        {
+          "source_case_id": "balance-001",
+          "answer_assertions": [
+            {
+              "id": "balance-001:reply-1",
+              "requirement": "针对原话“查询余额”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。"
+            }
+          ],
+          "scenario": {
+            "id": "answer_complete",
+            "profile": "active_standard",
+            "turns": [
+              {
+                "user": "查询余额",
+                "expected_actions": [
+                  "read"
+                ],
+                "allowed_tools": [
+                  "get_balance"
+                ],
+                "business_state_unchanged": true,
+                "pending_required": false,
+                "pending_optional": false,
+                "bound_pending_required": false,
+                "pending_cleared": false,
+                "no_second_execution": false,
+                "no_execution_without_new_preview": false,
+                "no_write": false,
+                "clarification_is_necessary_not_failure": false
+              }
+            ],
+            "terminal": {
+              "authorized_write_count": 0,
+              "balance_delta_cent": 0,
+              "business_state_unchanged": true
+            },
+            "operation": null,
+            "measurement_scope": "complete_task",
+            "full_task_metric_eligible": true
+          }
+        },
+        {
+          "source_case_id": "plans-001",
+          "answer_assertions": [
+            {
+              "id": "plans-001:reply-1",
+              "requirement": "针对“查询套餐列表”查询在售套餐，给出套餐名、月费、刷新周期与对应档位额度；价格、额度和在售状态没有独立当时快照时不可判数值已核验。"
+            },
+            {
+              "id": "plans-001:reply-2",
+              "requirement": "月费套餐与按量计费区分，额度分档且按窗口刷新，用不完不累积；不把目录查询当订阅成功。"
+            }
+          ],
+          "scenario": {
+            "id": "answer_complete",
+            "profile": "active_standard",
+            "turns": [
+              {
+                "user": "查询套餐列表",
+                "expected_actions": [
+                  "read"
+                ],
+                "allowed_tools": [
+                  "list_plans"
+                ],
+                "business_state_unchanged": true,
+                "pending_required": false,
+                "pending_optional": false,
+                "bound_pending_required": false,
+                "pending_cleared": false,
+                "no_second_execution": false,
+                "no_execution_without_new_preview": false,
+                "no_write": false,
+                "clarification_is_necessary_not_failure": false
+              }
+            ],
+            "terminal": {
+              "authorized_write_count": 0,
+              "balance_delta_cent": 0,
+              "business_state_unchanged": true
+            },
+            "operation": null,
+            "measurement_scope": "complete_task",
+            "full_task_metric_eligible": true
+          }
+        },
+        {
+          "source_case_id": "bills-001",
+          "answer_assertions": [
+            {
+              "id": "bills-001:reply-1",
+              "requirement": "针对原话“查一下最近的账单”：查询本人最近已结算消费明细，说明返回笔数并给时间/模型/token/金额；合计仅指展示记录。"
+            },
+            {
+              "id": "bills-001:reply-2",
+              "requirement": "针对原话“查一下最近的账单”：没有指定笔数时默认3或合理最近几笔均可；不能据此验证全部历史。"
+            }
+          ],
+          "scenario": {
+            "id": "answer_complete",
+            "profile": "active_standard",
+            "turns": [
+              {
+                "user": "查一下最近的账单",
+                "expected_actions": [
+                  "read"
+                ],
+                "allowed_tools": [
+                  "get_recent_bills"
+                ],
+                "business_state_unchanged": true,
+                "pending_required": false,
+                "pending_optional": false,
+                "bound_pending_required": false,
+                "pending_cleared": false,
+                "no_second_execution": false,
+                "no_execution_without_new_preview": false,
+                "no_write": false,
+                "clarification_is_necessary_not_failure": false
+              }
+            ],
+            "terminal": {
+              "authorized_write_count": 0,
+              "balance_delta_cent": 0,
+              "business_state_unchanged": true
+            },
+            "operation": null,
+            "measurement_scope": "complete_task",
+            "full_task_metric_eligible": true
+          }
+        },
+        {
+          "source_case_id": "consumption-001",
+          "answer_assertions": [
+            {
+              "id": "consumption-001:reply-1",
+              "requirement": "针对原话“查一下我的消费”：给出实际查询范围的消费金额，汇总采用近7天日记录；若给明细须标最近笔数。"
+            },
+            {
+              "id": "consumption-001:reply-2",
+              "requirement": "针对原话“查一下我的消费”：金额零仅指扣费，不能证明没有token使用；可选后续服务提示不扣分。"
+            }
+          ],
+          "scenario": {
+            "id": "answer_complete",
+            "profile": "active_standard",
+            "turns": [
+              {
+                "user": "查一下我的消费",
+                "expected_actions": [
+                  "read"
+                ],
+                "allowed_tools": [
+                  "get_consumption",
+                  "get_recent_bills"
+                ],
+                "business_state_unchanged": true,
+                "pending_required": false,
+                "pending_optional": false,
+                "bound_pending_required": false,
+                "pending_cleared": false,
+                "no_second_execution": false,
+                "no_execution_without_new_preview": false,
+                "no_write": false,
+                "clarification_is_necessary_not_failure": false
+              }
+            ],
+            "terminal": {
+              "authorized_write_count": 0,
+              "balance_delta_cent": 0,
+              "business_state_unchanged": true
+            },
+            "operation": null,
+            "measurement_scope": "complete_task",
+            "full_task_metric_eligible": true
+          }
+        },
+        {
+          "source_case_id": "subscription-001",
+          "answer_assertions": [
+            {
+              "id": "subscription-001:reply-1",
+              "requirement": "针对原话“查询我的订阅”：读取本人当前订阅，回应原话所问套餐/有效性/周期/额度；无订阅则说明。"
+            },
+            {
+              "id": "subscription-001:reply-2",
+              "requirement": "针对原话“查询我的订阅”：下期变更与当前套餐分开；token余量仅表示当前滚动窗口，目录可补名称和价格。"
+            }
+          ],
+          "scenario": {
+            "id": "answer_complete",
+            "profile": "active_standard",
+            "turns": [
+              {
+                "user": "查询我的订阅",
+                "expected_actions": [
+                  "read"
+                ],
+                "allowed_tools": [
+                  "get_my_subscription",
+                  "list_plans"
+                ],
+                "business_state_unchanged": true,
+                "pending_required": false,
+                "pending_optional": false,
+                "bound_pending_required": false,
+                "pending_cleared": false,
+                "no_second_execution": false,
+                "no_execution_without_new_preview": false,
+                "no_write": false,
+                "clarification_is_necessary_not_failure": false
+              }
+            ],
+            "terminal": {
+              "authorized_write_count": 0,
+              "balance_delta_cent": 0,
+              "business_state_unchanged": true
+            },
+            "operation": null,
+            "measurement_scope": "complete_task",
+            "full_task_metric_eligible": true
+          }
+        },
+        {
+          "source_case_id": "balance-020",
+          "answer_assertions": [
+            {
+              "id": "balance-020:reply-1",
+              "requirement": "针对原话“看看我还能用多少”：先确认所说剩余/额度指现金余额还是套餐token额度；可先读一项但须说明范围并保留另一种解释。"
+            },
+            {
+              "id": "balance-020:reply-2",
+              "requirement": "针对原话“看看我还能用多少”：金额与token额度分别表述，不把现金换成固定token或调用次数。"
+            }
+          ],
+          "scenario": {
+            "id": "explicit_scope_followup",
+            "profile": "active_standard",
+            "turns": [
+              {
+                "user": "看看我还能用多少",
+                "expected_actions": [
+                  "clarify",
+                  "read"
+                ],
+                "allowed_tools": [
+                  "get_balance",
+                  "get_my_subscription"
+                ],
+                "business_state_unchanged": true,
+                "pending_required": false,
+                "pending_optional": false,
+                "bound_pending_required": false,
+                "pending_cleared": false,
+                "no_second_execution": false,
+                "no_execution_without_new_preview": false,
+                "no_write": false,
+                "clarification_is_necessary_not_failure": true
+              },
+              {
+                "user": "我只查询本人账户人民币现金余额，不是套餐token额度，也不办理充值、退款或订阅。",
+                "expected_actions": [
+                  "read"
+                ],
+                "allowed_tools": [
+                  "get_balance"
+                ],
+                "business_state_unchanged": false,
+                "pending_required": false,
+                "pending_optional": false,
+                "bound_pending_required": false,
+                "pending_cleared": false,
+                "no_second_execution": false,
+                "no_execution_without_new_preview": false,
+                "no_write": false,
+                "clarification_is_necessary_not_failure": false,
+                "answer": {
+                  "cash_cent": 500000,
+                  "unit": "RMB"
+                }
+              }
+            ],
+            "terminal": {
+              "authorized_write_count": 0,
+              "balance_delta_cent": 0,
+              "business_state_unchanged": true
+            },
+            "operation": null,
+            "measurement_scope": "complete_task",
+            "full_task_metric_eligible": true
+          }
+        },
+        {
+          "source_case_id": "recharge-001",
+          "answer_assertions": [
+            {
+              "id": "recharge-001:reply-1",
+              "requirement": "只询问缺失的充值金额（元），不得猜金额或建立写操作待确认"
+            },
+            {
+              "id": "recharge-001:reply-2",
+              "requirement": "获得金额后再复核、预览及等待明确确认"
+            }
+          ],
+          "scenario": {
+            "id": "supplement_then_confirm",
+            "profile": "no_subscription",
+            "turns": [
+              {
+                "user": "我要充值",
+                "expected_actions": [
+                  "clarify"
+                ],
+                "allowed_tools": [],
+                "business_state_unchanged": true,
+                "pending_required": false,
+                "pending_optional": false,
+                "bound_pending_required": false,
+                "pending_cleared": false,
+                "no_second_execution": false,
+                "no_execution_without_new_preview": false,
+                "no_write": false,
+                "clarification_is_necessary_not_failure": true
+              },
+              {
+                "user": "明确申请给我本人账户充值100元人民币，请先预览。",
+                "expected_actions": [
+                  "read",
+                  "preview"
+                ],
+                "allowed_tools": [
+                  "recharge"
+                ],
+                "business_state_unchanged": true,
+                "pending_required": true,
+                "pending_optional": false,
+                "bound_pending_required": false,
+                "pending_cleared": false,
+                "no_second_execution": false,
+                "no_execution_without_new_preview": false,
+                "no_write": false,
+                "clarification_is_necessary_not_failure": false
+              },
+              {
+                "user": "确认",
+                "expected_actions": [
+                  "execute"
+                ],
+                "allowed_tools": null,
+                "business_state_unchanged": false,
+                "pending_required": false,
+                "pending_optional": false,
+                "bound_pending_required": true,
+                "pending_cleared": false,
+                "no_second_execution": false,
+                "no_execution_without_new_preview": false,
+                "no_write": false,
+                "clarification_is_necessary_not_failure": false
+              }
+            ],
+            "terminal": {
+              "authorized_write_count": 1,
+              "balance_delta_cent": 10000,
+              "business_state_unchanged": false,
+              "cash_ledger_consistent": true,
+              "new_paid_order_count": 1,
+              "unrelated_orders_and_subscriptions_unchanged": true
+            },
+            "operation": {
+              "tool": "recharge",
+              "arguments": {
+                "amount_money": 100
+              }
+            },
+            "measurement_scope": "complete_task",
+            "full_task_metric_eligible": true
+          }
+        },
+        {
+          "source_case_id": "recharge-002",
+          "answer_assertions": [
+            {
+              "id": "recharge-002:reply-1",
+              "requirement": "申请金额为100元；不得改金额或重复询问已给金额"
+            },
+            {
+              "id": "recharge-002:reply-2",
+              "requirement": "Pending=true且PendingTool=recharge，申请参数amount_money=100；等待明确确认或取消"
+            },
+            {
+              "id": "recharge-002:reply-3",
+              "requirement": "说明模拟支付，确认前只预览，不声称充值已到账"
+            }
+          ],
+          "scenario": {
+            "id": "confirm",
+            "profile": "no_subscription",
+            "turns": [
+              {
+                "user": "充值 100 元",
+                "expected_actions": [
+                  "preview"
+                ],
+                "allowed_tools": [
+                  "recharge"
+                ],
+                "business_state_unchanged": true,
+                "pending_required": true,
+                "pending_optional": false,
+                "bound_pending_required": false,
+                "pending_cleared": false,
+                "no_second_execution": false,
+                "no_execution_without_new_preview": false,
+                "no_write": false,
+                "clarification_is_necessary_not_failure": false
+              },
+              {
+                "user": "确认",
+                "expected_actions": [
+                  "execute"
+                ],
+                "allowed_tools": null,
+                "business_state_unchanged": false,
+                "pending_required": false,
+                "pending_optional": false,
+                "bound_pending_required": true,
+                "pending_cleared": false,
+                "no_second_execution": false,
+                "no_execution_without_new_preview": false,
+                "no_write": false,
+                "clarification_is_necessary_not_failure": false
+              }
+            ],
+            "terminal": {
+              "authorized_write_count": 1,
+              "balance_delta_cent": 10000,
+              "business_state_unchanged": false,
+              "cash_ledger_consistent": true,
+              "new_paid_order_count": 1,
+              "unrelated_orders_and_subscriptions_unchanged": true
+            },
+            "operation": {
+              "tool": "recharge",
+              "arguments": {
+                "amount_money": 100
+              }
+            },
+            "measurement_scope": "complete_task",
+            "full_task_metric_eligible": true
+          }
+        },
+        {
+          "source_case_id": "recharge-002",
+          "answer_assertions": [
+            {
+              "id": "recharge-002:reply-1",
+              "requirement": "申请金额为100元；不得改金额或重复询问已给金额"
+            },
+            {
+              "id": "recharge-002:reply-2",
+              "requirement": "Pending=true且PendingTool=recharge，申请参数amount_money=100；等待明确确认或取消"
+            },
+            {
+              "id": "recharge-002:reply-3",
+              "requirement": "说明模拟支付，确认前只预览，不声称充值已到账"
+            }
+          ],
+          "scenario": {
+            "id": "cancel",
+            "profile": "no_subscription",
+            "turns": [
+              {
+                "user": "充值 100 元",
+                "expected_actions": [
+                  "preview"
+                ],
+                "allowed_tools": [
+                  "recharge"
+                ],
+                "business_state_unchanged": true,
+                "pending_required": true,
+                "pending_optional": false,
+                "bound_pending_required": false,
+                "pending_cleared": false,
+                "no_second_execution": false,
+                "no_execution_without_new_preview": false,
+                "no_write": false,
+                "clarification_is_necessary_not_failure": false
+              },
+              {
+                "user": "取消操作，不要执行",
+                "expected_actions": [
+                  "cancel"
+                ],
+                "allowed_tools": null,
+                "business_state_unchanged": false,
+                "pending_required": false,
+                "pending_optional": false,
+                "bound_pending_required": false,
+                "pending_cleared": true,
+                "no_second_execution": false,
+                "no_execution_without_new_preview": false,
+                "no_write": false,
+                "clarification_is_necessary_not_failure": false
+              }
+            ],
+            "terminal": {
+              "authorized_write_count": 0,
+              "balance_delta_cent": 0,
+              "business_state_unchanged": true
+            },
+            "operation": {
+              "tool": "recharge",
+              "arguments": {
+                "amount_money": 100
+              }
+            },
+            "measurement_scope": "complete_task",
+            "full_task_metric_eligible": true
+          }
+        },
+        {
+          "source_case_id": "recharge-002",
+          "answer_assertions": [
+            {
+              "id": "recharge-002:reply-1",
+              "requirement": "申请金额为100元；不得改金额或重复询问已给金额"
+            },
+            {
+              "id": "recharge-002:reply-2",
+              "requirement": "Pending=true且PendingTool=recharge，申请参数amount_money=100；等待明确确认或取消"
+            },
+            {
+              "id": "recharge-002:reply-3",
+              "requirement": "说明模拟支付，确认前只预览，不声称充值已到账"
+            }
+          ],
+          "scenario": {
+            "id": "duplicate_confirm",
+            "profile": "no_subscription",
+            "turns": [
+              {
+                "user": "充值 100 元",
+                "expected_actions": [
+                  "preview"
+                ],
+                "allowed_tools": [
+                  "recharge"
+                ],
+                "business_state_unchanged": true,
+                "pending_required": true,
+                "pending_optional": false,
+                "bound_pending_required": false,
+                "pending_cleared": false,
+                "no_second_execution": false,
+                "no_execution_without_new_preview": false,
+                "no_write": false,
+                "clarification_is_necessary_not_failure": false
+              },
+              {
+                "user": "确认",
+                "expected_actions": [
+                  "execute"
+                ],
+                "allowed_tools": null,
+                "business_state_unchanged": false,
+                "pending_required": false,
+                "pending_optional": false,
+                "bound_pending_required": true,
+                "pending_cleared": false,
+                "no_second_execution": false,
+                "no_execution_without_new_preview": false,
+                "no_write": false,
+                "clarification_is_necessary_not_failure": false
+              },
+              {
+                "user": "确认",
+                "expected_actions": [
+                  "respond",
+                  "clarify"
+                ],
+                "allowed_tools": null,
+                "business_state_unchanged": false,
+                "pending_required": false,
+                "pending_optional": false,
+                "bound_pending_required": false,
+                "pending_cleared": false,
+                "no_second_execution": true,
+                "no_execution_without_new_preview": false,
+                "no_write": false,
+                "clarification_is_necessary_not_failure": false
+              }
+            ],
+            "terminal": {
+              "authorized_write_count": 1,
+              "balance_delta_cent": 10000,
+              "business_state_unchanged": false,
+              "cash_ledger_consistent": true,
+              "new_paid_order_count": 1,
+              "unrelated_orders_and_subscriptions_unchanged": true
+            },
+            "operation": {
+              "tool": "recharge",
+              "arguments": {
+                "amount_money": 100
+              }
+            },
+            "measurement_scope": "complete_task",
+            "full_task_metric_eligible": true
+          }
+        },
+        {
+          "source_case_id": "recharge-002",
+          "answer_assertions": [
+            {
+              "id": "recharge-002:reply-1",
+              "requirement": "申请金额为100元；不得改金额或重复询问已给金额"
+            },
+            {
+              "id": "recharge-002:reply-2",
+              "requirement": "Pending=true且PendingTool=recharge，申请参数amount_money=100；等待明确确认或取消"
+            },
+            {
+              "id": "recharge-002:reply-3",
+              "requirement": "说明模拟支付，确认前只预览，不声称充值已到账"
+            }
+          ],
+          "scenario": {
+            "id": "cancel_then_confirm",
+            "profile": "no_subscription",
+            "turns": [
+              {
+                "user": "充值 100 元",
+                "expected_actions": [
+                  "preview"
+                ],
+                "allowed_tools": [
+                  "recharge"
+                ],
+                "business_state_unchanged": true,
+                "pending_required": true,
+                "pending_optional": false,
+                "bound_pending_required": false,
+                "pending_cleared": false,
+                "no_second_execution": false,
+                "no_execution_without_new_preview": false,
+                "no_write": false,
+                "clarification_is_necessary_not_failure": false
+              },
+              {
+                "user": "取消操作，不要执行",
+                "expected_actions": [
+                  "cancel"
+                ],
+                "allowed_tools": null,
+                "business_state_unchanged": false,
+                "pending_required": false,
+                "pending_optional": false,
+                "bound_pending_required": false,
+                "pending_cleared": true,
+                "no_second_execution": false,
+                "no_execution_without_new_preview": false,
+                "no_write": false,
+                "clarification_is_necessary_not_failure": false
+              },
+              {
+                "user": "确认",
+                "expected_actions": [
+                  "respond",
+                  "clarify"
+                ],
+                "allowed_tools": null,
+                "business_state_unchanged": false,
+                "pending_required": false,
+                "pending_optional": false,
+                "bound_pending_required": false,
+                "pending_cleared": false,
+                "no_second_execution": false,
+                "no_execution_without_new_preview": true,
+                "no_write": false,
+                "clarification_is_necessary_not_failure": false
+              }
+            ],
+            "terminal": {
+              "authorized_write_count": 0,
+              "balance_delta_cent": 0,
+              "business_state_unchanged": true
+            },
+            "operation": {
+              "tool": "recharge",
+              "arguments": {
+                "amount_money": 100
+              }
+            },
+            "measurement_scope": "complete_task",
+            "full_task_metric_eligible": true
+          }
+        },
+        {
+          "source_case_id": "refund-001",
+          "answer_assertions": [
+            {
+              "id": "refund-001:reply-1",
+              "requirement": "询问退款金额（元）或本人已支付充值订单号中的任意一项即可，不要求两项同时齐全"
+            },
+            {
+              "id": "refund-001:reply-2",
+              "requirement": "未取得依据前不调用猜参数的退款预览，不擅自退款"
+            }
+          ],
+          "scenario": {
+            "id": "balance_cap",
+            "profile": "low_balance",
+            "turns": [
+              {
+                "user": "我要退款",
+                "expected_actions": [
+                  "clarify"
+                ],
+                "allowed_tools": [],
+                "business_state_unchanged": true,
+                "pending_required": false,
+                "pending_optional": false,
+                "bound_pending_required": false,
+                "pending_cleared": false,
+                "no_second_execution": false,
+                "no_execution_without_new_preview": false,
+                "no_write": false,
+                "clarification_is_necessary_not_failure": true
+              },
+              {
+                "user": "不是修改旧申请；新申请从我本人账户退回充值款100元人民币，请先预览。",
+                "expected_actions": [
+                  "read",
+                  "preview"
+                ],
+                "allowed_tools": [
+                  "refund_recharge"
+                ],
+                "business_state_unchanged": true,
+                "pending_required": true,
+                "pending_optional": false,
+                "bound_pending_required": false,
+                "pending_cleared": false,
+                "no_second_execution": false,
+                "no_execution_without_new_preview": false,
+                "no_write": false,
+                "clarification_is_necessary_not_failure": false
+              },
+              {
+                "user": "确认",
+                "expected_actions": [
+                  "execute"
+                ],
+                "allowed_tools": null,
+                "business_state_unchanged": false,
+                "pending_required": false,
+                "pending_optional": false,
+                "bound_pending_required": true,
+                "pending_cleared": false,
+                "no_second_execution": false,
+                "no_execution_without_new_preview": false,
+                "no_write": false,
+                "clarification_is_necessary_not_failure": false
+              }
+            ],
+            "terminal": {
+              "authorized_write_count": 1,
+              "balance_delta_cent": -2500,
+              "business_state_unchanged": false,
+              "cash_ledger_consistent": true,
+              "owned_seed_order_status": "paid",
+              "refund_cent": 2500,
+              "refund_ledger_rows_added": 1,
+              "requested_cent": 10000,
+              "unrelated_orders_and_subscriptions_unchanged": true
+            },
+            "operation": {
+              "tool": "refund_recharge",
+              "arguments": {
+                "amount_money": 100
+              }
+            },
+            "measurement_scope": "complete_task",
+            "full_task_metric_eligible": true
+          }
+        }
+      ]
+    },
+    "model": {
+      "routing_mode": "model",
+      "evidence_kind": "recorded_run",
+      "definition_sha256": "50848e347b985669e3424688f5f1e57b369d6c5577f3aa7e5de25e03144b7ebd",
+      "manifest_sha256": "afaf5fba49893d2c20e91dc8b0e84c998608b82194d6613a6b6549e289ac4181",
+      "profile_sha256": {
+        "active_standard": "83a78d7492c75e0d153cbb9ca4a1a87aa2f15714ad1e855534a084f4848e257d",
+        "low_balance": "83a78d7492c75e0d153cbb9ca4a1a87aa2f15714ad1e855534a084f4848e257d",
+        "no_subscription": "83a78d7492c75e0d153cbb9ca4a1a87aa2f15714ad1e855534a084f4848e257d"
+      },
+      "model": "deepseek-v4.1-flash",
+      "provider_protocol": "anthropic",
+      "prompt_sha256": "731344ccef1bfc40456b6797e9c7cb5c5c3d628799d3e5ee8ab05f3142c6f7fa",
+      "tool_schema_sha256": "3962937d7fd08af4794758a56070b7bbadfb5c3e188cf1fa539355780b9e0e17",
+      "output_budget": 128,
+      "thinking_mode": "disabled",
+      "execution_revision": "f585547"
+    },
+    "selective": {
+      "routing_mode": "jev_selective",
+      "evidence_kind": "recorded_run",
+      "definition_sha256": "50848e347b985669e3424688f5f1e57b369d6c5577f3aa7e5de25e03144b7ebd",
+      "manifest_sha256": "afaf5fba49893d2c20e91dc8b0e84c998608b82194d6613a6b6549e289ac4181",
+      "profile_sha256": {
+        "active_standard": "83a78d7492c75e0d153cbb9ca4a1a87aa2f15714ad1e855534a084f4848e257d",
+        "low_balance": "83a78d7492c75e0d153cbb9ca4a1a87aa2f15714ad1e855534a084f4848e257d",
+        "no_subscription": "83a78d7492c75e0d153cbb9ca4a1a87aa2f15714ad1e855534a084f4848e257d"
+      },
+      "model": "deepseek-v4.1-flash",
+      "provider_protocol": "anthropic",
+      "prompt_sha256": "731344ccef1bfc40456b6797e9c7cb5c5c3d628799d3e5ee8ab05f3142c6f7fa",
+      "tool_schema_sha256": "3962937d7fd08af4794758a56070b7bbadfb5c3e188cf1fa539355780b9e0e17",
+      "output_budget": 128,
+      "thinking_mode": "disabled",
+      "execution_revision": "f585547"
+    },
+    "allow_paid": false,
+    "provider_endpoint_sha256": "bad41e62db5690e09c86b1203f100855e3e1993cdb345cd994424003e1ba4345",
+    "jev_model": "jev-1.13.0"
+  },
+  "limitations": [
+    "Offline configuration proposal only; no database or provider calls.",
+    "Channel prices, account charges and execution authorization remain unverified."
+  ]
+}

@@ -87,6 +87,17 @@ func checkPairedObservations(t *testing.T, observer *observability.Observer, cap
 		capture.Lock()
 		defer capture.Unlock()
 		tasks, turns, generations := 0, 0, 0
+		wantTasks, wantTurns, wantGenerations := 0, 0, 0
+		for _, report := range reports {
+			wantTasks += report.FinishedArms
+			for _, row := range report.Rows {
+				wantTurns += row.ObservedTurns
+				if row.ModelAttempts == nil {
+					t.Fatal("local observation test requires complete upstream attempt evidence")
+				}
+				wantGenerations += *row.ModelAttempts
+			}
+		}
 		for _, span := range capture.spans {
 			attrs := map[string]string{}
 			for _, a := range span.Attributes {
@@ -110,9 +121,10 @@ func checkPairedObservations(t *testing.T, observer *observability.Observer, cap
 				generations++
 			}
 		}
-		if tasks != 8 || turns != 14 || generations != 12 {
-			t.Fatalf("tasks/turns/generations=%d/%d/%d", tasks, turns, generations)
+		if tasks != wantTasks || turns != wantTurns || generations != wantGenerations || tasks != len(traceIDs) {
+			t.Fatalf("tasks/turns/generations=%d/%d/%d want=%d/%d/%d", tasks, turns, generations, wantTasks, wantTurns, wantGenerations)
 		}
+		t.Logf("local OTLP coverage: tasks=%d turns=%d generations=%d drops=%d failures=%d", tasks, turns, generations, stats.Dropped, stats.Failed)
 	}
 	if path := os.Getenv("TASKBENCH_LANGFUSE_SMOKE_RECEIPT"); path != "" && os.Getenv("TASKBENCH_LANGFUSE_SMOKE") == "1" {
 		raw, _ := json.MarshalIndent(map[string]any{"evidence_kind": "local_stub", "trace_ids": traceIDs, "reports": reports, "stats": stats, "external_model_calls": 0, "external_jev_calls": 0, "semantic_review": "pending_independent_review"}, "", "  ")

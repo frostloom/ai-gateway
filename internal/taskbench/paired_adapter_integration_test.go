@@ -37,7 +37,7 @@ func TestAgentPairOwnedEnvironmentLocalReadAndWrite(t *testing.T) {
 	if e != nil {
 		t.Fatal(e)
 	}
-	for _, key := range []string{"balance-001/answer_complete", "balance-020/explicit_scope_followup", "recharge-002/confirm", "recharge-002/cancel"} {
+	for _, key := range []string{"balance-001/answer_complete", "balance-020/explicit_scope_followup", "recharge-002/confirm", "recharge-002/cancel", "recharge-001/supplement_then_confirm", "refund-001/balance_cap"} {
 		t.Run(key, func(t *testing.T) {
 			var selected ConversationCase
 			for _, c := range plan.Suite.Cases {
@@ -51,7 +51,7 @@ func TestAgentPairOwnedEnvironmentLocalReadAndWrite(t *testing.T) {
 			tool := "get_balance"
 			args := map[string]any{}
 			if selected.Scenario.Operation != nil {
-				tool = "recharge"
+				tool = selected.Scenario.Operation.Tool
 				args = map[string]any{"amount_money": 100}
 			}
 			provider := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -82,6 +82,12 @@ func TestAgentPairOwnedEnvironmentLocalReadAndWrite(t *testing.T) {
 							stop = "end_turn"
 						} else if block.Type == "text" && block.Text == "看看我还能用多少" {
 							content = []any{map[string]any{"type": "text", "text": "请问您要查询人民币现金余额，还是套餐token额度？"}}
+							stop = "end_turn"
+						} else if block.Type == "text" && block.Text == "我要充值" {
+							content = []any{map[string]any{"type": "text", "text": "请问要充值多少元人民币？"}}
+							stop = "end_turn"
+						} else if block.Type == "text" && block.Text == "我要退款" {
+							content = []any{map[string]any{"type": "text", "text": "请问要退回多少元充值款，或是哪笔充值订单？"}}
 							stop = "end_turn"
 						}
 					}
@@ -139,6 +145,17 @@ func TestAgentPairOwnedEnvironmentLocalReadAndWrite(t *testing.T) {
 					t.Fatal("missing task trace ID")
 				}
 				traceIDs = append(traceIDs, row.LangfuseTraceID)
+				if key == "recharge-001/supplement_then_confirm" || key == "refund-001/balance_cap" {
+					if !row.StructuralPass || row.FactErrors != 0 || row.HTTPFailures != 0 || len(row.NecessaryClarifications) != 1 {
+						t.Fatalf("necessary clarification lost or counted as failure: %+v", row)
+					}
+					q := row.NecessaryClarifications[0]
+					// No-tool prose is deliberately not auto-classified as correct
+					// clarification; preserve independent semantic review.
+					if q.Turn != 1 || q.Action != "unreviewed" || q.SemanticReview != "pending_independent_review" {
+						t.Fatalf("clarification status misrepresented: %+v", q)
+					}
+				}
 			}
 			reports = append(reports, r)
 			before := calls.Load()
@@ -160,6 +177,40 @@ func TestAgentPairOwnedEnvironmentLocalReadAndWrite(t *testing.T) {
 			right := j.finished[key+":jev_selective"].Result
 			if left.Fixture.TenantID == right.Fixture.TenantID {
 				t.Fatal("mutated accounts reused")
+			}
+			for _, result := range []*ConversationResult{left, right} {
+				for i, observation := range result.Observations {
+					var telemetry struct {
+						JEVCalls  *int   `json:"jev_calls"`
+						JEVErrors *int   `json:"jev_errors"`
+						LLMCalls  *int   `json:"llm_calls"`
+						Reason    string `json:"jev_fast_path_reason"`
+					}
+					if err := json.Unmarshal(observation.Turn.TelemetryRaw, &telemetry); err != nil {
+						t.Fatal(err)
+					}
+					wantJudgeCalls := 0
+					if result == right && i == 0 {
+						wantJudgeCalls = 1
+					}
+					if telemetry.JEVCalls == nil || telemetry.JEVErrors == nil || telemetry.LLMCalls == nil || *telemetry.JEVCalls != wantJudgeCalls || *telemetry.JEVErrors != 0 {
+						t.Fatal("missing telemetry, unexpected JEV call or judge failure")
+					}
+					if result == right && i > 0 && *telemetry.LLMCalls > 0 && telemetry.Reason != "conversation_context" {
+						t.Fatal("context prefilter reason lost")
+					}
+				}
+			}
+			for _, row := range r.Rows {
+				var actions []string
+				result := left
+				if row.Arm == "jev_selective" {
+					result = right
+				}
+				for _, observation := range result.Observations {
+					actions = append(actions, observation.Action)
+				}
+				t.Logf("local coverage key=%s arm=%s actions=%v structural=%v review=%s", key, row.Arm, actions, row.StructuralPass, row.Status)
 			}
 			opts.Model = model
 			raw, err := os.ReadFile(path + ".jev.jsonl")

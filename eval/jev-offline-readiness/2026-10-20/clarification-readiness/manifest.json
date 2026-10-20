@@ -1,0 +1,23 @@
+{
+  "schema": "clarification-readiness-manifest.v1",
+  "base_revision": "f585547",
+  "artifacts_sha256": {
+    "preflight.json": "d74858daf5283b30f68eb5664afedfb3371138ef6417565b54f4a48d0dfbf416",
+    "summary.json": "af1bb65ba49286f2866af593bc23d0502626a76e5ca8843b6f9f34535198df17",
+    "tdd-red.jsonl.gz": "ede24d151f2f4cf1808b5e16f08e04a033f7450aadba5d63881f316371ae6a22",
+    "tests.jsonl.gz": "1e9c1f03ff22745e83e3590962c9eceaa2b6c1a4db4389f28b6e8564f5dfc16d",
+    "vet.log.gz": "46b50c321b39e89a491b6727a01628c34245605a30beb3e7414c5e01cff90e6e"
+  },
+  "decompressed_logs_sha256": {
+    "tests.jsonl.gz": "5ec7dd36c90fbb89d4eb1e2ad1878b08bc822cf0cc6acc70dfd6c9e09c7ebcbe",
+    "tdd-red.jsonl.gz": "89c17a62341f9a04efc89799c9895d64944542fc056c90eef3c1d23be7f7afe7",
+    "vet.log.gz": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "source_lf_sha256": {
+    "internal/taskbench/paired_adapter_integration_test.go": "b9a9c9904af5b1a038fd7b886347a7bf38d3c08ec804296295b2144b15f53bb5",
+    "internal/taskbench/paired_observability_test.go": "887a3e14c565c7ed4081ccd15d697567526bedaebe4f1e1ae4a780db141ad6f6",
+    "docs/jev-clarification-readiness-2026-10-20.md": "cf300b5ec1b2637176da625fed363b211c6451b421fcfff2b54026973f74725e"
+  },
+  "historical_evidence_modified": false,
+  "frozen_task_definitions_modified": false
+}
