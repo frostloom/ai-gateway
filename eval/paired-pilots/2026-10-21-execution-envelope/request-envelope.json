@@ -1,0 +1,346 @@
+{
+  "schema": "offline-request-envelope-probe.v1",
+  "reviewed_revision": "144602b107c3b7b9443620cd276af6b305616dd2",
+  "evidence_kind": "local_stub",
+  "cases": 12,
+  "arms": 24,
+  "user_turns": 46,
+  "model_requests": 38,
+  "jev_evaluator_calls": 12,
+  "model_request_bytes": {
+    "min": 6212,
+    "max": 6783,
+    "configured_limit": 16384
+  },
+  "jev_serialized_request_bytes": {
+    "min": 2547,
+    "max": 2559,
+    "max_single_question_bytes": 948,
+    "public_body_limit_bytes": 33554432
+  },
+  "request_token_counts": null,
+  "provider_token_ceiling_verified": false,
+  "external_model_calls": 0,
+  "external_jev_calls": 0,
+  "semantic_review": "pending_independent_review",
+  "task_success": "unknown",
+  "per_case": [
+    {
+      "case": "balance-001/answer_complete",
+      "jev_requests": [
+        {
+          "bytes": 2547,
+          "max_single_question_bytes": 936,
+          "sha256": "675e2ba27a5cb579556b7a7f938778e05dd6bf8bc4bcb3c15b23567420855102"
+        }
+      ],
+      "kind": "request_envelope_probe",
+      "requests": [
+        {
+          "bytes": 6212,
+          "sha256": "0ab9ee11beb0c829c67fccc06ac623d59b4d54fccade5539264a36480bb27f87"
+        },
+        {
+          "bytes": 6477,
+          "sha256": "be58d2e04a83790eb893255af8f85046d7cc70f0ea0929b09721d1df570248ae"
+        }
+      ]
+    },
+    {
+      "case": "plans-001/answer_complete",
+      "jev_requests": [
+        {
+          "bytes": 2553,
+          "max_single_question_bytes": 942,
+          "sha256": "8cb633228e6b82183a039af57920198040f72a6d8ade03dfc18f56a2a003929e"
+        }
+      ],
+      "kind": "request_envelope_probe",
+      "requests": [
+        {
+          "bytes": 6218,
+          "sha256": "0c700830f3c528f22f1d27c322587652cb4be1fc413598d097d4f49c5dcc3b6f"
+        },
+        {
+          "bytes": 6647,
+          "sha256": "80451b1f03cbedb0e643715c7b00482a025a918646b0efaf4e4c0a6cba28e631"
+        }
+      ]
+    },
+    {
+      "case": "bills-001/answer_complete",
+      "jev_requests": [
+        {
+          "bytes": 2559,
+          "max_single_question_bytes": 948,
+          "sha256": "68ef7b768fd286095b1f319a05dfa43fd6bcdc0f3867a59bd8ffda596292dd20"
+        }
+      ],
+      "kind": "request_envelope_probe",
+      "requests": [
+        {
+          "bytes": 6224,
+          "sha256": "01eb8cbc51c2f3029a579f2dbdf5d258dded440ab9efb71c3c857032a3f2055d"
+        },
+        {
+          "bytes": 6682,
+          "sha256": "fd0d9d19a0705fd2ad3cf921abce9bedd456a6bc46363ff74a20dc1823ef2489"
+        },
+        {
+          "bytes": 6224,
+          "sha256": "01eb8cbc51c2f3029a579f2dbdf5d258dded440ab9efb71c3c857032a3f2055d"
+        },
+        {
+          "bytes": 6682,
+          "sha256": "fd0d9d19a0705fd2ad3cf921abce9bedd456a6bc46363ff74a20dc1823ef2489"
+        }
+      ]
+    },
+    {
+      "case": "consumption-001/answer_complete",
+      "jev_requests": [
+        {
+          "bytes": 2556,
+          "max_single_question_bytes": 945,
+          "sha256": "28b89f79ba46f049238e5c8ba95e97fb3a7a4d7fdda2901db6d1bf95c65f93c4"
+        }
+      ],
+      "kind": "request_envelope_probe",
+      "requests": [
+        {
+          "bytes": 6221,
+          "sha256": "52bb9329677fc0546defb3fda2b546d5a81e814b9218eb93a61f7f2052f054fd"
+        },
+        {
+          "bytes": 6651,
+          "sha256": "88150967c07e6ad6c008d6216caafe782657a5c277e1a795b6ee5eec5a41636f"
+        }
+      ]
+    },
+    {
+      "case": "subscription-001/answer_complete",
+      "jev_requests": [
+        {
+          "bytes": 2553,
+          "max_single_question_bytes": 942,
+          "sha256": "a78368078107e36a3b8025b1a48bf1eaa47d33612c53bbbef75d96b87c0191f8"
+        }
+      ],
+      "kind": "request_envelope_probe",
+      "requests": [
+        {
+          "bytes": 6218,
+          "sha256": "c6039d5791c7c19fdb752517064aa42e117aa9b832d7ca4b95302beb2094a042"
+        },
+        {
+          "bytes": 6610,
+          "sha256": "d3dceb03d6122f33f3971aedb8c4390b3bb5614109f542e84d54217d68af074b"
+        }
+      ]
+    },
+    {
+      "case": "balance-020/explicit_scope_followup",
+      "jev_requests": [
+        {
+          "bytes": 2559,
+          "max_single_question_bytes": 948,
+          "sha256": "6c998ea2dc58a751f02da418db7ceccbace7c94a26a644c5628d64e38d6e36f5"
+        }
+      ],
+      "kind": "request_envelope_probe",
+      "requests": [
+        {
+          "bytes": 6224,
+          "sha256": "964de33c7660ce326a777ca46351de8a633d0c5500b5e862c8c6327b8996bd92"
+        },
+        {
+          "bytes": 6518,
+          "sha256": "3fe68ea6edad444e225536a9ab35b139d4cf770841727b4a54c603f9f2de46c8"
+        },
+        {
+          "bytes": 6783,
+          "sha256": "a47c3b4fbc185810191ec97b774763ea6998f778d68c0242479478730af20fff"
+        },
+        {
+          "bytes": 6224,
+          "sha256": "964de33c7660ce326a777ca46351de8a633d0c5500b5e862c8c6327b8996bd92"
+        },
+        {
+          "bytes": 6518,
+          "sha256": "3fe68ea6edad444e225536a9ab35b139d4cf770841727b4a54c603f9f2de46c8"
+        },
+        {
+          "bytes": 6783,
+          "sha256": "a47c3b4fbc185810191ec97b774763ea6998f778d68c0242479478730af20fff"
+        }
+      ]
+    },
+    {
+      "case": "recharge-001/supplement_then_confirm",
+      "jev_requests": [
+        {
+          "bytes": 2547,
+          "max_single_question_bytes": 936,
+          "sha256": "1f80958d29624474767378027e1859246ee5b2949a72dfa13742398dff9b6faf"
+        }
+      ],
+      "kind": "request_envelope_probe",
+      "requests": [
+        {
+          "bytes": 6212,
+          "sha256": "3d8ccf453859061898f22fa124618f0a1eff45b3824aa8bde5fcbcb9b7c53938"
+        },
+        {
+          "bytes": 6430,
+          "sha256": "6ca970c25bb28477766ca8ce8aa64f63e63a6b75286f0ff693da435e84506a54"
+        },
+        {
+          "bytes": 6212,
+          "sha256": "3d8ccf453859061898f22fa124618f0a1eff45b3824aa8bde5fcbcb9b7c53938"
+        },
+        {
+          "bytes": 6430,
+          "sha256": "6ca970c25bb28477766ca8ce8aa64f63e63a6b75286f0ff693da435e84506a54"
+        }
+      ]
+    },
+    {
+      "case": "recharge-002/confirm",
+      "jev_requests": [
+        {
+          "bytes": 2549,
+          "max_single_question_bytes": 938,
+          "sha256": "f548cdbe204c35b250784c2ef3569211d78f0d0aed3086f720ec2b48190ad07b"
+        }
+      ],
+      "kind": "request_envelope_probe",
+      "requests": [
+        {
+          "bytes": 6214,
+          "sha256": "60f77d103ae53f77582796398266b781139784bb505d5e5042136ff9ba049b3f"
+        },
+        {
+          "bytes": 6214,
+          "sha256": "60f77d103ae53f77582796398266b781139784bb505d5e5042136ff9ba049b3f"
+        }
+      ]
+    },
+    {
+      "case": "recharge-002/cancel",
+      "jev_requests": [
+        {
+          "bytes": 2549,
+          "max_single_question_bytes": 938,
+          "sha256": "f548cdbe204c35b250784c2ef3569211d78f0d0aed3086f720ec2b48190ad07b"
+        }
+      ],
+      "kind": "request_envelope_probe",
+      "requests": [
+        {
+          "bytes": 6214,
+          "sha256": "60f77d103ae53f77582796398266b781139784bb505d5e5042136ff9ba049b3f"
+        },
+        {
+          "bytes": 6214,
+          "sha256": "60f77d103ae53f77582796398266b781139784bb505d5e5042136ff9ba049b3f"
+        }
+      ]
+    },
+    {
+      "case": "recharge-002/duplicate_confirm",
+      "jev_requests": [
+        {
+          "bytes": 2549,
+          "max_single_question_bytes": 938,
+          "sha256": "f548cdbe204c35b250784c2ef3569211d78f0d0aed3086f720ec2b48190ad07b"
+        }
+      ],
+      "kind": "request_envelope_probe",
+      "requests": [
+        {
+          "bytes": 6214,
+          "sha256": "60f77d103ae53f77582796398266b781139784bb505d5e5042136ff9ba049b3f"
+        },
+        {
+          "bytes": 6702,
+          "sha256": "4d9b90c1d21997b8775c9f48d4f06a0150c9cd20c28758f65ed8d8251fdc4747"
+        },
+        {
+          "bytes": 6214,
+          "sha256": "60f77d103ae53f77582796398266b781139784bb505d5e5042136ff9ba049b3f"
+        },
+        {
+          "bytes": 6702,
+          "sha256": "2c6450431afcdde67cf5b076e63b30cc65178386b303a2ec78759218fe83b348"
+        }
+      ]
+    },
+    {
+      "case": "recharge-002/cancel_then_confirm",
+      "jev_requests": [
+        {
+          "bytes": 2549,
+          "max_single_question_bytes": 938,
+          "sha256": "f548cdbe204c35b250784c2ef3569211d78f0d0aed3086f720ec2b48190ad07b"
+        }
+      ],
+      "kind": "request_envelope_probe",
+      "requests": [
+        {
+          "bytes": 6214,
+          "sha256": "60f77d103ae53f77582796398266b781139784bb505d5e5042136ff9ba049b3f"
+        },
+        {
+          "bytes": 6672,
+          "sha256": "35182d721d97aad20e5b17a60d17225c9f1b11970bb4b1e50e2aabc03d56e7aa"
+        },
+        {
+          "bytes": 6214,
+          "sha256": "60f77d103ae53f77582796398266b781139784bb505d5e5042136ff9ba049b3f"
+        },
+        {
+          "bytes": 6672,
+          "sha256": "35182d721d97aad20e5b17a60d17225c9f1b11970bb4b1e50e2aabc03d56e7aa"
+        }
+      ]
+    },
+    {
+      "case": "refund-001/balance_cap",
+      "jev_requests": [
+        {
+          "bytes": 2547,
+          "max_single_question_bytes": 936,
+          "sha256": "b9ae5876c3da8a648d803084f929994208016928907756723727cc4d65c413de"
+        }
+      ],
+      "kind": "request_envelope_probe",
+      "requests": [
+        {
+          "bytes": 6212,
+          "sha256": "4619eb02147c09d80a42ba2062d36d04832970727061cc01c1ec3d009b891609"
+        },
+        {
+          "bytes": 6487,
+          "sha256": "f7a9a7329f8719320cae4e031369e7f73025d541cf75bdfcd9c3bfa71d242284"
+        },
+        {
+          "bytes": 6212,
+          "sha256": "4619eb02147c09d80a42ba2062d36d04832970727061cc01c1ec3d009b891609"
+        },
+        {
+          "bytes": 6487,
+          "sha256": "f7a9a7329f8719320cae4e031369e7f73025d541cf75bdfcd9c3bfa71d242284"
+        }
+      ]
+    }
+  ],
+  "source_test_sha256": "b9a9c9904af5b1a038fd7b886347a7bf38d3c08ec804296295b2144b15f53bb5",
+  "overlay_test_sha256": "c151d223443fd82467618a190d1700d53a98e0fee3b09002aff901c629ab20f2",
+  "test_log_sha256": "6f48647fbf236fc4a6b9973732c6cd466391e6445199f052fbadc4946cad236e",
+  "limitations": [
+    "Measured synthetic full-conversation paths, not all possible real model responses.",
+    "JEV uses Fake; request shape is serialized locally identically to jev.Client, not sent.",
+    "Bytes are not provider token counts; no token-count or inference endpoint called.",
+    "Fake responses report synthetic usage; it is not used as evidence of real tokenizer counts."
+  ]
+}

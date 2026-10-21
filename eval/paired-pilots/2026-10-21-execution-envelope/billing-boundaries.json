@@ -1,0 +1,98 @@
+{
+  "schema": "account-billing-boundary-review.v1",
+  "checked_at": "2026-10-21T14:21:09.640706+00:00",
+  "sources": {
+    "jev-index": {
+      "url": "https://docs.typesafe.ai/llms.txt",
+      "status": 200,
+      "bytes": 18706,
+      "sha256": "e817e47899099364d29633f157ac5de74f936c849bdf5a14382e31ba4a09c688"
+    },
+    "qwen-index": {
+      "url": "https://platform.qianwenai.com/docs/llms.txt",
+      "status": 200,
+      "bytes": 205091,
+      "sha256": "19bc6292a755e408dffc122acaa4e39728bc9f4f566b36d124871896a92f5373"
+    },
+    "jev-openapi": {
+      "url": "https://api.typesafe.ai/openapi.json",
+      "status": 200,
+      "bytes": 21660,
+      "sha256": "ee599512cbea3a198b34af3f60addcd72b381d3521196f93c70ae83185c057c3"
+    },
+    "qwen-cli": {
+      "url": "https://platform.qianwenai.com/docs/api-reference/preparation/cli.md",
+      "status": 200,
+      "bytes": 98360,
+      "sha256": "5b6f4235e160ea67f6c5cdba9dddcb2e1650ed1921ad3711414412f7fa90306a"
+    },
+    "qwen-pricing": {
+      "url": "https://platform.qianwenai.com/docs/developer-guides/getting-started/pricing.md",
+      "status": 200,
+      "bytes": 12334,
+      "sha256": "1f2b93e9e06d6c5f618b9ace20d307c059fee41f899af9f7bd0de63e8a373f08"
+    },
+    "qwen-bill-query": {
+      "url": "https://platform.qianwenai.com/docs/resources/bill-query.md",
+      "status": 200,
+      "bytes": 7144,
+      "sha256": "0691a7e79ddbdad3fe5071a7b9ec91f33c0fcac1379bfd2a236e611ab507b4fd"
+    },
+    "qwen-billing-faq": {
+      "url": "https://platform.qianwenai.com/docs/resources/faq-billing.md",
+      "status": 200,
+      "bytes": 3795,
+      "sha256": "2b07427d9e1098de93ce1708cfa0ec6cacc57230d8fd755a6f78f88c59ad2b2c"
+    },
+    "qwen-balance": {
+      "url": "https://platform.qianwenai.com/docs/resources/billing-overview.md",
+      "status": 200,
+      "bytes": 3807,
+      "sha256": "dceb5fe174d596c40e82c21596afcf03316e8a7b43d5c1e8a2d6e1bfe04935d1"
+    },
+    "jev-errors": {
+      "url": "https://docs.typesafe.ai/api/errors.md",
+      "status": 200,
+      "bytes": 2695,
+      "sha256": "0aee0bfc3052128c4d32c05895c5bec800c9bc0c146af54fdf276dc04414c0de"
+    },
+    "jev-responses": {
+      "url": "https://docs.typesafe.ai/sdk/python/api/types/responses.md",
+      "status": 200,
+      "bytes": 34486,
+      "sha256": "08b198a7d70e499d726a9f9f3b1ac8ef852e2321c54e4945fe65db13eac2d4cb"
+    }
+  },
+  "qwen": {
+    "public_failed_calls_policy": "Provider pricing documentation says failed calls do not incur charges or consume free quota.",
+    "policy_scope": "Provider-confirmed failure; client timeout alone does not establish server-side failure.",
+    "function_calling_extra_tool_fee": false,
+    "function_descriptions_count_as_input_tokens": true,
+    "invoice_refresh": "Hourly with possible delay; absence of immediate bill is not zero spend.",
+    "management_cli_documented": true,
+    "management_cli_installed": false,
+    "management_auth_required": true,
+    "inference_key_is_management_login": false,
+    "billing_console_url": "https://platform.qianwenai.com/home/billing/pay-as-you-go",
+    "billing_console_state_observed": "not_signed_in",
+    "account_bill_read": false,
+    "account_tariff_verified": false
+  },
+  "jev": {
+    "published_openapi_paths": [
+      "/v1/models",
+      "/v1/systemone"
+    ],
+    "billing_or_balance_path_in_inspected_openapi": false,
+    "failure_charging_policy_found_in_inspected_docs": false,
+    "account_tariff_verified": false
+  },
+  "token_count": {
+    "documented_non_inference_counter_found_in_inspected_sources": false,
+    "token_count_endpoint_called": false,
+    "inference_executed": false,
+    "request_bytes_are_token_counts": false
+  },
+  "private_account_data_archived": false,
+  "scope": "No provider inference, account changes, new credentials, CLI install, billing-limit changes or payments."
+}

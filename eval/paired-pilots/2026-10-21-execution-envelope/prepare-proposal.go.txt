@@ -1,0 +1,38 @@
+package main
+
+import (
+ "crypto/sha256"
+ "encoding/json"
+ "fmt"
+ "os"
+ "github.com/frostloom/ai-gateway/internal/taskbench"
+)
+func main(){
+ root := ".tmp/execution-envelope-20261021/"
+ source,err:=taskbench.LoadConversations("eval/task-definitions/2026-10-12-full-dev-v1");must(err)
+ plan,err:=taskbench.PrepareSmallPair(source);must(err)
+ profiles,err:=taskbench.LoadPairedProfiles("eval/runtime-profiles/2026-10-13-six-profiles-v1");must(err)
+ keys:=[]string{"balance-001/answer_complete","balance-020/explicit_scope_followup","recharge-002/confirm","recharge-002/cancel","recharge-001/supplement_then_confirm","refund-001/balance_cap"}
+ calls:=[]int{3,7,3,3,4,4}
+ batches:=[]map[string]any{}
+ var total int64;turns:=0
+ for i,key:=range keys {
+  suite:=plan.Suite;suite.Cases=nil
+  for _,c:=range plan.Suite.Cases {if c.Key()==key {suite.Cases=append(suite.Cases,c);turns+=2*len(c.Scenario.Turns)}}
+  if len(suite.Cases)!=1 {panic("missing case")}
+  cfg,err:=taskbench.PrepareAgentPairConfig(suite,profiles,taskbench.PairModelSettings{BaseURL:"https://maas.qianwenaiapi.com/apps/anthropic",Model:"deepseek-v4.1-flash",Protocol:"anthropic"},"recorded_run","144602b107c3b7b9443620cd276af6b305616dd2","jev-1.13.0");must(err)
+  limits:=taskbench.PairBudgetLimits{MaxCalls:calls[i],MaxOutputTokens:128,MaxRequestBytes:16384,InputTokenCeiling:16384,MaxMicroCNY:int64(calls[i])*33792,InputMicroCNYPerMillion:2000000,OutputMicroCNYPerMillion:8000000}
+  estimate,err:=taskbench.EstimateDeclaredPairBudget(limits);must(err);total+=estimate.AllAttemptsMicroCNY
+  batches=append(batches,map[string]any{"id":fmt.Sprintf("batch-%03d",i+1),"key":key,"configuration":cfg,"pair_run_contract":taskbench.PairRunContract(cfg),"model_limits":limits,"max_jev_calls":1,"reserved_jev_micro_usd":2688,"model_estimate":estimate})
+ }
+ campaignLimits:=taskbench.CampaignLimits{MaxBatches:6,MaxModelCalls:24,MaxModelMicroCNY:1000000,MaxJEVCalls:6,MaxJEVMicroUSD:20000,JEVMicroUSDPerAttempt:2688}
+ proposal:=map[string]any{"schema":"small-pilot-execution-proposal.v1","allow_paid":false,"ready_for_paid_run":false,"authorized_spending":nil,"reviewed_revision":"144602b107c3b7b9443620cd276af6b305616dd2","planned_cases":6,"planned_arms":12,"planned_user_turns":turns,"proposed_campaign_limits":campaignLimits,"declared_reserved_model_micro_cny":total,"declared_reserved_jev_micro_usd":6*2688,"batches":batches,"automatic_scope_expansion":false,"token_envelope_verified":false,"account_tariff_verified":false,"jev_failure_charges_verified":false,"execution_driver_implemented":false}
+ raw,err:=json.MarshalIndent(proposal,"","  ");must(err);raw=append(raw,'\n');must(os.WriteFile(root+"execution-proposal.json",raw,0600))
+ // Offline reservation-only simulation. This ledger must never be used for inference.
+ digest:=fmt.Sprintf("%x",sha256.Sum256(append([]byte("offline-reservation-only:"),raw...)))
+ campaign,err:=taskbench.OpenCampaignBudget(root+"reservation-only",digest,campaignLimits);must(err)
+ for _,b:=range batches {lease,err:=campaign.ReserveBatch(b["id"].(string),b["pair_run_contract"].(string),b["model_limits"].(taskbench.PairBudgetLimits),1);must(err);must(lease.Finish(false))}
+ must(campaign.Close())
+ fmt.Printf("Offline proposal: cases=6 arms=12 turns=%d model_reserved_micro_cny=%d jev_reserved_micro_usd=%d; six reservations validated; zero providers\n",turns,total,6*2688)
+}
+func must(err error){if err!=nil{panic(err)}}

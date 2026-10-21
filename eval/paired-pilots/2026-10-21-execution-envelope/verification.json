@@ -1,0 +1,68 @@
+{
+  "schema": "execution-envelope-verification.v1",
+  "reviewed_revision": "144602b107c3b7b9443620cd276af6b305616dd2",
+  "probe_test": {
+    "top_level_pass": 1,
+    "subtests_pass": 12,
+    "failed": 0,
+    "skipped": 0,
+    "model_requests": 38,
+    "jev_evaluator_calls": 12,
+    "local_otel_tasks": 24,
+    "local_otel_turns": 46,
+    "local_otel_generations": 38,
+    "drops": 0,
+    "export_failures": 0,
+    "real_langfuse_ingestion": false
+  },
+  "proposal_reservation_simulation": {
+    "only": true,
+    "batches": 6,
+    "model_call_cap": 24,
+    "jev_call_cap": 6,
+    "model_reserved_micro_cny": 811008,
+    "jev_reserved_micro_usd": 16128,
+    "model_proposed_cap_micro_cny": 1000000,
+    "jev_proposed_cap_micro_usd": 20000,
+    "must_never_reuse_simulation_ledger_for_execution": true
+  },
+  "allow_paid": false,
+  "ready_for_paid_run": false,
+  "external_model_calls": 0,
+  "external_jev_calls": 0,
+  "account_tariff_verified": false,
+  "token_envelope_verified": false,
+  "public_files": {
+    "request-envelope.json": "d863bb9616fbe5413e756f644dad004de830e81cb2dd2aad9ed245c8fa52ed68",
+    "prepare-proposal.go.txt": "9b40d836e443052b12242c21097426c1b5af9c4a119479959cab63369782261f",
+    "probe-overlay.patch": "c0b9bb1a3f2dc5d4fc26dd245cfa7983a0e7c7bb74a83b7e442932d19eda1ee4",
+    "execution-proposal.json": "42825e6acba9bcc289059e6961dbab0964e50b56b09b636c5740abb4db660013",
+    "billing-boundaries.json": "1ad813aac1f73ae892d100cc2d4072e1d878ddde7e983378d9dc3f333aec936c"
+  },
+  "local_evidence": {
+    "probe-test.jsonl": "96222a118dd63356a8b6a7f23540378ff52725d577d451dea4f4fc0b830f4b0a",
+    "probe-test-v2.jsonl": "efe262ea1cb2e2270f51b212bfba1054cbc94b877cb100420793389a53583b9a",
+    "probe-test-v3.jsonl": "6f48647fbf236fc4a6b9973732c6cd466391e6445199f052fbadc4946cad236e",
+    "paired_adapter_integration_v3_test.go": "c151d223443fd82467618a190d1700d53a98e0fee3b09002aff901c629ab20f2",
+    "reservation-only/campaign.jsonl": "15a76f092c2e01b56de1db5379666651b236eb60ef8fba2880b6aeba11aea7e4"
+  },
+  "first_probe_failure": "The existing six-case Fake was extended to twelve cases but still generated recharge previews for duplicate/cancelled confirmations; original assertions failed. Added no-tool responses to Fake only, preserving product code and assertions. Rerun passed all twelve cases.",
+  "limitations": [
+    "No provider tokenizer or token-count receipt; byte coverage established only for measured local paths.",
+    "No authenticated billing session; actual account tariffs unavailable.",
+    "No real model availability, quality, cost or live JEV failure-fee claim."
+  ],
+  "artifact_validation": {
+    "json_and_evidence_hashes": "passed",
+    "source_unchanged_and_patch_reproduction": "passed",
+    "counts_and_reservations": "passed",
+    "document_links_and_whitespace": "passed",
+    "credential_pattern_scan": "passed"
+  },
+  "independent_review": {
+    "reviewer": "review_execution_envelope",
+    "result": "passed",
+    "material_findings": 0,
+    "scope": "Billing boundaries, local request evidence, proposal arithmetic, stop semantics, paid authorization and sensitive data; not semantic evaluation of real model answers."
+  }
+}

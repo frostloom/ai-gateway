@@ -1,5 +1,7 @@
 # 小样本测评：价格、预算与本地链路核验（2026-10-21）
 
+同日后续：[完整请求测量、计费边界与首轮执行提案](paired-execution-proposal-2026-10-21.md)。
+
 本轮完成真实测评前的准备核验，代码基线为 main `b9db163c5d2fe65b58d3ce5e5239ac0c77c59093`。新离线 preflight 保持 `allow_paid=false`、`ready_for_paid_run=false`，外部模型/JEV推理均为 0。本轮没有修改产品代码或私密配置，也没有新增付费执行入口。
 
 ## 范围和当前配置

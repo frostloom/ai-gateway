@@ -1,0 +1,62 @@
+--- a/internal/taskbench/paired_adapter_integration_test.go
++++ b/internal/taskbench/paired_adapter_integration_test.go
+@@ -4,0 +5,4 @@
++ "crypto/sha256"
++ "fmt"
++ "io"
++ "sync"
+@@ -40 +44,3 @@
+-	for _, key := range []string{"balance-001/answer_complete", "balance-020/explicit_scope_followup", "recharge-002/confirm", "recharge-002/cancel", "recharge-001/supplement_then_confirm", "refund-001/balance_cap"} {
++	for _, picked := range plan.Suite.Cases {
++ key := picked.Key()
++
+@@ -50,0 +57,3 @@
++ var probeMu sync.Mutex
++ var requestProbe []map[string]any
++ var jevProbe []map[string]any
+@@ -51,0 +61 @@
++ if len(selected.Scenario.Turns)>0 && len(selected.Scenario.Turns[0].AllowedTools)>0 {tool=selected.Scenario.Turns[0].AllowedTools[0]}
+@@ -58,0 +69,6 @@
++ rawBody, readErr := io.ReadAll(r.Body)
++ if readErr != nil {t.Error(readErr);return}
++ r.Body=io.NopCloser(bytes.NewReader(rawBody))
++ probeMu.Lock()
++ requestProbe=append(requestProbe,map[string]any{"bytes":len(rawBody),"sha256":fmt.Sprintf("%x",sha256.Sum256(rawBody))})
++ probeMu.Unlock()
+@@ -83 +99,4 @@
+-						} else if block.Type == "text" && block.Text == "看看我还能用多少" {
++						} else if block.Type == "text" && block.Text == "确认" && (selected.Scenario.ID == "duplicate_confirm" || selected.Scenario.ID == "cancel_then_confirm") {
++ content = []any{map[string]any{"type":"text","text":"当前没有待确认操作；如有新的充值申请，请重新说明。"}}
++ stop="end_turn"
++ } else if block.Type == "text" && block.Text == "看看我还能用多少" {
+@@ -98 +117 @@
+-			model := PairModelSettings{BaseURL: provider.URL, APIKey: "local-only", Model: "local", Protocol: "anthropic"}
++			model := PairModelSettings{BaseURL: provider.URL, APIKey: "local-only", Model: "deepseek-v4.1-flash", Protocol: "anthropic"}
+@@ -128 +147,4 @@
+-				return jev.NewFake(localJevScript(tool, confidence), localJevScript(tool, confidence))
++				return &measuredJEVProbe{Evaluator: jev.NewFake(localJevScript(tool, confidence), localJevScript(tool, confidence)), observe:func(raw []byte, questionBytes int){
++ probeMu.Lock();defer probeMu.Unlock()
++ jevProbe=append(jevProbe,map[string]any{"bytes":len(raw),"max_single_question_bytes":questionBytes,"sha256":fmt.Sprintf("%x",sha256.Sum256(raw))})
++ }}
+@@ -161 +183,5 @@
+-			before := calls.Load()
++			probeMu.Lock()
++ rawProbe,_:=json.Marshal(map[string]any{"kind":"request_envelope_probe","case":key,"requests":requestProbe,"jev_requests":jevProbe})
++ t.Log(string(rawProbe))
++ probeMu.Unlock()
++ before := calls.Load()
+@@ -233,0 +260,14 @@
++
++// measuredJEVProbe serializes the same shape as jev.Client; all evaluation remains Fake.
++type measuredJEVProbe struct { jev.Evaluator; observe func([]byte,int) }
++func (m *measuredJEVProbe) Evaluate(ctx context.Context, state any, questions map[string]jev.Question) (*jev.Result,error) {
++ raw,err:=json.Marshal(map[string]any{"model":"jev-1.13.0","state":state,"questions":questions})
++ if err!=nil{return nil,err}
++ maxQuestion:=0
++ for name,q:=range questions {
++  one,err:=json.Marshal(map[string]any{"model":"jev-1.13.0","state":state,"questions":map[string]jev.Question{name:q}})
++  if err!=nil{return nil,err};if len(one)>maxQuestion{maxQuestion=len(one)}
++ }
++ m.observe(raw,maxQuestion)
++ return m.Evaluator.Evaluate(ctx,state,questions)
++}
