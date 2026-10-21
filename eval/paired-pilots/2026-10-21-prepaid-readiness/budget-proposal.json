@@ -1,0 +1,28 @@
+{
+  "model": {
+    "max_calls": 24,
+    "max_request_bytes": 16384,
+    "input_token_ceiling": 16384,
+    "max_output_tokens": 128,
+    "input_micro_cny_per_million": 2000000,
+    "output_micro_cny_per_million": 8000000,
+    "per_attempt_reserved_micro_cny": 33792,
+    "all_attempts_reserved_micro_cny": 811008,
+    "proposed_cap_micro_cny": 1000000,
+    "input_token_ceiling_verified": false,
+    "complete_request_byte_coverage_verified": false
+  },
+  "jev": {
+    "max_calls": 12,
+    "assumed_input_token_ceiling": 64000,
+    "input_micro_usd_per_million": 42000,
+    "per_attempt_reserved_micro_usd": 2688,
+    "all_attempts_reserved_micro_usd": 32256,
+    "proposed_cap_micro_usd": 32256,
+    "account_charge_envelope_verified": false
+  },
+  "actual_spend": null,
+  "approved_spending": null,
+  "proposal_only": true,
+  "full_completion_guaranteed": false
+}

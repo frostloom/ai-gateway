@@ -1,5 +1,7 @@
 # 真实小样本测评准备（2026-10-21）
 
+同日后续：[价格、预算与本地链路的新核验](paired-prepaid-readiness-2026-10-21.md)已完成；[Hindsight排查](hindsight-write-diagnosis-2026-10-21.md)已确认写入成功，本文末尾的超时描述保留为当时状态。
+
 本轮在 `main` 修复并验证了执行前的 Langfuse 记录器检查，代码提交为 `d35d98c`。仍未开始新的真实模型/JEV测评；`allow_paid=false`、`ready_for_paid_run=false`。继续开发、提交和推送的授权不包含付费推理。
 
 ## 已完成的入口修复

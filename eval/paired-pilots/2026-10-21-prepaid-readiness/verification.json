@@ -1,0 +1,114 @@
+{
+  "schema": "prepaid-readiness-verification.v1",
+  "date": "2026-10-21",
+  "reviewed_revision": "b9db163c5d2fe65b58d3ce5e5239ac0c77c59093",
+  "allow_paid": false,
+  "ready_for_paid_run": false,
+  "external_model_calls": 0,
+  "external_jev_calls": 0,
+  "planned_scope": {
+    "cases": 12,
+    "arms": 24,
+    "user_turns_both_arms": 46
+  },
+  "local_fixture_scope": {
+    "cases": 6,
+    "arms": 12,
+    "turns": 26,
+    "generations": 20,
+    "scores_verified": 84,
+    "release": "prepaid-readiness-20261021-b9db163",
+    "evidence_kind": "local_stub",
+    "semantic_review": "pending_independent_review",
+    "task_success": "unknown"
+  },
+  "exporter": {
+    "Accepted": 82,
+    "Dropped": 0,
+    "Exported": 82,
+    "Failed": 0,
+    "Batches": 19,
+    "Turns": 26,
+    "SampledTurns": 26,
+    "QueueDepth": 0
+  },
+  "targeted_tests": [
+    {
+      "command": [
+        "go",
+        "test",
+        "./cmd/paired-eval",
+        "-count=1",
+        "-json"
+      ],
+      "exit_code": 0,
+      "top_level": {
+        "pass": 4
+      }
+    },
+    {
+      "command": [
+        "go",
+        "test",
+        "./internal/taskbench",
+        "-run",
+        "^Test(PairBudget|Campaign|DeclaredPairBudget|PairedRuntimeDisabled|PairJEVGuard|RecordedAgentPair)",
+        "-count=1",
+        "-json",
+        "-timeout",
+        "3m"
+      ],
+      "exit_code": 0,
+      "top_level": {
+        "pass": 14
+      }
+    }
+  ],
+  "local_fixture_test": {
+    "exit_code": 0,
+    "seconds": 10.32,
+    "release": "prepaid-readiness-20261021-b9db163",
+    "model_credentials_injected": false,
+    "jev_credentials_injected": false,
+    "prior_attempt": "config whitelist omitted LANGFUSE project keys and OTEL endpoint; failed before observer creation"
+  },
+  "settings": {
+    "root_env_channel_model_protocol_match_proposal": true,
+    "root_env_jev_model_unset": true,
+    "execution_requires_explicit_jev_model": "jev-1.13.0",
+    "no_configuration_files_modified": true
+  },
+  "remaining_gates": [
+    "Account-specific tariff and failed-request charging verification.",
+    "Provider input-token envelope and complete serialized-request byte coverage; 16384 is still an operator declaration.",
+    "Explicit authorization of exact cases, attempt caps and separate CNY/USD envelopes.",
+    "For an authorized recorded run, construct explicit evaluation observer and fresh campaign/journals; local fixture coverage does not establish provider availability or model accuracy."
+  ],
+  "files": {
+    "preflight.json": "eb1c78d99804174cf73b52cb4eacd7f827ac9762bfdcbe040d0af81a30e1c4b7",
+    "public-price-review.json": "cc2bdb86511dc50324f0a1e656b9177b477bbeb5e6f46f0f342e250867fe1513",
+    "budget-proposal.json": "8169c93b0b1567158e2d815790f88728b8d3bbadf99da94eaef58f6257bbbf1b"
+  },
+  "local_evidence": {
+    "langfuse-smoke.json": "e8e859a3809b3d4df18aa23c5677721550534136c491dd360e15e659577cdf3e",
+    "langfuse-smoke-rerun.jsonl": "598934f7d53c3f527876632c01c804cdd15fe07052581c76517722cdd86745ea",
+    "langfuse-smoke-test.jsonl": "bf736d89fa8bf1bb2dbc7c78b7c34cd08709e5e29c15c72611b945f17b04985b",
+    "trace-readback.json": "58da516995990e7e6325a1795f95aba10cacddae07d9997fb8ed348d81d8487c",
+    "score-plan.json": "2fa58fa9699fc668b46c26cba086d775ad1b0652c2dd5101190654521704488b",
+    "score-publish.jsonl": "e0501946604d4a89536cdd0e7572f8b601988822e6e8c3b9445105ed9a76211c",
+    "langfuse-readback.json": "63d0a9b6a8cbd0a15f9ca69ebe9f3cfe71abacf718c23aa401d9bfb05fa32d00",
+    "guards-0.jsonl": "b66d4683817daeefc5166ebbee27a4512bf02703b3d6bb4fa47a493dbbec3a1d",
+    "guards-1.jsonl": "79f27b5323e7f665e1e05625cfb42376267a22163e6a67cbb557bbaf6ff6373e",
+    "memory-readback.json": "368d020129ce192d3ddaaa9c45a423f6a7349058b3d0ce477b6153c9bea59a46"
+  },
+  "independent_review": {
+    "result": "no_blocking_findings",
+    "scope": "sanitized preparation artifacts, source linkage/hashes, arithmetic, local telemetry/score evidence",
+    "preflight_generic_price_notice_clarified_in_report": true
+  },
+  "project_memory": {
+    "bank_id": "ai-gateway",
+    "write_success": true,
+    "readback_confirmed": true
+  }
+}

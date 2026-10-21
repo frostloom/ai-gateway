@@ -1,0 +1,99 @@
+{
+  "schema": "pilot-public-price-review.v2",
+  "checked_at": "2026-10-21T12:47:38.897135+00:00",
+  "sources": {
+    "model-page": {
+      "url": "https://www.qianwenai.com/models/deepseek-v4.1-flash",
+      "http_status": 200,
+      "sha256": "203bb2739e13fecaa1db2e2e3a06293e1df58fa4a59dc9d8567792af55c48234",
+      "bytes": 77273,
+      "final_url": "https://www.qianwenai.com/models/deepseek-v4.1-flash"
+    },
+    "jev-models": {
+      "url": "https://docs.typesafe.ai/models",
+      "http_status": 200,
+      "sha256": "00fa0721ad13e62b518760c9d13e3b64d485555da77dd3fdb4ec3eeae1e0c61c",
+      "bytes": 396204,
+      "final_url": "https://docs.typesafe.ai/models"
+    },
+    "anthropic-protocol": {
+      "url": "https://platform.qianwenai.com/docs/api-reference/chat/anthropic",
+      "http_status": 200,
+      "sha256": "18b39d23f417945cc0aac5eeb9142d6433c8073ad56d0f03c0166f7403f62303",
+      "bytes": 1142247,
+      "final_url": "https://platform.qianwenai.com/docs/api-reference/chat/anthropic"
+    },
+    "model-entry": {
+      "url": "https://q.alyasset.com/lowcode/entry/prod/d23deac40214b3498492b41114edb7e5.js",
+      "http_status": 200,
+      "sha256": "91946b75f904acb309253cdcdf0e3ef20af26f48a01888e149954b39701ad63b",
+      "bytes": 39930,
+      "referenced_by_current_model_page": true
+    }
+  },
+  "model": {
+    "name": "deepseek-v4.1-flash",
+    "prices": [
+      {
+        "Price": "1",
+        "PriceName": "输入",
+        "PriceUnit": "每百万tokens",
+        "TimeBand": "offpeak",
+        "Type": "input_token"
+      },
+      {
+        "Price": "2",
+        "PriceName": "输入",
+        "PriceUnit": "每百万tokens",
+        "TimeBand": "peak",
+        "Type": "input_token"
+      },
+      {
+        "Price": "4",
+        "PriceName": "输出",
+        "PriceUnit": "每百万tokens",
+        "TimeBand": "offpeak",
+        "Type": "output_token"
+      },
+      {
+        "Price": "8",
+        "PriceName": "输出",
+        "PriceUnit": "每百万tokens",
+        "TimeBand": "peak",
+        "Type": "output_token"
+      },
+      {
+        "Price": "0.1",
+        "PriceName": "输入（缓存命中）",
+        "PriceUnit": "每百万tokens",
+        "TimeBand": "offpeak",
+        "Type": "input_token_cache"
+      },
+      {
+        "Price": "0.2",
+        "PriceName": "输入（缓存命中）",
+        "PriceUnit": "每百万tokens",
+        "TimeBand": "peak",
+        "Type": "input_token_cache"
+      }
+    ],
+    "public_max_input_tokens": 1000000,
+    "public_max_output_tokens": 393216,
+    "budget_input_cny_per_million": "2",
+    "budget_output_cny_per_million": "8",
+    "cache_discount_assumed": false
+  },
+  "jev": {
+    "pinned_model": "jev-1.13.0",
+    "input_usd_per_million": "0.042",
+    "output_price_usd": "0",
+    "default_request_context_tokens": 64000,
+    "default_question_context_tokens": 32000,
+    "long_context_enabled": false,
+    "stable_alias": "jev-1.13.0",
+    "preview_alias": "jev-1.14.0"
+  },
+  "account_tariff_verified": false,
+  "failed_request_charges_verified": false,
+  "provider_inference_executed": false
+}
