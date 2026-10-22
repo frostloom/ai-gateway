@@ -61,9 +61,8 @@
   },
   "observations": {
     "safari_authenticated_console_home_observed": true,
-    "safari_billing_page_read": false,
+    "safari_billing_page_read": true,
     "independent_browser_login_page_observed": true,
-    "account_balance_verified": false,
     "account_effective_tariff_verified": false,
     "failed_request_fee_rule_verified": false,
     "jev_usage_optional_post_response": true,
@@ -81,7 +80,15 @@
         "/apps/anthropic/v1/messages"
       ]
     },
-    "non_inference_exact_token_counter_found": false
+    "non_inference_exact_token_counter_found": false,
+    "safari_usage_page_read": true,
+    "browser_account_available_credits_observed": true,
+    "browser_account_expiring_credits_observed": true,
+    "browser_account_auto_recharge_enabled": false,
+    "usage_price_label_is_estimated": true,
+    "usage_statistics_may_be_delayed": true,
+    "project_key_account_mapping_verified": false,
+    "project_key_account_balance_verified": false
   },
   "controls": {
     "allow_paid": false,
