@@ -1,0 +1,41 @@
+{
+  "schema": "customer-service-model-migration.v1",
+  "date": "2026-10-22",
+  "source": "CC Switch Pi provider, compared with Pi live models.json",
+  "provider_id": "cc-switch-deep-seek",
+  "base_url": "https://api.deepseek.com/v1",
+  "model": "deepseek-flash",
+  "protocol": "openai",
+  "selection": "Keep the existing Flash tier; Pi provider has Pro and Flash, with no default model configured.",
+  "cc_switch_and_pi_config_match": true,
+  "credential_comparison_in_memory_only": true,
+  "root_env_mode": "0600",
+  "private_env_and_backups_ignored": true,
+  "startup_overlay_does_not_override_model": true,
+  "graceful_launchd_reload": true,
+  "running_process_four_model_settings_match": true,
+  "non_inference_models_get": {
+    "status": 200,
+    "target_model_listed": true,
+    "redirects_allowed": false
+  },
+  "agent_health_status": 200,
+  "gateway_portal_status": 200,
+  "local_protocol_tests": {
+    "exit_code": 0,
+    "named_tests": [
+      "TestDetectProtocol",
+      "TestOpenAIAppliesRecordedOutputBudget",
+      "TestLLMTelemetryOpenAI",
+      "TestLLMEvaluationClientExplicitBudget"
+    ],
+    "cmd_agent_compiled": true,
+    "external_inference_used": false
+  },
+  "go_source_modified": false,
+  "full_go_regression_repeated": false,
+  "external_model_inference_calls": 0,
+  "external_jev_inference_calls": 0,
+  "prior_qwen_campaign_executed": false,
+  "credentials_archived": false
+}
