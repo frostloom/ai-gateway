@@ -1,0 +1,22 @@
+{
+  "schema": "pi-independent-review-sync-result.v1",
+  "original_execution_revision": "43133e90596bcfd4ecd9d3cf58af226bd42c2d0f",
+  "original_review_sha256": "0b5562bd98ce8722290241bff29dd06afa3d2b54c9ce24a28dc78e7021b65026",
+  "model_calls": 0,
+  "jev_calls": 0,
+  "new_scores_verified": 4,
+  "original_scores_still_verified": 14,
+  "independent_review_status": "reviewed_pass",
+  "reviewed_task_success": "passed",
+  "original_execution_status": "needs_review",
+  "checkpoint_advanced": false,
+  "automatic_retries": 0,
+  "immediate_publish_verification": "not_confirmed",
+  "separate_read_only_verification": "succeeded",
+  "source_check": "original manifest hashes matched and Go offline rederived report equals original",
+  "tests": {
+    "python_tests": 170,
+    "skipped": 15,
+    "independent_code_review": "passed after fixing explicit-empty-review-flag fallback"
+  }
+}

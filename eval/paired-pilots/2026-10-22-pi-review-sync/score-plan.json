@@ -1,0 +1,124 @@
+{
+  "jev_calls": 0,
+  "model_calls": 0,
+  "schema": "langfuse-score-plan.v1",
+  "scores": [
+    {
+      "comment": "Independent semantic review bound to the original journal, requirements and answers; original deterministic scores retained. Not a population-level quality or savings claim.",
+      "dataType": "CATEGORICAL",
+      "environment": "evaluation",
+      "id": "16afc05f29485c548ef9c4ba33e6592dfa6397c82260261f4ca58d866ac640aa",
+      "metadata": {
+        "arm": "model",
+        "case_key": "balance-001/answer_complete",
+        "evidence_kind": "recorded_run",
+        "execution_revision": "43133e90596bcfd4ecd9d3cf58af226bd42c2d0f",
+        "expected_turns": 1,
+        "journal_sha256": "72089a3cc4866f5b686b55332897cda0121bafdb267b00856d64eed9403991f8",
+        "report_sha256": "365477b8d012ea9cf4f0318230f6c932fe58f1526eabf5534a0e95a47d0df1e0",
+        "require_answers": true,
+        "review_method": "independent_agent_evidence_review",
+        "review_sha256": "0b5562bd98ce8722290241bff29dd06afa3d2b54c9ce24a28dc78e7021b65026",
+        "reviewer": "/root/review_first_batch_evidence"
+      },
+      "name": "independent_review_status",
+      "traceId": "651bc3ecf1bde972c192fe05956f96b5",
+      "value": "reviewed_pass"
+    },
+    {
+      "comment": "Independent semantic review bound to the original journal, requirements and answers; original deterministic scores retained. Not a population-level quality or savings claim.",
+      "dataType": "CATEGORICAL",
+      "environment": "evaluation",
+      "id": "6446661d3bb1a3e23a061a328e05322caf0f1b163fa173413bc4da64a9ceb8f7",
+      "metadata": {
+        "arm": "model",
+        "case_key": "balance-001/answer_complete",
+        "evidence_kind": "recorded_run",
+        "execution_revision": "43133e90596bcfd4ecd9d3cf58af226bd42c2d0f",
+        "expected_turns": 1,
+        "journal_sha256": "72089a3cc4866f5b686b55332897cda0121bafdb267b00856d64eed9403991f8",
+        "report_sha256": "365477b8d012ea9cf4f0318230f6c932fe58f1526eabf5534a0e95a47d0df1e0",
+        "require_answers": true,
+        "review_method": "independent_agent_evidence_review",
+        "review_sha256": "0b5562bd98ce8722290241bff29dd06afa3d2b54c9ce24a28dc78e7021b65026",
+        "reviewer": "/root/review_first_batch_evidence"
+      },
+      "name": "reviewed_task_success",
+      "traceId": "651bc3ecf1bde972c192fe05956f96b5",
+      "value": "passed"
+    },
+    {
+      "comment": "Independent semantic review bound to the original journal, requirements and answers; original deterministic scores retained. Not a population-level quality or savings claim.",
+      "dataType": "CATEGORICAL",
+      "environment": "evaluation",
+      "id": "0d4e5d99a1f10454e017b0b80aa1c844f030c3c6fc79c3c1081c4eab4f39f33f",
+      "metadata": {
+        "arm": "jev_selective",
+        "case_key": "balance-001/answer_complete",
+        "evidence_kind": "recorded_run",
+        "execution_revision": "43133e90596bcfd4ecd9d3cf58af226bd42c2d0f",
+        "expected_turns": 1,
+        "journal_sha256": "72089a3cc4866f5b686b55332897cda0121bafdb267b00856d64eed9403991f8",
+        "report_sha256": "365477b8d012ea9cf4f0318230f6c932fe58f1526eabf5534a0e95a47d0df1e0",
+        "require_answers": true,
+        "review_method": "independent_agent_evidence_review",
+        "review_sha256": "0b5562bd98ce8722290241bff29dd06afa3d2b54c9ce24a28dc78e7021b65026",
+        "reviewer": "/root/review_first_batch_evidence"
+      },
+      "name": "independent_review_status",
+      "traceId": "86ed2f84a3a18f78cabae73feb397826",
+      "value": "reviewed_pass"
+    },
+    {
+      "comment": "Independent semantic review bound to the original journal, requirements and answers; original deterministic scores retained. Not a population-level quality or savings claim.",
+      "dataType": "CATEGORICAL",
+      "environment": "evaluation",
+      "id": "917565bf7679fa2d9774ad4e51c29ab78c4097f12b0f3f8e5686d6f386fffb5c",
+      "metadata": {
+        "arm": "jev_selective",
+        "case_key": "balance-001/answer_complete",
+        "evidence_kind": "recorded_run",
+        "execution_revision": "43133e90596bcfd4ecd9d3cf58af226bd42c2d0f",
+        "expected_turns": 1,
+        "journal_sha256": "72089a3cc4866f5b686b55332897cda0121bafdb267b00856d64eed9403991f8",
+        "report_sha256": "365477b8d012ea9cf4f0318230f6c932fe58f1526eabf5534a0e95a47d0df1e0",
+        "require_answers": true,
+        "review_method": "independent_agent_evidence_review",
+        "review_sha256": "0b5562bd98ce8722290241bff29dd06afa3d2b54c9ce24a28dc78e7021b65026",
+        "reviewer": "/root/review_first_batch_evidence"
+      },
+      "name": "reviewed_task_success",
+      "traceId": "86ed2f84a3a18f78cabae73feb397826",
+      "value": "passed"
+    }
+  ],
+  "trace_bindings": {
+    "651bc3ecf1bde972c192fe05956f96b5": {
+      "arm": "model",
+      "case_key": "balance-001/answer_complete",
+      "evidence_kind": "recorded_run",
+      "expected_content": [
+        {
+          "input_sha256": "3b9a9df22ae389c49450043b62d843adac20be735f61c94eba15bed9eee53c30",
+          "reply_sha256": "c4f04c2708602813f4461b466137f3a603406401c42804fde6658dc2522e8742"
+        }
+      ],
+      "expected_turns": 1,
+      "require_answers": true
+    },
+    "86ed2f84a3a18f78cabae73feb397826": {
+      "arm": "jev_selective",
+      "case_key": "balance-001/answer_complete",
+      "evidence_kind": "recorded_run",
+      "expected_content": [
+        {
+          "input_sha256": "3b9a9df22ae389c49450043b62d843adac20be735f61c94eba15bed9eee53c30",
+          "reply_sha256": "560707ca5b3d033d9007796a9414779d7873c670a4019dd0aea0c772d32ae2ed"
+        }
+      ],
+      "expected_turns": 1,
+      "require_answers": true
+    }
+  },
+  "unlinked_rows": []
+}

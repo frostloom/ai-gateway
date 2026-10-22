@@ -1,0 +1,29 @@
+{
+  "jev_calls": 0,
+  "kind": "verified",
+  "model_calls": 0,
+  "plan_sha256": "3d5f18801bc326a6b5f3724e9f68bfe639e4953e5bb1024fac195d45a8973b5c",
+  "score_count": 14,
+  "trace_summaries": [
+    {
+      "arm": "model",
+      "case_key": "balance-001/answer_complete",
+      "content_turns": 1,
+      "evidence_kind": "recorded_run",
+      "expected_turns": 1,
+      "require_answers": true,
+      "trace_id": "651bc3ecf1bde972c192fe05956f96b5",
+      "turns": 1
+    },
+    {
+      "arm": "jev_selective",
+      "case_key": "balance-001/answer_complete",
+      "content_turns": 1,
+      "evidence_kind": "recorded_run",
+      "expected_turns": 1,
+      "require_answers": true,
+      "trace_id": "86ed2f84a3a18f78cabae73feb397826",
+      "turns": 1
+    }
+  ]
+}

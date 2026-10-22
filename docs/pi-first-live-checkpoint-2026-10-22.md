@@ -1,5 +1,7 @@
 # Pi 客服首批真实评测检查点（2026-10-22）
 
+后续进展：独立语义复核结果已作为 4 项单独评分同步并读回，原始评分保留，见 [复核同步记录](langfuse-independent-review-2026-10-22.md)。
+
 首批 `balance-001/answer_complete` 已真实执行，当前状态为 `checkpoint_pending`。DeepSeek 官方 `deepseek-flash` 路径完成两次模型请求；选择性 JEV 路径完成一次固定版本 `jev-1.13.0` 请求，没有转入模型回退。第二至第六批均未启动。
 
 ## 执行来源与范围
