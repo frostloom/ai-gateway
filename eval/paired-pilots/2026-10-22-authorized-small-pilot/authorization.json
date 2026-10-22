@@ -1,0 +1,73 @@
+{
+  "schema": "small-pilot-authorization.v1",
+  "authorized_on": "2026-10-22",
+  "authorization_source": "Human explicitly approved the immediately preceding six-case scope and CNY/USD budget in this conversation.",
+  "human_authorized": true,
+  "authorized_spending": {
+    "max_batches": 6,
+    "max_model_calls": 24,
+    "max_model_micro_cny": 1000000,
+    "max_jev_calls": 6,
+    "max_jev_micro_usd": 20000,
+    "jev_micro_usd_per_attempt": 2688
+  },
+  "cases": [
+    {
+      "batch_id": "batch-001",
+      "key": "balance-001/answer_complete",
+      "max_model_calls": 3,
+      "max_jev_calls": 1
+    },
+    {
+      "batch_id": "batch-002",
+      "key": "balance-020/explicit_scope_followup",
+      "max_model_calls": 7,
+      "max_jev_calls": 1
+    },
+    {
+      "batch_id": "batch-003",
+      "key": "recharge-002/confirm",
+      "max_model_calls": 3,
+      "max_jev_calls": 1
+    },
+    {
+      "batch_id": "batch-004",
+      "key": "recharge-002/cancel",
+      "max_model_calls": 3,
+      "max_jev_calls": 1
+    },
+    {
+      "batch_id": "batch-005",
+      "key": "recharge-001/supplement_then_confirm",
+      "max_model_calls": 4,
+      "max_jev_calls": 1
+    },
+    {
+      "batch_id": "batch-006",
+      "key": "refund-001/balance_cap",
+      "max_model_calls": 4,
+      "max_jev_calls": 1
+    }
+  ],
+  "scope_plan": "eval/paired-pilots/2026-10-22-campaign-preflight/plan.json",
+  "scope_plan_sha256": "80c1686d56b0d29dda8a2a10af05ecd62a793573d896a9f751d021af94a9b557",
+  "model": "deepseek-v4.1-flash",
+  "protocol": "anthropic",
+  "jev_model": "jev-1.13.0",
+  "automatic_scope_expansion": false,
+  "automatic_paid_retries": false,
+  "balance_rechecks_requested": false,
+  "authorized_run_started": false,
+  "model_calls": 0,
+  "jev_calls": 0,
+  "ready_for_paid_run": false,
+  "status": "authorized_blocked_on_execution_and_billing_evidence",
+  "remaining_blockers": [
+    "Current paired-eval CLI supports offline preparation/reporting only. A real execution entry must preserve existing guards.",
+    "Account tariff, token billing envelope and JEV failure charge evidence remain unverified; do not set AgentPairOptions.RatesVerified merely from human spending approval."
+  ],
+  "fresh_preflight_revision": "dc4a8b5b143170f5494b7fd658937f92a720b89e",
+  "fresh_preflight_sha256": "0c58a80e31b0c8fb3c8a37eedf8ad63d13c641c96c86da3dcadf82221a562d2c",
+  "declared_reserved_model_micro_cny": 811008,
+  "declared_reserved_jev_micro_usd": 16128
+}
