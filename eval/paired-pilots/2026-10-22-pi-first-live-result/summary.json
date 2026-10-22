@@ -1,0 +1,234 @@
+{
+  "schema": "pi-first-live-checkpoint-summary.v1",
+  "execution_revision": "43133e90596bcfd4ecd9d3cf58af226bd42c2d0f",
+  "status": "checkpoint_pending",
+  "case_key": "balance-001/answer_complete",
+  "target": {
+    "model": "deepseek-flash",
+    "protocol": "openai",
+    "model_base": "https://api.deepseek.com/v1",
+    "jev_model": "jev-1.13.0",
+    "thinking_mode": "disabled"
+  },
+  "entry_outcome": {
+    "cleanup_and_receipt_succeeded": true,
+    "execution_receipt": "receipt.json",
+    "schema": "paired-live-entry-outcome.v1",
+    "status": "checkpoint_pending"
+  },
+  "batches": [
+    {
+      "id": "batch-001",
+      "status": "checkpoint_pending"
+    },
+    {
+      "id": "batch-002",
+      "status": "not_started"
+    },
+    {
+      "id": "batch-003",
+      "status": "not_started"
+    },
+    {
+      "id": "batch-004",
+      "status": "not_started"
+    },
+    {
+      "id": "batch-005",
+      "status": "not_started"
+    },
+    {
+      "id": "batch-006",
+      "status": "not_started"
+    }
+  ],
+  "model_budget": {
+    "attempts": 2,
+    "reserved_micro_cny": 67584,
+    "priced_usage_micro_cny": 7452,
+    "input_tokens": 3562,
+    "output_tokens": 41
+  },
+  "jev_attempts": 1,
+  "jev_failure_policy": "reserve_full_attempt_stop_on_failure",
+  "jev_failure_charges_verified": false,
+  "observer_stats": {
+    "Accepted": 9,
+    "Dropped": 0,
+    "Exported": 9,
+    "Failed": 0,
+    "Batches": 4,
+    "Turns": 2,
+    "SampledTurns": 2,
+    "QueueDepth": 0
+  },
+  "rows": [
+    {
+      "observed_turns": 1,
+      "langfuse_trace_id": "651bc3ecf1bde972c192fe05956f96b5",
+      "key": "balance-001/answer_complete",
+      "arm": "model",
+      "status": "needs_review",
+      "structural_pass": true,
+      "fact_checks": [
+        {
+          "turn_index": 0,
+          "fact": "cash_balance",
+          "claim": "¥5000.00",
+          "expected": "500000 cent",
+          "status": "match"
+        }
+      ],
+      "fact_errors": 0,
+      "review_requirements": [
+        {
+          "id": "balance-001/answer_complete/turn-1/action-reply",
+          "turn_index": 0,
+          "requirement": "Independently verify observed action label read, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "081665de74845d068e8981f5a25c4a0ab1a3a209c1f719e401392125e2350de2",
+          "reply_sha256": "c4f04c2708602813f4461b466137f3a603406401c42804fde6658dc2522e8742"
+        },
+        {
+          "id": "balance-001:reply-1",
+          "turn_index": 0,
+          "requirement": "针对原话“查询余额”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。",
+          "requirement_sha256": "8e1b584787e58b8af746ccc06571e16f810521e58e36fb63c2753fdc31001c76",
+          "reply_sha256": "c4f04c2708602813f4461b466137f3a603406401c42804fde6658dc2522e8742"
+        },
+        {
+          "id": "balance-001/answer_complete/final-reply",
+          "turn_index": 0,
+          "requirement": "Final reply accurately describes the task outcome, amounts, identities, scope and limitations using the verified final state; no false success claim.",
+          "requirement_sha256": "0374ad4229039a0635d5729377c122dac8b4129f54fc991f10373ab7b0ecdf4e",
+          "reply_sha256": "c4f04c2708602813f4461b466137f3a603406401c42804fde6658dc2522e8742"
+        }
+      ],
+      "necessary_clarifications": [],
+      "http_failures": 0,
+      "runner_elapsed_ms": 1860.01325,
+      "telemetry": {
+        "completion_rate": null,
+        "response_latency_ms": 1516.791,
+        "llm_calls": 2,
+        "jev_calls": 0,
+        "tokens": {
+          "llm_input": 3562,
+          "llm_output": 41,
+          "jev_input": 0,
+          "jev_output": 0
+        }
+      },
+      "guarded_upstream_model_attempts": 2,
+      "priced_model_usage_micro_cny": 7452,
+      "reserved_model_micro_cny": 67584
+    },
+    {
+      "observed_turns": 1,
+      "langfuse_trace_id": "86ed2f84a3a18f78cabae73feb397826",
+      "key": "balance-001/answer_complete",
+      "arm": "jev_selective",
+      "status": "needs_review",
+      "structural_pass": true,
+      "fact_checks": [
+        {
+          "turn_index": 0,
+          "fact": "cash_balance",
+          "claim": "¥5000.00",
+          "expected": "500000 cent",
+          "status": "match"
+        },
+        {
+          "turn_index": 0,
+          "fact": "ledger_balance",
+          "claim": "¥5000.00",
+          "expected": "500000 cent",
+          "status": "match"
+        }
+      ],
+      "fact_errors": 0,
+      "review_requirements": [
+        {
+          "id": "balance-001/answer_complete/turn-1/action-reply",
+          "turn_index": 0,
+          "requirement": "Independently verify observed action label read, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "feff44be650d877e10562aa831cf2149a9e07fbec5a1e2a7945d001a617d6d7a",
+          "reply_sha256": "560707ca5b3d033d9007796a9414779d7873c670a4019dd0aea0c772d32ae2ed"
+        },
+        {
+          "id": "balance-001:reply-1",
+          "turn_index": 0,
+          "requirement": "针对原话“查询余额”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。",
+          "requirement_sha256": "c6680079b2826f5d10323896a946c8b937df68dd32177823b03b979f74d76850",
+          "reply_sha256": "560707ca5b3d033d9007796a9414779d7873c670a4019dd0aea0c772d32ae2ed"
+        },
+        {
+          "id": "balance-001/answer_complete/final-reply",
+          "turn_index": 0,
+          "requirement": "Final reply accurately describes the task outcome, amounts, identities, scope and limitations using the verified final state; no false success claim.",
+          "requirement_sha256": "fcda619d04d2966aa93996d92d5f348edd8769b32caeb8942dfed90d115c4a9d",
+          "reply_sha256": "560707ca5b3d033d9007796a9414779d7873c670a4019dd0aea0c772d32ae2ed"
+        }
+      ],
+      "necessary_clarifications": [],
+      "http_failures": 0,
+      "runner_elapsed_ms": 976.95425,
+      "telemetry": {
+        "completion_rate": null,
+        "response_latency_ms": 654.958167,
+        "llm_calls": 0,
+        "jev_calls": 1,
+        "tokens": {
+          "llm_input": 0,
+          "llm_output": 0,
+          "jev_input": 1201,
+          "jev_output": 186
+        }
+      },
+      "guarded_upstream_model_attempts": 0,
+      "priced_model_usage_micro_cny": 0,
+      "reserved_model_micro_cny": 0
+    }
+  ],
+  "langfuse_readback": {
+    "jev_calls": 0,
+    "kind": "verified",
+    "model_calls": 0,
+    "plan_sha256": "3d5f18801bc326a6b5f3724e9f68bfe639e4953e5bb1024fac195d45a8973b5c",
+    "score_count": 14,
+    "trace_summaries": [
+      {
+        "arm": "model",
+        "case_key": "balance-001/answer_complete",
+        "content_turns": 1,
+        "evidence_kind": "recorded_run",
+        "expected_turns": 1,
+        "require_answers": true,
+        "trace_id": "651bc3ecf1bde972c192fe05956f96b5",
+        "turns": 1
+      },
+      {
+        "arm": "jev_selective",
+        "case_key": "balance-001/answer_complete",
+        "content_turns": 1,
+        "evidence_kind": "recorded_run",
+        "expected_turns": 1,
+        "require_answers": true,
+        "trace_id": "86ed2f84a3a18f78cabae73feb397826",
+        "turns": 1
+      }
+    ]
+  },
+  "effect_claims_allowed": false,
+  "limitations": [
+    "One case and one attempt per arm; no population-level quality, latency or savings claims.",
+    "Priced model usage is configured-rate arithmetic, not a supplier invoice; reservations are not spend.",
+    "Original execution receipt and published scores retain needs_review/unknown until separate bound semantic-review evidence is applied.",
+    "No later batch executed and no production restart performed."
+  ],
+  "original_score_review_status": "pending_independent_review",
+  "independent_review": {
+    "file": "independent-review.json",
+    "verdict": "passed",
+    "blocking_findings": 0
+  }
+}

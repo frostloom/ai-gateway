@@ -1,0 +1,27 @@
+{
+  "schema": "pi-first-live-result-manifest.v1",
+  "execution_revision": "43133e90596bcfd4ecd9d3cf58af226bd42c2d0f",
+  "public_files": {
+    "summary.json": "b87ccdb1ad0daf247722de127f4ecd0cb647db1865d161c71a6a85e02c43c371",
+    "independent-review.json": "0b5562bd98ce8722290241bff29dd06afa3d2b54c9ce24a28dc78e7021b65026"
+  },
+  "private_evidence_sha256": {
+    "receipt.json": "eda937afa1f314b1bb4e98a08e940a10814b60fc23e2c033689fb333b5bf8db3",
+    "entry-outcome.json": "37733429436825fa0c7fea6ec88cd24b54df0573d51af265b8c38219d44617fe",
+    "campaign/batch-001/run.jsonl": "72089a3cc4866f5b686b55332897cda0121bafdb267b00856d64eed9403991f8",
+    "campaign/batch-001/report.json": "7ac971bbbb26d418db1f8f0d22ae5093724ddf629360bd7dc11cf044e99fdd76",
+    "langfuse-sync.jsonl": "3fd16a72012af8f7268282002282f7c9d1388156a25f6f0b1e050ffb39093957",
+    "langfuse-readback.json": "f14992a9c1064fa0032dd8ad62968df093565c96cf122ea0f8faeaae8f528d9a",
+    "langfuse-metadata-readback.json": "48abf786d7f2fa2d92ad86690ff403ab646f060383e37847b3b6fdf1295c58ce"
+  },
+  "build_provenance": {
+    "binary_sha256": "6b3669d8b1457fdb388c94b466a0ad7e086bd7e0ddd25c068d81213430d8f8fb",
+    "build_flags": "-mod=readonly -trimpath -buildvcs=false",
+    "commit": "43133e90596bcfd4ecd9d3cf58af226bd42c2d0f",
+    "go_version": "go version go1.25.12 darwin/arm64",
+    "schema": "paired-live-archive-build.v1",
+    "sdkroot": "/Library/Developer/CommandLineTools/SDKs/MacOSX26.5.sdk",
+    "source_archive_sha256": "6ea583a4b4d30ce761d286f2c636f9860118ec68dc909701c63aea23d9f2d983",
+    "tree": "8bb81d5898932197ef0d701217c9d3ba799172f4"
+  }
+}

@@ -1,0 +1,75 @@
+{
+  "schema": "pi-first-live-independent-review.v1",
+  "reviewer": "/root/review_first_batch_evidence",
+  "method": "independent_agent_evidence_review",
+  "execution_revision": "43133e90596bcfd4ecd9d3cf58af226bd42c2d0f",
+  "journal_sha256": "72089a3cc4866f5b686b55332897cda0121bafdb267b00856d64eed9403991f8",
+  "blocking_findings": [],
+  "rows": [
+    {
+      "arm": "model",
+      "case_key": "balance-001/answer_complete",
+      "verdict": "passed",
+      "requirements": [
+        {
+          "id": "balance-001/answer_complete/turn-1/action-reply",
+          "turn_index": 0,
+          "requirement": "Independently verify observed action label read, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "081665de74845d068e8981f5a25c4a0ab1a3a209c1f719e401392125e2350de2",
+          "reply_sha256": "c4f04c2708602813f4461b466137f3a603406401c42804fde6658dc2522e8742",
+          "verdict": "passed"
+        },
+        {
+          "id": "balance-001:reply-1",
+          "turn_index": 0,
+          "requirement": "针对原话“查询余额”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。",
+          "requirement_sha256": "8e1b584787e58b8af746ccc06571e16f810521e58e36fb63c2753fdc31001c76",
+          "reply_sha256": "c4f04c2708602813f4461b466137f3a603406401c42804fde6658dc2522e8742",
+          "verdict": "passed"
+        },
+        {
+          "id": "balance-001/answer_complete/final-reply",
+          "turn_index": 0,
+          "requirement": "Final reply accurately describes the task outcome, amounts, identities, scope and limitations using the verified final state; no false success claim.",
+          "requirement_sha256": "0374ad4229039a0635d5729377c122dac8b4129f54fc991f10373ab7b0ecdf4e",
+          "reply_sha256": "c4f04c2708602813f4461b466137f3a603406401c42804fde6658dc2522e8742",
+          "verdict": "passed"
+        }
+      ],
+      "rationale": "Reply accurately states own available cash and ledger balances as CNY 5000.00 from 500000 cent. Only get_balance({}) read executed. No pending confirmation or unsupported claims. Business balances, orders, subscriptions, topups, allowances and foreign-tenant control state unchanged; only own read audit and capture timestamps added."
+    },
+    {
+      "arm": "jev_selective",
+      "case_key": "balance-001/answer_complete",
+      "verdict": "passed",
+      "requirements": [
+        {
+          "id": "balance-001/answer_complete/turn-1/action-reply",
+          "turn_index": 0,
+          "requirement": "Independently verify observed action label read, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "feff44be650d877e10562aa831cf2149a9e07fbec5a1e2a7945d001a617d6d7a",
+          "reply_sha256": "560707ca5b3d033d9007796a9414779d7873c670a4019dd0aea0c772d32ae2ed",
+          "verdict": "passed"
+        },
+        {
+          "id": "balance-001:reply-1",
+          "turn_index": 0,
+          "requirement": "针对原话“查询余额”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。",
+          "requirement_sha256": "c6680079b2826f5d10323896a946c8b937df68dd32177823b03b979f74d76850",
+          "reply_sha256": "560707ca5b3d033d9007796a9414779d7873c670a4019dd0aea0c772d32ae2ed",
+          "verdict": "passed"
+        },
+        {
+          "id": "balance-001/answer_complete/final-reply",
+          "turn_index": 0,
+          "requirement": "Final reply accurately describes the task outcome, amounts, identities, scope and limitations using the verified final state; no false success claim.",
+          "requirement_sha256": "fcda619d04d2966aa93996d92d5f348edd8769b32caeb8942dfed90d115c4a9d",
+          "reply_sha256": "560707ca5b3d033d9007796a9414779d7873c670a4019dd0aea0c772d32ae2ed",
+          "verdict": "passed"
+        }
+      ],
+      "rationale": "Reply accurately states own available cash and ledger balances as CNY 5000.00 from 500000 cent. Only get_balance({}) read executed. No pending confirmation or unsupported claims. Business balances, orders, subscriptions, topups, allowances and foreign-tenant control state unchanged; only own read audit and capture timestamps added."
+    }
+  ],
+  "scope": "Semantic review of batch-001 only; no modification of immutable execution receipt or published deterministic scores; no authorization of later paid batches."
+}
