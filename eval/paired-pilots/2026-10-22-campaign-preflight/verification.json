@@ -1,0 +1,75 @@
+{
+  "schema": "campaign-preflight-verification.v1",
+  "date": "2026-10-22",
+  "base_revision": "dd2604015f261a0b298821c121a4be97856a1236",
+  "scope": "Reusable offline proposal generation only; no live execution driver.",
+  "tdd": {
+    "builder_red": "undefined new types/functions",
+    "cli_red": "campaign-plan flag absent",
+    "targeted_green": true
+  },
+  "full_go_test": {
+    "command": "go test ./... -p 1 -count=1 -json -timeout 8m",
+    "exit_code": 0,
+    "top_level_passed": 373,
+    "packages_passed": 17,
+    "failed": 0,
+    "skipped": [
+      {
+        "package": "github.com/frostloom/ai-gateway/internal/agent",
+        "test": "TestLiveJevSemanticsDiagnostic"
+      },
+      {
+        "package": "github.com/frostloom/ai-gateway/internal/billing/store",
+        "test": "TestCashLoad"
+      },
+      {
+        "package": "github.com/frostloom/ai-gateway/internal/billing/store",
+        "test": "TestCashProfileRowTiming"
+      }
+    ]
+  },
+  "go_vet": {
+    "command": "go vet ./cmd/paired-eval ./internal/taskbench",
+    "exit_code": 0
+  },
+  "independent_review": {
+    "reviewer": "review_campaign_preflight",
+    "material_findings": 0,
+    "result": "passed"
+  },
+  "cli_smoke": {
+    "cases": 6,
+    "arms": 12,
+    "user_turns": 26,
+    "model_attempt_cap": 24,
+    "jev_call_cap": 6,
+    "declared_reserved_model_micro_cny": 811008,
+    "declared_reserved_jev_micro_usd": 16128,
+    "declared_revision": "working-tree-after-dd26040",
+    "output_permission": "0600",
+    "runtime_journals_created": false,
+    "provider_calls": 0,
+    "http_sentinel_test": "passed",
+    "allow_paid": false,
+    "ready_for_paid_run": false,
+    "authorized_spending": null,
+    "account_tariff_verified": false,
+    "token_envelope_verified": false,
+    "jev_failure_charges_verified": false
+  },
+  "source_sha256": {
+    "cmd/paired-eval/main.go": "18d8d95b3b2dc2e21a253493eec4164f64d33df1753f1446db7785dffe89fb13",
+    "cmd/paired-eval/main_test.go": "6062fe02ac112b547f3b8da8b122e9990e6f03345f6782cafbbf079ae27010c6",
+    "internal/taskbench/campaign_budget.go": "37485679961d92431cedde54fef93e28d37b8cbd7339c16b010c873888e2724f",
+    "internal/taskbench/campaign_prepare.go": "4d5aa4bb689a27fd31fcef8341afa6b9c88d553a0804ab75bf822c210ae2909f",
+    "internal/taskbench/campaign_prepare_test.go": "5a6864aa92fc022f991d4ef97d8ff83896fe6902da4e475af6f9a64d8fd3efc9"
+  },
+  "local_evidence_sha256": {
+    ".superpowers/sdd/2026-10-22-campaign-preflight/full-go-test.jsonl": "d085aa9176fea7dbfbc720388ee06be8c4f47b2e0a03325ca0682a2222057d82",
+    ".superpowers/sdd/2026-10-22-campaign-preflight/full-go-test.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    ".superpowers/sdd/2026-10-22-campaign-preflight/targeted-green.log": "ced0ccf6b328cf53fcdd07a77d70aa5357cd0a801ffa1b91db5ecea21fa919a8",
+    ".tmp/campaign-preflight-20261022/proposal.json": "ad924138699bf90e0f79827227b759d8e8f69d8ffe26f11c4c7ad500893cf1a9"
+  },
+  "example_plan_sha256": "80c1686d56b0d29dda8a2a10af05ecd62a793573d896a9f751d021af94a9b557"
+}

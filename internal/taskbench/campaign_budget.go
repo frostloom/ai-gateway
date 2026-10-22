@@ -58,9 +58,19 @@ type CampaignBatchLease struct {
 
 var campaignBatchID = regexp.MustCompile(`^batch-[0-9]{3,6}$`)
 
+func (limits CampaignLimits) validate() error {
+	if limits.MaxBatches < 1 || limits.MaxBatches > 10000 || limits.MaxModelCalls < 1 || limits.MaxModelCalls > 1000000 || limits.MaxModelMicroCNY < 1 || limits.MaxModelMicroCNY > 1000000000 || limits.MaxJEVCalls < 1 || limits.MaxJEVCalls > 1000000 || limits.MaxJEVMicroUSD < 1 || limits.MaxJEVMicroUSD > 1000000000 || limits.JEVMicroUSDPerAttempt < 1 || limits.JEVMicroUSDPerAttempt > 1000000 {
+		return fmt.Errorf("explicit campaign call/separate currency limits required")
+	}
+	return nil
+}
+
 func OpenCampaignBudget(dir, contract string, limits CampaignLimits) (*CampaignBudget, error) {
-	if dir == "" || !comparisonDigest(contract) || limits.MaxBatches < 1 || limits.MaxBatches > 10000 || limits.MaxModelCalls < 1 || limits.MaxModelCalls > 1000000 || limits.MaxModelMicroCNY < 1 || limits.MaxModelMicroCNY > 1000000000 || limits.MaxJEVCalls < 1 || limits.MaxJEVCalls > 1000000 || limits.MaxJEVMicroUSD < 1 || limits.MaxJEVMicroUSD > 1000000000 || limits.JEVMicroUSDPerAttempt < 1 || limits.JEVMicroUSDPerAttempt > 1000000 {
+	if dir == "" || !comparisonDigest(contract) {
 		return nil, fmt.Errorf("explicit campaign contract/call/separate currency limits required")
+	}
+	if err := limits.validate(); err != nil {
+		return nil, err
 	}
 	dir, err := filepath.Abs(dir)
 	if err != nil {

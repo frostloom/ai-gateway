@@ -1,0 +1,91 @@
+{
+  "schema": "campaign-preflight-plan.v1",
+  "campaign_limits": {
+    "max_batches": 6,
+    "max_model_calls": 24,
+    "max_model_micro_cny": 1000000,
+    "max_jev_calls": 6,
+    "max_jev_micro_usd": 20000,
+    "jev_micro_usd_per_attempt": 2688
+  },
+  "batches": [
+    {
+      "key": "balance-001/answer_complete",
+      "model_limits": {
+        "max_calls": 3,
+        "max_output_tokens": 128,
+        "max_request_bytes": 16384,
+        "input_token_ceiling": 16384,
+        "max_micro_cny": 101376,
+        "input_micro_cny_per_million": 2000000,
+        "output_micro_cny_per_million": 8000000
+      },
+      "max_jev_calls": 1
+    },
+    {
+      "key": "balance-020/explicit_scope_followup",
+      "model_limits": {
+        "max_calls": 7,
+        "max_output_tokens": 128,
+        "max_request_bytes": 16384,
+        "input_token_ceiling": 16384,
+        "max_micro_cny": 236544,
+        "input_micro_cny_per_million": 2000000,
+        "output_micro_cny_per_million": 8000000
+      },
+      "max_jev_calls": 1
+    },
+    {
+      "key": "recharge-002/confirm",
+      "model_limits": {
+        "max_calls": 3,
+        "max_output_tokens": 128,
+        "max_request_bytes": 16384,
+        "input_token_ceiling": 16384,
+        "max_micro_cny": 101376,
+        "input_micro_cny_per_million": 2000000,
+        "output_micro_cny_per_million": 8000000
+      },
+      "max_jev_calls": 1
+    },
+    {
+      "key": "recharge-002/cancel",
+      "model_limits": {
+        "max_calls": 3,
+        "max_output_tokens": 128,
+        "max_request_bytes": 16384,
+        "input_token_ceiling": 16384,
+        "max_micro_cny": 101376,
+        "input_micro_cny_per_million": 2000000,
+        "output_micro_cny_per_million": 8000000
+      },
+      "max_jev_calls": 1
+    },
+    {
+      "key": "recharge-001/supplement_then_confirm",
+      "model_limits": {
+        "max_calls": 4,
+        "max_output_tokens": 128,
+        "max_request_bytes": 16384,
+        "input_token_ceiling": 16384,
+        "max_micro_cny": 135168,
+        "input_micro_cny_per_million": 2000000,
+        "output_micro_cny_per_million": 8000000
+      },
+      "max_jev_calls": 1
+    },
+    {
+      "key": "refund-001/balance_cap",
+      "model_limits": {
+        "max_calls": 4,
+        "max_output_tokens": 128,
+        "max_request_bytes": 16384,
+        "input_token_ceiling": 16384,
+        "max_micro_cny": 135168,
+        "input_micro_cny_per_million": 2000000,
+        "output_micro_cny_per_million": 8000000
+      },
+      "max_jev_calls": 1
+    }
+  ]
+}

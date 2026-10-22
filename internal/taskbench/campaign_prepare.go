@@ -1,0 +1,101 @@
+package taskbench
+
+import "fmt"
+
+// CampaignPreparationPlan supplies declarations only, never paid permission.
+type CampaignPreparationPlan struct {
+	Schema  string                     `json:"schema"`
+	Limits  CampaignLimits             `json:"campaign_limits"`
+	Batches []CampaignPreparationBatch `json:"batches"`
+}
+
+type CampaignPreparationBatch struct {
+	Key         string           `json:"key"`
+	ModelLimits PairBudgetLimits `json:"model_limits"`
+	MaxJEVCalls int              `json:"max_jev_calls"`
+}
+
+type CampaignProposalBatch struct {
+	CampaignPreparationBatch
+	ID                  string                     `json:"id"`
+	Configuration       PairRunConfig              `json:"configuration"`
+	Contract            string                     `json:"pair_run_contract"`
+	ModelEstimate       DeclaredPairBudgetEstimate `json:"model_estimate"`
+	ReservedJEVMicroUSD int64                      `json:"reserved_jev_micro_usd"`
+}
+
+type CampaignProposal struct {
+	Schema                    string                  `json:"schema"`
+	ReviewedRevision          string                  `json:"reviewed_revision"`
+	Limits                    CampaignLimits          `json:"proposed_campaign_limits"`
+	Batches                   []CampaignProposalBatch `json:"batches"`
+	PlannedCases              int                     `json:"planned_cases"`
+	PlannedArms               int                     `json:"planned_arms"`
+	PlannedUserTurns          int                     `json:"planned_user_turns"`
+	ModelReservedMicroCNY     int64                   `json:"declared_reserved_model_micro_cny"`
+	JEVReservedMicroUSD       int64                   `json:"declared_reserved_jev_micro_usd"`
+	AllowPaid                 bool                    `json:"allow_paid"`
+	ReadyForPaidRun           bool                    `json:"ready_for_paid_run"`
+	ProviderCalls             int                     `json:"provider_calls"`
+	AuthorizedSpending        *CampaignLimits         `json:"authorized_spending"`
+	AccountTariffVerified     bool                    `json:"account_tariff_verified"`
+	TokenEnvelopeVerified     bool                    `json:"token_envelope_verified"`
+	JEVFailureChargesVerified bool                    `json:"jev_failure_charges_verified"`
+	AutomaticScopeExpansion   bool                    `json:"automatic_scope_expansion"`
+}
+
+// PrepareCampaignProposal binds selected frozen cases using integer arithmetic
+// and disabled-provider configuration preparation. It creates no execution
+// lease, journal, database connection or network request.
+func PrepareCampaignProposal(source ConversationSuite, profiles PairedProfiles, model PairModelSettings, revision, jevModel string, plan CampaignPreparationPlan) (CampaignProposal, error) {
+	if plan.Schema != "campaign-preflight-plan.v1" || len(plan.Batches) == 0 {
+		return CampaignProposal{}, fmt.Errorf("explicit campaign preparation schema/batches required")
+	}
+	if err := plan.Limits.validate(); err != nil {
+		return CampaignProposal{}, err
+	}
+	small, err := PrepareSmallPair(source)
+	if err != nil {
+		return CampaignProposal{}, err
+	}
+	byKey := map[string]ConversationCase{}
+	for _, c := range small.Suite.Cases {
+		byKey[c.Key()] = c
+	}
+	seen := map[string]bool{}
+	proposal := CampaignProposal{Schema: "small-pilot-execution-proposal.v1", ReviewedRevision: revision, Limits: plan.Limits}
+	// Reuse the ledger's pure reservation checks without opening a ledger or
+	// issuing leases; these in-memory entries cannot be used for execution.
+	check := CampaignBudget{limits: plan.Limits, reserved: map[string]campaignEvent{}}
+	for i, b := range plan.Batches {
+		c, ok := byKey[b.Key]
+		if !ok || seen[b.Key] {
+			return CampaignProposal{}, fmt.Errorf("campaign case missing or repeated: %s", b.Key)
+		}
+		seen[b.Key] = true
+		suite := small.Suite
+		suite.Cases = []ConversationCase{c}
+		cfg, err := PrepareAgentPairConfig(suite, profiles, model, "recorded_run", revision, jevModel)
+		if err != nil {
+			return CampaignProposal{}, err
+		}
+		estimate, err := EstimateDeclaredPairBudget(b.ModelLimits)
+		if err != nil {
+			return CampaignProposal{}, err
+		}
+		if !estimate.FitsBudget || b.ModelLimits.MaxOutputTokens != cfg.Model.OutputBudget || b.MaxJEVCalls < 1 || b.MaxJEVCalls > 256 {
+			return CampaignProposal{}, fmt.Errorf("campaign child budget/output differs")
+		}
+		batch := CampaignProposalBatch{CampaignPreparationBatch: b, ID: fmt.Sprintf("batch-%03d", i+1), Configuration: cfg, Contract: PairRunContract(cfg), ModelEstimate: estimate, ReservedJEVMicroUSD: int64(b.MaxJEVCalls) * plan.Limits.JEVMicroUSDPerAttempt}
+		if err = check.applyReservation(campaignEvent{ID: batch.ID, Binding: batch.Contract, ModelCalls: b.ModelLimits.MaxCalls, ModelMicroCNY: estimate.AllAttemptsMicroCNY, JEVCalls: b.MaxJEVCalls, JEVMicroUSD: batch.ReservedJEVMicroUSD}); err != nil {
+			return CampaignProposal{}, err
+		}
+		proposal.Batches = append(proposal.Batches, batch)
+		proposal.PlannedUserTurns += 2 * len(c.Scenario.Turns)
+	}
+	proposal.PlannedCases = len(proposal.Batches)
+	proposal.PlannedArms = 2 * proposal.PlannedCases
+	proposal.ModelReservedMicroCNY = check.used.ModelMicroCNY
+	proposal.JEVReservedMicroUSD = check.used.JEVMicroUSD
+	return proposal, nil
+}

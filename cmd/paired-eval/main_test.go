@@ -4,12 +4,115 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"strings"
+	"sync/atomic"
 	"testing"
 
 	"github.com/frostloom/ai-gateway/internal/taskbench"
 )
+
+func campaignCLIArgs(out, plan, base string) []string {
+	return []string{"-mode", "campaign-preflight", "-definitions", "../../eval/task-definitions/2026-10-12-full-dev-v1", "-profiles", "../../eval/runtime-profiles/2026-10-13-six-profiles-v1", "-model-base", base, "-model-name", "deepseek-v4.1-flash", "-protocol", "anthropic", "-revision", "reviewed-revision", "-jev-model", "jev-1.13.0", "-campaign-plan", plan, "-out", out}
+}
+
+func TestPairedCLICampaignPreflightOffline(t *testing.T) {
+	var calls atomic.Int64
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { calls.Add(1); w.WriteHeader(500) }))
+	defer srv.Close()
+	t.Setenv("AGENT_LLM_API_KEY", "do-not-read-this-key")
+	t.Setenv("JEV_API_KEY", "do-not-read-this-jev-key")
+	dir := t.TempDir()
+	out := filepath.Join(dir, "proposal.json")
+	args := campaignCLIArgs(out, "../../eval/paired-pilots/2026-10-22-campaign-preflight/plan.json", srv.URL)
+	if run(args) != 0 {
+		t.Fatal("campaign preflight rejected")
+	}
+	raw, err := os.ReadFile(out)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var proposal taskbench.CampaignProposal
+	if json.Unmarshal(raw, &proposal) != nil || proposal.PlannedCases != 6 || proposal.PlannedArms != 12 || proposal.PlannedUserTurns != 26 || proposal.ModelReservedMicroCNY != 811008 || proposal.JEVReservedMicroUSD != 16128 || proposal.AllowPaid || proposal.ReadyForPaidRun || proposal.ProviderCalls != 0 || proposal.AuthorizedSpending != nil {
+		t.Fatal("incorrect offline proposal")
+	}
+	if strings.Contains(string(raw), "do-not-read-this") {
+		t.Fatal("discovered environment key")
+	}
+	info, _ := os.Stat(out)
+	if info.Mode().Perm() != 0600 {
+		t.Fatal("proposal is not private")
+	}
+	if run(args) == 0 {
+		t.Fatal("overwrote proposal")
+	}
+	entries, _ := os.ReadDir(dir)
+	if len(entries) != 1 || calls.Load() != 0 {
+		t.Fatal("preflight created runtime artifacts or called provider")
+	}
+}
+
+func TestPairedCLICampaignPreflightRejectsInvalidInputs(t *testing.T) {
+	planPath := "../../eval/paired-pilots/2026-10-22-campaign-preflight/plan.json"
+	raw, err := os.ReadFile(planPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, field := range []string{"profiles", "model-base", "model-name", "protocol", "revision", "jev-model", "campaign-plan"} {
+		t.Run("missing-"+field, func(t *testing.T) {
+			out := filepath.Join(t.TempDir(), "proposal.json")
+			original := campaignCLIArgs(out, planPath, "https://provider.invalid")
+			args := []string{}
+			for i := 0; i < len(original); i += 2 {
+				if original[i] != "-"+field {
+					args = append(args, original[i:i+2]...)
+				}
+			}
+			if run(args) == 0 {
+				t.Fatal("missing explicit flag accepted")
+			}
+			if _, err := os.Stat(out); !os.IsNotExist(err) {
+				t.Fatal("invalid input created output")
+			}
+		})
+	}
+	for _, mode := range []string{"prepare", "preflight", "report", "live"} {
+		t.Run("wrong-mode-"+mode, func(t *testing.T) {
+			args := campaignCLIArgs(filepath.Join(t.TempDir(), "out.json"), planPath, "https://provider.invalid")
+			args[1] = mode
+			if run(args) == 0 {
+				t.Fatal("campaign plan accepted outside campaign mode")
+			}
+		})
+	}
+	invalid := map[string]string{
+		"unknown":        strings.Replace(string(raw), "\"schema\":", "\"allow_paid\":true,\"schema\":", 1),
+		"nested-unknown": strings.Replace(string(raw), "\"max_calls\":", "\"ignore_budget\":true,\"max_calls\":", 1),
+		"trailing":       string(raw) + "{}",
+		"malformed":      "{",
+		"null":           "null",
+		"over-budget":    strings.Replace(string(raw), "\"max_model_calls\": 24", "\"max_model_calls\": 23", 1),
+	}
+	for name, data := range invalid {
+		t.Run(name, func(t *testing.T) {
+			dir := t.TempDir()
+			input := filepath.Join(dir, "plan.json")
+			out := filepath.Join(dir, "out.json")
+			if err := os.WriteFile(input, []byte(data), 0600); err != nil {
+				t.Fatal(err)
+			}
+			if run(campaignCLIArgs(out, input, "https://provider.invalid")) == 0 {
+				t.Fatal("invalid plan accepted")
+			}
+			if _, err := os.Stat(out); !os.IsNotExist(err) {
+				t.Fatal("invalid plan created output")
+			}
+		})
+	}
+}
 
 func TestPairedCLIPrepareOfflineAndNoOverwrite(t *testing.T) {
 	p := filepath.Join(t.TempDir(), "plan.json")

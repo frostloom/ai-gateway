@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io"
 	"os"
 	"strings"
 
@@ -26,7 +27,8 @@ func writeExclusive(path string, raw []byte) error {
 }
 func run(args []string) int {
 	flags := flag.NewFlagSet("paired-eval", flag.ContinueOnError)
-	mode := flags.String("mode", "prepare", "prepare, preflight or report; never live")
+	mode := flags.String("mode", "prepare", "prepare, preflight, campaign-preflight or report; never live")
+	campaignPlan := flags.String("campaign-plan", "", "explicit offline batch/budget JSON for campaign-preflight")
 	profiles := flags.String("profiles", "", "pinned runtime profile directory for preflight")
 	base := flags.String("model-base", "", "public model base URL for offline preflight")
 	model := flags.String("model-name", "", "explicit model name for offline preflight")
@@ -39,10 +41,11 @@ func run(args []string) int {
 	if flags.Parse(args) != nil {
 		return 2
 	}
-	preflight := *mode == "preflight"
+	campaignPreflight := *mode == "campaign-preflight"
+	preflight := *mode == "preflight" || campaignPreflight
 	publicArgs := *profiles != "" || *base != "" || *model != "" || *protocol != "" || *revision != "" || *jevModel != ""
-	if flags.NArg() != 0 || *out == "" || (*mode != "prepare" && *mode != "report" && !preflight) || (*mode == "report" && *journal == "") || (*mode != "report" && *journal != "") || (!preflight && publicArgs) || (preflight && (*profiles == "" || *base == "" || *model == "" || *protocol == "" || *revision == "" || *jevModel == "")) {
-		fmt.Fprintln(os.Stderr, "offline prepare/preflight/report and new -out required; no live mode")
+	if flags.NArg() != 0 || *out == "" || (*mode != "prepare" && *mode != "report" && !preflight) || (*mode == "report" && *journal == "") || (*mode != "report" && *journal != "") || (!preflight && publicArgs) || (preflight && (*profiles == "" || *base == "" || *model == "" || *protocol == "" || *revision == "" || *jevModel == "")) || (campaignPreflight != (*campaignPlan != "")) {
+		fmt.Fprintln(os.Stderr, "offline prepare/preflight/campaign-preflight/report and new -out required; no live mode")
 		return 2
 	}
 	paths := []string{*out}
@@ -75,17 +78,30 @@ func run(args []string) int {
 				fmt.Fprintln(os.Stderr, err)
 				return 2
 			}
-			cfg, err := taskbench.PrepareAgentPairConfig(p.Suite, profiles, taskbench.PairModelSettings{BaseURL: *base, Model: *model, Protocol: *protocol}, "recorded_run", *revision, *jevModel)
-			if err != nil {
-				fmt.Fprintln(os.Stderr, err)
-				return 2
+			if campaignPreflight {
+				plan, err := readCampaignPlan(*campaignPlan)
+				if err != nil {
+					fmt.Fprintln(os.Stderr, err)
+					return 2
+				}
+				value, err = taskbench.PrepareCampaignProposal(s, profiles, taskbench.PairModelSettings{BaseURL: *base, Model: *model, Protocol: *protocol}, *revision, *jevModel, plan)
+				if err != nil {
+					fmt.Fprintln(os.Stderr, err)
+					return 2
+				}
+			} else {
+				cfg, err := taskbench.PrepareAgentPairConfig(p.Suite, profiles, taskbench.PairModelSettings{BaseURL: *base, Model: *model, Protocol: *protocol}, "recorded_run", *revision, *jevModel)
+				if err != nil {
+					fmt.Fprintln(os.Stderr, err)
+					return 2
+				}
+				value = struct {
+					Ready         bool                    `json:"ready_for_paid_run"`
+					Calls         int                     `json:"provider_calls"`
+					Configuration taskbench.PairRunConfig `json:"configuration"`
+					Limitations   []string                `json:"limitations"`
+				}{false, 0, cfg, []string{"Offline configuration proposal only; no database or provider calls.", "Channel prices, account charges and execution authorization remain unverified."}}
 			}
-			value = struct {
-				Ready         bool                    `json:"ready_for_paid_run"`
-				Calls         int                     `json:"provider_calls"`
-				Configuration taskbench.PairRunConfig `json:"configuration"`
-				Limitations   []string                `json:"limitations"`
-			}{false, 0, cfg, []string{"Offline configuration proposal only; no database or provider calls.", "Channel prices, account charges and execution authorization remain unverified."}}
 		}
 	} else {
 		r, err := taskbench.ReportPreparedPair(*journal)
@@ -109,6 +125,25 @@ func run(args []string) int {
 	}
 	fmt.Println("Offline paired preparation/report written; zero model/JEV calls.")
 	return 0
+}
+
+func readCampaignPlan(path string) (taskbench.CampaignPreparationPlan, error) {
+	var plan taskbench.CampaignPreparationPlan
+	f, err := os.Open(path)
+	if err != nil {
+		return plan, err
+	}
+	defer f.Close()
+	decoder := json.NewDecoder(f)
+	decoder.DisallowUnknownFields()
+	if err = decoder.Decode(&plan); err != nil {
+		return plan, fmt.Errorf("invalid campaign plan: %w", err)
+	}
+	var trailing any
+	if decoder.Decode(&trailing) != io.EOF {
+		return plan, fmt.Errorf("campaign plan must contain one JSON value")
+	}
+	return plan, nil
 }
 func pairMarkdown(r taskbench.SmallPairReport) string {
 	var b strings.Builder
