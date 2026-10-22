@@ -1,0 +1,95 @@
+{
+  "checked_on": "2026-10-22",
+  "scope": "read-only; public official sources and existing browser sessions",
+  "sources": {
+    "jev-index": {
+      "url": "https://docs.typesafe.ai/llms.txt",
+      "resolved_url": "https://docs.typesafe.ai/llms.txt",
+      "status": 200,
+      "bytes": 18706,
+      "sha256": "e817e47899099364d29633f157ac5de74f936c849bdf5a14382e31ba4a09c688"
+    },
+    "jev-models": {
+      "url": "https://docs.typesafe.ai/models.md",
+      "resolved_url": "https://docs.typesafe.ai/models.md",
+      "status": 200,
+      "bytes": 7688,
+      "sha256": "d78f8db1fa611344cb7bb84f0e1431f704689eaa2f888da7db1f42eb4e192b04"
+    },
+    "jev-responses": {
+      "url": "https://docs.typesafe.ai/sdk/python/api/types/responses.md",
+      "resolved_url": "https://docs.typesafe.ai/sdk/python/api/types/responses.md",
+      "status": 200,
+      "bytes": 34486,
+      "sha256": "db555b83d24b9afe4eb760d308b4587362e7e3baecdf60528a7168ae54881370"
+    },
+    "jev-exceptions": {
+      "url": "https://docs.typesafe.ai/sdk/python/api/exceptions.md",
+      "resolved_url": "https://docs.typesafe.ai/sdk/python/api/exceptions.md",
+      "status": 200,
+      "bytes": 3363,
+      "sha256": "5f7fa99b80679b71791540d260bf6d803ae2cd72c88bcb91cccd50283a3df342"
+    },
+    "jev-openapi": {
+      "url": "https://api.typesafe.ai/openapi.json",
+      "resolved_url": "https://api.typesafe.ai/openapi.json",
+      "status": 200,
+      "bytes": 21660,
+      "sha256": "ee599512cbea3a198b34af3f60addcd72b381d3521196f93c70ae83185c057c3"
+    },
+    "jev-mca": {
+      "url": "https://typesafe.ai/legal/mca",
+      "resolved_url": "https://typesafe.ai/legal/mca",
+      "status": 200,
+      "bytes": 278201,
+      "sha256": "6a6705df94b45d11e4ce5b367fb132ff41432e0812bc73fd4fd58e89a42863ba"
+    },
+    "qwen-index": {
+      "url": "https://platform.qianwenai.com/docs/llms.txt",
+      "resolved_url": "https://platform.qianwenai.com/docs/llms.txt",
+      "status": 200,
+      "bytes": 205091,
+      "sha256": "19bc6292a755e408dffc122acaa4e39728bc9f4f566b36d124871896a92f5373"
+    },
+    "qwen-anthropic-openapi": {
+      "url": "https://platform.qianwenai.com/docs/openapi-anthropic.json",
+      "resolved_url": "https://platform.qianwenai.com/docs/openapi-anthropic.json",
+      "status": 200,
+      "bytes": 60704,
+      "sha256": "00a3e6a830d6dc391051439a52849f4bf10eb4ae386bc0a2b19610d0af553f69"
+    }
+  },
+  "observations": {
+    "safari_authenticated_console_home_observed": true,
+    "safari_billing_page_read": false,
+    "independent_browser_login_page_observed": true,
+    "account_balance_verified": false,
+    "account_effective_tariff_verified": false,
+    "failed_request_fee_rule_verified": false,
+    "jev_usage_optional_post_response": true,
+    "jev_default_context": {
+      "per_request": "64k; state plus all questions",
+      "per_question": "32k; state plus any one question",
+      "verified_billing_cap": false
+    },
+    "documented_paths": {
+      "jev": [
+        "/v1/models",
+        "/v1/systemone"
+      ],
+      "qwen_anthropic": [
+        "/apps/anthropic/v1/messages"
+      ]
+    },
+    "non_inference_exact_token_counter_found": false
+  },
+  "controls": {
+    "allow_paid": false,
+    "ready_for_paid_run": false,
+    "inference_requests_sent": 0,
+    "login_submitted": false,
+    "agreements_accepted": false,
+    "account_settings_changed": false,
+    "model_pin": "jev-1.13.0"
+  }
+}
