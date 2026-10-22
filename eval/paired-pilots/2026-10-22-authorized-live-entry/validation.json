@@ -77,5 +77,79 @@
     "internal/taskbench/authorized_entry_run.go": "7f7613e25b8a0306bd499a21671336fb37f846b7703eff881f1d40de6c632962",
     "internal/taskbench/authorized_entry_run_test.go": "6c2f165bb5e95e2d477f34c059a44104516ef14cad0df0fe522b98f7c9efd7be",
     "internal/taskbench/authorized_entry_test.go": "40ec1e4c10022a187d04570f717028935ed5f2e05031805bf8e38d9d16686e59"
+  },
+  "billing_followup": {
+    "date": "2026-10-22",
+    "base_revision": "59cfcd4ecfaeb7f417038d771638595d4eb69679",
+    "official_public_sources": {
+      "qwen-prices": {
+        "url": "https://platform.qianwenai.com/docs/developer-guides/getting-started/model-prices.md",
+        "status": 200,
+        "bytes": 77575,
+        "sha256": "bc1abeafefca365871fbafaa9d34a21f081252fbd44a358c612819d8a8c176c4"
+      },
+      "qwen-anthropic": {
+        "url": "https://platform.qianwenai.com/docs/api-reference/chat/anthropic.md",
+        "status": 200,
+        "bytes": 61602,
+        "sha256": "39003ca3d26ebd80c457a2b1350611c640dd164dcb9025302e3ff7d35145dd91"
+      },
+      "qwen-openapi": {
+        "url": "https://platform.qianwenai.com/docs/openapi-anthropic.json",
+        "status": 200,
+        "bytes": 60704,
+        "sha256": "00a3e6a830d6dc391051439a52849f4bf10eb4ae386bc0a2b19610d0af553f69",
+        "published_paths": [
+          "/apps/anthropic/v1/messages"
+        ]
+      },
+      "jev-models": {
+        "url": "https://docs.typesafe.ai/models.md",
+        "status": 200,
+        "bytes": 7688,
+        "sha256": "d78f8db1fa611344cb7bb84f0e1431f704689eaa2f888da7db1f42eb4e192b04"
+      },
+      "jev-errors": {
+        "url": "https://docs.typesafe.ai/api/errors.md",
+        "status": 200,
+        "bytes": 2695,
+        "sha256": "0aee0bfc3052128c4d32c05895c5bec800c9bc0c146af54fdf276dc04414c0de"
+      },
+      "jev-openapi": {
+        "url": "https://api.typesafe.ai/openapi.json",
+        "status": 200,
+        "bytes": 21660,
+        "sha256": "ee599512cbea3a198b34af3f60addcd72b381d3521196f93c70ae83185c057c3",
+        "published_paths": [
+          "/v1/models",
+          "/v1/systemone"
+        ]
+      }
+    },
+    "http_response_contract_correction": {
+      "usage_required": true,
+      "input_tokens_and_output_tokens_required": true,
+      "original_sdk_nullable_fields_are_not_http_schema": true,
+      "openapi_changed_since_previous_archive": false
+    },
+    "evidence_file_sha256": "33036022d66b2b313554839d5c5fa012c81a4a50f969b758e414220c145e4c20",
+    "check": {
+      "blockers": [
+        "account_tariff_unverified",
+        "token_envelope_unverified",
+        "jev_failure_charges_unverified"
+      ],
+      "execution_scope": "batch-001 only, then checkpoint",
+      "human_authorized": true,
+      "jev_calls": 0,
+      "mode": "check",
+      "model_calls": 0,
+      "ready_for_paid_run": false
+    },
+    "real_authorization_claim_created": false,
+    "balance_checked": false,
+    "supplier_messages_sent": false,
+    "private_evidence_tracked": false,
+    "verification": "Source hashes, HTTP schema required fields, unchanged Go source hashes, JSON, links and read-only CLI; no Go changes, no repeated full suite."
   }
 }
