@@ -70,21 +70,47 @@ def build_plan(reports):
             'scores': scores, 'trace_bindings': traces, 'unlinked_rows': unlinked}
 
 
-def check_settings(c):
+def check_settings(c, target=None):
+    current = target is not None
+    if current and target != {'base_url': 'https://api.deepseek.com/v1', 'model': 'deepseek-flash',
+                              'protocol': 'openai', 'jev_model': 'jev-1.13.0'}:
+        raise ValueError('Unsupported customer target')
+    if target is None:
+        target = {'base_url': 'https://maas.qianwenaiapi.com/apps/anthropic',
+                  'model': 'deepseek-v4.1-flash', 'protocol': 'anthropic', 'jev_model': 'jev-1.13.0'}
     checks = {'monitor_enabled': c.get('AGENT_LANGFUSE_ENABLED') in ('true', '1'),
               'content_enabled': c.get('AGENT_LANGFUSE_CAPTURE_CONTENT') in ('true', '1'),
               'evaluation_environment': c.get('AGENT_LANGFUSE_ENVIRONMENT') == 'evaluation',
               'full_sampling': c.get('AGENT_LANGFUSE_SAMPLE_RATE') == '1',
               'identity_hash_key_valid': len(c.get('AGENT_LANGFUSE_HASH_KEY', '').encode('utf-8')) >= 32,
-              'chosen_channel': c.get('AGENT_LLM_BASE_URL', '').rstrip('/') == 'https://maas.qianwenaiapi.com/apps/anthropic',
-              'chosen_model': c.get('AGENT_LLM_MODEL') == 'deepseek-v4.1-flash',
-              'chosen_protocol': c.get('AGENT_LLM_PROTOCOL') == 'anthropic',
+              'chosen_channel': (c.get('AGENT_LLM_BASE_URL', '') if current else c.get('AGENT_LLM_BASE_URL', '').rstrip('/')) == target['base_url'],
+              'chosen_model': c.get('AGENT_LLM_MODEL') == target['model'],
+              'chosen_protocol': c.get('AGENT_LLM_PROTOCOL') == target['protocol'],
               'model_key_present': bool(c.get('AGENT_LLM_API_KEY', '').strip()),
               'jev_key_present': bool(c.get('JEV_API_KEY', '').strip()),
-              'pinned_jev_model': c.get('JEV_MODEL') == 'jev-1.13.0'}
+              'pinned_jev_model': c.get('JEV_MODEL') == target['jev_model']}
     return {'settings_valid': all(checks.values()), 'checks': checks, 'ready_for_paid_run': False,
             'model_calls': 0, 'jev_calls': 0,
-            'remaining_gates': ['Per-batch Observer injection, coverage and score readback', 'User authorization of an explicit 1220 currency cap', 'Account invoice unknown; public peak rates are not a bill']}
+            'remaining_gates': ['Per-batch Observer injection, coverage and score readback',
+                                'Target-bound execution authorization and billing evidence' if current else 'User authorization of an explicit 1220 currency cap',
+                                'Account invoice unknown; public peak rates are not a bill']}
+
+
+def customer_target(path):
+    with Path(path).open('rb') as source:
+        raw = source.read((1 << 20) + 1)
+    if len(raw) > 1 << 20:
+        raise ValueError('Bounded campaign plan required')
+    plan = json.loads(raw)
+    if not isinstance(plan, dict):
+        raise ValueError('Campaign plan must be an object')
+    target = plan.get('target')
+    if plan.get('schema') != 'campaign-preflight-plan.v2' or not isinstance(target, dict):
+        raise ValueError('Explicit v2 customer target required')
+    # Reuse the same allowlist as the settings check. This is a target check,
+    # not a validation of frozen cases, budget declarations or runtime bytes.
+    check_settings({}, target)
+    return target, sha(raw)
 
 
 def verify_bindings(directory):
@@ -219,6 +245,7 @@ def main(argv=None):
     parser.add_argument('--out', required=True)
     parser.add_argument('--execute', action='store_true')
     parser.add_argument('--preflight')
+    parser.add_argument('--campaign-plan')
     args = parser.parse_args(argv)
     if args.mode == 'publish' and not args.execute:
         print('Explicit --execute required for local score writes', file=sys.stderr)
@@ -226,15 +253,20 @@ def main(argv=None):
     try:
         if Path(args.out).exists():
             raise ValueError('New output path required; existing evidence is immutable')
-        if args.mode == 'check' and not args.preflight:
-            raise ValueError('Explicit versioned preflight required')
-        binding = verify_bindings(args.preflight) if args.mode == 'check' else None
+        target, campaign_binding = None, None
+        if args.campaign_plan and (args.mode != 'check' or args.preflight or not args.env_file):
+            raise ValueError('Customer check requires explicit campaign and private env files only')
+        if args.mode == 'check' and not (args.preflight or args.campaign_plan):
+            raise ValueError('Explicit versioned preflight or customer campaign required')
+        if args.campaign_plan:
+            target, campaign_binding = customer_target(args.campaign_plan)
+        binding = verify_bindings(args.preflight) if args.mode == 'check' and args.preflight else None
         if args.mode in ('plan', 'publish', 'verify'):
             if not args.report:
                 raise ValueError('Explicit trusted report paths required')
             plan = build_plan([json.loads(Path(p).read_text(encoding='utf-8')) for p in args.report])
         if args.mode != 'plan':
-            config = dict(os.environ)
+            config = {} if args.campaign_plan else dict(os.environ)
             for p in args.env_file:
                 for line in Path(p).read_text(encoding='utf-8-sig').splitlines():
                     if line.strip() and not line.lstrip().startswith('#') and '=' in line:
@@ -245,7 +277,7 @@ def main(argv=None):
             with Path(args.out).open('x', encoding='utf-8', newline='\n') as receipt:
                 publish(plan, client, receipt)
         else:
-            value = plan if args.mode == 'plan' else check_settings(config)
+            value = plan if args.mode == 'plan' else check_settings(config, target)
             if args.mode == 'verify':
                 summaries = client.validate_traces(plan)
                 client.verify_scores(plan['scores'])
@@ -256,8 +288,12 @@ def main(argv=None):
                 client.request('/api/public/health?failIfDatabaseUnavailable=true')
                 client.request('/api/public/v3/scores?limit=1')
                 value['local_langfuse_health_and_auth'] = True
-                value['runtime_binding_valid'] = True
-                value['proposal_sha256'] = binding
+                value['runtime_binding_valid'] = binding is not None
+                if args.campaign_plan:
+                    value['check_scope'] = 'customer_target_settings_only'
+                    value['campaign_plan_sha256'] = campaign_binding
+                else:
+                    value['proposal_sha256'] = binding
             with Path(args.out).open('xb') as output:
                 output.write(encoded(value))
             if args.mode == 'check' and not value['settings_valid']:

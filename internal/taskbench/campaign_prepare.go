@@ -5,8 +5,40 @@ import "fmt"
 // CampaignPreparationPlan supplies declarations only, never paid permission.
 type CampaignPreparationPlan struct {
 	Schema  string                     `json:"schema"`
+	Target  *PilotTarget               `json:"target,omitempty"`
 	Limits  CampaignLimits             `json:"campaign_limits"`
 	Batches []CampaignPreparationBatch `json:"batches"`
+}
+
+// PilotTarget is public channel identity, never credentials or spending permission.
+// v2 is the Pi successor; v1 archives retain their original model binding.
+type PilotTarget struct {
+	BaseURL  string `json:"base_url"`
+	Model    string `json:"model"`
+	Protocol string `json:"protocol"`
+	JEVModel string `json:"jev_model"`
+}
+
+func (t PilotTarget) validPi() bool {
+	return t == (PilotTarget{"https://api.deepseek.com/v1", "deepseek-flash", "openai", "jev-1.13.0"})
+}
+
+func (t PilotTarget) modelSettings() PairModelSettings {
+	return PairModelSettings{BaseURL: t.BaseURL, Model: t.Model, Protocol: t.Protocol}
+}
+
+func (p CampaignPreparationPlan) validateTarget(model PairModelSettings, jevModel string) error {
+	switch p.Schema {
+	case "campaign-preflight-plan.v1":
+		if p.Target == nil {
+			return nil
+		}
+	case "campaign-preflight-plan.v2":
+		if p.Target != nil && p.Target.validPi() && p.Target.BaseURL == model.BaseURL && p.Target.Model == model.Model && p.Target.Protocol == model.Protocol && p.Target.JEVModel == jevModel {
+			return nil
+		}
+	}
+	return fmt.Errorf("campaign schema or model target differs")
 }
 
 type CampaignPreparationBatch struct {
@@ -26,6 +58,7 @@ type CampaignProposalBatch struct {
 
 type CampaignProposal struct {
 	Schema                    string                  `json:"schema"`
+	Target                    *PilotTarget            `json:"target,omitempty"`
 	ReviewedRevision          string                  `json:"reviewed_revision"`
 	Limits                    CampaignLimits          `json:"proposed_campaign_limits"`
 	Batches                   []CampaignProposalBatch `json:"batches"`
@@ -48,8 +81,11 @@ type CampaignProposal struct {
 // and disabled-provider configuration preparation. It creates no execution
 // lease, journal, database connection or network request.
 func PrepareCampaignProposal(source ConversationSuite, profiles PairedProfiles, model PairModelSettings, revision, jevModel string, plan CampaignPreparationPlan) (CampaignProposal, error) {
-	if plan.Schema != "campaign-preflight-plan.v1" || len(plan.Batches) == 0 {
+	if len(plan.Batches) == 0 {
 		return CampaignProposal{}, fmt.Errorf("explicit campaign preparation schema/batches required")
+	}
+	if err := plan.validateTarget(model, jevModel); err != nil {
+		return CampaignProposal{}, err
 	}
 	if err := plan.Limits.validate(); err != nil {
 		return CampaignProposal{}, err
@@ -64,6 +100,11 @@ func PrepareCampaignProposal(source ConversationSuite, profiles PairedProfiles, 
 	}
 	seen := map[string]bool{}
 	proposal := CampaignProposal{Schema: "small-pilot-execution-proposal.v1", ReviewedRevision: revision, Limits: plan.Limits}
+	if plan.Target != nil {
+		target := *plan.Target
+		proposal.Target = &target
+		proposal.Schema = "small-pilot-execution-proposal.v2"
+	}
 	// Reuse the ledger's pure reservation checks without opening a ledger or
 	// issuing leases; these in-memory entries cannot be used for execution.
 	check := CampaignBudget{limits: plan.Limits, reserved: map[string]campaignEvent{}}

@@ -191,6 +191,94 @@ class LangfuseEvaluationTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 m.Client({'OTEL_EXPORTER_OTLP_TRACES_ENDPOINT': endpoint})
 
+class PiCustomerSettingsTests(unittest.TestCase):
+    target = {'base_url': 'https://api.deepseek.com/v1', 'model': 'deepseek-flash',
+              'protocol': 'openai', 'jev_model': 'jev-1.13.0'}
+
+    def settings(self):
+        return {'AGENT_LANGFUSE_ENABLED': 'true', 'AGENT_LANGFUSE_CAPTURE_CONTENT': 'true',
+                'AGENT_LANGFUSE_ENVIRONMENT': 'evaluation', 'AGENT_LANGFUSE_SAMPLE_RATE': '1',
+                'AGENT_LANGFUSE_HASH_KEY': 'h' * 32, 'AGENT_LLM_BASE_URL': 'https://api.deepseek.com/v1',
+                'AGENT_LLM_MODEL': 'deepseek-flash', 'AGENT_LLM_PROTOCOL': 'openai',
+                'AGENT_LLM_API_KEY': 'private-key-marker', 'JEV_API_KEY': 'private-jev-marker',
+                'JEV_MODEL': 'jev-1.13.0'}
+
+    def test_pi_settings_match_explicit_target_and_remain_unpaid(self):
+        m = load()
+        result = m.check_settings(self.settings(), self.target)
+        self.assertTrue(result['settings_valid'])
+        self.assertFalse(result['ready_for_paid_run'])
+        self.assertEqual(result['model_calls'], 0)
+        self.assertEqual(result['jev_calls'], 0)
+        self.assertNotIn('private-key-marker', json.dumps(result))
+        for key, value in [('AGENT_LLM_BASE_URL', 'https://maas.qianwenaiapi.com/apps/anthropic'),
+                           ('AGENT_LLM_MODEL', 'deepseek-v4.1-flash'), ('AGENT_LLM_PROTOCOL', 'anthropic'),
+                           ('JEV_MODEL', 'jev-latest')]:
+            config = {**self.settings(), key: value}
+            self.assertFalse(m.check_settings(config, self.target)['settings_valid'])
+
+    def test_campaign_check_uses_only_named_private_files(self):
+        m = load()
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            plan = root / 'plan.json'
+            plan.write_text(json.dumps({'schema': 'campaign-preflight-plan.v2', 'target': self.target}))
+            env = root / 'private.env'
+            # Required model and JEV keys are intentionally absent from this file.
+            config = {k: v for k, v in self.settings().items() if not k.endswith('API_KEY')}
+            env.write_text('\n'.join(k + '=' + v for k, v in config.items()))
+            out = root / 'result.json'
+            with patch.dict('os.environ', {'AGENT_LLM_API_KEY': 'ambient-secret', 'JEV_API_KEY': 'ambient-jev'}), \
+                 patch.object(m, 'Client'):
+                code = m.main(['check', '--campaign-plan', str(plan), '--env-file', str(env), '--out', str(out)])
+            self.assertEqual(code, 2)
+            result = json.loads(out.read_text())
+            self.assertFalse(result['checks']['model_key_present'])
+            self.assertFalse(result['checks']['jev_key_present'])
+            self.assertFalse(result['runtime_binding_valid'])
+            self.assertEqual(result['check_scope'], 'customer_target_settings_only')
+            self.assertEqual(result['campaign_plan_sha256'], m.sha(plan.read_bytes()))
+            self.assertNotIn('ambient-secret', out.read_text())
+
+    def test_malformed_campaign_root_is_rejected_without_crashing(self):
+        m = load()
+        for payload in ([], None, "plan", 3):
+            with self.subTest(payload=payload), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                path = root / 'plan.json'
+                path.write_text(json.dumps(payload))
+                out = root / 'result.json'
+                with patch.object(m, 'Client', side_effect=AssertionError('network constructed')):
+                    self.assertEqual(m.main(['check', '--campaign-plan', str(path), '--env-file', 'missing.env', '--out', str(out)]), 2)
+                self.assertFalse(out.exists())
+
+    def test_invalid_or_ambiguous_target_stops_before_network_or_output(self):
+        m = load()
+        for kind in ('missing-target', 'wrong-base', 'wrong-protocol', 'legacy-schema', 'both-inputs', 'missing-env'):
+            with self.subTest(kind=kind), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                target = dict(self.target)
+                plan = {'schema': 'campaign-preflight-plan.v2', 'target': target}
+                if kind == 'missing-target':
+                    del plan['target']
+                elif kind == 'wrong-base':
+                    target['base_url'] = 'https://secret@api.deepseek.com/v1'
+                elif kind == 'wrong-protocol':
+                    target['protocol'] = 'anthropic'
+                elif kind == 'legacy-schema':
+                    plan['schema'] = 'campaign-preflight-plan.v1'
+                path = root / 'plan.json'
+                path.write_text(json.dumps(plan))
+                out = root / 'result.json'
+                args = ['check', '--campaign-plan', str(path), '--out', str(out)]
+                if kind != 'missing-env':
+                    args += ['--env-file', str(root / 'missing.env')]
+                if kind == 'both-inputs':
+                    args += ['--preflight', str(root)]
+                with patch.object(m, 'Client', side_effect=AssertionError('network constructed')):
+                    self.assertEqual(m.main(args), 2)
+                self.assertFalse(out.exists())
+
 
 if __name__ == '__main__':
     unittest.main()

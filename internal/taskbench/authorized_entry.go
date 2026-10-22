@@ -24,6 +24,7 @@ type pilotAuthorization struct {
 	Limits   CampaignLimits   `json:"authorized_spending"`
 	Cases    []authorizedCase `json:"cases"`
 	PlanSHA  string           `json:"scope_plan_sha256"`
+	Base     string           `json:"model_base"`
 	Model    string           `json:"model"`
 	Protocol string           `json:"protocol"`
 	JEVModel string           `json:"jev_model"`
@@ -48,12 +49,16 @@ type pilotBilling struct {
 type AuthorizedPilot struct {
 	valid                                              bool
 	plan                                               CampaignPreparationPlan
+	model                                              PairModelSettings
 	authorizationSHA, planSHA, billingSHA, evidenceSHA string
 	blockers                                           []string
 }
 
 func (p AuthorizedPilot) Ready() bool        { return p.valid && len(p.blockers) == 0 }
 func (p AuthorizedPilot) Blockers() []string { return append([]string(nil), p.blockers...) }
+
+// ModelSettings returns the validated public binding; it never includes a key.
+func (p AuthorizedPilot) ModelSettings() PairModelSettings { return p.model }
 
 // ValidateFrozenInputs performs only local immutable archive and preparation
 // checks. It needs no credentials, database, observer or provider transport.
@@ -69,7 +74,7 @@ func (p AuthorizedPilot) ValidateFrozenInputs(definitions, profiles, revision st
 	if err != nil {
 		return err
 	}
-	_, err = PrepareCampaignProposal(source, fixtures, PairModelSettings{BaseURL: AuthorizedPilotModelBase, Model: AuthorizedPilotModel, Protocol: "anthropic"}, revision, AuthorizedPilotJEVModel, p.plan)
+	_, err = PrepareCampaignProposal(source, fixtures, p.model, revision, AuthorizedPilotJEVModel, p.plan)
 	return err
 }
 
@@ -82,7 +87,15 @@ func CheckAuthorizedPilot(authRaw, planRaw, billingRaw, evidenceRaw []byte) (Aut
 		return p, fmt.Errorf("bounded valid authorization and plan JSON required")
 	}
 	limits := CampaignLimits{MaxBatches: 6, MaxModelCalls: 24, MaxModelMicroCNY: 1000000, MaxJEVCalls: 6, MaxJEVMicroUSD: 20000, JEVMicroUSDPerAttempt: 2688}
-	if a.Schema != "small-pilot-authorization.v1" || !a.Approved || a.Expand || a.Retry || a.Model != AuthorizedPilotModel || a.Protocol != "anthropic" || a.JEVModel != AuthorizedPilotJEVModel || a.Limits != limits || p.plan.Schema != "campaign-preflight-plan.v1" || p.plan.Limits != limits || a.PlanSHA != conversationHash(planRaw) {
+	switch {
+	case a.Schema == "small-pilot-authorization.v1" && p.plan.Schema == "campaign-preflight-plan.v1" && p.plan.Target == nil && (a.Base == "" || a.Base == AuthorizedPilotModelBase):
+		p.model = PairModelSettings{BaseURL: AuthorizedPilotModelBase, Model: AuthorizedPilotModel, Protocol: "anthropic"}
+	case a.Schema == "small-pilot-authorization.v2" && p.plan.Schema == "campaign-preflight-plan.v2" && p.plan.Target != nil && p.plan.Target.validPi() && a.Base == p.plan.Target.BaseURL:
+		p.model = p.plan.Target.modelSettings()
+	default:
+		return AuthorizedPilot{}, fmt.Errorf("authorization model target or version differs")
+	}
+	if !a.Approved || a.Expand || a.Retry || a.Model != p.model.Model || a.Protocol != p.model.Protocol || a.JEVModel != AuthorizedPilotJEVModel || a.Limits != limits || p.plan.Limits != limits || a.PlanSHA != conversationHash(planRaw) {
 		return AuthorizedPilot{}, fmt.Errorf("authorization scope/plan differs from approved pilot")
 	}
 	keys := []string{"balance-001/answer_complete", "balance-020/explicit_scope_followup", "recharge-002/confirm", "recharge-002/cancel", "recharge-001/supplement_then_confirm", "refund-001/balance_cap"}
@@ -101,7 +114,7 @@ func CheckAuthorizedPilot(authRaw, planRaw, billingRaw, evidenceRaw []byte) (Aut
 	p.authorizationSHA, p.planSHA = conversationHash(authRaw), a.PlanSHA
 	var b pilotBilling
 	if len(billingRaw) > 0 {
-		if json.Unmarshal(billingRaw, &b) != nil || b.Schema != "paired-billing-attestation.v1" || b.PlanSHA != p.planSHA || b.Base != AuthorizedPilotModelBase || b.Model != AuthorizedPilotModel || b.Protocol != "anthropic" || b.JEVModel != AuthorizedPilotJEVModel {
+		if json.Unmarshal(billingRaw, &b) != nil || b.Schema != "paired-billing-attestation.v1" || b.PlanSHA != p.planSHA || b.Base != p.model.BaseURL || b.Model != p.model.Model || b.Protocol != p.model.Protocol || b.JEVModel != AuthorizedPilotJEVModel {
 			return AuthorizedPilot{}, fmt.Errorf("billing attestation scope/model/version differs")
 		}
 		p.billingSHA = conversationHash(billingRaw)

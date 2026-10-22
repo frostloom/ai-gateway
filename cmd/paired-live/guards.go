@@ -19,7 +19,7 @@ import (
 // even if fixture setup or the first request fails. Reconciliation is manual.
 func claimAuthorization(root string, plan []byte, out string) (string, error) {
 	var scope taskbench.CampaignPreparationPlan
-	if json.Unmarshal(plan, &scope) != nil || scope.Schema != "campaign-preflight-plan.v1" {
+	if json.Unmarshal(plan, &scope) != nil || (scope.Schema != "campaign-preflight-plan.v1" && scope.Schema != "campaign-preflight-plan.v2") {
 		return "", fmt.Errorf("invalid claim scope")
 	}
 	canonical, err := json.Marshal(scope)

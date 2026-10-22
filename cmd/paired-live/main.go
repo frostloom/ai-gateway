@@ -116,7 +116,8 @@ func runWithOutput(args []string, out io.Writer) int {
 	}
 	env["AGENT_RELEASE"] = *release
 	model := taskbench.PairModelSettings{BaseURL: env["AGENT_LLM_BASE_URL"], APIKey: env["AGENT_LLM_API_KEY"], Model: env["AGENT_LLM_MODEL"], Protocol: env["AGENT_LLM_PROTOCOL"]}
-	if model.BaseURL != taskbench.AuthorizedPilotModelBase || model.Model != taskbench.AuthorizedPilotModel || model.Protocol != "anthropic" || strings.TrimSpace(model.APIKey) == "" || env["JEV_MODEL"] != taskbench.AuthorizedPilotJEVModel || strings.TrimSpace(env["JEV_API_KEY"]) == "" || (env["JEV_ENDPOINT"] != "" && env["JEV_ENDPOINT"] != jev.DefaultEndpoint) {
+	bound := pilot.ModelSettings()
+	if model.BaseURL != bound.BaseURL || model.Model != bound.Model || model.Protocol != bound.Protocol || strings.TrimSpace(model.APIKey) == "" || env["JEV_MODEL"] != taskbench.AuthorizedPilotJEVModel || strings.TrimSpace(env["JEV_API_KEY"]) == "" || (env["JEV_ENDPOINT"] != "" && env["JEV_ENDPOINT"] != jev.DefaultEndpoint) {
 		return fail("private provider settings differ from authorized models/endpoints")
 	}
 	cfg, err := observability.ConfigFromEnv(func(k string) string { return env[k] })
@@ -146,7 +147,8 @@ func runWithOutput(args []string, out io.Writer) int {
 	return 0
 }
 func writeCheck(out io.Writer, p taskbench.AuthorizedPilot) int {
-	if json.NewEncoder(out).Encode(map[string]any{"human_authorized": true, "ready_for_paid_run": p.Ready(), "blockers": p.Blockers(), "mode": "check", "execution_scope": "batch-001 only, then checkpoint", "model_calls": 0, "jev_calls": 0}) != nil {
+	bound := p.ModelSettings()
+	if json.NewEncoder(out).Encode(map[string]any{"human_authorized": true, "ready_for_paid_run": p.Ready(), "blockers": p.Blockers(), "mode": "check", "model_base": bound.BaseURL, "model": bound.Model, "protocol": bound.Protocol, "execution_scope": "batch-001 only, then checkpoint", "model_calls": 0, "jev_calls": 0}) != nil {
 		return 1
 	}
 	return 0

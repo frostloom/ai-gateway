@@ -50,7 +50,8 @@ func RunAuthorizedFirstBatch(ctx context.Context, dir string, o AuthorizedFirstB
 	if o.Environment == nil || o.Environment.closed || o.Observer == nil || o.Upstream == nil || o.JEVFactory == nil || !regexp.MustCompile(`^[a-f0-9]{40}$`).MatchString(o.Revision) || dir == "" {
 		return r, fmt.Errorf("explicit fixtures, observer, providers, revision and new path required")
 	}
-	if o.Model.BaseURL != AuthorizedPilotModelBase || o.Model.Model != AuthorizedPilotModel || o.Model.Protocol != "anthropic" || o.Model.APIKey == "" {
+	bound := o.Pilot.ModelSettings()
+	if o.Model.BaseURL != bound.BaseURL || o.Model.Model != bound.Model || o.Model.Protocol != bound.Protocol || o.Model.APIKey == "" {
 		return r, fmt.Errorf("model configuration differs from authorization")
 	}
 	if err := ctx.Err(); err != nil {
