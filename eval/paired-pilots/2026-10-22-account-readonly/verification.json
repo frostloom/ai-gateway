@@ -1,0 +1,29 @@
+{
+  "schema": "account-readonly-verification.v1",
+  "checked_date": "2026-10-22",
+  "product_code_changes": false,
+  "public_source_receipts_checked": 14,
+  "source_hashes_and_openapi_paths": "passed",
+  "document_links_and_whitespace": "passed",
+  "credential_account_identifiers_and_private_bill_value_scan": "passed",
+  "authenticated_jev_models_get": {
+    "http_status": 200,
+    "inference": false,
+    "returned_aliases": [
+      "jev-latest",
+      "jev-preview"
+    ]
+  },
+  "ui_evidence_kind": "Live native accessibility observations, no private UI content archived.",
+  "reviewed_files_sha256": {
+    "eval/paired-pilots/2026-10-22-account-readonly/billing-boundaries.json": "7318d59170d2b4ce119aed70cb47d23f1cba8746962bfb689d1b1464c826b11d",
+    "docs/paired-account-readonly-2026-10-22.md": "5c64b4eddb0a125fcb8c5b3ede510954653fc871d5e81a8971d8cfd59096a45f",
+    "docs/paired-campaign-preflight-2026-10-22.md": "1725237eb96351d77de9c690e9cb8193a648a4e9c248c45f88635b8a2485aa2b"
+  },
+  "local_receipt_sha256": "9f5641b141d2e2bc7393c747cd2837444db0c11d3fd2c2284de33983fa463a04",
+  "independent_review": {
+    "reviewer": "review_campaign_preflight",
+    "result": "passed",
+    "material_findings": 0
+  }
+}

@@ -1,0 +1,149 @@
+{
+  "schema": "account-readonly-review.v1",
+  "checked_date": "2026-10-22",
+  "base_revision": "6892d6bec0e793aa41598e51ce4054b2459e556e",
+  "scope": "Read-only account UI and official documentation; no inference or account mutations.",
+  "sources": {
+    "qwen-index": {
+      "url": "https://platform.qianwenai.com/docs/llms.txt",
+      "status": 200,
+      "bytes": 205091,
+      "sha256": "19bc6292a755e408dffc122acaa4e39728bc9f4f566b36d124871896a92f5373"
+    },
+    "qwen-pricing": {
+      "url": "https://platform.qianwenai.com/docs/developer-guides/getting-started/pricing.md",
+      "status": 200,
+      "bytes": 12334,
+      "sha256": "1f2b93e9e06d6c5f618b9ace20d307c059fee41f899af9f7bd0de63e8a373f08"
+    },
+    "jev-index": {
+      "url": "https://docs.typesafe.ai/llms.txt",
+      "status": 200,
+      "bytes": 18706,
+      "sha256": "e817e47899099364d29633f157ac5de74f936c849bdf5a14382e31ba4a09c688"
+    },
+    "jev-openapi": {
+      "url": "https://api.typesafe.ai/openapi.json",
+      "status": 200,
+      "bytes": 21660,
+      "sha256": "ee599512cbea3a198b34af3f60addcd72b381d3521196f93c70ae83185c057c3"
+    },
+    "jev-errors": {
+      "url": "https://docs.typesafe.ai/api/errors.md",
+      "status": 200,
+      "bytes": 2695,
+      "sha256": "0aee0bfc3052128c4d32c05895c5bec800c9bc0c146af54fdf276dc04414c0de"
+    },
+    "qwen-anthropic-openapi": {
+      "url": "https://platform.qianwenai.com/docs/openapi-anthropic.json",
+      "status": 200,
+      "bytes": 60704,
+      "sha256": "00a3e6a830d6dc391051439a52849f4bf10eb4ae386bc0a2b19610d0af553f69"
+    },
+    "qwen-free-quota": {
+      "url": "https://platform.qianwenai.com/docs/resources/free-quota.md",
+      "status": 200,
+      "bytes": 8954,
+      "sha256": "75c2ce4f885aa811a60055c05a3ad207382a6d6ebe90b5847a6ad338fc441ad3"
+    },
+    "qwen-coupons": {
+      "url": "https://platform.qianwenai.com/docs/resources/coupons.md",
+      "status": 200,
+      "bytes": 7690,
+      "sha256": "e15de4736572e009773ed69b596ef2d006ab64b80ad114923eab370146c88371"
+    },
+    "qwen-prices": {
+      "url": "https://platform.qianwenai.com/docs/developer-guides/getting-started/model-prices.md",
+      "status": 200,
+      "bytes": 77575,
+      "sha256": "bc1abeafefca365871fbafaa9d34a21f081252fbd44a358c612819d8a8c176c4"
+    },
+    "jev-introduction": {
+      "url": "https://docs.typesafe.ai/introduction.md",
+      "resolved_url": "https://docs.typesafe.ai/introduction.md",
+      "status": 200,
+      "bytes": 4691,
+      "sha256": "f1dbcd1857df8903bdfdbab4acba8aca88f9711d399dea1f6588c8a7a34ea926"
+    },
+    "jev-quickstart": {
+      "url": "https://docs.typesafe.ai/introduction/quickstart.md",
+      "resolved_url": "https://docs.typesafe.ai/introduction/quickstart.md",
+      "status": 200,
+      "bytes": 14062,
+      "sha256": "c7a01049b23a8fbc28f1ce7efedc2bee7191751848f588069b4c368afc30e3e1"
+    },
+    "typesafe-home": {
+      "url": "https://typesafe.ai",
+      "resolved_url": "https://typesafe.ai",
+      "status": 200,
+      "bytes": 617764,
+      "sha256": "721ebdf53635b1b443d7f6640c3a2114c0ca78956608294afc2f695be5a80024"
+    },
+    "jev-mca": {
+      "url": "https://typesafe.ai/legal/mca",
+      "status": 200,
+      "bytes": 278201,
+      "sha256": "6a6705df94b45d11e4ce5b367fb132ff41432e0812bc73fd4fd58e89a42863ba"
+    },
+    "jev-models": {
+      "url": "https://docs.typesafe.ai/models.md",
+      "status": 200,
+      "bytes": 7688,
+      "sha256": "d78f8db1fa611344cb7bb84f0e1431f704689eaa2f888da7db1f42eb4e192b04"
+    }
+  },
+  "qwen": {
+    "existing_safari_management_session": "signed_in",
+    "historical_target_model_bill_rows_read": true,
+    "historical_discount_components_read": true,
+    "local_key_matches_displayed_payg_mask_suffix": true,
+    "full_plaintext_key_comparison_or_authentication_test": false,
+    "local_endpoint_matches_payg_anthropic_console_endpoint": true,
+    "local_model_matches_proposal": true,
+    "token_plan_uses_distinct_endpoint_and_key": true,
+    "historical_net_charge_is_future_price_guarantee": false,
+    "future_coupon_availability_and_validity_verified": false,
+    "future_effective_account_tariff_verified": false,
+    "public_model_peak_input_cny_per_million": 2,
+    "public_model_peak_output_cny_per_million": 8,
+    "public_failed_calls_policy": "Provider documentation says failed calls incur no charge; client timeout does not establish provider-side failure."
+  },
+  "jev": {
+    "official_console_url": "https://console.typesafe.ai/",
+    "isolated_browser_console_state": "redirected_to_login",
+    "existing_safari_management_session_verified": false,
+    "account_credit_balance_and_rate_verified": false,
+    "failure_charge_exception_found_in_inspected_sources": false,
+    "mca_section_8_2_reviewed": true,
+    "mca_interpretation_scope": "Describes credit consumption per submitted input and account/model-dependent rates; no explicit failed-request fee exemption found. Does not establish that every failed request is charged.",
+    "published_openapi_paths": [
+      "/v1/models",
+      "/v1/systemone"
+    ],
+    "documented_models_get_status": 200,
+    "model_list_key_authentication_verified": true,
+    "model_list_result_aliases": [
+      "jev-latest",
+      "jev-preview"
+    ],
+    "model_list_success_proves_credit_balance_or_inference": false,
+    "pinned_execution_model_unchanged": "jev-1.13.0",
+    "public_input_usd_per_million": 0.042
+  },
+  "token_count": {
+    "qwen_anthropic_published_paths": [
+      "/apps/anthropic/v1/messages"
+    ],
+    "non_inference_counter_in_inspected_exact_channel_openapi": false,
+    "documented_non_inference_counter_found_in_inspected_indexes": false,
+    "token_counter_called": false,
+    "bytes_used_as_token_proof": false
+  },
+  "allow_paid": false,
+  "ready_for_paid_run": false,
+  "external_model_inference_calls": 0,
+  "external_jev_inference_calls": 0,
+  "private_bill_or_key_material_archived": false,
+  "account_settings_changed": false,
+  "agreements_accepted": false
+}

@@ -1,5 +1,7 @@
 # 六批提案的可重复离线准备（2026-10-22）
 
+同日后续：[账户计费只读复核](paired-account-readonly-2026-10-22.md)已确认现有千问会话和历史账单可读；未来有效费率与其他执行前条件仍未齐备。
+
 `paired-eval -mode campaign-preflight` 将已审查的逐批案例和预算声明转换为完整配置、版本契约和分币种预留估算，替代上一轮临时生成脚本。它不读取密钥环境变量、不连接数据库、不打开预算账本，也不执行模型或 JEV 请求。输出始终 `allow_paid=false`、`ready_for_paid_run=false`、`provider_calls=0`、`authorized_spending=null`。
 
 ## 用法
