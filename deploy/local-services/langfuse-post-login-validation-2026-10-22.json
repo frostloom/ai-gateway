@@ -1,0 +1,38 @@
+{
+  "content_coverage_verified": true,
+  "environment_verified": true,
+  "evidence_kind": "local_stub",
+  "exporter_stats": {
+    "Accepted": 82,
+    "Batches": 20,
+    "Dropped": 0,
+    "Exported": 82,
+    "Failed": 0,
+    "QueueDepth": 0,
+    "SampledTurns": 26,
+    "Turns": 26
+  },
+  "external_jev_calls": 0,
+  "external_model_calls": 0,
+  "generations": 20,
+  "per_trace_generation_counts_verified": true,
+  "ready_for_paid_run": false,
+  "release": "post-login-local-verification-20261022",
+  "schema": "langfuse-post-login-verification.v1",
+  "scores_verified": 84,
+  "semantic_review": "pending_independent_review",
+  "tasks": 12,
+  "turns": 26,
+  "verified_date": "2026-10-22",
+  "accepted_score_writes": 84,
+  "source_revision": "ee812dd8f3c672b698754c1b1a1e1fd7e081ece5",
+  "test_command": "go test ./internal/taskbench -run ^TestAgentPairOwnedEnvironmentLocalReadAndWrite$ -count=1 -json",
+  "test_exit_code": 0,
+  "local_evidence_directory": ".tmp/langfuse-post-login-20261022",
+  "evidence_sha256": {
+    "receipt.json": "acc95c122cfa45888848dc0a1e4b446eab296fa87687e67c7f1062f97b1c0343",
+    "go-test.jsonl": "5ded20923536f3f6a7051ececc54d86af8b98334efe0a3b1896cbca0002b16b1",
+    "score-plan.json": "755725d3e6fcaf9bb923b8f9b73cae93dd403f8d22f03b44cd7cf445941b6c46",
+    "score-publish.jsonl": "5cfe253c05d961148d44504dd2d08c7ed1246a600f17b3acd1546483d7bd8ef7"
+  }
+}

@@ -26,3 +26,14 @@
 - 核对两个服务原数据卷仍在使用，私密配置权限正确，脱敏记录不含凭据。本轮是本机部署配置与登录变更，没有运行 Go 回归，也没有启动真实评测 campaign。
 
 Hindsight 原先的服务端提取超时记录保留在[诊断文档](hindsight-write-diagnosis-2026-10-21.md)，属于迁移前的历史证据。
+
+## 登录变更后的测评遥测验收
+
+随后针对 Web 重建与登录变更，复用现有 `TestAgentPairOwnedEnvironmentLocalReadAndWrite` 做一次真实本地 Langfuse 摄入验收，结果见[脱敏回执](../deploy/local-services/langfuse-post-login-validation-2026-10-22.json)。源码基线为 `ee812dd8f3c672b698754c1b1a1e1fd7e081ece5`，没有修改产品代码。
+
+- 六个场景、十二个实验臂通过；从接收端逐 trace 读回 12 个 task、26 个 turn、20 个 generation，核对案例、实验臂、轮次、问答内容与 generation 次数，环境均为 evaluation。
+- 导出 Accepted=82、Exported=82、Dropped=0、Failed=0；84 个确定性评分写入接受并全部读回。首次评分读回尚未全部可见，随后只读等待确认，没有重新执行用例或重复写评分。
+- 使用独立 release `post-login-local-verification-20261022`；仅加载主目录 `.env.agent` 中的 Langfuse 配置。模型来自本地 HTTP 替身，JEV 使用 FakeJEV，外部模型和 JEV 调用均为零。
+- 运行现有定向集成测试，退出码 0；没有重复全项目回归。证据仍为 local_stub，语义审核保持 pending_independent_review，不能解释为真实模型质量或付费评测结果。
+
+登录资料变更后，原项目 API 凭据仍能完成导出、追踪读回和评分同步。免费本地准备已完成；接下来真实评测仍受[计费边界与授权](paired-billing-final-check-2026-10-22.md)约束，不再以重复演练替代这些缺口。
