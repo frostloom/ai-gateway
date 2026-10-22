@@ -47,7 +47,7 @@ def main():
     # Do not inherit an overlay, workspace, tags, or persistent Go env settings
     # that could replace committed source or alter the controlled build flags.
     env.update(GOFLAGS="", GOWORK="off", GOENV="off", GO111MODULE="on")
-    with tempfile.TemporaryDirectory(prefix="paired-live-archive-", dir="/private/tmp") as temp:
+    with tempfile.TemporaryDirectory(prefix="paired-live-archive-") as temp:
         temporary = Path(temp)
         archive = temporary / "source.tar"
         subprocess.run(["git", "-C", str(repo), "archive", "--format=tar", "-o", str(archive), commit], check=True)
