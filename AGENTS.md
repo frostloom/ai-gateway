@@ -41,3 +41,5 @@
 ## 当前首轮真实测评授权
 
 2026-10-22 用户已在本对话明确批准既定六案例、最多 24 次模型尝试 / 6 次 JEV，人民币 ¥1 / 美元 $0.02 的首轮测评；不再重复询问这项授权，不再重复余额核查。范围、每批次数及计划绑定见 `eval/paired-pilots/2026-10-22-authorized-small-pilot/authorization.json`，状态说明见 `docs/paired-small-pilot-authorization-2026-10-22.md`。授权不等于执行完成或收费证据已核实，当前仍未启动真实调用；不得将未经核实的 RatesVerified 标为 true。早期文档“尚未授权”为历史状态，以本条为准。
+
+2026-10-22 新增 `cmd/paired-live` 真实首批入口：默认只读检查，不加载密钥；仅显式 execute 且收费证据就绪时执行 batch-001，完成后停在 checkpoint_pending。同范围授权在仓库 `.tmp/paired-live-authorizations/` 持久领取，换输出路径不能重置；失败也不自动删除或重试。执行要求与 HEAD 一致的未修改 VCS 构建及冻结输入校验。当前真实调用仍为零，账户费率、token 包络、JEV 失败收费证据尚未核实；授权保留，不重复询问或核查余额。操作说明见 `docs/paired-live-entry-2026-10-22.md`。

@@ -1,0 +1,81 @@
+{
+  "schema": "authorized-live-entry-validation.v1",
+  "date": "2026-10-22",
+  "implementation_base_revision": "40d1449a9226e0a7fb9a6721b9808f983e324a79",
+  "check": {
+    "blockers": [
+      "account_tariff_unverified",
+      "token_envelope_unverified",
+      "jev_failure_charges_unverified"
+    ],
+    "execution_scope": "batch-001 only, then checkpoint",
+    "human_authorized": true,
+    "jev_calls": 0,
+    "mode": "check",
+    "model_calls": 0,
+    "ready_for_paid_run": false
+  },
+  "full_go_regression": {
+    "command": "SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX26.5.sdk AGENT_LIVE_JEV=0 BILLING_CASH_LOAD=0 BILLING_CASH_PROFILE=0 go test ./... -p 1 -count=1 -json -timeout 8m",
+    "exit_code": 0,
+    "passed_test_events_including_subtests": 904,
+    "skipped_test_events": 3,
+    "failed_test_events": 0,
+    "passed_packages": 18,
+    "packages_without_tests": 27,
+    "skipped_tests": [
+      "TestLiveJevSemanticsDiagnostic",
+      "TestCashLoad",
+      "TestCashProfileRowTiming"
+    ],
+    "note": "Initial sandbox-only attempt lacked cache/loopback permissions; reran with authorized local service access. The final directory-sync change was subsequently covered by targeted tests and vet."
+  },
+  "targeted_tests": {
+    "exit_code": 0,
+    "packages": [
+      "cmd/paired-live",
+      "internal/jev",
+      "internal/taskbench"
+    ],
+    "provenance_guard_mutation_rejected": true,
+    "authorization_reuse_regression_passed": true,
+    "frozen_input_ordering_regression_passed": true
+  },
+  "vet": {
+    "exit_code": 0,
+    "packages": [
+      "internal/taskbench",
+      "internal/jev",
+      "cmd/paired-live",
+      "cmd/paired-eval"
+    ]
+  },
+  "independent_review": {
+    "initial_important_findings": 3,
+    "remaining_critical_or_important": 0,
+    "directory_sync_minor_addressed": true
+  },
+  "actual_evaluation": {
+    "model_attempts": 0,
+    "jev_attempts": 0,
+    "authorization_claim_created": false,
+    "later_batches_started": 0,
+    "billing_attestation_fabricated": false
+  },
+  "hindsight": {
+    "bank": "ai-gateway",
+    "synchronous_retain_succeeded": true,
+    "direct_readback_confirmed": true
+  },
+  "source_sha256": {
+    "cmd/paired-live/guards.go": "839c13da3924ada2637c8a11a9d39329fced448dbec5a0aa01c1ac4b09790e6e",
+    "cmd/paired-live/main.go": "69f141b7eb215eacfd5dbb7680eee19ac596183e6eba0b0c4f890755d72b688a",
+    "cmd/paired-live/main_test.go": "38d8b3812be9ddc6fe8695e313df502b5e86a9981388e412e71c5158ef34bf4b",
+    "internal/jev/evaluation.go": "dc05a6a3a3fdce15e53ff751fb59fe0693e051ea5ac84d9a9d13686b27ac846e",
+    "internal/jev/evaluation_test.go": "853a9f92ff93be7182b112f59be3b1f3e7d90e2def8e2bfc514854056d224bc4",
+    "internal/taskbench/authorized_entry.go": "7b1e3719dcab196487ec71c844994424ec686a81cc319648ca66537ba56f6477",
+    "internal/taskbench/authorized_entry_run.go": "7f7613e25b8a0306bd499a21671336fb37f846b7703eff881f1d40de6c632962",
+    "internal/taskbench/authorized_entry_run_test.go": "6c2f165bb5e95e2d477f34c059a44104516ef14cad0df0fe522b98f7c9efd7be",
+    "internal/taskbench/authorized_entry_test.go": "40ec1e4c10022a187d04570f717028935ed5f2e05031805bf8e38d9d16686e59"
+  }
+}
