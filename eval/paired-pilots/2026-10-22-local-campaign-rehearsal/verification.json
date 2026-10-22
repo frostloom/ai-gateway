@@ -1,0 +1,75 @@
+{
+  "schema": "local-campaign-rehearsal-verification.v1",
+  "checked_date": "2026-10-22",
+  "base_revision": "3e391f880a5c22203623ba8234c39986069e807c",
+  "execution_revision_label": "test-local-rehearsal",
+  "evidence_kind": "local_stub",
+  "allow_paid": false,
+  "ready_for_paid_run": false,
+  "external_model_calls": 0,
+  "external_jev_calls": 0,
+  "rehearsal": {
+    "batches": 6,
+    "arms": 12,
+    "user_turns": 26,
+    "synthetic_model_attempts": 20,
+    "fake_jev_attempts": 6,
+    "checked_local_otlp": {
+      "tasks": 12,
+      "turns": 26,
+      "generations": 20
+    }
+  },
+  "artifact_checks": {
+    "ordered_campaign_events": 13,
+    "report_journal_hashes_checked": 6,
+    "all_evidence_permissions_checked": true,
+    "no_locks_remain": true,
+    "receipt_sha256": "709ca5522e37e60f28d26677b2b4aadc0556a2d88a0d0f42450ae18be330ca1f"
+  },
+  "regression": {
+    "passed_tests": 379,
+    "skipped_tests": [
+      "github.com/frostloom/ai-gateway/internal/agent/TestLiveJevSemanticsDiagnostic",
+      "github.com/frostloom/ai-gateway/internal/billing/store/TestCashLoad",
+      "github.com/frostloom/ai-gateway/internal/billing/store/TestCashProfileRowTiming"
+    ],
+    "failed_tests": [],
+    "passed_packages": 17,
+    "exit_code": 0
+  },
+  "commands": [
+    "SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX26.5.sdk go test ./internal/taskbench -run TestLocalCampaign -count=1 -v",
+    "SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX26.5.sdk go test -json ./... -count=1",
+    "SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX26.5.sdk go vet ./internal/taskbench ./cmd/paired-eval"
+  ],
+  "vet": "passed",
+  "independent_review": {
+    "critical": 0,
+    "important": 0,
+    "minor": 0,
+    "result": "passed"
+  },
+  "source_sha256": {
+    "internal/taskbench/campaign_rehearsal.go": "3b6fc39546a4445e6803f43ac8188803b3bf1171b1c8c110fdc214539e637709",
+    "internal/taskbench/campaign_rehearsal_dependencies.go": "b3bd144e2a88c15d14e98f09a4f4c4ebb8be54e878adf5a17c56de21113d322b",
+    "internal/taskbench/campaign_rehearsal_test.go": "17267afe1b1eb254903015c38583ea2f00ba7cdcdc6e6fb5d250a99e11c528d5",
+    "docs/paired-local-campaign-rehearsal-2026-10-22.md": "5850e3aed704c3a02c86a494962ecc1331103f82aa9de61ef9913f4ed926b4ab",
+    "docs/superpowers/specs/2026-10-22-local-campaign-rehearsal-design.md": "4106e8172868c22cce32e1f6e132b1bbf9a41c04f604af014bcc829c54ee7bd1",
+    "docs/superpowers/plans/2026-10-22-local-campaign-rehearsal.md": "5830c2769cf0036c6cea91a735bc9a9823063a05ce4c2a81cc43d7d7f22220f6"
+  },
+  "local_evidence_sha256": {
+    ".tmp/local-campaign-rehearsal-20261022/green-faults.log": "175f92700877ed2d5758c127a166304bbb71432f8cda737a9fc32a4dac710eb8",
+    ".tmp/local-campaign-rehearsal-20261022/persistent-run.log": "5b31e72ecaf38257d6fc50f2592b0bb48e41114e57abb9b91a6de324d128e1fe",
+    ".tmp/local-campaign-rehearsal-20261022/full-tests.jsonl": "f5ea5af7f85a29215871f420c26fc72a464719aa2aab21d6230e6b20dfdda871",
+    ".tmp/local-campaign-rehearsal-20261022/full-tests-summary.json": "e6b1b4c0a261fc0ada3d4a56b171a859cf7af9cca367ea45f1ab8c8ecfd92334",
+    ".tmp/local-campaign-rehearsal-20261022/artifact-checks.json": "6926552717992cdbe98bfe3af9f29837acebf3681cfc8b606e1d0221b85a3d15"
+  },
+  "limitations": [
+    "Synthetic model usage and declared reservations are not invoices or verified token envelopes.",
+    "FakeJEV has no usage: combined system tokens may remain unknown.",
+    "Every answer remains needs_review; no model quality or cost benefit is established.",
+    "Local OTLP capture is not actual Langfuse ingestion.",
+    "Low-level campaign finish records execution only; final receipt and return error govern outer checkpoints; no directory reuse."
+  ]
+}
