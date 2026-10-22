@@ -1,0 +1,79 @@
+{
+  "schema": "customer-service-readiness.v1",
+  "date": "2026-10-22",
+  "deployment": {
+    "source_revision": "af0ba14eb2d8df458052ecafaf6ea45e1ec4520d",
+    "vcs_modified": true,
+    "go_source_changes": false,
+    "old_binary_sha256": "2a968ecbb3f40b6aceea930e50aad0e76af7106639a76c263e8b739b974220b4",
+    "new_binary_sha256": "38953c7ed6c61640df23bccce1076accc48d197fc805085293b0ff4f74aefcbf",
+    "release": "af0ba14eb2d8df458052ecafaf6ea45e1ec4520d-local",
+    "backup_available": true,
+    "running_model_config_matches_pi": {
+      "AGENT_LLM_BASE_URL": true,
+      "AGENT_LLM_API_KEY": true,
+      "AGENT_LLM_MODEL": true,
+      "AGENT_LLM_PROTOCOL": true
+    },
+    "running_release_matches": true
+  },
+  "runtime_check": {
+    "date": "2026-10-22",
+    "kind": "runtime_rejection_trace_check",
+    "model_calls": 0,
+    "jev_calls": 0,
+    "paid_evaluation_executed": false,
+    "agent_health": 200,
+    "gateway_portal": 200,
+    "invalid_json_http_status": 400,
+    "request_started_at": "2026-10-22T07:00:11.010370+00:00",
+    "request_finished_at": "2026-10-22T07:00:11.015220+00:00",
+    "recent_observation_count": 100,
+    "matching_rejection_traces": 1,
+    "trace_id": "b5c0811c85b75eccb138f2c7d414153a",
+    "observations": [
+      {
+        "name": "agent.turn",
+        "type": "AGENT",
+        "metadata": {
+          "jev_intent_confidence": 0,
+          "jev_intent": "",
+          "jev_fast_path_reason": "",
+          "jev_fast_path": false,
+          "jev_usage_missing": 0,
+          "llm_usage_missing": 0,
+          "jev_errors": 0,
+          "jev_calls": 0,
+          "llm_calls": 0,
+          "pending_confirm": false,
+          "stage": "request",
+          "http_status": 400,
+          "routing_mode": "jev_selective",
+          "scope.name": "ai-gateway/langfuse",
+          "resourceAttributes.service.name": "ai-gateway-agent",
+          "attributes.langfuse.observation.type": "agent",
+          "attributes.langfuse.trace.tags": [
+            "evaluation"
+          ],
+          "attributes.langfuse.environment": "evaluation",
+          "attributes.langfuse.release": "af0ba14eb2d8df458052ecafaf6ea45e1ec4520d-local",
+          "attributes.langfuse.version": "agent-observability.v1"
+        }
+      }
+    ],
+    "trace_readback_confirmed": true
+  },
+  "verification": {
+    "go_command": "SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX26.5.sdk go test ./internal/agent ./internal/taskbench ./internal/observability ./cmd/agent ./cmd/paired-live ./cmd/paired-eval -count=1",
+    "go_packages_passed": 6,
+    "python_command": "python3 -m unittest discover -s scripts/tests -p 'test_langfuse*.py'",
+    "python_tests_passed": 25
+  },
+  "evaluation_status": {
+    "real_conversation_executed": false,
+    "six_case_evaluation_executed": false,
+    "old_authorization_model": "deepseek-v4.1-flash",
+    "current_model": "deepseek-flash",
+    "old_runner_compatible": false
+  }
+}

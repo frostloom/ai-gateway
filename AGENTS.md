@@ -45,3 +45,5 @@
 2026-10-22 新增 `cmd/paired-live` 真实首批入口：默认只读检查，不加载密钥；仅显式 execute 且收费证据就绪时执行 batch-001，完成后停在 checkpoint_pending。同范围授权在仓库 `.tmp/paired-live-authorizations/` 持久领取，换输出路径不能重置；失败也不自动删除或重试。执行要求与 HEAD 一致的未修改 VCS 构建及冻结输入校验。当前真实调用仍为零，账户费率、token 包络、JEV 失败收费证据尚未核实；授权保留，不重复询问或核查余额。操作说明见 `docs/paired-live-entry-2026-10-22.md`。
 
 2026-10-22 后续用户停止上述收费核查，要求运行中的客服改用 CC Switch 的 Pi DeepSeek 配置。现行客服配置已更新为 `https://api.deepseek.com/v1`、`deepseek-flash`、`openai`，密钥与 Pi 文件及 CC Switch 相同，仅存本机被忽略的根 `.env`（0600）；私密备份在 `.tmp/paired-live-private/customer-model-20261022/`。经原 launchd 服务组温和重启后，运行进程四项配置比对、模型列表认证、客服健康和用户入口检查均通过。以本条覆盖旧千问“当前客服配置”描述；历史千问评测材料不代表现行客服配置。详情见 `docs/customer-service-pi-model-2026-10-22.md`。
+
+2026-10-22 评测前核对发现 launchd 使用的 `bin/agent` 仍为 `58073a8` 的旧构建。已从 main `af0ba14` 重建并部署，主目录及启动器引用的旧工作树 `.env.agent` 的 release 更新为完整 SHA 加 `-local`；运行进程 Pi 配置及新 release 的 Langfuse trace 已读回确认。构建保留 `vcs.modified=true`，不代表付费执行器的 pristine build 条件通过。备份在被忽略的 `.tmp/customer-readiness-20261022/backup/`。六个相关 Go 包与 25 项 Langfuse Python 测试通过，无真实模型/JEV 推理。后续评测先适配仍锁定千问的执行/检查入口，详见 `docs/customer-service-readiness-2026-10-22.md`。
