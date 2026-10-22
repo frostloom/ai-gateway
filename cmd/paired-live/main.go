@@ -108,7 +108,7 @@ func runWithOutput(args []string, out io.Writer) int {
 	}
 	built, modified := executingBuildRevision()
 	if err := verifyExecutionRevision(root, *revision, built, modified); err != nil {
-		return fail("execution requires HEAD-matching unmodified VCS-stamped build and reviewed source")
+		return fail("execution requires verified HEAD-matching build provenance and reviewed frozen inputs")
 	}
 	env, err := readEnvFiles(files)
 	if err != nil {
@@ -148,7 +148,7 @@ func runWithOutput(args []string, out io.Writer) int {
 }
 func writeCheck(out io.Writer, p taskbench.AuthorizedPilot) int {
 	bound := p.ModelSettings()
-	if json.NewEncoder(out).Encode(map[string]any{"human_authorized": true, "ready_for_paid_run": p.Ready(), "blockers": p.Blockers(), "mode": "check", "model_base": bound.BaseURL, "model": bound.Model, "protocol": bound.Protocol, "execution_scope": "batch-001 only, then checkpoint", "model_calls": 0, "jev_calls": 0}) != nil {
+	if json.NewEncoder(out).Encode(map[string]any{"human_authorized": true, "ready_for_paid_run": p.Ready(), "blockers": p.Blockers(), "mode": "check", "model_base": bound.BaseURL, "model": bound.Model, "protocol": bound.Protocol, "execution_scope": "batch-001 only, then checkpoint", "jev_failure_policy": p.JEVFailurePolicy(), "jev_failure_charges_verified": p.JEVFailureChargesVerified(), "check_scope": "authorization_and_billing_policy_only", "model_calls": 0, "jev_calls": 0}) != nil {
 		return 1
 	}
 	return 0

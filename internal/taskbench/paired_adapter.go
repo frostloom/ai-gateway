@@ -21,17 +21,18 @@ import (
 
 type PairModelSettings struct{ BaseURL, APIKey, Model, Protocol string }
 type AgentPairOptions struct {
-	Observer       *observability.Observer // required for recorded_run; caller owns flush/shutdown
-	AllowExecution bool                    // false is always side-effect-free
-	RatesVerified  bool                    // recorded_run requires operator verification for this channel
-	AllowJEVCalls  bool
-	MaxJEVCalls    int
-	DefinitionsDir string
-	Config         PairRunConfig
-	Environment    *PairedFixtureEnvironment
-	Budget         *PairBudgetTransport
-	Model          PairModelSettings
-	JEVFactory     func() jev.Evaluator // explicit and trusted; no credential discovery
+	Observer         *observability.Observer // required for recorded_run; caller owns flush/shutdown
+	AllowExecution   bool                    // false is always side-effect-free
+	RatesVerified    bool                    // recorded_run requires operator verification for this channel
+	StopOnJEVFailure bool                    // reviewed full-reservation policy forbids model fallback after a JEV failure
+	AllowJEVCalls    bool
+	MaxJEVCalls      int
+	DefinitionsDir   string
+	Config           PairRunConfig
+	Environment      *PairedFixtureEnvironment
+	Budget           *PairBudgetTransport
+	Model            PairModelSettings
+	JEVFactory       func() jev.Evaluator // explicit and trusted; no credential discovery
 }
 
 type disabledPairTransport struct{}
@@ -129,8 +130,8 @@ func RunAgentPair(ctx context.Context, path string, o AgentPairOptions) (runErr 
 	if err != nil {
 		return err
 	}
-	o.Budget.setCompanion(guard.Snapshot)
-	defer func() { o.Budget.setCompanion(nil); runErr = errors.Join(runErr, guard.Close()) }()
+	o.Budget.setCompanion(guard.Snapshot, o.StopOnJEVFailure)
+	defer func() { o.Budget.setCompanion(nil, false); runErr = errors.Join(runErr, guard.Close()) }()
 	factory := func(_ context.Context, arm string, _ ConversationCase) (ConversationDriver, error) {
 		oracle := &pairedStoreOracle{env: o.Environment}
 		llm, err := agent.NewEvaluationLLMClient(o.Model.BaseURL, o.Model.APIKey, o.Model.Model, o.Model.Protocol, &http.Client{Transport: o.Budget, Timeout: 90 * time.Second}, 128)

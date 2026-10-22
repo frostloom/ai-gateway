@@ -26,19 +26,21 @@ type AuthorizedFirstBatchOptions struct {
 	JEVFactory     func() jev.Evaluator
 }
 type AuthorizedFirstBatchReceipt struct {
-	Schema           string                      `json:"schema"`
-	Status           string                      `json:"status"`
-	FailedStage      string                      `json:"failed_stage,omitempty"`
-	AuthorizationSHA string                      `json:"authorization_sha256"`
-	PlanSHA          string                      `json:"plan_sha256"`
-	BillingSHA       string                      `json:"billing_attestation_sha256"`
-	EvidenceSHA      string                      `json:"billing_evidence_sha256"`
-	Revision         string                      `json:"execution_revision"`
-	Batches          []LocalCampaignBatchReceipt `json:"batches"`
-	ModelState       PairBudgetState             `json:"model_budget"`
-	JEVAttempts      int                         `json:"jev_attempts"`
-	Report           *SmallPairReport            `json:"report,omitempty"`
-	ObserverStats    observability.Stats         `json:"observer_stats"`
+	JEVFailurePolicy             string                      `json:"jev_failure_policy,omitempty"`
+	VendorFailureChargesVerified bool                        `json:"jev_failure_charges_verified"`
+	Schema                       string                      `json:"schema"`
+	Status                       string                      `json:"status"`
+	FailedStage                  string                      `json:"failed_stage,omitempty"`
+	AuthorizationSHA             string                      `json:"authorization_sha256"`
+	PlanSHA                      string                      `json:"plan_sha256"`
+	BillingSHA                   string                      `json:"billing_attestation_sha256"`
+	EvidenceSHA                  string                      `json:"billing_evidence_sha256"`
+	Revision                     string                      `json:"execution_revision"`
+	Batches                      []LocalCampaignBatchReceipt `json:"batches"`
+	ModelState                   PairBudgetState             `json:"model_budget"`
+	JEVAttempts                  int                         `json:"jev_attempts"`
+	Report                       *SmallPairReport            `json:"report,omitempty"`
+	ObserverStats                observability.Stats         `json:"observer_stats"`
 }
 
 // RunAuthorizedFirstBatch never advances to batch-002 or resumes any directory.
@@ -68,7 +70,7 @@ func RunAuthorizedFirstBatch(ctx context.Context, dir string, o AuthorizedFirstB
 	if err = os.Mkdir(dir, 0700); err != nil {
 		return r, fmt.Errorf("new first-batch directory required")
 	}
-	r = AuthorizedFirstBatchReceipt{Schema: "authorized-first-batch.v1", Status: "stopped", AuthorizationSHA: o.Pilot.authorizationSHA, PlanSHA: o.Pilot.planSHA, BillingSHA: o.Pilot.billingSHA, EvidenceSHA: o.Pilot.evidenceSHA, Revision: o.Revision}
+	r = AuthorizedFirstBatchReceipt{Schema: "authorized-first-batch.v1", Status: "stopped", AuthorizationSHA: o.Pilot.authorizationSHA, PlanSHA: o.Pilot.planSHA, BillingSHA: o.Pilot.billingSHA, EvidenceSHA: o.Pilot.evidenceSHA, Revision: o.Revision, JEVFailurePolicy: o.Pilot.JEVFailurePolicy(), VendorFailureChargesVerified: o.Pilot.JEVFailureChargesVerified()}
 	for _, b := range proposal.Batches {
 		r.Batches = append(r.Batches, LocalCampaignBatchReceipt{ID: b.ID, Key: b.Key, Status: "not_started"})
 	}
@@ -120,7 +122,7 @@ func RunAuthorizedFirstBatch(ctx context.Context, dir string, o AuthorizedFirstB
 		}
 	}()
 	stage = "execution"
-	err = RunCampaignBatch(ctx, lease, AgentPairOptions{AllowExecution: true, RatesVerified: true, AllowJEVCalls: true, MaxJEVCalls: batch.MaxJEVCalls, DefinitionsDir: o.DefinitionsDir, Config: cfg, Environment: o.Environment, Budget: budget, Model: o.Model, Observer: o.Observer, JEVFactory: func() jev.Evaluator { return &authorizedBillingJEV{inner: o.JEVFactory()} }})
+	err = RunCampaignBatch(ctx, lease, AgentPairOptions{AllowExecution: true, RatesVerified: true, StopOnJEVFailure: o.Pilot.JEVFailurePolicy() == fullAttemptFailurePolicy, AllowJEVCalls: true, MaxJEVCalls: batch.MaxJEVCalls, DefinitionsDir: o.DefinitionsDir, Config: cfg, Environment: o.Environment, Budget: budget, Model: o.Model, Observer: o.Observer, JEVFactory: func() jev.Evaluator { return &authorizedBillingJEV{inner: o.JEVFactory()} }})
 	r.ModelState = budget.Snapshot()
 	path := filepath.Join(lease.Dir, "run.jsonl")
 	report, reportErr := ReportPreparedPair(path)

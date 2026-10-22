@@ -43,17 +43,18 @@ type pairBudgetEvent struct {
 	Stop          string `json:"stop,omitempty"`
 }
 type PairBudgetTransport struct {
-	companion func() PairJEVBudgetState
-	mu        sync.Mutex
-	file      *os.File
-	lock      *os.File
-	path      string
-	contract  string
-	limits    PairBudgetLimits
-	upstream  http.RoundTripper
-	state     PairBudgetState
-	inflight  bool
-	closed    bool
+	companion        func() PairJEVBudgetState
+	stopOnJEVFailure bool
+	mu               sync.Mutex
+	file             *os.File
+	lock             *os.File
+	path             string
+	contract         string
+	limits           PairBudgetLimits
+	upstream         http.RoundTripper
+	state            PairBudgetState
+	inflight         bool
+	closed           bool
 }
 
 func (b *PairBudgetTransport) identity() string {
@@ -127,6 +128,11 @@ func OpenPairBudget(path, contract string, limits PairBudgetLimits, upstream htt
 }
 func (b *PairBudgetTransport) apply(ev pairBudgetEvent) error {
 	switch ev.Kind {
+	case "halt":
+		if b.inflight || ev.Stop == "" || b.state.Stopped != "" {
+			return fmt.Errorf("invalid budget halt")
+		}
+		b.state.Stopped = ev.Stop
 	case "reserve":
 		if b.inflight || b.state.Stopped != "" || ev.ID != b.state.Calls+1 || ev.RequestSHA == "" || b.state.Calls >= b.limits.MaxCalls || b.state.ReservedMicroCNY > b.limits.MaxMicroCNY-b.reserveCost() {
 			return fmt.Errorf("invalid reservation sequence")
@@ -180,10 +186,11 @@ func (b *PairBudgetTransport) Snapshot() PairBudgetState {
 	return s
 }
 
-func (b *PairBudgetTransport) setCompanion(f func() PairJEVBudgetState) {
+func (b *PairBudgetTransport) setCompanion(f func() PairJEVBudgetState, stopOnFailure bool) {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 	b.companion = f
+	b.stopOnJEVFailure = stopOnFailure
 }
 func (b *PairBudgetTransport) Close() error {
 	b.mu.Lock()
@@ -206,6 +213,17 @@ func (b *PairBudgetTransport) RoundTrip(req *http.Request) (*http.Response, erro
 	b.mu.Lock()
 	defer b.mu.Unlock()
 	if b.closed || b.state.Stopped != "" || b.inflight {
+		return nil, fmt.Errorf("budget stopped: %s", b.state.Stopped)
+	}
+	if b.stopOnJEVFailure && b.companion != nil && b.companion().Stopped {
+		ev := pairBudgetEvent{Kind: "halt", Stop: "JEV failure stops remaining model attempts; charge remains reserved"}
+		if err := b.write(ev); err != nil {
+			b.state.Stopped = "JEV failure stop could not be persisted"
+			return nil, err
+		}
+		if err := b.apply(ev); err != nil {
+			return nil, err
+		}
 		return nil, fmt.Errorf("budget stopped: %s", b.state.Stopped)
 	}
 	if req.Method != "POST" || req.URL == nil || req.URL.User != nil || req.URL.RawQuery != "" || req.Body == nil {

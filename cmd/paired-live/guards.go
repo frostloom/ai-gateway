@@ -93,20 +93,43 @@ func executingBuildRevision() (string, bool) {
 	return rev, modified
 }
 
+// Set only by scripts/build-paired-live.py when building a committed git archive.
+// These are our provenance fields, not replacements for Go's vcs.* settings.
+var archivedCommit, archivedTree string
+
 func verifyExecutionRevision(root, requested, built string, modified bool) error {
+	return verifyExecutionRevisionWithArchive(root, requested, built, modified, archivedCommit, archivedTree)
+}
+
+func verifyExecutionRevisionWithArchive(root, requested, built string, modified bool, archiveCommit, archiveTree string) error {
 	head, err := exec.Command("git", "-C", root, "rev-parse", "HEAD").Output()
-	if err != nil || strings.TrimSpace(string(head)) != requested || built != requested || modified {
-		return fmt.Errorf("reviewed revision must match HEAD and an unmodified VCS-stamped build")
+	if err != nil || strings.TrimSpace(string(head)) != requested {
+		return fmt.Errorf("reviewed revision must match HEAD")
+	}
+	archiveBuild := archiveCommit != "" || archiveTree != ""
+	if archiveBuild {
+		tree, err := exec.Command("git", "-C", root, "rev-parse", "HEAD^{tree}").Output()
+		if err != nil || archiveCommit != requested || archiveTree == "" || strings.TrimSpace(string(tree)) != archiveTree {
+			return fmt.Errorf("archive build commit and tree must match reviewed HEAD")
+		}
+	} else if built != requested || modified {
+		return fmt.Errorf("reviewed revision requires an unmodified VCS-stamped or committed-archive build")
 	}
 	// A source edit after building must not run under an older revision claim.
-	for _, args := range [][]string{{"diff", "--name-only", "-z", "HEAD"}, {"ls-files", "--others", "--exclude-standard", "-z"}} {
+	queries := [][]string{{"diff", "--name-only", "-z", "HEAD"}, {"ls-files", "--others", "--exclude-standard", "-z"}}
+	if archiveBuild {
+		// Disk source is not compiled by an archive build. Only the runtime
+		// frozen inputs must match HEAD, including ignored untracked files.
+		queries = [][]string{{"diff", "--name-only", "-z", "HEAD", "--", "eval/task-definitions", "eval/runtime-profiles"}, {"ls-files", "--others", "-z", "--", "eval/task-definitions", "eval/runtime-profiles"}}
+	}
+	for _, args := range queries {
 		cmd := append([]string{"-C", root}, args...)
 		raw, err := exec.Command("git", cmd...).Output()
 		if err != nil {
 			return fmt.Errorf("source state unavailable")
 		}
 		for _, path := range strings.Split(string(raw), "\x00") {
-			if strings.HasSuffix(path, ".go") || path == "go.mod" || path == "go.sum" || path == "go.work" || path == "go.work.sum" || strings.HasPrefix(path, "eval/task-definitions/") || strings.HasPrefix(path, "eval/runtime-profiles/") {
+			if path != "" && (archiveBuild || strings.HasSuffix(path, ".go") || path == "go.mod" || path == "go.sum" || path == "go.work" || path == "go.work.sum" || strings.HasPrefix(path, "eval/task-definitions/") || strings.HasPrefix(path, "eval/runtime-profiles/")) {
 				return fmt.Errorf("runtime source or frozen inputs differ from reviewed revision")
 			}
 		}

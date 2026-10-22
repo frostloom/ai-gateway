@@ -2,6 +2,20 @@
 
 `cmd/paired-live` 已提供显式的 batch-001 执行入口。六案例、最多 24 次模型尝试和 6 次 JEV、¥1 / $0.02 的既有授权继续有效。此版本执行首批后强制停在 `checkpoint_pending`，其余五批保持 `not_started`；首批仍须人工检查 trace、score 和语义质量。`cmd/paired-eval` 保持离线用途。
 
+## 同日后续：Pi 首批的保守预留策略与源码归档构建
+
+用户已多次明确批准原预算内执行首批，并授权直接采用 DeepSeek 官方价格、自行判断 Token 预算及调查 JEV。当前 Pi 授权文件为 `eval/paired-pilots/2026-10-22-authorized-pi-small-pilot/authorization.json`，计划为 `eval/paired-pilots/2026-10-22-pi-customer-preflight/plan.json`。官方价格和离线 Token 判断见 `docs/pi-customer-evaluation-entry-2026-10-22.md` 后续调查节。
+
+此前将“必须有供应商失败收费保证”作为唯一入口，混淆了供应商证明和工程预算策略。新增 `paired-billing-attestation.v2` 只供绑定 Pi v2 的试点使用：仍要求独立来源 SHA、官方费率和 Token 包络审查，但允许显式选择 `jev_failure_policy=reserve_full_attempt_stop_on_failure`，同时保持 `jev_failure_charges_verified=false`。它必须携带精确的 `jev_max_input_tokens=64000`、`jev_input_micro_usd_per_million=42000`、`jev_full_attempt_micro_usd=2688`；不接受更小预留或旧千问授权。该选择是受信操作员的保守风险分配，不是供应商对失败收费上限或退款的保证。
+
+该策略不依赖失败免费：每次按完整 64k 输入预留 $0.002688。JEV 任意失败会持久化模型预算 halt，阻止剩余模型回退；重开预算不能抹去 halt，不自动重试或执行后续批次。旧 v1 证明继续要求原三个 verified 条件，不能用新字段偷偷升级。检查输出和回执分别记录失败策略及供应商 verified=false；check 的 ready 只涵盖授权和预算策略，不替代构建、配置和实际执行检查。
+
+工作区已有前端产物和未追踪探针，不能清理或隐藏它们来伪造干净构建。新增 `scripts/build-paired-live.py --output /绝对路径/paired-live`：仅从已提交 `main` 的 `git archive` 在独占临时目录编译，不新建 Git 分支或开发工作树，不改动工作区。使用 `-mod=readonly -trimpath -buildvcs=false`，通过明确命名的 `archivedCommit` / `archivedTree` 记录真实来源；不伪造 Go 的 `vcs.revision` 或 `vcs.modified`。同名 `.provenance.json` 记录提交、tree、源码归档与二进制 SHA、Go 和 SDK 版本。它信任本机受信构建者，与原 VCS stamp 一样不是密码学供应链证明。
+
+归档构建执行时，提交与 tree 必须匹配当前 HEAD 和 `-revision`；磁盘上实际读取的冻结 definitions/profiles 不得有修改或额外文件，包括被忽略的文件。工作区 Go 源码没有参与归档编译，因此其无关探针不再构成误报。原干净 VCS 构建路径继续保留。实际执行仍需全部其他守卫及唯一领取记录，预算和首批 checkpoint 均未扩大。
+
+以下各节的千问 v1 未就绪记录与命令保留为历史，不代表当前 Pi v2 的状态。
+
 本轮没有发送真实模型或 JEV 请求。现有收费依据仍缺三项：账户适用费率、收费 token 包络、JEV 失败请求收费规则。余额和支出授权不能替代它们；不再核查余额，不生成虚假的已核实证明。
 
 ## 收费依据补齐结果

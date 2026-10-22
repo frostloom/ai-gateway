@@ -32,16 +32,20 @@ type pilotAuthorization struct {
 	Retry    bool             `json:"automatic_paid_retries"`
 }
 type pilotBilling struct {
-	Schema      string `json:"schema"`
-	PlanSHA     string `json:"scope_plan_sha256"`
-	Base        string `json:"model_base"`
-	Model       string `json:"model"`
-	Protocol    string `json:"protocol"`
-	JEVModel    string `json:"jev_model"`
-	Tariff      bool   `json:"account_tariff_verified"`
-	Tokens      bool   `json:"token_envelope_verified"`
-	Failure     bool   `json:"jev_failure_charges_verified"`
-	EvidenceSHA string `json:"evidence_sha256"`
+	Schema         string `json:"schema"`
+	PlanSHA        string `json:"scope_plan_sha256"`
+	Base           string `json:"model_base"`
+	Model          string `json:"model"`
+	Protocol       string `json:"protocol"`
+	JEVModel       string `json:"jev_model"`
+	Tariff         bool   `json:"account_tariff_verified"`
+	Tokens         bool   `json:"token_envelope_verified"`
+	Failure        bool   `json:"jev_failure_charges_verified"`
+	FailurePolicy  string `json:"jev_failure_policy"`
+	JEVMaxInput    int64  `json:"jev_max_input_tokens"`
+	JEVInputRate   int64  `json:"jev_input_micro_usd_per_million"`
+	JEVFullAttempt int64  `json:"jev_full_attempt_micro_usd"`
+	EvidenceSHA    string `json:"evidence_sha256"`
 }
 
 // AuthorizedPilot can only become valid through CheckAuthorizedPilot. Its
@@ -52,7 +56,14 @@ type AuthorizedPilot struct {
 	model                                              PairModelSettings
 	authorizationSHA, planSHA, billingSHA, evidenceSHA string
 	blockers                                           []string
+	failurePolicy                                      string
+	vendorFailureVerified                              bool
 }
+
+const fullAttemptFailurePolicy = "reserve_full_attempt_stop_on_failure"
+
+func (p AuthorizedPilot) JEVFailurePolicy() string        { return p.failurePolicy }
+func (p AuthorizedPilot) JEVFailureChargesVerified() bool { return p.vendorFailureVerified }
 
 func (p AuthorizedPilot) Ready() bool        { return p.valid && len(p.blockers) == 0 }
 func (p AuthorizedPilot) Blockers() []string { return append([]string(nil), p.blockers...) }
@@ -114,9 +125,24 @@ func CheckAuthorizedPilot(authRaw, planRaw, billingRaw, evidenceRaw []byte) (Aut
 	p.authorizationSHA, p.planSHA = conversationHash(authRaw), a.PlanSHA
 	var b pilotBilling
 	if len(billingRaw) > 0 {
-		if json.Unmarshal(billingRaw, &b) != nil || b.Schema != "paired-billing-attestation.v1" || b.PlanSHA != p.planSHA || b.Base != p.model.BaseURL || b.Model != p.model.Model || b.Protocol != p.model.Protocol || b.JEVModel != AuthorizedPilotJEVModel {
+		if json.Unmarshal(billingRaw, &b) != nil || b.PlanSHA != p.planSHA || b.Base != p.model.BaseURL || b.Model != p.model.Model || b.Protocol != p.model.Protocol || b.JEVModel != AuthorizedPilotJEVModel {
 			return AuthorizedPilot{}, fmt.Errorf("billing attestation scope/model/version differs")
 		}
+		switch b.Schema {
+		case "paired-billing-attestation.v1":
+			// Legacy attestations continue to require verified vendor terms.
+		case "paired-billing-attestation.v2":
+			// A reviewed risk reservation is distinct from a vendor guarantee.
+			// This policy is only valid for the pinned Pi pilot and its unchanged
+			// maximum-context reservation; every JEV failure must halt fallback.
+			if a.Schema != "small-pilot-authorization.v2" || b.Failure || b.FailurePolicy != fullAttemptFailurePolicy || b.JEVMaxInput != 64000 || b.JEVInputRate != 42000 || b.JEVFullAttempt != 2688 || b.JEVFullAttempt != limits.JEVMicroUSDPerAttempt {
+				return AuthorizedPilot{}, fmt.Errorf("reviewed full-attempt failure policy required")
+			}
+			p.failurePolicy = fullAttemptFailurePolicy
+		default:
+			return AuthorizedPilot{}, fmt.Errorf("billing attestation version differs")
+		}
+		p.vendorFailureVerified = b.Failure
 		p.billingSHA = conversationHash(billingRaw)
 	}
 	if !b.Tariff {
@@ -125,7 +151,7 @@ func CheckAuthorizedPilot(authRaw, planRaw, billingRaw, evidenceRaw []byte) (Aut
 	if !b.Tokens {
 		p.blockers = append(p.blockers, "token_envelope_unverified")
 	}
-	if !b.Failure {
+	if !b.Failure && p.failurePolicy != fullAttemptFailurePolicy {
 		p.blockers = append(p.blockers, "jev_failure_charges_unverified")
 	}
 	if len(p.blockers) == 0 {
