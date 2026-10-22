@@ -30,6 +30,8 @@
 
 ## 本机验证与部署
 
+2026-10-22 Hindsight 默认模型已按用户要求迁移至 CC Switch 中 Pi 的 DeepSeek 配置，使用 `provider=deepseek`、`model=deepseek-flash`；地址和密钥只在本机私密配置维护。控制台 9999 端口启用原生访问密钥登录（无邮箱账号体系），记忆 API 仍为 8888。新配置下已完成同步写入与实际读回。Langfuse 已更新原本地账户登录资料，用户 ID 和项目权限保留；登录资料只见被忽略的 `deploy/langfuse/.local-login.txt`。两项变更均保留原数据卷。记录见 `docs/local-services-settings-2026-10-22.md`。
+
 2026-10-20 已将匹配现有 Langfuse 数据的 `.env`、`.env.agent`、`.local-login.txt` 复制到主目录 `deploy/langfuse/`，权限为 0600，均被 Git 忽略。被替换的原 `.env` 备份在被忽略的 `deploy/langfuse/data/config-backups/`。本机启动脚本仍引用旧工作树配置，清理旧目录前需迁移该脚本依赖。
 
 当前 Mac 默认 MacOSX27.0.sdk 会触发链接器 unknown architecture 错误；本机 Go 回归使用进程级 `SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX26.5.sdk`，不修改系统默认值。

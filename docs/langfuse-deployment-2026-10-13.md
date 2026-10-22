@@ -1,5 +1,7 @@
 # Langfuse本地Docker部署
 
+2026-10-22 更新：当前 Mac 本机的 Web 服务已使用主目录 Compose 配置，并更新现有账户登录资料；当前登录信息只在被 Git 忽略的 `deploy/langfuse/.local-login.txt`。详见[本机配置更新记录](local-services-settings-2026-10-22.md)。下文为最初部署的历史记录，初始邮箱和随机密码描述不代表当前账号。
+
 服务位于独立分支 `codex/langfuse-observability` 的 E 盘工作树 `E:\github项目\ai-gateway\.worktrees\langfuse-observability`。网页地址 http://localhost:13000 ，本地管理员邮箱 `admin@ai-gateway.local`，随机密码见 `deploy/langfuse/.local-login.txt`（已忽略Git）。初始组织AI Gateway、项目Customer Service Evaluation；项目仅用于evaluation合成测试。
 
 按用户最新要求，持久化改为Docker独立命名卷，与现有Docker容器一起管理；不再要求data存E盘，也没有迁移Docker全局存储。E盘保留Compose、忽略Git的部署凭据 `.env`、agent凭据 `.env.agent`、私有登录文件、代码与验收文档。`ai-gateway-langfuse`是独立Compose项目，没有复用现有MySQL/Redis/Postgres或重启现有客服。
