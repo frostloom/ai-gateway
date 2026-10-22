@@ -1,0 +1,43 @@
+{
+  "schema": "pi-customer-preflight-manifest.v1",
+  "created_on": "2026-10-22",
+  "code_revision": "2e98b1e7201ef670cd942a1a7c66182f6fd77987",
+  "files": {
+    "plan.json": "0dd031dd03d9d6ae2aff69c032e61413899011bba9e0f9455f20e1e10c4906c4",
+    "proposal.json": "c04adaa7847b0ab81fa92e04db1df2027c32c7258cf1e3ae5bec47ae96159a8a",
+    "settings-check.json": "ac367e2a4f2fcb289a6bde7d83789fb082f2f2cdd7edb8afc076633676650fd8",
+    "evaluation.env.example": "d967005de4f6fac85b3735d066fe3a8717580f1ff4e4f6ac042393e97fefd1a5"
+  },
+  "runtime_source_sha256": {
+    "internal/taskbench/campaign_prepare.go": "faf1656fd4bc616249388df1ec67a08289dad45fe731061ad40c9f5b9bd831d8",
+    "internal/taskbench/authorized_entry.go": "da7819cc1300892842e1642cb852c8b3dc211b5d77a1d4f531e0b1881b91c2e8",
+    "internal/taskbench/authorized_entry_run.go": "4392b1926a679e89ff5506cee851e28ee200a643fa7f77924d58ba00a22ffb80",
+    "cmd/paired-live/main.go": "248f70c2b400cf81783a119ac78f7841e0754f2e5cd6e9213a9a2437f250bcc0",
+    "cmd/paired-live/guards.go": "f7d82bf3b6e5195c1bb5617e5f6671f050e7abf85485c2e913391c49ebd5df84",
+    "cmd/paired-eval/main.go": "18d8d95b3b2dc2e21a253493eec4164f64d33df1753f1446db7785dffe89fb13",
+    "scripts/langfuse-eval.py": "0979def304b30a19abc1faee0b5f55e1f8da319b135a3c5b512274b67c8cac95"
+  },
+  "scope": {
+    "cases": 6,
+    "paired_arms": 12,
+    "user_turns": 26,
+    "max_model_attempts": 24,
+    "max_jev_attempts": 6,
+    "model_max_output_tokens": 128
+  },
+  "declared_budget_only": true,
+  "account_tariff_verified": false,
+  "model_calls": 0,
+  "jev_calls": 0,
+  "real_conversation_executed": false,
+  "paid_execution_started": false,
+  "ready_for_paid_run": false,
+  "verification": {
+    "go_all_packages": 45,
+    "go_tested_packages_passed": 18,
+    "python_total": 162,
+    "python_skipped": 15,
+    "independent_review": "clean"
+  },
+  "evaluation_overlay": "Pins JEV only in evaluation; running customer service remains on its existing JEV default."
+}

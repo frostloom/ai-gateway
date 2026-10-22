@@ -47,7 +47,7 @@
 
 **Files:** eval/paired-pilots/2026-10-22-pi-customer-preflight/ 新plan、proposal、manifest；docs及AGENTS更新。
 
-- [ ] 从旧计划复制数值约束到新v2计划，显式注明费率为未核实声明；运行paired-eval生成新proposal。
-- [ ] 对显式本机env运行新配置检查，仅本机Langfuse健康/认证读取；归档脱敏结果，确认零推理。
-- [ ] Go全项目回归和Python脚本测试，独立review，修复重要问题。
-- [ ] 检查差异与暂存范围，提交main，正常推送并验证远端SHA；Hindsight写入并实际读回。
+- [x] 从旧计划复制数值约束到新v2计划，显式注明费率为未核实声明；运行paired-eval生成新proposal。
+- [x] 对显式本机env运行新配置检查，仅本机Langfuse健康/认证读取；归档脱敏结果，确认零推理。
+- [x] Go全项目回归和Python脚本测试，独立review，修复重要问题。
+- [x] 检查差异与暂存范围，提交main，正常推送并验证远端SHA；Hindsight写入并实际读回。
