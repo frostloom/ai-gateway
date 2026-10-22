@@ -1,0 +1,63 @@
+{
+  "schema": "small-pilot-authorization.v2",
+  "authorized_on": "2026-10-22",
+  "authorization_source": "Prior explicit six-case budget approval is retained. The user requested the Pi customer model and approved starting the first real balance-query batch in this conversation.",
+  "human_authorized": true,
+  "authorized_spending": {
+    "max_batches": 6,
+    "max_model_calls": 24,
+    "max_model_micro_cny": 1000000,
+    "max_jev_calls": 6,
+    "max_jev_micro_usd": 20000,
+    "jev_micro_usd_per_attempt": 2688
+  },
+  "cases": [
+    {
+      "batch_id": "batch-001",
+      "key": "balance-001/answer_complete",
+      "max_model_calls": 3,
+      "max_jev_calls": 1
+    },
+    {
+      "batch_id": "batch-002",
+      "key": "balance-020/explicit_scope_followup",
+      "max_model_calls": 7,
+      "max_jev_calls": 1
+    },
+    {
+      "batch_id": "batch-003",
+      "key": "recharge-002/confirm",
+      "max_model_calls": 3,
+      "max_jev_calls": 1
+    },
+    {
+      "batch_id": "batch-004",
+      "key": "recharge-002/cancel",
+      "max_model_calls": 3,
+      "max_jev_calls": 1
+    },
+    {
+      "batch_id": "batch-005",
+      "key": "recharge-001/supplement_then_confirm",
+      "max_model_calls": 4,
+      "max_jev_calls": 1
+    },
+    {
+      "batch_id": "batch-006",
+      "key": "refund-001/balance_cap",
+      "max_model_calls": 4,
+      "max_jev_calls": 1
+    }
+  ],
+  "scope_plan": "eval/paired-pilots/2026-10-22-pi-customer-preflight/plan.json",
+  "scope_plan_sha256": "0dd031dd03d9d6ae2aff69c032e61413899011bba9e0f9455f20e1e10c4906c4",
+  "model_base": "https://api.deepseek.com/v1",
+  "model": "deepseek-flash",
+  "protocol": "openai",
+  "jev_model": "jev-1.13.0",
+  "automatic_scope_expansion": false,
+  "automatic_paid_retries": false,
+  "balance_rechecks_requested": false,
+  "execution_scope": "batch-001 only, then checkpoint; no automatic later batches",
+  "authorization_does_not_verify_billing_evidence": true
+}
