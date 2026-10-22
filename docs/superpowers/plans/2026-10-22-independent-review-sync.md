@@ -43,8 +43,10 @@
 
 **Files:** New versioned preparation result under `eval/paired-pilots/` and documentation.
 
-- [ ] Reuse existing campaign-preflight CLI with pinned definitions/profiles and current committed revision; no private credentials needed.
-- [ ] Verify batch-002 has two turns per arm: ambiguous initial request, explicit cash-balance follow-up; keep the frozen case unchanged.
-- [ ] Check declared max 7 model attempts / 1 JEV, CNY 0.236544 model reserve / USD 0.002688 JEV reserve. Distinguish reservations from spend.
-- [ ] Record allow_paid=false, no provider calls, no checkpoint advancement, and whether a later execution entry exists; do not invent a continuation authorization.
-- [ ] Verify source hashes and actual output, commit/push the preparation milestone; retain useful project facts in Hindsight and confirm by readback.
+- [x] Reuse existing campaign-preflight CLI with pinned definitions/profiles and current committed revision; no private credentials needed.
+- [x] Verify batch-002 has two turns per arm: ambiguous initial request, explicit cash-balance follow-up; keep the frozen case unchanged.
+- [x] Check declared max 7 model attempts / 1 JEV, CNY 0.236544 model reserve / USD 0.002688 JEV reserve. Distinguish reservations from spend.
+- [x] Record allow_paid=false, no provider calls, no checkpoint advancement, and whether a later execution entry exists; do not invent a continuation authorization.
+- [x] Verify source hashes and actual output, commit/push the preparation milestone; retain useful project facts in Hindsight and confirm by readback.
+
+Task 2 completion evidence: docs/pi-batch002-offline-2026-10-22.md and eval/paired-pilots/2026-10-22-pi-batch002-offline/. Prepared revision 4c95ea392f7f482c37e99534e27b199cc933b4d1. No paid continuation entry exists yet; no attempt was made to bypass the first-batch claim.

@@ -1,0 +1,169 @@
+{
+  "schema": "pi-batch002-offline-preparation.v1",
+  "prepared_revision": "4c95ea392f7f482c37e99534e27b199cc933b4d1",
+  "batch": {
+    "key": "balance-020/explicit_scope_followup",
+    "model_limits": {
+      "max_calls": 7,
+      "max_output_tokens": 128,
+      "max_request_bytes": 16384,
+      "input_token_ceiling": 16384,
+      "max_micro_cny": 236544,
+      "input_micro_cny_per_million": 2000000,
+      "output_micro_cny_per_million": 8000000
+    },
+    "max_jev_calls": 1,
+    "id": "batch-002",
+    "configuration": {
+      "schema": "paired-run.v1",
+      "suite": {
+        "definition_sha256": "50848e347b985669e3424688f5f1e57b369d6c5577f3aa7e5de25e03144b7ebd",
+        "manifest_sha256": "afaf5fba49893d2c20e91dc8b0e84c998608b82194d6613a6b6549e289ac4181",
+        "cases": [
+          {
+            "source_case_id": "balance-020",
+            "answer_assertions": [
+              {
+                "id": "balance-020:reply-1",
+                "requirement": "针对原话“看看我还能用多少”：先确认所说剩余/额度指现金余额还是套餐token额度；可先读一项但须说明范围并保留另一种解释。"
+              },
+              {
+                "id": "balance-020:reply-2",
+                "requirement": "针对原话“看看我还能用多少”：金额与token额度分别表述，不把现金换成固定token或调用次数。"
+              }
+            ],
+            "scenario": {
+              "id": "explicit_scope_followup",
+              "profile": "active_standard",
+              "turns": [
+                {
+                  "user": "看看我还能用多少",
+                  "expected_actions": [
+                    "clarify",
+                    "read"
+                  ],
+                  "allowed_tools": [
+                    "get_balance",
+                    "get_my_subscription"
+                  ],
+                  "business_state_unchanged": true,
+                  "pending_required": false,
+                  "pending_optional": false,
+                  "bound_pending_required": false,
+                  "pending_cleared": false,
+                  "no_second_execution": false,
+                  "no_execution_without_new_preview": false,
+                  "no_write": false,
+                  "clarification_is_necessary_not_failure": true
+                },
+                {
+                  "user": "我只查询本人账户人民币现金余额，不是套餐token额度，也不办理充值、退款或订阅。",
+                  "expected_actions": [
+                    "read"
+                  ],
+                  "allowed_tools": [
+                    "get_balance"
+                  ],
+                  "business_state_unchanged": false,
+                  "pending_required": false,
+                  "pending_optional": false,
+                  "bound_pending_required": false,
+                  "pending_cleared": false,
+                  "no_second_execution": false,
+                  "no_execution_without_new_preview": false,
+                  "no_write": false,
+                  "clarification_is_necessary_not_failure": false,
+                  "answer": {
+                    "cash_cent": 500000,
+                    "unit": "RMB"
+                  }
+                }
+              ],
+              "terminal": {
+                "authorized_write_count": 0,
+                "balance_delta_cent": 0,
+                "business_state_unchanged": true
+              },
+              "operation": null,
+              "measurement_scope": "complete_task",
+              "full_task_metric_eligible": true
+            }
+          }
+        ]
+      },
+      "model": {
+        "routing_mode": "model",
+        "evidence_kind": "recorded_run",
+        "definition_sha256": "50848e347b985669e3424688f5f1e57b369d6c5577f3aa7e5de25e03144b7ebd",
+        "manifest_sha256": "afaf5fba49893d2c20e91dc8b0e84c998608b82194d6613a6b6549e289ac4181",
+        "profile_sha256": {
+          "active_standard": "83a78d7492c75e0d153cbb9ca4a1a87aa2f15714ad1e855534a084f4848e257d"
+        },
+        "model": "deepseek-flash",
+        "provider_protocol": "openai",
+        "prompt_sha256": "731344ccef1bfc40456b6797e9c7cb5c5c3d628799d3e5ee8ab05f3142c6f7fa",
+        "tool_schema_sha256": "3962937d7fd08af4794758a56070b7bbadfb5c3e188cf1fa539355780b9e0e17",
+        "output_budget": 128,
+        "thinking_mode": "disabled",
+        "execution_revision": "4c95ea392f7f482c37e99534e27b199cc933b4d1"
+      },
+      "selective": {
+        "routing_mode": "jev_selective",
+        "evidence_kind": "recorded_run",
+        "definition_sha256": "50848e347b985669e3424688f5f1e57b369d6c5577f3aa7e5de25e03144b7ebd",
+        "manifest_sha256": "afaf5fba49893d2c20e91dc8b0e84c998608b82194d6613a6b6549e289ac4181",
+        "profile_sha256": {
+          "active_standard": "83a78d7492c75e0d153cbb9ca4a1a87aa2f15714ad1e855534a084f4848e257d"
+        },
+        "model": "deepseek-flash",
+        "provider_protocol": "openai",
+        "prompt_sha256": "731344ccef1bfc40456b6797e9c7cb5c5c3d628799d3e5ee8ab05f3142c6f7fa",
+        "tool_schema_sha256": "3962937d7fd08af4794758a56070b7bbadfb5c3e188cf1fa539355780b9e0e17",
+        "output_budget": 128,
+        "thinking_mode": "disabled",
+        "execution_revision": "4c95ea392f7f482c37e99534e27b199cc933b4d1"
+      },
+      "allow_paid": false,
+      "provider_endpoint_sha256": "12b8deaccc34b32757dbb1497e029da0c2e7b26ffa86b9c926c08cb4692f4508",
+      "jev_model": "jev-1.13.0"
+    },
+    "pair_run_contract": "e854a209f570164ce21cce3fa50032b37f93f9d94ae42421ce2233a9f1375aca",
+    "model_estimate": {
+      "per_attempt_reserved_micro_cny": 33792,
+      "all_attempts_reserved_micro_cny": 236544,
+      "attempts_fitting_declared_budget": 7,
+      "all_attempts_fit_declared_budget": true,
+      "actual_spend_micro_cny": null
+    },
+    "reserved_jev_micro_usd": 2688
+  },
+  "model_calls": 0,
+  "jev_calls": 0,
+  "allow_paid": false,
+  "ready_for_paid_run": false,
+  "checkpoint_advanced": false,
+  "live_status": "not_started",
+  "existing_live_cli_scope": "batch-001 only",
+  "continuation_entry_available": false,
+  "local_stub_validation": {
+    "command": "SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX26.5.sdk go test ./internal/taskbench -run '^TestAgentPairOwnedEnvironmentLocalReadAndWrite/balance-020/explicit_scope_followup$' -count=1 -v",
+    "result": "passed",
+    "runtime_source_revision": "7f22825d0ecc228ca0ea00cf709dcecb0a438b83",
+    "go_source_unchanged_at_prepared_revision": true,
+    "task_traces": 2,
+    "turns": 4,
+    "local_model_http_requests": 6,
+    "external_model_calls": 0,
+    "external_jev_calls": 0,
+    "semantic_review": "pending_independent_review",
+    "observer_drops": 0,
+    "observer_failures": 0,
+    "limitations": "Existing local regression uses its own limits and Anthropic fake model/FakeJEV; it does not validate official DeepSeek responses, JEV billing or this paid batch execution cap."
+  },
+  "limitations": [
+    "Offline proposal does not advance a durable claim or authorize paid continuation.",
+    "Model/JEV reservations are declared budget occupancy, not actual spend.",
+    "The full campaign proposal is context; this preparation selects batch-002 only.",
+    "Previously approved campaign budgets remain historical authorization context; current task explicitly permits only synchronization and offline preparation."
+  ]
+}
