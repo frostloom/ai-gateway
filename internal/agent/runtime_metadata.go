@@ -54,7 +54,7 @@ func (h *Handler) runtimeMetadata() *RuntimeMetadata {
 	if model, ok := h.llm.(*LLMClient); ok {
 		metadata.Model, metadata.Protocol, metadata.MaxOutputTokens = model.Model(), model.Protocol(), model.maxTokens
 		metadata.EndpointSHA256 = endpointSHA(model.baseURL)
-		if model.strictEvaluation && model.proto == protoAnthropic {
+		if model.evaluationDisablesThinking() {
 			metadata.ThinkingMode = "disabled"
 		}
 	}

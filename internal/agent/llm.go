@@ -11,6 +11,7 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 )
@@ -43,10 +44,11 @@ type Tool struct {
 }
 
 type chatRequest struct {
-	Model     string    `json:"model"`
-	MaxTokens int       `json:"max_tokens,omitempty"`
-	Messages  []Message `json:"messages"`
-	Tools     []Tool    `json:"tools,omitempty"`
+	Model     string             `json:"model"`
+	MaxTokens int                `json:"max_tokens,omitempty"`
+	Messages  []Message          `json:"messages"`
+	Tools     []Tool             `json:"tools,omitempty"`
+	Thinking  *anthropicThinking `json:"thinking,omitempty"`
 }
 
 type chatResponse struct {
@@ -183,6 +185,19 @@ func (c *LLMClient) ConfigureEvaluationClient(client *http.Client, maxOutput int
 // Protocol 当前生效的协议（启动日志用，便于排查路径配错）。
 func (c *LLMClient) Protocol() string { return string(c.proto) }
 
+// The official Flash model enables thinking by default. The bounded evaluator
+// uses ordinary tool messages and must reserve its small output cap for answers.
+func (c *LLMClient) evaluationDisablesThinking() bool {
+	if !c.strictEvaluation {
+		return false
+	}
+	if c.proto == protoAnthropic {
+		return true
+	}
+	u, err := url.Parse(c.baseURL)
+	return err == nil && c.proto == protoOpenAI && u.Hostname() == "api.deepseek.com" && c.model == "deepseek-flash"
+}
+
 // Chat 调用一次 LLM，返回助手消息（可能带 tool_calls）。
 //
 // 「预算 vs 长思考」的实测结论（决定了下面的策略）：
@@ -265,7 +280,11 @@ func isBudgetExhausted(err error) bool {
 
 // chatOpenAI 走 OpenAI 兼容的 chat/completions。
 func (c *LLMClient) chatOpenAI(ctx context.Context, messages []Message, tools []Tool) (result *Message, err error) {
-	body, err := json.Marshal(chatRequest{Model: c.model, MaxTokens: c.maxTokens, Messages: messages, Tools: tools})
+	payload := chatRequest{Model: c.model, MaxTokens: c.maxTokens, Messages: messages, Tools: tools}
+	if c.evaluationDisablesThinking() {
+		payload.Thinking = &anthropicThinking{Type: "disabled"}
+	}
+	body, err := json.Marshal(payload)
 	if err != nil {
 		return nil, err
 	}

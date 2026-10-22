@@ -51,3 +51,17 @@ python3 scripts/langfuse-eval.py check \
 本机原客服配置没有设置 `JEV_MODEL`，运行服务使用已有默认值。第一次新检查因此正确拒绝 `pinned_jev_model`；加入公开的评测覆盖文件后通过。该文件仅为评测 pin 到 `jev-1.13.0`，没有应用到运行服务，不把“评测配置已通过”写成“生产 JEV 已升级/已固定版本”。
 
 下一阶段才是绑定当前 Pi 目标的受控真实首批执行。届时仍需完整执行条件，当前准备档案和旧授权都不能单独证明付费执行已就绪。
+
+## 后续官方计费调查与 Token 判断
+
+2026-10-22 用户明确要求直接查询 DeepSeek 官方价格，授权自行判断 Token 预算，并调查 JEV 失败计费。该要求更新了此前“不继续查价格”的范围；不需要重复询问既有消费授权，也没有查询账户余额。
+
+DeepSeek 官方中文定价页 `https://api-docs.deepseek.com/zh-cn/quick_start/pricing` 列出的 `deepseek-flash` 标准输入缓存未命中费率为每百万 Token ¥2，输出 ¥8，缓存命中更低。预算继续采用 ¥2 / ¥8 的较高费率，不依赖缓存、优惠或余额。单次预留按 16384 输入、128 输出计算为 ¥0.033792；首批最多三次尝试预留 ¥0.101376。这是保守的计划计价，不是实际账单。
+
+使用官方 Token 用量文档 `https://api-docs.deepseek.com/zh-cn/quick_start/token_usage` 链接的 `https://cdn.deepseek.com/api-docs/deepseek_v4_tokenizer.zip` 离线检查真实序列化代码生成的首个“查询余额”请求，包含完整系统提示和全部工具定义。修正思考模式后的请求为 6520 字节，整个 JSON 文本编码为 1544 Token；tokenizer.json SHA256 为 `89085f12ef79460ac5f66d1119325ddfc694b4ab209d80bbd81d35f081dc9614`。本机记录在被忽略的 `.tmp/pi-billing-evidence-20261022/`。这不是服务器聊天模板的精确计费数，也没有包含未来工具结果或 JEV 提示。工程判断：16384 输入 Token 对首个余额查询有充分余量；保留完整请求字节限制、128 输出限制、实际 usage 检查及超限后停止，不能声称“字节数等于 Token 数”或以本次测量证明所有未来请求。
+
+官方思考模式文档 `https://api-docs.deepseek.com/zh-cn/guides/thinking_mode` 说明默认启用思考。原 OpenAI 评测请求未关闭它，可能消耗有限输出预算，并且当前消息结构不保存多轮工具思考所需的 reasoning_content。因此本次仅对严格评测中官方 `api.deepseek.com` 的 `deepseek-flash` 请求显式加入 `thinking: {type: disabled}`，同步 RuntimeMetadata；普通客服请求、其他模型/提供商及原有 Anthropic 评测行为不变。旧 proposal 是修正前的历史快照，不能当作新行为的配置证据；后续准备/执行必须用新代码重新计算配置及契约。
+
+TypeSafe 官方模型文档 `https://docs.typesafe.ai/models` 对固定版本 `jev-1.13.0` 公布输入每百万 Token $0.042、输出免费，默认每请求 64k Token、每问题 32k Token。64k 全额输入预留为每次 $0.002688，六次 $0.016128，低于既有 $0.02 授权。官方错误说明 `https://docs.typesafe.ai/api/errors` 与主服务协议 `https://typesafe.ai/legal/mca` 未找到覆盖 HTTP 失败、断连和客户端超时的免费/退款或最大扣费承诺。不能把“未找到”写成供应商确认免费或确认失败收费上界；现有全额预留是保守预算处理，收费不明时保留该预留并停止后续尝试，不自动重试。没有据此将 `jev_failure_charges_verified` 写为 true。
+
+本次调查与修正未发送真实模型或 JEV 推理请求。现有 VCS 构建、收费证明及执行守卫继续生效；调查结论不等同于首批执行完成。
