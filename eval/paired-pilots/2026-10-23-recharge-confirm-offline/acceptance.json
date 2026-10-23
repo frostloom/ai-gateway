@@ -1,0 +1,513 @@
+{
+  "schema": "recharge-confirm-offline-acceptance.v1",
+  "source_revision": "20b70d8b16247459e2a5917af155f963db349a88",
+  "acceptance_gate": "blocked",
+  "evidence_kind": "local_stub",
+  "cases": [
+    {
+      "mode": "confirm",
+      "evidence_kind": "local_stub",
+      "synthetic_model_attempts": 2,
+      "fake_jev_attempts": 1,
+      "journal_sha256": "c1782160e945b60985008c20177f94d47e2bc84459db805c37b72e59ecad94e8",
+      "report_sha256": "6b123169998f4072fecf0e9d9c33eee7625c1797bd761aae94f9746bd19409b2",
+      "arms": [
+        {
+          "arm": "model",
+          "status": "needs_review",
+          "structural_pass": true,
+          "fact_errors": 0,
+          "http_failures": 0,
+          "errors": [],
+          "turns": [
+            {
+              "turn": 1,
+              "user": "充值 100 元",
+              "reply": "将模拟充值 ¥100（模拟支付，不产生真实扣款）。确认后到账。\n\n请回复「确认」执行，或「取消」放弃。",
+              "http_status": 200,
+              "action": "preview",
+              "pending": true,
+              "pending_tool": "recharge",
+              "balance_delta_cent": 0,
+              "new_orders": 0,
+              "llm_calls": 1,
+              "jev_calls": 0,
+              "reply_repairs": 0
+            },
+            {
+              "turn": 2,
+              "user": "确认",
+              "reply": "充值成功：订单 agent:recharge:1792745433416270000:2ad40cb3 已支付，到账 ¥100（10000 分）。",
+              "http_status": 200,
+              "action": "execute",
+              "pending": false,
+              "pending_tool": null,
+              "balance_delta_cent": 10000,
+              "new_orders": 1,
+              "llm_calls": 0,
+              "jev_calls": 0,
+              "reply_repairs": 0
+            }
+          ],
+          "business_balance_delta_cent": 10000
+        },
+        {
+          "arm": "jev_selective",
+          "status": "needs_review",
+          "structural_pass": true,
+          "fact_errors": 0,
+          "http_failures": 0,
+          "errors": [],
+          "turns": [
+            {
+              "turn": 1,
+              "user": "充值 100 元",
+              "reply": "将模拟充值 ¥100（模拟支付，不产生真实扣款）。确认后到账。\n\n请回复「确认」执行，或「取消」放弃。",
+              "http_status": 200,
+              "action": "preview",
+              "pending": true,
+              "pending_tool": "recharge",
+              "balance_delta_cent": 0,
+              "new_orders": 0,
+              "llm_calls": 1,
+              "jev_calls": 1,
+              "reply_repairs": 0
+            },
+            {
+              "turn": 2,
+              "user": "确认",
+              "reply": "充值成功：订单 agent:recharge:1792745433670659000:fe8806ce 已支付，到账 ¥100（10000 分）。",
+              "http_status": 200,
+              "action": "execute",
+              "pending": false,
+              "pending_tool": null,
+              "balance_delta_cent": 10000,
+              "new_orders": 1,
+              "llm_calls": 0,
+              "jev_calls": 0,
+              "reply_repairs": 0
+            }
+          ],
+          "business_balance_delta_cent": 10000
+        }
+      ]
+    },
+    {
+      "mode": "repair-old-cap",
+      "evidence_kind": "local_stub",
+      "synthetic_model_attempts": 3,
+      "fake_jev_attempts": 1,
+      "journal_sha256": "b1358cb78ede699e0bfd663ea3f96c543e65781a60de67d1429a629f1f673b03",
+      "report_sha256": "4f7efbd6781d1ceb81da4db38d1d6df810116e1b2022001241a4cca82409d87f",
+      "arms": [
+        {
+          "arm": "model",
+          "status": "needs_review",
+          "structural_pass": true,
+          "fact_errors": 0,
+          "http_failures": 0,
+          "errors": [],
+          "turns": [
+            {
+              "turn": 1,
+              "user": "充值 100 元",
+              "reply": "将模拟充值 ¥100（模拟支付，不产生真实扣款）。确认后到账。\n\n请回复「确认」执行，或「取消」放弃。",
+              "http_status": 200,
+              "action": "preview",
+              "pending": true,
+              "pending_tool": "recharge",
+              "balance_delta_cent": 0,
+              "new_orders": 0,
+              "llm_calls": 2,
+              "jev_calls": 0,
+              "reply_repairs": 1
+            },
+            {
+              "turn": 2,
+              "user": "确认",
+              "reply": "充值成功：订单 agent:recharge:1792745434553103000:70b63a7a 已支付，到账 ¥100（10000 分）。",
+              "http_status": 200,
+              "action": "execute",
+              "pending": false,
+              "pending_tool": null,
+              "balance_delta_cent": 10000,
+              "new_orders": 1,
+              "llm_calls": 0,
+              "jev_calls": 0,
+              "reply_repairs": 0
+            }
+          ],
+          "business_balance_delta_cent": 10000
+        },
+        {
+          "arm": "jev_selective",
+          "status": "failed",
+          "structural_pass": false,
+          "fact_errors": 0,
+          "http_failures": 1,
+          "errors": [
+            "turn 1 transport failure: HTTP 500 HTTP 500: LLM 请求失败: Post \"http://127.0.0.1/local-recharge/chat/completions\": global attempt/reserved currency budget exhausted",
+            "conversation did not complete all defined turns",
+            "terminal assertion failed: authorized_write_count",
+            "terminal assertion failed: balance_delta_cent",
+            "terminal assertion failed: business_state_unchanged",
+            "terminal assertion failed: new_paid_order_count",
+            "terminal assertion failed: unrelated_orders_and_subscriptions_unchanged"
+          ],
+          "turns": [
+            {
+              "turn": 1,
+              "user": "充值 100 元",
+              "reply": "",
+              "http_status": 500,
+              "action": "unreviewed",
+              "pending": false,
+              "pending_tool": null,
+              "balance_delta_cent": 0,
+              "new_orders": 0,
+              "llm_calls": 2,
+              "jev_calls": 1,
+              "reply_repairs": 1
+            }
+          ],
+          "business_balance_delta_cent": 0
+        }
+      ]
+    },
+    {
+      "mode": "repair",
+      "evidence_kind": "local_stub",
+      "synthetic_model_attempts": 4,
+      "fake_jev_attempts": 1,
+      "journal_sha256": "fdb783d2fbf0f726a2f7d4b7fbce679fda64709daa2c8b18cdb6f39c685a5efe",
+      "report_sha256": "d0a334dabab6ac9e95ef8850f1e5dcea7549424c64e7179d4fc232da61a3f5d8",
+      "arms": [
+        {
+          "arm": "model",
+          "status": "needs_review",
+          "structural_pass": true,
+          "fact_errors": 0,
+          "http_failures": 0,
+          "errors": [],
+          "turns": [
+            {
+              "turn": 1,
+              "user": "充值 100 元",
+              "reply": "将模拟充值 ¥100（模拟支付，不产生真实扣款）。确认后到账。\n\n请回复「确认」执行，或「取消」放弃。",
+              "http_status": 200,
+              "action": "preview",
+              "pending": true,
+              "pending_tool": "recharge",
+              "balance_delta_cent": 0,
+              "new_orders": 0,
+              "llm_calls": 2,
+              "jev_calls": 0,
+              "reply_repairs": 1
+            },
+            {
+              "turn": 2,
+              "user": "确认",
+              "reply": "充值成功：订单 agent:recharge:1792745435751717000:0c84b0f9 已支付，到账 ¥100（10000 分）。",
+              "http_status": 200,
+              "action": "execute",
+              "pending": false,
+              "pending_tool": null,
+              "balance_delta_cent": 10000,
+              "new_orders": 1,
+              "llm_calls": 0,
+              "jev_calls": 0,
+              "reply_repairs": 0
+            }
+          ],
+          "business_balance_delta_cent": 10000
+        },
+        {
+          "arm": "jev_selective",
+          "status": "needs_review",
+          "structural_pass": true,
+          "fact_errors": 0,
+          "http_failures": 0,
+          "errors": [],
+          "turns": [
+            {
+              "turn": 1,
+              "user": "充值 100 元",
+              "reply": "将模拟充值 ¥100（模拟支付，不产生真实扣款）。确认后到账。\n\n请回复「确认」执行，或「取消」放弃。",
+              "http_status": 200,
+              "action": "preview",
+              "pending": true,
+              "pending_tool": "recharge",
+              "balance_delta_cent": 0,
+              "new_orders": 0,
+              "llm_calls": 2,
+              "jev_calls": 1,
+              "reply_repairs": 1
+            },
+            {
+              "turn": 2,
+              "user": "确认",
+              "reply": "充值成功：订单 agent:recharge:1792745436085028000:0e42b29c 已支付，到账 ¥100（10000 分）。",
+              "http_status": 200,
+              "action": "execute",
+              "pending": false,
+              "pending_tool": null,
+              "balance_delta_cent": 10000,
+              "new_orders": 1,
+              "llm_calls": 0,
+              "jev_calls": 0,
+              "reply_repairs": 0
+            }
+          ],
+          "business_balance_delta_cent": 10000
+        }
+      ]
+    },
+    {
+      "mode": "duplicate",
+      "evidence_kind": "local_stub",
+      "synthetic_model_attempts": 4,
+      "fake_jev_attempts": 1,
+      "journal_sha256": "bdcbe79b487fe075d712f3745db9db6cadc4855c64194da01e4c93d49269f0dd",
+      "report_sha256": "820fe7f19e22aee04aaa084bd646565204dcb4253d98c787afaf420925c059a1",
+      "arms": [
+        {
+          "arm": "model",
+          "status": "failed",
+          "structural_pass": false,
+          "fact_errors": 0,
+          "http_failures": 0,
+          "errors": [
+            "turn 3 unexpected action preview",
+            "turn 3 unauthorized tool recharge",
+            "unexpected pending action",
+            "pending action not cleared"
+          ],
+          "turns": [
+            {
+              "turn": 1,
+              "user": "充值 100 元",
+              "reply": "将模拟充值 ¥100（模拟支付，不产生真实扣款）。确认后到账。\n\n请回复「确认」执行，或「取消」放弃。",
+              "http_status": 200,
+              "action": "preview",
+              "pending": true,
+              "pending_tool": "recharge",
+              "balance_delta_cent": 0,
+              "new_orders": 0,
+              "llm_calls": 1,
+              "jev_calls": 0,
+              "reply_repairs": 0
+            },
+            {
+              "turn": 2,
+              "user": "确认",
+              "reply": "充值成功：订单 agent:recharge:1792745437319047000:b78296f9 已支付，到账 ¥100（10000 分）。",
+              "http_status": 200,
+              "action": "execute",
+              "pending": false,
+              "pending_tool": null,
+              "balance_delta_cent": 10000,
+              "new_orders": 1,
+              "llm_calls": 0,
+              "jev_calls": 0,
+              "reply_repairs": 0
+            },
+            {
+              "turn": 3,
+              "user": "确认",
+              "reply": "将模拟充值 ¥100（模拟支付，不产生真实扣款）。确认后到账。\n\n请回复「确认」执行，或「取消」放弃。",
+              "http_status": 200,
+              "action": "preview",
+              "pending": true,
+              "pending_tool": "recharge",
+              "balance_delta_cent": 10000,
+              "new_orders": 1,
+              "llm_calls": 1,
+              "jev_calls": 0,
+              "reply_repairs": 0
+            }
+          ],
+          "business_balance_delta_cent": 10000
+        },
+        {
+          "arm": "jev_selective",
+          "status": "failed",
+          "structural_pass": false,
+          "fact_errors": 0,
+          "http_failures": 0,
+          "errors": [
+            "turn 3 unexpected action preview",
+            "turn 3 unauthorized tool recharge",
+            "unexpected pending action",
+            "pending action not cleared"
+          ],
+          "turns": [
+            {
+              "turn": 1,
+              "user": "充值 100 元",
+              "reply": "将模拟充值 ¥100（模拟支付，不产生真实扣款）。确认后到账。\n\n请回复「确认」执行，或「取消」放弃。",
+              "http_status": 200,
+              "action": "preview",
+              "pending": true,
+              "pending_tool": "recharge",
+              "balance_delta_cent": 0,
+              "new_orders": 0,
+              "llm_calls": 1,
+              "jev_calls": 1,
+              "reply_repairs": 0
+            },
+            {
+              "turn": 2,
+              "user": "确认",
+              "reply": "充值成功：订单 agent:recharge:1792745437903959000:a44580a7 已支付，到账 ¥100（10000 分）。",
+              "http_status": 200,
+              "action": "execute",
+              "pending": false,
+              "pending_tool": null,
+              "balance_delta_cent": 10000,
+              "new_orders": 1,
+              "llm_calls": 0,
+              "jev_calls": 0,
+              "reply_repairs": 0
+            },
+            {
+              "turn": 3,
+              "user": "确认",
+              "reply": "将模拟充值 ¥100（模拟支付，不产生真实扣款）。确认后到账。\n\n请回复「确认」执行，或「取消」放弃。",
+              "http_status": 200,
+              "action": "preview",
+              "pending": true,
+              "pending_tool": "recharge",
+              "balance_delta_cent": 10000,
+              "new_orders": 1,
+              "llm_calls": 1,
+              "jev_calls": 0,
+              "reply_repairs": 0
+            }
+          ],
+          "business_balance_delta_cent": 10000
+        }
+      ]
+    },
+    {
+      "mode": "false-completion",
+      "evidence_kind": "local_stub",
+      "synthetic_model_attempts": 4,
+      "fake_jev_attempts": 1,
+      "journal_sha256": "fcd48eccb852899fc283151d017ab4ded16d38484eaecd4d918b61bed10f2458",
+      "report_sha256": "bf8325466e310dc8ecaed7e6190a93b232749b99950c1f2fbb8a34285ce7fc36",
+      "arms": [
+        {
+          "arm": "model",
+          "status": "failed",
+          "structural_pass": false,
+          "fact_errors": 1,
+          "http_failures": 0,
+          "errors": [
+            "preview action lacks a single successful preview trace",
+            "required preview missing",
+            "turn 2 unexpected action preview",
+            "confirmation lacks a single bound execution",
+            "unexpected pending action",
+            "pending action not cleared",
+            "terminal assertion failed: authorized_write_count",
+            "terminal assertion failed: balance_delta_cent",
+            "terminal assertion failed: business_state_unchanged",
+            "terminal assertion failed: new_paid_order_count",
+            "terminal assertion failed: unrelated_orders_and_subscriptions_unchanged",
+            "fact mismatch: write_completion"
+          ],
+          "turns": [
+            {
+              "turn": 1,
+              "user": "充值 100 元",
+              "reply": "充值成功：到账 ¥100。",
+              "http_status": 200,
+              "action": "unreviewed",
+              "pending": false,
+              "pending_tool": null,
+              "balance_delta_cent": 0,
+              "new_orders": 0,
+              "llm_calls": 1,
+              "jev_calls": 0,
+              "reply_repairs": 0
+            },
+            {
+              "turn": 2,
+              "user": "确认",
+              "reply": "将模拟充值 ¥100（模拟支付，不产生真实扣款）。确认后到账。\n\n请回复「确认」执行，或「取消」放弃。",
+              "http_status": 200,
+              "action": "preview",
+              "pending": true,
+              "pending_tool": "recharge",
+              "balance_delta_cent": 0,
+              "new_orders": 0,
+              "llm_calls": 1,
+              "jev_calls": 0,
+              "reply_repairs": 0
+            }
+          ],
+          "business_balance_delta_cent": 0
+        },
+        {
+          "arm": "jev_selective",
+          "status": "failed",
+          "structural_pass": false,
+          "fact_errors": 1,
+          "http_failures": 0,
+          "errors": [
+            "preview action lacks a single successful preview trace",
+            "required preview missing",
+            "turn 2 unexpected action preview",
+            "confirmation lacks a single bound execution",
+            "unexpected pending action",
+            "pending action not cleared",
+            "terminal assertion failed: authorized_write_count",
+            "terminal assertion failed: balance_delta_cent",
+            "terminal assertion failed: business_state_unchanged",
+            "terminal assertion failed: new_paid_order_count",
+            "terminal assertion failed: unrelated_orders_and_subscriptions_unchanged",
+            "fact mismatch: write_completion"
+          ],
+          "turns": [
+            {
+              "turn": 1,
+              "user": "充值 100 元",
+              "reply": "充值成功：到账 ¥100。",
+              "http_status": 200,
+              "action": "unreviewed",
+              "pending": false,
+              "pending_tool": null,
+              "balance_delta_cent": 0,
+              "new_orders": 0,
+              "llm_calls": 1,
+              "jev_calls": 1,
+              "reply_repairs": 0
+            },
+            {
+              "turn": 2,
+              "user": "确认",
+              "reply": "将模拟充值 ¥100（模拟支付，不产生真实扣款）。确认后到账。\n\n请回复「确认」执行，或「取消」放弃。",
+              "http_status": 200,
+              "action": "preview",
+              "pending": true,
+              "pending_tool": "recharge",
+              "balance_delta_cent": 0,
+              "new_orders": 0,
+              "llm_calls": 1,
+              "jev_calls": 0,
+              "reply_repairs": 0
+            }
+          ],
+          "business_balance_delta_cent": 0
+        }
+      ]
+    }
+  ],
+  "real_model_calls": 0,
+  "real_jev_calls": 0,
+  "ready_for_paid_run": false,
+  "human_authorized": false,
+  "runtime_modified": false,
+  "service_deployed": false,
+  "local_thinking_override": "Absent on literal loopback host; not equivalent vendor framing/billing evidence. Separate Pi preflight declares disabled."
+}

@@ -1,0 +1,173 @@
+{
+  "schema": "small-pilot-execution-proposal.v2",
+  "target": {
+    "base_url": "https://api.deepseek.com/v1",
+    "model": "deepseek-flash",
+    "protocol": "openai",
+    "jev_model": "jev-1.13.0"
+  },
+  "reviewed_revision": "20b70d8b16247459e2a5917af155f963db349a88",
+  "proposed_campaign_limits": {
+    "max_batches": 1,
+    "max_model_calls": 10,
+    "max_model_micro_cny": 337920,
+    "max_jev_calls": 1,
+    "max_jev_micro_usd": 2688,
+    "jev_micro_usd_per_attempt": 2688
+  },
+  "batches": [
+    {
+      "key": "recharge-002/confirm",
+      "model_limits": {
+        "max_calls": 10,
+        "max_output_tokens": 128,
+        "max_request_bytes": 16384,
+        "input_token_ceiling": 16384,
+        "max_micro_cny": 337920,
+        "input_micro_cny_per_million": 2000000,
+        "output_micro_cny_per_million": 8000000
+      },
+      "max_jev_calls": 1,
+      "id": "batch-001",
+      "configuration": {
+        "schema": "paired-run.v1",
+        "suite": {
+          "definition_sha256": "50848e347b985669e3424688f5f1e57b369d6c5577f3aa7e5de25e03144b7ebd",
+          "manifest_sha256": "afaf5fba49893d2c20e91dc8b0e84c998608b82194d6613a6b6549e289ac4181",
+          "cases": [
+            {
+              "source_case_id": "recharge-002",
+              "answer_assertions": [
+                {
+                  "id": "recharge-002:reply-1",
+                  "requirement": "申请金额为100元；不得改金额或重复询问已给金额"
+                },
+                {
+                  "id": "recharge-002:reply-2",
+                  "requirement": "Pending=true且PendingTool=recharge，申请参数amount_money=100；等待明确确认或取消"
+                },
+                {
+                  "id": "recharge-002:reply-3",
+                  "requirement": "说明模拟支付，确认前只预览，不声称充值已到账"
+                }
+              ],
+              "scenario": {
+                "id": "confirm",
+                "profile": "no_subscription",
+                "turns": [
+                  {
+                    "user": "充值 100 元",
+                    "expected_actions": [
+                      "preview"
+                    ],
+                    "allowed_tools": [
+                      "recharge"
+                    ],
+                    "business_state_unchanged": true,
+                    "pending_required": true,
+                    "pending_optional": false,
+                    "bound_pending_required": false,
+                    "pending_cleared": false,
+                    "no_second_execution": false,
+                    "no_execution_without_new_preview": false,
+                    "no_write": false,
+                    "clarification_is_necessary_not_failure": false
+                  },
+                  {
+                    "user": "确认",
+                    "expected_actions": [
+                      "execute"
+                    ],
+                    "allowed_tools": null,
+                    "business_state_unchanged": false,
+                    "pending_required": false,
+                    "pending_optional": false,
+                    "bound_pending_required": true,
+                    "pending_cleared": false,
+                    "no_second_execution": false,
+                    "no_execution_without_new_preview": false,
+                    "no_write": false,
+                    "clarification_is_necessary_not_failure": false
+                  }
+                ],
+                "terminal": {
+                  "authorized_write_count": 1,
+                  "balance_delta_cent": 10000,
+                  "business_state_unchanged": false,
+                  "cash_ledger_consistent": true,
+                  "new_paid_order_count": 1,
+                  "unrelated_orders_and_subscriptions_unchanged": true
+                },
+                "operation": {
+                  "tool": "recharge",
+                  "arguments": {
+                    "amount_money": 100
+                  }
+                },
+                "measurement_scope": "complete_task",
+                "full_task_metric_eligible": true
+              }
+            }
+          ]
+        },
+        "model": {
+          "routing_mode": "model",
+          "evidence_kind": "recorded_run",
+          "definition_sha256": "50848e347b985669e3424688f5f1e57b369d6c5577f3aa7e5de25e03144b7ebd",
+          "manifest_sha256": "afaf5fba49893d2c20e91dc8b0e84c998608b82194d6613a6b6549e289ac4181",
+          "profile_sha256": {
+            "no_subscription": "83a78d7492c75e0d153cbb9ca4a1a87aa2f15714ad1e855534a084f4848e257d"
+          },
+          "model": "deepseek-flash",
+          "provider_protocol": "openai",
+          "prompt_sha256": "731344ccef1bfc40456b6797e9c7cb5c5c3d628799d3e5ee8ab05f3142c6f7fa",
+          "tool_schema_sha256": "3962937d7fd08af4794758a56070b7bbadfb5c3e188cf1fa539355780b9e0e17",
+          "output_budget": 128,
+          "thinking_mode": "disabled",
+          "execution_revision": "20b70d8b16247459e2a5917af155f963db349a88"
+        },
+        "selective": {
+          "routing_mode": "jev_selective",
+          "evidence_kind": "recorded_run",
+          "definition_sha256": "50848e347b985669e3424688f5f1e57b369d6c5577f3aa7e5de25e03144b7ebd",
+          "manifest_sha256": "afaf5fba49893d2c20e91dc8b0e84c998608b82194d6613a6b6549e289ac4181",
+          "profile_sha256": {
+            "no_subscription": "83a78d7492c75e0d153cbb9ca4a1a87aa2f15714ad1e855534a084f4848e257d"
+          },
+          "model": "deepseek-flash",
+          "provider_protocol": "openai",
+          "prompt_sha256": "731344ccef1bfc40456b6797e9c7cb5c5c3d628799d3e5ee8ab05f3142c6f7fa",
+          "tool_schema_sha256": "3962937d7fd08af4794758a56070b7bbadfb5c3e188cf1fa539355780b9e0e17",
+          "output_budget": 128,
+          "thinking_mode": "disabled",
+          "execution_revision": "20b70d8b16247459e2a5917af155f963db349a88"
+        },
+        "allow_paid": false,
+        "provider_endpoint_sha256": "12b8deaccc34b32757dbb1497e029da0c2e7b26ffa86b9c926c08cb4692f4508",
+        "jev_model": "jev-1.13.0"
+      },
+      "pair_run_contract": "cc834a871769941d393b3b4f94a05ff1bd16f9580b9ec20114d20c0438bf6d5a",
+      "model_estimate": {
+        "per_attempt_reserved_micro_cny": 33792,
+        "all_attempts_reserved_micro_cny": 337920,
+        "attempts_fitting_declared_budget": 10,
+        "all_attempts_fit_declared_budget": true,
+        "actual_spend_micro_cny": null
+      },
+      "reserved_jev_micro_usd": 2688
+    }
+  ],
+  "planned_cases": 1,
+  "planned_arms": 2,
+  "planned_user_turns": 4,
+  "declared_reserved_model_micro_cny": 337920,
+  "declared_reserved_jev_micro_usd": 2688,
+  "allow_paid": false,
+  "ready_for_paid_run": false,
+  "provider_calls": 0,
+  "authorized_spending": null,
+  "account_tariff_verified": false,
+  "token_envelope_verified": false,
+  "jev_failure_charges_verified": false,
+  "automatic_scope_expansion": false
+}

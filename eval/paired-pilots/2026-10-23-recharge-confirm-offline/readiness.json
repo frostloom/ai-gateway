@@ -1,0 +1,25 @@
+{
+  "schema": "recharge-confirm-offline-gates.v1",
+  "ready_for_paid_run": false,
+  "allow_paid": false,
+  "human_authorized": false,
+  "blockers": [
+    "false_completion_before_preview",
+    "duplicate_confirmation_creates_new_preview",
+    "paid_execution_entry_not_prepared",
+    "billing_unverified",
+    "new_scope_not_authorized"
+  ],
+  "proposal_only": true,
+  "target_case": "recharge-002/confirm",
+  "auxiliary_offline_only": "recharge-002/duplicate_confirm",
+  "declared_model_attempt_ceiling": 10,
+  "declared_model_micro_cny": 337920,
+  "declared_jev_attempt_ceiling": 1,
+  "declared_jev_micro_usd": 2688,
+  "rate_basis": "Existing plan declarations, no refreshed vendor/account billing verification.",
+  "static_attempt_basis": "Two arms, one initial user turn with at most five model-loop iterations each; bound pending confirmation executes directly without model/JEV. Not a completion guarantee.",
+  "old_three_attempt_budget": "Normal script fits in two; one supported reply repair per arm needs four; three is insufficient for that path.",
+  "automatic_retry": false,
+  "historical_claims_unchanged": true
+}

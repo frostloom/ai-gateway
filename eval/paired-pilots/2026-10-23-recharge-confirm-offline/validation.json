@@ -1,0 +1,30 @@
+{
+  "schema": "recharge-confirm-offline-validation.v1",
+  "go_test_packages_passed": 18,
+  "full_go_log_sha256": "38ef14dc831656a1d9578f040cb1abea2327b02d55ca4920f945fa0699eeef19",
+  "probe_log_sha256": "f10cfa7227dec713cb78104779e53b6930a214fb10e7e1c64817e3991f00b476",
+  "capture_log_sha256": "e702587f2df12847ef3020f1d9eb29d261e2946734c2f649a88851607bc68b49",
+  "independent_reviewer": "/root/review_recharge_offline_acceptance",
+  "independent_review": "No added blocking problems in audit deliverable; current recharge safety acceptance remains blocked by two reproduced runtime gaps.",
+  "known_runtime_blockers": 2,
+  "old_private_evidence_files_unchanged": 47,
+  "cleanup_readonly": {
+    "all_owned_pair_schemas_absent": true,
+    "jev_calls": 0,
+    "model_calls": 0,
+    "read_only": true,
+    "remaining_isolated_pair_schemas": 0,
+    "schema": "cash-recovery-cleanup-inventory.v1"
+  },
+  "source_loop_max_five_verified": true,
+  "isolated_schema_source_verified": true,
+  "source_attempt_bound_not_completion_guarantee": true,
+  "capture_synthetic_attempts": 17,
+  "capture_fake_jev_attempts": 5,
+  "real_model_calls": 0,
+  "real_jev_calls": 0,
+  "allow_paid": false,
+  "ready_for_paid_run": false,
+  "runtime_modified": false,
+  "service_deployed": false
+}

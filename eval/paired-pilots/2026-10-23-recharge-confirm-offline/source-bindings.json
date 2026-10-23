@@ -1,0 +1,38 @@
+{
+  "schema": "recharge-confirm-offline-sources.v1",
+  "source_files": {
+    "internal/taskbench/recharge_confirm_offline_test.go": "5169a425d4f82a1736b7ce3a536303bbe6b36c2ab652fcfa798818b36c411a16",
+    "internal/agent/chat.go": "62a7b2c91b79892bba0ad8f3f68a347d93bf02e675750bcd509b6b358e9066c5",
+    "internal/agent/reply_boundary.go": "7678e2e07851ead714467cd6324e02adc9dd602d8fafa387a6a95da6e1a5cc21",
+    "internal/agent/llm.go": "ab6af51fe69b2a0c41b21ce3d82b8b97e80e362ec42efe745b84156e0e88a96f",
+    "eval/task-definitions/2026-10-12-full-dev-v1/definitions.json": "50848e347b985669e3424688f5f1e57b369d6c5577f3aa7e5de25e03144b7ebd",
+    "eval/paired-pilots/2026-10-22-pi-customer-preflight/plan.json": "0dd031dd03d9d6ae2aff69c032e61413899011bba9e0f9455f20e1e10c4906c4",
+    "internal/taskbench/paired_environment.go": "79e6341adab279578c8a2ff5f42c027ac9d78cb41a437e5ba4a9058e52773d29"
+  },
+  "private_sources": {
+    ".tmp/paired-live-private/recharge-confirm-offline-20261023/confirm/report.json": "6b123169998f4072fecf0e9d9c33eee7625c1797bd761aae94f9746bd19409b2",
+    ".tmp/paired-live-private/recharge-confirm-offline-20261023/confirm/run.jsonl.jev.jsonl": "11770526a58ffb8c4693c566d8229d3eb663161320dcca8d285892082288e53d",
+    ".tmp/paired-live-private/recharge-confirm-offline-20261023/confirm/budget.jsonl": "2a8e1faae52419f0b909b46943527bf99382078add4344341970d34cdb6bc51d",
+    ".tmp/paired-live-private/recharge-confirm-offline-20261023/confirm/run.jsonl": "c1782160e945b60985008c20177f94d47e2bc84459db805c37b72e59ecad94e8",
+    ".tmp/paired-live-private/recharge-confirm-offline-20261023/repair-old-cap/report.json": "4f7efbd6781d1ceb81da4db38d1d6df810116e1b2022001241a4cca82409d87f",
+    ".tmp/paired-live-private/recharge-confirm-offline-20261023/repair-old-cap/run.jsonl.jev.jsonl": "92683d4d010b95917273daa516f7b377100e05c0017e05a04d56e748e18fb05f",
+    ".tmp/paired-live-private/recharge-confirm-offline-20261023/repair-old-cap/budget.jsonl": "80d01c76699bde48ca98e26290274d8c4185d8893b7d7caac5b3bbdfaf194318",
+    ".tmp/paired-live-private/recharge-confirm-offline-20261023/repair-old-cap/run.jsonl": "b1358cb78ede699e0bfd663ea3f96c543e65781a60de67d1429a629f1f673b03",
+    ".tmp/paired-live-private/recharge-confirm-offline-20261023/repair/report.json": "d0a334dabab6ac9e95ef8850f1e5dcea7549424c64e7179d4fc232da61a3f5d8",
+    ".tmp/paired-live-private/recharge-confirm-offline-20261023/repair/run.jsonl.jev.jsonl": "51c49561d99f95cf4737ddf6eb2f3fe3e06e6dd966322e54c7d876ea3426c740",
+    ".tmp/paired-live-private/recharge-confirm-offline-20261023/repair/budget.jsonl": "b0a86233579f6a34b66953c6ee59a2b29af8cedad53bd4078c2cbda0c7f3c478",
+    ".tmp/paired-live-private/recharge-confirm-offline-20261023/repair/run.jsonl": "fdb783d2fbf0f726a2f7d4b7fbce679fda64709daa2c8b18cdb6f39c685a5efe",
+    ".tmp/paired-live-private/recharge-confirm-offline-20261023/duplicate/report.json": "820fe7f19e22aee04aaa084bd646565204dcb4253d98c787afaf420925c059a1",
+    ".tmp/paired-live-private/recharge-confirm-offline-20261023/duplicate/run.jsonl.jev.jsonl": "a75b0af6b261d4f150828de26d2f3b65efbafdeab047398cd047e50e6e4335d5",
+    ".tmp/paired-live-private/recharge-confirm-offline-20261023/duplicate/budget.jsonl": "ee3583f9f40de94a4d4769a669f44f104fa3b765a6448b65064341d913079787",
+    ".tmp/paired-live-private/recharge-confirm-offline-20261023/duplicate/run.jsonl": "bdcbe79b487fe075d712f3745db9db6cadc4855c64194da01e4c93d49269f0dd",
+    ".tmp/paired-live-private/recharge-confirm-offline-20261023/false-completion/report.json": "bf8325466e310dc8ecaed7e6190a93b232749b99950c1f2fbb8a34285ce7fc36",
+    ".tmp/paired-live-private/recharge-confirm-offline-20261023/false-completion/run.jsonl.jev.jsonl": "547495ff3cc468b2e26cc752ab0bb68554a0c25e4916b6581c9a5123fda1baee",
+    ".tmp/paired-live-private/recharge-confirm-offline-20261023/false-completion/budget.jsonl": "22de3f436d3b0f56ce2119a927c7210822dc3f7a837e940be3044917cae91a12",
+    ".tmp/paired-live-private/recharge-confirm-offline-20261023/false-completion/run.jsonl": "fcd48eccb852899fc283151d017ab4ded16d38484eaecd4d918b61bed10f2458",
+    ".tmp/paired-live-private/recharge-confirm-offline-20261023/overlay.json": "9dd44f082b04236ffa768920cfd6adb95c22dda0bb456ded510588c3e9ce52d4",
+    ".tmp/paired-live-private/recharge-confirm-offline-20261023/capture_test.go": "6054b0a6db8f557b2127a4f259700d70e6c82da9cf35b4081446deb011628484",
+    ".tmp/paired-live-private/recharge-confirm-offline-20261023/cleanup-inventory.json": "0762ad060e774cdd794f1c92a0d93d7164e07e5e920c23e075ba3f1bb058dad9"
+  },
+  "capture_log_sha256": "e702587f2df12847ef3020f1d9eb29d261e2946734c2f649a88851607bc68b49"
+}
