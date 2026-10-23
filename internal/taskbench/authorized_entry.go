@@ -32,22 +32,23 @@ type pilotAuthorization struct {
 	Retry    bool             `json:"automatic_paid_retries"`
 }
 type pilotBilling struct {
-	CampaignID     string `json:"campaign_id,omitempty"`
-	Revision       string `json:"execution_revision,omitempty"`
-	Schema         string `json:"schema"`
-	PlanSHA        string `json:"scope_plan_sha256"`
-	Base           string `json:"model_base"`
-	Model          string `json:"model"`
-	Protocol       string `json:"protocol"`
-	JEVModel       string `json:"jev_model"`
-	Tariff         bool   `json:"account_tariff_verified"`
-	Tokens         bool   `json:"token_envelope_verified"`
-	Failure        bool   `json:"jev_failure_charges_verified"`
-	FailurePolicy  string `json:"jev_failure_policy"`
-	JEVMaxInput    int64  `json:"jev_max_input_tokens"`
-	JEVInputRate   int64  `json:"jev_input_micro_usd_per_million"`
-	JEVFullAttempt int64  `json:"jev_full_attempt_micro_usd"`
-	EvidenceSHA    string `json:"evidence_sha256"`
+	CampaignID         string `json:"campaign_id,omitempty"`
+	RuntimeContractSHA string `json:"runtime_contract_sha256,omitempty"`
+	Revision           string `json:"execution_revision,omitempty"`
+	Schema             string `json:"schema"`
+	PlanSHA            string `json:"scope_plan_sha256"`
+	Base               string `json:"model_base"`
+	Model              string `json:"model"`
+	Protocol           string `json:"protocol"`
+	JEVModel           string `json:"jev_model"`
+	Tariff             bool   `json:"account_tariff_verified"`
+	Tokens             bool   `json:"token_envelope_verified"`
+	Failure            bool   `json:"jev_failure_charges_verified"`
+	FailurePolicy      string `json:"jev_failure_policy"`
+	JEVMaxInput        int64  `json:"jev_max_input_tokens"`
+	JEVInputRate       int64  `json:"jev_input_micro_usd_per_million"`
+	JEVFullAttempt     int64  `json:"jev_full_attempt_micro_usd"`
+	EvidenceSHA        string `json:"evidence_sha256"`
 }
 
 // AuthorizedPilot can only become valid through an authorization checker. Its
@@ -56,6 +57,7 @@ type AuthorizedPilot struct {
 	valid                                              bool
 	retestApproved                                     bool
 	retestRevision                                     string
+	retestScope                                        cashRetestScope
 	plan                                               CampaignPreparationPlan
 	model                                              PairModelSettings
 	authorizationSHA, planSHA, billingSHA, evidenceSHA string
@@ -101,6 +103,9 @@ func CheckAuthorizedPilot(authRaw, planRaw, billingRaw, evidenceRaw []byte) (Aut
 	if len(authRaw) > 1<<20 || len(planRaw) > 1<<20 || len(billingRaw) > 1<<20 || len(evidenceRaw) > 1<<20 || json.Unmarshal(authRaw, &a) != nil || json.Unmarshal(planRaw, &p.plan) != nil {
 		return p, fmt.Errorf("bounded valid authorization and plan JSON required")
 	}
+	if p.plan.CampaignID != "" || p.plan.CustomerRevision != "" || p.plan.RuntimeContractSHA != "" {
+		return AuthorizedPilot{}, fmt.Errorf("retest plan cannot authorize original pilot")
+	}
 	limits := CampaignLimits{MaxBatches: 6, MaxModelCalls: 24, MaxModelMicroCNY: 1000000, MaxJEVCalls: 6, MaxJEVMicroUSD: 20000, JEVMicroUSDPerAttempt: 2688}
 	switch {
 	case a.Schema == "small-pilot-authorization.v1" && p.plan.Schema == "campaign-preflight-plan.v1" && p.plan.Target == nil && (a.Base == "" || a.Base == AuthorizedPilotModelBase):
@@ -136,16 +141,16 @@ func (p AuthorizedPilot) checkBilling(billingRaw, evidenceRaw []byte, allowRisk 
 		if json.Unmarshal(billingRaw, &b) != nil || b.PlanSHA != p.planSHA || b.Base != p.model.BaseURL || b.Model != p.model.Model || b.Protocol != p.model.Protocol || b.JEVModel != AuthorizedPilotJEVModel {
 			return AuthorizedPilot{}, fmt.Errorf("billing attestation scope/model/version differs")
 		}
-		if p.IsRetest() && (b.Schema != "paired-retest-billing-attestation.v1" || b.CampaignID != CashReadRetestID || b.Revision != p.retestRevision) {
+		if p.IsRetest() && (b.Schema != p.retestScope.BillingSchema || b.CampaignID != p.CampaignID() || b.Revision != p.retestRevision || b.RuntimeContractSHA != p.retestScope.RuntimeContractSHA) {
 			return AuthorizedPilot{}, fmt.Errorf("retest billing identity or revision differs")
 		}
-		if !p.IsRetest() && (b.Schema == "paired-retest-billing-attestation.v1" || b.CampaignID != "" || b.Revision != "") {
+		if !p.IsRetest() && (b.Schema == "paired-retest-billing-attestation.v1" || b.Schema == "paired-retest-billing-attestation.v2" || b.CampaignID != "" || b.Revision != "" || b.RuntimeContractSHA != "") {
 			return AuthorizedPilot{}, fmt.Errorf("retest billing cannot authorize original pilot")
 		}
 		switch b.Schema {
 		case "paired-billing-attestation.v1":
 			// Legacy attestations continue to require verified vendor terms.
-		case "paired-billing-attestation.v2", "paired-retest-billing-attestation.v1":
+		case "paired-billing-attestation.v2", "paired-retest-billing-attestation.v1", "paired-retest-billing-attestation.v2":
 			// A reviewed risk reservation is distinct from a vendor guarantee.
 			// This policy is only valid for the pinned Pi pilot and its unchanged
 			// maximum-context reservation; every JEV failure must halt fallback.

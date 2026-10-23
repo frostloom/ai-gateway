@@ -5,26 +5,64 @@ import (
 	"encoding/json"
 	"fmt"
 	"regexp"
+
+	"github.com/frostloom/ai-gateway/internal/agent"
 )
 
 const CashReadRetestID = "cash-read-retest-20261023"
+const CashReadRecoveryRetestID = "cash-read-recovery-retest-20261023"
+
+type cashRetestScope struct {
+	ID, BillingSchema, ReceiptSchema     string
+	PriorJournalSHA, PriorReviewSHA      string
+	CustomerRevision, RuntimeContractSHA string
+}
+
+// These are two separately reviewed scopes, not a user-selected retry ID.
+func checkedCashRetestScope(schema, id string) (cashRetestScope, bool) {
+	if schema == "cash-read-retest-authorization.v1" && id == CashReadRetestID {
+		return cashRetestScope{
+			ID: id, BillingSchema: "paired-retest-billing-attestation.v1", ReceiptSchema: "authorized-cash-retest.v1",
+			PriorJournalSHA: priorCashJournalSHA, PriorReviewSHA: priorCashReviewSHA,
+		}, true
+	}
+	if schema == "cash-read-retest-authorization.v2" && id == CashReadRecoveryRetestID {
+		return cashRetestScope{
+			ID: id, BillingSchema: "paired-retest-billing-attestation.v2", ReceiptSchema: "authorized-cash-retest.v2",
+			PriorJournalSHA:    "7d48f9caff31099149a06a3b14e3e9a5367b4a4b12067537130bba6453a9f754",
+			PriorReviewSHA:     "785834102ecae9104df8e33239a7089ace5503cc8d33c5a6850862e77f24b6f6",
+			CustomerRevision:   "4c715556d893a5bf8dadcd6a164310692ec2570a",
+			RuntimeContractSHA: "b92458d1bafd3187a2daa6387b0575e9517da84f66df6602b1945a8d47ba9d8e",
+		}, true
+	}
+	return cashRetestScope{}, false
+}
+
+type cashRetestPlanIdentity struct {
+	ID                 string `json:"campaign_id"`
+	CustomerRevision   string `json:"customer_source_revision"`
+	RuntimeContractSHA string `json:"runtime_contract_sha256"`
+}
+
 const cashRetestCase = "balance-020/explicit_scope_followup"
 const priorCashJournalSHA = "93a6d5df6c9d68fd5202dd023424a8af77de5a1170dd01993e7334b4804b66d2"
 const priorCashReviewSHA = "d0ea747fd5f59d10382b8b0cf1b6d94d7df8e68c739a64df8b4c8289b230b673"
 
 type cashRetestAuthorization struct {
-	Schema          string         `json:"schema"`
-	CampaignID      string         `json:"campaign_id"`
-	Approved        bool           `json:"human_authorized"`
-	PlanSHA         string         `json:"scope_plan_sha256"`
-	Target          PilotTarget    `json:"target"`
-	Limits          CampaignLimits `json:"authorized_spending"`
-	Key             string         `json:"case_key"`
-	Revision        string         `json:"execution_revision"`
-	PriorJournalSHA string         `json:"prior_journal_sha256"`
-	PriorReviewSHA  string         `json:"prior_review_sha256"`
-	Expand          bool           `json:"automatic_scope_expansion"`
-	Retry           bool           `json:"automatic_paid_retries"`
+	Schema             string         `json:"schema"`
+	CustomerRevision   string         `json:"customer_source_revision,omitempty"`
+	RuntimeContractSHA string         `json:"runtime_contract_sha256,omitempty"`
+	CampaignID         string         `json:"campaign_id"`
+	Approved           bool           `json:"human_authorized"`
+	PlanSHA            string         `json:"scope_plan_sha256"`
+	Target             PilotTarget    `json:"target"`
+	Limits             CampaignLimits `json:"authorized_spending"`
+	Key                string         `json:"case_key"`
+	Revision           string         `json:"execution_revision"`
+	PriorJournalSHA    string         `json:"prior_journal_sha256"`
+	PriorReviewSHA     string         `json:"prior_review_sha256"`
+	Expand             bool           `json:"automatic_scope_expansion"`
+	Retry              bool           `json:"automatic_paid_retries"`
 }
 
 func (p AuthorizedPilot) IsRetest() bool { return p.retestRevision != "" }
@@ -33,7 +71,7 @@ func (p AuthorizedPilot) HumanAuthorized() bool {
 }
 func (p AuthorizedPilot) CampaignID() string {
 	if p.IsRetest() {
-		return CashReadRetestID
+		return p.retestScope.ID
 	}
 	return ""
 }
@@ -50,8 +88,22 @@ func CheckAuthorizedRetest(authRaw, planRaw, billingRaw, evidenceRaw []byte) (Au
 	if len(authRaw) > 1<<20 || len(planRaw) > 1<<20 || len(billingRaw) > 1<<20 || len(evidenceRaw) > 1<<20 || json.Unmarshal(authRaw, &a) != nil || json.Unmarshal(planRaw, &p.plan) != nil {
 		return fail()
 	}
+	scope, ok := checkedCashRetestScope(a.Schema, a.CampaignID)
+	if !ok || a.CustomerRevision != scope.CustomerRevision || a.RuntimeContractSHA != scope.RuntimeContractSHA {
+		return fail()
+	}
+	wantIdentity := cashRetestPlanIdentity{}
+	if scope.RuntimeContractSHA != "" {
+		wantIdentity = cashRetestPlanIdentity{scope.ID, scope.CustomerRevision, scope.RuntimeContractSHA}
+		if (&agent.Handler{}).EvaluationRuntimeMetadata().ContractSHA256 != scope.RuntimeContractSHA {
+			return fail()
+		}
+	}
+	if (cashRetestPlanIdentity{p.plan.CampaignID, p.plan.CustomerRevision, p.plan.RuntimeContractSHA}) != wantIdentity {
+		return fail()
+	}
 	limits := CampaignLimits{MaxBatches: 1, MaxModelCalls: 12, MaxModelMicroCNY: 405504, MaxJEVCalls: 1, MaxJEVMicroUSD: 2688, JEVMicroUSDPerAttempt: 2688}
-	if a.Schema != "cash-read-retest-authorization.v1" || a.CampaignID != CashReadRetestID || a.PlanSHA != conversationHash(planRaw) || a.Key != cashRetestCase || !a.Target.validPi() || a.Limits != limits || !regexp.MustCompile(`^[a-f0-9]{40}$`).MatchString(a.Revision) || a.PriorJournalSHA != priorCashJournalSHA || a.PriorReviewSHA != priorCashReviewSHA || a.Expand || a.Retry {
+	if a.PlanSHA != conversationHash(planRaw) || a.Key != cashRetestCase || !a.Target.validPi() || a.Limits != limits || !regexp.MustCompile(`^[a-f0-9]{40}$`).MatchString(a.Revision) || a.PriorJournalSHA != scope.PriorJournalSHA || a.PriorReviewSHA != scope.PriorReviewSHA || a.Expand || a.Retry {
 		return fail()
 	}
 	want := PairBudgetLimits{MaxCalls: 12, MaxOutputTokens: 128, MaxRequestBytes: 16384, InputTokenCeiling: 16384, MaxMicroCNY: 405504, InputMicroCNYPerMillion: 2000000, OutputMicroCNYPerMillion: 8000000}
@@ -61,6 +113,7 @@ func CheckAuthorizedRetest(authRaw, planRaw, billingRaw, evidenceRaw []byte) (Au
 	p.model = a.Target.modelSettings()
 	p.authorizationSHA = conversationHash(authRaw)
 	p.planSHA = a.PlanSHA
+	p.retestScope = scope
 	p.retestRevision = a.Revision
 	p.retestApproved = a.Approved
 	if !a.Approved {

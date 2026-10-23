@@ -4,10 +4,13 @@ import "fmt"
 
 // CampaignPreparationPlan supplies declarations only, never paid permission.
 type CampaignPreparationPlan struct {
-	Schema  string                     `json:"schema"`
-	Target  *PilotTarget               `json:"target,omitempty"`
-	Limits  CampaignLimits             `json:"campaign_limits"`
-	Batches []CampaignPreparationBatch `json:"batches"`
+	CampaignID         string                     `json:"campaign_id,omitempty"`
+	CustomerRevision   string                     `json:"customer_source_revision,omitempty"`
+	RuntimeContractSHA string                     `json:"runtime_contract_sha256,omitempty"`
+	Schema             string                     `json:"schema"`
+	Target             *PilotTarget               `json:"target,omitempty"`
+	Limits             CampaignLimits             `json:"campaign_limits"`
+	Batches            []CampaignPreparationBatch `json:"batches"`
 }
 
 // PilotTarget is public channel identity, never credentials or spending permission.
@@ -28,6 +31,13 @@ func (t PilotTarget) modelSettings() PairModelSettings {
 }
 
 func (p CampaignPreparationPlan) validateTarget(model PairModelSettings, jevModel string) error {
+	if p.CampaignID != "" || p.CustomerRevision != "" || p.RuntimeContractSHA != "" {
+		scope, ok := checkedCashRetestScope("cash-read-retest-authorization.v2", p.CampaignID)
+		if !ok || p.CustomerRevision != scope.CustomerRevision || p.RuntimeContractSHA != scope.RuntimeContractSHA || p.Schema != "campaign-preflight-plan.v2" {
+			return fmt.Errorf("recovery retest plan markers differ")
+		}
+	}
+
 	switch p.Schema {
 	case "campaign-preflight-plan.v1":
 		if p.Target == nil {
@@ -57,6 +67,9 @@ type CampaignProposalBatch struct {
 }
 
 type CampaignProposal struct {
+	CampaignID                string                  `json:"campaign_id,omitempty"`
+	CustomerRevision          string                  `json:"customer_source_revision,omitempty"`
+	RuntimeContractSHA        string                  `json:"runtime_contract_sha256,omitempty"`
 	Schema                    string                  `json:"schema"`
 	Target                    *PilotTarget            `json:"target,omitempty"`
 	ReviewedRevision          string                  `json:"reviewed_revision"`
@@ -99,7 +112,7 @@ func PrepareCampaignProposal(source ConversationSuite, profiles PairedProfiles, 
 		byKey[c.Key()] = c
 	}
 	seen := map[string]bool{}
-	proposal := CampaignProposal{Schema: "small-pilot-execution-proposal.v1", ReviewedRevision: revision, Limits: plan.Limits}
+	proposal := CampaignProposal{CampaignID: plan.CampaignID, CustomerRevision: plan.CustomerRevision, RuntimeContractSHA: plan.RuntimeContractSHA, Schema: "small-pilot-execution-proposal.v1", ReviewedRevision: revision, Limits: plan.Limits}
 	if plan.Target != nil {
 		target := *plan.Target
 		proposal.Target = &target

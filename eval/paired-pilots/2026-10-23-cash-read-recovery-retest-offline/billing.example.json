@@ -1,0 +1,19 @@
+{
+  "schema": "paired-retest-billing-attestation.v2",
+  "campaign_id": "cash-read-recovery-retest-20261023",
+  "execution_revision": "0000000000000000000000000000000000000000",
+  "scope_plan_sha256": "98760fa0c184348727669bff546e671aef180e73958fb415b01459ab5503bef4",
+  "model_base": "https://api.deepseek.com/v1",
+  "model": "deepseek-flash",
+  "protocol": "openai",
+  "jev_model": "jev-1.13.0",
+  "account_tariff_verified": false,
+  "token_envelope_verified": false,
+  "jev_failure_charges_verified": false,
+  "jev_failure_policy": "reserve_full_attempt_stop_on_failure",
+  "jev_max_input_tokens": 64000,
+  "jev_input_micro_usd_per_million": 42000,
+  "jev_full_attempt_micro_usd": 2688,
+  "evidence_sha256": "",
+  "runtime_contract_sha256": "b92458d1bafd3187a2daa6387b0575e9517da84f66df6602b1945a8d47ba9d8e"
+}

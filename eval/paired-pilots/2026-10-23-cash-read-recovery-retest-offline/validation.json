@@ -1,0 +1,23 @@
+{
+  "schema": "cash-read-recovery-preparation-validation.v1",
+  "go_test_packages_passed": 18,
+  "full_go_log_sha256": "ddcbc285ab7c2c6e600dc22a342c9853d8ff1ed0439eb46dcdd7695a04e971a3",
+  "independent_review": "No important findings; scope, schema, billing, compiled contract, permanent claims and read-only boundaries reviewed.",
+  "local_fake_run": {
+    "model_attempts": 8,
+    "jev_attempts": 1,
+    "successful_cash_reads": 4,
+    "real_provider_calls": 0
+  },
+  "new_claim_exists": false,
+  "human_authorized": false,
+  "service_redeployed": false,
+  "red_green_logs_sha256": {
+    "ai-gateway-recovery-retest-red.log": "a1627816f164aef63619ea4ad8a44acd6c4599990885fe8d148719898cbac953",
+    "ai-gateway-recovery-retest-scope-and-claim.log": "bcc004c036e76ef2cd62f5e2eaf39e8ab48cab5bfc9dac2c83ac0e351d82fdad",
+    "ai-gateway-recovery-retest-cli-green.log": "aed5ea20aa59e3279099a92bad64ac6291c7cc87a10f03ecb0cd93e29009f837",
+    "ai-gateway-recovery-retest-runner-green.log": "f9a857d9ba7669e0d7feb4b4946f9445b85bda81d88b75be8186f065c5f1c7ab",
+    "ai-gateway-recovery-retest-preflight-red.log": "ab77f5d431f17a7d1c3ada49bdc5963fdf93f63804547d93a856269087aa3c0b",
+    "ai-gateway-recovery-retest-preflight-green.log": "4dd752833dcdcc1e1ba038945c57c56a126a1c47421827ed075970ec7ad6d8b3"
+  }
+}

@@ -1,0 +1,172 @@
+{
+  "campaign_id": "cash-read-recovery-retest-20261023",
+  "customer_source_revision": "4c715556d893a5bf8dadcd6a164310692ec2570a",
+  "runtime_contract_sha256": "b92458d1bafd3187a2daa6387b0575e9517da84f66df6602b1945a8d47ba9d8e",
+  "schema": "small-pilot-execution-proposal.v2",
+  "target": {
+    "base_url": "https://api.deepseek.com/v1",
+    "model": "deepseek-flash",
+    "protocol": "openai",
+    "jev_model": "jev-1.13.0"
+  },
+  "reviewed_revision": "5bb2d3774f458bb017aea645e93d29de32bbb2cf",
+  "proposed_campaign_limits": {
+    "max_batches": 1,
+    "max_model_calls": 12,
+    "max_model_micro_cny": 405504,
+    "max_jev_calls": 1,
+    "max_jev_micro_usd": 2688,
+    "jev_micro_usd_per_attempt": 2688
+  },
+  "batches": [
+    {
+      "key": "balance-020/explicit_scope_followup",
+      "model_limits": {
+        "max_calls": 12,
+        "max_output_tokens": 128,
+        "max_request_bytes": 16384,
+        "input_token_ceiling": 16384,
+        "max_micro_cny": 405504,
+        "input_micro_cny_per_million": 2000000,
+        "output_micro_cny_per_million": 8000000
+      },
+      "max_jev_calls": 1,
+      "id": "batch-001",
+      "configuration": {
+        "schema": "paired-run.v1",
+        "suite": {
+          "definition_sha256": "50848e347b985669e3424688f5f1e57b369d6c5577f3aa7e5de25e03144b7ebd",
+          "manifest_sha256": "afaf5fba49893d2c20e91dc8b0e84c998608b82194d6613a6b6549e289ac4181",
+          "cases": [
+            {
+              "source_case_id": "balance-020",
+              "answer_assertions": [
+                {
+                  "id": "balance-020:reply-1",
+                  "requirement": "针对原话“看看我还能用多少”：先确认所说剩余/额度指现金余额还是套餐token额度；可先读一项但须说明范围并保留另一种解释。"
+                },
+                {
+                  "id": "balance-020:reply-2",
+                  "requirement": "针对原话“看看我还能用多少”：金额与token额度分别表述，不把现金换成固定token或调用次数。"
+                }
+              ],
+              "scenario": {
+                "id": "explicit_scope_followup",
+                "profile": "active_standard",
+                "turns": [
+                  {
+                    "user": "看看我还能用多少",
+                    "expected_actions": [
+                      "clarify",
+                      "read"
+                    ],
+                    "allowed_tools": [
+                      "get_balance",
+                      "get_my_subscription"
+                    ],
+                    "business_state_unchanged": true,
+                    "pending_required": false,
+                    "pending_optional": false,
+                    "bound_pending_required": false,
+                    "pending_cleared": false,
+                    "no_second_execution": false,
+                    "no_execution_without_new_preview": false,
+                    "no_write": false,
+                    "clarification_is_necessary_not_failure": true
+                  },
+                  {
+                    "user": "我只查询本人账户人民币现金余额，不是套餐token额度，也不办理充值、退款或订阅。",
+                    "expected_actions": [
+                      "read"
+                    ],
+                    "allowed_tools": [
+                      "get_balance"
+                    ],
+                    "business_state_unchanged": false,
+                    "pending_required": false,
+                    "pending_optional": false,
+                    "bound_pending_required": false,
+                    "pending_cleared": false,
+                    "no_second_execution": false,
+                    "no_execution_without_new_preview": false,
+                    "no_write": false,
+                    "clarification_is_necessary_not_failure": false,
+                    "answer": {
+                      "cash_cent": 500000,
+                      "unit": "RMB"
+                    }
+                  }
+                ],
+                "terminal": {
+                  "authorized_write_count": 0,
+                  "balance_delta_cent": 0,
+                  "business_state_unchanged": true
+                },
+                "operation": null,
+                "measurement_scope": "complete_task",
+                "full_task_metric_eligible": true
+              }
+            }
+          ]
+        },
+        "model": {
+          "routing_mode": "model",
+          "evidence_kind": "recorded_run",
+          "definition_sha256": "50848e347b985669e3424688f5f1e57b369d6c5577f3aa7e5de25e03144b7ebd",
+          "manifest_sha256": "afaf5fba49893d2c20e91dc8b0e84c998608b82194d6613a6b6549e289ac4181",
+          "profile_sha256": {
+            "active_standard": "83a78d7492c75e0d153cbb9ca4a1a87aa2f15714ad1e855534a084f4848e257d"
+          },
+          "model": "deepseek-flash",
+          "provider_protocol": "openai",
+          "prompt_sha256": "731344ccef1bfc40456b6797e9c7cb5c5c3d628799d3e5ee8ab05f3142c6f7fa",
+          "tool_schema_sha256": "3962937d7fd08af4794758a56070b7bbadfb5c3e188cf1fa539355780b9e0e17",
+          "output_budget": 128,
+          "thinking_mode": "disabled",
+          "execution_revision": "5bb2d3774f458bb017aea645e93d29de32bbb2cf"
+        },
+        "selective": {
+          "routing_mode": "jev_selective",
+          "evidence_kind": "recorded_run",
+          "definition_sha256": "50848e347b985669e3424688f5f1e57b369d6c5577f3aa7e5de25e03144b7ebd",
+          "manifest_sha256": "afaf5fba49893d2c20e91dc8b0e84c998608b82194d6613a6b6549e289ac4181",
+          "profile_sha256": {
+            "active_standard": "83a78d7492c75e0d153cbb9ca4a1a87aa2f15714ad1e855534a084f4848e257d"
+          },
+          "model": "deepseek-flash",
+          "provider_protocol": "openai",
+          "prompt_sha256": "731344ccef1bfc40456b6797e9c7cb5c5c3d628799d3e5ee8ab05f3142c6f7fa",
+          "tool_schema_sha256": "3962937d7fd08af4794758a56070b7bbadfb5c3e188cf1fa539355780b9e0e17",
+          "output_budget": 128,
+          "thinking_mode": "disabled",
+          "execution_revision": "5bb2d3774f458bb017aea645e93d29de32bbb2cf"
+        },
+        "allow_paid": false,
+        "provider_endpoint_sha256": "12b8deaccc34b32757dbb1497e029da0c2e7b26ffa86b9c926c08cb4692f4508",
+        "jev_model": "jev-1.13.0"
+      },
+      "pair_run_contract": "4b5ec4fd541856726433e256653f4468b2b8d4170f0c5f45889907f8048e571e",
+      "model_estimate": {
+        "per_attempt_reserved_micro_cny": 33792,
+        "all_attempts_reserved_micro_cny": 405504,
+        "attempts_fitting_declared_budget": 12,
+        "all_attempts_fit_declared_budget": true,
+        "actual_spend_micro_cny": null
+      },
+      "reserved_jev_micro_usd": 2688
+    }
+  ],
+  "planned_cases": 1,
+  "planned_arms": 2,
+  "planned_user_turns": 4,
+  "declared_reserved_model_micro_cny": 405504,
+  "declared_reserved_jev_micro_usd": 2688,
+  "allow_paid": false,
+  "ready_for_paid_run": false,
+  "provider_calls": 0,
+  "authorized_spending": null,
+  "account_tariff_verified": false,
+  "token_envelope_verified": false,
+  "jev_failure_charges_verified": false,
+  "automatic_scope_expansion": false
+}

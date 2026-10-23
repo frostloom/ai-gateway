@@ -26,6 +26,8 @@ type AuthorizedFirstBatchOptions struct {
 	JEVFactory     func() jev.Evaluator
 }
 type AuthorizedFirstBatchReceipt struct {
+	CustomerRevision             string                      `json:"customer_source_revision,omitempty"`
+	RuntimeContractSHA           string                      `json:"runtime_contract_sha256,omitempty"`
 	CampaignID                   string                      `json:"campaign_id,omitempty"`
 	PriorJournalSHA              string                      `json:"prior_journal_sha256,omitempty"`
 	PriorReviewSHA               string                      `json:"prior_review_sha256,omitempty"`
@@ -94,10 +96,12 @@ func runAuthorizedBatch(ctx context.Context, dir string, o AuthorizedFirstBatchO
 	}
 	r = AuthorizedFirstBatchReceipt{Schema: "authorized-first-batch.v1", Status: "stopped", AuthorizationSHA: o.Pilot.authorizationSHA, PlanSHA: o.Pilot.planSHA, BillingSHA: o.Pilot.billingSHA, EvidenceSHA: o.Pilot.evidenceSHA, Revision: o.Revision, JEVFailurePolicy: o.Pilot.JEVFailurePolicy(), VendorFailureChargesVerified: o.Pilot.JEVFailureChargesVerified()}
 	if o.Pilot.IsRetest() {
-		r.Schema = "authorized-cash-retest.v1"
-		r.CampaignID = CashReadRetestID
-		r.PriorJournalSHA = priorCashJournalSHA
-		r.PriorReviewSHA = priorCashReviewSHA
+		r.Schema = o.Pilot.retestScope.ReceiptSchema
+		r.CampaignID = o.Pilot.CampaignID()
+		r.PriorJournalSHA = o.Pilot.retestScope.PriorJournalSHA
+		r.PriorReviewSHA = o.Pilot.retestScope.PriorReviewSHA
+		r.CustomerRevision = o.Pilot.retestScope.CustomerRevision
+		r.RuntimeContractSHA = o.Pilot.retestScope.RuntimeContractSHA
 	}
 	for _, b := range proposal.Batches {
 		r.Batches = append(r.Batches, LocalCampaignBatchReceipt{ID: b.ID, Key: b.Key, Status: "not_started"})
