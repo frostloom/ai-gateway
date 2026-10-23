@@ -1,0 +1,90 @@
+{
+  "schema": "cash-read-retest-offline-proposal.v1",
+  "campaign_id": "cash-read-retest-20261023",
+  "prepared_revision": "1755edbffbc13c3cf521081a6f6190b505b38720",
+  "runtime_fix_source_revision": "80051a64d9abbd2c9b5bc0d16c0622753ebc3ae5",
+  "case_key": "balance-020/explicit_scope_followup",
+  "case_definition_unchanged": true,
+  "scope": {
+    "cases": 1,
+    "arms": 2,
+    "user_turns": 4
+  },
+  "proposed_limits": {
+    "max_batches": 1,
+    "max_model_calls": 12,
+    "max_model_micro_cny": 405504,
+    "max_jev_calls": 1,
+    "max_jev_micro_usd": 2688,
+    "jev_micro_usd_per_attempt": 2688
+  },
+  "per_model_attempt_reserved_micro_cny": 33792,
+  "model_call_rationale": {
+    "read_and_reply_calls_per_turn": 2,
+    "maximum_existing_reply_repairs_per_turn": 1,
+    "turns_across_both_arms": 4,
+    "selected_hard_attempt_cap": 12,
+    "is_universal_worst_case": false,
+    "notes": "2+1 per turn is a planning envelope, not the loop maximum; extra tool loops or other behavior must stop at the shared hard cap, never raise it automatically."
+  },
+  "original_campaign": {
+    "already_reserved_model_calls": 10,
+    "already_reserved_model_micro_cny": 337920,
+    "already_reserved_jev_calls": 2,
+    "already_reserved_jev_micro_usd": 5376,
+    "already_actual_model_calls": 8,
+    "already_actual_jev_calls": 2,
+    "remaining_original_batches": 4,
+    "remaining_reserved_model_calls": 14,
+    "remaining_reserved_model_micro_cny": 473088,
+    "remaining_jev_calls": 4,
+    "old_limits_not_changed": true
+  },
+  "hypothetical_existing_plus_retest_only": {
+    "reserved_model_calls": 22,
+    "reserved_model_micro_cny": 743424,
+    "reserved_jev_calls": 3,
+    "reserved_jev_micro_usd": 8064
+  },
+  "hypothetical_full_original_plus_retest": {
+    "reserved_model_calls": 36,
+    "reserved_model_micro_cny": 1216512,
+    "reserved_jev_calls": 7,
+    "reserved_jev_micro_usd": 18816,
+    "exceeds_original_model_call_cap": true,
+    "exceeds_original_model_currency_cap": true,
+    "exceeds_original_jev_call_cap": true,
+    "permission_to_expand": false
+  },
+  "human_authorized": false,
+  "allow_paid": false,
+  "ready_for_paid_run": false,
+  "provider_calls": 0,
+  "checkpoint_advanced": false,
+  "standalone_live_entry_available": false,
+  "paid_blockers": [
+    "Explicit authorization for the new scope and budget is absent.",
+    "Existing paired-live authorization validates the original exact six-case campaign and cannot execute this standalone retest.",
+    "New reviewed execution revision/build, separate claim/ledger/output namespace and target/plan-bound billing-risk evidence must be prepared."
+  ],
+  "evidence_status": {
+    "account_tariff_verified": false,
+    "token_envelope_verified": false,
+    "jev_failure_charges_verified": false
+  },
+  "prohibited_actions": [
+    "Do not delete or reuse either consumed original batch claim.",
+    "Do not modify frozen cases, old authorization, journal, report or independent failed review.",
+    "Do not automatically run remaining original batches or paid retries."
+  ],
+  "limitations": [
+    "Declared reservations are not supplier invoices or new tariff evidence.",
+    "This preparation does not demonstrate live model success after the repair.",
+    "Proposal batch-001 is numbering within the new one-case namespace; it is not replay permission for original batch-001 or continuation of original batch-002."
+  ],
+  "artifact_review": {
+    "file": "artifact-review.json",
+    "verdict": "passed",
+    "does_not_authorize_execution": true
+  }
+}
