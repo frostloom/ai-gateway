@@ -1,0 +1,74 @@
+{
+  "schema": "customer-cash-read-recovery-deployment.v1",
+  "date": "2026-10-23",
+  "provenance": {
+    "schema": "customer-cash-recovery-archive-build.v1",
+    "commit": "4c715556d893a5bf8dadcd6a164310692ec2570a",
+    "tree": "e2b9f694417fae15ad99b51144e5d720e4de0fb7",
+    "source_archive_sha256": "b21c7b0d95ba63993dc4ecaf0d8aa6ca2ee1c04f7b58f49d412f1f0884da6564",
+    "binary_sha256": "17a15bc898dedaf74f2108bc99cda81678c35e8804de9a81f86ba9c2b49f8541",
+    "build_flags": "-mod=readonly -trimpath -buildvcs=false",
+    "release": "4c715556d893a5bf8dadcd6a164310692ec2570a-local",
+    "vcs_stamp_present": false,
+    "runtime_contract_sha256": "b92458d1bafd3187a2daa6387b0575e9517da84f66df6602b1945a8d47ba9d8e",
+    "sdkroot": "/Library/Developer/CommandLineTools/SDKs/MacOSX26.5.sdk"
+  },
+  "previous_release": "80051a64d9abbd2c9b5bc0d16c0622753ebc3ae5-local",
+  "previous_binary_sha256": "f94395014a1756db3c862829f0a0721d8ed11f3f440fe80786edd1f70f6d72c7",
+  "runtime_check": {
+    "schema": "customer-cash-recovery-runtime.v1",
+    "release": "4c715556d893a5bf8dadcd6a164310692ec2570a-local",
+    "process_model_config_matches": {
+      "AGENT_LLM_BASE_URL": true,
+      "AGENT_LLM_MODEL": true,
+      "AGENT_LLM_PROTOCOL": true,
+      "AGENT_LLM_API_KEY": true
+    },
+    "pid_changed": true,
+    "running_release_matches": true,
+    "agent_health": 200,
+    "model_calls": 0,
+    "jev_calls": 0,
+    "paid_evaluation_executed": false,
+    "trace_readback_confirmed": true,
+    "gateway_portal": 200,
+    "request_started_at": "2026-10-23T06:27:18.079214+00:00",
+    "invalid_json_http_status": 400,
+    "runtime_contract_sha256": "b92458d1bafd3187a2daa6387b0575e9517da84f66df6602b1945a8d47ba9d8e",
+    "request_trace_id": "b9e7960bed1f5f0661eeca578d3e5c8e",
+    "request_finished_at": "2026-10-23T06:27:18.084051+00:00",
+    "observations": [
+      {
+        "trace_id": "b9e7960bed1f5f0661eeca578d3e5c8e",
+        "name": "agent.turn",
+        "release": "4c715556d893a5bf8dadcd6a164310692ec2570a-local",
+        "http_status": 400,
+        "stage": "request",
+        "llm_calls": 0,
+        "jev_calls": 0
+      }
+    ]
+  },
+  "installation": {
+    "installed_binary_sha256": "17a15bc898dedaf74f2108bc99cda81678c35e8804de9a81f86ba9c2b49f8541",
+    "release_only_env_changes": true,
+    "root_env_unchanged": true,
+    "private_backup_permissions": "0600",
+    "backup_location": ".tmp/paired-live-private/customer-cash-recovery-deploy-20261023/backup",
+    "old_launcher_and_worktree_preserved": true,
+    "restart": "SIGTERM via existing local.ai-gateway launchd group"
+  },
+  "original_paid_evidence_hashes_unchanged": true,
+  "paid_retest_authorized": false,
+  "limitations": [
+    "Malformed JSON probe ends before authentication, session, business tools and inference",
+    "Runtime and telemetry verification are not a paid model-quality retest",
+    "Previously consumed cash-read-retest-20261023 claim remains consumed"
+  ],
+  "private_source_sha256": {
+    "provenance.json": "5c42ee9b918736dc36e37c5dda0b8afe2b4282b549ad0829ef1ee8b0e8e82ede",
+    "before.json": "7720786f83d5534636afa51a6421afbd6720a19afdc8fc79b841b2c305e54700",
+    "install.json": "7396fcaad3c24e41f756e0d6fb77fe27c2e764a3714dc7e290052ee4c9a53e39",
+    "runtime-check.json": "16fcfceb90c8e424cd4fe3f5bc72be5869cf9303e59d36621d68a7a8dbea6100"
+  }
+}
