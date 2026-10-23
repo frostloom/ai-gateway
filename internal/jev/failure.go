@@ -10,6 +10,7 @@ import (
 // Nil UpstreamAttempted means an untyped evaluator supplied no such evidence.
 type Failure struct {
 	Kind              string  `json:"kind"`
+	TransportCause    string  `json:"transport_cause,omitempty"`
 	HTTPStatus        int     `json:"http_status,omitempty"`
 	UpstreamAttempted *bool   `json:"upstream_attempted,omitempty"`
 	LatencyMS         float64 `json:"latency_ms,omitempty"`

@@ -57,3 +57,61 @@ func TestPairJEVFailureSurvivesGuardAndResume(t *testing.T) {
 		t.Fatalf("resume repeated request or lost local stop: %v calls=%d", d, calls)
 	}
 }
+
+// A transport cause must survive the durable budget guard and journal without
+// converting an unknown-send failure to known-unbilled or triggering retries.
+func TestPairJEVTransportCausePersistsWithoutRetry(t *testing.T) {
+	calls := 0
+	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		calls++
+		c, _, err := w.(http.Hijacker).Hijack()
+		if err != nil {
+			t.Error(err)
+			return
+		}
+		c.Close()
+	}))
+	defer s.Close()
+	path := filepath.Join(t.TempDir(), "jev.jsonl")
+	guard, err := openPairJEVGuard(path, "contract", 1, "pinned", func() jev.Evaluator { return jev.NewClient(s.URL, "synthetic", "pinned") })
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = guard.Evaluate(context.Background(), "local", map[string]jev.Question{"a": {Type: jev.QNoul}})
+	d := jev.FailureDetails(err)
+	if d.Kind != "transport" || d.UpstreamAttempted != nil {
+		t.Fatalf("send/charge inference changed: %+v", d)
+	}
+	if err := guard.Close(); err != nil {
+		t.Fatal(err)
+	}
+	raw, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var settle map[string]any
+	for _, line := range strings.Split(strings.TrimSpace(string(raw)), "\n") {
+		var e map[string]any
+		if json.Unmarshal([]byte(line), &e) != nil {
+			t.Fatal("journal")
+		}
+		if e["Kind"] == "settle" {
+			settle = e
+		}
+	}
+	failure, ok := settle["failure"].(map[string]any)
+	if !ok || failure["transport_cause"] != "eof" || settle["Failed"] != true || calls != 1 {
+		t.Fatalf("cause lost or retry: %s calls=%d", raw, calls)
+	}
+	if _, known := failure["upstream_attempted"]; known {
+		t.Fatal("unknown send state changed")
+	}
+	reopened, err := openPairJEVGuard(path, "contract", 1, "pinned", func() jev.Evaluator { return jev.NewClient(s.URL, "synthetic", "pinned") })
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer reopened.Close()
+	if _, err := reopened.Evaluate(context.Background(), "local", map[string]jev.Question{"a": {Type: jev.QNoul}}); err == nil || calls != 1 {
+		t.Fatal("failed attempt reservation reset after reopen")
+	}
+}

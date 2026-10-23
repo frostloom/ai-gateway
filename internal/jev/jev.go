@@ -202,7 +202,7 @@ func (c *Client) Evaluate(ctx context.Context, state any, questions map[string]Q
 		}
 		// Do may fail before sending or after a partial/complete write. Without
 		// response evidence, neither a sent request nor zero spend is known.
-		return nil, &Failure{Kind: kind}
+		return nil, &Failure{Kind: kind, TransportCause: transportFailureCause(err)}
 	}
 	defer func() { io.Copy(io.Discard, resp.Body); resp.Body.Close() }()
 	raw, err := io.ReadAll(io.LimitReader(resp.Body, 1<<20))

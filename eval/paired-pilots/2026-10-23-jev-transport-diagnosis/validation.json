@@ -1,0 +1,65 @@
+{
+  "schema": "jev-transport-diagnosis-validation.v1",
+  "base_commit": "8cedbf63fe512c61326d73428b689dc910deb4b2",
+  "historical_failure_root_cause_confirmed": false,
+  "historical_failure_reproduced": false,
+  "historical_send_or_charge_status": "unknown",
+  "readonly_get_models_requests": 4,
+  "readonly_get_models_all_200": true,
+  "production_transport_configuration_changed": false,
+  "customer_redeployed": false,
+  "model_calls": 0,
+  "jev_calls": 0,
+  "new_diagnostic_field": "transport_cause",
+  "raw_error_text_retained": false,
+  "inference_delivery_inferred": false,
+  "automatic_retries_added": false,
+  "full_go_test": {
+    "command": "SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX26.5.sdk go test ./... -count=1",
+    "exit_code": 0,
+    "passed_packages": 18
+  },
+  "tdd": {
+    "red_observed": "missing transport_cause across typed errors and real local TLS/EOF",
+    "green": "all JEV package tests and guard persistence/reopen tests passed",
+    "fixture_cleanup_hang": "separately diagnosed via stack and fixed with explicit handler release; not a production incident"
+  },
+  "local_fault_cases": [
+    "wrapped_dns",
+    "connection_refused",
+    "connection_reset",
+    "broken_pipe",
+    "tls_certificate",
+    "eof",
+    "unexpected_eof",
+    "timeout",
+    "canceled",
+    "unknown",
+    "real_local_tls",
+    "real_local_eof",
+    "real_local_proxy_refusal",
+    "real_local_request_deadline",
+    "durable_guard_no_retry_after_reopen"
+  ],
+  "independent_review": "no blocking findings",
+  "historical_integrity": {
+    "historical_private_files_checked": 131,
+    "all_unchanged": true,
+    "original_recharge_claim_sha256": "2c9d64b98bd985a24da5aed31c049d63311ebdd7f8dc4c862600ccd77e80dcbc",
+    "model_calls": 0,
+    "jev_calls": 0
+  },
+  "cleanup": {
+    "all_owned_pair_schemas_absent": true,
+    "jev_calls": 0,
+    "model_calls": 0,
+    "read_only": true,
+    "remaining_isolated_pair_schemas": 0,
+    "schema": "cash-recovery-cleanup-inventory.v1"
+  },
+  "limitations": [
+    "GET models does not reproduce the original POST inference request",
+    "Finite typed error causes are not complete network phase telemetry or proof of delivery/charging",
+    "Native Windows Winsock errors may conservatively classify as unknown"
+  ]
+}

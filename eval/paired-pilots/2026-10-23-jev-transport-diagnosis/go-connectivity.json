@@ -1,0 +1,153 @@
+{
+  "configuration_changed": false,
+  "jev_calls": 0,
+  "model_calls": 0,
+  "requests": [
+    {
+      "elapsed_ms": 576.96,
+      "endpoint": "/v1/models",
+      "events": [
+        {
+          "elapsed_ms": 1.627,
+          "event": "connect_start"
+        },
+        {
+          "elapsed_ms": 2.079,
+          "event": "connect_done",
+          "ok": true
+        },
+        {
+          "elapsed_ms": 7.428,
+          "event": "tls_start"
+        },
+        {
+          "alpn": "h2",
+          "elapsed_ms": 287.415,
+          "event": "tls_done",
+          "ok": true,
+          "version": 772
+        },
+        {
+          "elapsed_ms": 287.594,
+          "event": "got_connection",
+          "reused": false
+        },
+        {
+          "elapsed_ms": 287.8,
+          "event": "wrote_request",
+          "ok": true
+        },
+        {
+          "elapsed_ms": 576.724,
+          "event": "first_response_byte"
+        }
+      ],
+      "http2_enabled": true,
+      "http_status": 200,
+      "method": "GET",
+      "protocol": "HTTP/2.0",
+      "request_index": 1,
+      "transport_error": false
+    },
+    {
+      "elapsed_ms": 306.042,
+      "endpoint": "/v1/models",
+      "events": [
+        {
+          "elapsed_ms": 0.03,
+          "event": "got_connection",
+          "reused": true
+        },
+        {
+          "elapsed_ms": 0.116,
+          "event": "wrote_request",
+          "ok": true
+        },
+        {
+          "elapsed_ms": 305.933,
+          "event": "first_response_byte"
+        }
+      ],
+      "http2_enabled": true,
+      "http_status": 200,
+      "method": "GET",
+      "protocol": "HTTP/2.0",
+      "request_index": 2,
+      "transport_error": false
+    },
+    {
+      "elapsed_ms": 527.905,
+      "endpoint": "/v1/models",
+      "events": [
+        {
+          "elapsed_ms": 0.271,
+          "event": "connect_start"
+        },
+        {
+          "elapsed_ms": 0.499,
+          "event": "connect_done",
+          "ok": true
+        },
+        {
+          "elapsed_ms": 0.795,
+          "event": "tls_start"
+        },
+        {
+          "alpn": "",
+          "elapsed_ms": 212.072,
+          "event": "tls_done",
+          "ok": true,
+          "version": 772
+        },
+        {
+          "elapsed_ms": 212.081,
+          "event": "got_connection",
+          "reused": false
+        },
+        {
+          "elapsed_ms": 212.106,
+          "event": "wrote_request",
+          "ok": true
+        },
+        {
+          "elapsed_ms": 527.397,
+          "event": "first_response_byte"
+        }
+      ],
+      "http2_enabled": false,
+      "http_status": 200,
+      "method": "GET",
+      "protocol": "HTTP/1.1",
+      "request_index": 1,
+      "transport_error": false
+    },
+    {
+      "elapsed_ms": 296.922,
+      "endpoint": "/v1/models",
+      "events": [
+        {
+          "elapsed_ms": 0.078,
+          "event": "got_connection",
+          "reused": true
+        },
+        {
+          "elapsed_ms": 0.408,
+          "event": "wrote_request",
+          "ok": true
+        },
+        {
+          "elapsed_ms": 296.827,
+          "event": "first_response_byte"
+        }
+      ],
+      "http2_enabled": false,
+      "http_status": 200,
+      "method": "GET",
+      "protocol": "HTTP/1.1",
+      "request_index": 2,
+      "transport_error": false
+    }
+  ],
+  "schema": "jev-go-readonly-transport.v1",
+  "source_transport": "cmd/paired-live explicitTransport"
+}
