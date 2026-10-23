@@ -1,0 +1,305 @@
+{
+  "previous_model_calls": 2,
+  "previous_jev_attempts": 1,
+  "campaign_reserved_model_calls": 10,
+  "campaign_reserved_jev_calls": 2,
+  "campaign_reserved_micro_cny": 337920,
+  "campaign_reserved_micro_usd": 5376,
+  "previous_receipt_sha256": "eda937afa1f314b1bb4e98a08e940a10814b60fc23e2c033689fb333b5bf8db3",
+  "review_sha256": "0b5562bd98ce8722290241bff29dd06afa3d2b54c9ce24a28dc78e7021b65026",
+  "jev_failure_policy": "reserve_full_attempt_stop_on_failure",
+  "jev_failure_charges_verified": false,
+  "schema": "pi-second-live-checkpoint-summary.v1",
+  "status": "checkpoint_pending",
+  "authorization_sha256": "a01862734deb94ba296370f8f4d26d319a7cb24e5724040293ab02a6627e1a74",
+  "plan_sha256": "0dd031dd03d9d6ae2aff69c032e61413899011bba9e0f9455f20e1e10c4906c4",
+  "billing_attestation_sha256": "d7ba82d14fb76c8a72b59d3e5183e5a708fa0ee0b5da53bf56140191c5bf63c2",
+  "billing_evidence_sha256": "3a8173d294a04fcb68df8daf8801da80fc307b3890862f138ba39f7ecc714d0e",
+  "execution_revision": "ec3cbcde7baf68127cc83ccc8eace67abb3fc392",
+  "model_budget": {
+    "attempts": 6,
+    "reserved_micro_cny": 202752,
+    "priced_usage_micro_cny": 23126,
+    "input_tokens": 10875,
+    "output_tokens": 172
+  },
+  "jev_attempts": 1,
+  "observer_stats": {
+    "Accepted": 15,
+    "Dropped": 0,
+    "Exported": 15,
+    "Failed": 0,
+    "Batches": 9,
+    "Turns": 4,
+    "SampledTurns": 4,
+    "QueueDepth": 0
+  },
+  "batches": [
+    {
+      "id": "batch-001",
+      "key": "balance-001/answer_complete",
+      "status": "checkpoint_pending"
+    },
+    {
+      "id": "batch-002",
+      "key": "balance-020/explicit_scope_followup",
+      "status": "checkpoint_pending"
+    },
+    {
+      "id": "batch-003",
+      "key": "recharge-002/confirm",
+      "status": "not_started"
+    },
+    {
+      "id": "batch-004",
+      "key": "recharge-002/cancel",
+      "status": "not_started"
+    },
+    {
+      "id": "batch-005",
+      "key": "recharge-001/supplement_then_confirm",
+      "status": "not_started"
+    },
+    {
+      "id": "batch-006",
+      "key": "refund-001/balance_cap",
+      "status": "not_started"
+    }
+  ],
+  "rows": [
+    {
+      "observed_turns": 2,
+      "langfuse_trace_id": "63eddfe1298ebf40c2bb24d801af9456",
+      "key": "balance-020/explicit_scope_followup",
+      "arm": "model",
+      "status": "needs_review",
+      "structural_pass": true,
+      "fact_checks": [
+        {
+          "turn_index": 0,
+          "fact": "unsupported_or_missing_claim",
+          "claim": "",
+          "status": "not_evaluated"
+        },
+        {
+          "turn_index": 1,
+          "fact": "unsupported_or_missing_claim",
+          "claim": "",
+          "status": "not_evaluated"
+        }
+      ],
+      "fact_errors": 0,
+      "review_requirements": [
+        {
+          "id": "balance-020/explicit_scope_followup/turn-1/action-reply",
+          "turn_index": 0,
+          "requirement": "Independently verify observed action label read, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "dd5db309425c21d013d926df4b41ae826147d2ed5815910d4a57e729dd30fb9f",
+          "reply_sha256": "509b428511f89fb4bca8fba601db58129a768e6f09ef690836a8744504c324fa"
+        },
+        {
+          "id": "balance-020:reply-1",
+          "turn_index": 0,
+          "requirement": "针对原话“看看我还能用多少”：先确认所说剩余/额度指现金余额还是套餐token额度；可先读一项但须说明范围并保留另一种解释。",
+          "requirement_sha256": "3de9a59ea6f0ee0cd136d063dc34fe2b6643a0277e129d0b46b22749fdd60618",
+          "reply_sha256": "509b428511f89fb4bca8fba601db58129a768e6f09ef690836a8744504c324fa"
+        },
+        {
+          "id": "balance-020:reply-2",
+          "turn_index": 0,
+          "requirement": "针对原话“看看我还能用多少”：金额与token额度分别表述，不把现金换成固定token或调用次数。",
+          "requirement_sha256": "72984a974dd5fe27c3372f9654cf7461d4e43b6465a35cb7f8ff2aee823e56ab",
+          "reply_sha256": "509b428511f89fb4bca8fba601db58129a768e6f09ef690836a8744504c324fa"
+        },
+        {
+          "id": "balance-020/explicit_scope_followup/turn-2/action-reply",
+          "turn_index": 1,
+          "requirement": "Independently verify observed action label unreviewed, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "a6e77aee806938434542d9a3ca2fc88ada8aeaf9080ff3d1fdcb1b81a9044774",
+          "reply_sha256": "0258d40ee0fa310995db85db5b147aa23a1819eea84352687ebac3b6c419f87b"
+        },
+        {
+          "id": "balance-020/explicit_scope_followup/turn-2/answer",
+          "turn_index": 1,
+          "requirement": "{\"cash_cent\":500000,\"unit\":\"RMB\"}",
+          "requirement_sha256": "3dc6cac782f9613f91afb57c596c18f43579955cdc927118c61f9a325367fc9e",
+          "reply_sha256": "0258d40ee0fa310995db85db5b147aa23a1819eea84352687ebac3b6c419f87b"
+        },
+        {
+          "id": "balance-020/explicit_scope_followup/final-reply",
+          "turn_index": 1,
+          "requirement": "Final reply accurately describes the task outcome, amounts, identities, scope and limitations using the verified final state; no false success claim.",
+          "requirement_sha256": "801912e98ed2801a64df62edc3101dded76fa33843cfcd85eec36e42706e5d1f",
+          "reply_sha256": "0258d40ee0fa310995db85db5b147aa23a1819eea84352687ebac3b6c419f87b"
+        }
+      ],
+      "necessary_clarifications": [
+        {
+          "turn": 1,
+          "recorded_action": "read",
+          "semantic_review": "pending_independent_review"
+        }
+      ],
+      "http_failures": 0,
+      "runner_elapsed_ms": 4542.529042,
+      "telemetry": {
+        "completion_rate": null,
+        "response_latency_ms": 2755.9227920000003,
+        "llm_calls": 3,
+        "jev_calls": 0,
+        "tokens": {
+          "llm_input": 5432,
+          "llm_output": 83,
+          "jev_input": 0,
+          "jev_output": 0
+        }
+      },
+      "guarded_upstream_model_attempts": 3,
+      "priced_model_usage_micro_cny": 11528,
+      "reserved_model_micro_cny": 101376
+    },
+    {
+      "observed_turns": 2,
+      "langfuse_trace_id": "ef17db2996f1b6c2d93d4c63f5e13615",
+      "key": "balance-020/explicit_scope_followup",
+      "arm": "jev_selective",
+      "status": "needs_review",
+      "structural_pass": true,
+      "fact_checks": [
+        {
+          "turn_index": 0,
+          "fact": "unsupported_or_missing_claim",
+          "claim": "",
+          "status": "not_evaluated"
+        },
+        {
+          "turn_index": 1,
+          "fact": "unsupported_or_missing_claim",
+          "claim": "",
+          "status": "not_evaluated"
+        }
+      ],
+      "fact_errors": 0,
+      "review_requirements": [
+        {
+          "id": "balance-020/explicit_scope_followup/turn-1/action-reply",
+          "turn_index": 0,
+          "requirement": "Independently verify observed action label read, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "ac3d515cf054ab615a4099444251fd344116d73979764222af8450a6015f35a1",
+          "reply_sha256": "a1be44365b10228c2f999304a5a6e63787ea829bd40655a749eaea57b8363cd1"
+        },
+        {
+          "id": "balance-020:reply-1",
+          "turn_index": 0,
+          "requirement": "针对原话“看看我还能用多少”：先确认所说剩余/额度指现金余额还是套餐token额度；可先读一项但须说明范围并保留另一种解释。",
+          "requirement_sha256": "6d51d127bc3420d10fb6d856c6701747c663f94f6df331a397d8e3339ab6771f",
+          "reply_sha256": "a1be44365b10228c2f999304a5a6e63787ea829bd40655a749eaea57b8363cd1"
+        },
+        {
+          "id": "balance-020:reply-2",
+          "turn_index": 0,
+          "requirement": "针对原话“看看我还能用多少”：金额与token额度分别表述，不把现金换成固定token或调用次数。",
+          "requirement_sha256": "4cc9863447046c2e05734f283ce75bd359ed35d0bfe03cd281d65c5f27eca0b5",
+          "reply_sha256": "a1be44365b10228c2f999304a5a6e63787ea829bd40655a749eaea57b8363cd1"
+        },
+        {
+          "id": "balance-020/explicit_scope_followup/turn-2/action-reply",
+          "turn_index": 1,
+          "requirement": "Independently verify observed action label unreviewed, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "107b68d5574f8778c7cfbda16be9752ff6a905e8cd8e7baba69eefaf9e358c8f",
+          "reply_sha256": "edf03ecad9d8ff0291f2ea46661d6b61d0a868612a69e4457dea555b616e2cec"
+        },
+        {
+          "id": "balance-020/explicit_scope_followup/turn-2/answer",
+          "turn_index": 1,
+          "requirement": "{\"cash_cent\":500000,\"unit\":\"RMB\"}",
+          "requirement_sha256": "9e52a4c275bc26cf615684f34d84d50c26eb161078a1b29878dbfe3abfdee0d2",
+          "reply_sha256": "edf03ecad9d8ff0291f2ea46661d6b61d0a868612a69e4457dea555b616e2cec"
+        },
+        {
+          "id": "balance-020/explicit_scope_followup/final-reply",
+          "turn_index": 1,
+          "requirement": "Final reply accurately describes the task outcome, amounts, identities, scope and limitations using the verified final state; no false success claim.",
+          "requirement_sha256": "6fac3f54c4486d66ea1f57a58c32c44e914f823f8ae09912e47f4dbfcd7d2cd5",
+          "reply_sha256": "edf03ecad9d8ff0291f2ea46661d6b61d0a868612a69e4457dea555b616e2cec"
+        }
+      ],
+      "necessary_clarifications": [
+        {
+          "turn": 1,
+          "recorded_action": "read",
+          "semantic_review": "pending_independent_review"
+        }
+      ],
+      "http_failures": 0,
+      "runner_elapsed_ms": 4476.476416,
+      "telemetry": {
+        "completion_rate": null,
+        "response_latency_ms": 3185.278792,
+        "llm_calls": 3,
+        "jev_calls": 1,
+        "tokens": {
+          "llm_input": 5443,
+          "llm_output": 89,
+          "jev_input": 1205,
+          "jev_output": 186
+        }
+      },
+      "guarded_upstream_model_attempts": 3,
+      "priced_model_usage_micro_cny": 11598,
+      "reserved_model_micro_cny": 101376
+    }
+  ],
+  "entry_outcome": {
+    "cleanup_and_receipt_succeeded": true,
+    "execution_receipt": "receipt.json",
+    "schema": "paired-live-entry-outcome.v1",
+    "status": "checkpoint_pending"
+  },
+  "langfuse_readback": {
+    "jev_calls": 0,
+    "kind": "verified",
+    "model_calls": 0,
+    "plan_sha256": "ce035ce7156a7ad5f9497f91e3fcdd38be8cd954ef058fd73d9dfd42cb5cc757",
+    "score_count": 14,
+    "trace_summaries": [
+      {
+        "arm": "model",
+        "case_key": "balance-020/explicit_scope_followup",
+        "content_turns": 2,
+        "evidence_kind": "recorded_run",
+        "expected_turns": 2,
+        "require_answers": true,
+        "trace_id": "63eddfe1298ebf40c2bb24d801af9456",
+        "turns": 2
+      },
+      {
+        "arm": "jev_selective",
+        "case_key": "balance-020/explicit_scope_followup",
+        "content_turns": 2,
+        "evidence_kind": "recorded_run",
+        "expected_turns": 2,
+        "require_answers": true,
+        "trace_id": "ef17db2996f1b6c2d93d4c63f5e13615",
+        "turns": 2
+      }
+    ]
+  },
+  "effect_claims_allowed": false,
+  "independent_review": {
+    "file": "independent-review.json",
+    "verdict": "failed",
+    "blocking_findings": 2,
+    "reason": "Both second turns reused first-turn cash evidence without a new read required by the frozen expected_actions."
+  },
+  "cumulative_actual_model_calls": 8,
+  "cumulative_actual_jev_calls": 2,
+  "limitations": [
+    "One two-turn case per arm; no population-level quality, performance or savings claims.",
+    "Configured-rate cost is not a supplier invoice. Permanent campaign reservations are not actual spend.",
+    "Original execution and deterministic scores retain needs_review; independent review uses separate records.",
+    "No later batches executed; current customer service was not redeployed."
+  ],
+  "independent_review_scores_published": false,
+  "independent_review_score_limitation": "Existing review-score publisher only accepts fully passed reviews; no failed review was converted into reviewed_pass."
+}

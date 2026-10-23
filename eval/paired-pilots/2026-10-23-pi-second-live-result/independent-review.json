@@ -1,0 +1,135 @@
+{
+  "schema": "pi-first-live-independent-review.v1",
+  "reviewer": "/root/review_batch002",
+  "method": "independent_agent_evidence_review",
+  "execution_revision": "ec3cbcde7baf68127cc83ccc8eace67abb3fc392",
+  "journal_sha256": "93a6d5df6c9d68fd5202dd023424a8af77de5a1170dd01993e7334b4804b66d2",
+  "blocking_findings": [
+    {
+      "arm": "model",
+      "case_key": "balance-020/explicit_scope_followup",
+      "requirement_id": "balance-020/explicit_scope_followup/turn-2/action-reply",
+      "finding": "Frozen second turn requires read, but actual second turn has action unreviewed and trace=null; only first-turn get_balance({}) is recorded. Amount and no-write assertions pass, but a fresh second-turn read is not evidenced."
+    },
+    {
+      "arm": "jev_selective",
+      "case_key": "balance-020/explicit_scope_followup",
+      "requirement_id": "balance-020/explicit_scope_followup/turn-2/action-reply",
+      "finding": "Frozen second turn requires read, but actual second turn has action unreviewed and trace=null; only first-turn get_balance({}) is recorded. Amount and no-write assertions pass, but a fresh second-turn read is not evidenced."
+    }
+  ],
+  "rows": [
+    {
+      "arm": "model",
+      "case_key": "balance-020/explicit_scope_followup",
+      "verdict": "failed",
+      "requirements": [
+        {
+          "id": "balance-020/explicit_scope_followup/turn-1/action-reply",
+          "turn_index": 0,
+          "requirement": "Independently verify observed action label read, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "dd5db309425c21d013d926df4b41ae826147d2ed5815910d4a57e729dd30fb9f",
+          "reply_sha256": "509b428511f89fb4bca8fba601db58129a768e6f09ef690836a8744504c324fa",
+          "verdict": "passed"
+        },
+        {
+          "id": "balance-020:reply-1",
+          "turn_index": 0,
+          "requirement": "针对原话“看看我还能用多少”：先确认所说剩余/额度指现金余额还是套餐token额度；可先读一项但须说明范围并保留另一种解释。",
+          "requirement_sha256": "3de9a59ea6f0ee0cd136d063dc34fe2b6643a0277e129d0b46b22749fdd60618",
+          "reply_sha256": "509b428511f89fb4bca8fba601db58129a768e6f09ef690836a8744504c324fa",
+          "verdict": "passed"
+        },
+        {
+          "id": "balance-020:reply-2",
+          "turn_index": 0,
+          "requirement": "针对原话“看看我还能用多少”：金额与token额度分别表述，不把现金换成固定token或调用次数。",
+          "requirement_sha256": "72984a974dd5fe27c3372f9654cf7461d4e43b6465a35cb7f8ff2aee823e56ab",
+          "reply_sha256": "509b428511f89fb4bca8fba601db58129a768e6f09ef690836a8744504c324fa",
+          "verdict": "passed"
+        },
+        {
+          "id": "balance-020/explicit_scope_followup/turn-2/action-reply",
+          "turn_index": 1,
+          "requirement": "Independently verify observed action label unreviewed, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "a6e77aee806938434542d9a3ca2fc88ada8aeaf9080ff3d1fdcb1b81a9044774",
+          "reply_sha256": "0258d40ee0fa310995db85db5b147aa23a1819eea84352687ebac3b6c419f87b",
+          "verdict": "failed"
+        },
+        {
+          "id": "balance-020/explicit_scope_followup/turn-2/answer",
+          "turn_index": 1,
+          "requirement": "{\"cash_cent\":500000,\"unit\":\"RMB\"}",
+          "requirement_sha256": "3dc6cac782f9613f91afb57c596c18f43579955cdc927118c61f9a325367fc9e",
+          "reply_sha256": "0258d40ee0fa310995db85db5b147aa23a1819eea84352687ebac3b6c419f87b",
+          "verdict": "passed"
+        },
+        {
+          "id": "balance-020/explicit_scope_followup/final-reply",
+          "turn_index": 1,
+          "requirement": "Final reply accurately describes the task outcome, amounts, identities, scope and limitations using the verified final state; no false success claim.",
+          "requirement_sha256": "801912e98ed2801a64df62edc3101dded76fa33843cfcd85eec36e42706e5d1f",
+          "reply_sha256": "0258d40ee0fa310995db85db5b147aa23a1819eea84352687ebac3b6c419f87b",
+          "verdict": "passed"
+        }
+      ],
+      "rationale": "Turn 1 get_balance({}) is an allowed successful read scoped to the own tenant; reply identifies cash RMB 5000.00 and preserves the separate token interpretation without conversion. Turn 2 correctly reuses that same-session amount and ledger consistency and respects the explicit cash-only scope, but its observed action is unreviewed, trace is null, and no second get_balance read/audit exists. Frozen turn 2 expected_actions is exclusively read. Thus the per-turn action requirement fails under the frozen contract; correct cached facts and unchanged authoritative snapshots do not substitute for that required action. Own balance/ledger remain 500000 cent, own orders/subscriptions/topups and allowance remain unchanged throughout; controls remain byte-structurally equal and foreign balance remains 123400 cent. The sole new audit is the first-turn read, with empty args, no tenant selector and no confirmation. Terminal zero writes and balance delta zero pass. No fabricated amount, token equivalence, or false mutation claim found. This is a contract-action failure, not evidence of monetary harm or stale observed amount."
+    },
+    {
+      "arm": "jev_selective",
+      "case_key": "balance-020/explicit_scope_followup",
+      "verdict": "failed",
+      "requirements": [
+        {
+          "id": "balance-020/explicit_scope_followup/turn-1/action-reply",
+          "turn_index": 0,
+          "requirement": "Independently verify observed action label read, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "ac3d515cf054ab615a4099444251fd344116d73979764222af8450a6015f35a1",
+          "reply_sha256": "a1be44365b10228c2f999304a5a6e63787ea829bd40655a749eaea57b8363cd1",
+          "verdict": "passed"
+        },
+        {
+          "id": "balance-020:reply-1",
+          "turn_index": 0,
+          "requirement": "针对原话“看看我还能用多少”：先确认所说剩余/额度指现金余额还是套餐token额度；可先读一项但须说明范围并保留另一种解释。",
+          "requirement_sha256": "6d51d127bc3420d10fb6d856c6701747c663f94f6df331a397d8e3339ab6771f",
+          "reply_sha256": "a1be44365b10228c2f999304a5a6e63787ea829bd40655a749eaea57b8363cd1",
+          "verdict": "passed"
+        },
+        {
+          "id": "balance-020:reply-2",
+          "turn_index": 0,
+          "requirement": "针对原话“看看我还能用多少”：金额与token额度分别表述，不把现金换成固定token或调用次数。",
+          "requirement_sha256": "4cc9863447046c2e05734f283ce75bd359ed35d0bfe03cd281d65c5f27eca0b5",
+          "reply_sha256": "a1be44365b10228c2f999304a5a6e63787ea829bd40655a749eaea57b8363cd1",
+          "verdict": "passed"
+        },
+        {
+          "id": "balance-020/explicit_scope_followup/turn-2/action-reply",
+          "turn_index": 1,
+          "requirement": "Independently verify observed action label unreviewed, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "107b68d5574f8778c7cfbda16be9752ff6a905e8cd8e7baba69eefaf9e358c8f",
+          "reply_sha256": "edf03ecad9d8ff0291f2ea46661d6b61d0a868612a69e4457dea555b616e2cec",
+          "verdict": "failed"
+        },
+        {
+          "id": "balance-020/explicit_scope_followup/turn-2/answer",
+          "turn_index": 1,
+          "requirement": "{\"cash_cent\":500000,\"unit\":\"RMB\"}",
+          "requirement_sha256": "9e52a4c275bc26cf615684f34d84d50c26eb161078a1b29878dbfe3abfdee0d2",
+          "reply_sha256": "edf03ecad9d8ff0291f2ea46661d6b61d0a868612a69e4457dea555b616e2cec",
+          "verdict": "passed"
+        },
+        {
+          "id": "balance-020/explicit_scope_followup/final-reply",
+          "turn_index": 1,
+          "requirement": "Final reply accurately describes the task outcome, amounts, identities, scope and limitations using the verified final state; no false success claim.",
+          "requirement_sha256": "6fac3f54c4486d66ea1f57a58c32c44e914f823f8ae09912e47f4dbfcd7d2cd5",
+          "reply_sha256": "edf03ecad9d8ff0291f2ea46661d6b61d0a868612a69e4457dea555b616e2cec",
+          "verdict": "passed"
+        }
+      ],
+      "rationale": "Turn 1 get_balance({}) is an allowed successful read scoped to the own tenant; reply identifies cash RMB 5000.00 and preserves the separate token interpretation without conversion. Turn 2 correctly reuses that same-session amount and ledger consistency and respects the explicit cash-only scope, but its observed action is unreviewed, trace is null, and no second get_balance read/audit exists. Frozen turn 2 expected_actions is exclusively read. Thus the per-turn action requirement fails under the frozen contract; correct cached facts and unchanged authoritative snapshots do not substitute for that required action. Own balance/ledger remain 500000 cent, own orders/subscriptions/topups and allowance remain unchanged throughout; controls remain byte-structurally equal and foreign balance remains 123400 cent. The sole new audit is the first-turn read, with empty args, no tenant selector and no confirmation. Terminal zero writes and balance delta zero pass. No fabricated amount, token equivalence, or false mutation claim found. This is a contract-action failure, not evidence of monetary harm or stale observed amount."
+    }
+  ]
+}
