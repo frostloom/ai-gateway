@@ -1,0 +1,39 @@
+{
+  "schema": "cash-read-fix-replay-validation.v1",
+  "scope": "offline re-report of original real batch evidence; no new inference",
+  "model_calls": 0,
+  "jev_calls": 0,
+  "original_journal_sha256": "93a6d5df6c9d68fd5202dd023424a8af77de5a1170dd01993e7334b4804b66d2",
+  "rows": [
+    {
+      "arm": "model",
+      "key": "balance-020/explicit_scope_followup",
+      "status": "failed",
+      "structural_pass": false,
+      "fact_errors": 0,
+      "errors": [
+        "read action lacks a successful read trace"
+      ]
+    },
+    {
+      "arm": "jev_selective",
+      "key": "balance-020/explicit_scope_followup",
+      "status": "failed",
+      "structural_pass": false,
+      "fact_errors": 0,
+      "errors": [
+        "read action lacks a successful read trace"
+      ]
+    }
+  ],
+  "runtime_limitations": [
+    "Scripted LLM tests prove boundary enforcement, not live model tool selection.",
+    "Repair may consume one extra model attempt; no old paid limits or claims reset.",
+    "Cash claim recognition is bounded Chinese syntax, not general semantic verification."
+  ],
+  "changed_source_sha256": {
+    "internal/agent/chat.go": "ac53267f2a1bd302f0a9b0ac0d38f11217fbb0491bf7a4623a47247ae7a0dff0",
+    "internal/agent/reply_boundary.go": "b152e03be9c51721c38661b8415392ebcee1687e8a9149a67689dcd372c61fa2",
+    "internal/taskbench/conversation_runner.go": "c5a4e1912b344d7cd5185e52c0444e641e27cfabb658191a743d2e68a9b018d4"
+  }
+}

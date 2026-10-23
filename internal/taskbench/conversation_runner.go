@@ -139,7 +139,7 @@ func RunConversation(ctx context.Context, c ConversationCase, d ConversationDriv
 				fail(fmt.Errorf("turn %d unauthorized tool %s", i+1, tr.Tool))
 			}
 		}
-		if obs.Action == "read" && reads == 0 {
+		if (obs.Action == "read" || (len(rule.ExpectedActions) == 1 && rule.ExpectedActions[0] == "read")) && reads == 0 {
 			fail(fmt.Errorf("read action lacks a successful read trace"))
 		}
 		if (rule.PendingRequired || obs.Action == "preview") && (previews != 1 || !obs.Turn.Response.Pending) {

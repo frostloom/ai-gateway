@@ -95,3 +95,23 @@ func TestConversationHandlerPreservesFailureAndPendingOracle(t *testing.T) {
 		t.Fatal("nil oracle accepted")
 	}
 }
+
+func TestConversationRequiredReadCannotRemainUnreviewed(t *testing.T) {
+	f, state := conversationFixture()
+	for _, allowClarify := range []bool{false, true} {
+		actions := []string{"read"}
+		if allowClarify {
+			actions = append(actions, "clarify")
+		}
+		c := ConversationCase{SourceID: "balance-required", Scenario: ConversationScenario{ID: "read", Profile: "no_subscription", MeasurementScope: "complete_task", FullTaskMetricEligible: true, Turns: []ConversationRule{{User: "查当前余额", ExpectedActions: actions, AllowedTools: []string{"get_balance"}}}, Terminal: map[string]any{"business_state_unchanged": true}}}
+		d := &scriptedConversation{f: f, initial: state, steps: []ConversationObservation{{Action: "unreviewed", State: state, Turn: Turn{Status: 200, Response: Response{SessionID: "read-session", Reply: "当前现金余额 ¥5000.00。"}}}}}
+		r := RunConversation(context.Background(), c, d)
+		if allowClarify {
+			if !r.StructuralPass || r.Status != "needs_review" {
+				t.Fatalf("clarification alternatives lost review gate: %+v", r)
+			}
+		} else if r.StructuralPass {
+			t.Fatal("required successful read accepted without trace")
+		}
+	}
+}

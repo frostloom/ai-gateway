@@ -399,7 +399,12 @@ func (h *Handler) llmLoop(ctx context.Context, sessionID string, tenantID uint64
 			return "", trace, err
 		}
 		if len(msg.ToolCalls) == 0 {
-			if reason := replyRepairReason(msg.Content, lastUserMsg(ses), ses.PendingAction); reason != "" {
+			reason := replyRepairReason(msg.Content, lastUserMsg(ses), ses.PendingAction)
+			missingCashRead := cashBalanceClaimNeedsRead(msg.Content, trace)
+			if missingCashRead {
+				reason = "本轮尚无成功的现金余额读取，不能沿用历史金额。需要现金余额时调用余额读工具，拿到本轮结果后再回答；无法读取就说明限制，不输出余额数值。"
+			}
+			if reason != "" {
 				if !repaired && iter < 4 {
 					repaired, repair = true, reason
 					if stats := turnTelemetry(ctx); stats != nil {
@@ -407,7 +412,11 @@ func (h *Handler) llmLoop(ctx context.Context, sessionID string, tenantID uint64
 					}
 					continue
 				}
-				msg.Content = "目前没有生成可确认的操作，也没有执行改动。请核对办理事项及参数后重试。"
+				if missingCashRead {
+					msg.Content = "本轮未能核实当前现金余额，请稍后重新查询。"
+				} else {
+					msg.Content = "目前没有生成可确认的操作，也没有执行改动。请核对办理事项及参数后重试。"
+				}
 			}
 			ses.History = append(ses.History, *msg)
 			return msg.Content, trace, nil
@@ -528,6 +537,11 @@ func (h *Handler) llmLoop(ctx context.Context, sessionID string, tenantID uint64
 			// tool_call_id 没有完整配对，下一轮 LLM 校验会 400）。等确认时单独处理。
 			pendingReply = preview + "\n\n请回复「确认」执行，或「取消」放弃。"
 			explanation := sanitizeReply(msg.Content)
+			if cashBalanceClaimNeedsRead(explanation, trace) {
+				// A preview already exists: preserve its confirmation binding;
+				// do not call the model again or repeat the proposed operation.
+				explanation = "本轮未能核实当前现金余额。"
+			}
 			// The shared preview renderer must not drop an accompanying refund
 			// question just because the model emitted only a cancel tool call.
 			if name == "cancel_subscription" && consultationPatterns["refund_recharge"].MatchString(strings.TrimRight(strings.ToLower(lastUserMsg(ses)), "。？?!！. ")) &&

@@ -63,3 +63,40 @@ func writeProposalClarification(name, user string) string {
 	}
 	return ""
 }
+
+// A bounded Chinese cash-amount consistency check, not a semantic intent
+// classifier. Historical tool results never establish this turn's authority.
+var cashBalanceAmount = regexp.MustCompile(`余额[^。！？\n；;]{0,16}(?:[¥￥]\s*[0-9]|[0-9][0-9,.]*\s*元)`)
+
+var cashExampleScope = regexp.MustCompile(`例如|比如|假设|举例|您说的|你说的|引用`)
+var cashHistoryScope = regexp.MustCompile(`上轮|上次|之前|此前|历史|当时|刚才|先前|曾经`)
+var cashCurrentScope = regexp.MustCompile(`当前|现在|目前|最新`)
+
+func cashBalanceClaimNeedsRead(reply string, trace []traceItem) bool {
+	hasClaim := false
+	for _, clause := range strings.FieldsFunc(reply, func(r rune) bool { return strings.ContainsRune("。！？\n；;，", r) }) {
+		loc := cashBalanceAmount.FindStringIndex(clause)
+		if loc == nil {
+			continue
+		}
+		prefix := clause[:loc[0]]
+		if cashExampleScope.MatchString(prefix) {
+			continue
+		}
+		historical := cashHistoryScope.FindStringIndex(prefix)
+		if historical != nil && !cashCurrentScope.MatchString(prefix[historical[1]:]) {
+			continue
+		}
+		hasClaim = true
+		break
+	}
+	if !hasClaim {
+		return false
+	}
+	for _, tr := range trace {
+		if tr.Tool == "get_balance" && tr.Phase == "read" && tr.Outcome == "success" {
+			return false
+		}
+	}
+	return true
+}
