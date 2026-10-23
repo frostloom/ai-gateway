@@ -1,0 +1,29 @@
+{
+  "schema": "recharge-boundary-fix-validation.v1",
+  "go_test_packages_passed": 18,
+  "full_go_log_sha256": "c9374f7c8ef4f82eae100f27817d0b9da2b063361fb92836425ff445ca0497bd",
+  "direct_handler_red_log_sha256": "92b53e791090217b7a3c13945ba33950ec606f9b8ec4469ab8821572e3944e8d",
+  "direct_handler_green_log_sha256": "f7e7775195277ba20312cadcf3d83940cc5d33352469d4ecc2d69b0da1ab2ea2",
+  "historical_scope_red_log_sha256": "8c97b054fa71b2c8c14536aa99d4527ba21d7755ec197e83a3846ab8397281e1",
+  "historical_scope_green_log_sha256": "ab8b5bc92d2ce0d28e9151ea652c48622dd426bc769481ce1681030202cb1317",
+  "cli_green_log_sha256": "1ccd96432e6cd8c1b2069e056dcc5f38e17850d8237e17d2290ba346e6a44413",
+  "end_to_end_green_log_sha256": "e5722402bf4aefd4aa801713a80f25fc1d777a13bd8fbeef0a84b7c954a4eda7",
+  "independent_reviewer": "/root/review_recharge_boundary_fix",
+  "independent_review": "No blocking important findings. Static review, no shared DB tests or paid calls by reviewer.",
+  "boundary_regressions_passed": true,
+  "sustained_false_completion_remains_honest_task_failure": true,
+  "historical_v2_contract_readable_but_blocked": true,
+  "old_private_evidence_files_unchanged": 71,
+  "cleanup_readonly": {
+    "all_owned_pair_schemas_absent": true,
+    "jev_calls": 0,
+    "model_calls": 0,
+    "read_only": true,
+    "remaining_isolated_pair_schemas": 0,
+    "schema": "cash-recovery-cleanup-inventory.v1"
+  },
+  "real_model_calls": 0,
+  "real_jev_calls": 0,
+  "deployed": false,
+  "new_paid_authorization": false
+}

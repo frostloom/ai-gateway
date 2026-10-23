@@ -93,11 +93,10 @@ func CheckAuthorizedRetest(authRaw, planRaw, billingRaw, evidenceRaw []byte) (Au
 		return fail()
 	}
 	wantIdentity := cashRetestPlanIdentity{}
+	contractMismatch := false
 	if scope.RuntimeContractSHA != "" {
 		wantIdentity = cashRetestPlanIdentity{scope.ID, scope.CustomerRevision, scope.RuntimeContractSHA}
-		if (&agent.Handler{}).EvaluationRuntimeMetadata().ContractSHA256 != scope.RuntimeContractSHA {
-			return fail()
-		}
+		contractMismatch = (&agent.Handler{}).EvaluationRuntimeMetadata().ContractSHA256 != scope.RuntimeContractSHA
 	}
 	if (cashRetestPlanIdentity{p.plan.CampaignID, p.plan.CustomerRevision, p.plan.RuntimeContractSHA}) != wantIdentity {
 		return fail()
@@ -119,7 +118,11 @@ func CheckAuthorizedRetest(authRaw, planRaw, billingRaw, evidenceRaw []byte) (Au
 	if !a.Approved {
 		p.blockers = append(p.blockers, "retest_not_authorized")
 	}
-	return p.checkBilling(billingRaw, evidenceRaw, true)
+	checked, err := p.checkBilling(billingRaw, evidenceRaw, true)
+	if err == nil && contractMismatch {
+		checked.blockers = append(checked.blockers, "runtime_contract_mismatch")
+	}
+	return checked, err
 }
 
 // The CLI must durably claim the fixed identity before constructing fixtures.

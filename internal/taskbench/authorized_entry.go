@@ -80,7 +80,7 @@ func (p AuthorizedPilot) ModelSettings() PairModelSettings { return p.model }
 // ValidateFrozenInputs performs only local immutable archive and preparation
 // checks. It needs no credentials, database, observer or provider transport.
 func (p AuthorizedPilot) ValidateFrozenInputs(definitions, profiles, revision string) error {
-	if !p.valid || (p.IsRetest() && revision != p.retestRevision) {
+	if !p.valid || hasString(p.blockers, "runtime_contract_mismatch") || (p.IsRetest() && revision != p.retestRevision) {
 		return fmt.Errorf("validated authorization required")
 	}
 	source, err := LoadConversations(definitions)

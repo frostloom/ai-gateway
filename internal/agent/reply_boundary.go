@@ -6,6 +6,10 @@ import (
 )
 
 var confirmationInvitation = regexp.MustCompile(`(?:回复|请确认|确认即可|确认就|确认后我|确认的话我|确认的话.{0,6}办理)`)
+
+// Finite current-application forms, not a semantic/history completion judge.
+var rechargeApplication = regexp.MustCompile(`^(?:请\s*)?(?:(?:帮我|给我|替我|我要|我想|现在|立即)\s*)?(?:充值|充钱|充)\s*(?:[0-9]+(?:\.[0-9]+)?\s*(?:元|块|人民币|rmb|yuan)?)?\s*[。.!！]?$`)
+var rechargeCompletion = regexp.MustCompile(`^\s*(?:已)?充值成功(?:[：:。！!，,]|$)`)
 var explicitMoney = regexp.MustCompile(`(?:\d+\s*(?:元|块|rmb|yuan)|(?:充值|退款|退|充)\s*\d+)`)
 var asksMoney = regexp.MustCompile(`^(?:请问|请告诉|请提供|麻烦|您|你).{0,16}(?:充|退).{0,12}(?:多少|金额)`)
 var consultationPatterns = map[string]*regexp.Regexp{
@@ -29,6 +33,9 @@ var explicitApplicationPatterns = map[string]*regexp.Regexp{
 // is limited to an explicit own-cash read. Both arms share these bounds and
 // count actual upstream calls/usage. Do not replace necessary questions.
 func replyRepairReason(reply, user string, pending *pendingAction) string {
+	if rechargeApplication.MatchString(strings.ToLower(strings.TrimSpace(user))) && rechargeCompletion.MatchString(reply) {
+		return "本轮尚未执行已确认的充值，不能声称充值成功或到账。明确申请应先调用充值工具生成真实预览，等待用户确认后才执行；不能生成预览就说明未执行。"
+	}
 	if pending == nil && strings.Contains(reply, "确认") && confirmationInvitation.MatchString(reply) {
 		return "没有待确认操作，不能要求确认执行。明确申请且参数齐全则调用对应写工具生成真实预览；仅咨询则回答方法。"
 	}

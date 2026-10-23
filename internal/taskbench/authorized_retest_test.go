@@ -93,17 +93,13 @@ func TestRetestScopeConsentAndBindings(t *testing.T) {
 }
 
 func TestRetestLocalHandlerOneCaseAndFailureStop(t *testing.T) {
-	for _, mode := range []string{"complete", "stale-followup", "recovery-v2", "provider-failure", "jev-failure"} {
+	for _, mode := range []string{"complete", "stale-followup", "provider-failure", "jev-failure"} {
 		t.Run(mode, func(t *testing.T) {
 			failure := mode == "provider-failure"
-			complete := mode == "complete" || mode == "stale-followup" || mode == "recovery-v2"
+			complete := mode == "complete" || mode == "stale-followup"
 			o := localCampaignOptions(t)
 			a, p, b, e := retestInputs(t)
 			wantSchema, wantID := "authorized-cash-retest.v1", CashReadRetestID
-			if mode == "recovery-v2" {
-				a, p, b, e = recoveryRetestInputs(t)
-				wantSchema, wantID = "authorized-cash-retest.v2", CashReadRecoveryRetestID
-			}
 			pilot, err := CheckAuthorizedRetest(a, p, b, e)
 			if err != nil {
 				t.Fatal(err)
@@ -144,7 +140,7 @@ func TestRetestLocalHandlerOneCaseAndFailureStop(t *testing.T) {
 				if len(body.Messages) > 0 && body.Messages[len(body.Messages)-1].Role == "tool" {
 					msg = map[string]any{"role": "assistant", "content": "当前现金余额 ¥5000.00，非套餐token额度。"}
 				}
-				if (mode == "stale-followup" || mode == "recovery-v2") && len(body.Messages) > 0 && body.Messages[len(body.Messages)-1].Role == "user" && strings.HasPrefix(body.Messages[len(body.Messages)-1].Content, "我只查询本人账户") {
+				if (mode == "stale-followup") && len(body.Messages) > 0 && body.Messages[len(body.Messages)-1].Role == "user" && strings.HasPrefix(body.Messages[len(body.Messages)-1].Content, "我只查询本人账户") {
 					msg = map[string]any{"role": "assistant", "content": "当前现金余额为 ¥5000.00。"}
 				}
 				raw, _ := json.Marshal(map[string]any{"choices": []any{map[string]any{"message": msg}}, "usage": map[string]int{"prompt_tokens": 100, "completion_tokens": 8}})
@@ -169,11 +165,8 @@ func TestRetestLocalHandlerOneCaseAndFailureStop(t *testing.T) {
 				}
 			}
 
-			if (mode == "stale-followup" || mode == "recovery-v2") && (r.ModelState.Calls != 8 || r.JEVAttempts != 1) {
+			if (mode == "stale-followup") && (r.ModelState.Calls != 8 || r.JEVAttempts != 1) {
 				t.Fatal("recovery added provider calls")
-			}
-			if mode == "recovery-v2" && (r.PriorJournalSHA != "7d48f9caff31099149a06a3b14e3e9a5367b4a4b12067537130bba6453a9f754" || r.PriorReviewSHA != "785834102ecae9104df8e33239a7089ace5503cc8d33c5a6850862e77f24b6f6" || r.CustomerRevision != "4c715556d893a5bf8dadcd6a164310692ec2570a" || r.RuntimeContractSHA != "b92458d1bafd3187a2daa6387b0575e9517da84f66df6602b1945a8d47ba9d8e") {
-				t.Fatal("receipt lost recovery bindings")
 			}
 			if mode == "jev-failure" && r.JEVAttempts != 1 {
 				t.Fatal("JEV failure retried or uncounted")

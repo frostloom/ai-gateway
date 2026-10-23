@@ -1,6 +1,7 @@
 package taskbench
 
 import (
+	"context"
 	"encoding/json"
 	"os"
 	"path/filepath"
@@ -29,11 +30,11 @@ func recoveryRetestInputs(t *testing.T) ([]byte, []byte, []byte, []byte) {
 	return a, p, b, e
 }
 
-func TestRecoveryRetestExactNewScope(t *testing.T) {
+func TestRecoveryRetestHistoricalScopeBindings(t *testing.T) {
 	a, p, b, e := recoveryRetestInputs(t)
 	pilot, err := CheckAuthorizedRetest(a, p, b, e)
-	if err != nil || !pilot.Ready() || pilot.CampaignID() != "cash-read-recovery-retest-20261023" {
-		t.Fatalf("v2 rejected: %v", err)
+	if err != nil || pilot.Ready() || !hasString(pilot.Blockers(), "runtime_contract_mismatch") || pilot.CampaignID() != "cash-read-recovery-retest-20261023" {
+		t.Fatalf("historical v2 unreadable or executable: %v", err)
 	}
 	unapproved, err := CheckAuthorizedRetest(alteredJSON(a, "human_authorized", false), p, b, e)
 	if err != nil || unapproved.Ready() || unapproved.HumanAuthorized() {
@@ -94,5 +95,26 @@ func TestRecoveryRetestReferencesActualFailedEvidence(t *testing.T) {
 	json.Unmarshal(raw, &review)
 	if auth.PriorReviewSHA != conversationHash(raw) || auth.PriorJournalSHA != review.JournalSHA {
 		t.Fatal("scope not bound to actual latest failed review")
+	}
+}
+
+func TestHistoricalRecoveryScopeRemainsReadableButCannotExecute(t *testing.T) {
+	a, p, b, e := recoveryRetestInputs(t)
+	if _, err := CheckAuthorizedRetest(a, p, b, []byte("tampered evidence")); err == nil {
+		t.Fatal("runtime mismatch bypassed billing evidence binding")
+	}
+	pilot, err := CheckAuthorizedRetest(a, p, b, e)
+	if err != nil || pilot.Ready() || !pilot.HumanAuthorized() || !hasString(pilot.Blockers(), "runtime_contract_mismatch") {
+		t.Fatalf("historical scope unreadable or executable: blockers=%v err=%v", pilot.Blockers(), err)
+	}
+	if pilot.ValidateFrozenInputs("../../eval/task-definitions/2026-10-12-full-dev-v1", "../../eval/runtime-profiles/2026-10-13-six-profiles-v1", strings.Repeat("a", 40)) == nil {
+		t.Fatal("old contract frozen execution validated")
+	}
+	dir := filepath.Join(t.TempDir(), "must-not-exist")
+	if _, err := RunAuthorizedRetest(context.Background(), dir, AuthorizedFirstBatchOptions{Pilot: pilot}); err == nil {
+		t.Fatal("historical scope executed")
+	}
+	if _, err := os.Stat(dir); !os.IsNotExist(err) {
+		t.Fatal("historical scope created output")
 	}
 }

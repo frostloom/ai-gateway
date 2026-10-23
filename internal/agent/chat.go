@@ -303,6 +303,14 @@ func (h *Handler) process(ctx context.Context, sessionID string, tenantID uint64
 		// other：保留挂起状态，继续正常对话（LLM 会提醒还有待确认操作）
 	}
 
+	// A bare confirmation cannot authorize or create a new proposal without
+	// pending state. Complete phrase matching keeps compound applications routed.
+	if ses.PendingAction == nil && classifyConfirmation(userMsg) == 1 {
+		reply := "当前没有待确认操作，没有执行任何改动。若需办理，请重新提出申请。"
+		ses.History = append(ses.History, Message{Role: "assistant", Content: reply})
+		return reply, nil, nil
+	}
+
 	// P3 每轮统一前置判定：一次 JEV 请求拿到「意图 + 合法性 + 风险」及置信度，
 	// 再按分层策略决定后续 —— 高置信高风险直接拦下（不调 LLM、不碰工具），
 	// 中等可疑放行但警告+强制确认，正常则注入意图预判提示帮 LLM 一次选对工具。
@@ -543,6 +551,9 @@ func (h *Handler) llmLoop(ctx context.Context, sessionID string, tenantID uint64
 			// tool_call_id 没有完整配对，下一轮 LLM 校验会 400）。等确认时单独处理。
 			pendingReply = preview + "\n\n请回复「确认」执行，或「取消」放弃。"
 			explanation := sanitizeReply(msg.Content)
+			if name == "recharge" && rechargeCompletion.MatchString(explanation) {
+				explanation = "本次仅生成充值预览，尚未执行。"
+			}
 			if cashBalanceClaimNeedsRead(explanation, trace) {
 				// A preview already exists: preserve its confirmation binding;
 				// do not call the model again or repeat the proposed operation.

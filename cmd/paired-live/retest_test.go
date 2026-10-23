@@ -126,8 +126,15 @@ func syntheticRetestPilotAt(t *testing.T, base, revision string, reformat bool) 
 	ar, _ := json.Marshal(a)
 	br, _ := json.Marshal(b)
 	p, err := taskbench.CheckAuthorizedRetest(ar, plan, br, evidence)
-	if err != nil || !p.Ready() {
+	if err != nil {
 		t.Fatalf("synthetic scope %v", err)
+	}
+	if p.CampaignID() == taskbench.CashReadRecoveryRetestID {
+		if p.Ready() || !strings.Contains(strings.Join(p.Blockers(), ","), "runtime_contract_mismatch") {
+			t.Fatal("historical contract accepted execution")
+		}
+	} else if !p.Ready() {
+		t.Fatal("legacy synthetic scope unready")
 	}
 	return p
 }
@@ -142,16 +149,24 @@ func TestRecoveryRetestClaimsSeparateAndFixed(t *testing.T) {
 	before, _ := os.ReadFile(oldpath)
 	base := "../../eval/paired-pilots/2026-10-23-cash-read-recovery-retest-offline"
 	newPilot := syntheticRetestPilotAt(t, base, strings.Repeat("b", 40), false)
-	if err := claimRetest(root, newPilot, "new-output"); err != nil {
-		t.Fatalf("independent new scope rejected: %v", err)
+	if err := claimRetest(root, newPilot, "new-output"); err == nil {
+		t.Fatal("new build claimed retired runtime scope")
+	}
+	// Simulate the already-consumed historical marker to test permanent identity.
+	if err := persistRetestClaim(root, newPilot.CampaignID(), newPilot.ExecutionRevision(), "historical-output"); err != nil {
+		t.Fatal(err)
 	}
 	newpath := filepath.Join(root, ".tmp", "paired-live-retests", "cash-read-recovery-retest-20261023.json")
 	marker, err := os.ReadFile(newpath)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := claimRetest(root, syntheticRetestPilotAt(t, base, strings.Repeat("c", 40), true), "changed-output"); err == nil {
-		t.Fatal("new identity reset")
+	changed := syntheticRetestPilotAt(t, base, strings.Repeat("c", 40), true)
+	if err := persistRetestClaim(root, changed.CampaignID(), changed.ExecutionRevision(), "changed-output"); err == nil {
+		t.Fatal("historical identity reset")
+	}
+	if err := claimRetest(root, changed, "changed-output"); err == nil {
+		t.Fatal("changed retired scope claimed")
 	}
 	if err := claimRetest(root, old, "different-old-output"); err == nil {
 		t.Fatal("old identity reset")

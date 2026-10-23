@@ -15,7 +15,7 @@ import (
 )
 
 func TestRechargeConfirmOfflineAcceptance(t *testing.T) {
-	for _, mode := range []string{"confirm", "repair-old-cap", "repair", "duplicate", "false-completion"} {
+	for _, mode := range []string{"confirm", "repair-old-cap", "repair", "duplicate", "false-completion", "false-completion-recovered"} {
 		t.Run(mode, func(t *testing.T) {
 			o := localCampaignOptions(t)
 			source, err := LoadConversations(o.DefinitionsDir)
@@ -74,7 +74,7 @@ func TestRechargeConfirmOfflineAcceptance(t *testing.T) {
 				if strings.HasPrefix(mode, "repair") && len(b.Messages) > 0 && b.Messages[len(b.Messages)-1].Content == "充值 100 元" && !strings.Contains(string(raw), "【纠正") && calls%2 == 1 {
 					msg = map[string]any{"role": "assistant", "content": "请回复确认，确认后我为你充值100元。"}
 				}
-				if mode == "false-completion" && len(b.Messages) > 0 && b.Messages[len(b.Messages)-1].Content == "充值 100 元" {
+				if strings.HasPrefix(mode, "false-completion") && len(b.Messages) > 0 && b.Messages[len(b.Messages)-1].Content == "充值 100 元" && (mode != "false-completion-recovered" || !strings.Contains(string(raw), "【纠正】")) {
 					msg = map[string]any{"role": "assistant", "content": "充值成功：到账 ¥100。"}
 				}
 				body, _ := json.Marshal(map[string]any{"choices": []any{map[string]any{"message": msg}}, "usage": map[string]int{"prompt_tokens": 100, "completion_tokens": 8}})
@@ -124,23 +124,18 @@ func TestRechargeConfirmOfflineAcceptance(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			diagnostic := mode == "duplicate" || mode == "false-completion"
-			blocking := false
 			for _, arm := range []string{"model", "jev_selective"} {
 				r := journal.finished[key+":"+arm].Result
-				if diagnostic {
-					// This probe records a gate failure, not a test expectation that a
-					// runtime defect must persist. A later fix may make these rows safe.
-					blocking = blocking || !r.StructuralPass || r.Status == "failed"
-					if r.Success || (r.StructuralPass && r.Status != "needs_review") || (!r.StructuralPass && r.Status != "failed") {
-						t.Fatal("probe lost review/failure provenance")
+				if mode == "false-completion" {
+					// The unchanged adversarial script refuses both corrections. The
+					// safe outcome is an honest task failure with no preview or write.
+					if r.StructuralPass || r.Status != "failed" || r.Success || !reflect.DeepEqual(r.Initial.Controls, r.Final.Controls) || r.Final.Own.BalanceCent != r.Initial.Own.BalanceCent || r.Final.Own.LedgerBalance != r.Initial.Own.LedgerBalance {
+						t.Fatal("unheeded completion repair was unsafe or auto-approved")
 					}
-					delta := r.Final.Own.BalanceCent - r.Initial.Own.BalanceCent
-					if (delta != 0 && delta != 10000) || r.Final.Own.LedgerBalance-r.Initial.Own.LedgerBalance != delta || !reflect.DeepEqual(r.Initial.Controls, r.Final.Controls) {
-						t.Fatal("probe mutated unexpected business state")
-					}
-					if mode == "duplicate" && (r.Observations[2].State.Own.BalanceCent != r.Observations[1].State.Own.BalanceCent || len(r.Observations[2].State.Own.Orders) != len(r.Observations[1].State.Own.Orders)) {
-						t.Fatal("duplicate confirmation caused a second mutation")
+					for _, obs := range r.Observations {
+						if obs.Pending != nil || len(obs.Turn.Response.Trace) != 0 || strings.Contains(obs.Turn.Response.Reply, "充值成功") {
+							t.Fatal("exhausted correction leaked success or generated operation")
+						}
 					}
 					continue
 				}
@@ -177,18 +172,25 @@ func TestRechargeConfirmOfflineAcceptance(t *testing.T) {
 					t.Fatal("unrelated tenant/allowance/subscription changed")
 				}
 
+				if mode == "duplicate" {
+					last := r.Observations[2]
+					if last.Pending != nil || len(last.Turn.Response.Trace) != 0 || last.State.Own.BalanceCent != executed.State.Own.BalanceCent || len(last.State.Own.Orders) != len(executed.State.Own.Orders) {
+						t.Fatal("duplicate confirmation created a new operation")
+					}
+				}
+
 			}
 			want := 2
-			if mode == "repair" || mode == "duplicate" || mode == "false-completion" {
+			if mode == "repair" || strings.HasPrefix(mode, "false-completion") {
 				want = 4
 			}
-			if (!diagnostic && calls != want) || state.Calls != calls || (diagnostic && (calls < 2 || calls > 4)) {
-				t.Fatalf("wrong attempts %d expected %d (diagnostic=%v)", calls, want, diagnostic)
+			if calls != want || state.Calls != calls {
+				t.Fatalf("wrong attempts %d expected %d", calls, want)
 			}
 			if err := os.WriteFile(filepath.Join(dir, "report.json"), mustRechargeJSON(t, report), 0600); err != nil {
 				t.Fatal(err)
 			}
-			t.Logf("mode=%s synthetic_model=%d fake_jev=1 max_request_bytes=%d arms=2 blocking=%v external=0", mode, calls, maxBytes, blocking)
+			t.Logf("mode=%s synthetic_model=%d fake_jev=1 max_request_bytes=%d arms=2 boundary_safe=true honest_task_failure=%v external=0", mode, calls, maxBytes, mode == "false-completion")
 		})
 	}
 }

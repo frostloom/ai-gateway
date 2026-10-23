@@ -1,0 +1,23 @@
+{
+  "schema": "recharge-boundary-fix-readiness.v1",
+  "runtime_contract_sha256": "35c117c3dcee33a783e074712d6836236dd1f6a9d4a798fdfd01f0c92e95bce1",
+  "allow_paid": false,
+  "human_authorized": false,
+  "ready_for_paid_run": false,
+  "candidate_model_calls": 10,
+  "candidate_model_micro_cny": 337920,
+  "candidate_jev_calls": 1,
+  "candidate_jev_micro_usd": 2688,
+  "budget_increase_permission": "User permits a higher candidate budget; no new precise paid scope, amount or supplier execution authorization created.",
+  "scope": "recharge-002/confirm only; duplicate_confirm remains auxiliary offline safety coverage",
+  "remaining_gates": [
+    "paid_execution_entry_and_exact_source_bindings",
+    "verified_supplier_token_and_billing_evidence",
+    "explicit_paid_scope_authorization",
+    "running_customer_still_previous_deployed_contract"
+  ],
+  "runtime_deployed": false,
+  "rates_verified": false,
+  "real_model_calls": 0,
+  "real_jev_calls": 0
+}
