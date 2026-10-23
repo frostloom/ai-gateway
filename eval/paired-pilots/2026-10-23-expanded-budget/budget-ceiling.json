@@ -1,0 +1,36 @@
+{
+  "schema": "evaluation-budget-ceiling.v1",
+  "date": "2026-10-23",
+  "project": "ai-gateway",
+  "human_approved": true,
+  "user_answer": "100+1",
+  "question_currency_context": [
+    "CNY",
+    "USD"
+  ],
+  "cumulative_ceiling": {
+    "CNY": "100.00",
+    "USD": "1.00",
+    "micro_cny": 100000000,
+    "micro_usd": 1000000
+  },
+  "scope": "Subsequent real evaluations prepared after this approval; shared cumulative ceiling across batches",
+  "automatic_retries_authorized": false,
+  "balance_is_spending_authorization": false,
+  "resets_previous_claims": false,
+  "exact_execution_scope_bound": false,
+  "execution_ready": false,
+  "new_real_model_calls": 0,
+  "new_real_jev_calls": 0,
+  "requirements_before_execution": [
+    "Freeze cases, providers, payloads, maximum attempts and token envelopes",
+    "Bind final source revision, runtime contract, independent claim and cumulative reservations",
+    "Validate applicable billing evidence without treating a budget approval as rate verification"
+  ],
+  "historical_usage_reference": {
+    "model_calls": 24,
+    "jev_calls": 4,
+    "included_in_new_budget": false,
+    "supplier_invoice_cost_verified": false
+  }
+}

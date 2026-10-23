@@ -1,5 +1,7 @@
 # ai-gateway 项目记忆
 
+2026-10-23 充值确认边界修复056a760033186e4b768b320e50ec7b7186a32157已部署本机客服，覆盖文末该修复“尚未部署”的状态。归档构建（buildvcs=false，独立来源记录）安装SHA f4d6c6c0b4e7d7f819d00b1dc53ca3e1f5bb19168abe1b522b2e5052dbf553d5；两份.env.agent仅更新release，根.env不变，旧bin/配置备份保留。原launchd温和重启后新PID/release、四项模型配置、health/portal通过；解析阶段400实际返回合同35c117c3dcee33a783e074712d6836236dd1f6a9d4a798fdfd01f0c92e95bce1，trace994720ab0e63798ac48994dc90144ddf已Langfuse读回，模型/JEV均0。99份历史私密证据摘要不变，不等同真实模型质量通过。用户对人民币＋美元累计预算问题回复“100+1”，后续真实测评累计上限¥100＋$1已经批准，不再重复询问预算；不自动重试、不重置旧claim，不以余额授权额外支出。精确新案例/调用数/供应商payload/版本和累计预留仍须冻结绑定，预算批准不等于费率已核实。见docs/customer-recharge-boundary-deployment-2026-10-23.md和eval/paired-pilots/2026-10-23-expanded-budget/budget-ceiling.json。
+
 只在处理 ai-gateway 时使用。Hindsight 在 `http://127.0.0.1:8888`，记忆库 `ai-gateway`。服务没开就跳过，不要为此停下来问用户。不要读取或写入其他项目的记忆库。
 
 开始具体任务前先读取。`POST /v1/default/banks/ai-gateway/memories/recall`，正文只需要 `{"query":"与当前任务相关的一句话"}`。用查到的内容，不要把整段记忆复述给用户。

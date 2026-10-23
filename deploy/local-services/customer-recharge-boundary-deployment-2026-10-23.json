@@ -1,0 +1,77 @@
+{
+  "schema": "customer-recharge-boundary-deployment.v1",
+  "date": "2026-10-23",
+  "provenance": {
+    "schema": "customer-recharge-boundary-archive-build.v1",
+    "commit": "056a760033186e4b768b320e50ec7b7186a32157",
+    "tree": "17588f43161c2849b644068b17564bc8168c1a61",
+    "source_archive_sha256": "d3b74961bc6b126c6d095d52d08d1c393d955ea19497764724fc97dc280798ba",
+    "build_flags": "-mod=readonly -trimpath -buildvcs=false",
+    "release": "056a760033186e4b768b320e50ec7b7186a32157-local",
+    "vcs_stamp_present": false,
+    "runtime_contract_sha256": "35c117c3dcee33a783e074712d6836236dd1f6a9d4a798fdfd01f0c92e95bce1",
+    "sdkroot": "/Library/Developer/CommandLineTools/SDKs/MacOSX26.5.sdk",
+    "binary_sha256": "f4d6c6c0b4e7d7f819d00b1dc53ca3e1f5bb19168abe1b522b2e5052dbf553d5"
+  },
+  "previous_release": "4c715556d893a5bf8dadcd6a164310692ec2570a-local",
+  "previous_binary_sha256": "17a15bc898dedaf74f2108bc99cda81678c35e8804de9a81f86ba9c2b49f8541",
+  "runtime_check": {
+    "schema": "customer-recharge-boundary-runtime.v1",
+    "release": "056a760033186e4b768b320e50ec7b7186a32157-local",
+    "process_model_config_matches": {
+      "AGENT_LLM_BASE_URL": true,
+      "AGENT_LLM_MODEL": true,
+      "AGENT_LLM_PROTOCOL": true,
+      "AGENT_LLM_API_KEY": true
+    },
+    "pid_changed": true,
+    "running_release_matches": true,
+    "agent_health": 200,
+    "model_calls": 0,
+    "jev_calls": 0,
+    "paid_evaluation_executed": false,
+    "trace_readback_confirmed": true,
+    "gateway_portal": 200,
+    "request_started_at": "2026-10-23T09:42:19.736455+00:00",
+    "invalid_json_http_status": 400,
+    "runtime_contract_sha256": "35c117c3dcee33a783e074712d6836236dd1f6a9d4a798fdfd01f0c92e95bce1",
+    "request_trace_id": "994720ab0e63798ac48994dc90144ddf",
+    "request_finished_at": "2026-10-23T09:42:19.745738+00:00",
+    "observations": [
+      {
+        "trace_id": "994720ab0e63798ac48994dc90144ddf",
+        "name": "agent.turn",
+        "release": "056a760033186e4b768b320e50ec7b7186a32157-local",
+        "http_status": 400,
+        "stage": "request",
+        "llm_calls": 0,
+        "jev_calls": 0
+      }
+    ]
+  },
+  "installation": {
+    "installed_binary_sha256": "f4d6c6c0b4e7d7f819d00b1dc53ca3e1f5bb19168abe1b522b2e5052dbf553d5",
+    "release_only_env_changes": true,
+    "root_env_unchanged": true,
+    "private_backup_permissions": "0600",
+    "backup_location": ".tmp/paired-live-private/customer-recharge-boundary-deploy-20261023/backup",
+    "old_launcher_and_worktree_preserved": true,
+    "restart": "SIGTERM via existing local.ai-gateway launchd group"
+  },
+  "historical_private_evidence": {
+    "files_checked": 99,
+    "all_hashes_unchanged": true
+  },
+  "limitations": [
+    "Malformed JSON probe ends at request parsing, before authentication, session, tools or inference",
+    "Runtime and telemetry checks do not establish real model quality",
+    "Build provenance is recorded separately; buildvcs=false does not satisfy pristine paid executor checks"
+  ],
+  "private_source_sha256": {
+    "provenance.json": "49f874437ca67641dcd7392c871cab5f3aa9e19391e66f67b524ddc260733fec",
+    "before.json": "883fa8cc68c21feeeb95bc7229c721207e7e789b67a52d4a5be976e6f7c4d349",
+    "install.json": "7ba7553e975428554ae5fdd0b878f16a659b57394b549243db7b5a921ad99297",
+    "runtime-check.json": "de7d406f30fd398dab053620e2d2d5343251e366288bffe897e19f11b8c024ca",
+    "evidence-check.json": "0ca1941ba998abac7b6f6a65a2524222194dd6beec6dce59740f1cf22d548815"
+  }
+}
