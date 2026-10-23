@@ -32,6 +32,8 @@ type pilotAuthorization struct {
 	Retry    bool             `json:"automatic_paid_retries"`
 }
 type pilotBilling struct {
+	CampaignID     string `json:"campaign_id,omitempty"`
+	Revision       string `json:"execution_revision,omitempty"`
 	Schema         string `json:"schema"`
 	PlanSHA        string `json:"scope_plan_sha256"`
 	Base           string `json:"model_base"`
@@ -48,10 +50,12 @@ type pilotBilling struct {
 	EvidenceSHA    string `json:"evidence_sha256"`
 }
 
-// AuthorizedPilot can only become valid through CheckAuthorizedPilot. Its
+// AuthorizedPilot can only become valid through an authorization checker. Its
 // private snapshot cannot be upgraded by mutating public readiness flags.
 type AuthorizedPilot struct {
 	valid                                              bool
+	retestApproved                                     bool
+	retestRevision                                     string
 	plan                                               CampaignPreparationPlan
 	model                                              PairModelSettings
 	authorizationSHA, planSHA, billingSHA, evidenceSHA string
@@ -74,7 +78,7 @@ func (p AuthorizedPilot) ModelSettings() PairModelSettings { return p.model }
 // ValidateFrozenInputs performs only local immutable archive and preparation
 // checks. It needs no credentials, database, observer or provider transport.
 func (p AuthorizedPilot) ValidateFrozenInputs(definitions, profiles, revision string) error {
-	if !p.valid {
+	if !p.valid || (p.IsRetest() && revision != p.retestRevision) {
 		return fmt.Errorf("validated authorization required")
 	}
 	source, err := LoadConversations(definitions)
@@ -123,19 +127,29 @@ func CheckAuthorizedPilot(authRaw, planRaw, billingRaw, evidenceRaw []byte) (Aut
 		}
 	}
 	p.authorizationSHA, p.planSHA = conversationHash(authRaw), a.PlanSHA
+	return p.checkBilling(billingRaw, evidenceRaw, a.Schema == "small-pilot-authorization.v2")
+}
+
+func (p AuthorizedPilot) checkBilling(billingRaw, evidenceRaw []byte, allowRisk bool) (AuthorizedPilot, error) {
 	var b pilotBilling
 	if len(billingRaw) > 0 {
 		if json.Unmarshal(billingRaw, &b) != nil || b.PlanSHA != p.planSHA || b.Base != p.model.BaseURL || b.Model != p.model.Model || b.Protocol != p.model.Protocol || b.JEVModel != AuthorizedPilotJEVModel {
 			return AuthorizedPilot{}, fmt.Errorf("billing attestation scope/model/version differs")
 		}
+		if p.IsRetest() && (b.Schema != "paired-retest-billing-attestation.v1" || b.CampaignID != CashReadRetestID || b.Revision != p.retestRevision) {
+			return AuthorizedPilot{}, fmt.Errorf("retest billing identity or revision differs")
+		}
+		if !p.IsRetest() && (b.Schema == "paired-retest-billing-attestation.v1" || b.CampaignID != "" || b.Revision != "") {
+			return AuthorizedPilot{}, fmt.Errorf("retest billing cannot authorize original pilot")
+		}
 		switch b.Schema {
 		case "paired-billing-attestation.v1":
 			// Legacy attestations continue to require verified vendor terms.
-		case "paired-billing-attestation.v2":
+		case "paired-billing-attestation.v2", "paired-retest-billing-attestation.v1":
 			// A reviewed risk reservation is distinct from a vendor guarantee.
 			// This policy is only valid for the pinned Pi pilot and its unchanged
 			// maximum-context reservation; every JEV failure must halt fallback.
-			if a.Schema != "small-pilot-authorization.v2" || b.Failure || b.FailurePolicy != fullAttemptFailurePolicy || b.JEVMaxInput != 64000 || b.JEVInputRate != 42000 || b.JEVFullAttempt != 2688 || b.JEVFullAttempt != limits.JEVMicroUSDPerAttempt {
+			if !allowRisk || b.Failure || b.FailurePolicy != fullAttemptFailurePolicy || b.JEVMaxInput != 64000 || b.JEVInputRate != 42000 || b.JEVFullAttempt != 2688 || b.JEVFullAttempt != p.plan.Limits.JEVMicroUSDPerAttempt {
 				return AuthorizedPilot{}, fmt.Errorf("reviewed full-attempt failure policy required")
 			}
 			p.failurePolicy = fullAttemptFailurePolicy

@@ -42,7 +42,7 @@ func CheckAuthorizedContinuation(p AuthorizedPilot, dir string, reviewRaw []byte
 	fail := func() (AuthorizedContinuation, error) {
 		return AuthorizedContinuation{}, fmt.Errorf("complete bound first-batch checkpoint and passing review required")
 	}
-	if !p.valid || dir == "" || len(reviewRaw) > 1<<20 {
+	if !p.valid || p.IsRetest() || dir == "" || len(reviewRaw) > 1<<20 {
 		return fail()
 	}
 	dir, err := filepath.Abs(dir)

@@ -26,6 +26,9 @@ type AuthorizedFirstBatchOptions struct {
 	JEVFactory     func() jev.Evaluator
 }
 type AuthorizedFirstBatchReceipt struct {
+	CampaignID                   string                      `json:"campaign_id,omitempty"`
+	PriorJournalSHA              string                      `json:"prior_journal_sha256,omitempty"`
+	PriorReviewSHA               string                      `json:"prior_review_sha256,omitempty"`
 	PreviousModelCalls           int                         `json:"previous_model_calls,omitempty"`
 	PreviousJEVAttempts          int                         `json:"previous_jev_attempts,omitempty"`
 	CampaignReservedModelCalls   int                         `json:"campaign_reserved_model_calls"`
@@ -54,6 +57,9 @@ type AuthorizedFirstBatchReceipt struct {
 // RunAuthorizedFirstBatch never advances to batch-002 or resumes any directory.
 // The caller supplies trusted dependencies; the CLI pins real provider settings.
 func RunAuthorizedFirstBatch(ctx context.Context, dir string, o AuthorizedFirstBatchOptions) (AuthorizedFirstBatchReceipt, error) {
+	if o.Pilot.IsRetest() {
+		return AuthorizedFirstBatchReceipt{}, fmt.Errorf("retest requires its separate runner")
+	}
 	return runAuthorizedBatch(ctx, dir, o, nil)
 }
 func runAuthorizedBatch(ctx context.Context, dir string, o AuthorizedFirstBatchOptions, continuation *AuthorizedContinuation) (r AuthorizedFirstBatchReceipt, runErr error) {
@@ -62,7 +68,7 @@ func runAuthorizedBatch(ctx context.Context, dir string, o AuthorizedFirstBatchO
 		index = 1
 	}
 
-	if !o.Pilot.Ready() {
+	if !o.Pilot.Ready() || (o.Pilot.IsRetest() && (o.Revision != o.Pilot.retestRevision || continuation != nil)) {
 		return r, fmt.Errorf("verified authorized pilot required")
 	}
 	if o.Environment == nil || o.Environment.closed || o.Observer == nil || o.Upstream == nil || o.JEVFactory == nil || !regexp.MustCompile(`^[a-f0-9]{40}$`).MatchString(o.Revision) || dir == "" {
@@ -87,6 +93,12 @@ func runAuthorizedBatch(ctx context.Context, dir string, o AuthorizedFirstBatchO
 		return r, fmt.Errorf("new batch output directory required")
 	}
 	r = AuthorizedFirstBatchReceipt{Schema: "authorized-first-batch.v1", Status: "stopped", AuthorizationSHA: o.Pilot.authorizationSHA, PlanSHA: o.Pilot.planSHA, BillingSHA: o.Pilot.billingSHA, EvidenceSHA: o.Pilot.evidenceSHA, Revision: o.Revision, JEVFailurePolicy: o.Pilot.JEVFailurePolicy(), VendorFailureChargesVerified: o.Pilot.JEVFailureChargesVerified()}
+	if o.Pilot.IsRetest() {
+		r.Schema = "authorized-cash-retest.v1"
+		r.CampaignID = CashReadRetestID
+		r.PriorJournalSHA = priorCashJournalSHA
+		r.PriorReviewSHA = priorCashReviewSHA
+	}
 	for _, b := range proposal.Batches {
 		r.Batches = append(r.Batches, LocalCampaignBatchReceipt{ID: b.ID, Key: b.Key, Status: "not_started"})
 	}
