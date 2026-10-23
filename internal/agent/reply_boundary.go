@@ -24,9 +24,10 @@ var explicitApplicationPatterns = map[string]*regexp.Regexp{
 	"cancel_subscription": regexp.MustCompile(`(?:帮我|给我|替我|直接|现在|立即|请|我要|我想)\s*(?:退订|停止续费|取消订阅|取消续费)`),
 }
 
-// This is a bounded consistency repair, not a second intent router. The model
-// still chooses the tool. Both primary arms use the same repair and count its
-// actual upstream calls/usage. Do not replace necessary questions.
+// This is a bounded consistency repair, not a second intent router. Normal
+// proposals remain model-selected; the separate exhausted-repair cash recovery
+// is limited to an explicit own-cash read. Both arms share these bounds and
+// count actual upstream calls/usage. Do not replace necessary questions.
 func replyRepairReason(reply, user string, pending *pendingAction) string {
 	if pending == nil && strings.Contains(reply, "确认") && confirmationInvitation.MatchString(reply) {
 		return "没有待确认操作，不能要求确认执行。明确申请且参数齐全则调用对应写工具生成真实预览；仅咨询则回答方法。"

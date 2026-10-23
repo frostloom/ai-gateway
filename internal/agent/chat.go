@@ -413,6 +413,12 @@ func (h *Handler) llmLoop(ctx context.Context, sessionID string, tenantID uint64
 					continue
 				}
 				if missingCashRead {
+					if repaired {
+						if reply, read, recovered := h.recoverCashRead(ctx, sessionID, tenantID, lastUserMsg(ses), ses.PendingAction, trace); recovered {
+							ses.History = append(ses.History, Message{Role: "assistant", Content: reply})
+							return reply, append(trace, read), nil
+						}
+					}
 					msg.Content = "本轮未能核实当前现金余额，请稍后重新查询。"
 				} else {
 					msg.Content = "目前没有生成可确认的操作，也没有执行改动。请核对办理事项及参数后重试。"

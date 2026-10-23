@@ -1,0 +1,49 @@
+{
+  "schema": "cash-read-recovery-offline-validation.v1",
+  "base_revision": "4be7bc4f85741465d43a462a1c2b81424ce6a9c5",
+  "live_evaluation_model_calls": 0,
+  "live_evaluation_jev_calls": 0,
+  "deployed_to_running_customer": false,
+  "frozen_case": "balance-020/explicit_scope_followup",
+  "real_failed_journal_sha256": "7d48f9caff31099149a06a3b14e3e9a5367b4a4b12067537130bba6453a9f754",
+  "historical_run_still_failed": true,
+  "historical_private_source_hashes_unchanged": true,
+  "frozen_case_old_handler_red_then_current_green": true,
+  "local_fixture_four_turn_successful_read_trace_assertions": true,
+  "local_fixture_stale_followup_provider_attempts": {
+    "model": 8,
+    "jev": 1
+  },
+  "one_reply_repair_preserved": true,
+  "max_additional_cash_reads_per_turn": 1,
+  "no_retry_of_attempted_balance_read": true,
+  "full_go_test_packages": 18,
+  "source_sha256": {
+    "internal/agent/chat.go": "62a7b2c91b79892bba0ad8f3f68a347d93bf02e675750bcd509b6b358e9066c5",
+    "internal/agent/cash_read_recovery.go": "c1759126b37852efa8351ec31b9ec144966ed10912e2e648b0aecdc844fa38b5",
+    "internal/agent/cash_read_recovery_test.go": "60cc46924049a7b358d064827185cd11e5b0f1919b199e1b4977f234b0292ba9",
+    "internal/agent/runtime_metadata.go": "58583047741f8222debe1f30a6ab3aaf0588aa8f3e510537e6fe4267cf78386e",
+    "internal/taskbench/authorized_retest_test.go": "c1f50e00677bd261856bc8d88084abe3adeee5477badffbf4c5dd30835dc9d2a",
+    "internal/agent/reply_boundary.go": "7678e2e07851ead714467cd6324e02adc9dd602d8fafa387a6a95da6e1a5cc21"
+  },
+  "evidence_log_sha256": {
+    "unit_red": "19194a4f141ef219b17099035ca08edee49f943a90a4195f8bae54e111158167",
+    "loop_limit_red": "aa67f26341206d66402e6767deef0fa7425248db72d4665fd204a766b5f8624c",
+    "frozen_case_old_handler_red": "45ffd3bfa040a871595da665fd3da0945fbe0e01d9aabf6ef34ba2383e49a105",
+    "targeted_green": "291add2960229e72ef5d54f70b7bd7d8081e9016cac8518507080656f08cae5e",
+    "full_green": "d8d408a3129a79c8c5636b048066f5d7004a08968274300897fb995c7058e0d8",
+    "final_full_green": "66a450bd478c348be7d436f7498c5ecdc8bdede414fa92c3df0f6344cddc9f21"
+  },
+  "historical_replay_report_sha256": "d2d17c3f6d84bb1464d4e24c4adfd38f1b423928f29a34eef563b3a47183b61c",
+  "previous_runtime_contract_sha256": "d66fbde2e3a35be98c83ac84f744a204d97b195547a73498c955f8532622c709",
+  "new_runtime_contract_sha256": "b92458d1bafd3187a2daa6387b0575e9517da84f66df6602b1945a8d47ba9d8e",
+  "scope_limitations": [
+    "Complete supported own-cash query wording required; unsupported language keeps the safe fallback",
+    "Requires model unsupported cash amount even after one repair; no promise for cash requests answered without any amount",
+    "Pending actions, previous balance attempts, quoted/historical/negative/foreign/compound requests do not recover",
+    "No new paid permission or release of consumed claims"
+  ],
+  "independent_code_review": "no_important_findings",
+  "cancelled_context_zero_reads_and_audit_test_added": true,
+  "cancelled_context_zero_reads_and_audit_test_passed": true
+}

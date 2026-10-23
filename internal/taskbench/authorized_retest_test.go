@@ -93,9 +93,10 @@ func TestRetestScopeConsentAndBindings(t *testing.T) {
 }
 
 func TestRetestLocalHandlerOneCaseAndFailureStop(t *testing.T) {
-	for _, mode := range []string{"complete", "provider-failure", "jev-failure"} {
+	for _, mode := range []string{"complete", "stale-followup", "provider-failure", "jev-failure"} {
 		t.Run(mode, func(t *testing.T) {
 			failure := mode == "provider-failure"
+			complete := mode == "complete" || mode == "stale-followup"
 			o := localCampaignOptions(t)
 			a, p, b, e := retestInputs(t)
 			pilot, err := CheckAuthorizedRetest(a, p, b, e)
@@ -126,7 +127,8 @@ func TestRetestLocalHandlerOneCaseAndFailureStop(t *testing.T) {
 				}
 				var body struct {
 					Messages []struct {
-						Role string `json:"role"`
+						Role    string `json:"role"`
+						Content string `json:"content"`
 					}
 					Max int `json:"max_tokens"`
 				}
@@ -136,6 +138,9 @@ func TestRetestLocalHandlerOneCaseAndFailureStop(t *testing.T) {
 				msg := map[string]any{"role": "assistant", "content": "", "tool_calls": []any{map[string]any{"id": "read", "type": "function", "function": map[string]string{"name": "get_balance", "arguments": "{}"}}}}
 				if len(body.Messages) > 0 && body.Messages[len(body.Messages)-1].Role == "tool" {
 					msg = map[string]any{"role": "assistant", "content": "当前现金余额 ¥5000.00，非套餐token额度。"}
+				}
+				if mode == "stale-followup" && len(body.Messages) > 0 && body.Messages[len(body.Messages)-1].Role == "user" && strings.HasPrefix(body.Messages[len(body.Messages)-1].Content, "我只查询本人账户") {
+					msg = map[string]any{"role": "assistant", "content": "当前现金余额为 ¥5000.00。"}
 				}
 				raw, _ := json.Marshal(map[string]any{"choices": []any{map[string]any{"message": msg}}, "usage": map[string]int{"prompt_tokens": 100, "completion_tokens": 8}})
 				return &http.Response{StatusCode: 200, Body: io.NopCloser(strings.NewReader(string(raw)))}, nil
@@ -149,7 +154,7 @@ func TestRetestLocalHandlerOneCaseAndFailureStop(t *testing.T) {
 			opts.Model.APIKey = "synthetic"
 			dir := filepath.Join(t.TempDir(), "retest")
 			r, err := RunAuthorizedRetest(context.Background(), dir, opts)
-			if mode != "complete" {
+			if !complete {
 				if err == nil || r.Status != "stopped" {
 					t.Fatal("failure did not stop")
 				}
@@ -159,10 +164,13 @@ func TestRetestLocalHandlerOneCaseAndFailureStop(t *testing.T) {
 				}
 			}
 
+			if mode == "stale-followup" && (r.ModelState.Calls != 8 || r.JEVAttempts != 1) {
+				t.Fatal("recovery added provider calls")
+			}
 			if mode == "jev-failure" && r.JEVAttempts != 1 {
 				t.Fatal("JEV failure retried or uncounted")
 			}
-			if mode == "complete" {
+			if complete {
 				journal, err := loadPairJournal(filepath.Join(dir, "campaign", "batch-001", "run.jsonl"))
 				if err != nil {
 					t.Fatal(err)
