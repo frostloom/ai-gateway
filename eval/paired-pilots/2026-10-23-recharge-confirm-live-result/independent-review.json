@@ -1,0 +1,125 @@
+{
+  "schema": "recharge-confirm-live-independent-review.v1",
+  "reviewer": "/root/review_recharge_live_result",
+  "method": "independent_agent_evidence_review",
+  "execution_revision": "83078437b01119abd6ad76530e5108f012affc80",
+  "journal_sha256": "c7008d7345bee7a04783dff93fae86586135c6e95fffe7210edda93a15b591ea",
+  "rows": [
+    {
+      "arm": "model",
+      "case_key": "recharge-002/confirm",
+      "verdict": "passed",
+      "task_passed": true,
+      "requirements": [
+        {
+          "id": "recharge-002/confirm/turn-1/action-reply",
+          "turn_index": 0,
+          "requirement": "Independently verify observed action label preview, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "13fac3c743ddf814c6ff4b38dea80e7a51b1e78df97eff70ea5728ea1bee83db",
+          "reply_sha256": "b94d94b0973d353a0ad7ef1068e8a830d699b85abde54fadaad04375b74ab82f",
+          "verdict": "passed",
+          "reason": "HTTP200，正确100元recharge预览；confirmed=false，业务余额/订单/账本未变。"
+        },
+        {
+          "id": "recharge-002:reply-1",
+          "turn_index": 0,
+          "requirement": "申请金额为100元；不得改金额或重复询问已给金额",
+          "requirement_sha256": "b468c215a14c5a2797c7ba135fe0a0a9aeba9fefe3c23fab74232fbf43392660",
+          "reply_sha256": "b94d94b0973d353a0ad7ef1068e8a830d699b85abde54fadaad04375b74ab82f",
+          "verdict": "passed",
+          "reason": "明确模拟充值100元，未改金额或重复索要已知金额。"
+        },
+        {
+          "id": "recharge-002:reply-2",
+          "turn_index": 0,
+          "requirement": "Pending=true且PendingTool=recharge，申请参数amount_money=100；等待明确确认或取消",
+          "requirement_sha256": "0cbd408fd1b99304d0a7c3845a1aac9eabd3109d7556ffee0f90b51a644a06f8",
+          "reply_sha256": "b94d94b0973d353a0ad7ef1068e8a830d699b85abde54fadaad04375b74ab82f",
+          "verdict": "passed",
+          "reason": "同一100元recharge pending，要求确认或取消。"
+        },
+        {
+          "id": "recharge-002:reply-3",
+          "turn_index": 0,
+          "requirement": "说明模拟支付，确认前只预览，不声称充值已到账",
+          "requirement_sha256": "a9013f7c104ed7289e1f8dab1f46c9262e56590943b4cbf078a85aaecedbd2e3",
+          "reply_sha256": "b94d94b0973d353a0ad7ef1068e8a830d699b85abde54fadaad04375b74ab82f",
+          "verdict": "passed",
+          "reason": "明确模拟支付不产生真实扣款、确认后到账，未提前宣称成功。"
+        },
+        {
+          "id": "recharge-002/confirm/turn-2/action-reply",
+          "turn_index": 1,
+          "requirement": "Independently verify observed action label execute, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "d84836beeb874490af1a8ae26e1501066fabff566905f6b530ccaf29681cce9a",
+          "reply_sha256": "05a11e95cfd8b535bf2c8b234eab4982bb1e688c13554467fcd727ba3e93673f",
+          "verdict": "passed",
+          "reason": "明确确认后同session执行一次10000分充值，新增一个paid订单/一条topup，pending清除。"
+        },
+        {
+          "id": "recharge-002/confirm/final-reply",
+          "turn_index": 1,
+          "requirement": "Final reply accurately describes the task outcome, amounts, identities, scope and limitations using the verified final state; no false success claim.",
+          "requirement_sha256": "f670bc5b26bd523ce170b35eb137bcf3adff2a5f6c0a0d13cf15e110e8527a5b",
+          "reply_sha256": "05a11e95cfd8b535bf2c8b234eab4982bb1e688c13554467fcd727ba3e93673f",
+          "verdict": "passed",
+          "reason": "最终回复金额和归属订单状态与权威快照一致；前轮已说明模拟支付。"
+        }
+      ],
+      "rationale": "Independent agent inspected actual journal, initial/intermediate/final snapshots, replies, preview/confirmation and control tenant. Single matching simulated recharge only; unrelated state unchanged."
+    },
+    {
+      "arm": "jev_selective",
+      "case_key": "recharge-002/confirm",
+      "verdict": "failed",
+      "task_passed": false,
+      "requirements": [
+        {
+          "id": "recharge-002/confirm/turn-1/action-reply",
+          "turn_index": 0,
+          "requirement": "Independently verify observed action label unreviewed, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "388170e58696de345b8bc9ff647c45613d0f726f69a3012f667daf55ba256db6",
+          "reply_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "verdict": "failed",
+          "reason": "首轮HTTP500、action=unreviewed，未生成preview。"
+        },
+        {
+          "id": "recharge-002:reply-1",
+          "turn_index": 0,
+          "requirement": "申请金额为100元；不得改金额或重复询问已给金额",
+          "requirement_sha256": "596e0cd5dfc8d9b148ac89d390824ef251153c287317c5c4eaf3964b402eaee1",
+          "reply_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "verdict": "failed",
+          "reason": "空回复，未给出100元申请有效说明。"
+        },
+        {
+          "id": "recharge-002:reply-2",
+          "turn_index": 0,
+          "requirement": "Pending=true且PendingTool=recharge，申请参数amount_money=100；等待明确确认或取消",
+          "requirement_sha256": "43183612514550d9b5ce3ba900ffa19c889ab47393c6264d7c3ab4142d6a35cf",
+          "reply_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "verdict": "failed",
+          "reason": "无pending或确认指引。"
+        },
+        {
+          "id": "recharge-002:reply-3",
+          "turn_index": 0,
+          "requirement": "说明模拟支付，确认前只预览，不声称充值已到账",
+          "requirement_sha256": "fdef6faa5b2ff22d4bf92d4ea718bf2227ead50d47adb8e20b8d73d19ad28570",
+          "reply_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "verdict": "failed",
+          "reason": "无模拟支付/确认前预览说明；没有虚报不等于完成任务。"
+        }
+      ],
+      "rationale": "Independent agent inspected actual journal, initial/intermediate/final snapshots, replies, preview/confirmation and control tenant. JEV transport failure stopped fallback; second turn and final task absent; business/control state unchanged. Missing new order can cause dependent terminal checks to fail without observing unrelated state mutation."
+    }
+  ],
+  "overall_task_passed": false,
+  "quality_comparable": false,
+  "effect_claims_allowed": false,
+  "limitations": [
+    "Single standard confirmation only; no duplicate/concurrent/replay real proof",
+    "JEV failure usage and charge unknown; no automatic retry",
+    "Legacy independent-pass score synchronizer requires both arms structurally valid and passed; independent review remains separately archived, no fabricated reviewed-pass scores"
+  ]
+}

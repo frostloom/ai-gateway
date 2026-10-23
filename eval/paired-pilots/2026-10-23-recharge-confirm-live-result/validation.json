@@ -1,0 +1,22 @@
+{
+  "schema": "recharge-confirm-live-validation.v1",
+  "all_authorization_and_claim_bindings_match": true,
+  "original_entry_outcome_preserved": true,
+  "cleanup_separately_confirmed": true,
+  "historical_99_evidence_unchanged": true,
+  "prior_entry_validation_sources_unchanged": true,
+  "operator_token_review": {
+    "requests": 6,
+    "max_request_bytes": 6740,
+    "max_local_tokenizer_tokens": 1592,
+    "server_exact_count_verified": false
+  },
+  "original_jev_failure": {
+    "kind": "transport",
+    "latency_ms": 3183.576584,
+    "upstream_attempted": "unknown",
+    "actual_charge": "unknown"
+  },
+  "new_diagnostic_model_calls": 0,
+  "new_diagnostic_jev_calls": 0
+}

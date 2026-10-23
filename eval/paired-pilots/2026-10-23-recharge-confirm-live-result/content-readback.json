@@ -1,0 +1,45 @@
+{
+  "schema": "recharge-confirm-content-readback.v1",
+  "journal_sha256": "c7008d7345bee7a04783dff93fae86586135c6e95fffe7210edda93a15b591ea",
+  "all_three_observed_turn_contents_exact": true,
+  "trace_summaries": [
+    {
+      "trace_id": "3ae89571ba62a7c84d179fab549ec738",
+      "case_key": "recharge-002/confirm",
+      "arm": "model",
+      "evidence_kind": "recorded_run",
+      "expected_turns": 2,
+      "require_answers": true,
+      "expected_content": [
+        {
+          "input_sha256": "5b31afa5bb58f21534867f3bea04f2379661f3a6fbd71118643f6561695c572e",
+          "reply_sha256": "b94d94b0973d353a0ad7ef1068e8a830d699b85abde54fadaad04375b74ab82f"
+        },
+        {
+          "input_sha256": "36f33adaf0942634a8ece1eec4a6f30d44dec73e1ef8704b29d983a57f2e09ae",
+          "reply_sha256": "05a11e95cfd8b535bf2c8b234eab4982bb1e688c13554467fcd727ba3e93673f"
+        }
+      ],
+      "turns": 2,
+      "content_turns": 2
+    },
+    {
+      "trace_id": "b680b614d679049196157afca2fd1dc9",
+      "case_key": "recharge-002/confirm",
+      "arm": "jev_selective",
+      "evidence_kind": "recorded_run",
+      "expected_turns": 1,
+      "require_answers": false,
+      "expected_content": [
+        {
+          "input_sha256": "5b31afa5bb58f21534867f3bea04f2379661f3a6fbd71118643f6561695c572e",
+          "reply_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ],
+      "turns": 1,
+      "content_turns": 0
+    }
+  ],
+  "model_calls": 0,
+  "jev_calls": 0
+}

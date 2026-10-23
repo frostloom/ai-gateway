@@ -1,0 +1,29 @@
+{
+  "jev_calls": 0,
+  "kind": "verified",
+  "model_calls": 0,
+  "plan_sha256": "e6de94af7ba101e2d4e5fe6e789c328ed46bb85a9dc65297ef4b9496d66b1bab",
+  "score_count": 14,
+  "trace_summaries": [
+    {
+      "arm": "model",
+      "case_key": "recharge-002/confirm",
+      "content_turns": 2,
+      "evidence_kind": "recorded_run",
+      "expected_turns": 2,
+      "require_answers": true,
+      "trace_id": "3ae89571ba62a7c84d179fab549ec738",
+      "turns": 2
+    },
+    {
+      "arm": "jev_selective",
+      "case_key": "recharge-002/confirm",
+      "content_turns": 0,
+      "evidence_kind": "recorded_run",
+      "expected_turns": 1,
+      "require_answers": false,
+      "trace_id": "b680b614d679049196157afca2fd1dc9",
+      "turns": 1
+    }
+  ]
+}

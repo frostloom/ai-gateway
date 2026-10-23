@@ -1,0 +1,62 @@
+{
+  "schema": "recharge-confirm-live-result.v1",
+  "campaign_id": "recharge-confirm-20261023",
+  "execution_revision": "83078437b01119abd6ad76530e5108f012affc80",
+  "customer_source_revision": "056a760033186e4b768b320e50ec7b7186a32157",
+  "runtime_contract_sha256": "35c117c3dcee33a783e074712d6836236dd1f6a9d4a798fdfd01f0c92e95bce1",
+  "journal_sha256": "c7008d7345bee7a04783dff93fae86586135c6e95fffe7210edda93a15b591ea",
+  "status": "stopped",
+  "model_arm": "independent_review_passed",
+  "jev_selective_arm": "failed_transport",
+  "actual_upstream_model_attempts": 1,
+  "actual_jev_attempts": 1,
+  "model_input_tokens": 1757,
+  "model_output_tokens": 39,
+  "configured_model_cost_cny": "0.003826",
+  "not_supplier_invoice": true,
+  "jev_usage_and_actual_charge": "unknown",
+  "permanent_reservation": {
+    "model_calls": 10,
+    "model_micro_cny": 337920,
+    "jev_calls": 1,
+    "jev_micro_usd": 2688
+  },
+  "cumulative_actual_attempts_including_history": {
+    "model": 25,
+    "jev": 5
+  },
+  "approved_new_budget_ceiling": {
+    "cny": "100.00",
+    "usd": "1.00"
+  },
+  "unallocated_new_budget_after_permanent_reservation": {
+    "cny": "99.662080",
+    "usd": "0.997312"
+  },
+  "claim_consumed": true,
+  "automatic_retry_performed": false,
+  "observer_stats": {
+    "Accepted": 10,
+    "Dropped": 0,
+    "Exported": 10,
+    "Failed": 0,
+    "Batches": 4,
+    "Turns": 3,
+    "SampledTurns": 3,
+    "QueueDepth": 0
+  },
+  "trace_ids": {
+    "model": "3ae89571ba62a7c84d179fab549ec738",
+    "jev_selective": "b680b614d679049196157afca2fd1dc9"
+  },
+  "observed_turns": 3,
+  "planned_turns": 4,
+  "quality_comparable": false,
+  "effect_claims_allowed": false,
+  "source_entry_cleanup_and_receipt_succeeded": false,
+  "separate_cleanup_inventory_remaining_schemas": 0,
+  "deterministic_scores_read_back": 14,
+  "independent_review_scores_published": false,
+  "customer_redeployed": false,
+  "historical_private_evidence_hashes_unchanged": 99
+}
