@@ -1,0 +1,57 @@
+{
+  "schema": "recharge-diagnostic-retest-validation.v1",
+  "base_commit": "5c2f669413c0787ba1bd3a429c9552d628e1a44c",
+  "tdd_red_observed": "new fixed scope rejected before implementation",
+  "targeted_local_handler_modes": [
+    "complete",
+    "provider-failure",
+    "real-local-jev-eof"
+  ],
+  "transport_cause_eof_persisted_in_guard_journal": true,
+  "full_go_test": {
+    "command": "SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX26.5.sdk go test ./... -count=1",
+    "exit_code": 0,
+    "passed_packages": 18
+  },
+  "independent_review": "no blocking findings",
+  "integrity": {
+    "historical_private_files_checked": 143,
+    "all_unchanged": true,
+    "parent_claim_sha256": "2c9d64b98bd985a24da5aed31c049d63311ebdd7f8dc4c862600ccd77e80dcbc",
+    "new_claim_absent": true,
+    "scope_digests_match_actual_sources": true,
+    "planned_case_arms_turns": [
+      1,
+      2,
+      4
+    ],
+    "real_model_calls": 0,
+    "real_jev_calls": 0
+  },
+  "cleanup": {
+    "all_owned_pair_schemas_absent": true,
+    "jev_calls": 0,
+    "model_calls": 0,
+    "read_only": true,
+    "remaining_isolated_pair_schemas": 0,
+    "schema": "cash-recovery-cleanup-inventory.v1"
+  },
+  "budget": {
+    "ceiling_cny": "100.00",
+    "ceiling_usd": "1.00",
+    "existing_permanent_model_micro_cny": 337920,
+    "existing_permanent_jev_micro_usd": 2688,
+    "additional_scope_model_micro_cny": 337920,
+    "additional_scope_jev_micro_usd": 2688,
+    "cumulative_if_new_scope_claimed_model_micro_cny": 675840,
+    "cumulative_if_new_scope_claimed_jev_micro_usd": 5376,
+    "unallocated_if_claimed_cny": "99.324160",
+    "unallocated_if_claimed_usd": "0.994624"
+  },
+  "new_scope_claimed": false,
+  "new_exact_execution_authorized": false,
+  "budget_ceiling_approved": true,
+  "model_calls": 0,
+  "jev_calls": 0,
+  "customer_redeployed": false
+}

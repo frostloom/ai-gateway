@@ -26,6 +26,8 @@ type AuthorizedFirstBatchOptions struct {
 	JEVFactory     func() jev.Evaluator
 }
 type AuthorizedFirstBatchReceipt struct {
+	DiagnosticSourceRevision     string                      `json:"diagnostic_source_revision,omitempty"`
+	DiagnosticManifestSHA        string                      `json:"diagnostic_manifest_sha256,omitempty"`
 	BudgetCeilingSHA             string                      `json:"budget_ceiling_sha256,omitempty"`
 	OfflineManifestSHA           string                      `json:"prior_offline_manifest_sha256,omitempty"`
 	OfflineAcceptanceSHA         string                      `json:"prior_offline_acceptance_sha256,omitempty"`
@@ -100,6 +102,8 @@ func runAuthorizedBatch(ctx context.Context, dir string, o AuthorizedFirstBatchO
 	r = AuthorizedFirstBatchReceipt{Schema: "authorized-first-batch.v1", Status: "stopped", AuthorizationSHA: o.Pilot.authorizationSHA, PlanSHA: o.Pilot.planSHA, BillingSHA: o.Pilot.billingSHA, EvidenceSHA: o.Pilot.evidenceSHA, Revision: o.Revision, JEVFailurePolicy: o.Pilot.JEVFailurePolicy(), VendorFailureChargesVerified: o.Pilot.JEVFailureChargesVerified()}
 	if o.Pilot.IsRetest() {
 		r.Schema = o.Pilot.retestScope.ReceiptSchema
+		r.DiagnosticSourceRevision = o.Pilot.retestScope.DiagnosticSourceRevision
+		r.DiagnosticManifestSHA = o.Pilot.retestScope.DiagnosticManifestSHA
 		r.BudgetCeilingSHA = o.Pilot.retestScope.BudgetCeilingSHA
 		r.OfflineManifestSHA = o.Pilot.retestScope.OfflineManifestSHA
 		r.OfflineAcceptanceSHA = o.Pilot.retestScope.OfflineAcceptanceSHA

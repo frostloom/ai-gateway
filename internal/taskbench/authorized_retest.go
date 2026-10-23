@@ -13,6 +13,7 @@ const CashReadRetestID = "cash-read-retest-20261023"
 const CashReadRecoveryRetestID = "cash-read-recovery-retest-20261023"
 
 type cashRetestScope struct {
+	DiagnosticSourceRevision, DiagnosticManifestSHA            string
 	ID, BillingSchema, ReceiptSchema                           string
 	CaseKey                                                    string
 	ModelCalls                                                 int
@@ -53,23 +54,25 @@ const priorCashJournalSHA = "93a6d5df6c9d68fd5202dd023424a8af77de5a1170dd01993e7
 const priorCashReviewSHA = "d0ea747fd5f59d10382b8b0cf1b6d94d7df8e68c739a64df8b4c8289b230b673"
 
 type cashRetestAuthorization struct {
-	Schema               string         `json:"schema"`
-	BudgetCeilingSHA     string         `json:"budget_ceiling_sha256,omitempty"`
-	OfflineManifestSHA   string         `json:"prior_offline_manifest_sha256,omitempty"`
-	OfflineAcceptanceSHA string         `json:"prior_offline_acceptance_sha256,omitempty"`
-	CustomerRevision     string         `json:"customer_source_revision,omitempty"`
-	RuntimeContractSHA   string         `json:"runtime_contract_sha256,omitempty"`
-	CampaignID           string         `json:"campaign_id"`
-	Approved             bool           `json:"human_authorized"`
-	PlanSHA              string         `json:"scope_plan_sha256"`
-	Target               PilotTarget    `json:"target"`
-	Limits               CampaignLimits `json:"authorized_spending"`
-	Key                  string         `json:"case_key"`
-	Revision             string         `json:"execution_revision"`
-	PriorJournalSHA      string         `json:"prior_journal_sha256"`
-	PriorReviewSHA       string         `json:"prior_review_sha256"`
-	Expand               bool           `json:"automatic_scope_expansion"`
-	Retry                bool           `json:"automatic_paid_retries"`
+	DiagnosticSourceRevision string         `json:"diagnostic_source_revision,omitempty"`
+	DiagnosticManifestSHA    string         `json:"diagnostic_manifest_sha256,omitempty"`
+	Schema                   string         `json:"schema"`
+	BudgetCeilingSHA         string         `json:"budget_ceiling_sha256,omitempty"`
+	OfflineManifestSHA       string         `json:"prior_offline_manifest_sha256,omitempty"`
+	OfflineAcceptanceSHA     string         `json:"prior_offline_acceptance_sha256,omitempty"`
+	CustomerRevision         string         `json:"customer_source_revision,omitempty"`
+	RuntimeContractSHA       string         `json:"runtime_contract_sha256,omitempty"`
+	CampaignID               string         `json:"campaign_id"`
+	Approved                 bool           `json:"human_authorized"`
+	PlanSHA                  string         `json:"scope_plan_sha256"`
+	Target                   PilotTarget    `json:"target"`
+	Limits                   CampaignLimits `json:"authorized_spending"`
+	Key                      string         `json:"case_key"`
+	Revision                 string         `json:"execution_revision"`
+	PriorJournalSHA          string         `json:"prior_journal_sha256"`
+	PriorReviewSHA           string         `json:"prior_review_sha256"`
+	Expand                   bool           `json:"automatic_scope_expansion"`
+	Retry                    bool           `json:"automatic_paid_retries"`
 }
 
 func (p AuthorizedPilot) IsRetest() bool { return p.retestRevision != "" }
@@ -96,7 +99,7 @@ func CheckAuthorizedRetest(authRaw, planRaw, billingRaw, evidenceRaw []byte) (Au
 		return fail()
 	}
 	scope, ok := checkedCashRetestScope(a.Schema, a.CampaignID)
-	if !ok || a.CustomerRevision != scope.CustomerRevision || a.RuntimeContractSHA != scope.RuntimeContractSHA || a.BudgetCeilingSHA != scope.BudgetCeilingSHA || a.OfflineManifestSHA != scope.OfflineManifestSHA || a.OfflineAcceptanceSHA != scope.OfflineAcceptanceSHA {
+	if !ok || a.DiagnosticSourceRevision != scope.DiagnosticSourceRevision || a.DiagnosticManifestSHA != scope.DiagnosticManifestSHA || a.CustomerRevision != scope.CustomerRevision || a.RuntimeContractSHA != scope.RuntimeContractSHA || a.BudgetCeilingSHA != scope.BudgetCeilingSHA || a.OfflineManifestSHA != scope.OfflineManifestSHA || a.OfflineAcceptanceSHA != scope.OfflineAcceptanceSHA {
 		return fail()
 	}
 	wantIdentity := cashRetestPlanIdentity{}

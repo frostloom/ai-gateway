@@ -6,6 +6,7 @@ import (
 	"github.com/frostloom/ai-gateway/internal/jev"
 	"io"
 	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"strings"
@@ -88,10 +89,13 @@ func TestRechargeEntryFixedScope(t *testing.T) {
 // only external model/JEV transports are replaced. Missing preview/confirmation,
 // lost receipt provenance, fallback after vendor failure or output reuse fails.
 func TestRechargeEntryLocalRunner(t *testing.T) {
+	testRechargeScopeLocalRunner(t, rechargeEntryInputs, "authorized-recharge-confirm.v1")
+}
+func testRechargeScopeLocalRunner(t *testing.T, inputs func(*testing.T) ([]byte, []byte, []byte, []byte), receiptSchema string) {
 	for _, mode := range []string{"complete", "provider-failure", "jev-failure"} {
 		t.Run(mode, func(t *testing.T) {
 			o := localCampaignOptions(t)
-			a, p, b, e := rechargeEntryInputs(t)
+			a, p, b, e := inputs(t)
 			pilot, err := CheckAuthorizedRetest(a, p, b, e)
 			if err != nil {
 				t.Fatal(err)
@@ -101,6 +105,18 @@ func TestRechargeEntryLocalRunner(t *testing.T) {
 				t.Fatal(err)
 			}
 			defer deps.close()
+			var transportServer *httptest.Server
+			if receiptSchema == "authorized-recharge-confirm.v2" && mode == "jev-failure" {
+				transportServer = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					conn, _, err := w.(http.Hijacker).Hijack()
+					if err != nil {
+						t.Error(err)
+						return
+					}
+					conn.Close()
+				}))
+				defer transportServer.Close()
+			}
 			calls := 0
 			up := pairedRoundTripFunc(func(req *http.Request) (*http.Response, error) {
 				calls++
@@ -121,6 +137,9 @@ func TestRechargeEntryLocalRunner(t *testing.T) {
 			})
 			opts := AuthorizedFirstBatchOptions{Pilot: pilot, DefinitionsDir: o.DefinitionsDir, Environment: o.Environment, Revision: strings.Repeat("a", 40), Observer: deps.observer, Model: pilot.ModelSettings(), Upstream: up, JEVFactory: func() jev.Evaluator {
 				if mode == "jev-failure" {
+					if transportServer != nil {
+						return jev.NewClient(transportServer.URL, "synthetic", "jev-1.13.0")
+					}
 					return policyFailureJEV{}
 				}
 				return authorizedTestJEV{jev.NewFake(localJevScript("recharge", .99)), true}
@@ -133,7 +152,7 @@ func TestRechargeEntryLocalRunner(t *testing.T) {
 					t.Fatalf("failure did not stop: %v %s", err, r.Status)
 				}
 			} else {
-				if err != nil || r.Status != "checkpoint_pending" || r.Report == nil || r.Report.FinishedArms != 2 || r.Schema != "authorized-recharge-confirm.v1" {
+				if err != nil || r.Status != "checkpoint_pending" || r.Report == nil || r.Report.FinishedArms != 2 || r.Schema != receiptSchema {
 					t.Fatalf("incomplete run %v %+v", err, r)
 				}
 				if r.ModelState.Calls != 2 || r.JEVAttempts != 1 || r.CampaignReservedModelCalls != 10 || r.CampaignReservedMicroCNY != 337920 || r.CampaignReservedMicroUSD != 2688 {
@@ -166,6 +185,29 @@ func TestRechargeEntryLocalRunner(t *testing.T) {
 			if mode == "jev-failure" && r.JEVAttempts != 1 {
 				t.Fatal("JEV retried")
 			}
+			if receiptSchema == "authorized-recharge-confirm.v2" {
+				if r.DiagnosticSourceRevision != "5c2f669413c0787ba1bd3a429c9552d628e1a44c" || r.PriorJournalSHA != "c7008d7345bee7a04783dff93fae86586135c6e95fffe7210edda93a15b591ea" {
+					t.Fatal("diagnostic/prior evidence lost in receipt")
+				}
+				if mode == "jev-failure" {
+					raw, err := os.ReadFile(filepath.Join(dir, "campaign", "batch-001", "run.jsonl.jev.jsonl"))
+					if err != nil {
+						t.Fatal(err)
+					}
+					found := false
+					for _, line := range strings.Split(strings.TrimSpace(string(raw)), "\n") {
+						var e map[string]any
+						json.Unmarshal([]byte(line), &e)
+						if f, ok := e["failure"].(map[string]any); ok && f["transport_cause"] == "eof" && e["Failed"] == true {
+							found = true
+						}
+					}
+					if !found {
+						t.Fatal("actual local transport cause not persisted")
+					}
+				}
+			}
+
 			before := calls
 			if _, err := RunAuthorizedRetest(context.Background(), dir, opts); err == nil || calls != before {
 				t.Fatal("reused output touched upstream")

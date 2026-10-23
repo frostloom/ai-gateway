@@ -1,0 +1,33 @@
+{
+  "schema": "recharge-confirm-authorization.v2",
+  "campaign_id": "recharge-confirm-diagnostic-retest-20261023",
+  "human_authorized": false,
+  "scope_plan_sha256": "ad1af810e511e0987c156312539807b00aa5ea8e8b838e00ea9f42b31ebe9932",
+  "target": {
+    "base_url": "https://api.deepseek.com/v1",
+    "model": "deepseek-flash",
+    "protocol": "openai",
+    "jev_model": "jev-1.13.0"
+  },
+  "authorized_spending": {
+    "max_batches": 1,
+    "max_model_calls": 10,
+    "max_model_micro_cny": 337920,
+    "max_jev_calls": 1,
+    "max_jev_micro_usd": 2688,
+    "jev_micro_usd_per_attempt": 2688
+  },
+  "case_key": "recharge-002/confirm",
+  "execution_revision": "0000000000000000000000000000000000000000",
+  "automatic_scope_expansion": false,
+  "automatic_paid_retries": false,
+  "customer_source_revision": "056a760033186e4b768b320e50ec7b7186a32157",
+  "runtime_contract_sha256": "35c117c3dcee33a783e074712d6836236dd1f6a9d4a798fdfd01f0c92e95bce1",
+  "budget_ceiling_sha256": "4669a31fe6f74f7f6901ed9a4dcb114016d7ed4aac85be949d9b0b6e74c0c00b",
+  "prior_offline_manifest_sha256": "3b6ffcf29430361abfff62cbabcd0cd14ba8a4158d7281cb304a50442e4c0637",
+  "prior_offline_acceptance_sha256": "29c6a248afa1650b08ab9e3bbaed7301280ec1bb7fa1a87f969321d56237ae4d",
+  "prior_journal_sha256": "c7008d7345bee7a04783dff93fae86586135c6e95fffe7210edda93a15b591ea",
+  "prior_review_sha256": "53199923545c6dc8c0e4d24671fa4135c6277377eb4dfb63510f3dcb8bbb9208",
+  "diagnostic_source_revision": "5c2f669413c0787ba1bd3a429c9552d628e1a44c",
+  "diagnostic_manifest_sha256": "8731a95fc1efd01abd76d6448335f86f84ffaa1137165a9bbc446cfffd0cf8b3"
+}
