@@ -1,0 +1,245 @@
+{
+  "schema": "pi-first-live-independent-review.v1",
+  "reviewer": "/root/review_recovery_live_result",
+  "method": "independent_agent_evidence_review",
+  "execution_revision": "c6e32305663ab8af5e747de683390b78dbfe844b",
+  "journal_sha256": "4cf518d902a9514f94cc0a0a51dbd7fdf4cad86b8f38a0805aab048bed25c197",
+  "blocking_findings": [],
+  "rows": [
+    {
+      "arm": "model",
+      "case_key": "balance-020/explicit_scope_followup",
+      "verdict": "passed",
+      "requirements": [
+        {
+          "id": "balance-020/explicit_scope_followup/turn-1/action-reply",
+          "turn_index": 0,
+          "requirement": "Independently verify observed action label read, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "e14ee139c04185846035189811e71eabf15ad75b02cdf432b5fc8ead4b08b221",
+          "reply_sha256": "419d3936ac938e472e6be92aa48b6af1727c5751247a0e99d7d5ad29ea8230e0",
+          "verdict": "passed"
+        },
+        {
+          "id": "balance-020:reply-1",
+          "turn_index": 0,
+          "requirement": "针对原话“看看我还能用多少”：先确认所说剩余/额度指现金余额还是套餐token额度；可先读一项但须说明范围并保留另一种解释。",
+          "requirement_sha256": "a3b4b461018ad2566c3d501b11ce5f0a3089d43647205163939c9d973dcd617d",
+          "reply_sha256": "419d3936ac938e472e6be92aa48b6af1727c5751247a0e99d7d5ad29ea8230e0",
+          "verdict": "passed"
+        },
+        {
+          "id": "balance-020:reply-2",
+          "turn_index": 0,
+          "requirement": "针对原话“看看我还能用多少”：金额与token额度分别表述，不把现金换成固定token或调用次数。",
+          "requirement_sha256": "8952ebb64bcb242971800fc2a3b6355ad78c891fd0a309a492023c702127271f",
+          "reply_sha256": "419d3936ac938e472e6be92aa48b6af1727c5751247a0e99d7d5ad29ea8230e0",
+          "verdict": "passed"
+        },
+        {
+          "id": "balance-020/explicit_scope_followup/turn-2/action-reply",
+          "turn_index": 1,
+          "requirement": "Independently verify observed action label read, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "8e82293ebb11bec1f0e94fca3a814680a090f686bb52c70a4d29da22d90490a4",
+          "reply_sha256": "560707ca5b3d033d9007796a9414779d7873c670a4019dd0aea0c772d32ae2ed",
+          "verdict": "passed"
+        },
+        {
+          "id": "balance-020/explicit_scope_followup/turn-2/answer",
+          "turn_index": 1,
+          "requirement": "{\"cash_cent\":500000,\"unit\":\"RMB\"}",
+          "requirement_sha256": "4186b8a247ab2e223971de0a472de91c6008d6e768bd9eb5bcf1fbc0bb1ba9cf",
+          "reply_sha256": "560707ca5b3d033d9007796a9414779d7873c670a4019dd0aea0c772d32ae2ed",
+          "verdict": "passed"
+        },
+        {
+          "id": "balance-020/explicit_scope_followup/final-reply",
+          "turn_index": 1,
+          "requirement": "Final reply accurately describes the task outcome, amounts, identities, scope and limitations using the verified final state; no false success claim.",
+          "requirement_sha256": "260db5106d0206d313df5ca28223c5e1cfc2b785bec42161b5a184bfd03e3697",
+          "reply_sha256": "560707ca5b3d033d9007796a9414779d7873c670a4019dd0aea0c772d32ae2ed",
+          "verdict": "passed"
+        }
+      ],
+      "rationale": "两轮满足冻结任务；首轮模型路径读取且现金/token范围说明充分；第二轮经一次纠正后由执行层恢复新读取并直接返回权威金额，完整任务passed不等于模型独立遵循fresh-read成功。"
+    },
+    {
+      "arm": "jev_selective",
+      "case_key": "balance-020/explicit_scope_followup",
+      "verdict": "passed",
+      "requirements": [
+        {
+          "id": "balance-020/explicit_scope_followup/turn-1/action-reply",
+          "turn_index": 0,
+          "requirement": "Independently verify observed action label read, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "86952d37c3c7c7fd0fd55982fec468f923b084adc1278f81f6f6576afd5f8aa4",
+          "reply_sha256": "9697ab64ad360d5c6a649bd0efdaa4d4de849c09062436e1e5fb499f16226f7d",
+          "verdict": "passed"
+        },
+        {
+          "id": "balance-020:reply-1",
+          "turn_index": 0,
+          "requirement": "针对原话“看看我还能用多少”：先确认所说剩余/额度指现金余额还是套餐token额度；可先读一项但须说明范围并保留另一种解释。",
+          "requirement_sha256": "e92175ebf1727c9b72de4abcfc1547668520fb0a9f5d077927e57cee62931077",
+          "reply_sha256": "9697ab64ad360d5c6a649bd0efdaa4d4de849c09062436e1e5fb499f16226f7d",
+          "verdict": "passed"
+        },
+        {
+          "id": "balance-020:reply-2",
+          "turn_index": 0,
+          "requirement": "针对原话“看看我还能用多少”：金额与token额度分别表述，不把现金换成固定token或调用次数。",
+          "requirement_sha256": "15da20a4f49815b2248a0a65e2fa2e10aa8e62e3450d9205dd679797f3691152",
+          "reply_sha256": "9697ab64ad360d5c6a649bd0efdaa4d4de849c09062436e1e5fb499f16226f7d",
+          "verdict": "passed"
+        },
+        {
+          "id": "balance-020/explicit_scope_followup/turn-2/action-reply",
+          "turn_index": 1,
+          "requirement": "Independently verify observed action label read, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "05cc99c51fd0804a92ad6430a52f4ccf5b5360a1f10a2cc01d1d256d9026afdb",
+          "reply_sha256": "560707ca5b3d033d9007796a9414779d7873c670a4019dd0aea0c772d32ae2ed",
+          "verdict": "passed"
+        },
+        {
+          "id": "balance-020/explicit_scope_followup/turn-2/answer",
+          "turn_index": 1,
+          "requirement": "{\"cash_cent\":500000,\"unit\":\"RMB\"}",
+          "requirement_sha256": "b66276b19de81bce7cc952b9b0f3db5b3dc347bfff465f799a4ee91c341430e7",
+          "reply_sha256": "560707ca5b3d033d9007796a9414779d7873c670a4019dd0aea0c772d32ae2ed",
+          "verdict": "passed"
+        },
+        {
+          "id": "balance-020/explicit_scope_followup/final-reply",
+          "turn_index": 1,
+          "requirement": "Final reply accurately describes the task outcome, amounts, identities, scope and limitations using the verified final state; no false success claim.",
+          "requirement_sha256": "da462bd207e9065864c2680eb621952952cee5dc3d32ffcd473b4b70a5287c50",
+          "reply_sha256": "560707ca5b3d033d9007796a9414779d7873c670a4019dd0aea0c772d32ae2ed",
+          "verdict": "passed"
+        }
+      ],
+      "rationale": "两轮满足冻结任务；首轮模型路径读取且现金/token范围说明充分；第二轮经一次纠正后由执行层恢复新读取并直接返回权威金额，完整任务passed不等于模型独立遵循fresh-read成功。"
+    }
+  ],
+  "business_state_review": [
+    {
+      "arm": "model",
+      "checks": [
+        {
+          "stage": "turn-1",
+          "verdict": "passed",
+          "balance_cent": 500000,
+          "ledger_balance": 500000,
+          "consistent": true,
+          "business_fields_unchanged": true,
+          "other_tenant_controls_unchanged": true,
+          "allowance_unchanged": true,
+          "answer_authority_unchanged_except_capture_time": true,
+          "read_audit_count": 1,
+          "authorized_write_count": 0,
+          "balance_delta_cent": 0
+        },
+        {
+          "stage": "turn-2",
+          "verdict": "passed",
+          "balance_cent": 500000,
+          "ledger_balance": 500000,
+          "consistent": true,
+          "business_fields_unchanged": true,
+          "other_tenant_controls_unchanged": true,
+          "allowance_unchanged": true,
+          "answer_authority_unchanged_except_capture_time": true,
+          "read_audit_count": 2,
+          "authorized_write_count": 0,
+          "balance_delta_cent": 0
+        },
+        {
+          "stage": "terminal",
+          "verdict": "passed",
+          "balance_cent": 500000,
+          "ledger_balance": 500000,
+          "consistent": true,
+          "business_fields_unchanged": true,
+          "other_tenant_controls_unchanged": true,
+          "allowance_unchanged": true,
+          "answer_authority_unchanged_except_capture_time": true,
+          "read_audit_count": 2,
+          "authorized_write_count": 0,
+          "balance_delta_cent": 0
+        }
+      ],
+      "rationale": "逐轮与终态核对本人余额/账本/订单/订阅/充值、套餐额度、其他租户和authority；仅本人读取审计由0到1到2及采样时间变化，无业务写入。"
+    },
+    {
+      "arm": "jev_selective",
+      "checks": [
+        {
+          "stage": "turn-1",
+          "verdict": "passed",
+          "balance_cent": 500000,
+          "ledger_balance": 500000,
+          "consistent": true,
+          "business_fields_unchanged": true,
+          "other_tenant_controls_unchanged": true,
+          "allowance_unchanged": true,
+          "answer_authority_unchanged_except_capture_time": true,
+          "read_audit_count": 1,
+          "authorized_write_count": 0,
+          "balance_delta_cent": 0
+        },
+        {
+          "stage": "turn-2",
+          "verdict": "passed",
+          "balance_cent": 500000,
+          "ledger_balance": 500000,
+          "consistent": true,
+          "business_fields_unchanged": true,
+          "other_tenant_controls_unchanged": true,
+          "allowance_unchanged": true,
+          "answer_authority_unchanged_except_capture_time": true,
+          "read_audit_count": 2,
+          "authorized_write_count": 0,
+          "balance_delta_cent": 0
+        },
+        {
+          "stage": "terminal",
+          "verdict": "passed",
+          "balance_cent": 500000,
+          "ledger_balance": 500000,
+          "consistent": true,
+          "business_fields_unchanged": true,
+          "other_tenant_controls_unchanged": true,
+          "allowance_unchanged": true,
+          "answer_authority_unchanged_except_capture_time": true,
+          "read_audit_count": 2,
+          "authorized_write_count": 0,
+          "balance_delta_cent": 0
+        }
+      ],
+      "rationale": "逐轮与终态核对本人余额/账本/订单/订阅/充值、套餐额度、其他租户和authority；仅本人读取审计由0到1到2及采样时间变化，无业务写入。"
+    }
+  ],
+  "usage_and_budget": {
+    "actual_model_attempts": 8,
+    "actual_jev_attempts": 1,
+    "model_input_tokens": 14738,
+    "model_output_tokens": 262,
+    "configured_priced_model_usage_micro_cny": 31572,
+    "model_attempt_reservation_micro_cny": 270336,
+    "campaign_reserved_model_calls": 12,
+    "campaign_reserved_micro_cny": 405504,
+    "campaign_reserved_jev_calls": 1,
+    "campaign_reserved_micro_usd": 2688,
+    "supplier_invoice_verified": false
+  },
+  "root_cause_evidence": [
+    "两臂第二轮llm_calls=2/reply_repairs=1，新增成功get_balance审计带cash_read_recovery，证据表明有限纠正未让模型主动读取，由执行层恢复完成。",
+    "JEV仅首轮1次intent_uncertain；第二轮conversation_context为0次，不能声称JEV改善本轮质量。"
+  ],
+  "limitations": [
+    "仅本单案例两臂四轮的端到端任务通过；不证明通用NLU、所有问法、模型自主fresh read或普遍质量改善。",
+    "journal/oracle/telemetry为可信记录，非加密执行证明；配置价格与永久预留不等于供应商账单。",
+    "entry-outcome cleanup_and_receipt_succeeded=true、receipt checkpoint_pending；审查未重跑、未调用模型/JEV，未修改原日志/报告或旧failed证据。",
+    "独立审查不授予重试、后续付费或claim释放。"
+  ],
+  "source_review_sha256": "41f8bc9921f84ac5c17d2cf2cba4dcac361ab40c84e5fb9c4756471fa0820ee8",
+  "serialization_note": "Requirements projected to the exact score API shape. Full independent rationales retained in the source review; verdicts and bindings unchanged."
+}

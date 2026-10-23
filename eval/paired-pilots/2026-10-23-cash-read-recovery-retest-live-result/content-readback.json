@@ -1,0 +1,68 @@
+{
+  "schema": "cash-recovery-content-readback.v1",
+  "journal_sha256": "4cf518d902a9514f94cc0a0a51dbd7fdf4cad86b8f38a0805aab048bed25c197",
+  "all_four_turn_contents_exact": true,
+  "traces": [
+    {
+      "arm": "model",
+      "trace_id": "2177b73f4471e0339e498365970b2b91",
+      "observations": 9,
+      "turns": [
+        {
+          "turn_index": 2,
+          "input_sha256": "5cfba7b788b2f47f7c828f28b1806b6589c642c9f6719ad81d1c142e938ff249",
+          "reply_sha256": "560707ca5b3d033d9007796a9414779d7873c670a4019dd0aea0c772d32ae2ed"
+        },
+        {
+          "turn_index": 1,
+          "input_sha256": "d86345c6e43d57525f89efc049ffe3352a06ba339b8a3d4ed1805fa09cbb01d9",
+          "reply_sha256": "419d3936ac938e472e6be92aa48b6af1727c5751247a0e99d7d5ad29ea8230e0"
+        }
+      ],
+      "observation_names": [
+        "tool.get_balance",
+        "llm.attempt",
+        "llm.attempt",
+        "agent.turn",
+        "llm.attempt",
+        "tool.get_balance",
+        "llm.attempt",
+        "agent.turn",
+        "evaluation.task"
+      ],
+      "observation_file_sha256": "23ffe7048ec263da7f004660b99d6d495b1889527664629730f3701ca8af1ae4"
+    },
+    {
+      "arm": "jev_selective",
+      "trace_id": "b46c02d9ca61f9197b2dfd5806eecef5",
+      "observations": 10,
+      "turns": [
+        {
+          "turn_index": 2,
+          "input_sha256": "5cfba7b788b2f47f7c828f28b1806b6589c642c9f6719ad81d1c142e938ff249",
+          "reply_sha256": "560707ca5b3d033d9007796a9414779d7873c670a4019dd0aea0c772d32ae2ed"
+        },
+        {
+          "turn_index": 1,
+          "input_sha256": "d86345c6e43d57525f89efc049ffe3352a06ba339b8a3d4ed1805fa09cbb01d9",
+          "reply_sha256": "9697ab64ad360d5c6a649bd0efdaa4d4de849c09062436e1e5fb499f16226f7d"
+        }
+      ],
+      "observation_names": [
+        "tool.get_balance",
+        "llm.attempt",
+        "llm.attempt",
+        "agent.turn",
+        "llm.attempt",
+        "tool.get_balance",
+        "llm.attempt",
+        "jev.intent",
+        "agent.turn",
+        "evaluation.task"
+      ],
+      "observation_file_sha256": "fb2d7317c9ef3db9903587ff238075997dc6ec698a9a40e0078c2e31a4703e98"
+    }
+  ],
+  "model_calls": 0,
+  "jev_calls": 0
+}

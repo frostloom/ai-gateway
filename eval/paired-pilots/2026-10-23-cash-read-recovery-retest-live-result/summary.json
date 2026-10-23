@@ -1,0 +1,201 @@
+{
+  "campaign_id": "cash-read-recovery-retest-20261023",
+  "status": "checkpoint_pending",
+  "authorization_sha256": "3fdff9a6aca4e9a9b2f905e2eeea8142b53cdf9c37962dfc67ac53289e49e2d9",
+  "plan_sha256": "98760fa0c184348727669bff546e671aef180e73958fb415b01459ab5503bef4",
+  "billing_attestation_sha256": "a6aef989b0691857160b7cd7e83761f71f075b2a52ea19298bb0de589f0e7409",
+  "billing_evidence_sha256": "ac67e5d716fb1bbcf061f363e2d40921b93e5f77cde691db4eba41159882b5f6",
+  "execution_revision": "c6e32305663ab8af5e747de683390b78dbfe844b",
+  "customer_source_revision": "4c715556d893a5bf8dadcd6a164310692ec2570a",
+  "runtime_contract_sha256": "b92458d1bafd3187a2daa6387b0575e9517da84f66df6602b1945a8d47ba9d8e",
+  "model_budget": {
+    "attempts": 8,
+    "reserved_micro_cny": 270336,
+    "priced_usage_micro_cny": 31572,
+    "input_tokens": 14738,
+    "output_tokens": 262
+  },
+  "jev_attempts": 1,
+  "campaign_reserved_model_calls": 12,
+  "campaign_reserved_jev_calls": 1,
+  "campaign_reserved_micro_cny": 405504,
+  "campaign_reserved_micro_usd": 2688,
+  "jev_failure_policy": "reserve_full_attempt_stop_on_failure",
+  "jev_failure_charges_verified": false,
+  "observer_stats": {
+    "Accepted": 19,
+    "Dropped": 0,
+    "Exported": 19,
+    "Failed": 0,
+    "Batches": 11,
+    "Turns": 4,
+    "SampledTurns": 4,
+    "QueueDepth": 0
+  },
+  "schema": "cash-read-recovery-retest-live-summary.v1",
+  "binary_sha256": "627118ab255d543a1265ba84f5fb28676f4f4cca2243d209be314d8e16d3fb3f",
+  "independent_verdict": "passed",
+  "journal_sha256": "4cf518d902a9514f94cc0a0a51dbd7fdf4cad86b8f38a0805aab048bed25c197",
+  "entry_outcome": {
+    "cleanup_and_receipt_succeeded": true,
+    "execution_receipt": "receipt.json",
+    "schema": "paired-live-entry-outcome.v1",
+    "status": "checkpoint_pending"
+  },
+  "separate_cleanup_inventory": {
+    "all_owned_pair_schemas_absent": true,
+    "jev_calls": 0,
+    "model_calls": 0,
+    "read_only": true,
+    "remaining_isolated_pair_schemas": 0,
+    "schema": "cash-recovery-cleanup-inventory.v1"
+  },
+  "accounting": {
+    "schema": "cash-recovery-retest-accounting.v1",
+    "old_evidence_files_unchanged": 32,
+    "all_model_attempts_settled": true,
+    "model_attempts": 8,
+    "jev_attempts": 1,
+    "model_input_tokens": 14738,
+    "model_output_tokens": 262,
+    "priced_model_usage_micro_cny": 31572,
+    "supplier_invoice": false,
+    "within_authorized_limits": true,
+    "campaign_reserved_calls": 12,
+    "campaign_reserved_micro_cny": 405504,
+    "campaign_reserved_jev": 1,
+    "campaign_reserved_micro_usd": 2688,
+    "fixed_claim_consumed": true,
+    "repeat_execution_permitted": false,
+    "cumulative_actual_model_calls": 24,
+    "cumulative_actual_jev_calls": 4,
+    "no_validation_inference": true
+  },
+  "rows": [
+    {
+      "arm": "model",
+      "key": "balance-020/explicit_scope_followup",
+      "status": "needs_review",
+      "structural_pass": true,
+      "fact_errors": 0,
+      "langfuse_trace_id": "2177b73f4471e0339e498365970b2b91",
+      "guarded_upstream_model_attempts": 4,
+      "priced_model_usage_micro_cny": 15662,
+      "reserved_model_micro_cny": 135168,
+      "telemetry": {
+        "completion_rate": null,
+        "response_latency_ms": 3805.2847920000004,
+        "llm_calls": 4,
+        "jev_calls": 0,
+        "tokens": {
+          "llm_input": 7355,
+          "llm_output": 119,
+          "jev_input": 0,
+          "jev_output": 0
+        }
+      },
+      "turns": [
+        {
+          "turn": 1,
+          "message": "看看我还能用多少",
+          "reply": "当前现金余额为 ¥5000.00，账本余额也一致。\n\n现金余额不等于套餐的 token 额度。如需查看套餐额度，我可以再帮你查订阅信息。",
+          "action": "read",
+          "tools": [
+            {
+              "tool": "get_balance",
+              "phase": "read",
+              "outcome": "success",
+              "args": "{}"
+            }
+          ],
+          "reply_repairs": 0,
+          "execution_cash_read_recovery": false
+        },
+        {
+          "turn": 2,
+          "message": "我只查询本人账户人民币现金余额，不是套餐token额度，也不办理充值、退款或订阅。",
+          "reply": "当前可用余额 ¥5000.00；账本口径 ¥5000.00，两者一致。",
+          "action": "read",
+          "tools": [
+            {
+              "tool": "get_balance",
+              "phase": "read",
+              "outcome": "success",
+              "args": "{}"
+            }
+          ],
+          "reply_repairs": 1,
+          "execution_cash_read_recovery": true
+        }
+      ],
+      "independent_verdict": "passed"
+    },
+    {
+      "arm": "jev_selective",
+      "key": "balance-020/explicit_scope_followup",
+      "status": "needs_review",
+      "structural_pass": true,
+      "fact_errors": 0,
+      "langfuse_trace_id": "b46c02d9ca61f9197b2dfd5806eecef5",
+      "guarded_upstream_model_attempts": 4,
+      "priced_model_usage_micro_cny": 15910,
+      "reserved_model_micro_cny": 135168,
+      "telemetry": {
+        "completion_rate": null,
+        "response_latency_ms": 5615.619500000001,
+        "llm_calls": 4,
+        "jev_calls": 1,
+        "tokens": {
+          "llm_input": 7383,
+          "llm_output": 143,
+          "jev_input": 1205,
+          "jev_output": 186
+        }
+      },
+      "turns": [
+        {
+          "turn": 1,
+          "message": "看看我还能用多少",
+          "reply": "你的当前可用现金余额是 ¥5000.00，账本余额与此一致。\n\n现金余额并不包括套餐的 token 额度；如果你想看套餐的剩余额度或近期消费情况，可以告诉我。",
+          "action": "read",
+          "tools": [
+            {
+              "tool": "get_balance",
+              "phase": "read",
+              "outcome": "success",
+              "args": "{}"
+            }
+          ],
+          "reply_repairs": 0,
+          "execution_cash_read_recovery": false
+        },
+        {
+          "turn": 2,
+          "message": "我只查询本人账户人民币现金余额，不是套餐token额度，也不办理充值、退款或订阅。",
+          "reply": "当前可用余额 ¥5000.00；账本口径 ¥5000.00，两者一致。",
+          "action": "read",
+          "tools": [
+            {
+              "tool": "get_balance",
+              "phase": "read",
+              "outcome": "success",
+              "args": "{}"
+            }
+          ],
+          "reply_repairs": 1,
+          "execution_cash_read_recovery": true
+        }
+      ],
+      "independent_verdict": "passed"
+    }
+  ],
+  "total_actual_calls_including_prior_runs": {
+    "model": 24,
+    "jev": 4
+  },
+  "original_six_case_campaign_unchanged": true,
+  "prior_failed_retest_unchanged": true,
+  "next_paid_execution_authorized": false,
+  "automatic_retry": false,
+  "population_quality_or_savings_claim": false
+}

@@ -1,0 +1,28 @@
+{
+  "schema": "cash-read-retest-authorization.v2",
+  "campaign_id": "cash-read-recovery-retest-20261023",
+  "human_authorized": true,
+  "scope_plan_sha256": "98760fa0c184348727669bff546e671aef180e73958fb415b01459ab5503bef4",
+  "target": {
+    "base_url": "https://api.deepseek.com/v1",
+    "model": "deepseek-flash",
+    "protocol": "openai",
+    "jev_model": "jev-1.13.0"
+  },
+  "authorized_spending": {
+    "max_batches": 1,
+    "max_model_calls": 12,
+    "max_model_micro_cny": 405504,
+    "max_jev_calls": 1,
+    "max_jev_micro_usd": 2688,
+    "jev_micro_usd_per_attempt": 2688
+  },
+  "case_key": "balance-020/explicit_scope_followup",
+  "execution_revision": "c6e32305663ab8af5e747de683390b78dbfe844b",
+  "prior_journal_sha256": "7d48f9caff31099149a06a3b14e3e9a5367b4a4b12067537130bba6453a9f754",
+  "prior_review_sha256": "785834102ecae9104df8e33239a7089ace5503cc8d33c5a6850862e77f24b6f6",
+  "automatic_scope_expansion": false,
+  "automatic_paid_retries": false,
+  "customer_source_revision": "4c715556d893a5bf8dadcd6a164310692ec2570a",
+  "runtime_contract_sha256": "b92458d1bafd3187a2daa6387b0575e9517da84f66df6602b1945a8d47ba9d8e"
+}
