@@ -1,0 +1,32 @@
+{
+  "schema": "cash-read-retest-authorization.v1",
+  "campaign_id": "cash-read-retest-20261023",
+  "human_authorized": true,
+  "scope_plan_sha256": "4229975d5b9c8c314061344be0981af0f785f6bdede7552dffef9804569cdb93",
+  "target": {
+    "base_url": "https://api.deepseek.com/v1",
+    "model": "deepseek-flash",
+    "protocol": "openai",
+    "jev_model": "jev-1.13.0"
+  },
+  "authorized_spending": {
+    "max_batches": 1,
+    "max_model_calls": 12,
+    "max_model_micro_cny": 405504,
+    "max_jev_calls": 1,
+    "max_jev_micro_usd": 2688,
+    "jev_micro_usd_per_attempt": 2688
+  },
+  "case_key": "balance-020/explicit_scope_followup",
+  "execution_revision": "5bf242aee81eaecb77b34cf47422ee45525669c8",
+  "prior_journal_sha256": "93a6d5df6c9d68fd5202dd023424a8af77de5a1170dd01993e7334b4804b66d2",
+  "prior_review_sha256": "d0ea747fd5f59d10382b8b0cf1b6d94d7df8e68c739a64df8b4c8289b230b673",
+  "automatic_scope_expansion": false,
+  "automatic_paid_retries": false,
+  "authorization_basis": {
+    "user_instruction": "批准",
+    "approved_on": "2026-10-23T05:43:02.977594+00:00",
+    "explicit_scope": "User explicitly approved sending frozen synthetic evaluation dialogue, system prompt, tool definitions and isolated fixture results to DeepSeek deepseek-flash and TypeSafe jev-1.13.0 for one retest, max 12 model / CNY0.405504 and one JEV / USD0.002688; no automatic retry",
+    "status": "explicitly_approved_after_auto_review_request"
+  }
+}

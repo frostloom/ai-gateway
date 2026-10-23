@@ -1,0 +1,29 @@
+{
+  "jev_calls": 0,
+  "kind": "verified",
+  "model_calls": 0,
+  "plan_sha256": "c57cb5bda51d51e093c0cc6675fb3a3ff412f8d2bc646bbae9ab43f55a54acf8",
+  "score_count": 14,
+  "trace_summaries": [
+    {
+      "arm": "model",
+      "case_key": "balance-020/explicit_scope_followup",
+      "content_turns": 2,
+      "evidence_kind": "recorded_run",
+      "expected_turns": 2,
+      "require_answers": false,
+      "trace_id": "1017466a23cc10d79889fc153da81633",
+      "turns": 2
+    },
+    {
+      "arm": "jev_selective",
+      "case_key": "balance-020/explicit_scope_followup",
+      "content_turns": 2,
+      "evidence_kind": "recorded_run",
+      "expected_turns": 2,
+      "require_answers": false,
+      "trace_id": "12aa75b32ba7f396dbaeaaa6e3690e7c",
+      "turns": 2
+    }
+  ]
+}
