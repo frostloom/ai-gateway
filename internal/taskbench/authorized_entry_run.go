@@ -26,6 +26,14 @@ type AuthorizedFirstBatchOptions struct {
 	JEVFactory     func() jev.Evaluator
 }
 type AuthorizedFirstBatchReceipt struct {
+	PreviousModelCalls           int                         `json:"previous_model_calls,omitempty"`
+	PreviousJEVAttempts          int                         `json:"previous_jev_attempts,omitempty"`
+	CampaignReservedModelCalls   int                         `json:"campaign_reserved_model_calls"`
+	CampaignReservedJEVCalls     int                         `json:"campaign_reserved_jev_calls"`
+	CampaignReservedMicroCNY     int64                       `json:"campaign_reserved_micro_cny"`
+	CampaignReservedMicroUSD     int64                       `json:"campaign_reserved_micro_usd"`
+	PreviousReceiptSHA           string                      `json:"previous_receipt_sha256,omitempty"`
+	ReviewSHA                    string                      `json:"review_sha256,omitempty"`
 	JEVFailurePolicy             string                      `json:"jev_failure_policy,omitempty"`
 	VendorFailureChargesVerified bool                        `json:"jev_failure_charges_verified"`
 	Schema                       string                      `json:"schema"`
@@ -45,7 +53,15 @@ type AuthorizedFirstBatchReceipt struct {
 
 // RunAuthorizedFirstBatch never advances to batch-002 or resumes any directory.
 // The caller supplies trusted dependencies; the CLI pins real provider settings.
-func RunAuthorizedFirstBatch(ctx context.Context, dir string, o AuthorizedFirstBatchOptions) (r AuthorizedFirstBatchReceipt, runErr error) {
+func RunAuthorizedFirstBatch(ctx context.Context, dir string, o AuthorizedFirstBatchOptions) (AuthorizedFirstBatchReceipt, error) {
+	return runAuthorizedBatch(ctx, dir, o, nil)
+}
+func runAuthorizedBatch(ctx context.Context, dir string, o AuthorizedFirstBatchOptions, continuation *AuthorizedContinuation) (r AuthorizedFirstBatchReceipt, runErr error) {
+	index := 0
+	if continuation != nil {
+		index = 1
+	}
+
 	if !o.Pilot.Ready() {
 		return r, fmt.Errorf("verified authorized pilot required")
 	}
@@ -68,7 +84,7 @@ func RunAuthorizedFirstBatch(ctx context.Context, dir string, o AuthorizedFirstB
 		return r, err
 	}
 	if err = os.Mkdir(dir, 0700); err != nil {
-		return r, fmt.Errorf("new first-batch directory required")
+		return r, fmt.Errorf("new batch output directory required")
 	}
 	r = AuthorizedFirstBatchReceipt{Schema: "authorized-first-batch.v1", Status: "stopped", AuthorizationSHA: o.Pilot.authorizationSHA, PlanSHA: o.Pilot.planSHA, BillingSHA: o.Pilot.billingSHA, EvidenceSHA: o.Pilot.evidenceSHA, Revision: o.Revision, JEVFailurePolicy: o.Pilot.JEVFailurePolicy(), VendorFailureChargesVerified: o.Pilot.JEVFailureChargesVerified()}
 	for _, b := range proposal.Batches {
@@ -80,8 +96,8 @@ func RunAuthorizedFirstBatch(ctx context.Context, dir string, o AuthorizedFirstB
 		if runErr != nil {
 			r.Status = "stopped"
 			r.FailedStage = stage
-			r.Batches[0].Status = "failed"
-			r.Batches[0].FailedStage = stage
+			r.Batches[index].Status = "failed"
+			r.Batches[index].FailedStage = stage
 		}
 		if e := writeLocalCampaignJSON(filepath.Join(dir, "receipt.json"), r); e != nil {
 			r.Status = "stopped"
@@ -91,8 +107,20 @@ func RunAuthorizedFirstBatch(ctx context.Context, dir string, o AuthorizedFirstB
 	}()
 	// Bind permission/evidence to the parent ledger; child contracts bind the
 	// exact live configuration, including AllowPaid, before reservation.
-	binding, _ := json.Marshal([]string{r.AuthorizationSHA, r.PlanSHA, r.BillingSHA, r.EvidenceSHA, r.Revision})
-	campaign, err := OpenCampaignBudget(filepath.Join(dir, "campaign"), conversationHash(binding), o.Pilot.plan.Limits)
+	parentDir := filepath.Join(dir, "campaign")
+	bindingRevision := r.Revision
+	if continuation != nil {
+		r.Schema = "authorized-second-batch.v1"
+		r.PreviousModelCalls = continuation.PreviousModelCalls()
+		r.PreviousJEVAttempts = continuation.PreviousJEVCalls()
+		r.PreviousReceiptSHA = continuation.receiptSHA
+		r.ReviewSHA = continuation.reviewSHA
+		r.Batches[0] = continuation.receipt.Batches[0]
+		parentDir = filepath.Join(continuation.dir, "campaign")
+		bindingRevision = continuation.receipt.Revision
+	}
+	binding, _ := json.Marshal([]string{r.AuthorizationSHA, r.PlanSHA, r.BillingSHA, r.EvidenceSHA, bindingRevision})
+	campaign, err := OpenCampaignBudget(parentDir, conversationHash(binding), o.Pilot.plan.Limits)
 	if err != nil {
 		return r, err
 	}
@@ -102,7 +130,7 @@ func RunAuthorizedFirstBatch(ctx context.Context, dir string, o AuthorizedFirstB
 			runErr = errors.Join(runErr, err)
 		}
 	}()
-	batch := proposal.Batches[0]
+	batch := proposal.Batches[index]
 	cfg := batch.Configuration
 	cfg.AllowPaid = true
 	stage = "reservation"
@@ -110,6 +138,10 @@ func RunAuthorizedFirstBatch(ctx context.Context, dir string, o AuthorizedFirstB
 	if err != nil {
 		return r, err
 	}
+	r.CampaignReservedModelCalls = campaign.used.ModelCalls
+	r.CampaignReservedJEVCalls = campaign.used.JEVCalls
+	r.CampaignReservedMicroCNY = campaign.used.ModelMicroCNY
+	r.CampaignReservedMicroUSD = campaign.used.JEVMicroUSD
 	stage = "model_budget"
 	budget, err := OpenPairBudget(filepath.Join(lease.Dir, "budget.jsonl"), PairRunContract(cfg), batch.ModelLimits, o.Upstream)
 	if err != nil {
@@ -128,24 +160,24 @@ func RunAuthorizedFirstBatch(ctx context.Context, dir string, o AuthorizedFirstB
 	report, reportErr := ReportPreparedPair(path)
 	if reportErr == nil {
 		r.Report = &report
-		r.Batches[0].Report = &report
+		r.Batches[index].Report = &report
 		reportErr = writeLocalCampaignJSON(filepath.Join(lease.Dir, "report.json"), report)
 	}
 	attempts, jevErr := authorizedJEVAttempts(path + ".jev.jsonl")
 	r.JEVAttempts = attempts
 	if combined := errors.Join(err, reportErr, jevErr); combined != nil {
-		return r, fmt.Errorf("first batch execution/evidence failed")
+		return r, fmt.Errorf("selected batch execution/evidence failed")
 	}
 	if r.ModelState.Stopped != "" || r.ModelState.CostMicroCNY == nil {
 		return r, fmt.Errorf("model charge evidence incomplete")
 	}
 	for _, row := range report.Rows {
 		if row.FactErrors > 0 || row.ModelAttempts == nil || row.PricedModelMicroCNY == nil {
-			return r, fmt.Errorf("first-batch report incomplete")
+			return r, fmt.Errorf("selected batch report incomplete")
 		}
 	}
 	stage = "checkpoint"
-	r.Batches[0].Status = "checkpoint_pending"
+	r.Batches[index].Status = "checkpoint_pending"
 	r.Status = "checkpoint_pending"
 	return r, nil
 }

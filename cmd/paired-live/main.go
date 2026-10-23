@@ -1,9 +1,11 @@
-// paired-live checks the approved pilot, or explicitly executes batch-001 only.
+// paired-live checks the approved pilot or executes one explicitly selected batch.
 package main
 
 import (
 	"bufio"
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"flag"
@@ -55,6 +57,9 @@ func runWithOutput(args []string, out io.Writer) int {
 	revision := f.String("revision", "", "reviewed 40-character execution revision")
 	dir := f.String("out", "", "new private output directory; never reused")
 	release := f.String("release", "", "explicit evaluation release")
+	previous := f.String("continue-from", "", "original successful batch-001 output; selects batch-002 only")
+	review := f.String("review", "", "bound passing first-batch independent review JSON")
+	permission := f.String("continuation-authorization", "", "explicit batch-002 permission; required only for execution")
 	execute := f.Bool("execute", false, "explicitly run batch-001 only when all evidence is ready")
 	var files envFiles
 	f.Var(&files, "env-file", "explicit private env file (repeat); never loaded by check")
@@ -87,8 +92,32 @@ func runWithOutput(args []string, out io.Writer) int {
 	if err != nil {
 		return fail("authorization or billing evidence binding rejected")
 	}
+	var continuation *taskbench.AuthorizedContinuation
+	if *previous != "" {
+		raw, err := boundedFile(*review)
+		if err != nil {
+			return fail("explicit independent review required")
+		}
+		checked, err := taskbench.CheckAuthorizedContinuation(pilot, *previous, raw)
+		if err != nil {
+			return fail("continuation checkpoint or independent review rejected")
+		}
+		continuation = &checked
+	} else if *review != "" || *permission != "" {
+		return fail("continue-from required for continuation inputs")
+	}
 	if !*execute {
+		if continuation != nil {
+			return writeContinuationCheck(out, pilot, *continuation)
+		}
 		return writeCheck(out, pilot)
+	}
+	if continuation != nil {
+		consent, err := boundedFile(*permission)
+		sum := sha256.Sum256(p)
+		if err != nil || validateContinuationPermission(consent, hex.EncodeToString(sum[:]), continuation.ReceiptSHA(), continuation.ReviewSHA()) != nil {
+			return fail("explicit bound batch-002 permission required before credentials or fixtures")
+		}
 	}
 	if !pilot.Ready() {
 		return fail("billing evidence is incomplete; execution stopped before credentials or fixtures")
@@ -131,19 +160,29 @@ func runWithOutput(args []string, out io.Writer) int {
 	if env["PAIRED_FIXTURE_ADMIN_DSN"] == "" {
 		return fail("explicit owned-fixture administration configuration required")
 	}
-	if _, err := claimAuthorization(root, p, *dir); err != nil {
+	var claimErr error
+	if continuation != nil {
+		claimErr = claimContinuation(root, p, *previous, *dir)
+	} else {
+		_, claimErr = claimAuthorization(root, p, *dir)
+	}
+	if claimErr != nil {
 		return fail("authorization already consumed or durable claim failed; reconcile before any further execution")
 	}
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer cancel()
 	ctx, deadline := context.WithTimeout(ctx, 5*time.Minute)
 	defer deadline()
-	receipt, err := executeFirst(ctx, *dir, *defs, *profiles, *revision, pilot, model, cfg, env)
+	receipt, err := executeFirst(ctx, *dir, *defs, *profiles, *revision, pilot, model, cfg, env, continuation)
 	if err != nil {
-		fmt.Fprintln(out, "first batch stopped; inspect private evidence, never automatically retry")
+		fmt.Fprintln(out, "selected batch stopped; inspect private evidence, never automatically retry")
 		return 1
 	}
-	fmt.Fprintf(out, "%s: batch-001 only; inspect traces, scores and semantic review before any later batch\n", receipt.Status)
+	batchID := "batch-001"
+	if continuation != nil {
+		batchID = "batch-002"
+	}
+	fmt.Fprintf(out, "%s: %s only; inspect traces, scores and semantic review before any later batch\n", receipt.Status, batchID)
 	return 0
 }
 func writeCheck(out io.Writer, p taskbench.AuthorizedPilot) int {
@@ -178,7 +217,7 @@ func readEnvFiles(files []string) (map[string]string, error) {
 	}
 	return env, nil
 }
-func executeFirst(ctx context.Context, dir, defs, profiles, revision string, p taskbench.AuthorizedPilot, model taskbench.PairModelSettings, cfg observability.Config, env map[string]string) (r taskbench.AuthorizedFirstBatchReceipt, err error) {
+func executeFirst(ctx context.Context, dir, defs, profiles, revision string, p taskbench.AuthorizedPilot, model taskbench.PairModelSettings, cfg observability.Config, env map[string]string, continuation ...*taskbench.AuthorizedContinuation) (r taskbench.AuthorizedFirstBatchReceipt, err error) {
 	defer func() {
 		if _, e := os.Stat(dir); e == nil {
 			status := r.Status
@@ -227,7 +266,11 @@ func executeFirst(ctx context.Context, dir, defs, profiles, revision string, p t
 	}
 	defer modelTransport.CloseIdleConnections()
 	defer jevTransport.CloseIdleConnections()
-	return taskbench.RunAuthorizedFirstBatch(ctx, dir, taskbench.AuthorizedFirstBatchOptions{Pilot: p, DefinitionsDir: defs, Environment: fixture, Revision: revision, Observer: observer, Model: model, Upstream: modelTransport, JEVFactory: func() jev.Evaluator { return judge }})
+	opts := taskbench.AuthorizedFirstBatchOptions{Pilot: p, DefinitionsDir: defs, Environment: fixture, Revision: revision, Observer: observer, Model: model, Upstream: modelTransport, JEVFactory: func() jev.Evaluator { return judge }}
+	if len(continuation) > 0 && continuation[0] != nil {
+		return taskbench.RunAuthorizedSecondBatch(ctx, dir, opts, *continuation[0])
+	}
+	return taskbench.RunAuthorizedFirstBatch(ctx, dir, opts)
 }
 func explicitTransport(proxy string) (*http.Transport, error) {
 	t := &http.Transport{DialContext: (&net.Dialer{Timeout: 10 * time.Second, KeepAlive: 30 * time.Second}).DialContext, TLSHandshakeTimeout: 10 * time.Second, ResponseHeaderTimeout: 90 * time.Second, ForceAttemptHTTP2: true}
