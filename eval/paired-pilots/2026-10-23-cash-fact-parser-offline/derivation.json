@@ -1,0 +1,124 @@
+{
+  "schema": "cash-fact-parser-offline-derivation.v1",
+  "source_execution_revision": "c6e32305663ab8af5e747de683390b78dbfe844b",
+  "evaluator_base_revision": "54da56cbb3694ef6f17ac3ddf9752725c811a6da",
+  "evaluator_source_hashes": {
+    "internal/taskbench/conversation_facts.go": "cf1bf3549cbc88b45f336580a3f92ddbdc6df4aa2e9908a69a94220a06883a5e",
+    "internal/taskbench/conversation_facts_test.go": "3294bb2c84729922bfc46b28692239aa463798fcadc24fb662192f212881141f"
+  },
+  "journal_sha256": "4cf518d902a9514f94cc0a0a51dbd7fdf4cad86b8f38a0805aab048bed25c197",
+  "original_report_sha256": "2c08aab96cc7ef7b4f43e15d17ebed1ae8694611342a9c44e64a768b3b969a6d",
+  "derived_report_sha256": "fcd9374c9937df380e26cc1b366e0f5646cbe2734c2abb90ba5f601a4e49a605",
+  "changes": [
+    {
+      "arm": "model",
+      "original_fact_checks": [
+        {
+          "turn_index": 0,
+          "fact": "unsupported_or_missing_claim",
+          "claim": "",
+          "status": "not_evaluated"
+        },
+        {
+          "turn_index": 1,
+          "fact": "cash_balance",
+          "claim": "¥5000.00",
+          "expected": "500000 cent",
+          "status": "match"
+        },
+        {
+          "turn_index": 1,
+          "fact": "ledger_balance",
+          "claim": "¥5000.00",
+          "expected": "500000 cent",
+          "status": "match"
+        }
+      ],
+      "derived_fact_checks": [
+        {
+          "turn_index": 0,
+          "fact": "cash_balance",
+          "claim": "¥5000.00",
+          "expected": "500000 cent",
+          "status": "match"
+        },
+        {
+          "turn_index": 1,
+          "fact": "cash_balance",
+          "claim": "¥5000.00",
+          "expected": "500000 cent",
+          "status": "match"
+        },
+        {
+          "turn_index": 1,
+          "fact": "ledger_balance",
+          "claim": "¥5000.00",
+          "expected": "500000 cent",
+          "status": "match"
+        }
+      ]
+    },
+    {
+      "arm": "jev_selective",
+      "original_fact_checks": [
+        {
+          "turn_index": 0,
+          "fact": "unsupported_reply_form",
+          "claim": "",
+          "status": "not_evaluated"
+        },
+        {
+          "turn_index": 1,
+          "fact": "cash_balance",
+          "claim": "¥5000.00",
+          "expected": "500000 cent",
+          "status": "match"
+        },
+        {
+          "turn_index": 1,
+          "fact": "ledger_balance",
+          "claim": "¥5000.00",
+          "expected": "500000 cent",
+          "status": "match"
+        }
+      ],
+      "derived_fact_checks": [
+        {
+          "turn_index": 0,
+          "fact": "cash_balance",
+          "claim": "¥5000.00",
+          "expected": "500000 cent",
+          "status": "match"
+        },
+        {
+          "turn_index": 0,
+          "fact": "unsupported_reply_form",
+          "claim": "",
+          "status": "not_evaluated"
+        },
+        {
+          "turn_index": 1,
+          "fact": "cash_balance",
+          "claim": "¥5000.00",
+          "expected": "500000 cent",
+          "status": "match"
+        },
+        {
+          "turn_index": 1,
+          "fact": "ledger_balance",
+          "claim": "¥5000.00",
+          "expected": "500000 cent",
+          "status": "match"
+        }
+      ]
+    }
+  ],
+  "only_fact_checks_changed": true,
+  "both_statuses_remain_needs_review": true,
+  "implicit_ledger_numeric_claims_added": false,
+  "historical_reports_and_scores_overwritten": false,
+  "model_calls": 0,
+  "jev_calls": 0,
+  "new_paid_authorization": false,
+  "service_deployed": false
+}

@@ -17,7 +17,7 @@ type ConversationFactCheck struct {
 	Status    string `json:"status"` // match, mismatch, not_evaluated
 }
 
-var cashClaim = regexp.MustCompile(`(?:^|[；;，,。\n])\s*(当前可用余额|当前余额|现金余额|余额|账本口径|账本余额)[：:为是\s]*([¥￥]\s*-?[0-9]+(?:\.[0-9]+)?|-?[0-9]+(?:\.[0-9]+)?\s*元)`)
+var cashClaim = regexp.MustCompile(`(?:^|[；;，,。\n])\s*(当前可用余额|当前余额|(?:你的)?当前(?:可用)?现金余额|现金余额|余额|账本口径|账本余额)[：:为是\s]*([¥￥]\s*-?[0-9]+(?:\.[0-9]+)?|-?[0-9]+(?:\.[0-9]+)?\s*元)`)
 var rechargeClaim = regexp.MustCompile(`(?:将模拟充值|到账)[：:\s]*([¥￥]\s*[0-9]+(?:\.[0-9]+)?|[0-9]+(?:\.[0-9]+)?\s*元)`)
 var refundClaim = regexp.MustCompile(`(?:实际退款|已退款|已退还|退回|退款成功[：:])[：:\s]*([¥￥]\s*[0-9]+(?:\.[0-9]+)?|[0-9]+(?:\.[0-9]+)?\s*元)`)
 var ownOrderClaim = regexp.MustCompile(`(?:订单号|订单)[：:\s]+([A-Za-z0-9_:-]+)(?:\s+(?:已支付|已退款|退回)|[：:]订单额度)`)
@@ -87,13 +87,31 @@ func CheckConversationFacts(r ConversationResult) []ConversationFactCheck {
 			got, ok := claimCent(claim)
 			add(fact, claim, fmt.Sprintf("%d cent", want), ok && got == want)
 		}
-		// Avoid treating hypothetical advice or a quoted user claim as a assertion.
-		if strings.Contains(reply, "如果") || strings.Contains(reply, "假设") || strings.ContainsAny(reply, "“”\"") || strings.Contains(reply, "你说") {
-			checks = append(checks, ConversationFactCheck{TurnIndex: i, Fact: "unsupported_reply_form", Status: "not_evaluated"})
-			previous = obs.State
-			continue
+		// A leading independent cash sentence may precede conditional advice.
+		// Other fact types retain the conservative whole-reply exclusion below.
+		cashReply := reply
+		reported := strings.Contains(reply, "假设") || strings.ContainsAny(reply, "“”\"") || strings.Contains(reply, "你说")
+		if reported {
+			cashReply = ""
+		} else if strings.Contains(reply, "如果") {
+			first, _, complete := strings.Cut(reply, "。")
+			cashReply = ""
+			if complete && !strings.Contains(first, "如果") {
+				first = strings.TrimSpace(first)
+				match := cashClaim.FindStringSubmatchIndex(first)
+				// Both the full match and its label must start the reply:
+				// no conditional/reported prefix or leading punctuation.
+				if len(match) > 0 && match[0] == 0 && match[2] == 0 && !strings.HasPrefix(first, "账本") {
+					cashReply = first[:match[1]] // Only this first cash claim, never ledger/advice.
+				}
+			}
 		}
-		for _, m := range cashClaim.FindAllStringSubmatch(reply, -1) {
+		for _, m := range cashClaim.FindAllStringSubmatch(cashReply, -1) {
+			// New current-cash labels are supported only as direct reply prefixes;
+			// do not broaden legacy clause matching to reported/conditional text.
+			if strings.Contains(m[1], "当前") && strings.HasSuffix(m[1], "现金余额") && !strings.HasPrefix(strings.TrimSpace(cashReply), strings.TrimSpace(m[0])) {
+				continue
+			}
 			want := obs.State.Own.BalanceCent
 			fact := "cash_balance"
 			if strings.HasPrefix(m[1], "账本") {
@@ -101,6 +119,12 @@ func CheckConversationFacts(r ConversationResult) []ConversationFactCheck {
 				fact = "ledger_balance"
 			}
 			money(fact, m[2], want)
+		}
+		// Avoid treating hypothetical advice or a quoted user claim as an assertion.
+		if reported || strings.Contains(reply, "如果") {
+			checks = append(checks, ConversationFactCheck{TurnIndex: i, Fact: "unsupported_reply_form", Status: "not_evaluated"})
+			previous = obs.State
+			continue
 		}
 		executed := false
 		tool := ""

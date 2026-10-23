@@ -134,3 +134,55 @@ func TestConversationFactsForeignOrMissingOrderRefusalIsNotFalseClaim(t *testing
 		}
 	}
 }
+
+func TestConversationFactsObservedCashReplyForms(t *testing.T) {
+	f, s := conversationFixture()
+	for _, tc := range []struct {
+		name, reply string
+		want        string
+	}{
+		{"model", "当前现金余额为 ¥5000.00，账本余额也一致。\n\n现金余额不等于套餐的 token 额度。如需查看套餐额度，我可以再帮你查订阅信息。", "match"},
+		{"selective", "你的当前可用现金余额是 ¥5000.00，账本余额与此一致。\n\n现金余额并不包括套餐的 token 额度；如果你想看套餐的剩余额度或近期消费情况，可以告诉我。", "match"},
+		{"wrong_model", "当前现金余额为 ¥4999.00，账本余额也一致。", "mismatch"},
+		{"wrong_before_advice", "你的当前可用现金余额是 ¥4999.00，账本余额与此一致。\n如果需要，可查询套餐。", "mismatch"},
+		{"conditional_prefix_no_advice", "若充值成功，当前现金余额为 ¥4999.00。", ""},
+		{"reported_prefix_no_advice", "客户表示，当前现金余额为 ¥4999.00。", ""},
+		{"conditional_prefix", "若充值成功，当前现金余额为 ¥4999.00。如果需要可以继续查询。", ""},
+		{"reported_prefix", "客户表示，当前现金余额为 ¥4999.00。如果需要可再核实。", ""},
+		{"incomplete_prefix", "当前现金余额尚不确定，当前现金余额为 ¥4999.00。如果需要可再核实。", ""},
+		{"explicit_ledger_with_advice", "当前现金余额为 ¥5000.00，账本余额为 ¥4999.00。如果需要可再核实。", "match"},
+		{"conditional", "如果你的当前可用现金余额是 ¥4999.00，可以充值。", ""},
+		{"conditional_first_sentence", "如果你想了解现金。\n你的当前可用现金余额是 ¥4999.00。", ""},
+		{"quoted", "“你的当前可用现金余额是 ¥4999.00”。如果需要可核实。", ""},
+		{"reported", "你说当前现金余额为 ¥4999.00。", ""},
+		{"hypothetical", "假设如下。\n当前现金余额为 ¥4999.00。", ""},
+		{"foreign", "他的当前可用现金余额是 ¥4999.00。", ""},
+		{"negative", "你的当前可用现金余额不是 ¥4999.00。", ""},
+		{"token", "当前可用套餐额度是 4999 tokens。", ""},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			r := ConversationResult{Fixture: f, Initial: s, Observations: []ConversationObservation{{State: s, Turn: Turn{Response: Response{Reply: tc.reply}}}}}
+			checks := CheckConversationFacts(r)
+			var cash []ConversationFactCheck
+			for _, c := range checks {
+				if c.Fact == "cash_balance" {
+					cash = append(cash, c)
+				}
+			}
+			if tc.want == "" {
+				if len(cash) != 0 {
+					t.Fatalf("unsupported claim evaluated: %+v", checks)
+				}
+				return
+			}
+			if len(cash) != 1 || cash[0].Status != tc.want || cash[0].Expected != "500000 cent" {
+				t.Fatalf("want cash %s: %+v", tc.want, checks)
+			}
+			for _, c := range checks {
+				if c.Fact == "ledger_balance" {
+					t.Fatalf("ledger claim escaped narrow cash-only scope: %+v", checks)
+				}
+			}
+		})
+	}
+}
