@@ -1,0 +1,89 @@
+{
+  "schema": "customer-service-current-cash-deployment.v1",
+  "date": "2026-10-23",
+  "deployment": {
+    "schema": "customer-agent-archive-build.v1",
+    "commit": "80051a64d9abbd2c9b5bc0d16c0622753ebc3ae5",
+    "tree": "b1eb124916fd60db529f89e5dfa3c2b7b47a0f35",
+    "source_archive_sha256": "b6d7f1664cdd0213fce86f0cbf49aa0de6a1985724067ab0af4f512814466a33",
+    "binary_sha256": "f94395014a1756db3c862829f0a0721d8ed11f3f440fe80786edd1f70f6d72c7",
+    "build_flags": "-mod=readonly -trimpath -buildvcs=false",
+    "release": "80051a64d9abbd2c9b5bc0d16c0622753ebc3ae5-local",
+    "vcs_stamp_present": false
+  },
+  "runtime_check": {
+    "schema": "customer-current-cash-runtime.v1",
+    "release": "80051a64d9abbd2c9b5bc0d16c0622753ebc3ae5-local",
+    "process_model_config_matches": {
+      "AGENT_LLM_BASE_URL": true,
+      "AGENT_LLM_MODEL": true,
+      "AGENT_LLM_PROTOCOL": true,
+      "AGENT_LLM_API_KEY": true
+    },
+    "pid_changed": true,
+    "running_release_matches": true,
+    "model_calls": 0,
+    "jev_calls": 0,
+    "paid_evaluation_executed": false,
+    "agent_health": 200,
+    "gateway_portal": 200,
+    "request_started_at": "2026-10-23T03:49:55.687728+00:00",
+    "invalid_json_http_status": 400,
+    "request_finished_at": "2026-10-23T03:49:55.722313+00:00",
+    "trace_readback_confirmed": false
+  },
+  "kafka_health": {
+    "schema": "kafka-health-threshold-validation.v1",
+    "before_interval_seconds": 5,
+    "before_timeout_seconds": 5,
+    "after_interval_seconds": 15,
+    "after_timeout_seconds": 30,
+    "standalone_probe_elapsed_seconds": [
+      18.84,
+      24.02
+    ],
+    "standalone_probe_exit_codes": [
+      0,
+      0
+    ],
+    "current_health": "healthy",
+    "same_data_mounts": [
+      {
+        "type": "volume",
+        "name": "ai-gateway_kafka-data",
+        "destination": "/tmp/kraft-combined-logs"
+      },
+      {
+        "type": "volume",
+        "name": "b28bafa388160569a12a1ffb9e3f9305f1c654b7ffaf2bf2b7b5306eca4c2b9e",
+        "destination": "/etc/kafka/secrets"
+      },
+      {
+        "type": "volume",
+        "name": "f46c66c1d57656096d6543df3f6c5aa33b166ddd436fcd0261d371504ff94f66",
+        "destination": "/mnt/shared/config"
+      },
+      {
+        "type": "volume",
+        "name": "05b89f54c077488a94cc51c4aae72d36f93eeb979351f02f2fd541f8062aa751",
+        "destination": "/var/lib/kafka/data"
+      }
+    ],
+    "health_config": {
+      "Test": [
+        "CMD-SHELL",
+        "/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:29092 --list >/dev/null 2>&1"
+      ],
+      "Interval": 15000000000,
+      "Timeout": 30000000000,
+      "Retries": 30
+    }
+  },
+  "backup_available": true,
+  "paid_evaluation_executed": false,
+  "limitations": [
+    "Health and malformed-JSON rejection do not establish live model cash-query behavior.",
+    "Build is from committed git archive, with explicit provenance and no Go VCS stamp.",
+    "No paid retest or consumed batch claim was reused."
+  ]
+}
