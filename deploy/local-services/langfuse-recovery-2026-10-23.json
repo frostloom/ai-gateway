@@ -1,0 +1,113 @@
+{
+  "schema": "langfuse-recovery-validation.v1",
+  "date": "2026-10-23",
+  "runtime_check": {
+    "schema": "customer-current-cash-runtime.v1",
+    "release": "80051a64d9abbd2c9b5bc0d16c0622753ebc3ae5-local",
+    "process_model_config_matches": {
+      "AGENT_LLM_BASE_URL": true,
+      "AGENT_LLM_MODEL": true,
+      "AGENT_LLM_PROTOCOL": true,
+      "AGENT_LLM_API_KEY": true
+    },
+    "pid_changed": true,
+    "running_release_matches": true,
+    "model_calls": 0,
+    "jev_calls": 0,
+    "paid_evaluation_executed": false,
+    "agent_health": 200,
+    "gateway_portal": 200,
+    "request_started_at": "2026-10-23T04:20:58.694790+00:00",
+    "invalid_json_http_status": 400,
+    "request_finished_at": "2026-10-23T04:20:58.713515+00:00",
+    "trace_readback_confirmed": true,
+    "observations": [
+      {
+        "trace_id": "ab923259cbb20718bea4a965fc758f4c",
+        "name": "agent.turn",
+        "release": "80051a64d9abbd2c9b5bc0d16c0622753ebc3ae5-local",
+        "http_status": 400,
+        "stage": "request",
+        "llm_calls": 0,
+        "jev_calls": 0
+      }
+    ]
+  },
+  "old_second_batch_scores": {
+    "jev_calls": 0,
+    "kind": "verified",
+    "model_calls": 0,
+    "plan_sha256": "ce035ce7156a7ad5f9497f91e3fcdd38be8cd954ef058fd73d9dfd42cb5cc757",
+    "score_count": 14,
+    "trace_summaries": [
+      {
+        "arm": "model",
+        "case_key": "balance-020/explicit_scope_followup",
+        "content_turns": 2,
+        "evidence_kind": "recorded_run",
+        "expected_turns": 2,
+        "require_answers": true,
+        "trace_id": "63eddfe1298ebf40c2bb24d801af9456",
+        "turns": 2
+      },
+      {
+        "arm": "jev_selective",
+        "case_key": "balance-020/explicit_scope_followup",
+        "content_turns": 2,
+        "evidence_kind": "recorded_run",
+        "expected_turns": 2,
+        "require_answers": true,
+        "trace_id": "ef17db2996f1b6c2d93d4c63f5e13615",
+        "turns": 2
+      }
+    ]
+  },
+  "stable_window_seconds": 90.0,
+  "services": {
+    "ai-gateway-langfuse-langfuse-web-1": {
+      "status": "running",
+      "health": "healthy",
+      "restarts": 0,
+      "started": "2026-10-23T04:18:13.959650958Z"
+    },
+    "ai-gateway-langfuse-langfuse-worker-1": {
+      "status": "running",
+      "health": "healthy",
+      "restarts": 0,
+      "started": "2026-10-23T04:18:13.950749958Z"
+    },
+    "ai-gateway-langfuse-postgres-1": {
+      "status": "running",
+      "health": "healthy",
+      "restarts": 0,
+      "started": "2026-10-23T04:18:14.0232185Z"
+    },
+    "ai-gateway-langfuse-redis-1": {
+      "status": "running",
+      "health": "healthy",
+      "restarts": 0,
+      "started": "2026-10-23T04:18:13.868054958Z"
+    },
+    "ai-gateway-langfuse-clickhouse-1": {
+      "status": "running",
+      "health": "healthy",
+      "restarts": 0,
+      "started": "2026-10-23T04:18:14.002988Z"
+    },
+    "ai-gateway-langfuse-minio-1": {
+      "status": "running",
+      "health": "healthy",
+      "restarts": 0,
+      "started": "2026-10-23T04:18:13.924643917Z"
+    }
+  },
+  "actions": [
+    "Opened existing Docker Desktop and waited for API recovery",
+    "No Langfuse or global resource configuration changes",
+    "One new malformed JSON request, rejected before inference"
+  ],
+  "model_calls": 0,
+  "jev_calls": 0,
+  "historical_root_cause_confirmed": false,
+  "prior_deployment_receipt_modified": false
+}
