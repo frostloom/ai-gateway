@@ -33,6 +33,9 @@ func (t PilotTarget) modelSettings() PairModelSettings {
 func (p CampaignPreparationPlan) validateTarget(model PairModelSettings, jevModel string) error {
 	if p.CampaignID != "" || p.CustomerRevision != "" || p.RuntimeContractSHA != "" {
 		scope, ok := checkedCashRetestScope("cash-read-retest-authorization.v2", p.CampaignID)
+		if !ok {
+			scope, ok = checkedRechargeScope("recharge-confirm-authorization.v1", p.CampaignID)
+		}
 		if !ok || p.CustomerRevision != scope.CustomerRevision || p.RuntimeContractSHA != scope.RuntimeContractSHA || p.Schema != "campaign-preflight-plan.v2" {
 			return fmt.Errorf("recovery retest plan markers differ")
 		}

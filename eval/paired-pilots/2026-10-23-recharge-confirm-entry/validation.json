@@ -1,0 +1,51 @@
+{
+  "schema": "recharge-confirm-entry-validation.v1",
+  "base_commit": "4aadd59ad5145947501e7d7e231a2f0d36dc9308",
+  "red_observed": [
+    "new fixed scope rejected before implementation",
+    "new billing schema accepted by legacy mode without identity before rejection fix"
+  ],
+  "targeted_local_handler_modes": [
+    "complete",
+    "provider-failure",
+    "jev-failure"
+  ],
+  "normal_local_usage": {
+    "model_calls": 2,
+    "jev_calls": 1,
+    "external_calls": 0
+  },
+  "full_go_test": {
+    "command": "SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX26.5.sdk go test ./... -count=1",
+    "exit_code": 0,
+    "passed_packages": 18,
+    "log_sha256": "88e890b206cf57b02d59037c54e6f5cd97377c0ef7f60e655699d89faf3339e9"
+  },
+  "independent_review": "no important findings",
+  "historical_evidence": {
+    "historical_private_evidence_files": 99,
+    "all_hashes_unchanged": true,
+    "recharge_claim_exists": false,
+    "new_authorization_digests_valid": true
+  },
+  "cleanup": {
+    "all_owned_pair_schemas_absent": true,
+    "jev_calls": 0,
+    "model_calls": 0,
+    "read_only": true,
+    "remaining_isolated_pair_schemas": 0,
+    "schema": "cash-recovery-cleanup-inventory.v1"
+  },
+  "model_calls": 0,
+  "jev_calls": 0,
+  "real_evaluation_executed": false,
+  "customer_redeployed": false,
+  "customer_runtime_source_revision": "056a760033186e4b768b320e50ec7b7186a32157",
+  "budget_ceiling_approved": true,
+  "exact_execution_authorized": false,
+  "private_source_sha256": {
+    ".tmp/paired-live-private/recharge-confirm-entry-20261023/go-test.log": "88e890b206cf57b02d59037c54e6f5cd97377c0ef7f60e655699d89faf3339e9",
+    ".tmp/paired-live-private/recharge-confirm-entry-20261023/cleanup-inventory.json": "0762ad060e774cdd794f1c92a0d93d7164e07e5e920c23e075ba3f1bb058dad9",
+    ".tmp/paired-live-private/recharge-confirm-entry-20261023/integrity-check.json": "d4016abf7d2fa5687794480792ba104eab3012cfc6b4ded11eb6f12f8f9cc1d8"
+  }
+}

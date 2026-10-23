@@ -26,6 +26,9 @@ type AuthorizedFirstBatchOptions struct {
 	JEVFactory     func() jev.Evaluator
 }
 type AuthorizedFirstBatchReceipt struct {
+	BudgetCeilingSHA             string                      `json:"budget_ceiling_sha256,omitempty"`
+	OfflineManifestSHA           string                      `json:"prior_offline_manifest_sha256,omitempty"`
+	OfflineAcceptanceSHA         string                      `json:"prior_offline_acceptance_sha256,omitempty"`
 	CustomerRevision             string                      `json:"customer_source_revision,omitempty"`
 	RuntimeContractSHA           string                      `json:"runtime_contract_sha256,omitempty"`
 	CampaignID                   string                      `json:"campaign_id,omitempty"`
@@ -97,6 +100,9 @@ func runAuthorizedBatch(ctx context.Context, dir string, o AuthorizedFirstBatchO
 	r = AuthorizedFirstBatchReceipt{Schema: "authorized-first-batch.v1", Status: "stopped", AuthorizationSHA: o.Pilot.authorizationSHA, PlanSHA: o.Pilot.planSHA, BillingSHA: o.Pilot.billingSHA, EvidenceSHA: o.Pilot.evidenceSHA, Revision: o.Revision, JEVFailurePolicy: o.Pilot.JEVFailurePolicy(), VendorFailureChargesVerified: o.Pilot.JEVFailureChargesVerified()}
 	if o.Pilot.IsRetest() {
 		r.Schema = o.Pilot.retestScope.ReceiptSchema
+		r.BudgetCeilingSHA = o.Pilot.retestScope.BudgetCeilingSHA
+		r.OfflineManifestSHA = o.Pilot.retestScope.OfflineManifestSHA
+		r.OfflineAcceptanceSHA = o.Pilot.retestScope.OfflineAcceptanceSHA
 		r.CampaignID = o.Pilot.CampaignID()
 		r.PriorJournalSHA = o.Pilot.retestScope.PriorJournalSHA
 		r.PriorReviewSHA = o.Pilot.retestScope.PriorReviewSHA

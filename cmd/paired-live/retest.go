@@ -20,7 +20,7 @@ func claimRetest(root string, p taskbench.AuthorizedPilot, out string) error {
 // Each reviewed identity is fixed across plans, revisions, output paths and failed runs.
 // Never remove a claim automatically or reuse any legacy campaign claim.
 func persistRetestClaim(root, campaignID, revision, out string) error {
-	if campaignID != taskbench.CashReadRetestID && campaignID != taskbench.CashReadRecoveryRetestID {
+	if campaignID != taskbench.CashReadRetestID && campaignID != taskbench.CashReadRecoveryRetestID && campaignID != taskbench.RechargeConfirmID {
 		return fmt.Errorf("unknown fixed retest scope")
 	}
 
@@ -35,7 +35,15 @@ func persistRetestClaim(root, campaignID, revision, out string) error {
 	if err != nil {
 		return fmt.Errorf("retest already claimed or durable claim unavailable")
 	}
-	raw, _ := json.Marshal(map[string]string{"schema": "paired-live-retest-claim.v1", "campaign_id": campaignID, "execution_revision": revision, "output": out, "status": "consumed_before_execution"})
+	record := map[string]any{"schema": "paired-live-retest-claim.v1", "campaign_id": campaignID, "execution_revision": revision, "output": out, "status": "consumed_before_execution"}
+	if campaignID == taskbench.RechargeConfirmID {
+		record["budget_ceiling_sha256"] = taskbench.RechargeBudgetCeilingSHA
+		record["reserved_model_calls"] = 10
+		record["reserved_model_micro_cny"] = 337920
+		record["reserved_jev_calls"] = 1
+		record["reserved_jev_micro_usd"] = 2688
+	}
+	raw, _ := json.Marshal(record)
 	_, w := f.Write(append(raw, '\n'))
 	s := f.Sync()
 	c := f.Close()

@@ -1,5 +1,7 @@
 # ai-gateway 项目记忆
 
+2026-10-23 已新增充值确认独立受控入口recharge-confirm-20261023，复用paired-live -retest但使用独立recharge-confirm-authorization.v1/计费/回执schema。固定recharge-002/confirm，两臂四轮共享10模型/¥0.337920声明预留+1JEV/$0.002688，绑定已部署056a760源码、35c117合同、修复离线manifest/acceptance及已批准¥100+$1预算SHA。固定永久claim记录预算摘要和预留，失败/换输出/换版本不重领；当前新预算只分配此一范围，未来范围须汇总永久预留再分配，不是通用多范围预算管理器。旧现金范围和计费不能混用，旧入口拒绝无身份新计费schema。本轮示例精确授权false、费率/token证据false、只读不就绪，无新真实推理/claim/客服重部署；这不撤销或重复询问总预算批准。新入口真实Handler隔离替身三路径、Go全项目18测试包及独立审查通过，隔离库0、99旧私密证据不变。档案eval/paired-pilots/2026-10-23-recharge-confirm-entry/，操作与剩余执行绑定见docs/recharge-confirm-entry-2026-10-23.md。
+
 2026-10-23 充值确认边界修复056a760033186e4b768b320e50ec7b7186a32157已部署本机客服，覆盖文末该修复“尚未部署”的状态。归档构建（buildvcs=false，独立来源记录）安装SHA f4d6c6c0b4e7d7f819d00b1dc53ca3e1f5bb19168abe1b522b2e5052dbf553d5；两份.env.agent仅更新release，根.env不变，旧bin/配置备份保留。原launchd温和重启后新PID/release、四项模型配置、health/portal通过；解析阶段400实际返回合同35c117c3dcee33a783e074712d6836236dd1f6a9d4a798fdfd01f0c92e95bce1，trace994720ab0e63798ac48994dc90144ddf已Langfuse读回，模型/JEV均0。99份历史私密证据摘要不变，不等同真实模型质量通过。用户对人民币＋美元累计预算问题回复“100+1”，后续真实测评累计上限¥100＋$1已经批准，不再重复询问预算；不自动重试、不重置旧claim，不以余额授权额外支出。精确新案例/调用数/供应商payload/版本和累计预留仍须冻结绑定，预算批准不等于费率已核实。见docs/customer-recharge-boundary-deployment-2026-10-23.md和eval/paired-pilots/2026-10-23-expanded-budget/budget-ceiling.json。
 
 只在处理 ai-gateway 时使用。Hindsight 在 `http://127.0.0.1:8888`，记忆库 `ai-gateway`。服务没开就跳过，不要为此停下来问用户。不要读取或写入其他项目的记忆库。

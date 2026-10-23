@@ -1,0 +1,19 @@
+{
+  "schema": "recharge-confirm-billing-attestation.v1",
+  "campaign_id": "recharge-confirm-20261023",
+  "execution_revision": "0000000000000000000000000000000000000000",
+  "scope_plan_sha256": "91916a43e291d84ecf39517400abbee02b7aef847a0713637198d5e15b2dc518",
+  "model_base": "https://api.deepseek.com/v1",
+  "model": "deepseek-flash",
+  "protocol": "openai",
+  "jev_model": "jev-1.13.0",
+  "account_tariff_verified": false,
+  "token_envelope_verified": false,
+  "jev_failure_charges_verified": false,
+  "jev_failure_policy": "reserve_full_attempt_stop_on_failure",
+  "jev_max_input_tokens": 64000,
+  "jev_input_micro_usd_per_million": 42000,
+  "jev_full_attempt_micro_usd": 2688,
+  "evidence_sha256": "",
+  "runtime_contract_sha256": "35c117c3dcee33a783e074712d6836236dd1f6a9d4a798fdfd01f0c92e95bce1"
+}

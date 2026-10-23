@@ -60,7 +60,7 @@ func runWithOutput(args []string, out io.Writer) int {
 	previous := f.String("continue-from", "", "original successful batch-001 output; selects batch-002 only")
 	review := f.String("review", "", "bound passing first-batch independent review JSON")
 	permission := f.String("continuation-authorization", "", "explicit batch-002 permission; required only for execution")
-	retest := f.Bool("retest", false, "separate one-case cash retest; requires independent scope and billing")
+	retest := f.Bool("retest", false, "separate fixed one-case evaluation; requires independent scope and billing")
 	execute := f.Bool("execute", false, "explicitly run batch-001 only when all evidence is ready")
 	var files envFiles
 	f.Var(&files, "env-file", "explicit private env file (repeat); never loaded by check")
