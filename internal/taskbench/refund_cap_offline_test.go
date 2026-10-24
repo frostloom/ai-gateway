@@ -16,7 +16,9 @@ import (
 
 // Frozen task acceptance uses authoritative fixture state. A diagnostic that
 // detects an unsupported success claim is a blocking finding, not task success.
-func TestRefundCapOfflineAcceptance(t *testing.T) {
+func TestRefundCapOfflineAcceptance(t *testing.T) { testRefundCapOfflineAcceptance(t, false) }
+func TestRefundCapRepairRequired(t *testing.T)    { testRefundCapOfflineAcceptance(t, true) }
+func testRefundCapOfflineAcceptance(t *testing.T, requireRepair bool) {
 	for _, mode := range []string{"normal", "unsupported-completion", "insufficient-cap"} {
 		t.Run(mode, func(t *testing.T) {
 			o := localCampaignOptions(t)
@@ -128,6 +130,9 @@ func TestRefundCapOfflineAcceptance(t *testing.T) {
 						t.Fatal("budget failure hidden or wrote business state")
 					}
 					continue
+				}
+				if mode == "unsupported-completion" && requireRepair && !r.StructuralPass {
+					t.Fatalf("required refund correction missing: %v", r.Errors)
 				}
 				if mode == "unsupported-completion" && !r.StructuralPass {
 					if r.Status != "failed" || r.Success || len(r.Observations) != 3 || !strings.Contains(strings.Join(r.Errors, " "), "write_completion") {

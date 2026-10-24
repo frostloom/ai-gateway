@@ -1,0 +1,92 @@
+{
+  "schema": "refund-completion-fix-acceptance.v1",
+  "base_revision": "6a3273ce7acf59ccd4d01fa489b396198f8be2ef",
+  "case_key": "refund-001/balance_cap",
+  "paths": [
+    {
+      "mode": "normal",
+      "arms": [
+        {
+          "arm": "model",
+          "status": "needs_review",
+          "structural_pass": true,
+          "fact_errors": 0,
+          "http_failures": 0,
+          "observed_turns": 3
+        },
+        {
+          "arm": "jev_selective",
+          "status": "needs_review",
+          "structural_pass": true,
+          "fact_errors": 0,
+          "http_failures": 0,
+          "observed_turns": 3
+        }
+      ],
+      "synthetic_model_attempts": 4,
+      "synthetic_jev_attempts": 1
+    },
+    {
+      "mode": "unsupported-completion",
+      "arms": [
+        {
+          "arm": "model",
+          "status": "needs_review",
+          "structural_pass": true,
+          "fact_errors": 0,
+          "http_failures": 0,
+          "observed_turns": 3
+        },
+        {
+          "arm": "jev_selective",
+          "status": "needs_review",
+          "structural_pass": true,
+          "fact_errors": 0,
+          "http_failures": 0,
+          "observed_turns": 3
+        }
+      ],
+      "synthetic_model_attempts": 6,
+      "synthetic_jev_attempts": 1
+    },
+    {
+      "mode": "insufficient-cap",
+      "arms": [
+        {
+          "arm": "model",
+          "status": "needs_review",
+          "structural_pass": true,
+          "fact_errors": 0,
+          "http_failures": 0,
+          "observed_turns": 3
+        },
+        {
+          "arm": "jev_selective",
+          "status": "failed",
+          "structural_pass": false,
+          "fact_errors": 0,
+          "http_failures": 1,
+          "observed_turns": 2
+        }
+      ],
+      "synthetic_model_attempts": 3,
+      "synthetic_jev_attempts": 1
+    }
+  ],
+  "requested_cent": 10000,
+  "available_cent": 2500,
+  "actual_confirmed_refund_cent": 2500,
+  "finite_guard_only": true,
+  "max_reply_repairs": 1,
+  "automatic_refund_execution_added": false,
+  "runtime_contract_sha256": "a95cacd041830012619a0f4d7fd8208c184aa9e8d45b7ee05afaa239a30e1e8f",
+  "original_failure_retained": true,
+  "allow_paid": false,
+  "ready_for_paid_run": false,
+  "deployed": false,
+  "real_model_calls": 0,
+  "real_jev_calls": 0,
+  "cumulative_real_model_calls": 33,
+  "cumulative_real_jev_calls": 8,
+  "new_claim_created": false
+}

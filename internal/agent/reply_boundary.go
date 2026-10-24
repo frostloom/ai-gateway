@@ -13,6 +13,11 @@ var rechargeApplication = regexp.MustCompile(`^(?:请\s*)?(?:(?:帮我|给我|�
 // An explicit own-account application, with a bounded optional preview suffix.
 // Whole-string matching excludes history, quotations, other owners and compounds.
 var ownRechargeApplication = regexp.MustCompile(`^(?:明确申请|请)?\s*给我本人账户充值\s*[0-9]+(?:\.[0-9]+)?\s*(?:元人民币|元|人民币|rmb|yuan)\s*(?:[，,]\s*请先预览)?[。.!！]?$`)
+
+// Finite explicit refund applications only; whole-string matching preserves
+// negation/history/quotation/other-owner/consultation and compound exclusions.
+var refundApplication = regexp.MustCompile(`^(?:(?:请\s*)?(?:(?:帮我|给我|替我|我要|我想|现在|立即)\s*)?(?:退款|退钱)\s*(?:[0-9]+(?:\.[0-9]+)?\s*(?:元人民币|元|块|人民币|rmb|yuan)?)?|(?:不是修改旧申请[；;]\s*新申请)?从我本人账户退回充值款\s*[0-9]+(?:\.[0-9]+)?\s*(?:元人民币|元|人民币|rmb|yuan)\s*(?:[，,]\s*请先预览)?)[。.!！]?$`)
+var refundCompletion = regexp.MustCompile(`^\s*(?:已)?退款成功(?:[：:。！!，,]|$)`)
 var rechargeCompletion = regexp.MustCompile(`^\s*(?:已)?充值成功(?:[：:。！!，,]|$)`)
 var explicitMoney = regexp.MustCompile(`(?:\d+\s*(?:元|块|rmb|yuan)|(?:充值|退款|退|充)\s*\d+)`)
 var asksMoney = regexp.MustCompile(`^(?:请问|请告诉|请提供|麻烦|您|你).{0,16}(?:充|退).{0,12}(?:多少|金额)`)
@@ -40,6 +45,9 @@ func replyRepairReason(reply, user string, pending *pendingAction) string {
 	application := strings.ToLower(strings.TrimSpace(user))
 	if (rechargeApplication.MatchString(application) || ownRechargeApplication.MatchString(application)) && rechargeCompletion.MatchString(reply) {
 		return "本轮尚未执行已确认的充值，不能声称充值成功或到账。明确申请应先调用充值工具生成真实预览，等待用户确认后才执行；不能生成预览就说明未执行。"
+	}
+	if refundApplication.MatchString(application) && refundCompletion.MatchString(reply) {
+		return "本轮尚未执行已确认的退款，不能声称退款成功或已退回。明确申请应先调用退款工具生成真实预览，等待用户确认后才执行；不能生成预览就说明未执行。"
 	}
 	if pending == nil && strings.Contains(reply, "确认") && confirmationInvitation.MatchString(reply) {
 		return "没有待确认操作，不能要求确认执行。明确申请且参数齐全则调用对应写工具生成真实预览；仅咨询则回答方法。"

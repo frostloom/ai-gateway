@@ -1,0 +1,49 @@
+{
+  "schema": "refund-completion-fix-validation.v1",
+  "full_go_regression": {
+    "command": "SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX26.5.sdk go test ./... -count=1 -json",
+    "exit_code": 0,
+    "passed_packages": [
+      "github.com/frostloom/ai-gateway/cmd/agent",
+      "github.com/frostloom/ai-gateway/cmd/conversation-eval",
+      "github.com/frostloom/ai-gateway/cmd/eval",
+      "github.com/frostloom/ai-gateway/cmd/task-eval",
+      "github.com/frostloom/ai-gateway/cmd/paired-eval",
+      "github.com/frostloom/ai-gateway/internal/billing/admin",
+      "github.com/frostloom/ai-gateway/internal/billing/outbox",
+      "github.com/frostloom/ai-gateway/internal/gateway/handler",
+      "github.com/frostloom/ai-gateway/cmd/paired-live",
+      "github.com/frostloom/ai-gateway/internal/gateway/middleware",
+      "github.com/frostloom/ai-gateway/internal/jev",
+      "github.com/frostloom/ai-gateway/internal/observability",
+      "github.com/frostloom/ai-gateway/internal/pkg/controlplane",
+      "github.com/frostloom/ai-gateway/internal/router",
+      "github.com/frostloom/ai-gateway/internal/billing/consumer",
+      "github.com/frostloom/ai-gateway/internal/agent",
+      "github.com/frostloom/ai-gateway/internal/billing/store",
+      "github.com/frostloom/ai-gateway/internal/taskbench"
+    ],
+    "failure_events": 0,
+    "standard_parallelism": true,
+    "default_timeout": true
+  },
+  "targeted_capture_exit_code": 0,
+  "red_green_evidence": [
+    "red.log",
+    "contract-red.log",
+    "green.log",
+    "unit-red.log",
+    "capture-final.log"
+  ],
+  "historical_files_checked": 3095,
+  "historical_hashes_changed": 0,
+  "remaining_isolated_databases": 0,
+  "independent_review": {
+    "reviewer": "review_refund_completion_fix",
+    "p1_p2_findings": [],
+    "limitation": "Reviewer integration execution blocked by sandbox MySQL access; primary full regression and capture passed"
+  },
+  "deployed": false,
+  "new_real_model_calls": 0,
+  "new_real_jev_calls": 0
+}

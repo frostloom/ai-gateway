@@ -129,7 +129,7 @@ func syntheticRetestPilotAt(t *testing.T, base, revision string, reformat bool) 
 	if err != nil {
 		t.Fatalf("synthetic scope %v", err)
 	}
-	if p.CampaignID() == taskbench.CashReadRecoveryRetestID || p.CampaignID() == taskbench.RechargeConfirmID || p.CampaignID() == taskbench.RechargeDiagnosticRetestID || p.CampaignID() == taskbench.RechargeCancelID {
+	if p.CampaignID() == taskbench.CashReadRecoveryRetestID || p.CampaignID() == taskbench.RechargeConfirmID || p.CampaignID() == taskbench.RechargeDiagnosticRetestID || p.CampaignID() == taskbench.RechargeCancelID || p.CampaignID() == taskbench.RechargeSupplementID {
 		if p.Ready() || !strings.Contains(strings.Join(p.Blockers(), ","), "runtime_contract_mismatch") {
 			t.Fatal("historical contract accepted execution")
 		}
@@ -219,7 +219,7 @@ func TestRecoveryRetestClaimRejectsUnknownIdentityBeforeIO(t *testing.T) {
 }
 
 func TestHistoricalRechargeCannotClaimNewRuntime(t *testing.T) {
-	for _, base := range []string{"2026-10-23-recharge-confirm-entry", "2026-10-23-recharge-diagnostic-retest-entry", "2026-10-24-recharge-cancel-entry"} {
+	for _, base := range []string{"2026-10-23-recharge-confirm-entry", "2026-10-23-recharge-diagnostic-retest-entry", "2026-10-24-recharge-cancel-entry", "2026-10-24-recharge-supplement-entry"} {
 		p := syntheticRetestPilotAt(t, "../../eval/paired-pilots/"+base, strings.Repeat("a", 40), false)
 		root := t.TempDir()
 		if claimRetest(root, p, "absent") == nil {

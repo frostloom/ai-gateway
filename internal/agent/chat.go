@@ -554,6 +554,9 @@ func (h *Handler) llmLoop(ctx context.Context, sessionID string, tenantID uint64
 			if name == "recharge" && rechargeCompletion.MatchString(explanation) {
 				explanation = "本次仅生成充值预览，尚未执行。"
 			}
+			if name == "refund_recharge" && refundCompletion.MatchString(explanation) {
+				explanation = "本次仅生成退款预览，尚未执行。"
+			}
 			if cashBalanceClaimNeedsRead(explanation, trace) {
 				// A preview already exists: preserve its confirmation binding;
 				// do not call the model again or repeat the proposed operation.
