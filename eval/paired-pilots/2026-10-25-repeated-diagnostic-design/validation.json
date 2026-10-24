@@ -1,0 +1,19 @@
+{
+  "schema": "repeated-diagnostic-design-check.v1",
+  "legacy_schedule_byte_values_equal": true,
+  "pairs": 24,
+  "arms": 48,
+  "turns": 104,
+  "each_case_four_pairs_two_orders_each_twice": true,
+  "model_call_cap": 248,
+  "jev_call_cap": 24,
+  "integer_budget_arithmetic_checked": true,
+  "prior_claim_sha_checked": true,
+  "provider_calls": 0,
+  "new_claims": 0,
+  "implementation_ready": false,
+  "paid_ready": false,
+  "all_source_bindings_checked": true,
+  "spec_plan_self_review": "Spec requirements mapped to 3 tasks; 5 review-focus classes each have explicit Task1/2 negative tests; no implementation or permission implied.",
+  "historical_cli_rejects_candidate_without_credentials": true
+}

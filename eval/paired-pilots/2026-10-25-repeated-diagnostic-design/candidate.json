@@ -1,0 +1,522 @@
+{
+  "schema": "repeated-export-diagnostic-design.v1",
+  "candidate_id": "v5-repeated-export-diagnostic-20261025",
+  "design_only": true,
+  "implemented": false,
+  "human_authorized": false,
+  "allow_paid": false,
+  "ready_for_paid_run": false,
+  "execution_revision_frozen": false,
+  "new_claim_created": false,
+  "customer_revision": "50e3c8dab14b4b6cc25322fd340a274e6970200b",
+  "runtime_contract_sha256": "a95cacd041830012619a0f4d7fd8208c184aa9e8d45b7ee05afaa239a30e1e8f",
+  "observer_diagnostic_revision": "4d887382300a906ae6d1a33972f3fe4d4aca4e0d",
+  "synthetic_archive_revision": "e8a8efe91abdd6ff014925e97dca518e08e7be48",
+  "prior_repeated_claim_sha256": "c7f14ee3b310cec23cf71b7dc004fe73b29ec5e8efa4b6c4167eb91159c8dd58",
+  "legacy_plan_sha256": "527334cf64842106d8b28003f7b40c1010bca02455fab20572f79affb7ccc8bf",
+  "target": {
+    "base_url": "https://api.deepseek.com/v1",
+    "model": "deepseek-flash",
+    "protocol": "openai",
+    "jev_model": "jev-1.13.0"
+  },
+  "candidate_limits": {
+    "max_batches": 24,
+    "max_model_calls": 248,
+    "max_model_micro_cny": 8380416,
+    "max_jev_calls": 24,
+    "max_jev_micro_usd": 64512,
+    "jev_micro_usd_per_attempt": 2688
+  },
+  "batches": [
+    {
+      "key": "balance-001/answer_complete",
+      "model_limits": {
+        "max_calls": 6,
+        "max_output_tokens": 128,
+        "max_request_bytes": 16384,
+        "input_token_ceiling": 16384,
+        "max_micro_cny": 202752,
+        "input_micro_cny_per_million": 2000000,
+        "output_micro_cny_per_million": 8000000
+      },
+      "max_jev_calls": 1,
+      "pair_id": "block-00-pair-00",
+      "block_id": "block-00",
+      "arm_order": [
+        "model",
+        "jev_selective"
+      ]
+    },
+    {
+      "key": "balance-020/explicit_scope_followup",
+      "model_limits": {
+        "max_calls": 12,
+        "max_output_tokens": 128,
+        "max_request_bytes": 16384,
+        "input_token_ceiling": 16384,
+        "max_micro_cny": 405504,
+        "input_micro_cny_per_million": 2000000,
+        "output_micro_cny_per_million": 8000000
+      },
+      "max_jev_calls": 1,
+      "pair_id": "block-00-pair-01",
+      "block_id": "block-00",
+      "arm_order": [
+        "model",
+        "jev_selective"
+      ]
+    },
+    {
+      "key": "recharge-002/confirm",
+      "model_limits": {
+        "max_calls": 10,
+        "max_output_tokens": 128,
+        "max_request_bytes": 16384,
+        "input_token_ceiling": 16384,
+        "max_micro_cny": 337920,
+        "input_micro_cny_per_million": 2000000,
+        "output_micro_cny_per_million": 8000000
+      },
+      "max_jev_calls": 1,
+      "pair_id": "block-00-pair-02",
+      "block_id": "block-00",
+      "arm_order": [
+        "model",
+        "jev_selective"
+      ]
+    },
+    {
+      "key": "recharge-002/cancel",
+      "model_limits": {
+        "max_calls": 10,
+        "max_output_tokens": 128,
+        "max_request_bytes": 16384,
+        "input_token_ceiling": 16384,
+        "max_micro_cny": 337920,
+        "input_micro_cny_per_million": 2000000,
+        "output_micro_cny_per_million": 8000000
+      },
+      "max_jev_calls": 1,
+      "pair_id": "block-00-pair-03",
+      "block_id": "block-00",
+      "arm_order": [
+        "model",
+        "jev_selective"
+      ]
+    },
+    {
+      "key": "recharge-001/supplement_then_confirm",
+      "model_limits": {
+        "max_calls": 12,
+        "max_output_tokens": 128,
+        "max_request_bytes": 16384,
+        "input_token_ceiling": 16384,
+        "max_micro_cny": 405504,
+        "input_micro_cny_per_million": 2000000,
+        "output_micro_cny_per_million": 8000000
+      },
+      "max_jev_calls": 1,
+      "pair_id": "block-00-pair-04",
+      "block_id": "block-00",
+      "arm_order": [
+        "model",
+        "jev_selective"
+      ]
+    },
+    {
+      "key": "refund-001/balance_cap",
+      "model_limits": {
+        "max_calls": 12,
+        "max_output_tokens": 128,
+        "max_request_bytes": 16384,
+        "input_token_ceiling": 16384,
+        "max_micro_cny": 405504,
+        "input_micro_cny_per_million": 2000000,
+        "output_micro_cny_per_million": 8000000
+      },
+      "max_jev_calls": 1,
+      "pair_id": "block-00-pair-05",
+      "block_id": "block-00",
+      "arm_order": [
+        "model",
+        "jev_selective"
+      ]
+    },
+    {
+      "key": "balance-020/explicit_scope_followup",
+      "model_limits": {
+        "max_calls": 12,
+        "max_output_tokens": 128,
+        "max_request_bytes": 16384,
+        "input_token_ceiling": 16384,
+        "max_micro_cny": 405504,
+        "input_micro_cny_per_million": 2000000,
+        "output_micro_cny_per_million": 8000000
+      },
+      "max_jev_calls": 1,
+      "pair_id": "block-01-pair-00",
+      "block_id": "block-01",
+      "arm_order": [
+        "jev_selective",
+        "model"
+      ]
+    },
+    {
+      "key": "recharge-002/confirm",
+      "model_limits": {
+        "max_calls": 10,
+        "max_output_tokens": 128,
+        "max_request_bytes": 16384,
+        "input_token_ceiling": 16384,
+        "max_micro_cny": 337920,
+        "input_micro_cny_per_million": 2000000,
+        "output_micro_cny_per_million": 8000000
+      },
+      "max_jev_calls": 1,
+      "pair_id": "block-01-pair-01",
+      "block_id": "block-01",
+      "arm_order": [
+        "jev_selective",
+        "model"
+      ]
+    },
+    {
+      "key": "recharge-002/cancel",
+      "model_limits": {
+        "max_calls": 10,
+        "max_output_tokens": 128,
+        "max_request_bytes": 16384,
+        "input_token_ceiling": 16384,
+        "max_micro_cny": 337920,
+        "input_micro_cny_per_million": 2000000,
+        "output_micro_cny_per_million": 8000000
+      },
+      "max_jev_calls": 1,
+      "pair_id": "block-01-pair-02",
+      "block_id": "block-01",
+      "arm_order": [
+        "jev_selective",
+        "model"
+      ]
+    },
+    {
+      "key": "recharge-001/supplement_then_confirm",
+      "model_limits": {
+        "max_calls": 12,
+        "max_output_tokens": 128,
+        "max_request_bytes": 16384,
+        "input_token_ceiling": 16384,
+        "max_micro_cny": 405504,
+        "input_micro_cny_per_million": 2000000,
+        "output_micro_cny_per_million": 8000000
+      },
+      "max_jev_calls": 1,
+      "pair_id": "block-01-pair-03",
+      "block_id": "block-01",
+      "arm_order": [
+        "jev_selective",
+        "model"
+      ]
+    },
+    {
+      "key": "refund-001/balance_cap",
+      "model_limits": {
+        "max_calls": 12,
+        "max_output_tokens": 128,
+        "max_request_bytes": 16384,
+        "input_token_ceiling": 16384,
+        "max_micro_cny": 405504,
+        "input_micro_cny_per_million": 2000000,
+        "output_micro_cny_per_million": 8000000
+      },
+      "max_jev_calls": 1,
+      "pair_id": "block-01-pair-04",
+      "block_id": "block-01",
+      "arm_order": [
+        "jev_selective",
+        "model"
+      ]
+    },
+    {
+      "key": "balance-001/answer_complete",
+      "model_limits": {
+        "max_calls": 6,
+        "max_output_tokens": 128,
+        "max_request_bytes": 16384,
+        "input_token_ceiling": 16384,
+        "max_micro_cny": 202752,
+        "input_micro_cny_per_million": 2000000,
+        "output_micro_cny_per_million": 8000000
+      },
+      "max_jev_calls": 1,
+      "pair_id": "block-01-pair-05",
+      "block_id": "block-01",
+      "arm_order": [
+        "jev_selective",
+        "model"
+      ]
+    },
+    {
+      "key": "recharge-002/confirm",
+      "model_limits": {
+        "max_calls": 10,
+        "max_output_tokens": 128,
+        "max_request_bytes": 16384,
+        "input_token_ceiling": 16384,
+        "max_micro_cny": 337920,
+        "input_micro_cny_per_million": 2000000,
+        "output_micro_cny_per_million": 8000000
+      },
+      "max_jev_calls": 1,
+      "pair_id": "block-02-pair-00",
+      "block_id": "block-02",
+      "arm_order": [
+        "model",
+        "jev_selective"
+      ]
+    },
+    {
+      "key": "recharge-002/cancel",
+      "model_limits": {
+        "max_calls": 10,
+        "max_output_tokens": 128,
+        "max_request_bytes": 16384,
+        "input_token_ceiling": 16384,
+        "max_micro_cny": 337920,
+        "input_micro_cny_per_million": 2000000,
+        "output_micro_cny_per_million": 8000000
+      },
+      "max_jev_calls": 1,
+      "pair_id": "block-02-pair-01",
+      "block_id": "block-02",
+      "arm_order": [
+        "model",
+        "jev_selective"
+      ]
+    },
+    {
+      "key": "recharge-001/supplement_then_confirm",
+      "model_limits": {
+        "max_calls": 12,
+        "max_output_tokens": 128,
+        "max_request_bytes": 16384,
+        "input_token_ceiling": 16384,
+        "max_micro_cny": 405504,
+        "input_micro_cny_per_million": 2000000,
+        "output_micro_cny_per_million": 8000000
+      },
+      "max_jev_calls": 1,
+      "pair_id": "block-02-pair-02",
+      "block_id": "block-02",
+      "arm_order": [
+        "model",
+        "jev_selective"
+      ]
+    },
+    {
+      "key": "refund-001/balance_cap",
+      "model_limits": {
+        "max_calls": 12,
+        "max_output_tokens": 128,
+        "max_request_bytes": 16384,
+        "input_token_ceiling": 16384,
+        "max_micro_cny": 405504,
+        "input_micro_cny_per_million": 2000000,
+        "output_micro_cny_per_million": 8000000
+      },
+      "max_jev_calls": 1,
+      "pair_id": "block-02-pair-03",
+      "block_id": "block-02",
+      "arm_order": [
+        "model",
+        "jev_selective"
+      ]
+    },
+    {
+      "key": "balance-001/answer_complete",
+      "model_limits": {
+        "max_calls": 6,
+        "max_output_tokens": 128,
+        "max_request_bytes": 16384,
+        "input_token_ceiling": 16384,
+        "max_micro_cny": 202752,
+        "input_micro_cny_per_million": 2000000,
+        "output_micro_cny_per_million": 8000000
+      },
+      "max_jev_calls": 1,
+      "pair_id": "block-02-pair-04",
+      "block_id": "block-02",
+      "arm_order": [
+        "model",
+        "jev_selective"
+      ]
+    },
+    {
+      "key": "balance-020/explicit_scope_followup",
+      "model_limits": {
+        "max_calls": 12,
+        "max_output_tokens": 128,
+        "max_request_bytes": 16384,
+        "input_token_ceiling": 16384,
+        "max_micro_cny": 405504,
+        "input_micro_cny_per_million": 2000000,
+        "output_micro_cny_per_million": 8000000
+      },
+      "max_jev_calls": 1,
+      "pair_id": "block-02-pair-05",
+      "block_id": "block-02",
+      "arm_order": [
+        "model",
+        "jev_selective"
+      ]
+    },
+    {
+      "key": "recharge-002/cancel",
+      "model_limits": {
+        "max_calls": 10,
+        "max_output_tokens": 128,
+        "max_request_bytes": 16384,
+        "input_token_ceiling": 16384,
+        "max_micro_cny": 337920,
+        "input_micro_cny_per_million": 2000000,
+        "output_micro_cny_per_million": 8000000
+      },
+      "max_jev_calls": 1,
+      "pair_id": "block-03-pair-00",
+      "block_id": "block-03",
+      "arm_order": [
+        "jev_selective",
+        "model"
+      ]
+    },
+    {
+      "key": "recharge-001/supplement_then_confirm",
+      "model_limits": {
+        "max_calls": 12,
+        "max_output_tokens": 128,
+        "max_request_bytes": 16384,
+        "input_token_ceiling": 16384,
+        "max_micro_cny": 405504,
+        "input_micro_cny_per_million": 2000000,
+        "output_micro_cny_per_million": 8000000
+      },
+      "max_jev_calls": 1,
+      "pair_id": "block-03-pair-01",
+      "block_id": "block-03",
+      "arm_order": [
+        "jev_selective",
+        "model"
+      ]
+    },
+    {
+      "key": "refund-001/balance_cap",
+      "model_limits": {
+        "max_calls": 12,
+        "max_output_tokens": 128,
+        "max_request_bytes": 16384,
+        "input_token_ceiling": 16384,
+        "max_micro_cny": 405504,
+        "input_micro_cny_per_million": 2000000,
+        "output_micro_cny_per_million": 8000000
+      },
+      "max_jev_calls": 1,
+      "pair_id": "block-03-pair-02",
+      "block_id": "block-03",
+      "arm_order": [
+        "jev_selective",
+        "model"
+      ]
+    },
+    {
+      "key": "balance-001/answer_complete",
+      "model_limits": {
+        "max_calls": 6,
+        "max_output_tokens": 128,
+        "max_request_bytes": 16384,
+        "input_token_ceiling": 16384,
+        "max_micro_cny": 202752,
+        "input_micro_cny_per_million": 2000000,
+        "output_micro_cny_per_million": 8000000
+      },
+      "max_jev_calls": 1,
+      "pair_id": "block-03-pair-03",
+      "block_id": "block-03",
+      "arm_order": [
+        "jev_selective",
+        "model"
+      ]
+    },
+    {
+      "key": "balance-020/explicit_scope_followup",
+      "model_limits": {
+        "max_calls": 12,
+        "max_output_tokens": 128,
+        "max_request_bytes": 16384,
+        "input_token_ceiling": 16384,
+        "max_micro_cny": 405504,
+        "input_micro_cny_per_million": 2000000,
+        "output_micro_cny_per_million": 8000000
+      },
+      "max_jev_calls": 1,
+      "pair_id": "block-03-pair-04",
+      "block_id": "block-03",
+      "arm_order": [
+        "jev_selective",
+        "model"
+      ]
+    },
+    {
+      "key": "recharge-002/confirm",
+      "model_limits": {
+        "max_calls": 10,
+        "max_output_tokens": 128,
+        "max_request_bytes": 16384,
+        "input_token_ceiling": 16384,
+        "max_micro_cny": 337920,
+        "input_micro_cny_per_million": 2000000,
+        "output_micro_cny_per_million": 8000000
+      },
+      "max_jev_calls": 1,
+      "pair_id": "block-03-pair-05",
+      "block_id": "block-03",
+      "arm_order": [
+        "jev_selective",
+        "model"
+      ]
+    }
+  ],
+  "whole_command_timeout_seconds": 300,
+  "prior_permanent_reservation": {
+    "model_micro_cny": 12300288,
+    "jev_micro_usd": 94080
+  },
+  "conditional_new_permanent_reservation": {
+    "model_micro_cny": 8380416,
+    "jev_micro_usd": 64512
+  },
+  "conditional_cumulative_reservation": {
+    "model_micro_cny": 20680704,
+    "jev_micro_usd": 158592
+  },
+  "conditional_unallocated": {
+    "model_micro_cny": 79319296,
+    "jev_micro_usd": 841408
+  },
+  "actual_reservation_changed": false,
+  "current_rates_verified": false,
+  "token_envelope_rechecked": false,
+  "source_sha256": {
+    "eval/paired-pilots/2026-10-24-v5-repeated-entry/plan.json": "527334cf64842106d8b28003f7b40c1010bca02455fab20572f79affb7ccc8bf",
+    "eval/paired-pilots/2026-10-25-observer-export-diagnostics/source-sha256.json": "16121832bb7f1850e699aab4b005bc9e3755016dc430002a490406352c6f3ba9",
+    "eval/paired-pilots/2026-10-25-observer-synthetic-delivery/verification-provenance.json": "08f6badd79c44bf2d9648ae0698f2c5a324144bbede791e4de5606017d331409",
+    "eval/paired-pilots/2026-10-25-observer-synthetic-delivery/validation.json": "3c4d13b0dc26d7ffe25da906a0e96cd0071bcd3e5551940ee23e635b9476603f",
+    "eval/paired-pilots/2026-10-24-v5-repeated-live-result/manifest.json": "41b2560c7f4230cad1c8b22df4123544f2687a6c2a275a3c2fe7bcf66cf781e8"
+  },
+  "candidate_binding": {
+    "observer_revision": "4d887382300a906ae6d1a33972f3fe4d4aca4e0d",
+    "observer_source_sha256": "16121832bb7f1850e699aab4b005bc9e3755016dc430002a490406352c6f3ba9",
+    "synthetic_provenance_sha256": "08f6badd79c44bf2d9648ae0698f2c5a324144bbede791e4de5606017d331409",
+    "prior_result_manifest_sha256": "41b2560c7f4230cad1c8b22df4123544f2687a6c2a275a3c2fe7bcf66cf781e8"
+  }
+}
