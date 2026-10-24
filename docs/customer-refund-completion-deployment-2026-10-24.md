@@ -1,0 +1,9 @@
+# 退款完成边界本机部署
+
+已部署通过离线验证和独立审查的源码50e3c8dab14b4b6cc25322fd340a274e6970200b，覆盖该修复尚未部署的当前状态。源码归档构建cmd/agent，SDKROOT MacOSX26.5.sdk，mod=readonly/trimpath/buildvcs=false，以独立来源清单绑定源码；安装SHA cc5306a1f400a9069f7c45149e45341240ff0ac4bed8551de57422a368ffdfa2。首次构建命令输出路径误在工作区父目录，被沙箱拒绝，没有安装该构建；已从正确归档目录重新构建成功。
+
+旧二进制及主目录/旧工作树两份.env.agent均已0600备份，仅更新AGENT_RELEASE为50e3c8dab14b4b6cc25322fd340a274e6970200b-local，根.env及所有模型配置不变。原launchd服务组SIGTERM温和重启，确认新PID/release、四项模型配置相同、9105健康和18080/portal通过，旧启动脚本、工作树、数据卷保留。
+
+解析阶段400请求返回合同v5 SHA a95cacd041830012619a0f4d7fd8208c184aa9e8d45b7ee05afaa239a30e1e8f，该请求模型/JEV均0；精确trace 21e69373dd67045c8f6264f572a57726 的新release、400、request阶段及零推理字段已Langfuse读回。部署健康和遥测通过不代表真实模型质量通过。
+
+3122项旧私密文件/claim SHA不变；无新claim、付费调用或真实评分，累计33模型8JEV。原退款失败证据保留；后续独立退款入口须绑定本次源码和v5合同，旧已消耗授权不可沿用。完整脱敏回执见deploy/local-services/customer-refund-completion-deployment-2026-10-24.json，回滚材料仅在被忽略的.tmp/paired-live-private/customer-refund-completion-deploy-20261024/backup/。

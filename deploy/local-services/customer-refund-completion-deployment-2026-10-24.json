@@ -1,0 +1,73 @@
+{
+  "schema": "customer-refund-completion-deployment.v1",
+  "provenance": {
+    "schema": "customer-refund-completion-archive-build.v1",
+    "commit": "50e3c8dab14b4b6cc25322fd340a274e6970200b",
+    "tree": "308aada75d0875cc50333dc6e1bc2a8856fbe8d6",
+    "source_archive_sha256": "adc3705221ce33752671f4209add02d30c5dd177ec5cc0eccd5edbfbdc019d04",
+    "build_flags": "-mod=readonly -trimpath -buildvcs=false",
+    "release": "50e3c8dab14b4b6cc25322fd340a274e6970200b-local",
+    "vcs_stamp_present": false,
+    "runtime_contract_sha256": "a95cacd041830012619a0f4d7fd8208c184aa9e8d45b7ee05afaa239a30e1e8f",
+    "sdkroot": "/Library/Developer/CommandLineTools/SDKs/MacOSX26.5.sdk",
+    "binary_sha256": "cc5306a1f400a9069f7c45149e45341240ff0ac4bed8551de57422a368ffdfa2"
+  },
+  "runtime": {
+    "schema": "customer-refund-completion-runtime.v1",
+    "release": "50e3c8dab14b4b6cc25322fd340a274e6970200b-local",
+    "process_model_config_matches": {
+      "AGENT_LLM_BASE_URL": true,
+      "AGENT_LLM_MODEL": true,
+      "AGENT_LLM_PROTOCOL": true,
+      "AGENT_LLM_API_KEY": true
+    },
+    "pid_changed": true,
+    "running_release_matches": true,
+    "agent_health": 200,
+    "model_calls": 0,
+    "jev_calls": 0,
+    "paid_evaluation_executed": false,
+    "trace_readback_confirmed": true,
+    "gateway_portal": 200,
+    "request_started_at": "2026-10-24T09:54:18.913897+00:00",
+    "invalid_json_http_status": 400,
+    "runtime_contract_sha256": "a95cacd041830012619a0f4d7fd8208c184aa9e8d45b7ee05afaa239a30e1e8f",
+    "request_trace_id": "21e69373dd67045c8f6264f572a57726",
+    "request_finished_at": "2026-10-24T09:54:18.916810+00:00",
+    "observations": [
+      {
+        "trace_id": "21e69373dd67045c8f6264f572a57726",
+        "name": "agent.turn",
+        "release": "50e3c8dab14b4b6cc25322fd340a274e6970200b-local",
+        "http_status": 400,
+        "stage": "request",
+        "llm_calls": 0,
+        "jev_calls": 0
+      }
+    ]
+  },
+  "installation": {
+    "installed_binary_sha256": "cc5306a1f400a9069f7c45149e45341240ff0ac4bed8551de57422a368ffdfa2",
+    "release_only_env_changes": true,
+    "root_env_unchanged": true,
+    "private_backup_permissions": "0600",
+    "backup_location": ".tmp/paired-live-private/customer-refund-completion-deploy-20261024/backup",
+    "old_launcher_and_worktree_preserved": true,
+    "restart": "SIGTERM via existing local.ai-gateway launchd group"
+  },
+  "historical_files_checked": 3122,
+  "historical_hashes_changed": 0,
+  "paid_model_calls": 0,
+  "paid_jev_calls": 0,
+  "cumulative_paid_model_calls": 33,
+  "cumulative_paid_jev_calls": 8,
+  "rollback_backups_preserved": true,
+  "paid_claim_created": false,
+  "evidence_sha256": {
+    "before.json": "de14f5424b5e47ee1c0f2a7affcc750a4a48dfd6298e0554b343705894beecb5",
+    "provenance.json": "55fc5faa67e2c362092106956fe915f5a200677ffa0f8d2694fa4f39dfd06764",
+    "runtime-check.json": "6639abab32da56c4202d98bea3d7613bbfd868b2334c49f83379ee8c5ce672fe",
+    "baseline.json": "e3f17cd74c26e5fc7f6a4e1114ae5e9b13c9299dd3c3e83388ca496036ba34e1",
+    "install.json": "c680070fc7c2050a0c5562aa55934a1bd2126b839ded7ad73d5f0c310f0d10d6"
+  }
+}
