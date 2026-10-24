@@ -22,7 +22,7 @@ func claimRetest(root string, p taskbench.AuthorizedPilot, out string) error {
 // Each reviewed identity is fixed across plans, revisions, output paths and failed runs.
 // Never remove a claim automatically or reuse any legacy campaign claim.
 func persistRetestClaim(root, campaignID, revision, out string) error {
-	if campaignID != taskbench.CashReadRetestID && campaignID != taskbench.CashReadRecoveryRetestID && campaignID != taskbench.RechargeConfirmID && campaignID != taskbench.RechargeDiagnosticRetestID {
+	if campaignID != taskbench.CashReadRetestID && campaignID != taskbench.CashReadRecoveryRetestID && campaignID != taskbench.RechargeConfirmID && campaignID != taskbench.RechargeDiagnosticRetestID && campaignID != taskbench.RechargeCancelID {
 		return fmt.Errorf("unknown fixed retest scope")
 	}
 
@@ -37,6 +37,21 @@ func persistRetestClaim(root, campaignID, revision, out string) error {
 			return fmt.Errorf("predecessor claim changed")
 		}
 	}
+	if campaignID == taskbench.RechargeCancelID {
+		for _, prior := range []struct{ id, sha string }{
+			{taskbench.RechargeConfirmID, taskbench.RechargePriorClaimSHA},
+			{taskbench.RechargeDiagnosticRetestID, taskbench.RechargeDiagnosticClaimSHA},
+		} {
+			raw, err := boundedFile(filepath.Join(dir, prior.id+".json"))
+			if err != nil {
+				return fmt.Errorf("exact consumed predecessor claims required")
+			}
+			sum := sha256.Sum256(raw)
+			if hex.EncodeToString(sum[:]) != prior.sha {
+				return fmt.Errorf("predecessor claim changed")
+			}
+		}
+	}
 	if err := os.MkdirAll(dir, 0700); err != nil {
 		return err
 	}
@@ -48,7 +63,7 @@ func persistRetestClaim(root, campaignID, revision, out string) error {
 		return fmt.Errorf("retest already claimed or durable claim unavailable")
 	}
 	record := map[string]any{"schema": "paired-live-retest-claim.v1", "campaign_id": campaignID, "execution_revision": revision, "output": out, "status": "consumed_before_execution"}
-	if campaignID == taskbench.RechargeConfirmID || campaignID == taskbench.RechargeDiagnosticRetestID {
+	if campaignID == taskbench.RechargeConfirmID || campaignID == taskbench.RechargeDiagnosticRetestID || campaignID == taskbench.RechargeCancelID {
 		record["budget_ceiling_sha256"] = taskbench.RechargeBudgetCeilingSHA
 		record["reserved_model_calls"] = 10
 		record["reserved_model_micro_cny"] = 337920
@@ -61,6 +76,14 @@ func persistRetestClaim(root, campaignID, revision, out string) error {
 		record["diagnostic_manifest_sha256"] = taskbench.RechargeDiagnosticManifestSHA
 		record["cumulative_reserved_model_micro_cny"] = 675840
 		record["cumulative_reserved_jev_micro_usd"] = 5376
+	}
+	if campaignID == taskbench.RechargeCancelID {
+		record["prior_confirm_claim_sha256"] = taskbench.RechargePriorClaimSHA
+		record["prior_diagnostic_claim_sha256"] = taskbench.RechargeDiagnosticClaimSHA
+		record["diagnostic_source_revision"] = taskbench.RechargeDiagnosticSourceRevision
+		record["diagnostic_manifest_sha256"] = taskbench.RechargeDiagnosticManifestSHA
+		record["cumulative_reserved_model_micro_cny"] = 1013760
+		record["cumulative_reserved_jev_micro_usd"] = 8064
 	}
 	raw, _ := json.Marshal(record)
 	_, w := f.Write(append(raw, '\n'))

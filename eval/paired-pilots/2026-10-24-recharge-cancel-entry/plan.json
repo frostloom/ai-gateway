@@ -1,0 +1,35 @@
+{
+  "schema": "campaign-preflight-plan.v2",
+  "target": {
+    "base_url": "https://api.deepseek.com/v1",
+    "model": "deepseek-flash",
+    "protocol": "openai",
+    "jev_model": "jev-1.13.0"
+  },
+  "campaign_limits": {
+    "max_batches": 1,
+    "max_model_calls": 10,
+    "max_model_micro_cny": 337920,
+    "max_jev_calls": 1,
+    "max_jev_micro_usd": 2688,
+    "jev_micro_usd_per_attempt": 2688
+  },
+  "batches": [
+    {
+      "key": "recharge-002/cancel",
+      "model_limits": {
+        "max_calls": 10,
+        "max_output_tokens": 128,
+        "max_request_bytes": 16384,
+        "input_token_ceiling": 16384,
+        "max_micro_cny": 337920,
+        "input_micro_cny_per_million": 2000000,
+        "output_micro_cny_per_million": 8000000
+      },
+      "max_jev_calls": 1
+    }
+  ],
+  "campaign_id": "recharge-cancel-20261024",
+  "customer_source_revision": "056a760033186e4b768b320e50ec7b7186a32157",
+  "runtime_contract_sha256": "35c117c3dcee33a783e074712d6836236dd1f6a9d4a798fdfd01f0c92e95bce1"
+}

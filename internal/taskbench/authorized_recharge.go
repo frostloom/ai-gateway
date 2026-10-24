@@ -9,10 +9,10 @@ const RechargeBudgetCeilingSHA = "4669a31fe6f74f7f6901ed9a4dcb114016d7ed4aac85be
 
 // These two fixed scopes reserve 675840/5376 micro currency units cumulatively,
 // even on failure. The diagnostic scope requires the exact consumed prior
-// claim. Future allocations must account for both permanent reservations.
+// claim. The cancellation successor accounts for both permanent reservations.
 func checkedRechargeScope(schema, id string) (cashRetestScope, bool) {
 	if (schema != "recharge-confirm-authorization.v1" || id != RechargeConfirmID) && (schema != "recharge-confirm-authorization.v2" || id != RechargeDiagnosticRetestID) {
-		return cashRetestScope{}, false
+		return checkedRechargeCancelScope(schema, id)
 	}
 	scope := cashRetestScope{
 		ID: id, BillingSchema: "recharge-confirm-billing-attestation.v1", ReceiptSchema: "authorized-recharge-confirm.v1",

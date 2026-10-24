@@ -1,0 +1,33 @@
+{
+  "schema": "recharge-cancel-authorization.v1",
+  "campaign_id": "recharge-cancel-20261024",
+  "human_authorized": false,
+  "scope_plan_sha256": "78db2072c4b048be856093502aa1b42139f658d3c52008148f8d660d29dd3617",
+  "target": {
+    "base_url": "https://api.deepseek.com/v1",
+    "model": "deepseek-flash",
+    "protocol": "openai",
+    "jev_model": "jev-1.13.0"
+  },
+  "authorized_spending": {
+    "max_batches": 1,
+    "max_model_calls": 10,
+    "max_model_micro_cny": 337920,
+    "max_jev_calls": 1,
+    "max_jev_micro_usd": 2688,
+    "jev_micro_usd_per_attempt": 2688
+  },
+  "case_key": "recharge-002/cancel",
+  "execution_revision": "0000000000000000000000000000000000000000",
+  "automatic_scope_expansion": false,
+  "automatic_paid_retries": false,
+  "customer_source_revision": "056a760033186e4b768b320e50ec7b7186a32157",
+  "runtime_contract_sha256": "35c117c3dcee33a783e074712d6836236dd1f6a9d4a798fdfd01f0c92e95bce1",
+  "budget_ceiling_sha256": "4669a31fe6f74f7f6901ed9a4dcb114016d7ed4aac85be949d9b0b6e74c0c00b",
+  "prior_offline_manifest_sha256": "0458f4ce65f17983185611a8affb236332d48a4b48bd388d803db64673d03f79",
+  "prior_offline_acceptance_sha256": "f3a3d5b62b88dd6de7ce08aaf34443627696c12f674f26ff457eb471262122f0",
+  "prior_journal_sha256": "",
+  "prior_review_sha256": "",
+  "diagnostic_source_revision": "5c2f669413c0787ba1bd3a429c9552d628e1a44c",
+  "diagnostic_manifest_sha256": "8731a95fc1efd01abd76d6448335f86f84ffaa1137165a9bbc446cfffd0cf8b3"
+}

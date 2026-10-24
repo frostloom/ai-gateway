@@ -1,0 +1,62 @@
+{
+  "schema": "recharge-cancel-entry-acceptance.v1",
+  "scope": "recharge-002/cancel",
+  "paths": [
+    {
+      "path": "complete",
+      "status": "checkpoint_pending",
+      "synthetic_model_calls": 2,
+      "synthetic_jev_attempts": 1,
+      "receipt_sha256": "70d2aff537c400de4791123108e5e9d0cf42997f0778884641c01ac5e6fddb14",
+      "automatic_arm_statuses": [
+        "needs_review",
+        "needs_review"
+      ],
+      "external_provider_calls": 0
+    },
+    {
+      "path": "repair",
+      "status": "checkpoint_pending",
+      "synthetic_model_calls": 4,
+      "synthetic_jev_attempts": 1,
+      "receipt_sha256": "87d570eb5b1aa8a8e2de592e2c86c6947ad94a67585eb2dc22e2354cea8dc72a",
+      "automatic_arm_statuses": [
+        "needs_review",
+        "needs_review"
+      ],
+      "external_provider_calls": 0
+    },
+    {
+      "path": "provider-failure",
+      "status": "stopped",
+      "synthetic_model_calls": 1,
+      "synthetic_jev_attempts": 0,
+      "receipt_sha256": "4f7fe2f8e936df45806a99aa2d2c3baa32a14c0ba708dbffad358b2d939218a4",
+      "automatic_arm_statuses": [
+        "failed",
+        "not_started"
+      ],
+      "external_provider_calls": 0
+    },
+    {
+      "path": "jev-failure",
+      "status": "stopped",
+      "synthetic_model_calls": 1,
+      "synthetic_jev_attempts": 1,
+      "receipt_sha256": "6a8e0da9f5666d6551d936ae40c3f82d7213fdb3c5257395cbf7d337c073ae6c",
+      "automatic_arm_statuses": [
+        "needs_review",
+        "failed"
+      ],
+      "external_provider_calls": 0
+    }
+  ],
+  "business_and_control_unchanged_on_completed_paths": true,
+  "cancel_pending_cleared": true,
+  "cancel_round_model_calls": 0,
+  "cancel_audit_per_completed_arm": 1,
+  "actual_local_jev_eof_persisted": true,
+  "semantic_quality_verified": false,
+  "real_model_calls": 0,
+  "real_jev_attempts": 0
+}

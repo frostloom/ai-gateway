@@ -1,0 +1,43 @@
+{
+  "schema": "recharge-cancel-entry-validation.v1",
+  "fixed_scope_red_observed": true,
+  "scope_and_claim_tests_passed": true,
+  "real_handler_local_runner_paths_passed": [
+    "complete",
+    "repair",
+    "provider-failure",
+    "jev-failure"
+  ],
+  "review_regression_passed": true,
+  "initial_full_go_passed": false,
+  "initial_full_go_passed_packages": 16,
+  "initial_full_go_failed_packages": [
+    "internal/billing/store",
+    "internal/taskbench"
+  ],
+  "initial_failures": [
+    "TestReserveConcurrentNoOversell: cash lock request lock timed out",
+    "taskbench package 10m timeout while TestLocalCampaignStopsAfterSecondBatchBudgetFailure fixture migration running"
+  ],
+  "bounded_rechecks": {
+    "TestReserveConcurrentNoOversell": "failed: lock timeouts, insufficient=33 want90",
+    "TestLocalCampaignStopsAfterSecondBatchBudgetFailure": "passed"
+  },
+  "full_suite_rerun": false,
+  "root_cause_confirmed": false,
+  "aggregate_acceptance": "blocked",
+  "independent_code_review_blockers": 0,
+  "review_budget_digest_counterexample_added": true,
+  "isolated_schemas_remaining": 0,
+  "old_local_files_checked": 2780,
+  "old_local_files_unchanged": true,
+  "new_actual_claim_exists": false,
+  "real_model_calls": 0,
+  "real_jev_attempts": 0,
+  "cumulative_real_model_calls": 27,
+  "cumulative_real_jev_attempts": 6,
+  "human_authorized": false,
+  "ready_for_paid_run": false,
+  "deployment": false,
+  "hindsight_entry_write_and_readback_confirmed": true
+}
