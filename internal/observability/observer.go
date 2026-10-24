@@ -66,7 +66,7 @@ func New(ctx context.Context, c Config) (*Observer, error) {
 		c.ExportTimeout = 2 * time.Second
 	}
 	auth := base64.StdEncoding.EncodeToString([]byte(c.PublicKey + ":" + c.SecretKey))
-	exp, err := otlptracehttp.New(ctx, otlptracehttp.WithEndpointURL(c.Endpoint), otlptracehttp.WithHeaders(map[string]string{"Authorization": "Basic " + auth, "x-langfuse-ingestion-version": "4"}), otlptracehttp.WithTimeout(c.ExportTimeout), otlptracehttp.WithHTTPClient(&http.Client{Timeout: c.ExportTimeout, CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}), otlptracehttp.WithMaxRequestSize(1<<20), otlptracehttp.WithRetry(otlptracehttp.RetryConfig{Enabled: false}))
+	exp, err := otlptracehttp.New(ctx, otlptracehttp.WithEndpointURL(c.Endpoint), otlptracehttp.WithHeaders(map[string]string{"Authorization": "Basic " + auth, "x-langfuse-ingestion-version": "4"}), otlptracehttp.WithTimeout(c.ExportTimeout), otlptracehttp.WithHTTPClient(&http.Client{Transport: &exportDiagnosticTransport{}, Timeout: c.ExportTimeout, CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}), otlptracehttp.WithMaxRequestSize(1<<20), otlptracehttp.WithRetry(otlptracehttp.RetryConfig{Enabled: false}))
 	if err != nil {
 		return nil, err
 	}

@@ -92,6 +92,22 @@ func TestExportAcknowledgementDoesNotProveDeliveryLoss(t *testing.T) {
 			if failed && (stats.Failed != 3 || stats.Exported != 0) || !failed && (stats.Failed != 0 || stats.Exported != 3) {
 				t.Fatalf("acknowledgement counters=%+v", stats)
 			}
+			if failed {
+				diagnostics := stats.ExportDiagnostics
+				if diagnostics == nil || len(diagnostics.Failures) != 1 {
+					t.Fatal("missing diagnostic")
+				}
+				record := diagnostics.Failures[0]
+				want := map[string]string{"response_timeout": "deadline_exceeded", "http_503": "http_status", "connection_close": "transport", "malformed_protobuf": "response_decode"}[mode]
+				if record.ErrorKind != want || record.HTTPRoundTrips != 1 || record.SpanCount != 3 {
+					t.Fatalf("wrong diagnostic: %+v want %s", record, want)
+				}
+				if (mode == "response_timeout" || mode == "connection_close") && record.HTTPStatus != nil {
+					t.Fatal("invented HTTP status")
+				}
+			} else if stats.ExportDiagnostics != nil {
+				t.Fatal("successful export invented failure evidence")
+			}
 			record := map[string]any{"scenario": mode, "receiver_complete_body_spans": received.Load(), "requests": requests.Load(), "client_stats": stats, "flush_failed": flushErr != nil, "shutdown_failed": shutdownErr != nil, "historical_cause_proven": false, "model_calls": 0, "jev_calls": 0}
 			encoded, _ := json.Marshal(record)
 			t.Log(string(encoded))

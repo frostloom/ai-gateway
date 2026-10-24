@@ -12,24 +12,27 @@ import (
 type Stats struct {
 	Accepted, Dropped, Exported, Failed, Batches, Turns, SampledTurns uint64
 	QueueDepth                                                        int
+	ExportDiagnostics                                                 *ExportDiagnostics `json:"export_diagnostics,omitempty"`
 }
 type counters struct{ accepted, dropped, exported, failed, batches, turns, sampledTurns atomic.Uint64 }
 type flushRequest struct{ done chan error }
 
-// boundedProcessor accounts for actual discarded spans. OnEnd never waits for
-// the network; only this worker exports. No process-wide OTel globals are used.
+// boundedProcessor accounts for local drops and exporter outcomes. Failed spans
+// belong to calls that returned an error, not proven delivery loss. OnEnd never
+// waits for the network; only this worker exports. No OTel globals are used.
 type boundedProcessor struct {
-	exporter sdktrace.SpanExporter
-	queue    chan sdktrace.ReadOnlySpan
-	flush    chan flushRequest
-	done     chan struct{}
-	ctx      context.Context
-	cancel   context.CancelFunc
-	timeout  time.Duration
-	mu       sync.RWMutex
-	closed   bool
-	counts   counters
-	lastErr  error // worker writes before closing done
+	exporter    sdktrace.SpanExporter
+	queue       chan sdktrace.ReadOnlySpan
+	flush       chan flushRequest
+	done        chan struct{}
+	ctx         context.Context
+	cancel      context.CancelFunc
+	timeout     time.Duration
+	mu          sync.RWMutex
+	closed      bool
+	counts      counters
+	lastErr     error // worker writes before closing done
+	diagnostics exportDiagnosticState
 }
 
 func newProcessor(exp sdktrace.SpanExporter, size int, timeout time.Duration) *boundedProcessor {
@@ -62,8 +65,12 @@ func (p *boundedProcessor) export(batch []sdktrace.ReadOnlySpan) error {
 	}
 	ctx, cancel := context.WithTimeout(p.ctx, p.timeout)
 	defer cancel()
-	p.counts.batches.Add(1)
+	sequence := p.counts.batches.Add(1)
+	capture := &exportCapture{}
+	ctx = context.WithValue(ctx, exportCaptureKey{}, capture)
+	begun := time.Now()
 	if err := p.exporter.ExportSpans(ctx, batch); err != nil {
+		p.diagnostics.add(capture.failure(sequence, len(batch), float64(time.Since(begun))/float64(time.Millisecond), err))
 		p.counts.failed.Add(uint64(len(batch)))
 		p.lastErr = errors.New("telemetry export failed")
 		return p.lastErr
@@ -152,5 +159,5 @@ func (p *boundedProcessor) Shutdown(ctx context.Context) error {
 	}
 }
 func (p *boundedProcessor) stats() Stats {
-	return Stats{Accepted: p.counts.accepted.Load(), Dropped: p.counts.dropped.Load(), Exported: p.counts.exported.Load(), Failed: p.counts.failed.Load(), Batches: p.counts.batches.Load(), Turns: p.counts.turns.Load(), SampledTurns: p.counts.sampledTurns.Load(), QueueDepth: len(p.queue)}
+	return Stats{Accepted: p.counts.accepted.Load(), Dropped: p.counts.dropped.Load(), Exported: p.counts.exported.Load(), Failed: p.counts.failed.Load(), Batches: p.counts.batches.Load(), Turns: p.counts.turns.Load(), SampledTurns: p.counts.sampledTurns.Load(), QueueDepth: len(p.queue), ExportDiagnostics: p.diagnostics.snapshot()}
 }

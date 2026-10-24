@@ -338,6 +338,42 @@ func TestRepeatedLocalRunnerStopsAndAccounts(t *testing.T) {
 						t.Fatal("structural failure did not persist firstarm/unrun denominator")
 					}
 				}
+				if mode == "observer-failure" {
+					persisted, readErr := os.ReadFile(filepath.Join(dir, "receipt.json"))
+					if readErr != nil {
+						t.Fatal(readErr)
+					}
+					var saved map[string]any
+					if json.Unmarshal(persisted, &saved) != nil {
+						t.Fatal("invalid persisted receipt")
+					}
+					stats := saved["observer_stats"].(map[string]any)
+					diagnostics, ok := stats["export_diagnostics"].(map[string]any)
+					if !ok {
+						t.Fatal("stopped receipt lost export diagnostic")
+					}
+					records := diagnostics["failures"].([]any)
+					if len(records) == 0 || len(records) > 8 || diagnostics["omitted_failures"] != float64(0) {
+						t.Fatal("diagnostic bound/count invalid", diagnostics)
+					}
+					failedSpans := float64(0)
+					for _, value := range records {
+						record := value.(map[string]any)
+						if record["error_kind"] != "http_status" || record["http_status"] != float64(503) || record["http_round_trips"] != float64(1) {
+							t.Fatal("wrong stopped receipt cause", record)
+						}
+						failedSpans += record["span_count"].(float64)
+					}
+					if failedSpans != stats["Failed"] || stats["Failed"] == float64(0) || stats["Dropped"] != float64(0) {
+						t.Fatal("diagnostics not bound to original failure counts")
+					}
+					expectedStats, _ := json.Marshal(r.ObserverStats)
+					var returned map[string]any
+					json.Unmarshal(expectedStats, &returned)
+					if !reflect.DeepEqual(stats, returned) {
+						t.Fatal("persisted diagnostics differ from returned receipt")
+					}
+				}
 				if mode == "jev-failure" {
 					b, e := os.ReadFile(filepath.Join(dir, "campaign", "batch-002", "run.jsonl.jev.jsonl"))
 					if e != nil || !strings.Contains(string(b), `"transport_cause":"eof"`) {
