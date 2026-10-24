@@ -1,0 +1,83 @@
+{
+  "schema": "recharge-cancel-offline-acceptance.v1",
+  "cases": [
+    {
+      "mode": "normal",
+      "journal_sha256": "5783e0970261279c89d21af021a1932d56c014b28b98f94433819c4df00988b5",
+      "evidence_kind": "local_stub",
+      "rows": [
+        {
+          "arm": "model",
+          "status": "needs_review",
+          "structural_pass": true,
+          "observed_turns": 2,
+          "http_failures": 0,
+          "semantic_requirements": 6
+        },
+        {
+          "arm": "jev_selective",
+          "status": "needs_review",
+          "structural_pass": true,
+          "observed_turns": 2,
+          "http_failures": 0,
+          "semantic_requirements": 6
+        }
+      ]
+    },
+    {
+      "mode": "repair",
+      "journal_sha256": "9a0888fdddcfca37195a428d7193c3f9ce14357af95875547984df5273439f39",
+      "evidence_kind": "local_stub",
+      "rows": [
+        {
+          "arm": "model",
+          "status": "needs_review",
+          "structural_pass": true,
+          "observed_turns": 2,
+          "http_failures": 0,
+          "semantic_requirements": 6
+        },
+        {
+          "arm": "jev_selective",
+          "status": "needs_review",
+          "structural_pass": true,
+          "observed_turns": 2,
+          "http_failures": 0,
+          "semantic_requirements": 6
+        }
+      ]
+    },
+    {
+      "mode": "repair-old-cap",
+      "journal_sha256": "1661059c2a0e95a3760087080767eda6f21c6ea9e50d1d79abf972c59033e81e",
+      "evidence_kind": "local_stub",
+      "rows": [
+        {
+          "arm": "model",
+          "status": "needs_review",
+          "structural_pass": true,
+          "observed_turns": 2,
+          "http_failures": 0,
+          "semantic_requirements": 6
+        },
+        {
+          "arm": "jev_selective",
+          "status": "failed",
+          "structural_pass": false,
+          "observed_turns": 1,
+          "http_failures": 1,
+          "semantic_requirements": 4
+        }
+      ]
+    }
+  ],
+  "business_state_unchanged_all_modes": true,
+  "successful_paths_cancel_pending_cleared": true,
+  "successful_paths_cancel_model_calls": 0,
+  "successful_paths_cancel_audit_count_per_arm": 1,
+  "semantic_review": "pending_independent_reply_review",
+  "task_success_claimed": false,
+  "model_calls": 0,
+  "jev_calls": 0,
+  "candidate_exact_execution_authorized": false
+}

@@ -1,0 +1,59 @@
+{
+  "schema": "recharge-cancel-offline-validation.v1",
+  "base_commit": "071dbfe126258066f7d2a67184fcf96b7075ddf5",
+  "production_behavior_changed": false,
+  "customer_redeployed": false,
+  "actual_model_calls": 0,
+  "actual_jev_calls": 0,
+  "claim_created": false,
+  "local_modes": {
+    "normal": {
+      "synthetic_model_attempts": 2,
+      "fake_jev_attempts": 1
+    },
+    "repair": {
+      "synthetic_model_attempts": 4,
+      "fake_jev_attempts": 1
+    },
+    "repair-old-cap": {
+      "synthetic_model_attempts": 3,
+      "fake_jev_attempts": 1,
+      "selective_arm": "failed"
+    }
+  },
+  "full_go": {
+    "exit_code": 1,
+    "passed_packages": 17,
+    "failed_test": "TestConsumerKafkaE2E",
+    "failure": "Kafka Not Leader For Partition"
+  },
+  "bounded_kafka_recheck": {
+    "exit_code": 0,
+    "test": "TestConsumerKafkaE2E",
+    "passed": true,
+    "configuration_changed": false,
+    "root_cause_confirmed": false
+  },
+  "independent_review": "no blocking findings",
+  "integrity": {
+    "old_private_files_checked": 178,
+    "all_unchanged": true,
+    "new_claim_created": false,
+    "real_model_calls": 0,
+    "real_jev_calls": 0
+  },
+  "cleanup": {
+    "all_owned_pair_schemas_absent": true,
+    "jev_calls": 0,
+    "model_calls": 0,
+    "read_only": true,
+    "remaining_isolated_pair_schemas": 0,
+    "schema": "cash-recovery-cleanup-inventory.v1"
+  },
+  "candidate_authorized": false,
+  "limitations": [
+    "local_stub only; real model/JEV quality and tariffs not verified",
+    "unreviewed no-trace cancel needs independent semantic review",
+    "initial full suite failed; single bounded Kafka recheck passed, not a green full-suite rerun"
+  ]
+}
