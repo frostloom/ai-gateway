@@ -1,0 +1,57 @@
+{
+  "schema": "refund-cap-content-readback.v1",
+  "journal_sha256": "04b3ff96e2afdfe90dccf40f773ac9958bbae15e8043cb3b38c71021e8c997de",
+  "all_six_observed_turn_contents_exact": true,
+  "trace_summaries": [
+    {
+      "trace_id": "de8780ac0395a7f459ba06dba2f36012",
+      "case_key": "refund-001/balance_cap",
+      "arm": "model",
+      "evidence_kind": "recorded_run",
+      "expected_turns": 3,
+      "require_answers": true,
+      "expected_content": [
+        {
+          "input_sha256": "23d7e89e690e808a25c716e857eb6a3bb8917e0d9d79f3db77a3dc5e5c4233fe",
+          "reply_sha256": "7e8b0839448a957ade69911f055dbb3dce78f0329f8b68916d5db01b69d44ea1"
+        },
+        {
+          "input_sha256": "d6b8534fdf6b91173df7b254b314da48874d2f15102f98e3d697f225d261d092",
+          "reply_sha256": "ce876d9ba04c70657266f34f16c9b9dc81553d99fc8e1734396c85b1c539c803"
+        },
+        {
+          "input_sha256": "36f33adaf0942634a8ece1eec4a6f30d44dec73e1ef8704b29d983a57f2e09ae",
+          "reply_sha256": "6da7cacb8b0640de00a2d9449f3eb249423ac37ae21a94ab7f755e5f6c899fde"
+        }
+      ],
+      "turns": 3,
+      "content_turns": 3
+    },
+    {
+      "trace_id": "750747308c412b886a808acf695b021b",
+      "case_key": "refund-001/balance_cap",
+      "arm": "jev_selective",
+      "evidence_kind": "recorded_run",
+      "expected_turns": 3,
+      "require_answers": true,
+      "expected_content": [
+        {
+          "input_sha256": "23d7e89e690e808a25c716e857eb6a3bb8917e0d9d79f3db77a3dc5e5c4233fe",
+          "reply_sha256": "4670b41f0b837feb0a735a627b4cdfc40cef8a9e91ad8aeab670d01bc0c8db7a"
+        },
+        {
+          "input_sha256": "d6b8534fdf6b91173df7b254b314da48874d2f15102f98e3d697f225d261d092",
+          "reply_sha256": "ce876d9ba04c70657266f34f16c9b9dc81553d99fc8e1734396c85b1c539c803"
+        },
+        {
+          "input_sha256": "36f33adaf0942634a8ece1eec4a6f30d44dec73e1ef8704b29d983a57f2e09ae",
+          "reply_sha256": "6da7cacb8b0640de00a2d9449f3eb249423ac37ae21a94ab7f755e5f6c899fde"
+        }
+      ],
+      "turns": 3,
+      "content_turns": 3
+    }
+  ],
+  "model_calls": 0,
+  "jev_calls": 0
+}

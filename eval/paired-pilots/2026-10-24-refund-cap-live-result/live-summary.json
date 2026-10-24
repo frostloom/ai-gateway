@@ -1,0 +1,73 @@
+{
+  "schema": "refund-cap-live-summary.v1",
+  "execution_revision": "e8c345c38e899f440eb0b478f8e9c56de727b471",
+  "case_key": "refund-001/balance_cap",
+  "status": "checkpoint_pending",
+  "model_attempts": 4,
+  "model_input_tokens": 7140,
+  "model_output_tokens": 156,
+  "model_config_priced_micro_cny": 15528,
+  "jev_attempts": 1,
+  "jev_input_tokens": 1201,
+  "jev_output_tokens": 187,
+  "jev_config_priced_usd": 5.0442e-05,
+  "rows": [
+    {
+      "key": "refund-001/balance_cap",
+      "arm": "model",
+      "status": "needs_review",
+      "structural_pass": true,
+      "observed_turns": 3,
+      "http_failures": 0,
+      "runner_elapsed_ms": 2354.996542,
+      "telemetry": {
+        "completion_rate": null,
+        "response_latency_ms": 1760.892293,
+        "llm_calls": 2,
+        "jev_calls": 0,
+        "tokens": {
+          "llm_input": 3578,
+          "llm_output": 86,
+          "jev_input": 0,
+          "jev_output": 0
+        }
+      },
+      "guarded_upstream_model_attempts": 2,
+      "priced_model_usage_micro_cny": 7844
+    },
+    {
+      "key": "refund-001/balance_cap",
+      "arm": "jev_selective",
+      "status": "needs_review",
+      "structural_pass": true,
+      "observed_turns": 3,
+      "http_failures": 0,
+      "runner_elapsed_ms": 2481.775625,
+      "telemetry": {
+        "completion_rate": null,
+        "response_latency_ms": 2112.581376,
+        "llm_calls": 2,
+        "jev_calls": 1,
+        "tokens": {
+          "llm_input": 3562,
+          "llm_output": 70,
+          "jev_input": 1201,
+          "jev_output": 187
+        }
+      },
+      "guarded_upstream_model_attempts": 2,
+      "priced_model_usage_micro_cny": 7684
+    }
+  ],
+  "observer_stats": {
+    "Accepted": 17,
+    "Dropped": 0,
+    "Exported": 17,
+    "Failed": 0,
+    "Batches": 7,
+    "Turns": 6,
+    "SampledTurns": 6,
+    "QueueDepth": 0
+  },
+  "vendor_invoice_not_verified": true
+}

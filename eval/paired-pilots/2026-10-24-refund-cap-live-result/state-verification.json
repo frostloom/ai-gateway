@@ -1,0 +1,37 @@
+{
+  "schema": "refund-cap-state-verification.v1",
+  "arms": [
+    {
+      "arm": "model",
+      "first_turn_no_write_or_pending": true,
+      "preview_request_yuan": 100,
+      "actual_refund_cap_cent": 2500,
+      "preview_no_business_write": true,
+      "confirmed_write_count": 1,
+      "balance_delta_cent": -2500,
+      "ledger_delta_cent": -2500,
+      "new_order_count": 0,
+      "new_refund_topup_count": 1,
+      "orders_subscriptions_controls_allowance_authority_unchanged": true,
+      "confirmation_model_calls": 0,
+      "confirmation_jev_calls": 0,
+      "reply_repair_count": 0
+    },
+    {
+      "arm": "jev_selective",
+      "first_turn_no_write_or_pending": true,
+      "preview_request_yuan": 100,
+      "actual_refund_cap_cent": 2500,
+      "preview_no_business_write": true,
+      "confirmed_write_count": 1,
+      "balance_delta_cent": -2500,
+      "ledger_delta_cent": -2500,
+      "new_order_count": 0,
+      "new_refund_topup_count": 1,
+      "orders_subscriptions_controls_allowance_authority_unchanged": true,
+      "confirmation_model_calls": 0,
+      "confirmation_jev_calls": 0,
+      "reply_repair_count": 0
+    }
+  ]
+}

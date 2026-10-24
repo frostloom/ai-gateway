@@ -1,0 +1,29 @@
+{
+  "jev_calls": 0,
+  "kind": "verified",
+  "model_calls": 0,
+  "plan_sha256": "bb046b17b10326e66b3fb99e4f3d8695e38986af58300ab2d4328ae4f458d67f",
+  "score_count": 14,
+  "trace_summaries": [
+    {
+      "arm": "model",
+      "case_key": "refund-001/balance_cap",
+      "content_turns": 3,
+      "evidence_kind": "recorded_run",
+      "expected_turns": 3,
+      "require_answers": true,
+      "trace_id": "de8780ac0395a7f459ba06dba2f36012",
+      "turns": 3
+    },
+    {
+      "arm": "jev_selective",
+      "case_key": "refund-001/balance_cap",
+      "content_turns": 3,
+      "evidence_kind": "recorded_run",
+      "expected_turns": 3,
+      "require_answers": true,
+      "trace_id": "750747308c412b886a808acf695b021b",
+      "turns": 3
+    }
+  ]
+}

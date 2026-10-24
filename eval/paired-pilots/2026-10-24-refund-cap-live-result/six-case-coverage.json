@@ -1,0 +1,53 @@
+{
+  "schema": "six-case-historical-coverage.v1",
+  "cases": [
+    {
+      "case_key": "balance-001/answer_complete",
+      "state": "independently_passed_in_its_historical_frozen_run",
+      "execution_revision": "43133e90596bcfd4ecd9d3cf58af226bd42c2d0f",
+      "review_file": "eval/paired-pilots/2026-10-22-pi-first-live-result/independent-review.json",
+      "review_sha256": "0b5562bd98ce8722290241bff29dd06afa3d2b54c9ce24a28dc78e7021b65026"
+    },
+    {
+      "case_key": "balance-020/explicit_scope_followup",
+      "state": "independently_passed_in_its_historical_frozen_run",
+      "execution_revision": "c6e32305663ab8af5e747de683390b78dbfe844b",
+      "review_file": "eval/paired-pilots/2026-10-23-cash-read-recovery-retest-live-result/independent-review.json",
+      "review_sha256": "41f8bc9921f84ac5c17d2cf2cba4dcac361ab40c84e5fb9c4756471fa0820ee8"
+    },
+    {
+      "case_key": "recharge-002/confirm",
+      "state": "independently_passed_in_its_historical_frozen_run",
+      "execution_revision": "b3f58e874944efc95c6dc699af95bb440daea18b",
+      "review_file": "eval/paired-pilots/2026-10-24-recharge-diagnostic-live-result/independent-review.json",
+      "review_sha256": "74a6682d60095ff67dc2da27f4f640af06b78bdf23833ecd3667f89eaaf0eb9b"
+    },
+    {
+      "case_key": "recharge-002/cancel",
+      "state": "independently_passed_in_its_historical_frozen_run",
+      "execution_revision": "5cd536feffa9721fd282b09caa7a826a7c2ac1b1",
+      "review_file": "eval/paired-pilots/2026-10-24-recharge-cancel-live-result/independent-review.json",
+      "review_sha256": "b5570a6f84e111a94682e2c530e13f106f9a34e7584c51ff75cd64f1ab9c6cdb"
+    },
+    {
+      "case_key": "recharge-001/supplement_then_confirm",
+      "state": "independently_passed_in_its_historical_frozen_run",
+      "execution_revision": "089017bc70f5e0af8e36198f1ff489296d2710be",
+      "review_file": "eval/paired-pilots/2026-10-24-recharge-supplement-live-result/independent-review.json",
+      "review_sha256": "180c172d52ad3b183393236ac2a26fb80ab730e5a7b1aaae94bc6d8247a11c22"
+    },
+    {
+      "case_key": "refund-001/balance_cap",
+      "state": "independently_passed_in_its_historical_frozen_run",
+      "execution_revision": "e8c345c38e899f440eb0b478f8e9c56de727b471",
+      "review_file": "eval/paired-pilots/2026-10-24-refund-cap-live-result/independent-review.json",
+      "review_sha256": "9d6bb8b25e514f7316bd9c03b2b218098bf651cce4d1790b5a40e9739ec6551f"
+    }
+  ],
+  "historical_cases_with_independent_live_pass": 6,
+  "total_selected_cases": 6,
+  "same_revision_full_suite_passed": false,
+  "limitations": "These are individually frozen historical executions across different runtime/executor revisions, not a same-version suite or population benefit estimate. Original failures and consumed claims remain.",
+  "actual_cumulative_model_attempts": 37,
+  "actual_cumulative_jev_attempts": 9
+}

@@ -1,0 +1,46 @@
+{
+  "schema": "refund-cap-live-validation.v1",
+  "execution_command_exit_code": 0,
+  "status": "checkpoint_pending",
+  "independent_requirement_count": 12,
+  "independent_pass_count": 12,
+  "independent_blocking_findings": [],
+  "all_six_turn_contents_exactly_read_back": true,
+  "deterministic_scores_read_back": 14,
+  "independent_scores_read_back": 4,
+  "publish_commands": {
+    "each_called_once": true,
+    "deterministic_accepted": 14,
+    "independent_accepted": 4,
+    "immediate_validation_exit_codes": [
+      2,
+      2
+    ],
+    "subsequent_readonly_verify_exit_codes": [
+      0,
+      0
+    ],
+    "root_cause_confirmed": false
+  },
+  "observer_accepted": 17,
+  "observer_exported": 17,
+  "observer_dropped": 0,
+  "observer_failed": 0,
+  "entry_cleanup_receipt": true,
+  "remaining_isolated_databases": 0,
+  "historical_files_checked": 3218,
+  "historical_hashes_changed": 0,
+  "new_claim_sha256": "9a026381dea69bc1feb9712d58a41e305877701e1355ba2464543aaaa0857b30",
+  "automatic_paid_retry": false,
+  "new_model_attempts": 4,
+  "new_jev_attempts": 1,
+  "cumulative_model_attempts": 37,
+  "cumulative_jev_attempts": 9,
+  "deployed_this_round": false,
+  "automatic_report_retained": "needs_review / Successfalse",
+  "auxiliary_check_corrections": [
+    "Approved empty blockers serialize null, corrected local helper expectation; no production/auth change",
+    "State authority captured_at changes each snapshot, compared business fields excluding only snapshot timestamps"
+  ],
+  "supplier_invoice_verified": false
+}
