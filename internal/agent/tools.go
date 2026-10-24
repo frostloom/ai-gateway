@@ -16,6 +16,7 @@ import (
 	"unicode"
 
 	"github.com/frostloom/ai-gateway/internal/billing/store"
+	"github.com/frostloom/ai-gateway/internal/knowledge"
 	"github.com/frostloom/ai-gateway/internal/observability"
 	"github.com/frostloom/ai-gateway/internal/pkg/controlplane"
 )
@@ -106,8 +107,9 @@ type execTool struct {
 
 // Toolbox 工具集：LLM 只能从这里挑工具，参数一律在此层重新校验（执行层不信任 LLM）。
 type Toolbox struct {
-	admin *AdminClient
-	tools map[string]*execTool
+	knowledge *knowledge.Corpus
+	admin     *AdminClient
+	tools     map[string]*execTool
 }
 
 func NewToolbox(admin *AdminClient) *Toolbox {

@@ -104,6 +104,10 @@ func main() {
 	defer bc.Close()
 
 	tb := agent.NewToolbox(agent.NewAdminClient(adminBase))
+	if err := configureKnowledge(tb, os.Getenv); err != nil {
+		log.Error("knowledge initialization failed", "err", err)
+		os.Exit(1)
+	}
 	llm := agent.NewLLMClient(llmBase, llmKey, llmModel)
 	h := agent.NewHandler(bc, tb, llm, st, rdb, log)
 	routingMode := config.Getenv("AGENT_ROUTING_MODE", string(agent.RoutingJevSelective))

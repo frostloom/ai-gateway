@@ -11,6 +11,8 @@ import (
 // RuntimeMetadata identifies the actual shared model/execution contract. It
 // contains no credentials. Dataset/fixture hashes belong to the evaluator.
 type RuntimeMetadata struct {
+	KnowledgeEnabled bool               `json:"knowledge_enabled,omitempty"`
+	CorpusVersion    string             `json:"corpus_version,omitempty"`
 	Model            string             `json:"model"`
 	Protocol         string             `json:"protocol"`
 	EndpointSHA256   string             `json:"endpoint_sha256"`
@@ -40,13 +42,15 @@ func contentSHA(raw []byte) string {
 func (h *Handler) runtimeMetadata() *RuntimeMetadata {
 	metadata := &RuntimeMetadata{Model: "unknown", Protocol: "unknown", RoutingMode: string(h.RoutingMode()),
 		RoutingRevision: "selective-context-prefilter-v1",
-		PromptSHA256:    contentSHA([]byte(systemPrompt)), ContractSHA256: contentSHA([]byte(runtimeContract)),
+		PromptSHA256:    contentSHA([]byte(h.basePrompt())), ContractSHA256: contentSHA([]byte(h.effectiveContract())),
 		ReplyRepairLimit: 1, Thresholds: map[string]float64{"intent_min": .90, "shape_min": .90,
 			"legit_min": .85, "risk_max_exclusive": .5, "risk_confidence_min": .8}}
 	if h.jevFastPathMin > 0 {
 		metadata.Thresholds["intent_min"] = h.jevFastPathMin
 		metadata.Thresholds["shape_min"] = h.jevFastPathMin
 	}
+	metadata.CorpusVersion = h.tb.KnowledgeVersion()
+	metadata.KnowledgeEnabled = metadata.CorpusVersion != ""
 	if h.tb != nil {
 		raw, _ := json.Marshal(h.tb.All())
 		metadata.ToolsSHA256 = contentSHA(raw)

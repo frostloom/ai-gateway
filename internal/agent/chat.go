@@ -370,7 +370,7 @@ func isGearToolLine(t string) bool {
 	if !strings.HasPrefix(t, "⚙") {
 		return false
 	}
-	for _, n := range []string{"get_balance", "get_consumption", "get_recent_bills", "list_models", "list_plans", "get_my_subscription", "recharge", "refund", "subscribe_plan", "change_plan", "cancel_subscription"} {
+	for _, n := range []string{"search_platform_knowledge", "get_balance", "get_consumption", "get_recent_bills", "list_models", "list_plans", "get_my_subscription", "recharge", "refund", "subscribe_plan", "change_plan", "cancel_subscription"} {
 		if strings.Contains(t, n) {
 			return true
 		}
@@ -390,7 +390,7 @@ func (h *Handler) llmLoop(ctx context.Context, sessionID string, tenantID uint64
 	repaired := false
 
 	for iter := 0; iter < 5; iter++ {
-		messages := buildMessages(ses, pending, v)
+		messages := buildMessages(ses, pending, v, h.basePrompt())
 		if repair != "" {
 			messages[0].Content += "\n【纠正】" + repair
 		}
@@ -594,8 +594,11 @@ func (h *Handler) llmLoop(ctx context.Context, sessionID string, tenantID uint64
 // JEV 的两类提示行语义不同，都要带进去：
 //   - Hint：意图预判（正常请求，帮 LLM 一次选对工具）
 //   - Warn：安全提醒（中等可疑，要求谨慎并强制确认）
-func buildMessages(ses *session, pending *pendingAction, v jevVerdict) []Message {
+func buildMessages(ses *session, pending *pendingAction, v jevVerdict, base ...string) []Message {
 	sys := systemPrompt
+	if len(base) > 0 {
+		sys = base[0]
+	}
 	if v.Warn {
 		sys += "\n\n【安全模式】本轮请求的合理性判定偏低，请严格遵守：" +
 			"只做用户明确要求的事，涉及资金/合同的操作必须先给出预览并等用户确认，禁止推测执行。"
@@ -748,12 +751,13 @@ func isPendingCancellation(text string) bool {
 
 // readTools 只读工具集（即时执行，无需确认）。
 var readTools = map[string]bool{
-	"get_balance":         true,
-	"get_consumption":     true,
-	"get_recent_bills":    true,
-	"list_models":         true,
-	"list_plans":          true,
-	"get_my_subscription": true,
+	"search_platform_knowledge": true,
+	"get_balance":               true,
+	"get_consumption":           true,
+	"get_recent_bills":          true,
+	"list_models":               true,
+	"list_plans":                true,
+	"get_my_subscription":       true,
 }
 
 // ---------- 小工具 ----------
