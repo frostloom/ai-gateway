@@ -1,0 +1,97 @@
+package main
+
+import (
+	"context"
+	"encoding/json"
+	"github.com/frostloom/ai-gateway/internal/observability"
+	"go.opentelemetry.io/otel/trace"
+	"net/url"
+	"os"
+	"strings"
+	"time"
+)
+
+type row struct {
+	Index   int                 `json:"index"`
+	Trace   string              `json:"trace_id"`
+	FlushMS float64             `json:"flush_ms"`
+	FlushOK bool                `json:"flush_ok"`
+	Stats   observability.Stats `json:"stats"`
+}
+
+func main() {
+	raw, e := os.ReadFile(".tmp/paired-live-private/v5-six-cohort-entry-20261024/evaluation.env")
+	if e != nil {
+		panic("private env unavailable")
+	}
+	env := map[string]string{}
+	for _, l := range strings.Split(string(raw), "\n") {
+		k, v, ok := strings.Cut(l, "=")
+		if ok {
+			env[strings.TrimSpace(k)] = strings.Trim(strings.TrimSpace(v), "\"'")
+		}
+	}
+	c, e := observability.ConfigFromEnv(func(k string) string { return env[k] })
+	if e != nil || !c.Enabled || c.Environment != "evaluation" {
+		panic("invalid explicit evaluation config")
+	}
+	u, e := url.Parse(c.Endpoint)
+	if e != nil || (u.Hostname() != "127.0.0.1" && u.Hostname() != "localhost") {
+		panic("local endpoint required")
+	}
+	c.CaptureContent = false
+	c.Release = "observer-synthetic-delivery-20261025"
+	c.SampleRate = 1
+	ctx, cancel := context.WithTimeout(context.Background(), 90*time.Second)
+	defer cancel()
+	o, e := observability.New(ctx, c)
+	if e != nil {
+		panic("observer initialization failed")
+	}
+	f, e := os.OpenFile(".tmp/paired-live-private/observer-synthetic-delivery-20261025/rows.jsonl", os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0600)
+	if e != nil {
+		panic("exclusive output required")
+	}
+	defer f.Close()
+	enc := json.NewEncoder(f)
+	failed := false
+	for i := 1; i <= 24; i++ {
+		if ctx.Err() != nil {
+			failed = true
+			break
+		}
+		tctx, t := o.StartTurn(ctx, "diagnostic_zero_inference")
+		id := trace.SpanContextFromContext(tctx).TraceID().String()
+		_, a := observability.Start(tctx, "diagnostic.synthetic.prepare", "span")
+		a.End(nil)
+		_, b := observability.Start(tctx, "diagnostic.synthetic.finish", "span")
+		b.End(nil)
+		t.End(200, observability.Summary{Stage: "diagnostic_zero_inference"})
+		start := time.Now()
+		e = o.ForceFlush(ctx)
+		s := o.Stats()
+		if enc.Encode(row{i, id, float64(time.Since(start)) / float64(time.Millisecond), e == nil, s}) != nil {
+			failed = true
+			break
+		}
+		if f.Sync() != nil {
+			failed = true
+			break
+		}
+		if e != nil || s.Failed != 0 || s.Dropped != 0 {
+			failed = true
+			break
+		}
+	}
+	shutdownCtx, stop := context.WithTimeout(context.Background(), 3*time.Second)
+	defer stop()
+	e = o.Shutdown(shutdownCtx)
+	safe := map[string]any{"schema": "observer-synthetic-delivery.v1", "release": c.Release, "model_calls": 0, "jev_calls": 0, "max_traces": 24, "spans_per_trace": 3, "stopped": failed, "shutdown_ok": e == nil, "stats": o.Stats()}
+	out, _ := json.MarshalIndent(safe, "", "  ")
+	if os.WriteFile(".tmp/paired-live-private/observer-synthetic-delivery-20261025/outcome.json", out, 0600) != nil {
+		os.Exit(2)
+	}
+	if failed || e != nil {
+		os.Exit(1)
+	}
+}

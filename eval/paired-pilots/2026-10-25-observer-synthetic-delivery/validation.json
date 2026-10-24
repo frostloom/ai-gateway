@@ -1,0 +1,33 @@
+{
+  "schema": "observer-synthetic-delivery-validation.v1",
+  "execution_revision": "4d887382300a906ae6d1a33972f3fe4d4aca4e0d",
+  "traces": 24,
+  "observations": 72,
+  "unique_observation_ids": 72,
+  "export_batches": 24,
+  "failed_spans": 0,
+  "dropped_spans": 0,
+  "first_readback_complete": true,
+  "strict_final_readback_complete": true,
+  "no_content": true,
+  "no_model_jev_calls": true,
+  "new_claims": 0,
+  "deployed": false,
+  "protected_files": 7978,
+  "protected_changed": 0,
+  "flush_ms": {
+    "minimum": 11.597625,
+    "median": 35.564770499999995,
+    "maximum": 273.546833
+  },
+  "current_program_sha256": {
+    "probe.go": "28d6a674ec215a4b5fce3234fbfa04b472b68bd1ec9cc00693bd227c1cfead00",
+    "readback.py": "ea9a8ec3367464bb567d964c3c097a301f845cc896172bb54bc5b517fff1e115",
+    "plan.txt": "b5037c9c5be5cd9e2a7b6de9330024b52aa15afee6a1284a42afeac465d15c59"
+  },
+  "limitations": [
+    "24 immediate sequential flushes; not a load or whole-cohort reproduction",
+    "No proof of historical cause, permanent stability or arbitrary durable storage",
+    "No quality, cost saving or customer E2E conclusion"
+  ]
+}

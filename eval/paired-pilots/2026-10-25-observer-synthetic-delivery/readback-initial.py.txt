@@ -1,0 +1,20 @@
+import importlib.util,json,sys
+from pathlib import Path
+p=Path(__file__).parent
+spec=importlib.util.spec_from_file_location('langfuse_eval', 'scripts/langfuse-eval.py');m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
+c={}
+for line in Path('.tmp/paired-live-private/v5-six-cohort-entry-20261024/evaluation.env').read_text().splitlines():
+ k,sep,v=line.partition('=')
+ if sep:c[k.strip()]=v.strip().strip('\"\'')
+client=m.Client(c)
+rows=[json.loads(x) for x in (p/'rows.jsonl').read_text().splitlines()]
+checks=[]
+for r in rows:
+ data=client.observations(r['trace_id'])
+ names=sorted(x.get('name','') for x in data)
+ expected=['agent.turn','diagnostic.synthetic.finish','diagnostic.synthetic.prepare']
+ no_content=all(x.get('input') is None and x.get('output') is None for x in data)
+ release=all(x.get('version')=='agent-observability.v1' for x in data)
+ checks.append({'index':r['index'],'trace_id':r['trace_id'],'count':len(data),'names_match':names==expected,'no_content':no_content,'version_match':release,'metadata': [x.get('metadata',{}) for x in data]})
+out={'schema':'observer-synthetic-readback.v1','traces':len(rows),'observations':sum(x['count'] for x in checks),'complete':len(rows)==24 and all(x['count']==3 and x['names_match'] and x['no_content'] for x in checks),'checks':checks}
+Path(sys.argv[1]).write_text(json.dumps(out,indent=2)+'\n');print(json.dumps({k:v for k,v in out.items() if k!='checks'}));sys.exit(0 if out['complete'] else 2)

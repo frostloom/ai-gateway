@@ -1,5 +1,7 @@
 # ai-gateway 项目记忆
 
+2026-10-25 导出诊断4d887382300a906ae6d1a33972f3fe4d4aca4e0d已推送main后，一次固定新建24条合成trace/72span的本机Langfuse零推理验证完成：24批Accepted72/Exported72/Failed0/Dropped0/队列0，Shutdown成功，第一次只读查询即完整72项；第二次只读检查72唯一ID、24trace绑定、名称、版本、evaluation/专用release/诊断标签、无正文全部匹配。默认2秒导出、最多90秒/24轮、失败即停、逐轮同步、无重试/旧trace重发，未改共享配置/客服部署/业务。flush最小11.598、中位35.565、最大273.547ms仅本轮导出耗时；24次紧邻顺序flush不复现原队列时长负载，不确认历史根因或永久稳定。7978旧私密SHA不变；新增真实模型/JEV/claim均0，累计仍117/31、c7f14ee3旧claim和完整预留不变。用户自主推进偏好已Hindsight写入成功并读回；本任务证据见docs/observer-synthetic-delivery-2026-10-25.md及同日档案。下一步自主离线设计带诊断的新独立重复范围，不补跑17–24、不重领或释放旧claim；实际新付费仍单独授权。
+
 2026-10-25 最小有界OTLP失败诊断已实现并离线交付，未部署：Stats仅失败时新增export_diagnostics，保留首8条及省略计数，批次/请求序号、span数、耗时、可选HTTP状态和有限错误分类，无URL/正文/凭据/error string；深复制快照，首次读失败不被Close覆盖，protobuf解码分类须观测HTTP2xx。生产2秒/重试关闭/固定错误/计数/停止策略不变，旧成功及禁用JSON不变；不确认历史Failed3根因。HTTP、TLS、EOF、截断体、上限及并发RED→GREEN，旧源码overlay实际Handler回执反例RED、当前GREEN（6模型替身1FakeJEV），停止及全额预留保留。最终obs包与race通过（平台linker warning保留），标准全Go18包退出0/taskbench486.178秒；独立源码复审无剩余P1/P2，审查者测试缓存权限受限由主代理提供测试证据。7978旧私密SHA不变、测试后隔离库0；零新增实际模型/JEV/claim/部署，累计仍117/31，c7f14ee3 claim及完整预留不改。Hindsight初读超时后下一任务读取成功；不得将未读回写入称已记忆。下一步自主完成新建合成trace零推理验证，无旧trace重发。见docs/observer-export-diagnostics-2026-10-25.md及同日档案。
 
 2026-10-25 用户明确要求每个小任务验证、提交并推送后自主判断下一步，不再逐项确认；常规离线开发、只读排查及零推理验证连续推进。新的精确付费范围仍遵循已有单独明确授权约定，不复用已消耗claim或旧批准。

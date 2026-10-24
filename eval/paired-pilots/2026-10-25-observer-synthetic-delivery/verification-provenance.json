@@ -1,0 +1,26 @@
+{
+  "schema": "synthetic-delivery-verification-provenance.v1",
+  "execution_revision": "4d887382300a906ae6d1a33972f3fe4d4aca4e0d",
+  "original_execution_provenance_sha256": "2e120fd3f7603d717c931ede0c27467eddc89fe9ad7daa91c8f6f39c7d4d4e83",
+  "clarification": "Original execution-provenance source_sha256 for readback.py binds the initial script; final stricter readback is separately bound below. No telemetry re-export occurred.",
+  "stages": {
+    "one_time_export": {
+      "source_file": "probe.go",
+      "source_sha256": "28d6a674ec215a4b5fce3234fbfa04b472b68bd1ec9cc00693bd227c1cfead00",
+      "result_file": "rows.jsonl",
+      "result_sha256": "7eca4fdab8ac70436c5a3d7dcf53517308d778cfd8e632c15a5abbfd3f616c16"
+    },
+    "initial_read_only": {
+      "source_file": "readback-initial.py",
+      "source_sha256": "d65cc34f1dfe2ec9f28074b5c5003064cc81070060bcd32f91d519cbd4f52b9f",
+      "result_file": "readback-initial.json",
+      "result_sha256": "06ffb62e45cc49c244b29fb8dd73e605402924ef35f6a766f66a5a43517157ce"
+    },
+    "strict_final_read_only": {
+      "source_file": "readback.py",
+      "source_sha256": "ea9a8ec3367464bb567d964c3c097a301f845cc896172bb54bc5b517fff1e115",
+      "result_file": "readback-final.json",
+      "result_sha256": "dacdd27e1ff64d2ed39a68d37598eed35f6375716abe8547acf5ca03761fbcd4"
+    }
+  }
+}
