@@ -1,0 +1,23 @@
+services:
+  agent-knowledge:
+    profiles: [knowledge]
+    image: ai-gateway-agent-knowledge:local
+    build:
+      context: ../..
+      dockerfile: deploy/agent/Dockerfile
+      target: runtime
+    user: "65532:65532"
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    tmpfs: [/tmp:size=16m,mode=1777]
+    env_file:
+      - path: .env.agent
+        required: false
+    environment:
+      AGENT_KNOWLEDGE_ENABLED: ${AGENT_KNOWLEDGE_ENABLED:-false}
+      AGENT_KNOWLEDGE_DIR: /app/knowledge/platform
+      LISTEN_HOST: 0.0.0.0
+      AGENT_PORT: "9105"
+    extra_hosts: ["host.docker.internal:host-gateway"]
+    ports: ["127.0.0.1:${AGENT_CONTAINER_PORT:-19105}:9105"]

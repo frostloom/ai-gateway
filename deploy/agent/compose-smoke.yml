@@ -1,0 +1,59 @@
+services:
+  mysql:
+    image: docker.m.daocloud.io/library/mysql:8.0.40
+    environment: {MYSQL_ROOT_PASSWORD: smoke, MYSQL_DATABASE: knowledge_smoke}
+    tmpfs: [/var/lib/mysql]
+    healthcheck:
+      test: [CMD, mysql, -h, 127.0.0.1, -uroot, -psmoke, -D, knowledge_smoke, -e, "SELECT 1"]
+      interval: 3s
+      timeout: 3s
+      retries: 50
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: [CMD, redis-cli, ping]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+  fixture:
+    image: ai-gateway-agent-knowledge:smoke
+    build: {context: ../.., dockerfile: deploy/agent/Dockerfile, target: smoke}
+    entrypoint: [/app/knowledge-smoke]
+    read_only: true
+    environment:
+      MYSQL_DSN: root:smoke@tcp(mysql:3306)/knowledge_smoke?charset=utf8mb4&parseTime=True&loc=Local
+      REDIS_ADDR: redis:6379
+    depends_on:
+      mysql: {condition: service_healthy}
+      redis: {condition: service_healthy}
+    healthcheck:
+      test: [CMD, /app/knowledge-smoke, -ready]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+  agent-knowledge:
+    image: ai-gateway-agent-knowledge:smoke
+    build: {context: ../.., dockerfile: deploy/agent/Dockerfile, target: smoke}
+    user: "65532:65532"
+    read_only: true
+    environment:
+      AGENT_KNOWLEDGE_ENABLED: "true"
+      AGENT_ROUTING_MODE: model
+      CONTROL_PLANE_TOKEN: smoke-control
+      MYSQL_DSN: root:smoke@tcp(mysql:3306)/knowledge_smoke?charset=utf8mb4&parseTime=True&loc=Local
+      REDIS_ADDR: redis:6379
+      BILLING_ADDR: fixture:9992
+      BILLING_ADMIN_ADDR: http://fixture:9991
+      AGENT_LLM_BASE_URL: http://fixture:9991
+      AGENT_LLM_API_KEY: smoke-unused
+      AGENT_LLM_MODEL: local-smoke
+      AGENT_LLM_PROTOCOL: openai
+      AGENT_LANGFUSE_ENABLED: "true"
+      AGENT_LANGFUSE_CAPTURE_CONTENT: "true"
+      AGENT_LANGFUSE_HASH_KEY: smoke-hash-key-at-least-32-characters-long
+      LANGFUSE_PUBLIC_KEY: pk-smoke
+      LANGFUSE_SECRET_KEY: sk-smoke
+      AGENT_LANGFUSE_ENVIRONMENT: evaluation
+      OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: http://fixture:9991/api/public/otel/v1/traces
+    depends_on:
+      fixture: {condition: service_healthy}

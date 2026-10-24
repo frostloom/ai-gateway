@@ -32,6 +32,13 @@ import (
 )
 
 func main() {
+	if len(os.Args) > 1 && os.Args[1] == "-healthcheck" {
+		if err := healthcheck("http://127.0.0.1:" + config.Getenv("AGENT_PORT", "9105") + "/healthz"); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+		return
+	}
 	log := logger.New(config.Getenv("LOG_LEVEL", "info"))
 	controlToken := controlplane.Require(log)
 
@@ -79,6 +86,12 @@ func main() {
 		log.Info("llm call", "attempt", attempt, "budget", budget, "msgs", msgs, "tools", tools)
 	})
 
+	tb := agent.NewToolbox(agent.NewAdminClient(adminBase))
+	if err := configureKnowledge(tb, os.Getenv); err != nil {
+		log.Error("knowledge initialization failed", "err", err)
+		os.Exit(1)
+	}
+
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{Logger: gormlogger.Default.LogMode(gormlogger.Error)})
 	if err != nil {
 		log.Error("connect mysql", "err", err)
@@ -103,11 +116,6 @@ func main() {
 	}
 	defer bc.Close()
 
-	tb := agent.NewToolbox(agent.NewAdminClient(adminBase))
-	if err := configureKnowledge(tb, os.Getenv); err != nil {
-		log.Error("knowledge initialization failed", "err", err)
-		os.Exit(1)
-	}
 	llm := agent.NewLLMClient(llmBase, llmKey, llmModel)
 	h := agent.NewHandler(bc, tb, llm, st, rdb, log)
 	routingMode := config.Getenv("AGENT_ROUTING_MODE", string(agent.RoutingJevSelective))
