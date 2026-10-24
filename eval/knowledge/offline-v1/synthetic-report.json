@@ -1,0 +1,154 @@
+{
+  "knowledge_change_pp": 0,
+  "total_cost_change_pct": {
+    "CNY": 0
+  },
+  "cost_per_correct_change_pct": {
+    "CNY": 0
+  },
+  "p95_change_pct": 0,
+  "cost_reduction_gate": "unavailable",
+  "schema": "knowledge-report.v1",
+  "evidence_kind": "local_stub",
+  "clock": "runner",
+  "end_to_end": false,
+  "quality_comparable": true,
+  "effect_claims_allowed": false,
+  "a": {
+    "failed_attempts": 0,
+    "timeouts": 0,
+    "unknown_outcomes": 0,
+    "cache_read": 0,
+    "cache_creation": 0,
+    "correct": 72,
+    "reviewed": 72,
+    "categories": {
+      "dynamic": {
+        "n": 12,
+        "reviewed": 12,
+        "correct": 12
+      },
+      "knowledge": {
+        "n": 36,
+        "reviewed": 36,
+        "correct": 36
+      },
+      "safety": {
+        "n": 12,
+        "reviewed": 12,
+        "correct": 12
+      },
+      "unknown": {
+        "n": 12,
+        "reviewed": 12,
+        "correct": 12
+      }
+    },
+    "completion_rate": 1,
+    "unsupported_rate": 0,
+    "citation_precision": 1,
+    "citation_coverage": 1,
+    "recall_at_3": 0,
+    "critical_errors": 0,
+    "configured_total_micro": {
+      "CNY": 72000
+    },
+    "cost_per_correct_micro": {
+      "CNY": 1000
+    },
+    "common_pass_micro": {
+      "CNY": 72000
+    },
+    "attempts": 72,
+    "uncached_input": 72000,
+    "output": 0,
+    "p50_ms": 10,
+    "p95_ms": 10,
+    "latency_n": 72,
+    "gates": {
+      "citation_coverage": "pass",
+      "citation_precision": "pass",
+      "critical_errors": "pass",
+      "dynamic": "pass",
+      "knowledge": "pass",
+      "recall_at_3": "fail",
+      "safety": "pass",
+      "unknown": "pass",
+      "unsupported": "pass"
+    }
+  },
+  "b": {
+    "failed_attempts": 0,
+    "timeouts": 0,
+    "unknown_outcomes": 0,
+    "cache_read": 0,
+    "cache_creation": 0,
+    "correct": 72,
+    "reviewed": 72,
+    "categories": {
+      "dynamic": {
+        "n": 12,
+        "reviewed": 12,
+        "correct": 12
+      },
+      "knowledge": {
+        "n": 36,
+        "reviewed": 36,
+        "correct": 36
+      },
+      "safety": {
+        "n": 12,
+        "reviewed": 12,
+        "correct": 12
+      },
+      "unknown": {
+        "n": 12,
+        "reviewed": 12,
+        "correct": 12
+      }
+    },
+    "completion_rate": 1,
+    "unsupported_rate": 0,
+    "citation_precision": 1,
+    "citation_coverage": 1,
+    "recall_at_3": 1,
+    "critical_errors": 0,
+    "configured_total_micro": {
+      "CNY": 72000
+    },
+    "cost_per_correct_micro": {
+      "CNY": 1000
+    },
+    "common_pass_micro": {
+      "CNY": 72000
+    },
+    "attempts": 72,
+    "uncached_input": 72000,
+    "output": 0,
+    "p50_ms": 10,
+    "p95_ms": 10,
+    "latency_n": 72,
+    "gates": {
+      "citation_coverage": "pass",
+      "citation_precision": "pass",
+      "critical_errors": "pass",
+      "dynamic": "pass",
+      "knowledge": "pass",
+      "recall_at_3": "pass",
+      "safety": "pass",
+      "unknown": "pass",
+      "unsupported": "pass"
+    }
+  },
+  "candidate_wins": 0,
+  "candidate_losses": 0,
+  "ties": 72,
+  "discordant_win_95": null,
+  "limitations": [
+    "Small frozen diagnostic suite; no population-wide accuracy or cost promise.",
+    "Recorder provenance and independent reviews are trusted inputs, not execution attestations.",
+    "Costs are configured estimates in separate currencies, not invoices; CPU/storage/telemetry overhead requires separate measurements.",
+    "EffectClaimsAllowed permits comparing recorded differences, not asserting positive benefit.",
+    "Missing usage/review is unavailable. local_stub cannot prove real-model benefits."
+  ]
+}

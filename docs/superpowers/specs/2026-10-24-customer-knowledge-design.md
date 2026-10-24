@@ -1,6 +1,6 @@
 # 客服平台知识检索、容器交付与 Langfuse 设计
 
-状态：用户于 2026-10-24 同意准备开发，设计与指标方案进入实施计划；没有实现、部署或付费调用。
+状态：已完成工程实现、Docker与Langfuse离线验收；未替换现有客服、未进行真实模型质量/成本测评。结果见 docs/customer-knowledge-offline-2026-10-24.md。
 分支：`codex/customer-knowledge-rag`；源码基点 `647ba9ffc8f44d47792b2a5174ec53d08d410d88`。
 
 ## 用户要求与本方案的选择

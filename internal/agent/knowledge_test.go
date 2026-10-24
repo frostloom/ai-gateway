@@ -92,3 +92,17 @@ func TestKnowledgeUsesLivePrice(t *testing.T) {
 		t.Fatalf("live tools unavailable: %+v %v", tr, e)
 	}
 }
+
+func TestKnowledgeLoopBoundary(t *testing.T) {
+	h, _ := isolatedObservedHandler(t)
+	enableKnowledge(t, h.tb)
+	model := &scriptedLLM{}
+	for i := 0; i < 6; i++ {
+		model.steps = append(model.steps, toolCallMsg("k"+string(rune('a'+i)), "search_platform_knowledge", `{"query":"退订退款`+string(rune('a'+i))+`"}`))
+	}
+	h.llm = model
+	reply, tr, e := h.llmLoop(context.Background(), "knowledge-bound", 42, jevVerdict{}, &session{History: []Message{{Role: "user", Content: "解释退订规则"}}})
+	if e != nil || len(tr) != 5 || len(model.steps) != 1 || !strings.Contains(reply, "循环次数过多") {
+		t.Fatalf("loop widened: %s %d %v", reply, len(tr), e)
+	}
+}

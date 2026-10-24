@@ -1,0 +1,83 @@
+{
+  "schema": "knowledge-offline-validation.v1",
+  "date": "2026-10-24",
+  "base_revision": "647ba9ffc8f44d47792b2a5174ec53d08d410d88",
+  "implementation_revision": "f1ce1c6c79a1c42421e4df10f3871f366f93a5b5",
+  "evidence_kind": "local_stub_and_local_langfuse",
+  "customer_live_model_calls": 0,
+  "jev_calls": 0,
+  "real_quality_or_benefit_proven": false,
+  "deployed_to_existing_customer": false,
+  "initial_full_go": {
+    "test_packages_passed": 21,
+    "test_packages_failed": 1,
+    "packages_without_tests": 27,
+    "skipped_tests": [
+      "TestCashLoad",
+      "TestCashProfileRowTiming",
+      "TestLiveJevSemanticsDiagnostic"
+    ]
+  },
+  "final_full_go": {
+    "test_packages_passed": 22,
+    "test_packages_failed": 0,
+    "packages_without_tests": 27,
+    "skipped_tests": [
+      "TestCashLoad",
+      "TestCashProfileRowTiming",
+      "TestLiveJevSemanticsDiagnostic",
+      "TestKnowledgeLangfuseReadback"
+    ]
+  },
+  "python": "3.12.15 (process PATH only)",
+  "sdkroot": "/Library/Developer/CommandLineTools/SDKs/MacOSX26.5.sdk",
+  "docker_successful_isolated_smokes": 2,
+  "successful_langfuse_traces": 4,
+  "successful_langfuse_observations": 28,
+  "all_langfuse_synthetic_probes": {
+    "release": "knowledge-synthetic-verification",
+    "observations": 84,
+    "traces": {
+      "4efec956aac7f4d6ad4e5a7498730bf6": 4,
+      "0037731465dd20c56cfc9d61ba065ade": 5,
+      "0ac8f29869823e5a85ae223f1529f8d0": 10,
+      "8b587cac465731543e41de3e3d70a50e": 9,
+      "a0d2945733e1de87b87d4c89b76ce611": 10,
+      "65072347529659de704c4be2645c0dce": 9,
+      "8b4c55363de3dce1a0c8e8499d5d57ef": 10,
+      "caa08de7b14307dd4a4c403620ea21b9": 9,
+      "ab5a7133f5ec65c732ede288539690a6": 9,
+      "5a07be072bd56a7283f2eb97a62b054c": 9
+    },
+    "scope": "All synthetic verification probes including failed assertions; no live model or quality scores"
+  },
+  "original_claim_files_checked": 2,
+  "original_claim_files_changed": 0,
+  "old_tracked_pilot_archives_changed": false,
+  "private_evidence_directory": ".tmp/knowledge-validation/2026-10-24/",
+  "private_log_sha256": {
+    "full-go.jsonl": "a6a0279f5c465e2f7caa6e14f2332105ff3b3eb64f310bee00b4fb51dfe3602d",
+    "full-go-python312.jsonl": "7fff6719e4e25b6f00e0b42b280714fb0bd36bf5de2492cd190e58d20d5317a3",
+    "archive-python312.log": "e10187bd3aa3019d4ef0ff17965b02bdb648a694b147b28ecd6878c6996ef8a7",
+    "docker-build.log": "cc949eb2f86acc23def20398835e2ba5a50a6241622b6f054745f85d326f46d5",
+    "docker-build-local.log": "d4e2b1d84133f60a78a77cd46786b460f6d4cc0781cfce37829918dbb25ff44d",
+    "docker-runtime-final.log": "1cc3689dd2ae76ff9ef3e73918e9c74f16c8cef87ca2bbb59832667faaf8be31",
+    "docker-smoke.log": "24a8ff247bcc4a4010614b46658c05397ebb846d2fe6de875f19f6a308c445e3",
+    "docker-smoke-diagnostic.log": "93e56605cc2c0aa9450c8b99dc3e35dde2838884c4448d867324be05ed7789e8",
+    "docker-smoke-ready.log": "c11a20867ab3a61620692bb91db09f42bf42e77961b8240b969c84bc1912a0a1",
+    "docker-smoke-network.log": "6e5bcab0aecfd082da138f8d75a00ed0cb64c81d3443f7b8037c7e02be8f6558",
+    "docker-smoke-final.log": "9cf04c41010429a44641c308b847689847321230a9a80a9e2488a9a157fadcde",
+    "langfuse-readback.log": "a5a0e7cbbe0825f525eb61e90d88ffea7d340fe9d549166558888cfabd3565e3",
+    "langfuse-v2-readback.log": "5ed80e56aecd2438fbeb44e8898703dace359eb7ecfc9e3af2c5298a8dd478ca",
+    "langfuse-fields-readback.log": "02acc421d9f24338e80a96acdecaef7defa9165d7dd0675639ebd1e9da1afd1a",
+    "langfuse-final-readback.log": "de4a9fcad8cf32f81338eea0e3763d84b8bcac34a0b09eca62fe363c3f6bff9c",
+    "langfuse-decoded-readback.log": "c66888940356650368294aede27986893853bedd323c4e4c8b988217472cb758",
+    "langfuse-all-probes.json": "592793075d0635f685c8c00dd9a7666d2ff599b38bc6a8b63cff0ed3cbf07cca",
+    "langfuse-receipt.json": "26d298ea5703197029160348940268b86a36fea36798dfeb16854a35701a4207",
+    "synthetic-report.json": "9d4b3e5054fc712818f151c3e6d61057b97e86eefcd2585fd62a52512784208f"
+  },
+  "working_tree_additional_test_sha256": {
+    "internal/agent/knowledge_test.go": "9eaeb3e2aa54a2e26fe6f0e62a33b13ca0729faeacfaddb9da44fdf27fdc67b7",
+    "internal/agent/knowledge_langfuse_test.go": "0265db528dbb1e2e0ac49744be52c5baf587be5ec5ec04b42dec81f25c5d79e5"
+  }
+}
