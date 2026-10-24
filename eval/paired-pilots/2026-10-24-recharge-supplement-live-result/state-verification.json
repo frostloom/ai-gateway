@@ -1,0 +1,35 @@
+{
+  "schema": "recharge-supplement-state-verification.v1",
+  "arms": [
+    {
+      "arm": "model",
+      "first_turn_no_write_or_pending": true,
+      "preview_amount_yuan": 100,
+      "preview_no_business_write": true,
+      "confirmed_write_count": 1,
+      "balance_delta_cent": 10000,
+      "ledger_delta_cent": 10000,
+      "new_order_count": 1,
+      "new_topup_count": 1,
+      "subscriptions_controls_allowance_unchanged": true,
+      "confirmation_model_calls": 0,
+      "confirmation_jev_calls": 0,
+      "reply_repair_count": 0
+    },
+    {
+      "arm": "jev_selective",
+      "first_turn_no_write_or_pending": true,
+      "preview_amount_yuan": 100,
+      "preview_no_business_write": true,
+      "confirmed_write_count": 1,
+      "balance_delta_cent": 10000,
+      "ledger_delta_cent": 10000,
+      "new_order_count": 1,
+      "new_topup_count": 1,
+      "subscriptions_controls_allowance_unchanged": true,
+      "confirmation_model_calls": 0,
+      "confirmation_jev_calls": 0,
+      "reply_repair_count": 0
+    }
+  ]
+}

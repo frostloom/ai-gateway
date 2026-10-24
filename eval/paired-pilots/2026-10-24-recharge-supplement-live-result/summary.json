@@ -1,0 +1,95 @@
+{
+  "schema": "recharge-supplement-live-summary.v1",
+  "execution_revision": "089017bc70f5e0af8e36198f1ff489296d2710be",
+  "case_key": "recharge-001/supplement_then_confirm",
+  "status": "checkpoint_pending",
+  "model_attempts": 4,
+  "model_input_tokens": 7064,
+  "model_output_tokens": 90,
+  "model_config_priced_micro_cny": 14848,
+  "jev_attempts": 1,
+  "jev_input_tokens": 1201,
+  "jev_output_tokens": 186,
+  "rows": [
+    {
+      "key": "recharge-001/supplement_then_confirm",
+      "arm": "model",
+      "status": "needs_review",
+      "structural_pass": true,
+      "observed_turns": 3,
+      "http_failures": 0,
+      "runner_elapsed_ms": 2118.667625,
+      "telemetry": {
+        "completion_rate": null,
+        "response_latency_ms": 1830.943459,
+        "llm_calls": 2,
+        "jev_calls": 0,
+        "tokens": {
+          "llm_input": 3532,
+          "llm_output": 45,
+          "jev_input": 0,
+          "jev_output": 0
+        }
+      },
+      "guarded_upstream_model_attempts": 2,
+      "priced_model_usage_micro_cny": 7424
+    },
+    {
+      "key": "recharge-001/supplement_then_confirm",
+      "arm": "jev_selective",
+      "status": "needs_review",
+      "structural_pass": true,
+      "observed_turns": 3,
+      "http_failures": 0,
+      "runner_elapsed_ms": 2506.61525,
+      "telemetry": {
+        "completion_rate": null,
+        "response_latency_ms": 2223.905749,
+        "llm_calls": 2,
+        "jev_calls": 1,
+        "tokens": {
+          "llm_input": 3532,
+          "llm_output": 45,
+          "jev_input": 1201,
+          "jev_output": 186
+        }
+      },
+      "guarded_upstream_model_attempts": 2,
+      "priced_model_usage_micro_cny": 7424
+    }
+  ],
+  "observer_stats": {
+    "Accepted": 17,
+    "Dropped": 0,
+    "Exported": 17,
+    "Failed": 0,
+    "Batches": 7,
+    "Turns": 6,
+    "SampledTurns": 6,
+    "QueueDepth": 0
+  },
+  "cleanup_and_receipt_succeeded": true,
+  "cumulative_model_attempts": 33,
+  "cumulative_jev_attempts": 8,
+  "permanent_reserved_model_micro_cny": 1419264,
+  "permanent_reserved_jev_micro_usd": 10752,
+  "unallocated_model_micro_cny": 98580736,
+  "unallocated_jev_micro_usd": 989248,
+  "invoice_verified": false,
+  "model_calls_saved_in_this_case": 0,
+  "deployed": false,
+  "jev_config_priced_usd": "0.000050442",
+  "independent_review_requirements_passed": 12,
+  "independent_review_blocking_findings": [],
+  "six_turn_content_readback_verified": true,
+  "deterministic_scores_verified": 14,
+  "independent_scores_verified": 4,
+  "historical_files_verified": 3040,
+  "historical_hashes_unchanged": true,
+  "new_claim_sha256": "824e1e44882b1043bba833ec6af5b88980d6d89b4ce8e4023fd12c68c98fb11c",
+  "new_claim_permanently_consumed": true,
+  "remaining_isolated_databases": 0,
+  "reply_corrections_triggered": 0,
+  "transient_score_check_failure_root_cause_confirmed": false,
+  "scope_authorization_consumed": true
+}

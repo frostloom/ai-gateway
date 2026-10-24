@@ -1,0 +1,29 @@
+{
+  "jev_calls": 0,
+  "kind": "verified",
+  "model_calls": 0,
+  "plan_sha256": "07bcbd2880dfca9b93b1636593bc4d36e3456ac7fe9dc64f51f8337d6e27c79b",
+  "score_count": 14,
+  "trace_summaries": [
+    {
+      "arm": "model",
+      "case_key": "recharge-001/supplement_then_confirm",
+      "content_turns": 3,
+      "evidence_kind": "recorded_run",
+      "expected_turns": 3,
+      "require_answers": true,
+      "trace_id": "8071597e0c3763a6874393b5f2f31b45",
+      "turns": 3
+    },
+    {
+      "arm": "jev_selective",
+      "case_key": "recharge-001/supplement_then_confirm",
+      "content_turns": 3,
+      "evidence_kind": "recorded_run",
+      "expected_turns": 3,
+      "require_answers": true,
+      "trace_id": "581477fdd7c6111cd7c6a8d6bde7a11d",
+      "turns": 3
+    }
+  ]
+}
