@@ -32,6 +32,7 @@ func (tb *Toolbox) knowledgeTool() *execTool {
 			return "", e
 		}
 		r, e := tb.knowledge.Search(q)
+		observeKnowledgeResult(ctx, r)
 		b, _ := json.Marshal(r)
 		return string(b), e
 	}}

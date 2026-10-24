@@ -77,7 +77,7 @@ type observedSpans struct {
 	raw   []byte
 }
 
-func localObserver(t *testing.T) (*observability.Observer, *observedSpans) {
+func localObserver(t *testing.T, capture ...bool) (*observability.Observer, *observedSpans) {
 	t.Helper()
 	c := &observedSpans{}
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -97,7 +97,7 @@ func localObserver(t *testing.T) (*observability.Observer, *observedSpans) {
 		w.Header().Set("Content-Type", "application/x-protobuf")
 	}))
 	t.Cleanup(srv.Close)
-	o, err := observability.New(context.Background(), observability.Config{Enabled: true, Endpoint: srv.URL + "/api/public/otel/v1/traces", PublicKey: "pk-local", SecretKey: "sk-local-secret", HashKey: strings.Repeat("a", 32), Environment: "evaluation", Release: "test", SampleRate: 1, ExportTimeout: time.Second})
+	o, err := observability.New(context.Background(), observability.Config{Enabled: true, CaptureContent: len(capture) > 0 && capture[0], Endpoint: srv.URL + "/api/public/otel/v1/traces", PublicKey: "pk-local", SecretKey: "sk-local-secret", HashKey: strings.Repeat("a", 32), Environment: "evaluation", Release: "test", SampleRate: 1, ExportTimeout: time.Second})
 	if err != nil {
 		t.Fatal(err)
 	}

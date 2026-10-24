@@ -209,7 +209,9 @@ func (c *LLMClient) chatAnthropic(ctx context.Context, messages []Message, tools
 
 	ctx, finishAttempt := beginLLMAttempt(ctx, protoAnthropic)
 	defer func() { finishAttempt(err) }()
+	observeKnowledgeRequest(ctx, messages, knowledgeRequestOrdinal(ctx))
 	resp, err := c.cli.Do(httpReq)
+	observeKnowledgeResponse(ctx, messages, err)
 	if err != nil {
 		return nil, fmt.Errorf("LLM 请求失败: %v", err)
 	}

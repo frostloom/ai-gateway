@@ -297,7 +297,9 @@ func (c *LLMClient) chatOpenAI(ctx context.Context, messages []Message, tools []
 
 	ctx, finishAttempt := beginLLMAttempt(ctx, protoOpenAI)
 	defer func() { finishAttempt(err) }()
+	observeKnowledgeRequest(ctx, messages, knowledgeRequestOrdinal(ctx))
 	resp, err := c.cli.Do(req)
+	observeKnowledgeResponse(ctx, messages, err)
 	if err != nil {
 		return nil, fmt.Errorf("LLM 请求失败: %v", err)
 	}
