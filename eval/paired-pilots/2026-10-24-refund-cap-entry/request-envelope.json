@@ -1,0 +1,78 @@
+{
+  "schema": "refund-cap-request-envelope.v1",
+  "requests": [
+    {
+      "file": "complete/requests/request-01.json",
+      "bytes": 6520,
+      "sha256": "57ba80727a855948795a342655889551d25904486bc70b7e293c8015997f4873",
+      "serialized_text_tokens": 1544
+    },
+    {
+      "file": "complete/requests/request-02.json",
+      "bytes": 6712,
+      "sha256": "ca7d65423093c2590d283bf6c2928fdaae03e9708a10821787d3af2f7a940ef7",
+      "serialized_text_tokens": 1589
+    },
+    {
+      "file": "complete/requests/request-03.json",
+      "bytes": 6520,
+      "sha256": "57ba80727a855948795a342655889551d25904486bc70b7e293c8015997f4873",
+      "serialized_text_tokens": 1544
+    },
+    {
+      "file": "complete/requests/request-04.json",
+      "bytes": 6712,
+      "sha256": "ca7d65423093c2590d283bf6c2928fdaae03e9708a10821787d3af2f7a940ef7",
+      "serialized_text_tokens": 1589
+    },
+    {
+      "file": "repair/requests/request-01.json",
+      "bytes": 6520,
+      "sha256": "57ba80727a855948795a342655889551d25904486bc70b7e293c8015997f4873",
+      "serialized_text_tokens": 1544
+    },
+    {
+      "file": "repair/requests/request-02.json",
+      "bytes": 6712,
+      "sha256": "ca7d65423093c2590d283bf6c2928fdaae03e9708a10821787d3af2f7a940ef7",
+      "serialized_text_tokens": 1589
+    },
+    {
+      "file": "repair/requests/request-03.json",
+      "bytes": 6933,
+      "sha256": "3bf19f181f8366e8409407f96a5b71d55c2b75e491653831d2aac6ac76c17980",
+      "serialized_text_tokens": 1634
+    },
+    {
+      "file": "repair/requests/request-04.json",
+      "bytes": 6520,
+      "sha256": "57ba80727a855948795a342655889551d25904486bc70b7e293c8015997f4873",
+      "serialized_text_tokens": 1544
+    },
+    {
+      "file": "repair/requests/request-05.json",
+      "bytes": 6712,
+      "sha256": "ca7d65423093c2590d283bf6c2928fdaae03e9708a10821787d3af2f7a940ef7",
+      "serialized_text_tokens": 1589
+    },
+    {
+      "file": "repair/requests/request-06.json",
+      "bytes": 6933,
+      "sha256": "3bf19f181f8366e8409407f96a5b71d55c2b75e491653831d2aac6ac76c17980",
+      "serialized_text_tokens": 1634
+    }
+  ],
+  "max_bytes": 6933,
+  "max_serialized_text_tokens": 1634,
+  "max_output_tokens": 128,
+  "thinking": "disabled",
+  "service_usage_not_measured": true,
+  "tokenizer": {
+    "documentation": "https://api-docs.deepseek.com/zh-cn/quick_start/token_usage/",
+    "download": "https://cdn.deepseek.com/api-docs/deepseek_v4_tokenizer.zip",
+    "reviewed_on": "2026-10-24",
+    "zip_sha256": "e7310d1dafe0a86d8a5629fe78a7c763760f651db9b8682718a1781dcd6fe495",
+    "tokenizer_sha256": "89085f12ef79460ac5f66d1119325ddfc694b4ab209d80bbd81d35f081dc9614"
+  },
+  "limitations": "Local serialized JSON count is not server usage or a guarantee for every possible output; guarded byte/token/missing-usage stops remain."
+}

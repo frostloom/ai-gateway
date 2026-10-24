@@ -7,7 +7,7 @@ const RechargeCancelClaimSHA = "a9ce7a22d79e4e42e8ded0b932c34648df3db0d0574ad071
 // It is a separate frozen clarification case, not a retry of previous scopes.
 func checkedRechargeSupplementScope(schema, id string) (cashRetestScope, bool) {
 	if schema != "recharge-supplement-authorization.v1" || id != RechargeSupplementID {
-		return cashRetestScope{}, false
+		return checkedRefundCapScope(schema, id)
 	}
 	return cashRetestScope{
 		ID: id, BillingSchema: "recharge-supplement-billing-attestation.v1", ReceiptSchema: "authorized-recharge-supplement.v1",

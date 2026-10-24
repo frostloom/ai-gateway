@@ -1,0 +1,19 @@
+{
+  "schema": "refund-cap-billing-attestation.v1",
+  "campaign_id": "refund-cap-20261024",
+  "execution_revision": "0000000000000000000000000000000000000000",
+  "scope_plan_sha256": "2cb91f79b380fd3be71655644e4c212af9bff52cfeab6966014320e3f9d1c8aa",
+  "model_base": "https://api.deepseek.com/v1",
+  "model": "deepseek-flash",
+  "protocol": "openai",
+  "jev_model": "jev-1.13.0",
+  "account_tariff_verified": false,
+  "token_envelope_verified": false,
+  "jev_failure_charges_verified": false,
+  "jev_failure_policy": "reserve_full_attempt_stop_on_failure",
+  "jev_max_input_tokens": 64000,
+  "jev_input_micro_usd_per_million": 42000,
+  "jev_full_attempt_micro_usd": 2688,
+  "evidence_sha256": "",
+  "runtime_contract_sha256": "a95cacd041830012619a0f4d7fd8208c184aa9e8d45b7ee05afaa239a30e1e8f"
+}

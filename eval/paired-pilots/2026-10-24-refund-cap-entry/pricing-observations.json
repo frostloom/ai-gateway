@@ -1,0 +1,22 @@
+{
+  "schema": "refund-cap-pricing-observations.v1",
+  "reviewed_on": "2026-10-24",
+  "method": "Official DeepSeek pricing/token and TypeSafe model pages reopened2026-10-24; conservative operator reservation, not invoice or negotiated tariff",
+  "deepseek": {
+    "url": "https://api-docs.deepseek.com/zh-cn/quick_start/pricing/",
+    "model": "deepseek-flash",
+    "input_micro_cny_per_million": 2000000,
+    "output_micro_cny_per_million": 8000000,
+    "discount_not_assumed": true
+  },
+  "jev": {
+    "url": "https://docs.typesafe.ai/models",
+    "model": "jev-1.13.0",
+    "input_micro_usd_per_million": 42000,
+    "output_micro_usd_per_million": 0,
+    "max_request_tokens": 64000,
+    "long_context_enabled": false
+  },
+  "vendor_failure_charge_guarantee_verified": false,
+  "failure_policy": "reserve_full_attempt_stop_on_failure"
+}
