@@ -1,0 +1,84 @@
+{
+  "schema": "customer-recharge-supplement-deployment.v1",
+  "date": "2026-10-24",
+  "provenance": {
+    "schema": "customer-recharge-supplement-archive-build.v1",
+    "commit": "262a47f25572ad77ef38f68d00fb8703d0f45e53",
+    "tree": "ff7f496aa3ece47d6d6ce9c6a63f7d02afea244a",
+    "source_archive_sha256": "1a4a12c26fb99da7368d8f84e8f5c4aa050400549e78e0aa10fd034dabd1cc9a",
+    "build_flags": "-mod=readonly -trimpath -buildvcs=false",
+    "release": "262a47f25572ad77ef38f68d00fb8703d0f45e53-local",
+    "vcs_stamp_present": false,
+    "runtime_contract_sha256": "624a53c69b2fece1f705332ca208ee854be0588decad986d4dee42355ad46477",
+    "sdkroot": "/Library/Developer/CommandLineTools/SDKs/MacOSX26.5.sdk",
+    "binary_sha256": "1dbe8d2e92b60404250e3a90a2e013e62eaa78307f47393338d51ab795da8091"
+  },
+  "previous_release": "056a760033186e4b768b320e50ec7b7186a32157-local",
+  "previous_binary_sha256": "f4d6c6c0b4e7d7f819d00b1dc53ca3e1f5bb19168abe1b522b2e5052dbf553d5",
+  "runtime_check": {
+    "schema": "customer-recharge-supplement-runtime.v1",
+    "release": "262a47f25572ad77ef38f68d00fb8703d0f45e53-local",
+    "process_model_config_matches": {
+      "AGENT_LLM_BASE_URL": true,
+      "AGENT_LLM_MODEL": true,
+      "AGENT_LLM_PROTOCOL": true,
+      "AGENT_LLM_API_KEY": true
+    },
+    "pid_changed": true,
+    "running_release_matches": true,
+    "agent_health": 200,
+    "model_calls": 0,
+    "jev_calls": 0,
+    "paid_evaluation_executed": false,
+    "trace_readback_confirmed": true,
+    "gateway_portal": 200,
+    "request_started_at": "2026-10-24T08:06:23.865585+00:00",
+    "invalid_json_http_status": 400,
+    "runtime_contract_sha256": "624a53c69b2fece1f705332ca208ee854be0588decad986d4dee42355ad46477",
+    "request_trace_id": "2a1d870c890a92fca67ac09fcf3f6b49",
+    "request_finished_at": "2026-10-24T08:06:23.869662+00:00",
+    "observations": [
+      {
+        "trace_id": "2a1d870c890a92fca67ac09fcf3f6b49",
+        "name": "agent.turn",
+        "release": "262a47f25572ad77ef38f68d00fb8703d0f45e53-local",
+        "http_status": 400,
+        "stage": "request",
+        "llm_calls": 0,
+        "jev_calls": 0
+      }
+    ]
+  },
+  "installation": {
+    "installed_binary_sha256": "1dbe8d2e92b60404250e3a90a2e013e62eaa78307f47393338d51ab795da8091",
+    "release_only_env_changes": true,
+    "root_env_unchanged": true,
+    "private_backup_permissions": "0600",
+    "backup_location": ".tmp/paired-live-private/customer-recharge-supplement-deploy-20261024/backup",
+    "old_launcher_and_worktree_preserved": true,
+    "restart": "SIGTERM via existing local.ai-gateway launchd group"
+  },
+  "historical_private_evidence": {
+    "files_checked": 2950,
+    "all_hashes_unchanged": true
+  },
+  "actual_new_model_calls": 0,
+  "actual_new_jev_calls": 0,
+  "cumulative_actual_model_calls": 29,
+  "cumulative_actual_jev_calls": 7,
+  "new_paid_scope_created": false,
+  "limitations": [
+    "Malformed JSON probe stops at request parsing, before authentication, session, tools or inference",
+    "Runtime and telemetry checks do not establish real model quality",
+    "buildvcs=false archive provenance does not satisfy pristine paid executor checks"
+  ],
+  "private_source_sha256": {
+    "provenance.json": "4e2afb1c98d04352986c7b1806b223261d421a61ff72958cf7c792a8a6b23f24",
+    "before.json": "4b5de838c52ac8d789324572527eebd675a3fd8ff4695694ae6d8393d5b2eb5b",
+    "install.json": "34d5c25a40f341a21b5b41efde9c603918efa3630746bddd5281b7543301bd79",
+    "runtime-check.json": "2338944fd71fc67a927b0575887c34011b247f6cb34e3552f966786010fb8a6e",
+    "evidence-check.json": "19a2b94c23dfd7dc2843d83250e26f21078d339278ec5bf2dd89bc4698fb84c4",
+    "install.py": "66bfdeadd35427a52900230588f4d11e937c76c56cb255fff2ab8a6c5b8ffd7c",
+    "verify-runtime.py": "0d8a695bd7e5b64a13608691e8d4eb50000ca67084546bc20497c51731556e54"
+  }
+}
