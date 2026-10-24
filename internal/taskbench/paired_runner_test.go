@@ -149,6 +149,23 @@ func TestPairReportPreservesExecutionFailures(t *testing.T) {
 		})
 	}
 }
+
+func TestPairCohortStopsAfterCleanupFailure(t *testing.T) {
+	cfg := pairTestConfig()
+	p := filepath.Join(t.TempDir(), "pair")
+	calls := 0
+	err := runPreparedPair(context.Background(), p, cfg, nil, func(context.Context, string, ConversationCase) (ConversationDriver, error) {
+		calls++
+		return &pairFaultDriver{ConversationDriver: rechargeDriver(), stage: "cleanup"}, nil
+	}, nil, true)
+	if err == nil || calls != 1 {
+		t.Fatalf("cleanup failure continued: err=%v arms=%d", err, calls)
+	}
+	r, err := ReportPreparedPair(p)
+	if err != nil || r.FinishedArms != 1 || r.UnrunArms != 1 || r.Rows[0].StructuralPass {
+		t.Fatalf("failed first arm not retained: %+v err=%v", r, err)
+	}
+}
 func TestPairRunRejectsFreshBudgetOnResume(t *testing.T) {
 	cfg := pairTestConfig()
 	dir := t.TempDir()

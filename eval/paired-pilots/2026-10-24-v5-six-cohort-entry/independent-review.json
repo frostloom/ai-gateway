@@ -1,0 +1,15 @@
+{
+  "schema": "v5-six-cohort-independent-review.v1",
+  "reviewer": "review_v5_cohort_entry",
+  "initial_findings": [
+    {
+      "priority": "P2",
+      "finding": "Cleanup execution failure did not immediately halt before second arm",
+      "resolution": "Include durable entry.ExecutionFailures in opt-in stop; RED/GREEN first-arm cleanup regression",
+      "status": "resolved"
+    }
+  ],
+  "remaining_p1_p2": 0,
+  "recheck": "Independent cleanup/fixed-scope/historical-entry rejection tests passed 0.861s",
+  "integration_limitation": "Reviewer sandbox fixture MySQL unavailable; primary authorized integration capture and full suite required"
+}

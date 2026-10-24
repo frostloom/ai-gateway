@@ -61,6 +61,7 @@ func runWithOutput(args []string, out io.Writer) int {
 	review := f.String("review", "", "bound passing first-batch independent review JSON")
 	permission := f.String("continuation-authorization", "", "explicit batch-002 permission; required only for execution")
 	retest := f.Bool("retest", false, "separate fixed one-case evaluation; requires independent scope and billing")
+	cohort := f.Bool("cohort", false, "fixed current-v5 six-case cohort; separate exact authorization")
 	execute := f.Bool("execute", false, "explicitly run batch-001 only when all evidence is ready")
 	var files envFiles
 	f.Var(&files, "env-file", "explicit private env file (repeat); never loaded by check")
@@ -68,6 +69,9 @@ func runWithOutput(args []string, out io.Writer) int {
 		return 2
 	}
 	fail := func(msg string) int { fmt.Fprintln(out, msg); return 2 }
+	if *cohort && (*retest || *previous != "" || *review != "" || *permission != "") {
+		return fail("cohort cannot use retest or continuation inputs")
+	}
 	if *retest && (*previous != "" || *review != "" || *permission != "") {
 		return fail("retest cannot use continuation inputs")
 	}
@@ -93,7 +97,9 @@ func runWithOutput(args []string, out io.Writer) int {
 		}
 	}
 	var pilot taskbench.AuthorizedPilot
-	if *retest {
+	if *cohort {
+		pilot, err = taskbench.CheckAuthorizedCohort(a, p, b, e)
+	} else if *retest {
 		pilot, err = taskbench.CheckAuthorizedRetest(a, p, b, e)
 	} else {
 		pilot, err = taskbench.CheckAuthorizedPilot(a, p, b, e)
@@ -170,7 +176,9 @@ func runWithOutput(args []string, out io.Writer) int {
 		return fail("explicit owned-fixture administration configuration required")
 	}
 	var claimErr error
-	if pilot.IsRetest() {
+	if pilot.IsCohort() {
+		claimErr = claimCohort(root, pilot, *dir)
+	} else if pilot.IsRetest() {
 		claimErr = claimRetest(root, pilot, *dir)
 	} else if continuation != nil {
 		claimErr = claimContinuation(root, p, *previous, *dir)
@@ -189,6 +197,10 @@ func runWithOutput(args []string, out io.Writer) int {
 		fmt.Fprintln(out, "selected batch stopped; inspect private evidence, never automatically retry")
 		return 1
 	}
+	if pilot.IsCohort() {
+		fmt.Fprintf(out, "%s: fixed six-case cohort completed; inspect all traces and independent review; no further execution\n", receipt.Status)
+		return 0
+	}
 	batchID := "batch-001"
 	if continuation != nil {
 		batchID = "batch-002"
@@ -198,7 +210,11 @@ func runWithOutput(args []string, out io.Writer) int {
 }
 func writeCheck(out io.Writer, p taskbench.AuthorizedPilot) int {
 	bound := p.ModelSettings()
-	if json.NewEncoder(out).Encode(map[string]any{"human_authorized": p.HumanAuthorized(), "campaign_id": p.CampaignID(), "execution_revision": p.ExecutionRevision(), "ready_for_paid_run": p.Ready(), "blockers": p.Blockers(), "mode": "check", "model_base": bound.BaseURL, "model": bound.Model, "protocol": bound.Protocol, "execution_scope": "batch-001 only, then checkpoint", "jev_failure_policy": p.JEVFailurePolicy(), "jev_failure_charges_verified": p.JEVFailureChargesVerified(), "check_scope": "authorization_and_billing_policy_only", "model_calls": 0, "jev_calls": 0}) != nil {
+	scope := "batch-001 only, then checkpoint"
+	if p.IsCohort() {
+		scope = "fixed six-case cohort only, then checkpoint; first structural/provider/JEV/evidence failure stops"
+	}
+	if json.NewEncoder(out).Encode(map[string]any{"human_authorized": p.HumanAuthorized(), "campaign_id": p.CampaignID(), "execution_revision": p.ExecutionRevision(), "ready_for_paid_run": p.Ready(), "blockers": p.Blockers(), "mode": "check", "model_base": bound.BaseURL, "model": bound.Model, "protocol": bound.Protocol, "execution_scope": scope, "jev_failure_policy": p.JEVFailurePolicy(), "jev_failure_charges_verified": p.JEVFailureChargesVerified(), "check_scope": "authorization_and_billing_policy_only", "model_calls": 0, "jev_calls": 0}) != nil {
 		return 1
 	}
 	return 0
@@ -280,6 +296,9 @@ func executeFirst(ctx context.Context, dir, defs, profiles, revision string, p t
 	opts := taskbench.AuthorizedFirstBatchOptions{Pilot: p, DefinitionsDir: defs, Environment: fixture, Revision: revision, Observer: observer, Model: model, Upstream: modelTransport, JEVFactory: func() jev.Evaluator { return judge }}
 	if len(continuation) > 0 && continuation[0] != nil {
 		return taskbench.RunAuthorizedSecondBatch(ctx, dir, opts, *continuation[0])
+	}
+	if p.IsCohort() {
+		return taskbench.RunAuthorizedCohort(ctx, dir, opts)
 	}
 	if p.IsRetest() {
 		return taskbench.RunAuthorizedRetest(ctx, dir, opts)

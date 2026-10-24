@@ -21,18 +21,19 @@ import (
 
 type PairModelSettings struct{ BaseURL, APIKey, Model, Protocol string }
 type AgentPairOptions struct {
-	Observer         *observability.Observer // required for recorded_run; caller owns flush/shutdown
-	AllowExecution   bool                    // false is always side-effect-free
-	RatesVerified    bool                    // recorded_run requires operator verification for this channel
-	StopOnJEVFailure bool                    // reviewed full-reservation policy forbids model fallback after a JEV failure
-	AllowJEVCalls    bool
-	MaxJEVCalls      int
-	DefinitionsDir   string
-	Config           PairRunConfig
-	Environment      *PairedFixtureEnvironment
-	Budget           *PairBudgetTransport
-	Model            PairModelSettings
-	JEVFactory       func() jev.Evaluator // explicit and trusted; no credential discovery
+	Observer                *observability.Observer // required for recorded_run; caller owns flush/shutdown
+	AllowExecution          bool                    // false is always side-effect-free
+	RatesVerified           bool                    // recorded_run requires operator verification for this channel
+	StopOnStructuralFailure bool                    // opt-in evaluator stop; legacy defaults remain unchanged
+	StopOnJEVFailure        bool                    // reviewed full-reservation policy forbids model fallback after a JEV failure
+	AllowJEVCalls           bool
+	MaxJEVCalls             int
+	DefinitionsDir          string
+	Config                  PairRunConfig
+	Environment             *PairedFixtureEnvironment
+	Budget                  *PairBudgetTransport
+	Model                   PairModelSettings
+	JEVFactory              func() jev.Evaluator // explicit and trusted; no credential discovery
 }
 
 type disabledPairTransport struct{}
@@ -154,7 +155,7 @@ func RunAgentPair(ctx context.Context, path string, o AgentPairOptions) (runErr 
 		})
 		return NewHandlerConversationDriver(wrapper, oracle)
 	}
-	err = runPreparedPair(ctx, path, o.Config, o.Budget, factory, o.Observer)
+	err = runPreparedPair(ctx, path, o.Config, o.Budget, factory, o.Observer, o.StopOnStructuralFailure)
 	if o.Observer == nil {
 		return err
 	}

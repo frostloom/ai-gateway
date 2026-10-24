@@ -1,0 +1,100 @@
+{
+  "schema": "campaign-preflight-plan.v2",
+  "target": {
+    "base_url": "https://api.deepseek.com/v1",
+    "model": "deepseek-flash",
+    "protocol": "openai",
+    "jev_model": "jev-1.13.0"
+  },
+  "campaign_limits": {
+    "max_batches": 6,
+    "max_model_calls": 62,
+    "max_model_micro_cny": 2095104,
+    "max_jev_calls": 6,
+    "max_jev_micro_usd": 16128,
+    "jev_micro_usd_per_attempt": 2688
+  },
+  "batches": [
+    {
+      "key": "balance-001/answer_complete",
+      "model_limits": {
+        "max_calls": 6,
+        "max_output_tokens": 128,
+        "max_request_bytes": 16384,
+        "input_token_ceiling": 16384,
+        "max_micro_cny": 202752,
+        "input_micro_cny_per_million": 2000000,
+        "output_micro_cny_per_million": 8000000
+      },
+      "max_jev_calls": 1
+    },
+    {
+      "key": "balance-020/explicit_scope_followup",
+      "model_limits": {
+        "max_calls": 12,
+        "max_output_tokens": 128,
+        "max_request_bytes": 16384,
+        "input_token_ceiling": 16384,
+        "max_micro_cny": 405504,
+        "input_micro_cny_per_million": 2000000,
+        "output_micro_cny_per_million": 8000000
+      },
+      "max_jev_calls": 1
+    },
+    {
+      "key": "recharge-002/confirm",
+      "model_limits": {
+        "max_calls": 10,
+        "max_output_tokens": 128,
+        "max_request_bytes": 16384,
+        "input_token_ceiling": 16384,
+        "max_micro_cny": 337920,
+        "input_micro_cny_per_million": 2000000,
+        "output_micro_cny_per_million": 8000000
+      },
+      "max_jev_calls": 1
+    },
+    {
+      "key": "recharge-002/cancel",
+      "model_limits": {
+        "max_calls": 10,
+        "max_output_tokens": 128,
+        "max_request_bytes": 16384,
+        "input_token_ceiling": 16384,
+        "max_micro_cny": 337920,
+        "input_micro_cny_per_million": 2000000,
+        "output_micro_cny_per_million": 8000000
+      },
+      "max_jev_calls": 1
+    },
+    {
+      "key": "recharge-001/supplement_then_confirm",
+      "model_limits": {
+        "max_calls": 12,
+        "max_output_tokens": 128,
+        "max_request_bytes": 16384,
+        "input_token_ceiling": 16384,
+        "max_micro_cny": 405504,
+        "input_micro_cny_per_million": 2000000,
+        "output_micro_cny_per_million": 8000000
+      },
+      "max_jev_calls": 1
+    },
+    {
+      "key": "refund-001/balance_cap",
+      "model_limits": {
+        "max_calls": 12,
+        "max_output_tokens": 128,
+        "max_request_bytes": 16384,
+        "input_token_ceiling": 16384,
+        "max_micro_cny": 405504,
+        "input_micro_cny_per_million": 2000000,
+        "output_micro_cny_per_million": 8000000
+      },
+      "max_jev_calls": 1
+    }
+  ],
+  "campaign_id": "v5-six-case-cohort-20261024",
+  "customer_source_revision": "50e3c8dab14b4b6cc25322fd340a274e6970200b",
+  "runtime_contract_sha256": "a95cacd041830012619a0f4d7fd8208c184aa9e8d45b7ee05afaa239a30e1e8f"
+}

@@ -200,7 +200,7 @@ func RunPreparedPair(ctx context.Context, path string, cfg PairRunConfig, budget
 	return runPreparedPair(ctx, path, cfg, budget, factory, nil)
 }
 
-func runPreparedPair(ctx context.Context, path string, cfg PairRunConfig, budget *PairBudgetTransport, factory PairDriverFactory, observer *observability.Observer) error {
+func runPreparedPair(ctx context.Context, path string, cfg PairRunConfig, budget *PairBudgetTransport, factory PairDriverFactory, observer *observability.Observer, stopOnFailure ...bool) error {
 	if err := validatePairRun(cfg); err != nil {
 		return err
 	}
@@ -348,6 +348,11 @@ func runPreparedPair(ctx context.Context, path string, cfg PairRunConfig, budget
 		}
 		if budget != nil && budget.Snapshot().Stopped != "" {
 			return fmt.Errorf("pair halted: model charge uncertain")
+		}
+		// Cohort policy is pinned by its authorized executor revision. Keep the
+		// failed arm durable, then stop before another arm or batch can start.
+		if len(stopOnFailure) > 0 && stopOnFailure[0] && (!result.StructuralPass || result.HTTPFailures > 0 || len(entry.ExecutionFailures) > 0) {
+			return fmt.Errorf("pair halted: structural failure; later arms not started")
 		}
 	}
 	return nil

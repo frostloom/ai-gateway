@@ -1,0 +1,71 @@
+{
+  "schema": "v5-six-case-cohort-authorization.v1",
+  "campaign_id": "v5-six-case-cohort-20261024",
+  "human_authorized": false,
+  "scope_plan_sha256": "fa7b96a994635c238c021b2bd7f0e8cb8d02700f9ea64e8716694922e492edb7",
+  "target": {
+    "base_url": "https://api.deepseek.com/v1",
+    "model": "deepseek-flash",
+    "protocol": "openai",
+    "jev_model": "jev-1.13.0"
+  },
+  "authorized_spending": {
+    "max_batches": 6,
+    "max_model_calls": 62,
+    "max_model_micro_cny": 2095104,
+    "max_jev_calls": 6,
+    "max_jev_micro_usd": 16128,
+    "jev_micro_usd_per_attempt": 2688
+  },
+  "case_key": "",
+  "execution_revision": "0000000000000000000000000000000000000000",
+  "automatic_scope_expansion": false,
+  "automatic_paid_retries": false,
+  "customer_source_revision": "50e3c8dab14b4b6cc25322fd340a274e6970200b",
+  "runtime_contract_sha256": "a95cacd041830012619a0f4d7fd8208c184aa9e8d45b7ee05afaa239a30e1e8f",
+  "budget_ceiling_sha256": "4669a31fe6f74f7f6901ed9a4dcb114016d7ed4aac85be949d9b0b6e74c0c00b",
+  "prior_offline_manifest_sha256": "7643f8e596e879e27b7b025e0c91e6c245a449645ac05a1df6b610b3978a1bf3",
+  "prior_offline_acceptance_sha256": "0cf9d0b8587709f607a55d7fe175a7da927e279f8893a60fc7dde63800210360",
+  "prior_journal_sha256": "",
+  "prior_review_sha256": "",
+  "diagnostic_source_revision": "5c2f669413c0787ba1bd3a429c9552d628e1a44c",
+  "diagnostic_manifest_sha256": "8731a95fc1efd01abd76d6448335f86f84ffaa1137165a9bbc446cfffd0cf8b3",
+  "cases": [
+    {
+      "batch_id": "batch-001",
+      "key": "balance-001/answer_complete",
+      "max_model_calls": 6,
+      "max_jev_calls": 1
+    },
+    {
+      "batch_id": "batch-002",
+      "key": "balance-020/explicit_scope_followup",
+      "max_model_calls": 12,
+      "max_jev_calls": 1
+    },
+    {
+      "batch_id": "batch-003",
+      "key": "recharge-002/confirm",
+      "max_model_calls": 10,
+      "max_jev_calls": 1
+    },
+    {
+      "batch_id": "batch-004",
+      "key": "recharge-002/cancel",
+      "max_model_calls": 10,
+      "max_jev_calls": 1
+    },
+    {
+      "batch_id": "batch-005",
+      "key": "recharge-001/supplement_then_confirm",
+      "max_model_calls": 12,
+      "max_jev_calls": 1
+    },
+    {
+      "batch_id": "batch-006",
+      "key": "refund-001/balance_cap",
+      "max_model_calls": 12,
+      "max_jev_calls": 1
+    }
+  ]
+}

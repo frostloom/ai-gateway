@@ -55,6 +55,7 @@ type pilotBilling struct {
 // private snapshot cannot be upgraded by mutating public readiness flags.
 type AuthorizedPilot struct {
 	valid                                              bool
+	cohort                                             bool
 	retestApproved                                     bool
 	retestRevision                                     string
 	retestScope                                        cashRetestScope
@@ -144,13 +145,13 @@ func (p AuthorizedPilot) checkBilling(billingRaw, evidenceRaw []byte, allowRisk 
 		if p.IsRetest() && (b.Schema != p.retestScope.BillingSchema || b.CampaignID != p.CampaignID() || b.Revision != p.retestRevision || b.RuntimeContractSHA != p.retestScope.RuntimeContractSHA) {
 			return AuthorizedPilot{}, fmt.Errorf("retest billing identity or revision differs")
 		}
-		if !p.IsRetest() && (b.Schema == "paired-retest-billing-attestation.v1" || b.Schema == "paired-retest-billing-attestation.v2" || b.Schema == "recharge-confirm-billing-attestation.v1" || b.Schema == "recharge-confirm-billing-attestation.v2" || b.Schema == "recharge-cancel-billing-attestation.v1" || b.Schema == "recharge-supplement-billing-attestation.v1" || b.Schema == "refund-cap-billing-attestation.v1" || b.CampaignID != "" || b.Revision != "" || b.RuntimeContractSHA != "") {
+		if !p.IsRetest() && (b.Schema == "paired-retest-billing-attestation.v1" || b.Schema == "paired-retest-billing-attestation.v2" || b.Schema == "recharge-confirm-billing-attestation.v1" || b.Schema == "recharge-confirm-billing-attestation.v2" || b.Schema == "recharge-cancel-billing-attestation.v1" || b.Schema == "recharge-supplement-billing-attestation.v1" || b.Schema == "refund-cap-billing-attestation.v1" || b.Schema == "v5-six-case-cohort-billing-attestation.v1" || b.CampaignID != "" || b.Revision != "" || b.RuntimeContractSHA != "") {
 			return AuthorizedPilot{}, fmt.Errorf("retest billing cannot authorize original pilot")
 		}
 		switch b.Schema {
 		case "paired-billing-attestation.v1":
 			// Legacy attestations continue to require verified vendor terms.
-		case "paired-billing-attestation.v2", "paired-retest-billing-attestation.v1", "paired-retest-billing-attestation.v2", "recharge-confirm-billing-attestation.v1", "recharge-confirm-billing-attestation.v2", "recharge-cancel-billing-attestation.v1", "recharge-supplement-billing-attestation.v1", "refund-cap-billing-attestation.v1":
+		case "paired-billing-attestation.v2", "paired-retest-billing-attestation.v1", "paired-retest-billing-attestation.v2", "recharge-confirm-billing-attestation.v1", "recharge-confirm-billing-attestation.v2", "recharge-cancel-billing-attestation.v1", "recharge-supplement-billing-attestation.v1", "refund-cap-billing-attestation.v1", "v5-six-case-cohort-billing-attestation.v1":
 			// A reviewed risk reservation is distinct from a vendor guarantee.
 			// This policy is only valid for the pinned Pi pilot and its unchanged
 			// maximum-context reservation; every JEV failure must halt fallback.

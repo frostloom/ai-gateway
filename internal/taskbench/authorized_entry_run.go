@@ -26,6 +26,11 @@ type AuthorizedFirstBatchOptions struct {
 	JEVFactory     func() jev.Evaluator
 }
 type AuthorizedFirstBatchReceipt struct {
+	ScopeReservedModelCalls      int                         `json:"scope_reserved_model_calls,omitempty"`
+	ScopeReservedJEVCalls        int                         `json:"scope_reserved_jev_calls,omitempty"`
+	ScopeReservedMicroCNY        int64                       `json:"scope_reserved_micro_cny,omitempty"`
+	ScopeReservedMicroUSD        int64                       `json:"scope_reserved_micro_usd,omitempty"`
+	CohortBatchModelStates       []CohortBatchModelState     `json:"cohort_batch_model_states,omitempty"`
 	DiagnosticSourceRevision     string                      `json:"diagnostic_source_revision,omitempty"`
 	DiagnosticManifestSHA        string                      `json:"diagnostic_manifest_sha256,omitempty"`
 	BudgetCeilingSHA             string                      `json:"budget_ceiling_sha256,omitempty"`

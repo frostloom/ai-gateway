@@ -1,0 +1,280 @@
+{
+  "schema": "v5-six-cohort-entry-acceptance.v1",
+  "paths": [
+    {
+      "mode": "normal",
+      "status": "checkpoint_pending",
+      "failed_stage": "",
+      "model_attempts": 22,
+      "jev_attempts": 6,
+      "batch_statuses": [
+        {
+          "id": "batch-001",
+          "status": "completed_pending_review"
+        },
+        {
+          "id": "batch-002",
+          "status": "completed_pending_review"
+        },
+        {
+          "id": "batch-003",
+          "status": "completed_pending_review"
+        },
+        {
+          "id": "batch-004",
+          "status": "completed_pending_review"
+        },
+        {
+          "id": "batch-005",
+          "status": "completed_pending_review"
+        },
+        {
+          "id": "batch-006",
+          "status": "completed_pending_review"
+        }
+      ],
+      "returned_receipt_sha256": "0cd47eb13f862769260014bfdb106a915061d66e9fe46eb0c915738c6f2fb34f",
+      "scope_reserved_model_calls": 62,
+      "scope_reserved_jev_calls": 6,
+      "campaign_reserved_model_calls": 62,
+      "campaign_reserved_jev_calls": 6
+    },
+    {
+      "mode": "repair",
+      "status": "checkpoint_pending",
+      "failed_stage": "",
+      "model_attempts": 30,
+      "jev_attempts": 6,
+      "batch_statuses": [
+        {
+          "id": "batch-001",
+          "status": "completed_pending_review"
+        },
+        {
+          "id": "batch-002",
+          "status": "completed_pending_review"
+        },
+        {
+          "id": "batch-003",
+          "status": "completed_pending_review"
+        },
+        {
+          "id": "batch-004",
+          "status": "completed_pending_review"
+        },
+        {
+          "id": "batch-005",
+          "status": "completed_pending_review"
+        },
+        {
+          "id": "batch-006",
+          "status": "completed_pending_review"
+        }
+      ],
+      "returned_receipt_sha256": "bcf0478df1fef5f45de2a1ce050daefc1d43a7f6c26ebe2ccff9ca21b7c7f517",
+      "scope_reserved_model_calls": 62,
+      "scope_reserved_jev_calls": 6,
+      "campaign_reserved_model_calls": 62,
+      "campaign_reserved_jev_calls": 6
+    },
+    {
+      "mode": "provider-failure",
+      "status": "stopped",
+      "failed_stage": "batch_execution",
+      "model_attempts": 3,
+      "jev_attempts": 1,
+      "batch_statuses": [
+        {
+          "id": "batch-001",
+          "status": "completed_pending_review"
+        },
+        {
+          "id": "batch-002",
+          "status": "failed"
+        },
+        {
+          "id": "batch-003",
+          "status": "not_started"
+        },
+        {
+          "id": "batch-004",
+          "status": "not_started"
+        },
+        {
+          "id": "batch-005",
+          "status": "not_started"
+        },
+        {
+          "id": "batch-006",
+          "status": "not_started"
+        }
+      ],
+      "returned_receipt_sha256": "88a27a641eb5b114bdcd8e4c48818b7a210b1a174b8381ea1e6127f2e0a4414e",
+      "scope_reserved_model_calls": 62,
+      "scope_reserved_jev_calls": 6,
+      "campaign_reserved_model_calls": 18,
+      "campaign_reserved_jev_calls": 2
+    },
+    {
+      "mode": "jev-failure",
+      "status": "stopped",
+      "failed_stage": "batch_execution",
+      "model_attempts": 6,
+      "jev_attempts": 2,
+      "batch_statuses": [
+        {
+          "id": "batch-001",
+          "status": "completed_pending_review"
+        },
+        {
+          "id": "batch-002",
+          "status": "failed"
+        },
+        {
+          "id": "batch-003",
+          "status": "not_started"
+        },
+        {
+          "id": "batch-004",
+          "status": "not_started"
+        },
+        {
+          "id": "batch-005",
+          "status": "not_started"
+        },
+        {
+          "id": "batch-006",
+          "status": "not_started"
+        }
+      ],
+      "returned_receipt_sha256": "4ee97ff1328385a6f6be41664ec55fe0a8e821e97011eeffc95acecc18bc570e",
+      "scope_reserved_model_calls": 62,
+      "scope_reserved_jev_calls": 6,
+      "campaign_reserved_model_calls": 18,
+      "campaign_reserved_jev_calls": 2
+    },
+    {
+      "mode": "structural-failure",
+      "status": "stopped",
+      "failed_stage": "batch_execution",
+      "model_attempts": 5,
+      "jev_attempts": 1,
+      "batch_statuses": [
+        {
+          "id": "batch-001",
+          "status": "completed_pending_review"
+        },
+        {
+          "id": "batch-002",
+          "status": "failed"
+        },
+        {
+          "id": "batch-003",
+          "status": "not_started"
+        },
+        {
+          "id": "batch-004",
+          "status": "not_started"
+        },
+        {
+          "id": "batch-005",
+          "status": "not_started"
+        },
+        {
+          "id": "batch-006",
+          "status": "not_started"
+        }
+      ],
+      "returned_receipt_sha256": "345ec7d262be923ff02ac17ff521fbef7ef02d3971adc1a13e869ddb09182ff5",
+      "scope_reserved_model_calls": 62,
+      "scope_reserved_jev_calls": 6,
+      "campaign_reserved_model_calls": 18,
+      "campaign_reserved_jev_calls": 2
+    },
+    {
+      "mode": "usage-failure",
+      "status": "stopped",
+      "failed_stage": "batch_execution",
+      "model_attempts": 3,
+      "jev_attempts": 1,
+      "batch_statuses": [
+        {
+          "id": "batch-001",
+          "status": "completed_pending_review"
+        },
+        {
+          "id": "batch-002",
+          "status": "failed"
+        },
+        {
+          "id": "batch-003",
+          "status": "not_started"
+        },
+        {
+          "id": "batch-004",
+          "status": "not_started"
+        },
+        {
+          "id": "batch-005",
+          "status": "not_started"
+        },
+        {
+          "id": "batch-006",
+          "status": "not_started"
+        }
+      ],
+      "returned_receipt_sha256": "f8f05361029cfba7d0bbea936041134b5bf6c3cde1b30511b5b9d240104a8fd2",
+      "scope_reserved_model_calls": 62,
+      "scope_reserved_jev_calls": 6,
+      "campaign_reserved_model_calls": 18,
+      "campaign_reserved_jev_calls": 2
+    },
+    {
+      "mode": "receipt-failure",
+      "status": "stopped",
+      "failed_stage": "receipt_write",
+      "model_attempts": 22,
+      "jev_attempts": 6,
+      "batch_statuses": [
+        {
+          "id": "batch-001",
+          "status": "completed_pending_review"
+        },
+        {
+          "id": "batch-002",
+          "status": "completed_pending_review"
+        },
+        {
+          "id": "batch-003",
+          "status": "completed_pending_review"
+        },
+        {
+          "id": "batch-004",
+          "status": "completed_pending_review"
+        },
+        {
+          "id": "batch-005",
+          "status": "completed_pending_review"
+        },
+        {
+          "id": "batch-006",
+          "status": "completed_pending_review"
+        }
+      ],
+      "returned_receipt_sha256": "ab73db41c79c4dcd6d82b185edfa20c617445d49e0f035967db1fed6d456d63f",
+      "scope_reserved_model_calls": 62,
+      "scope_reserved_jev_calls": 6,
+      "campaign_reserved_model_calls": 62,
+      "campaign_reserved_jev_calls": 6
+    }
+  ],
+  "synthetic_only": true,
+  "new_external_model_calls": 0,
+  "new_external_jev_calls": 0,
+  "independent_semantic_review_still_required": true,
+  "cleanup_failure_regression": "RED arms=2 then GREEN arms=1; first failure durable second not started",
+  "receipt_failure_regression": "RED checkpoint_pending then GREEN stopped/receipt_write; existing file not overwritten",
+  "capture_before_final_cleanup_stop_refinement": true,
+  "final_source_seven_paths_revalidated": "green-final-gates.log",
+  "unknown_usage_cost_preserved": true
+}
