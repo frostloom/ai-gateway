@@ -15,6 +15,14 @@ import (
 )
 
 func TestAgentPairOwnedEnvironmentLocalReadAndWrite(t *testing.T) {
+	runAgentPairOwnedEnvironment(t, false)
+}
+
+func TestExplicitArmOrderOwnedEnvironmentLocalReadAndWrite(t *testing.T) {
+	runAgentPairOwnedEnvironment(t, true)
+}
+
+func runAgentPairOwnedEnvironment(t *testing.T, reverse bool) {
 	observer, capture := pairedTestObserver(t)
 	var traceIDs []string
 	var reports []SmallPairReport
@@ -100,6 +108,9 @@ func TestAgentPairOwnedEnvironmentLocalReadAndWrite(t *testing.T) {
 			if e != nil {
 				t.Fatal(e)
 			}
+			if reverse {
+				cfg.ArmOrder = []string{"jev_selective", "model"}
+			}
 			dir := t.TempDir()
 			limits := pairedLimits()
 			limits.MaxCalls = 8
@@ -136,6 +147,25 @@ func TestAgentPairOwnedEnvironmentLocalReadAndWrite(t *testing.T) {
 			r, e := ReportPreparedPair(path)
 			if e != nil {
 				t.Fatal(e)
+			}
+			if reverse {
+				raw, err := os.ReadFile(path)
+				if err != nil {
+					t.Fatal(err)
+				}
+				var starts []string
+				for _, line := range bytes.Split(bytes.TrimSpace(raw), []byte("\n")) {
+					var event pairRunEvent
+					if err := json.Unmarshal(line, &event); err != nil {
+						t.Fatal(err)
+					}
+					if event.Kind == "start" {
+						starts = append(starts, event.Arm)
+					}
+				}
+				if len(starts) != 2 || starts[0] != "jev_selective" || starts[1] != "model" {
+					t.Fatal("actual reverse journal order lost", starts)
+				}
 			}
 			if r.FinishedArms != 2 || r.Rows[0].Status != "needs_review" || r.Rows[1].Status != "needs_review" {
 				t.Fatalf("wrong report: %+v", r)

@@ -97,6 +97,10 @@ func RunAgentPair(ctx context.Context, path string, o AgentPairOptions) (runErr 
 		return err
 	}
 	want.AllowPaid = o.Config.AllowPaid
+	if err := validatePairRun(o.Config); err != nil {
+		return err
+	}
+	want.ArmOrder = o.Config.ArmOrder
 	if !reflect.DeepEqual(want, o.Config) {
 		return fmt.Errorf("agent configuration differs before provider calls")
 	}

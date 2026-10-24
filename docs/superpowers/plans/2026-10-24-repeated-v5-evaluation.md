@@ -24,9 +24,9 @@ main only; preserve unrelated web changes. No new claim/paid calls/deployment du
 Files: internal/taskbench/paired_runner.go, paired_runner_test.go, paired_adapter integration tests.
 Interface: add `ArmOrder []string` with json `arm_order,omitempty` to PairRunConfig; nil retains historical pairOrder parity; explicit order is exactly model/jev_selective in either permutation and applies to every case in that config. No routing-name swaps. PairRunContract includes explicit order.
 
-- [ ] RED tests: forward/reversed actual factory and persisted start order; empty non-nil/duplicate/unknown/single entries reject before files; nil old configuration serialization and contract unchanged; changed order cannot resume journal or reuse budget binding.
-- [ ] Implement minimal validation/order selection, preserving omitted legacy behavior.
-- [ ] GREEN targeted tests and real Handler local reverse pair; first-arm cleanup/provider/JEV failure leaves one durable failed arm and second unrun. Run related taskbench/CLI tests; independent review before commit/push this unit.
+- [x] RED tests: forward/reversed actual factory and persisted start order; empty non-nil/duplicate/unknown/single entries reject before files; nil old configuration serialization and contract unchanged; changed order cannot resume journal or reuse budget binding.
+- [x] Implement minimal validation/order selection, preserving omitted legacy behavior.
+- [x] GREEN targeted tests and real Handler local reverse pair; first-arm cleanup/provider/JEV failure leaves one durable failed arm and second unrun. Run related taskbench/CLI tests; independent review before commit/push this unit.
 
 ### Task 2: Separate repeated scope and ledger
 

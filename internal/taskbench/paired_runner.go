@@ -22,6 +22,7 @@ type PairRunConfig struct {
 	AllowPaid              bool                         `json:"allow_paid"`
 	ProviderEndpointSHA256 string                       `json:"provider_endpoint_sha256,omitempty"`
 	JEVModel               string                       `json:"jev_model,omitempty"`
+	ArmOrder               []string                     `json:"arm_order,omitempty"`
 }
 type pairRunEvent struct {
 	LangfuseTraceID   string                 `json:"langfuse_trace_id,omitempty"`
@@ -49,6 +50,9 @@ func PairRunContract(cfg PairRunConfig) string {
 	return conversationHash(raw)
 }
 func validatePairRun(cfg PairRunConfig) error {
+	if cfg.ArmOrder != nil && (len(cfg.ArmOrder) != 2 || !((cfg.ArmOrder[0] == "model" && cfg.ArmOrder[1] == "jev_selective") || (cfg.ArmOrder[0] == "jev_selective" && cfg.ArmOrder[1] == "model"))) {
+		return fmt.Errorf("explicit arm order requires model and jev_selective exactly once")
+	}
 	if cfg.Schema != "paired-run.v1" || len(cfg.Suite.Cases) < 1 || len(cfg.Suite.Cases) > 12 {
 		return fmt.Errorf("paired run requires 1..12 explicit complete tasks")
 	}
@@ -98,6 +102,9 @@ func pairOrder(cfg PairRunConfig) []pairRunEvent {
 		arms := []string{"model", "jev_selective"}
 		if i%2 == 1 {
 			arms[0], arms[1] = arms[1], arms[0]
+		}
+		if cfg.ArmOrder != nil {
+			arms = cfg.ArmOrder
 		}
 		for _, arm := range arms {
 			order = append(order, pairRunEvent{Key: c.Key(), Arm: arm})
