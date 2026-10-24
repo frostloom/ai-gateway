@@ -1,0 +1,169 @@
+{
+  "schema": "knowledge-controlled-validation.v1",
+  "date": "2026-10-25",
+  "implementation_revision": "1f16d24315c00daa8693ab2d4046a01329adefea",
+  "branch": "codex/customer-knowledge-rag",
+  "scope_id": "knowledge-control-20261024",
+  "paid_execution_ready": false,
+  "customer_model_calls": 0,
+  "jev_calls": 0,
+  "paid_claims_created": 0,
+  "deployed": false,
+  "effect_claims_allowed": false,
+  "blockers": [
+    "cross_entry_budget_uncoordinated",
+    "billing_evidence_unverified",
+    "execution_authorization_unbound"
+  ],
+  "runs": {
+    "pre_fix": {
+      "package_status": {
+        "pass": 24,
+        "skip": 27
+      },
+      "failed_tests": [],
+      "opt_in_skips": [
+        "TestKnowledgePilotLangfuseReadback",
+        "TestCashLoad",
+        "TestCashProfileRowTiming",
+        "TestLiveJevSemanticsDiagnostic",
+        "TestKnowledgeLangfuseReadback"
+      ]
+    },
+    "post_fix_first": {
+      "package_status": {
+        "pass": 23,
+        "skip": 27,
+        "fail": 1
+      },
+      "failed_tests": [
+        "TestReserveConcurrentNoOversell"
+      ],
+      "opt_in_skips": [
+        "TestKnowledgePilotLangfuseReadback",
+        "TestCashLoad",
+        "TestCashProfileRowTiming",
+        "TestLiveJevSemanticsDiagnostic",
+        "TestKnowledgeLangfuseReadback"
+      ]
+    },
+    "post_fix_confirmation": {
+      "package_status": {
+        "pass": 24,
+        "skip": 27
+      },
+      "failed_tests": [],
+      "opt_in_skips": [
+        "TestKnowledgePilotLangfuseReadback",
+        "TestCashLoad",
+        "TestCashProfileRowTiming",
+        "TestLiveJevSemanticsDiagnostic",
+        "TestKnowledgeLangfuseReadback"
+      ]
+    }
+  },
+  "isolated_store_retest": {
+    "test": "TestReserveConcurrentNoOversell",
+    "passed": true,
+    "skipped": false,
+    "elapsed_seconds": 2.74,
+    "root_cause_confirmed": false
+  },
+  "docker": {
+    "passed": true,
+    "project": "knowledge-smoke-084ddfc8d1",
+    "cleanup_completed": true,
+    "source_boundary": "agent/knowledge runtime inputs unchanged by final evaluator-only fixes"
+  },
+  "langfuse_final": {
+    "dropped": 0,
+    "exported": 10,
+    "failed": 0,
+    "readback": [
+      {
+        "task_id": "K001-a",
+        "trace_id": "0e661bcddbb0288f65879acabf4149e1",
+        "verified": true,
+        "observations": 2,
+        "receipt_sha256": "265511792dd20682574aedcbf6761157244df4169acb523d0089dc2ae2193231"
+      },
+      {
+        "task_id": "K001-b",
+        "trace_id": "c5b20e9917fb51fe88b554dc1919569a",
+        "verified": true,
+        "observations": 8,
+        "receipt_sha256": "f6b9136013542a558791976bb0b48865d4a74fc947f4835c7fe194129b052786"
+      }
+    ]
+  },
+  "langfuse_all_synthetic_probes": {
+    "traces": 6,
+    "observations": 30,
+    "first_failure": "relative receipt output path; readback itself completed"
+  },
+  "review": {
+    "fresh_context_reviews": 1,
+    "critical": 0,
+    "important": 3,
+    "important_fixed_red_green": 3,
+    "deferred_minor": [
+      "attempt DurationMS ends at response headers; runner_request includes full body"
+    ]
+  },
+  "quality_limitations": [
+    "No real-model accuracy or savings measured.",
+    "S011 unchanged pending is a semantic failure; original question and customer rules preserved.",
+    "Literal loopback synthetic verification does not validate official thinking behavior or tariffs."
+  ],
+  "frozen_input_sha256": {
+    "eval/knowledge/acceptance-v1/manifest.json": "1d571d3d2b36cca055d450f492de3946e480506cfd3686fe77cbc4d695672850",
+    "eval/knowledge/acceptance-v1/questions.json": "784ba059d389382bd3b4f1671fef3b0f8064b24fd88b943a39e85353a85efd95",
+    "eval/knowledge/acceptance-v1/rubric.md": "1d7375ad5aeaa142e58872fa4d786691191806d400a0e02e3f3fd58cc097f644",
+    "eval/knowledge/acceptance-v1/README.md": "d6ee7578ddf1f5b687ffe0a2a4d376b08d7df29f61a22eb948790cb662bd6187",
+    "eval/knowledge/control-v1/scope.example.json": "17068f31be003f35a3d3c927082eb29ece3e39e880681d718a32c835a25318b4",
+    "eval/knowledge/control-v1/profiles.json": "7f8d4f449cbd3f4605bac3205b4f561c9d54531bcbc904b011f687915d779666",
+    "eval/knowledge/control-v1/order.json": "035d7a28eb900fa8d8cc6f9bf7a65dee4f4c353da0f9643e33da90abf0e1fcd3",
+    "knowledge/platform/manifest.json": "0ca3a7a5627e5d79c06ad9d2a414809a088c4dfcf7d5b55de4802df9764874b2"
+  },
+  "private_log_sha256": {
+    "task1-red.log": "17d80a0cf66b6c0aedc398f13dfeedae656e8ad6e437cfb67432902727f6da9e",
+    "task-1-brief.md": "faaa869a6b0f9c4685d2cdfe56e36513f917378d64dfb6cbea994ce39a1955ae",
+    "langfuse-final.log": "1eefe2695d6f9ffdd64dccf4ae040558885681d0d3ba39e02699a5e91f6aaa34",
+    "review-green.log": "b472b6b17a957fb89eddf04438917430297bdf907a4ec224766698b748d9e1a1",
+    "langfuse.log": "c7188ef3bb7f5cc04a9d8b2cdf85d7688c6902a6dd7da0275eaa23ea5e416bf1",
+    "verify_evidence.py": "9f95c294813ffac6b5c56841d883d420cc00c205573a335bb7f48063175b60c3",
+    "langfuse-postfix.log": "472dfd14273f0031b3435d9507ee0671934b807dd67001bce77b19ee12013eb1",
+    "task2-red.log": "74475f8916b414490ae6752218b3ca08f020232e01127c0a72e24a1af25173de",
+    "langfuse-readback.json": "02d3256b31758014606e2fb7465ba83395460f9159a5f404d9a4a64c5562993b",
+    "task-1-tests.log": "91a4f073478df83cbe3d5522f9877c38237c25066df41c9d3b833d0b67a0cc8c",
+    "progress.md": "8f5514449ebdab80fd4dfb6437799573314f030df8ee0234d4a8bc08233feb37",
+    "task3-final.log": "b354db6754aa29860623fdd9754a6fd3f9ea93450f809bcff3f0ee50b9fabc7a",
+    "task3-red.log": "ba13812b10c334a6c2f10e960ae660b61fcc7ddf1eb9f2567c29f8ec59362e80",
+    "review-caf19bb..67ffcf3.diff": "6ab0a1a3218298f07fd7c94c16f7440376a0a9ca34e0d66db0849155c8530b34",
+    "task3-third.log": "227d168e0bbe39e01c289c19ab3c4244fa5b0edb179aa87d3f011df22ac403b5",
+    "check.json": "d0bc396876dea4257903d093af35621c45cf5823af8234a1d3fb8f4ad128f069",
+    "hindsight-recall.json": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "task3-first.log": "ef14f1ddbbff1f859fc7b1315fb204efb291d774e35a72dd0213b2bc2c86485f",
+    "task4-green.log": "0daf240b3d42a563d32d07a0d434ad8a45f510de7799f8f0ef47fa2aa12d3494",
+    "task-2-brief.md": "c798546e6f7c7f3108e5db0f5791f4aef04d123c4ae8eefec286622d65b1a834",
+    "task-3-brief.md": "430f41832efd655b6a4e9578f16f628194894674798c809171d6aeaebfcea7a1",
+    "docker-smoke.log": "127a0a541724513fa55f20add925cf9663470d9cef908c989f352fb9c8cf27f2",
+    "task-2-tests.log": "3e8edf15bcb2d38e687bedb5939d65a7091f9f6c51d43747fd8ffcc873bf6814",
+    "full-go-first.jsonl": "b64b259f2be028b6864f15d8655dbe4c62b94c76a73b51d76244bdc892cd8fe4",
+    "task3-final2.log": "5da36eeb34cde42ab25fe875644f95ee1ac0fb7ea5a102ceacedc96f6930ed41",
+    "state-red.log": "e7afd97296151ef5d0435c04963e24f62d0fd20d7322993d0d91aa3cf982cc39",
+    "full-go-final.jsonl": "ecc21bf0191728026779f3008038f591d73c6b42e53018b745f8af59deadd37d",
+    "task4-local.log": "e8ea2682970a57114fda41c5062ae3955c600e4ab9dbd8427b65846345478c9e",
+    "task3-second.log": "ff72df1ccb2dc46546cd2a502bfbddae0e140104c4e2e4bb1e2bf8d8846bc554",
+    "review-red.log": "ef0b63743e5eac850e440c8ec69142932a2d42eb072f487f03facaf01334e83a",
+    "full-go-confirmation.jsonl": "075f78dad4982b93bbbfa94125e4c2bcd0db0496b721c7702ea4d98ca3ca46b1",
+    "langfuse-postfix-readback.json": "66e5c6747591157e0fa08c942e480b507c8b1c1b2ea0b74d08f9dff27c334c12",
+    "task4-red.log": "80fd92766cdc8f1a43d8cc2de8d669cbc6f0b1329d41a9033541050d9a6a0ff4",
+    "task-3-tests.log": "1850f3d4bfc428833fefe7a4b350fba2334fdee09fec6bfed20a24153bc24cda",
+    "store-isolated.jsonl": "ab0418307825c5cef13de4cb36c18ca47780e97ad0ee7165ae2ba13844637a3a",
+    "task3-green.log": "0c35b81d8cc08c013242e76ad17edf992dc500b723586ab57dd808613f4e739f",
+    "task-4-brief.md": "a1b1a8dc1380db242b2927bec963b99e92496f68b06542a02379aa88ae972dc3",
+    "plan-path": "707546a57e9ac743cf4f2412b1f86126998c8835db010a59af775ccc79b923e2",
+    "scope-generator/main.go": "bc88eac0ce440246129bc26dc43b2c9ed163a77e7a1223cdcaa2f42e4a68ea50"
+  }
+}
