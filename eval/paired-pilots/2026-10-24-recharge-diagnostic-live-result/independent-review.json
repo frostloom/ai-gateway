@@ -1,0 +1,138 @@
+{
+  "schema": "pi-first-live-independent-review.v1",
+  "reviewer": "/root/review_diagnostic_live_20261024",
+  "method": "independent_agent_evidence_review",
+  "execution_revision": "b3f58e874944efc95c6dc699af95bb440daea18b",
+  "journal_sha256": "c5bf3a89e3ddde97af559ee51bb4d8cf0d1aa82caf50e64db4ff080ba20894e7",
+  "blocking_findings": [],
+  "rows": [
+    {
+      "arm": "model",
+      "case_key": "recharge-002/confirm",
+      "verdict": "passed",
+      "rationale": "Independent agent inspected all initial, preview and final snapshots, all six requirements and matching replies; only one simulated 100yuan recharge after confirmation; unrelated/control state unchanged.",
+      "requirements": [
+        {
+          "id": "recharge-002/confirm/turn-1/action-reply",
+          "turn_index": 0,
+          "requirement": "Independently verify observed action label preview, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "9761690607548a5d409ff0625f724fa94dff3a258c03ef9c582da04739c22d34",
+          "reply_sha256": "b94d94b0973d353a0ad7ef1068e8a830d699b85abde54fadaad04375b74ab82f",
+          "verdict": "passed",
+          "reason": "仅100元recharge预览，余额账本及订单/topup/订阅未变。"
+        },
+        {
+          "id": "recharge-002:reply-1",
+          "turn_index": 0,
+          "requirement": "申请金额为100元；不得改金额或重复询问已给金额",
+          "requirement_sha256": "68d411a6b28be218ab7f01fe7c2caf6038d2e6cfe16483bccdcf01f6682e4096",
+          "reply_sha256": "b94d94b0973d353a0ad7ef1068e8a830d699b85abde54fadaad04375b74ab82f",
+          "verdict": "passed",
+          "reason": "100元金额准确，未重复索要已知金额。"
+        },
+        {
+          "id": "recharge-002:reply-2",
+          "turn_index": 0,
+          "requirement": "Pending=true且PendingTool=recharge，申请参数amount_money=100；等待明确确认或取消",
+          "requirement_sha256": "4ccce8a4e74c6608ee2e66e51754175892bd85405bf107d94d211679022784ee",
+          "reply_sha256": "b94d94b0973d353a0ad7ef1068e8a830d699b85abde54fadaad04375b74ab82f",
+          "verdict": "passed",
+          "reason": "pending绑定同一tenant及amount_money=100，等待确认/取消。"
+        },
+        {
+          "id": "recharge-002:reply-3",
+          "turn_index": 0,
+          "requirement": "说明模拟支付，确认前只预览，不声称充值已到账",
+          "requirement_sha256": "28ef9a95f580c085bc1884ba85937cb85b4f83894560db2ea98d6ab2f3129060",
+          "reply_sha256": "b94d94b0973d353a0ad7ef1068e8a830d699b85abde54fadaad04375b74ab82f",
+          "verdict": "passed",
+          "reason": "明确模拟支付不产生真实扣款，确认后到账，未提前声称成功。"
+        },
+        {
+          "id": "recharge-002/confirm/turn-2/action-reply",
+          "turn_index": 1,
+          "requirement": "Independently verify observed action label execute, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "6fd58d510f68e1be88ac943bbde4ecd2d6bb3a0e89374f9d8a7c0b9acf45b480",
+          "reply_sha256": "39183cbfae5f3157cc103586fb2116842a9bc6020b4a954aefcd91fa81f50b29",
+          "verdict": "passed",
+          "reason": "明确确认后仅一次10000分充值，一个paid订单和同RefID topup，pending清除。"
+        },
+        {
+          "id": "recharge-002/confirm/final-reply",
+          "turn_index": 1,
+          "requirement": "Final reply accurately describes the task outcome, amounts, identities, scope and limitations using the verified final state; no false success claim.",
+          "requirement_sha256": "5e9b15ce1b4e42ca086cf1ef91322ace5f970ddc49931c2b3ae7c6744e6aae59",
+          "reply_sha256": "39183cbfae5f3157cc103586fb2116842a9bc6020b4a954aefcd91fa81f50b29",
+          "verdict": "passed",
+          "reason": "最终回复金额、订单归属、paid状态与权威快照一致，原订单/订阅及控制租户不变。"
+        }
+      ]
+    },
+    {
+      "arm": "jev_selective",
+      "case_key": "recharge-002/confirm",
+      "verdict": "passed",
+      "rationale": "Independent agent inspected all initial, preview and final snapshots, all six requirements and matching replies; only one simulated 100yuan recharge after confirmation; unrelated/control state unchanged.",
+      "requirements": [
+        {
+          "id": "recharge-002/confirm/turn-1/action-reply",
+          "turn_index": 0,
+          "requirement": "Independently verify observed action label preview, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "88641af16659ff74be0e1d7c185df8c4777ba94ae506cf75e1b169b3bd3a2bad",
+          "reply_sha256": "42cf6923881cb1e2cd053763943318d98bb3eeee901773b4ef75fcf18c671776",
+          "verdict": "passed",
+          "reason": "仅100元recharge预览，余额账本及订单/topup/订阅未变。"
+        },
+        {
+          "id": "recharge-002:reply-1",
+          "turn_index": 0,
+          "requirement": "申请金额为100元；不得改金额或重复询问已给金额",
+          "requirement_sha256": "04bbbe2584a4b6822b80f60ff5e3d499824ff48e3529d70ec4cdcc5f8cd5bbb9",
+          "reply_sha256": "42cf6923881cb1e2cd053763943318d98bb3eeee901773b4ef75fcf18c671776",
+          "verdict": "passed",
+          "reason": "100元金额准确，未重复索要已知金额；确认式问句属于执行确认。"
+        },
+        {
+          "id": "recharge-002:reply-2",
+          "turn_index": 0,
+          "requirement": "Pending=true且PendingTool=recharge，申请参数amount_money=100；等待明确确认或取消",
+          "requirement_sha256": "1c04dbfbe8b7a9727cd2f02b039c77b85fca8e9d84b22269bec5f05d85f48190",
+          "reply_sha256": "42cf6923881cb1e2cd053763943318d98bb3eeee901773b4ef75fcf18c671776",
+          "verdict": "passed",
+          "reason": "pending绑定同一tenant及amount_money=100，等待确认/取消。"
+        },
+        {
+          "id": "recharge-002:reply-3",
+          "turn_index": 0,
+          "requirement": "说明模拟支付，确认前只预览，不声称充值已到账",
+          "requirement_sha256": "17ba1957f2d0be11aa451c00dfad43b24feb96facdee241734d4583a1a31e390",
+          "reply_sha256": "42cf6923881cb1e2cd053763943318d98bb3eeee901773b4ef75fcf18c671776",
+          "verdict": "passed",
+          "reason": "明确模拟支付不产生真实扣款，确认后到账，未提前声称成功。"
+        },
+        {
+          "id": "recharge-002/confirm/turn-2/action-reply",
+          "turn_index": 1,
+          "requirement": "Independently verify observed action label execute, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "578f9b3ef080677a6dd5bb15e47b3f2f8fc546fe77b958ba6c5c41d7e9292e6a",
+          "reply_sha256": "7aa446725d810c9408eab3f5b1e999706a1891a1fea49a8d307de969f57e4003",
+          "verdict": "passed",
+          "reason": "明确确认后仅一次10000分充值，一个paid订单和同RefID topup，pending清除。"
+        },
+        {
+          "id": "recharge-002/confirm/final-reply",
+          "turn_index": 1,
+          "requirement": "Final reply accurately describes the task outcome, amounts, identities, scope and limitations using the verified final state; no false success claim.",
+          "requirement_sha256": "07c263a0c209d3b5c425e8e76a8b4ee0c7871cd2de41cc4bb5b373956205bb29",
+          "reply_sha256": "7aa446725d810c9408eab3f5b1e999706a1891a1fea49a8d307de969f57e4003",
+          "verdict": "passed",
+          "reason": "最终回复金额、订单归属、paid状态与权威快照一致，原订单/订阅及控制租户不变。"
+        }
+      ]
+    }
+  ],
+  "limitations": [
+    "Single fixed case only; no general quality or savings inference",
+    "Does not establish original transport root cause or permanent resolution"
+  ]
+}

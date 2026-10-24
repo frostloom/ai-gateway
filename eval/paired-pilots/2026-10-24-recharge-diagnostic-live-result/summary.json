@@ -1,0 +1,85 @@
+{
+  "schema": "recharge-diagnostic-live-result.v1",
+  "execution_revision": "b3f58e874944efc95c6dc699af95bb440daea18b",
+  "campaign_id": "recharge-confirm-diagnostic-retest-20261023",
+  "status": "checkpoint_pending",
+  "independent_task_verdict": "both_passed_12_requirements",
+  "model_attempts": 2,
+  "jev_attempts": 1,
+  "model_input_tokens": 3514,
+  "model_output_tokens": 90,
+  "configured_model_cost_cny": "0.007748",
+  "configured_jev_cost_usd": "0.000050568",
+  "supplier_invoice_verified": false,
+  "jev_usage": {
+    "input": 1204,
+    "output": 186
+  },
+  "permanent_cumulative_reservation": {
+    "model_micro_cny": 675840,
+    "jev_micro_usd": 5376
+  },
+  "unallocated_new_budget": {
+    "cny": "99.324160",
+    "usd": "0.994624"
+  },
+  "cumulative_actual_attempts": {
+    "model": 27,
+    "jev": 6
+  },
+  "claim_consumed": true,
+  "automatic_retry_performed": false,
+  "customer_redeployed": false,
+  "old_transport_root_cause_confirmed": false,
+  "observer_stats": {
+    "Accepted": 13,
+    "Dropped": 0,
+    "Exported": 13,
+    "Failed": 0,
+    "Batches": 7,
+    "Turns": 4,
+    "SampledTurns": 4,
+    "QueueDepth": 0
+  },
+  "arms": [
+    {
+      "arm": "model",
+      "trace_id": "98a00849083a4db94cbf78d92f3f0a16",
+      "telemetry": {
+        "completion_rate": null,
+        "response_latency_ms": 1007.746959,
+        "llm_calls": 1,
+        "jev_calls": 0,
+        "tokens": {
+          "llm_input": 1757,
+          "llm_output": 39,
+          "jev_input": 0,
+          "jev_output": 0
+        }
+      },
+      "independent_verdict": "passed"
+    },
+    {
+      "arm": "jev_selective",
+      "trace_id": "1bbe4d4a67eaab7a70d0c253197d2ba9",
+      "telemetry": {
+        "completion_rate": null,
+        "response_latency_ms": 2080.269833,
+        "llm_calls": 1,
+        "jev_calls": 1,
+        "tokens": {
+          "llm_input": 1757,
+          "llm_output": 51,
+          "jev_input": 1204,
+          "jev_output": 186
+        }
+      },
+      "independent_verdict": "passed"
+    }
+  ],
+  "limits": [
+    "Single case, no population-level savings claim",
+    "Both arms one model call each; selective adds JEV overhead",
+    "Original report/checkpoint kept unchanged"
+  ]
+}
