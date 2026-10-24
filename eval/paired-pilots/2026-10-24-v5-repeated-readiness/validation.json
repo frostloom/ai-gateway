@@ -1,0 +1,130 @@
+{
+  "schema": "v5-repeated-summary-validation.v1",
+  "focused_python_tests": 11,
+  "focused_exit_code": 0,
+  "full_python_tests": 182,
+  "full_python_skipped": 15,
+  "full_python_exit_code": 0,
+  "initial_full_python_failure": "test_local_score_write_readback_and_stable_ids: sandbox loopback bind PermissionError; original failure log retained",
+  "final_full_python_log_sha256": "1aee7fbce2aff7da71abeba27a7a0dd7bb3888d294bc8d471024f1657d71157e",
+  "go_sources_unchanged_since_18_package_full_regression": true,
+  "go_regression_validation_sha256": "c8a85490c8681bc955ddba1449afb0742cb0e14bafe6b7186fbea69fb5d8725e",
+  "go_regression_source_bindings": {
+    "cmd/paired-live/main.go": "d4a813558b6f57adf175c3b7ec11d2cedff75482d4bf1ef29a062e9e7bfa05b1",
+    "cmd/paired-live/repeated.go": "cca007002f03d93091c98c62c251878eca1686538c97bfa7a15a1546eb3403e9",
+    "cmd/paired-live/repeated_test.go": "8e55ebf84f4a7aaf11f65290db49490155ff35a7056376119e813a54608bf0a3",
+    "internal/observability/evaluation.go": "4b1591863c89acfd1846bd7d8bc77368655186a1e716e8fe60535b0c1240f21f",
+    "internal/taskbench/authorized_repeated_fact_stop_test.go": "b9848b99cf805192f1b7dd99e28507a4e60abbbe52981b1ca3fea6e415e4e8c4",
+    "internal/taskbench/authorized_repeated.go": "97d23eeb4948646db9d3a4eadaae37137d72a8d535e75136767034b356ab9968",
+    "internal/taskbench/authorized_repeated_run_test.go": "aec27f99017d9ab4d0f8c6d8ad7c03c31b56a30f3319affca2fdf4a2eace1ff0",
+    "internal/taskbench/authorized_repeated_run.go": "1d32556fa922efbd0162b47298c8506e278f451e009e08be32011e2e983b4305",
+    "internal/taskbench/authorized_repeated_test.go": "f2b0975c6c5c03a9c0b7039e9187ae48e963a228d1e2e3644a88f6c9d38cd774",
+    "internal/taskbench/authorized_cohort_run.go": "9435629658f6ee70fc7c60949382a192aa9d76f63609f6bdfab154cd2848510f",
+    "internal/taskbench/authorized_entry.go": "d196c27187f9eac4b9c82031af780f5ae4b31d464f808db3f688763dd2be7821",
+    "internal/taskbench/authorized_retest.go": "32c1bcb2ee71479dba7afa98de58082179a2fa9d7603daf0b0651c068800cab5",
+    "internal/taskbench/campaign_prepare.go": "7a643c01a321f329da6ad93f91e83288c46b3e48b63b56f1393860ddca2a8412",
+    "internal/taskbench/campaign_rehearsal.go": "98e1e2818bd1638533ca8268a6dc71c1b7d2464a2ce8b9ab311218f1852380c9",
+    "internal/taskbench/paired_adapter.go": "846f6f3f7fa7badc276480464cca48df956aac801ced145c833eccbe787e3288",
+    "internal/taskbench/paired_report.go": "7a19e075155d6267c110260a9410ae809dbe8a958d5edb937c6904bda0b1abe0",
+    "internal/taskbench/paired_runner.go": "c51bd576950516e6ac8d07f02fa92671db253ccd6a421dd527592f5e650ce82c"
+  },
+  "smokes": [
+    {
+      "mode": "cancelled",
+      "summary_sha256": "129415de0e8c8ab49cb7df429de003648a572e135a79e5ec36acf58f8e266252",
+      "eligible_pairs": 0,
+      "pair_count": 24,
+      "input_manifest_sha256": "c78c584d5aa79fd1f1620f15f28e154151cd88471ad1f77f1c1debd56f1e008e",
+      "evidence_origin": "synthetic_test"
+    },
+    {
+      "mode": "historical",
+      "summary_sha256": "262fd35bcb30ef360c3da87553f6e6b6612e7353f61f1e210b5f3bd407a9eaa1",
+      "eligible_pairs": 6,
+      "pair_count": 6,
+      "input_manifest_sha256": "140375ebd6e4cda83ad4475c751e2ee916665700b74fe0bc62cd8d93d1f4474e",
+      "evidence_origin": "actual"
+    },
+    {
+      "mode": "jev-failure",
+      "summary_sha256": "f9bb1dee1c338e5c613ad72dd6506c4f9d7f102e8374c97c1138db41063866f5",
+      "eligible_pairs": 0,
+      "pair_count": 24,
+      "input_manifest_sha256": "a34b513153bb120ed21065ca724cef63c187ca530f62569385d820d626304328",
+      "evidence_origin": "synthetic_test"
+    },
+    {
+      "mode": "normal",
+      "summary_sha256": "e1a55de79d4863be1428b4d7e0ca30868577ab7d36825e5fdb038b4f75cef0d2",
+      "eligible_pairs": 0,
+      "pair_count": 24,
+      "input_manifest_sha256": "bfffb754abf5e5f35b100c4c0ef6b6195dc9e33f03aad7e6c0f4baeede095b0b",
+      "evidence_origin": "synthetic_test"
+    },
+    {
+      "mode": "observer-failure",
+      "summary_sha256": "6aec093a31150165c391d9214bd2dfc923b59011b6a8872020e89e260b41b045",
+      "eligible_pairs": 0,
+      "pair_count": 24,
+      "input_manifest_sha256": "46212b287d28ec4594a9ef155d38a7e65c624bb9e3ee16405c0072c016bce126",
+      "evidence_origin": "synthetic_test"
+    },
+    {
+      "mode": "provider-failure",
+      "summary_sha256": "9e66a31c8f4ac10bec9f5b4029d68a9618b6d00ab90a3694b8e7f541c254a2c0",
+      "eligible_pairs": 0,
+      "pair_count": 24,
+      "input_manifest_sha256": "cb3354f96ab94e87e4d911f45f8e48b21c1c1610ea153b19fe46db8967555496",
+      "evidence_origin": "synthetic_test"
+    },
+    {
+      "mode": "receipt-failure",
+      "summary_sha256": "e68268af548ea5b10978795496524cb6805cc751d1aa500d9a632fdcd3af2af5",
+      "eligible_pairs": 0,
+      "pair_count": 24,
+      "input_manifest_sha256": "980ed7c2c94eea44592471f14db4a465433a3ef6fc72e1988eac0cfe484d728a",
+      "evidence_origin": "synthetic_test"
+    },
+    {
+      "mode": "reverse-jev-failure",
+      "summary_sha256": "49d9912e711cea88fc759f2a4cc0938ff1d3f5d9d3f26793449f201488303f4e",
+      "eligible_pairs": 0,
+      "pair_count": 24,
+      "input_manifest_sha256": "c2ca526e1a4889b93226f513b9f28de90b4e90aecf6c925f2711ad6bae24197d",
+      "evidence_origin": "synthetic_test"
+    },
+    {
+      "mode": "reverse-provider-failure",
+      "summary_sha256": "53601e9172cc7615b408c8d19baf9b9831215b930859fec96ac41447076e599a",
+      "eligible_pairs": 0,
+      "pair_count": 24,
+      "input_manifest_sha256": "31f28f25ddfb07477fe0f09b75339a7249e60f2638a710979c13ce4ec3182e7c",
+      "evidence_origin": "synthetic_test"
+    },
+    {
+      "mode": "structural-failure",
+      "summary_sha256": "d6da40fdd27cac93745950412f5348af12342290b0db352d92b225cfddd4b7eb",
+      "eligible_pairs": 0,
+      "pair_count": 24,
+      "input_manifest_sha256": "5b8e81a77e799cc33ba9adf3290a5c75ca7879293fb2ddca27a21e6bfd530f0b",
+      "evidence_origin": "synthetic_test"
+    },
+    {
+      "mode": "usage-failure",
+      "summary_sha256": "67e497790a04ea15249f164883d3c8953a08d28b8a3d4ccc326519dacac4aa2b",
+      "eligible_pairs": 0,
+      "pair_count": 24,
+      "input_manifest_sha256": "e90f6cad2a3ab3a4e196d5f6d99b96a23095d451c3d9e2eac97f8374fa8a8392",
+      "evidence_origin": "synthetic_test"
+    }
+  ],
+  "old_private_files_checked": 6796,
+  "old_private_hashes_changed": 0,
+  "new_paid_model_calls": 0,
+  "new_paid_jev_calls": 0,
+  "new_claim_exists": false,
+  "customer_deployed": false,
+  "cumulative_actual_model_calls": 60,
+  "cumulative_actual_jev_calls": 15,
+  "historical_repeats_fabricated": false
+}

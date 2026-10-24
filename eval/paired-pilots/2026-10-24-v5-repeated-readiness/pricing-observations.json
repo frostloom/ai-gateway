@@ -1,0 +1,22 @@
+{
+  "schema": "v5-repeated-pricing-observations.v1",
+  "checked_date": "2026-10-24",
+  "sources": [
+    "https://api-docs.deepseek.com/zh-cn/quick_start/pricing/",
+    "https://api-docs.deepseek.com/zh-cn/quick_start/token_usage/",
+    "https://docs.typesafe.ai/models"
+  ],
+  "model": "deepseek-flash",
+  "model_input_micro_cny_per_million": 2000000,
+  "model_output_micro_cny_per_million": 8000000,
+  "conservative_peak_uncached_price": true,
+  "off_peak_or_cache_discount_not_assumed": true,
+  "jev_model": "jev-1.13.0",
+  "jev_input_micro_usd_per_million": 42000,
+  "jev_output_price": 0,
+  "jev_default_context_tokens": 64000,
+  "long_context_enabled": false,
+  "jev_failure_charges_verified": false,
+  "not_provider_invoice_guarantee": true,
+  "failure_policy": "reserve_full_attempt_stop_on_failure"
+}

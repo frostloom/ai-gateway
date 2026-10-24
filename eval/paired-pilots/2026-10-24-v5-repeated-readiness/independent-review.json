@@ -1,0 +1,13 @@
+{
+  "schema": "v5-repeated-summary-code-review.v1",
+  "reviewer": "/root/review_repeated_summary",
+  "base_revision": "1940e58db18e1a65ea004be75ed5a7ff0efd56f2",
+  "initial_p2": [
+    "Failed receipt batch still eligible",
+    "Original finish execution failure hidden by successful report"
+  ],
+  "regressions": "Both counterexamples failed (eligible24 vs23) then passed; metrics remain visible with exclusion reasons.",
+  "final_p1_p2": [],
+  "focused_test_count": 11,
+  "zero_model_jev_calls": true
+}

@@ -1,0 +1,28 @@
+{
+  "campaign_plan_sha256": "527334cf64842106d8b28003f7b40c1010bca02455fab20572f79affb7ccc8bf",
+  "check_scope": "customer_target_settings_only",
+  "checks": {
+    "chosen_channel": true,
+    "chosen_model": true,
+    "chosen_protocol": true,
+    "content_enabled": true,
+    "evaluation_environment": true,
+    "full_sampling": true,
+    "identity_hash_key_valid": true,
+    "jev_key_present": true,
+    "model_key_present": true,
+    "monitor_enabled": true,
+    "pinned_jev_model": true
+  },
+  "jev_calls": 0,
+  "local_langfuse_health_and_auth": true,
+  "model_calls": 0,
+  "ready_for_paid_run": false,
+  "remaining_gates": [
+    "Per-batch Observer injection, coverage and score readback",
+    "Target-bound execution authorization and billing evidence",
+    "Account invoice unknown; public peak rates are not a bill"
+  ],
+  "runtime_binding_valid": false,
+  "settings_valid": true
+}

@@ -1,0 +1,610 @@
+{
+  "schema": "repeated-v5-summary.v1",
+  "mode": "historical-single-block",
+  "evidence_origin": "actual",
+  "execution_revision": "cb71495428543d529785956984bfbfbb6524d45a",
+  "receipt_status": "checkpoint_pending",
+  "receipt_accounting": {
+    "model_budget": {
+      "attempts": 23,
+      "reserved_micro_cny": 777216,
+      "priced_usage_micro_cny": 90010,
+      "input_tokens": 41785,
+      "output_tokens": 805
+    },
+    "jev_attempts": 6,
+    "scope_reserved_model_calls": 62,
+    "scope_reserved_jev_calls": 6,
+    "scope_reserved_micro_cny": 2095104,
+    "scope_reserved_micro_usd": 16128
+  },
+  "eligible_pairs": 6,
+  "pairs": [
+    {
+      "batch_id": "batch-001",
+      "pair_id": "block-00-pair-00",
+      "block_id": "block-00",
+      "case_key": "balance-001/answer_complete",
+      "arm_order": [
+        "model",
+        "jev_selective"
+      ],
+      "status": "completed_pending_review",
+      "arms": {
+        "model": {
+          "status": "needs_review",
+          "trace_id": "1407c9d3cec60ccfd77f887cb66ce015",
+          "metrics": {
+            "model_attempts": "2",
+            "model_micro_cny": "7484",
+            "jev_micro_usd": "0",
+            "server_ms": "1767.833542",
+            "http_ms": "1810.226292",
+            "conversation_ms": "1849.179833",
+            "runner_ms": "2065.636917"
+          }
+        },
+        "jev_selective": {
+          "status": "needs_review",
+          "trace_id": "f3440844907bd7a60dfafb3c88e42fd4",
+          "metrics": {
+            "model_attempts": "0",
+            "model_micro_cny": "0",
+            "jev_micro_usd": "50.442",
+            "server_ms": "919.40225",
+            "http_ms": "1055.151375",
+            "conversation_ms": "1143.096",
+            "runner_ms": "1268.695542"
+          }
+        }
+      },
+      "exclusion_reasons": [],
+      "delta_selective_minus_model": {
+        "model_attempts": "-2",
+        "model_micro_cny": "-7484",
+        "jev_micro_usd": "50.442",
+        "server_ms": "-848.431292",
+        "http_ms": "-755.074917",
+        "conversation_ms": "-706.083833",
+        "runner_ms": "-796.941375"
+      },
+      "independent_review": "passed"
+    },
+    {
+      "batch_id": "batch-002",
+      "pair_id": "block-00-pair-01",
+      "block_id": "block-00",
+      "case_key": "balance-020/explicit_scope_followup",
+      "arm_order": [
+        "model",
+        "jev_selective"
+      ],
+      "status": "completed_pending_review",
+      "arms": {
+        "model": {
+          "status": "needs_review",
+          "trace_id": "b0f74a9e354f9b1bf264b3c9abf9811f",
+          "metrics": {
+            "model_attempts": "5",
+            "model_micro_cny": "20688",
+            "jev_micro_usd": "0",
+            "server_ms": "4219.975666",
+            "http_ms": "4304.12775",
+            "conversation_ms": "4346.423542",
+            "runner_ms": "4529.793333"
+          }
+        },
+        "jev_selective": {
+          "status": "needs_review",
+          "trace_id": "1979a7481191aa2ab7e9198b60fcd0df",
+          "metrics": {
+            "model_attempts": "4",
+            "model_micro_cny": "16218",
+            "jev_micro_usd": "50.61",
+            "server_ms": "4142.013667",
+            "http_ms": "4229.21775",
+            "conversation_ms": "4274.137042",
+            "runner_ms": "4375.489375"
+          }
+        }
+      },
+      "exclusion_reasons": [],
+      "delta_selective_minus_model": {
+        "model_attempts": "-1",
+        "model_micro_cny": "-4470",
+        "jev_micro_usd": "50.61",
+        "server_ms": "-77.961999",
+        "http_ms": "-74.91",
+        "conversation_ms": "-72.2865",
+        "runner_ms": "-154.303958"
+      },
+      "independent_review": "passed"
+    },
+    {
+      "batch_id": "batch-003",
+      "pair_id": "block-00-pair-02",
+      "block_id": "block-00",
+      "case_key": "recharge-002/confirm",
+      "arm_order": [
+        "model",
+        "jev_selective"
+      ],
+      "status": "completed_pending_review",
+      "arms": {
+        "model": {
+          "status": "needs_review",
+          "trace_id": "137568a1fa05f37dc60f1907574ab043",
+          "metrics": {
+            "model_attempts": "1",
+            "model_micro_cny": "3826",
+            "jev_micro_usd": "0",
+            "server_ms": "970.878792",
+            "http_ms": "1053.569042",
+            "conversation_ms": "1106.239542",
+            "runner_ms": "1221.456375"
+          }
+        },
+        "jev_selective": {
+          "status": "needs_review",
+          "trace_id": "5248ce8eff80c957d04a76c5b1f580b6",
+          "metrics": {
+            "model_attempts": "1",
+            "model_micro_cny": "3826",
+            "jev_micro_usd": "50.568",
+            "server_ms": "986.538125",
+            "http_ms": "1073.587167",
+            "conversation_ms": "1122.995334",
+            "runner_ms": "1231.743708"
+          }
+        }
+      },
+      "exclusion_reasons": [],
+      "delta_selective_minus_model": {
+        "model_attempts": "0",
+        "model_micro_cny": "0",
+        "jev_micro_usd": "50.568",
+        "server_ms": "15.659333",
+        "http_ms": "20.018125",
+        "conversation_ms": "16.755792",
+        "runner_ms": "10.287333"
+      },
+      "independent_review": "passed"
+    },
+    {
+      "batch_id": "batch-004",
+      "pair_id": "block-00-pair-03",
+      "block_id": "block-00",
+      "case_key": "recharge-002/cancel",
+      "arm_order": [
+        "model",
+        "jev_selective"
+      ],
+      "status": "completed_pending_review",
+      "arms": {
+        "model": {
+          "status": "needs_review",
+          "trace_id": "65317bf45522528a2de1fdd5c0b55e42",
+          "metrics": {
+            "model_attempts": "1",
+            "model_micro_cny": "3826",
+            "jev_micro_usd": "0",
+            "server_ms": "671.163416",
+            "http_ms": "768.185",
+            "conversation_ms": "818.119667",
+            "runner_ms": "935.406458"
+          }
+        },
+        "jev_selective": {
+          "status": "needs_review",
+          "trace_id": "1fe37506a59eb5c39d5ae53ae6729fe2",
+          "metrics": {
+            "model_attempts": "1",
+            "model_micro_cny": "3826",
+            "jev_micro_usd": "50.568",
+            "server_ms": "976.558959",
+            "http_ms": "1129.025751",
+            "conversation_ms": "1196.63625",
+            "runner_ms": "1298.665"
+          }
+        }
+      },
+      "exclusion_reasons": [],
+      "delta_selective_minus_model": {
+        "model_attempts": "0",
+        "model_micro_cny": "0",
+        "jev_micro_usd": "50.568",
+        "server_ms": "305.395543",
+        "http_ms": "360.840751",
+        "conversation_ms": "378.516583",
+        "runner_ms": "363.258542"
+      },
+      "independent_review": "passed"
+    },
+    {
+      "batch_id": "batch-005",
+      "pair_id": "block-00-pair-04",
+      "block_id": "block-00",
+      "case_key": "recharge-001/supplement_then_confirm",
+      "arm_order": [
+        "model",
+        "jev_selective"
+      ],
+      "status": "completed_pending_review",
+      "arms": {
+        "model": {
+          "status": "needs_review",
+          "trace_id": "c18782205f226b9d47884e2589b6e366",
+          "metrics": {
+            "model_attempts": "2",
+            "model_micro_cny": "7534",
+            "jev_micro_usd": "0",
+            "server_ms": "1828.13729",
+            "http_ms": "2041.687958",
+            "conversation_ms": "2084.473458",
+            "runner_ms": "2201.29225"
+          }
+        },
+        "jev_selective": {
+          "status": "needs_review",
+          "trace_id": "d1fd93f1a9e01871e420c8a82d0da1f0",
+          "metrics": {
+            "model_attempts": "2",
+            "model_micro_cny": "7424",
+            "jev_micro_usd": "50.442",
+            "server_ms": "2060.480625",
+            "http_ms": "2245.770417",
+            "conversation_ms": "2297.37775",
+            "runner_ms": "2415.537667"
+          }
+        }
+      },
+      "exclusion_reasons": [],
+      "delta_selective_minus_model": {
+        "model_attempts": "0",
+        "model_micro_cny": "-110",
+        "jev_micro_usd": "50.442",
+        "server_ms": "232.343335",
+        "http_ms": "204.082459",
+        "conversation_ms": "212.904292",
+        "runner_ms": "214.245417"
+      },
+      "independent_review": "passed"
+    },
+    {
+      "batch_id": "batch-006",
+      "pair_id": "block-00-pair-05",
+      "block_id": "block-00",
+      "case_key": "refund-001/balance_cap",
+      "arm_order": [
+        "model",
+        "jev_selective"
+      ],
+      "status": "completed_pending_review",
+      "arms": {
+        "model": {
+          "status": "needs_review",
+          "trace_id": "21c7d439e22149425c321cef98325b8a",
+          "metrics": {
+            "model_attempts": "2",
+            "model_micro_cny": "7704",
+            "jev_micro_usd": "0",
+            "server_ms": "1574.003791",
+            "http_ms": "1724.8515",
+            "conversation_ms": "1772.8605",
+            "runner_ms": "1927.967833"
+          }
+        },
+        "jev_selective": {
+          "status": "needs_review",
+          "trace_id": "b64439a7a10f3343cc3bb15c4fe628d0",
+          "metrics": {
+            "model_attempts": "2",
+            "model_micro_cny": "7654",
+            "jev_micro_usd": "50.442",
+            "server_ms": "2228.979417",
+            "http_ms": "2393.967875",
+            "conversation_ms": "2447.035416",
+            "runner_ms": "2580.669792"
+          }
+        }
+      },
+      "exclusion_reasons": [],
+      "delta_selective_minus_model": {
+        "model_attempts": "0",
+        "model_micro_cny": "-50",
+        "jev_micro_usd": "50.442",
+        "server_ms": "654.975626",
+        "http_ms": "669.116375",
+        "conversation_ms": "674.174916",
+        "runner_ms": "652.701959"
+      },
+      "independent_review": "passed"
+    }
+  ],
+  "strata": [
+    {
+      "case_key": "balance-001/answer_complete",
+      "arm_order": [
+        "model",
+        "jev_selective"
+      ],
+      "eligible_pairs": 1,
+      "delta_descriptive": {
+        "model_attempts": {
+          "median": "-2",
+          "min": "-2",
+          "max": "-2"
+        },
+        "model_micro_cny": {
+          "median": "-7484",
+          "min": "-7484",
+          "max": "-7484"
+        },
+        "jev_micro_usd": {
+          "median": "50.442",
+          "min": "50.442",
+          "max": "50.442"
+        },
+        "server_ms": {
+          "median": "-848.431292",
+          "min": "-848.431292",
+          "max": "-848.431292"
+        },
+        "http_ms": {
+          "median": "-755.074917",
+          "min": "-755.074917",
+          "max": "-755.074917"
+        },
+        "conversation_ms": {
+          "median": "-706.083833",
+          "min": "-706.083833",
+          "max": "-706.083833"
+        },
+        "runner_ms": {
+          "median": "-796.941375",
+          "min": "-796.941375",
+          "max": "-796.941375"
+        }
+      }
+    },
+    {
+      "case_key": "balance-020/explicit_scope_followup",
+      "arm_order": [
+        "model",
+        "jev_selective"
+      ],
+      "eligible_pairs": 1,
+      "delta_descriptive": {
+        "model_attempts": {
+          "median": "-1",
+          "min": "-1",
+          "max": "-1"
+        },
+        "model_micro_cny": {
+          "median": "-4470",
+          "min": "-4470",
+          "max": "-4470"
+        },
+        "jev_micro_usd": {
+          "median": "50.61",
+          "min": "50.61",
+          "max": "50.61"
+        },
+        "server_ms": {
+          "median": "-77.961999",
+          "min": "-77.961999",
+          "max": "-77.961999"
+        },
+        "http_ms": {
+          "median": "-74.91",
+          "min": "-74.91",
+          "max": "-74.91"
+        },
+        "conversation_ms": {
+          "median": "-72.2865",
+          "min": "-72.2865",
+          "max": "-72.2865"
+        },
+        "runner_ms": {
+          "median": "-154.303958",
+          "min": "-154.303958",
+          "max": "-154.303958"
+        }
+      }
+    },
+    {
+      "case_key": "recharge-002/confirm",
+      "arm_order": [
+        "model",
+        "jev_selective"
+      ],
+      "eligible_pairs": 1,
+      "delta_descriptive": {
+        "model_attempts": {
+          "median": "0",
+          "min": "0",
+          "max": "0"
+        },
+        "model_micro_cny": {
+          "median": "0",
+          "min": "0",
+          "max": "0"
+        },
+        "jev_micro_usd": {
+          "median": "50.568",
+          "min": "50.568",
+          "max": "50.568"
+        },
+        "server_ms": {
+          "median": "15.659333",
+          "min": "15.659333",
+          "max": "15.659333"
+        },
+        "http_ms": {
+          "median": "20.018125",
+          "min": "20.018125",
+          "max": "20.018125"
+        },
+        "conversation_ms": {
+          "median": "16.755792",
+          "min": "16.755792",
+          "max": "16.755792"
+        },
+        "runner_ms": {
+          "median": "10.287333",
+          "min": "10.287333",
+          "max": "10.287333"
+        }
+      }
+    },
+    {
+      "case_key": "recharge-002/cancel",
+      "arm_order": [
+        "model",
+        "jev_selective"
+      ],
+      "eligible_pairs": 1,
+      "delta_descriptive": {
+        "model_attempts": {
+          "median": "0",
+          "min": "0",
+          "max": "0"
+        },
+        "model_micro_cny": {
+          "median": "0",
+          "min": "0",
+          "max": "0"
+        },
+        "jev_micro_usd": {
+          "median": "50.568",
+          "min": "50.568",
+          "max": "50.568"
+        },
+        "server_ms": {
+          "median": "305.395543",
+          "min": "305.395543",
+          "max": "305.395543"
+        },
+        "http_ms": {
+          "median": "360.840751",
+          "min": "360.840751",
+          "max": "360.840751"
+        },
+        "conversation_ms": {
+          "median": "378.516583",
+          "min": "378.516583",
+          "max": "378.516583"
+        },
+        "runner_ms": {
+          "median": "363.258542",
+          "min": "363.258542",
+          "max": "363.258542"
+        }
+      }
+    },
+    {
+      "case_key": "recharge-001/supplement_then_confirm",
+      "arm_order": [
+        "model",
+        "jev_selective"
+      ],
+      "eligible_pairs": 1,
+      "delta_descriptive": {
+        "model_attempts": {
+          "median": "0",
+          "min": "0",
+          "max": "0"
+        },
+        "model_micro_cny": {
+          "median": "-110",
+          "min": "-110",
+          "max": "-110"
+        },
+        "jev_micro_usd": {
+          "median": "50.442",
+          "min": "50.442",
+          "max": "50.442"
+        },
+        "server_ms": {
+          "median": "232.343335",
+          "min": "232.343335",
+          "max": "232.343335"
+        },
+        "http_ms": {
+          "median": "204.082459",
+          "min": "204.082459",
+          "max": "204.082459"
+        },
+        "conversation_ms": {
+          "median": "212.904292",
+          "min": "212.904292",
+          "max": "212.904292"
+        },
+        "runner_ms": {
+          "median": "214.245417",
+          "min": "214.245417",
+          "max": "214.245417"
+        }
+      }
+    },
+    {
+      "case_key": "refund-001/balance_cap",
+      "arm_order": [
+        "model",
+        "jev_selective"
+      ],
+      "eligible_pairs": 1,
+      "delta_descriptive": {
+        "model_attempts": {
+          "median": "0",
+          "min": "0",
+          "max": "0"
+        },
+        "model_micro_cny": {
+          "median": "-50",
+          "min": "-50",
+          "max": "-50"
+        },
+        "jev_micro_usd": {
+          "median": "50.442",
+          "min": "50.442",
+          "max": "50.442"
+        },
+        "server_ms": {
+          "median": "654.975626",
+          "min": "654.975626",
+          "max": "654.975626"
+        },
+        "http_ms": {
+          "median": "669.116375",
+          "min": "669.116375",
+          "max": "669.116375"
+        },
+        "conversation_ms": {
+          "median": "674.174916",
+          "min": "674.174916",
+          "max": "674.174916"
+        },
+        "runner_ms": {
+          "median": "652.701959",
+          "min": "652.701959",
+          "max": "652.701959"
+        }
+      }
+    }
+  ],
+  "clock_definitions": {
+    "server_ms": "Sum of turn.response.telemetry.total_latency_ms",
+    "http_ms": "Sum of turn.latency_ms",
+    "conversation_ms": "result.duration_ms",
+    "runner_ms": "finish.runner_elapsed_ms; excludes global database preparation/deletion, final export and manual scoring"
+  },
+  "population_effect_claims_allowed": false,
+  "limitations": [
+    "Descriptive fixed-schedule observations only; no population, statistical or causal benefit claim.",
+    "Prices are frozen configuration estimates in separate currencies, not invoices.",
+    "Synthetic evidence validates tooling only; historical-single-block is not a repeated sample.",
+    "Unknown and unrun metrics remain null; excluded pairs remain visible; no user E2E clock."
+  ],
+  "input_manifest_sha256": "140375ebd6e4cda83ad4475c751e2ee916665700b74fe0bc62cd8d93d1f4474e"
+}
