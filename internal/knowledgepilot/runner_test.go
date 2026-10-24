@@ -9,6 +9,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"path/filepath"
 	"strings"
 	"sync/atomic"
@@ -20,10 +21,10 @@ func runLocal(t *testing.T, ids []string, handler http.HandlerFunc) (Receipt, er
 	t.Helper()
 	return runLocalObserved(t, ids, handler, nil)
 }
-func runLocalObserved(t *testing.T, ids []string, handler http.HandlerFunc, observer *observability.Observer) (Receipt, error) {
+func localOptions(t *testing.T, ids []string, handler http.HandlerFunc) RunOptions {
 	t.Helper()
 	srv := httptest.NewServer(handler)
-	defer srv.Close()
+	t.Cleanup(srv.Close)
 	_, s := template(t)
 	in, e := LoadInputs("../..", s)
 	if e != nil {
@@ -37,11 +38,15 @@ func runLocalObserved(t *testing.T, ids []string, handler http.HandlerFunc, obse
 	if e != nil {
 		t.Fatal(e)
 	}
-	defer j.Close()
-	tr := NewTransport(http.DefaultTransport, c, s.Limits, j)
+	t.Cleanup(func() { j.Close() })
+	return RunOptions{AllowExecution: true, Root: "../..", Inputs: in, Claim: c, Transport: NewTransport(http.DefaultTransport, c, s.Limits, j), AdminDSN: "root:root@tcp(127.0.0.1:3307)/", Out: filepath.Join(t.TempDir(), "run"), CaseIDs: ids}
+}
+func runLocalObserved(t *testing.T, ids []string, handler http.HandlerFunc, observer *observability.Observer) (Receipt, error) {
+	o := localOptions(t, ids, handler)
+	o.Observer = observer
 	ctx, cancel := context.WithTimeout(context.Background(), 90*time.Second)
 	defer cancel()
-	return Run(ctx, RunOptions{Observer: observer, AllowExecution: true, Root: "../..", Inputs: in, Claim: c, Transport: tr, AdminDSN: "root:root@tcp(127.0.0.1:3307)/", Out: filepath.Join(t.TempDir(), "run"), CaseIDs: ids})
+	return Run(ctx, o)
 }
 func modelAnswer(w http.ResponseWriter, msg agent.Message) {
 	json.NewEncoder(w).Encode(map[string]any{"choices": []any{map[string]any{"message": msg}}, "usage": map[string]any{"prompt_tokens": 100, "completion_tokens": 10, "prompt_tokens_details": map[string]any{"cached_tokens": 0}}, "model": "local-synthetic"})
@@ -177,5 +182,66 @@ func TestRunnerFiveIterationBound(t *testing.T) {
 		if task.Telemetry.LLMCalls != 5 || len(task.Attempts) != 5 {
 			t.Fatal("attempt count differs")
 		}
+	}
+}
+
+func TestRunnerRejectsUnexpectedPending(t *testing.T) {
+	r, e := runLocal(t, []string{"S010"}, func(w http.ResponseWriter, r *http.Request) {
+		var tc agent.ToolCall
+		tc.ID = "forbidden-preview"
+		tc.Type = "function"
+		tc.Function.Name = "cancel_subscription"
+		tc.Function.Arguments = `{}`
+		modelAnswer(w, agent.Message{Role: "assistant", ToolCalls: []agent.ToolCall{tc}})
+	})
+	if e == nil || r.Status != "stopped" || len(r.Recording.Tasks) != 1 || !r.Recording.Tasks[0].PendingAfter || r.Recording.Tasks[0].StateOK {
+		t.Fatal("consultation pending contamination was accepted", e, r.Status)
+	}
+}
+func TestClaimCannotReuseAcrossRunsOrTransports(t *testing.T) {
+	var calls atomic.Int32
+	o := localOptions(t, []string{"K001"}, func(w http.ResponseWriter, r *http.Request) {
+		calls.Add(1)
+		modelAnswer(w, agent.Message{Role: "assistant", Content: "SYNTHETIC"})
+	})
+	if _, e := Run(context.Background(), o); e != nil {
+		t.Fatal(e)
+	}
+	n := calls.Load()
+	o.Out = filepath.Join(t.TempDir(), "second")
+	if _, e := Run(context.Background(), o); e == nil || calls.Load() != n {
+		t.Fatal("claim reused")
+	}
+	if _, e := os.Stat(o.Out); !os.IsNotExist(e) {
+		t.Fatal("reuse created output")
+	}
+	j, e := OpenJournal(filepath.Join(t.TempDir(), "new.jsonl"))
+	if e != nil {
+		t.Fatal(e)
+	}
+	defer j.Close()
+	o.Transport = NewTransport(http.DefaultTransport, o.Claim, o.Claim.scope.Limits, j)
+	o.Out = filepath.Join(t.TempDir(), "third")
+	if _, e := Run(context.Background(), o); e == nil || calls.Load() != n {
+		t.Fatal("new transport reset claim")
+	}
+}
+func TestReviewPackageFailurePersistsStopped(t *testing.T) {
+	var o RunOptions
+	o = localOptions(t, []string{"K001"}, func(w http.ResponseWriter, r *http.Request) {
+		os.WriteFile(filepath.Join(o.Out, "review-map.json"), []byte(`{}`), 0600)
+		modelAnswer(w, agent.Message{Role: "assistant", Content: "SYNTHETIC"})
+	})
+	r, e := Run(context.Background(), o)
+	if e == nil {
+		t.Fatal("collision not reported")
+	}
+	b, e := os.ReadFile(filepath.Join(o.Out, "receipt.json"))
+	if e != nil {
+		t.Fatal(e)
+	}
+	var saved Receipt
+	if json.Unmarshal(b, &saved) != nil || saved.Status != "stopped" || saved.Recording.Complete || saved.Failure == "" || r.Status != "stopped" {
+		t.Fatalf("success receipt persisted: saved=%s complete=%v failure=%q returned=%s", saved.Status, saved.Recording.Complete, saved.Failure, r.Status)
 	}
 }

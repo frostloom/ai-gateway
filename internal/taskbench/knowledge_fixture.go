@@ -56,11 +56,24 @@ func (a *KnowledgeFixtureAccess) Snapshot(ctx context.Context) (json.RawMessage,
 	if err != nil {
 		return nil, nil, false, err
 	}
-	p, err := a.oracle.Pending(ctx, a.oracle.f, a.Session)
+	raw, err := a.Redis.Get(ctx, "agent:session:"+a.Session).Bytes()
 	if err != nil {
 		return nil, nil, false, err
 	}
-	full, err := json.Marshal(state)
+	var session struct {
+		Pending json.RawMessage `json:"pending_action"`
+	}
+	if err = json.Unmarshal(raw, &session); err != nil {
+		return nil, nil, false, err
+	}
+	if len(session.Pending) == 0 {
+		session.Pending = json.RawMessage("null")
+	}
+	hasPending := string(session.Pending) != "null"
+	full, err := json.Marshal(struct {
+		State   ConversationState `json:"state"`
+		Pending json.RawMessage   `json:"pending_action"`
+	}{state, session.Pending})
 	if err != nil {
 		return nil, nil, false, err
 	}
@@ -75,7 +88,7 @@ func (a *KnowledgeFixtureAccess) Snapshot(ctx context.Context) (json.RawMessage,
 		state.Controls[k] = s
 	}
 	business, err := json.Marshal(state)
-	return full, business, p != nil, err
+	return full, business, hasPending, err
 }
 func (a *KnowledgeFixtureAccess) Close() {
 	if a != nil && a.server != nil {

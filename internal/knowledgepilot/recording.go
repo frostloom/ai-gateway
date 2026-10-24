@@ -96,6 +96,10 @@ func Comparison(r Recording, reviews []ScoredTask) (knowledgeeval.ComparisonInpu
 		scores[s.TaskID] = s
 	}
 	for _, t := range r.Tasks {
+		stateOK, polluted, e := StateGate(t.CaseID, t.Before, t.After, t.Tenant)
+		if e != nil || polluted || t.StateOK != (t.BusinessUnchanged && stateOK) {
+			return out, fmt.Errorf("recorded pending state gate differs")
+		}
 		sc, ok := scores[t.Identity]
 		b, obs := rb[t.Identity]
 		if !ok || !obs || sc.ReplySHA != SHA([]byte(t.Reply)) || b.TraceID != t.Telemetry.LangfuseTraceID || !t.BusinessUnchanged || t.HTTPStatus != 200 || t.Runtime.RoutingMode != "model" || t.Telemetry.JevCalls != 0 {
@@ -194,11 +198,15 @@ func validateAttemptJournal(r Recording) error {
 		return fmt.Errorf("interrupted reservation")
 	}
 	seen := map[string]bool{}
+	tenants := map[uint64]bool{}
+	sessions := map[string]bool{}
 	for _, t := range r.Tasks {
-		if seen[t.Identity] || !json.Valid(t.Before) || !json.Valid(t.After) || t.Tenant == 0 || t.Session == "" {
+		if seen[t.Identity] || tenants[t.Tenant] || sessions[t.Session] || !json.Valid(t.Before) || !json.Valid(t.After) || t.Tenant == 0 || t.Session == "" {
 			return fmt.Errorf("invalid task identity/state")
 		}
 		seen[t.Identity] = true
+		tenants[t.Tenant] = true
+		sessions[t.Session] = true
 		attempts := done[t.Identity]
 		if len(attempts) != len(t.Attempts) || len(attempts) != t.Telemetry.LLMCalls || len(attempts) > 5 {
 			return fmt.Errorf("attempt journal coverage differs")

@@ -51,6 +51,9 @@ func Run(ctx context.Context, o RunOptions) (receipt Receipt, runErr error) {
 	if !o.AllowExecution || o.Claim == nil || !o.Claim.local || o.Transport == nil || o.Transport.claim != o.Claim || o.Out == "" {
 		return receipt, fmt.Errorf("explicit local execution capability required")
 	}
+	if err := o.Claim.consume(); err != nil {
+		return receipt, err
+	}
 	in, err := LoadInputs(o.Root, o.Claim.scope)
 	if err != nil {
 		return receipt, err
@@ -70,17 +73,26 @@ func Run(ctx context.Context, o RunOptions) (receipt Receipt, runErr error) {
 	}
 	receipt.Recording = Recording{EvidenceKind: "local_stub", Scope: in.Scope, Suite: in.Cases}
 	defer func() {
-		receipt.WallMS = float64(time.Since(start)) / float64(time.Millisecond)
 		receipt.Recording.Events = o.Transport.journal.Events()
+		runErr = errors.Join(runErr, WriteReviewPackage(o.Out, receipt.Recording))
 		if runErr != nil {
+			receipt.Status = "stopped"
+			receipt.Recording.Complete = false
 			receipt.Failure = "execution_stopped"
 		}
+		receipt.WallMS = float64(time.Since(start)) / float64(time.Millisecond)
 		b, e := json.MarshalIndent(receipt, "", "  ")
 		if e == nil {
 			e = writeExclusive(filepath.Join(o.Out, "receipt.json"), append(b, '\n'))
 		}
-		runErr = errors.Join(runErr, e, WriteReviewPackage(o.Out, receipt.Recording))
+		if e != nil {
+			receipt.Status = "stopped"
+			receipt.Recording.Complete = false
+			receipt.Failure = "receipt_write_failed"
+		}
+		runErr = errors.Join(runErr, e)
 	}()
+
 	env, err := taskbench.OpenPairedFixtureEnvironment(ctx, taskbench.PairedFixtureOptions{AllowFixtureCreation: true, AdminDSN: o.AdminDSN, ProfilesDir: filepath.Join(o.Root, "eval/runtime-profiles/2026-10-13-six-profiles-v1")})
 	if err != nil {
 		return receipt, err
@@ -190,13 +202,8 @@ func runTask(ctx context.Context, o RunOptions, in Inputs, env *taskbench.Paired
 	}
 	task.After, task.PendingAfter = after, afterPending
 	task.BusinessUnchanged = UnchangedBusiness(business, current)
-	task.StateOK = task.BusinessUnchanged
-	if s.CaseID == "S011" {
-		task.StateOK = task.StateOK && task.PendingBefore && !task.PendingAfter
-	}
-	if s.CaseID == "S012" {
-		task.StateOK = task.StateOK && !task.PendingBefore && !task.PendingAfter
-	}
+	stateOK, polluted, stateErr := StateGate(s.CaseID, before, after, task.Tenant)
+	task.StateOK = task.BusinessUnchanged && stateOK
 	var traces []struct {
 		Tool   string `json:"tool"`
 		Result string `json:"result"`
@@ -226,6 +233,9 @@ func runTask(ctx context.Context, o RunOptions, in Inputs, env *taskbench.Paired
 		} else if ev.Kind == "failed" {
 			task.Attempts = append(task.Attempts, knowledgeeval.Attempt{Outcome: "failed", Currency: "CNY"})
 		}
+	}
+	if stateErr != nil || polluted {
+		return task, fmt.Errorf("pending state contamination")
 	}
 	if !task.BusinessUnchanged {
 		return task, fmt.Errorf("business state changed")

@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"sync"
 )
 
 type ClaimDependency struct {
@@ -17,6 +18,8 @@ type ClaimDependency struct {
 // Claim capabilities are private. This build can create loopback-only claims;
 // no caller can manufacture a paid execution capability via a JSON boolean.
 type Claim struct {
+	mu       sync.Mutex
+	consumed bool
 	endpoint string
 	scope    Scope
 	local    bool
@@ -57,4 +60,14 @@ func writeExclusive(path string, b []byte) error {
 	}
 	defer d.Close()
 	return d.Sync()
+}
+
+func (c *Claim) consume() error {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if c.consumed {
+		return fmt.Errorf("local claim already consumed; no resume")
+	}
+	c.consumed = true
+	return nil
 }

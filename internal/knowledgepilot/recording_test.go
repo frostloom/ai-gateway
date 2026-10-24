@@ -27,7 +27,11 @@ func completeLocalRecording(t *testing.T) (Recording, []ScoredTask) {
 			m = s.B
 		}
 		trace := fmt.Sprintf("%032x", i+1)
-		task := RecordedTask{CaseID: x.CaseID, Arm: x.Arm, Identity: x.Identity, Tenant: uint64(i + 1), Session: x.Identity, Reply: "SYNTHETIC", HTTPStatus: 200, Trace: json.RawMessage(`[]`), Telemetry: agent.TurnTelemetry{LangfuseTraceID: trace, LLMCalls: 1}, Runtime: m, DurationMS: 10, Attempts: []knowledgeeval.Attempt{a}, StateOK: true, BusinessUnchanged: true, Before: json.RawMessage(`{"balance":25}`), After: json.RawMessage(`{"balance":25}`)}
+		task := RecordedTask{CaseID: x.CaseID, Arm: x.Arm, Identity: x.Identity, Tenant: uint64(i + 1), Session: x.Identity, Reply: "SYNTHETIC", HTTPStatus: 200, Trace: json.RawMessage(`[]`), Telemetry: agent.TurnTelemetry{LangfuseTraceID: trace, LLMCalls: 1}, Runtime: m, DurationMS: 10, Attempts: []knowledgeeval.Attempt{a}, StateOK: true, BusinessUnchanged: true, Before: json.RawMessage(`{"pending_action":null,"balance":25}`), After: json.RawMessage(`{"pending_action":null,"balance":25}`)}
+		if x.CaseID == "S011" {
+			task.PendingBefore = true
+			task.Before = json.RawMessage(fmt.Sprintf(`{"pending_action":{"tool":"recharge","args":{"amount_money":100},"tenant_id":%d,"idem_key":"initial","preview":"preview"},"balance":25}`, task.Tenant))
+		}
 		r.Tasks = append(r.Tasks, task)
 		r.Readback = append(r.Readback, Readback{TaskID: x.Identity, TraceID: trace, Verified: true, Observations: 1, ReceiptSHA: SHA([]byte("synthetic-receipt-" + x.Identity))})
 		r.Events = append(r.Events, Event{Kind: "reserved", TaskID: x.Identity, Sequence: i + 1, RequestSHA: SHA([]byte(requestBody)), Request: json.RawMessage(requestBody)}, Event{Kind: "completed", Status: 200, TaskID: x.Identity, Sequence: i + 1, RequestSHA: SHA([]byte(requestBody)), Response: json.RawMessage(goodResponse), Attempt: &a})
@@ -40,9 +44,13 @@ func TestRecordingRejectsPartialMissingReviewOrEvidence(t *testing.T) {
 	if _, e := Comparison(r, rv); e != nil {
 		t.Fatal(e)
 	}
-	for _, kind := range []string{"partial", "review", "journal", "reply", "state"} {
+	for _, kind := range []string{"partial", "review", "journal", "reply", "state", "tenant", "pending"} {
 		r, rv := completeLocalRecording(t)
 		switch kind {
+		case "tenant":
+			r.Tasks[1].Tenant = r.Tasks[0].Tenant
+		case "pending":
+			r.Tasks[0].After = json.RawMessage(fmt.Sprintf(`{"pending_action":{"tool":"recharge","args":{"amount_money":100},"tenant_id":%d,"idem_key":"unexpected","preview":"preview"}}`, r.Tasks[0].Tenant))
 		case "partial":
 			r.Complete = false
 		case "review":
