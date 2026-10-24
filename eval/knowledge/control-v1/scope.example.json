@@ -1,0 +1,64 @@
+{
+  "schema": "knowledge-control-scope.v1",
+  "scope_id": "knowledge-control-20261024",
+  "revision": "caf19bb2cddb72cd8e96ab0140f8071e4eebcaf3",
+  "suite_sha256": "f84cd60dec07cdb98e7514339c4fc56622c52cb3b456ba734e664c7c5eb11994",
+  "suite_file_sha256": "784ba059d389382bd3b4f1671fef3b0f8064b24fd88b943a39e85353a85efd95",
+  "profile_sha256": "7f8d4f449cbd3f4605bac3205b4f561c9d54531bcbc904b011f687915d779666",
+  "order_sha256": "035d7a28eb900fa8d8cc6f9bf7a65dee4f4c353da0f9643e33da90abf0e1fcd3",
+  "corpus_version": "fd64639a5c1e5af7b05fc4747089b675e92b9a3ea1ebb43e2d35b88737763aa4",
+  "endpoint": "https://api.deepseek.com/v1",
+  "model": "deepseek-flash",
+  "protocol": "openai",
+  "a": {
+    "model": "deepseek-flash",
+    "protocol": "openai",
+    "endpoint_sha256": "12b8deaccc34b32757dbb1497e029da0c2e7b26ffa86b9c926c08cb4692f4508",
+    "prompt_sha256": "731344ccef1bfc40456b6797e9c7cb5c5c3d628799d3e5ee8ab05f3142c6f7fa",
+    "tools_sha256": "3962937d7fd08af4794758a56070b7bbadfb5c3e188cf1fa539355780b9e0e17",
+    "contract_sha256": "a95cacd041830012619a0f4d7fd8208c184aa9e8d45b7ee05afaa239a30e1e8f",
+    "routing_mode": "model",
+    "routing_revision": "selective-context-prefilter-v1",
+    "thresholds": {
+      "intent_min": 0.9,
+      "legit_min": 0.85,
+      "risk_confidence_min": 0.8,
+      "risk_max_exclusive": 0.5,
+      "shape_min": 0.9
+    },
+    "max_output_tokens": 512,
+    "thinking_mode": "disabled",
+    "reply_repair_limit": 1
+  },
+  "b": {
+    "knowledge_enabled": true,
+    "corpus_version": "fd64639a5c1e5af7b05fc4747089b675e92b9a3ea1ebb43e2d35b88737763aa4",
+    "model": "deepseek-flash",
+    "protocol": "openai",
+    "endpoint_sha256": "12b8deaccc34b32757dbb1497e029da0c2e7b26ffa86b9c926c08cb4692f4508",
+    "prompt_sha256": "f740a7874ec5c8aa867e0c70a57cfc5c8666b37a0b4b0bfeb52687625ee5b3d7",
+    "tools_sha256": "6917f2e239ac349b6378f098fceb5d19209fb91a8167b0f64b21b797eaeade63",
+    "contract_sha256": "342cf28b9824cc84c80595709a94a5a5f63d51970345d71f5b3558c61538e52a",
+    "routing_mode": "model",
+    "routing_revision": "selective-context-prefilter-v1",
+    "thresholds": {
+      "intent_min": 0.9,
+      "legit_min": 0.85,
+      "risk_confidence_min": 0.8,
+      "risk_max_exclusive": 0.5,
+      "shape_min": 0.9
+    },
+    "max_output_tokens": 512,
+    "thinking_mode": "disabled",
+    "reply_repair_limit": 1
+  },
+  "limits": {
+    "attempts_per_task": 5,
+    "attempts_total": 720,
+    "max_output_tokens": 512,
+    "max_request_bytes": 65536
+  },
+  "allow_paid": false,
+  "human_authorized": false,
+  "reserved_cny_micro": null
+}
