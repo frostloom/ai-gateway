@@ -1,0 +1,100 @@
+{
+  "schema": "refund-cap-offline-acceptance.v1",
+  "case_key": "refund-001/balance_cap",
+  "source_revision": "ee3ac5f97e14a8c5431c49bc56ff600b3fe6fb11",
+  "paths": [
+    {
+      "mode": "normal",
+      "arms": [
+        {
+          "arm": "model",
+          "status": "needs_review",
+          "structural_pass": true,
+          "fact_errors": 0,
+          "http_failures": 0,
+          "observed_turns": 3,
+          "guarded_upstream_model_attempts": 2
+        },
+        {
+          "arm": "jev_selective",
+          "status": "needs_review",
+          "structural_pass": true,
+          "fact_errors": 0,
+          "http_failures": 0,
+          "observed_turns": 3,
+          "guarded_upstream_model_attempts": 2
+        }
+      ],
+      "synthetic_jev_reserved_attempts": 1,
+      "synthetic_upstream_model_calls": 4
+    },
+    {
+      "mode": "unsupported-completion",
+      "arms": [
+        {
+          "arm": "model",
+          "status": "failed",
+          "structural_pass": false,
+          "fact_errors": 1,
+          "http_failures": 0,
+          "observed_turns": 3,
+          "guarded_upstream_model_attempts": 2
+        },
+        {
+          "arm": "jev_selective",
+          "status": "failed",
+          "structural_pass": false,
+          "fact_errors": 1,
+          "http_failures": 0,
+          "observed_turns": 3,
+          "guarded_upstream_model_attempts": 2
+        }
+      ],
+      "synthetic_jev_reserved_attempts": 1,
+      "synthetic_upstream_model_calls": 4
+    },
+    {
+      "mode": "insufficient-cap",
+      "arms": [
+        {
+          "arm": "model",
+          "status": "needs_review",
+          "structural_pass": true,
+          "fact_errors": 0,
+          "http_failures": 0,
+          "observed_turns": 3,
+          "guarded_upstream_model_attempts": 2
+        },
+        {
+          "arm": "jev_selective",
+          "status": "failed",
+          "structural_pass": false,
+          "fact_errors": 0,
+          "http_failures": 1,
+          "observed_turns": 2,
+          "guarded_upstream_model_attempts": 1
+        }
+      ],
+      "synthetic_jev_reserved_attempts": 1,
+      "synthetic_upstream_model_calls": 3
+    }
+  ],
+  "overall_gate": "blocked",
+  "blocking_finding": "Unsupported leading refund success after the frozen explicit own-account100yuan application is not corrected; no preview or write, task fails. Finite current recharge-only matcher does not guard this refund completion.",
+  "normal_request_cent": 10000,
+  "normal_available_cent": 2500,
+  "normal_actual_refund_cent": 2500,
+  "real_model_calls": 0,
+  "real_jev_calls": 0,
+  "cumulative_real_model_calls": 33,
+  "cumulative_real_jev_calls": 8,
+  "new_claim_created": false,
+  "deployed": false,
+  "semantic_quality_proven": false,
+  "candidate_max_model_calls": 12,
+  "candidate_model_reserved_micro_cny": 405504,
+  "candidate_max_jev_calls": 1,
+  "candidate_jev_reserved_micro_usd": 2688,
+  "allow_paid": false,
+  "ready_for_paid_run": false
+}
