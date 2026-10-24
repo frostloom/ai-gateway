@@ -1,0 +1,20 @@
+{
+  "schema": "recharge-supplement-offline-validation.v1",
+  "full_go_passed_packages": 18,
+  "full_go_failures": 0,
+  "after_full_run_diagnostic_assertions_strengthened": true,
+  "final_focused_regression_passed": true,
+  "independent_review": "One P2 diagnostic false-positive gap fixed: require actual injected completion,3HTTP200 rounds, empty pending/trace, confirm no-op, per-round own/control/allowance unchanged; reverified.",
+  "acceptance_gate": "blocked",
+  "runtime_logic_changed": false,
+  "real_model_calls": 0,
+  "real_jev_calls": 0,
+  "cumulative_real_model_calls": 29,
+  "cumulative_real_jev_calls": 7,
+  "old_local_files_checked": 2899,
+  "all_old_files_unchanged": true,
+  "deployment": false,
+  "new_claim_created": false,
+  "paid_authorized": false,
+  "isolated_schemas_remaining": 0
+}

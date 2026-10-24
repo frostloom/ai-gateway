@@ -1,0 +1,107 @@
+{
+  "schema": "recharge-supplement-offline-acceptance.v1",
+  "case_key": "recharge-001/supplement_then_confirm",
+  "acceptance_gate": "blocked",
+  "blocking_findings": [
+    "Finite recharge completion repair does not match frozen explicit supplemental application prefix; unsupported leading success is not corrected before preview."
+  ],
+  "paths": [
+    {
+      "path": "normal",
+      "arms": [
+        {
+          "arm": "model",
+          "status": "needs_review",
+          "structural_pass": true,
+          "model_calls": 2,
+          "jev_calls": 0,
+          "errors": null
+        },
+        {
+          "arm": "jev_selective",
+          "status": "needs_review",
+          "structural_pass": true,
+          "model_calls": 2,
+          "jev_calls": 1,
+          "errors": null
+        }
+      ]
+    },
+    {
+      "path": "repair",
+      "arms": [
+        {
+          "arm": "model",
+          "status": "failed",
+          "structural_pass": false,
+          "model_calls": 2,
+          "jev_calls": 0,
+          "errors": [
+            "preview action lacks a single successful preview trace",
+            "required preview missing",
+            "confirmation lacks a single bound execution",
+            "terminal assertion failed: new_paid_order_count",
+            "terminal assertion failed: unrelated_orders_and_subscriptions_unchanged",
+            "terminal assertion failed: authorized_write_count",
+            "terminal assertion failed: balance_delta_cent",
+            "terminal assertion failed: business_state_unchanged",
+            "turn 2 false fact: write_completion (充值成功： expected successful confirmed matching write in this turn)"
+          ]
+        },
+        {
+          "arm": "jev_selective",
+          "status": "failed",
+          "structural_pass": false,
+          "model_calls": 2,
+          "jev_calls": 1,
+          "errors": [
+            "preview action lacks a single successful preview trace",
+            "required preview missing",
+            "confirmation lacks a single bound execution",
+            "terminal assertion failed: balance_delta_cent",
+            "terminal assertion failed: business_state_unchanged",
+            "terminal assertion failed: new_paid_order_count",
+            "terminal assertion failed: unrelated_orders_and_subscriptions_unchanged",
+            "terminal assertion failed: authorized_write_count",
+            "turn 2 false fact: write_completion (充值成功： expected successful confirmed matching write in this turn)"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "insufficient-cap",
+      "arms": [
+        {
+          "arm": "model",
+          "status": "needs_review",
+          "structural_pass": true,
+          "model_calls": 2,
+          "jev_calls": 0,
+          "errors": null
+        },
+        {
+          "arm": "jev_selective",
+          "status": "failed",
+          "structural_pass": false,
+          "model_calls": 2,
+          "jev_calls": 1,
+          "errors": [
+            "turn 2 transport failure: HTTP 500 HTTP 500: LLM 请求失败: Post \"http://127.0.0.1/local-supplement/chat/completions\": global attempt/reserved currency budget exhausted",
+            "conversation did not complete all defined turns",
+            "terminal assertion failed: new_paid_order_count",
+            "terminal assertion failed: unrelated_orders_and_subscriptions_unchanged",
+            "terminal assertion failed: authorized_write_count",
+            "terminal assertion failed: balance_delta_cent",
+            "terminal assertion failed: business_state_unchanged"
+          ]
+        }
+      ]
+    }
+  ],
+  "real_model_calls": 0,
+  "real_jev_calls": 0,
+  "human_authorized": false,
+  "ready_for_paid_run": false,
+  "no_runtime_change": true,
+  "deployment": false
+}
