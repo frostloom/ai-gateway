@@ -3,6 +3,7 @@ package observability
 import (
 	"context"
 	"strconv"
+	"strings"
 	"sync/atomic"
 
 	"go.opentelemetry.io/otel/attribute"
@@ -11,7 +12,11 @@ import (
 )
 
 // Evaluation contains only public frozen case identifiers, never credentials.
-type Evaluation struct{ RunID, CaseKey, Arm, EvidenceKind string }
+type Evaluation struct {
+	RunID, CaseKey, Arm, EvidenceKind string
+	PairID, BlockID                   string
+	ArmOrder                          []string
+}
 type EvaluationResult struct {
 	Status                                string
 	StructuralPass                        bool
@@ -34,6 +39,9 @@ func (o *Observer) StartEvaluation(ctx context.Context, e Evaluation) (context.C
 		attribute.String("langfuse.environment", o.cfg.Environment), attribute.String("langfuse.release", o.cfg.Release),
 		attribute.StringSlice("langfuse.trace.tags", []string{o.cfg.Environment, e.EvidenceKind, e.Arm}),
 		meta("run_id", e.RunID), meta("case_key", e.CaseKey), meta("arm", e.Arm), meta("evidence_kind", e.EvidenceKind),
+	}
+	if e.PairID != "" {
+		common = append(common, meta("pair_id", e.PairID), meta("block_id", e.BlockID), meta("arm_order", strings.Join(e.ArmOrder, ",")))
 	}
 	ctx, span := o.tracer.Start(ctx, "evaluation.task", trace.WithNewRoot(), trace.WithAttributes(append(common, attribute.String("langfuse.observation.type", "span"))...))
 	run := &EvaluationRun{root: span, common: common}

@@ -142,7 +142,7 @@ func CheckAuthorizedRetest(authRaw, planRaw, billingRaw, evidenceRaw []byte) (Au
 // The CLI must durably claim the fixed identity before constructing fixtures.
 // Like the original runner, dependencies are trusted caller-owned resources.
 func RunAuthorizedRetest(ctx context.Context, dir string, o AuthorizedFirstBatchOptions) (AuthorizedFirstBatchReceipt, error) {
-	if !o.Pilot.IsRetest() || o.Pilot.IsCohort() {
+	if !o.Pilot.IsRetest() || (o.Pilot.IsCohort() || o.Pilot.IsRepeated()) {
 		return AuthorizedFirstBatchReceipt{}, fmt.Errorf("separate evaluation permission required")
 	}
 	return runAuthorizedBatch(ctx, dir, o, nil)

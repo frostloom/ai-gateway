@@ -33,11 +33,11 @@ Interface: add `ArmOrder []string` with json `arm_order,omitempty` to PairRunCon
 Files: new internal/taskbench/authorized_repeated.go, authorized_repeated_run.go and tests; new cmd/paired-live/repeated.go/tests; explicit CLI route in main.go. Reuse pure scope checker/owned fixture/guard machinery without registering this identity as a historical scope.
 Interfaces: CheckAuthorizedRepeated(authRaw,planRaw,billingRaw,evidenceRaw []byte)(AuthorizedPilot,error), RunAuthorizedRepeated(ctx,dir,AuthorizedFirstBatchOptions)(AuthorizedFirstBatchReceipt,error); private discriminator checked by every entry path. Derive fixed schedule as defined in spec; proposal pair identity is distinct from original case_key. Expose discriminator only after validation.
 
-- [ ] Freeze separate scope identity and auth/billing/receipt schemas, fixed schedule/block/pair identities,248/24 caps and six prior claim SHAs. No public true authorization. Do not reuse the six-batch cohort validator or broaden its constants.
-- [ ] RED tests for all cross-entry attempts, coherent scope expansion, schedule/order/duplicate pair mutation, six missing/tampered predecessors, replay under different output/revision, full248/24 permanent allocation versus started prefix.
-- [ ] Implement fixed checker/claim and runner, preserving old schemas/config contracts. Explicit release/observer metadata includes block/pair identity; original single-pair scoring remains valid because journals and trace IDs are unique.
-- [ ] GREEN local captures normal/repair all104turns, both orders twice per case, independent fixtures; reverse-first provider/JEV/structural/cleanup failures, missingusage, observer loss, receipt failure and deadline stop preserve prefix and suffix. Original definitions/agent sources unchanged.
-- [ ] Standard SDKROOT MacOSX26.5.sdk `go test ./... -count=1 -json`, independent review and exact commit/push. Preserve any failures; full final source pass required before readiness.
+- [x] Freeze separate scope identity and auth/billing/receipt schemas, fixed schedule/block/pair identities,248/24 caps and six prior claim SHAs. No public true authorization. Do not reuse the six-batch cohort validator or broaden its constants.
+- [x] RED tests for all cross-entry attempts, coherent scope expansion, schedule/order/duplicate pair mutation, six missing/tampered predecessors, replay under different output/revision, full248/24 permanent allocation versus started prefix.
+- [x] Implement fixed checker/claim and runner, preserving old schemas/config contracts. Explicit release/observer metadata includes block/pair identity; original single-pair scoring remains valid because journals and trace IDs are unique.
+- [x] GREEN local captures normal/repair all104turns, both orders twice per case, independent fixtures; reverse-first provider/JEV/structural/cleanup failures, missingusage, observer loss, receipt failure and deadline stop preserve prefix and suffix. Original definitions/agent sources unchanged.
+- [x] Standard SDKROOT MacOSX26.5.sdk `go test ./... -count=1 -json`, independent review and exact commit/push. Preserve any failures; full final source pass required before readiness.
 
 ### Task 3: Offline repeated-result aggregation and readiness
 

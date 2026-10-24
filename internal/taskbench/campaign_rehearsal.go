@@ -30,6 +30,9 @@ type LocalCampaignObservations struct {
 }
 
 type LocalCampaignBatchReceipt struct {
+	PairID      string           `json:"pair_id,omitempty"`
+	BlockID     string           `json:"block_id,omitempty"`
+	ArmOrder    []string         `json:"arm_order,omitempty"`
 	ID          string           `json:"id"`
 	Key         string           `json:"key"`
 	Status      string           `json:"status"`

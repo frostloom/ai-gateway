@@ -22,6 +22,10 @@ func RunAuthorizedCohort(ctx context.Context, dir string, o AuthorizedFirstBatch
 	if !o.Pilot.Ready() || !o.Pilot.IsCohort() || o.Pilot.CampaignID() != V5SixCohortID || o.Revision != o.Pilot.ExecutionRevision() {
 		return r, fmt.Errorf("ready fixed cohort and exact revision required")
 	}
+	return runAuthorizedFixedCohort(ctx, dir, o)
+}
+
+func runAuthorizedFixedCohort(ctx context.Context, dir string, o AuthorizedFirstBatchOptions) (r AuthorizedFirstBatchReceipt, runErr error) {
 	if o.Environment == nil || o.Environment.closed || o.Observer == nil || o.Upstream == nil || o.JEVFactory == nil || !regexp.MustCompile(`^[a-f0-9]{40}$`).MatchString(o.Revision) || dir == "" {
 		return r, fmt.Errorf("explicit owned cohort dependencies required")
 	}
@@ -48,7 +52,7 @@ func RunAuthorizedCohort(ctx context.Context, dir string, o AuthorizedFirstBatch
 	cost := int64(0)
 	r = AuthorizedFirstBatchReceipt{Schema: scope.ReceiptSchema, Status: "stopped", AuthorizationSHA: o.Pilot.authorizationSHA, PlanSHA: o.Pilot.planSHA, BillingSHA: o.Pilot.billingSHA, EvidenceSHA: o.Pilot.evidenceSHA, Revision: o.Revision, CampaignID: scope.ID, CustomerRevision: scope.CustomerRevision, RuntimeContractSHA: scope.RuntimeContractSHA, BudgetCeilingSHA: scope.BudgetCeilingSHA, OfflineManifestSHA: scope.OfflineManifestSHA, OfflineAcceptanceSHA: scope.OfflineAcceptanceSHA, DiagnosticSourceRevision: scope.DiagnosticSourceRevision, DiagnosticManifestSHA: scope.DiagnosticManifestSHA, JEVFailurePolicy: o.Pilot.JEVFailurePolicy(), VendorFailureChargesVerified: o.Pilot.JEVFailureChargesVerified(), ScopeReservedModelCalls: limits.MaxModelCalls, ScopeReservedJEVCalls: limits.MaxJEVCalls, ScopeReservedMicroCNY: limits.MaxModelMicroCNY, ScopeReservedMicroUSD: limits.MaxJEVMicroUSD, ModelState: PairBudgetState{CostMicroCNY: &cost}}
 	for _, b := range proposal.Batches {
-		r.Batches = append(r.Batches, LocalCampaignBatchReceipt{ID: b.ID, Key: b.Key, Status: "not_started"})
+		r.Batches = append(r.Batches, LocalCampaignBatchReceipt{ID: b.ID, Key: b.Key, Status: "not_started", PairID: b.Configuration.PairID, BlockID: b.Configuration.BlockID, ArmOrder: b.Configuration.ArmOrder})
 	}
 	index := 0
 	stage := "campaign"
@@ -123,7 +127,7 @@ func runAuthorizedCohortBatch(ctx context.Context, lease *CampaignBatchLease, b 
 		return state, nil, 0, errors.Join(err, lease.Finish(true))
 	}
 	defer func() { runErr = errors.Join(runErr, budget.Close()) }()
-	runErr = RunCampaignBatch(ctx, lease, AgentPairOptions{AllowExecution: true, RatesVerified: true, StopOnJEVFailure: true, StopOnStructuralFailure: true, AllowJEVCalls: true, MaxJEVCalls: b.MaxJEVCalls, DefinitionsDir: o.DefinitionsDir, Config: cfg, Environment: o.Environment, Budget: budget, Model: o.Model, Observer: o.Observer, JEVFactory: func() jev.Evaluator { return &authorizedBillingJEV{inner: o.JEVFactory()} }})
+	runErr = RunCampaignBatch(ctx, lease, AgentPairOptions{AllowExecution: true, RatesVerified: true, StopOnJEVFailure: true, StopOnStructuralFailure: true, StopOnObserverFailure: o.Pilot.IsRepeated(), StopOnFactFailure: o.Pilot.IsRepeated(), AllowJEVCalls: true, MaxJEVCalls: b.MaxJEVCalls, DefinitionsDir: o.DefinitionsDir, Config: cfg, Environment: o.Environment, Budget: budget, Model: o.Model, Observer: o.Observer, JEVFactory: func() jev.Evaluator { return &authorizedBillingJEV{inner: o.JEVFactory()} }})
 	state = budget.Snapshot()
 	path := filepath.Join(lease.Dir, "run.jsonl")
 	value, reportErr := ReportPreparedPair(path)

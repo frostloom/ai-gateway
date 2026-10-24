@@ -48,6 +48,10 @@ func (p CampaignPreparationPlan) validateTarget(model PairModelSettings, jevMode
 		if !ok {
 			scope, ok = checkedRefundCapScope("refund-cap-authorization.v1", p.CampaignID)
 		}
+		if !ok && p.CampaignID == V5RepeatedID {
+			scope = v5RepeatedScope()
+			ok = true
+		}
 		if !ok && p.CampaignID == V5SixCohortID {
 			scope = v5CohortScope()
 			ok = true
@@ -71,6 +75,9 @@ func (p CampaignPreparationPlan) validateTarget(model PairModelSettings, jevMode
 }
 
 type CampaignPreparationBatch struct {
+	PairID      string           `json:"pair_id,omitempty"`
+	BlockID     string           `json:"block_id,omitempty"`
+	ArmOrder    []string         `json:"arm_order,omitempty"`
 	Key         string           `json:"key"`
 	ModelLimits PairBudgetLimits `json:"model_limits"`
 	MaxJEVCalls int              `json:"max_jev_calls"`
@@ -113,6 +120,18 @@ type CampaignProposal struct {
 // and disabled-provider configuration preparation. It creates no execution
 // lease, journal, database connection or network request.
 func PrepareCampaignProposal(source ConversationSuite, profiles PairedProfiles, model PairModelSettings, revision, jevModel string, plan CampaignPreparationPlan) (CampaignProposal, error) {
+	repeated := plan.CampaignID == V5RepeatedID
+	if repeated {
+		if err := validateRepeatedPlan(plan); err != nil {
+			return CampaignProposal{}, err
+		}
+	} else {
+		for _, b := range plan.Batches {
+			if b.PairID != "" || b.BlockID != "" || b.ArmOrder != nil {
+				return CampaignProposal{}, fmt.Errorf("repeated metadata forbidden in historical proposal")
+			}
+		}
+	}
 	if len(plan.Batches) == 0 {
 		return CampaignProposal{}, fmt.Errorf("explicit campaign preparation schema/batches required")
 	}
@@ -142,15 +161,24 @@ func PrepareCampaignProposal(source ConversationSuite, profiles PairedProfiles, 
 	check := CampaignBudget{limits: plan.Limits, reserved: map[string]campaignEvent{}}
 	for i, b := range plan.Batches {
 		c, ok := byKey[b.Key]
-		if !ok || seen[b.Key] {
+		identity := b.Key
+		if repeated {
+			identity = b.PairID
+		}
+		if !ok || seen[identity] {
 			return CampaignProposal{}, fmt.Errorf("campaign case missing or repeated: %s", b.Key)
 		}
-		seen[b.Key] = true
+		seen[identity] = true
 		suite := small.Suite
 		suite.Cases = []ConversationCase{c}
 		cfg, err := PrepareAgentPairConfig(suite, profiles, model, "recorded_run", revision, jevModel)
 		if err != nil {
 			return CampaignProposal{}, err
+		}
+		if repeated {
+			cfg.PairID = b.PairID
+			cfg.BlockID = b.BlockID
+			cfg.ArmOrder = append([]string{}, b.ArmOrder...)
 		}
 		estimate, err := EstimateDeclaredPairBudget(b.ModelLimits)
 		if err != nil {

@@ -15,6 +15,8 @@ import (
 )
 
 type PairRunConfig struct {
+	PairID                 string                       `json:"pair_id,omitempty"`
+	BlockID                string                       `json:"block_id,omitempty"`
 	Schema                 string                       `json:"schema"`
 	Suite                  ConversationSuite            `json:"suite"`
 	Model                  ConversationComparisonConfig `json:"model"`
@@ -50,6 +52,11 @@ func PairRunContract(cfg PairRunConfig) string {
 	return conversationHash(raw)
 }
 func validatePairRun(cfg PairRunConfig) error {
+	if cfg.PairID != "" || cfg.BlockID != "" {
+		if !validRepeatedIdentity(cfg.PairID, cfg.BlockID) || cfg.ArmOrder == nil {
+			return fmt.Errorf("complete repeated identity and explicit order required")
+		}
+	}
 	if cfg.ArmOrder != nil && (len(cfg.ArmOrder) != 2 || !((cfg.ArmOrder[0] == "model" && cfg.ArmOrder[1] == "jev_selective") || (cfg.ArmOrder[0] == "jev_selective" && cfg.ArmOrder[1] == "model"))) {
 		return fmt.Errorf("explicit arm order requires model and jev_selective exactly once")
 	}
@@ -305,19 +312,20 @@ func runPreparedPair(ctx context.Context, path string, cfg PairRunConfig, budget
 		}
 		begun := time.Now()
 		c := cfg.Suite.Cases[i/2]
-		armCtx, observedTask := observer.StartEvaluation(ctx, observability.Evaluation{RunID: PairRunContract(cfg), CaseKey: c.Key(), Arm: entry.Arm, EvidenceKind: cfg.Model.EvidenceKind})
+		armCtx, observedTask := observer.StartEvaluation(ctx, observability.Evaluation{RunID: PairRunContract(cfg), CaseKey: c.Key(), Arm: entry.Arm, EvidenceKind: cfg.Model.EvidenceKind, PairID: cfg.PairID, BlockID: cfg.BlockID, ArmOrder: cfg.ArmOrder})
 		entry.LangfuseTraceID = observedTask.TraceID()
 		driver, setupErr := factory(armCtx, entry.Arm, c)
 		if driver == nil && setupErr == nil {
 			setupErr = fmt.Errorf("driver factory returned nil")
 		}
 		var result ConversationResult
+		var facts []ConversationFactCheck
 		if setupErr != nil {
 			result = ConversationResult{Case: c, Status: "setup_failed", SetupError: true, Errors: []string{"driver factory failed"}}
 			entry.ExecutionFailures = append(entry.ExecutionFailures, PairExecutionFailure{Stage: "factory"})
 		} else {
 			tracked := &pairTrackingDriver{ConversationDriver: driver}
-			result, _ = RunFactCheckedConversation(armCtx, c, tracked)
+			result, facts = RunFactCheckedConversation(armCtx, c, tracked)
 			entry.ExecutionFailures = append(entry.ExecutionFailures, tracked.failures...)
 		}
 		if closer, ok := driver.(interface{ Close() error }); ok {
@@ -360,6 +368,20 @@ func runPreparedPair(ctx context.Context, path string, cfg PairRunConfig, budget
 		// failed arm durable, then stop before another arm or batch can start.
 		if len(stopOnFailure) > 0 && stopOnFailure[0] && (!result.StructuralPass || result.HTTPFailures > 0 || len(entry.ExecutionFailures) > 0) {
 			return fmt.Errorf("pair halted: structural failure; later arms not started")
+		}
+		if len(stopOnFailure) > 1 && stopOnFailure[1] && observer != nil {
+			flushErr := observer.ForceFlush(ctx)
+			stats := observer.Stats()
+			if flushErr != nil || stats.Dropped != 0 || stats.Failed != 0 {
+				return fmt.Errorf("pair halted: observer failure after durable arm; later arms not started")
+			}
+		}
+		if len(stopOnFailure) > 2 && stopOnFailure[2] {
+			for _, fact := range facts {
+				if fact.Status == "mismatch" {
+					return fmt.Errorf("pair halted: deterministic fact mismatch; later arms not started")
+				}
+			}
 		}
 	}
 	return nil

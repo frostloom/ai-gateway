@@ -33,6 +33,9 @@ type PairReportRow struct {
 	ReservedModelMicroCNY   *int64                        `json:"reserved_model_micro_cny"`
 }
 type SmallPairReport struct {
+	PairID              string                        `json:"pair_id,omitempty"`
+	BlockID             string                        `json:"block_id,omitempty"`
+	ArmOrder            []string                      `json:"arm_order,omitempty"`
 	Schema              string                        `json:"schema"`
 	JournalSHA256       string                        `json:"journal_sha256"`
 	EvidenceKind        string                        `json:"evidence_kind"`
@@ -61,6 +64,9 @@ func ReportPreparedPair(path string) (SmallPairReport, error) {
 	if err != nil {
 		return r, err
 	}
+	r.PairID = j.cfg.PairID
+	r.BlockID = j.cfg.BlockID
+	r.ArmOrder = j.cfg.ArmOrder
 	r.EvidenceKind = j.cfg.Model.EvidenceKind
 	r.JournalSHA256 = j.sha
 	r.PlannedCases = len(j.cfg.Suite.Cases)

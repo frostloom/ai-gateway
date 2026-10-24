@@ -25,6 +25,8 @@ type AgentPairOptions struct {
 	AllowExecution          bool                    // false is always side-effect-free
 	RatesVerified           bool                    // recorded_run requires operator verification for this channel
 	StopOnStructuralFailure bool                    // opt-in evaluator stop; legacy defaults remain unchanged
+	StopOnObserverFailure   bool                    // opt-in per-arm flush; repeated scope stops before another arm
+	StopOnFactFailure       bool                    // opt-in deterministic mismatch stop after durable first arm
 	StopOnJEVFailure        bool                    // reviewed full-reservation policy forbids model fallback after a JEV failure
 	AllowJEVCalls           bool
 	MaxJEVCalls             int
@@ -101,6 +103,8 @@ func RunAgentPair(ctx context.Context, path string, o AgentPairOptions) (runErr 
 		return err
 	}
 	want.ArmOrder = o.Config.ArmOrder
+	want.PairID = o.Config.PairID
+	want.BlockID = o.Config.BlockID
 	if !reflect.DeepEqual(want, o.Config) {
 		return fmt.Errorf("agent configuration differs before provider calls")
 	}
@@ -159,7 +163,7 @@ func RunAgentPair(ctx context.Context, path string, o AgentPairOptions) (runErr 
 		})
 		return NewHandlerConversationDriver(wrapper, oracle)
 	}
-	err = runPreparedPair(ctx, path, o.Config, o.Budget, factory, o.Observer, o.StopOnStructuralFailure)
+	err = runPreparedPair(ctx, path, o.Config, o.Budget, factory, o.Observer, o.StopOnStructuralFailure, o.StopOnObserverFailure, o.StopOnFactFailure)
 	if o.Observer == nil {
 		return err
 	}
