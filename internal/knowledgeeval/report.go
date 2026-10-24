@@ -280,7 +280,7 @@ func summarize(suite []Case, arm Arm, common map[string]bool) (ArmReport, bool, 
 func BuildReport(x ComparisonInput) (Report, error) {
 	r := Report{Schema: "knowledge-report.v1", EvidenceKind: x.EvidenceKind, Clock: x.Clock, EndToEnd: x.Clock == "client_request_to_response", Limitations: []string{"Small frozen diagnostic suite; no population-wide accuracy or cost promise.", "Recorder provenance and independent reviews are trusted inputs, not execution attestations.", "Costs are configured estimates in separate currencies, not invoices; CPU/storage/telemetry overhead requires separate measurements.", "EffectClaimsAllowed permits comparing recorded differences, not asserting positive benefit.", "Missing usage/review is unavailable. local_stub cannot prove real-model benefits."}}
 	fail := func(e error) (Report, error) { return r, e }
-	if x.Schema != "knowledge-comparison.v1" || (x.EvidenceKind != "local_stub" && x.EvidenceKind != "recorded_run") || (x.Clock != "client_request_to_response" && x.Clock != "server_turn" && x.Clock != "runner") {
+	if x.Schema != "knowledge-comparison.v1" || (x.EvidenceKind != "local_stub" && x.EvidenceKind != "recorded_run") || (x.Clock != "client_request_to_response" && x.Clock != "server_turn" && x.Clock != "runner" && x.Clock != "runner_request") {
 		return fail(fmt.Errorf("unsupported comparison schema/evidence/clock"))
 	}
 	if e := config(x.A.Config); e != nil {

@@ -316,3 +316,12 @@ func TestWrongEvidenceHashOrVersionCannotRecall(t *testing.T) {
 		}
 	}
 }
+
+func TestRunnerRequestClockNotEndToEnd(t *testing.T) {
+	x := fixture()
+	x.Clock = "runner_request"
+	r, e := BuildReport(x)
+	if e != nil || r.EndToEnd || r.Clock != "runner_request" {
+		t.Fatalf("%+v %v", r, e)
+	}
+}
