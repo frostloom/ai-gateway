@@ -1,0 +1,54 @@
+{
+  "schema": "recharge-cancel-live-summary.v1",
+  "execution_revision": "5cd536feffa9721fd282b09caa7a826a7c2ac1b1",
+  "status": "checkpoint_pending",
+  "model_budget": {
+    "attempts": 2,
+    "reserved_micro_cny": 67584,
+    "priced_usage_micro_cny": 7652,
+    "input_tokens": 3514,
+    "output_tokens": 78
+  },
+  "jev_attempts": 1,
+  "configured_model_cny_not_invoice": 0.007652,
+  "configured_jev_usd_not_invoice": 5.056800000000001e-05,
+  "observer_stats": {
+    "Accepted": 11,
+    "Dropped": 0,
+    "Exported": 11,
+    "Failed": 0,
+    "Batches": 6,
+    "Turns": 4,
+    "SampledTurns": 4,
+    "QueueDepth": 0
+  },
+  "arms": [
+    {
+      "arm": "model",
+      "server_turn_latency_sum_ms": 1183.130834,
+      "full_runner_task_duration_ms": 1255.316792,
+      "llm_calls": 1,
+      "jev_calls": 0,
+      "state_unchanged": true
+    },
+    {
+      "arm": "jev_selective",
+      "server_turn_latency_sum_ms": 2089.23025,
+      "full_runner_task_duration_ms": 2226.538375,
+      "llm_calls": 1,
+      "jev_calls": 1,
+      "state_unchanged": true
+    }
+  ],
+  "cumulative_model_attempts": 29,
+  "cumulative_jev_attempts": 7,
+  "permanent_cumulative_reserved_cny": "1.013760",
+  "permanent_cumulative_reserved_usd": "0.008064",
+  "unallocated_cny": "98.986240",
+  "unallocated_usd": "0.991936",
+  "old_local_files_checked": 2780,
+  "all_unchanged": true,
+  "pair_schemas_remaining": 0,
+  "new_claim_permanently_consumed": true,
+  "deployment": false
+}

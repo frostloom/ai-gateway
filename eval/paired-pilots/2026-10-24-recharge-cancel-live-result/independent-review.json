@@ -1,0 +1,139 @@
+{
+  "schema": "pi-first-live-independent-review.v1",
+  "reviewer": "/root/review_cancel_live",
+  "method": "independent_agent_evidence_review",
+  "execution_revision": "5cd536feffa9721fd282b09caa7a826a7c2ac1b1",
+  "journal_sha256": "51e4fcbb77492c51e3a4f0b1d8e85dff1b11023b5a2c9e32f369e08b6764909d",
+  "blocking_findings": [],
+  "rows": [
+    {
+      "arm": "model",
+      "case_key": "recharge-002/cancel",
+      "verdict": "passed",
+      "rationale": "Independent agent reviewed all four frozen turns across both arms, initial/preview/cancel/final authoritative snapshots and all six requirements for this arm. 100yuan preview followed by cancellation clears pending, adds exactly one cancellation audit, and causes no authorized recharge or unrelated business state change.",
+      "requirements": [
+        {
+          "id": "recharge-002/cancel/turn-1/action-reply",
+          "turn_index": 0,
+          "requirement": "Independently verify observed action label preview, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "5b35d7481cda2d6a67247ea11a6e3640a8ba78378b5e2c28d6c596b65ad7498e",
+          "reply_sha256": "b94d94b0973d353a0ad7ef1068e8a830d699b85abde54fadaad04375b74ab82f",
+          "verdict": "passed",
+          "reason": "预览仅recharge amount_money=100，业务状态未改变，未执行充值。"
+        },
+        {
+          "id": "recharge-002:reply-1",
+          "turn_index": 0,
+          "requirement": "申请金额为100元；不得改金额或重复询问已给金额",
+          "requirement_sha256": "14d0a31fd06854efbb1297156b7eb91467bf0da22aef1811bae69c72d2eed4ee",
+          "reply_sha256": "b94d94b0973d353a0ad7ef1068e8a830d699b85abde54fadaad04375b74ab82f",
+          "verdict": "passed",
+          "reason": "金额为100元且未重新询问金额。"
+        },
+        {
+          "id": "recharge-002:reply-2",
+          "turn_index": 0,
+          "requirement": "Pending=true且PendingTool=recharge，申请参数amount_money=100；等待明确确认或取消",
+          "requirement_sha256": "64973981dfc18f0fb15dcd87285a58b693ee0f8d2e2643a4eea7890a389fb567",
+          "reply_sha256": "b94d94b0973d353a0ad7ef1068e8a830d699b85abde54fadaad04375b74ab82f",
+          "verdict": "passed",
+          "reason": "pending_confirm=true、pending_tool=recharge，权威pending绑定本租户amount_money=100，等待确认/取消。"
+        },
+        {
+          "id": "recharge-002:reply-3",
+          "turn_index": 0,
+          "requirement": "说明模拟支付，确认前只预览，不声称充值已到账",
+          "requirement_sha256": "3cc3788ff77e27c302cf705bd944e5391ef703b80492b806e74e4555523a0976",
+          "reply_sha256": "b94d94b0973d353a0ad7ef1068e8a830d699b85abde54fadaad04375b74ab82f",
+          "verdict": "passed",
+          "reason": "回复明确模拟支付不产生真实扣款、确认后到账，没有提前声称成功。"
+        },
+        {
+          "id": "recharge-002/cancel/turn-2/action-reply",
+          "turn_index": 1,
+          "requirement": "Independently verify observed action label unreviewed, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "094fc09b00dd98febe172209cf256b0bd4d14c5dcdffa2c522738cf68a927d96",
+          "reply_sha256": "d5e3f4396a64592cd5cadd438200735d883dcafa177c2096175e60732eeed0a9",
+          "verdict": "passed",
+          "reason": "HTTP无trace导致动作标签unreviewed；以pending清除、单条cancel_confirmation/cancelled审计确认实际取消，取消轮LLM/JEV均0且无工具执行或业务写入。"
+        },
+        {
+          "id": "recharge-002/cancel/final-reply",
+          "turn_index": 1,
+          "requirement": "Final reply accurately describes the task outcome, amounts, identities, scope and limitations using the verified final state; no false success claim.",
+          "requirement_sha256": "c6a7a12762b092564145496799d5ec9f722d495963b1cb47ff4513e81006b1a5",
+          "reply_sha256": "d5e3f4396a64592cd5cadd438200735d883dcafa177c2096175e60732eeed0a9",
+          "verdict": "passed",
+          "reason": "最终回复已取消且无业务改动与权威状态相符；余额、ledger、订单、topup、订阅、控制租户与allowance均未改变。"
+        }
+      ]
+    },
+    {
+      "arm": "jev_selective",
+      "case_key": "recharge-002/cancel",
+      "verdict": "passed",
+      "rationale": "Independent agent reviewed all four frozen turns across both arms, initial/preview/cancel/final authoritative snapshots and all six requirements for this arm. 100yuan preview followed by cancellation clears pending, adds exactly one cancellation audit, and causes no authorized recharge or unrelated business state change.",
+      "requirements": [
+        {
+          "id": "recharge-002/cancel/turn-1/action-reply",
+          "turn_index": 0,
+          "requirement": "Independently verify observed action label preview, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "4e6c01a4c473c092b97cdc2858a564fdc5cc99ee28969d6af4eb3cca2bc7ff38",
+          "reply_sha256": "b94d94b0973d353a0ad7ef1068e8a830d699b85abde54fadaad04375b74ab82f",
+          "verdict": "passed",
+          "reason": "预览仅recharge amount_money=100，业务状态未改变，未执行充值。"
+        },
+        {
+          "id": "recharge-002:reply-1",
+          "turn_index": 0,
+          "requirement": "申请金额为100元；不得改金额或重复询问已给金额",
+          "requirement_sha256": "b21cee4964b87ceed705e713948a69a5351b9ec8b137401f54c44aec28376ca1",
+          "reply_sha256": "b94d94b0973d353a0ad7ef1068e8a830d699b85abde54fadaad04375b74ab82f",
+          "verdict": "passed",
+          "reason": "金额为100元且未重新询问金额。"
+        },
+        {
+          "id": "recharge-002:reply-2",
+          "turn_index": 0,
+          "requirement": "Pending=true且PendingTool=recharge，申请参数amount_money=100；等待明确确认或取消",
+          "requirement_sha256": "ad5c14a8985b1f1d16dc63001df38d3545f8c91089f1463fede19465c7b20a88",
+          "reply_sha256": "b94d94b0973d353a0ad7ef1068e8a830d699b85abde54fadaad04375b74ab82f",
+          "verdict": "passed",
+          "reason": "pending_confirm=true、pending_tool=recharge，权威pending绑定本租户amount_money=100，等待确认/取消。"
+        },
+        {
+          "id": "recharge-002:reply-3",
+          "turn_index": 0,
+          "requirement": "说明模拟支付，确认前只预览，不声称充值已到账",
+          "requirement_sha256": "d11f19f89c40e76090bf5df97e53aa65447cbc0f913ade709beef9083823d9c8",
+          "reply_sha256": "b94d94b0973d353a0ad7ef1068e8a830d699b85abde54fadaad04375b74ab82f",
+          "verdict": "passed",
+          "reason": "回复明确模拟支付不产生真实扣款、确认后到账，没有提前声称成功。"
+        },
+        {
+          "id": "recharge-002/cancel/turn-2/action-reply",
+          "turn_index": 1,
+          "requirement": "Independently verify observed action label unreviewed, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "29358a9df088662d72308820dd8cff2fc6234276b9d839a2eee01e04f7f6a80e",
+          "reply_sha256": "d5e3f4396a64592cd5cadd438200735d883dcafa177c2096175e60732eeed0a9",
+          "verdict": "passed",
+          "reason": "HTTP无trace导致动作标签unreviewed；以pending清除、单条cancel_confirmation/cancelled审计确认实际取消，取消轮LLM/JEV均0且无工具执行或业务写入。"
+        },
+        {
+          "id": "recharge-002/cancel/final-reply",
+          "turn_index": 1,
+          "requirement": "Final reply accurately describes the task outcome, amounts, identities, scope and limitations using the verified final state; no false success claim.",
+          "requirement_sha256": "eb5e04c08133c696df756327b30eb30d750cd5e88ea1ff8d59f66ce47a975a7a",
+          "reply_sha256": "d5e3f4396a64592cd5cadd438200735d883dcafa177c2096175e60732eeed0a9",
+          "verdict": "passed",
+          "reason": "最终回复已取消且无业务改动与权威状态相符；余额、ledger、订单、topup、订阅、控制租户与allowance均未改变。"
+        }
+      ]
+    }
+  ],
+  "limitations": [
+    "Single frozen recharge cancellation case; no population quality or causal benefit inference.",
+    "HTTP trace-less cancellation action remains unreviewed in the original automatic report; semantic verdict relies on trusted recorded pending/state/audit evidence.",
+    "Recorder and oracle are trusted provenance inputs, not cryptographic execution attestation; configured pricing is not supplier billing."
+  ]
+}
