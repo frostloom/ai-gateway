@@ -1,0 +1,22 @@
+{
+  "id": "KB-002",
+  "title": "现金余额与token额度",
+  "version": "1",
+  "status": "approved",
+  "reviewed_at": "2026-10-24",
+  "scope": "源码647ba9f；演示平台规则；不替代实时业务查询",
+  "aliases": [
+    "钱包",
+    "token和钱包一样吗",
+    "现金额度区别"
+  ],
+  "sources": [
+    {
+      "path": "internal/billing/store/mysql.go",
+      "symbol": "Reserve"
+    }
+  ],
+  "paragraphs": [
+    "现金余额以人民币计量，套餐额度以token计量，二者不能互换。订阅开通不充值现金，走订阅结算的调用消耗token额度但不扣现金；零扣费不能推出零用量。本人余额和剩余额度必须实时查询。"
+  ]
+}

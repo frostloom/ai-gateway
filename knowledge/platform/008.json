@@ -1,0 +1,22 @@
+{
+  "id": "KB-008",
+  "title": "充值建单和模拟支付",
+  "version": "1",
+  "status": "approved",
+  "reviewed_at": "2026-10-24",
+  "scope": "源码647ba9f；演示平台规则；不替代实时业务查询",
+  "aliases": [
+    "充值多久到账",
+    "怎么充值",
+    "支付"
+  ],
+  "sources": [
+    {
+      "path": "internal/agent/tools.go",
+      "symbol": "rechargeTool"
+    }
+  ],
+  "paragraphs": [
+    "建充值订单不等于支付或到账。当前演示环境为模拟支付，不会产生真实银行扣款。客服充值需正整数元金额，确认预览后才建单并模拟支付。不承诺真实渠道或到账期限。"
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "id": "KB-012",
+  "title": "聊天API接入",
+  "version": "1",
+  "status": "approved",
+  "reviewed_at": "2026-10-24",
+  "scope": "源码647ba9f；演示平台规则；不替代实时业务查询",
+  "aliases": [
+    "API接入",
+    "chat/completions",
+    "OpenAI兼容"
+  ],
+  "sources": [
+    {
+      "path": "internal/gateway/handler/chat.go",
+      "symbol": "Chat"
+    }
+  ],
+  "paragraphs": [
+    "平台提供OpenAI兼容的/v1/chat/completions接口，使用本人API Key鉴权；服务地址取实际部署地址，模型名取实时目录。示例不能含真实密钥，不承诺未验证的SDK版本、接口特性或模型能力。"
+  ]
+}

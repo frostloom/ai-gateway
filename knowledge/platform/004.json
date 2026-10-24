@@ -1,0 +1,22 @@
+{
+  "id": "KB-004",
+  "title": "套餐提供的权益和模拟月费",
+  "version": "1",
+  "status": "approved",
+  "reviewed_at": "2026-10-24",
+  "scope": "源码647ba9f；演示平台规则；不替代实时业务查询",
+  "aliases": [
+    "套餐区别",
+    "套餐买什么",
+    "月费"
+  ],
+  "sources": [
+    {
+      "path": "internal/billing/store/plan.go",
+      "symbol": "SubscribePlan"
+    }
+  ],
+  "paragraphs": [
+    "当前新购只接受上架定期订阅，提供各模型档次滚动窗口内的token额度，未用不累积。月费为模拟展示价；当前订阅和续期延长权益，不实现真实月费收款，也不向现金余额充值。名称、价格、周期和额度须实时查套餐目录。"
+  ]
+}

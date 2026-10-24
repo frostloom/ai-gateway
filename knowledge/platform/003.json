@@ -1,0 +1,22 @@
+{
+  "id": "KB-003",
+  "title": "模型输入输出如何计价",
+  "version": "1",
+  "status": "approved",
+  "reviewed_at": "2026-10-24",
+  "scope": "源码647ba9f；演示平台规则；不替代实时业务查询",
+  "aliases": [
+    "模型价格",
+    "输入输出价格",
+    "每百万token"
+  ],
+  "sources": [
+    {
+      "path": "internal/billing/store/models.go",
+      "symbol": "Model"
+    }
+  ],
+  "paragraphs": [
+    "目录分别列出输入与输出每百万token的单价，当前价格必须查询实时模型目录。实际账单由用量及结算路径决定，不能拿目录报价当作某次实际扣费。不承诺未核实的缓存折扣或优惠。"
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "id": "KB-010",
+  "title": "消费金额与token用量",
+  "version": "1",
+  "status": "approved",
+  "reviewed_at": "2026-10-24",
+  "scope": "源码647ba9f；演示平台规则；不替代实时业务查询",
+  "aliases": [
+    "查消费",
+    "月账单",
+    "消费统计"
+  ],
+  "sources": [
+    {
+      "path": "internal/agent/tools.go",
+      "symbol": "readRecentBills"
+    }
+  ],
+  "paragraphs": [
+    "近期每日扣费与token用量是不同指标。客服每日扣费工具为近7天；最近账单默认3笔最多10笔，含token与金额。部分最近账单不能证明完整月份合计，实际数字必须查询本人业务工具。"
+  ]
+}

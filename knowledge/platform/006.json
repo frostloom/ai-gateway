@@ -1,0 +1,22 @@
+{
+  "id": "KB-006",
+  "title": "退订不退当期费用",
+  "version": "1",
+  "status": "approved",
+  "reviewed_at": "2026-10-24",
+  "scope": "源码647ba9f；演示平台规则；不替代实时业务查询",
+  "aliases": [
+    "取消套餐会退钱吗",
+    "退订退款",
+    "停续费"
+  ],
+  "sources": [
+    {
+      "path": "internal/billing/store/plan.go",
+      "symbol": "CancelSubscription"
+    }
+  ],
+  "paragraphs": [
+    "退订定期套餐只停止下期续费，当期不退款，本期权益可用到周期结束。退订与充值退款是不同事项。本人周期结束日和续费状态必须实时查询；实际办理需要预览及明确确认。"
+  ]
+}

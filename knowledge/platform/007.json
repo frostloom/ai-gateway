@@ -1,0 +1,21 @@
+{
+  "id": "KB-007",
+  "title": "更换套餐下期生效",
+  "version": "1",
+  "status": "approved",
+  "reviewed_at": "2026-10-24",
+  "scope": "源码647ba9f；演示平台规则；不替代实时业务查询",
+  "aliases": [
+    "升级套餐",
+    "换套餐什么时候生效"
+  ],
+  "sources": [
+    {
+      "path": "internal/billing/store/plan.go",
+      "symbol": "ChangePlan"
+    }
+  ],
+  "paragraphs": [
+    "定期订阅改套餐在下一周期生效，当期权益不立即更换，目标必须是有效上架的定期套餐。能否办理以本人状态和预览为准；不承诺即时升级或差价补退。"
+  ]
+}
