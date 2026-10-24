@@ -1,0 +1,27 @@
+{
+  "schema": "six-case-next-stage-decision.v1",
+  "same_version_live_suite_ready": false,
+  "next_milestone": "offline acceptance of original six cases on current50e3c8d/v5 Handler, then independently frozen cohort entry",
+  "current_contract_sha256": "a95cacd041830012619a0f4d7fd8208c184aa9e8d45b7ee05afaa239a30e1e8f",
+  "new_scope_implemented": false,
+  "paid_authorized": false,
+  "new_paid_calls": 0,
+  "benefit_study_requires": [
+    "traffic strata and target population",
+    "predefined paired repeats and stopping rule",
+    "balanced order and cache accounting",
+    "same runtime/model/prompt/tool/profile envelope",
+    "quality and safety requirements with all failures retained",
+    "separate currency costs and explicit clocks"
+  ],
+  "claims_allowed": [
+    "six selected historical individually passed runs",
+    "one observed single-turn balance fastpath saved two model calls"
+  ],
+  "claims_not_allowed": [
+    "same-version full-suite live pass",
+    "population success rate",
+    "overall cost or latency savings",
+    "old claim reuse or paid scope expansion"
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "schema": "cancel-timing-erratum.v1",
+  "original_summary_file": "eval/paired-pilots/2026-10-24-recharge-cancel-live-result/summary.json",
+  "original_summary_sha256": "c4a515815301f29f4cd799f089bc0e26e2c427f65932881f8c9159ac48e78214",
+  "original_archive_unchanged": true,
+  "rows": [
+    {
+      "arm": "model",
+      "old_full_runner_label_actually_conversation_ms": 1255.316792,
+      "correct_runner_ms": 1414.805167,
+      "old_server_sum_label_actually_http_roundtrip_ms": 1183.130834,
+      "correct_server_telemetry_sum_ms": 964.069
+    },
+    {
+      "arm": "jev_selective",
+      "old_full_runner_label_actually_conversation_ms": 2226.538375,
+      "correct_runner_ms": 2435.90725,
+      "old_server_sum_label_actually_http_roundtrip_ms": 2089.23025,
+      "correct_server_telemetry_sum_ms": 1723.039875
+    }
+  ],
+  "runtime_result_unchanged": true
+}

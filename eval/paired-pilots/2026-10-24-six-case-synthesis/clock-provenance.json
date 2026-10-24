@@ -1,0 +1,47 @@
+{
+  "schema": "historical-runner-clock-provenance.v1",
+  "revisions": [
+    {
+      "execution_revision": "43133e90596bcfd4ecd9d3cf58af226bd42c2d0f",
+      "file": "internal/taskbench/paired_runner.go",
+      "source_sha256": "3cc8093d26ad6b622c95abce9f9334b81abdce763a49c84e725ae30d6ddb6778",
+      "factory_and_cleanup_inside_timer": true
+    },
+    {
+      "execution_revision": "c6e32305663ab8af5e747de683390b78dbfe844b",
+      "file": "internal/taskbench/paired_runner.go",
+      "source_sha256": "3cc8093d26ad6b622c95abce9f9334b81abdce763a49c84e725ae30d6ddb6778",
+      "factory_and_cleanup_inside_timer": true
+    },
+    {
+      "execution_revision": "b3f58e874944efc95c6dc699af95bb440daea18b",
+      "file": "internal/taskbench/paired_runner.go",
+      "source_sha256": "3cc8093d26ad6b622c95abce9f9334b81abdce763a49c84e725ae30d6ddb6778",
+      "factory_and_cleanup_inside_timer": true
+    },
+    {
+      "execution_revision": "5cd536feffa9721fd282b09caa7a826a7c2ac1b1",
+      "file": "internal/taskbench/paired_runner.go",
+      "source_sha256": "3cc8093d26ad6b622c95abce9f9334b81abdce763a49c84e725ae30d6ddb6778",
+      "factory_and_cleanup_inside_timer": true
+    },
+    {
+      "execution_revision": "089017bc70f5e0af8e36198f1ff489296d2710be",
+      "file": "internal/taskbench/paired_runner.go",
+      "source_sha256": "3cc8093d26ad6b622c95abce9f9334b81abdce763a49c84e725ae30d6ddb6778",
+      "factory_and_cleanup_inside_timer": true
+    },
+    {
+      "execution_revision": "e8c345c38e899f440eb0b478f8e9c56de727b471",
+      "file": "internal/taskbench/paired_runner.go",
+      "source_sha256": "3cc8093d26ad6b622c95abce9f9334b81abdce763a49c84e725ae30d6ddb6778",
+      "factory_and_cleanup_inside_timer": true
+    }
+  ],
+  "excludes": [
+    "human think time",
+    "campaign-wide fixture database startup/drop",
+    "post-run observer shutdown/export wait",
+    "Langfuse content/score readback"
+  ]
+}

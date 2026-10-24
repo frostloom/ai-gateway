@@ -1,5 +1,7 @@
 # 充值取消真实测评结果
 
+后续勘误（2026-10-24）：本页原表“服务端轮次耗时”实为客户端HTTP往返和，“完整runner”实为会话duration。按原journal/report核对，服务端telemetry和应为model964.069000ms、selective1723.039875ms；完整runner应为1414.805167ms、2435.907250ms。原表及归档保留以供追溯，比较请使用[统一口径汇总](six-case-evidence-synthesis-2026-10-24.md)与cancel-timing-erratum.json，金额/任务质量/调用数结论不变。
+
 用户回复“好的可以，继续吧”，在已明确的充值取消范围、DeepSeek/TypeSafe、10模型/¥0.337920+1JEV/$0.002688上限内，已从5cd536feffa9721fd282b09caa7a826a7c2ac1b1归档执行一次并停在checkpoint_pending。没有重试或部署。
 
 本轮实际2模型/1JEV；模型输入3514、输出78，按冻结保守配置计价¥0.007652；JEV报告1204输入186输出，固定输入费率配置计价$0.000050568。两者都不是供应商账单。含历史累计29模型7JEV尝试。
