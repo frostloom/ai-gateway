@@ -24,14 +24,15 @@ func fixture() ComparisonInput {
 			category = []string{"unknown", "dynamic", "safety"}[(i-36)/12]
 		}
 		id := fmt.Sprintf("case-%02d", i)
-		c := Case{ID: id, Question: "question " + id, Category: category, EvidenceIDs: []string{"KB-001"}}
+		c := Case{ID: id, Question: "question " + id, Category: category, RequiredEvidence: []Evidence{{ChunkID: "KB-001:1", SHA256: strings.Repeat("2", 64), CorpusVersion: strings.Repeat("1", 64)}}}
 		if category == "dynamic" {
 			c.ExpectedTools = []string{"get_balance"}
 		}
 		x.Suite = append(x.Suite, c)
-		task := Task{ActualTools: []string{"get_balance"}, AttemptsComplete: true, CaseID: id, Review: &Review{Correct: true, Claims: 1, Citations: 1, SupportedCitations: 1, Reference: "independent-review"}, RetrievedIDs: []string{"KB-001:1"}, DurationMS: ms(10), Attempts: []Attempt{{Outcome: "success", Currency: "CNY", Input: n(1000), Output: n(0), CacheRead: n(0), CacheCreation: n(0), Price: &Price{Input: n(1000000), Output: n(0), CacheRead: n(0), CacheCreation: n(0), Verified: true}}}}
+		task := Task{ActualTools: []string{"get_balance"}, AttemptsComplete: true, CaseID: id, Review: &Review{Correct: true, Claims: 1, Citations: 1, SupportedCitations: 1, Reference: "independent-review"}, DurationMS: ms(10), Attempts: []Attempt{{Outcome: "success", Currency: "CNY", Input: n(1000), Output: n(0), CacheRead: n(0), CacheCreation: n(0), Price: &Price{Input: n(1000000), Output: n(0), CacheRead: n(0), CacheCreation: n(0), Verified: true}}}}
 		x.A.Tasks = append(x.A.Tasks, task)
 		copy := task
+		copy.Retrieved = []Evidence{{ChunkID: "KB-001:1", SHA256: strings.Repeat("2", 64), CorpusVersion: strings.Repeat("1", 64)}}
 		v := *task.Review
 		copy.Review = &v
 		copy.Attempts = append([]Attempt(nil), task.Attempts...)
@@ -234,5 +235,84 @@ func TestAttemptOutcomeAndCacheCounts(t *testing.T) {
 	r, e := BuildReport(x)
 	if e != nil || r.B.FailedAttempts != 1 || r.B.Timeouts != 1 || r.B.CacheRead == nil || *r.B.CacheRead != 25 {
 		t.Fatal("lost failure/cache metrics")
+	}
+}
+func TestMissingAndNullReviewCannotPass(t *testing.T) {
+	for _, field := range []string{"correct", "claims", "unsupported", "citations", "supported_citations", "critical_errors", "independent_review_reference"} {
+		for _, null := range []bool{false, true} {
+			b, _ := json.Marshal(fixture())
+			var raw map[string]any
+			json.Unmarshal(b, &raw)
+			review := raw["b"].(map[string]any)["tasks"].([]any)[0].(map[string]any)["review"].(map[string]any)
+			if null {
+				review[field] = nil
+			} else {
+				delete(review, field)
+			}
+			b, _ = json.Marshal(raw)
+			var x ComparisonInput
+			e := json.Unmarshal(b, &x)
+			if e != nil {
+				continue
+			}
+			r, e := BuildReport(x)
+			if e == nil && (r.QualityComparable || r.CostReductionGate == "pass") {
+				t.Fatalf("missing/null %s admitted", field)
+			}
+		}
+	}
+}
+func TestNonexistentChunkCannotRecall(t *testing.T) {
+	x := fixture()
+	for i, c := range x.Suite {
+		if c.Category == "knowledge" {
+			x.B.Tasks[i].Retrieved = []Evidence{{ChunkID: "KB-001:999", SHA256: strings.Repeat("2", 64), CorpusVersion: strings.Repeat("1", 64)}}
+		}
+	}
+	r, e := BuildReport(x)
+	if e != nil {
+		t.Fatal(e)
+	}
+	if r.B.RecallAt3 != nil && *r.B.RecallAt3 > 0 {
+		t.Fatal("nonexistent chunk counted as complete evidence")
+	}
+}
+func TestZeroKnowledgeCitationCoverageBlocksCostGate(t *testing.T) {
+	x := fixture()
+	x.EvidenceKind = "recorded_run"
+	for i, c := range x.Suite {
+		if c.Category == "knowledge" {
+			x.B.Tasks[i].Review.Citations = 0
+			x.B.Tasks[i].Review.SupportedCitations = 0
+		}
+		x.B.Tasks[i].Attempts[0].Input = n(500)
+	}
+	r, e := BuildReport(x)
+	if e != nil {
+		t.Fatal(e)
+	}
+	if r.CostReductionGate == "pass" {
+		t.Fatal("zero source coverage passed cost gate")
+	}
+}
+func TestWrongEvidenceHashOrVersionCannotRecall(t *testing.T) {
+	for _, field := range []string{"sha", "version"} {
+		x := fixture()
+		for i, c := range x.Suite {
+			if c.Category == "knowledge" {
+				if field == "sha" {
+					x.B.Tasks[i].Retrieved[0].SHA256 = strings.Repeat("f", 64)
+				} else {
+					x.B.Tasks[i].Retrieved[0].CorpusVersion = strings.Repeat("f", 64)
+				}
+			}
+		}
+		r, e := BuildReport(x)
+		if e != nil {
+			t.Fatal(e)
+		}
+		if r.B.RecallAt3 != nil && *r.B.RecallAt3 != 0 {
+			t.Fatal("wrong digest/version credited")
+		}
 	}
 }

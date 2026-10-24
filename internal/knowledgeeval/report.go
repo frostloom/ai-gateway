@@ -1,12 +1,15 @@
 package knowledgeeval
 
 import (
+	"bytes"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"io"
 	"math"
 	"reflect"
+	"regexp"
 	"sort"
 	"strings"
 )
@@ -136,15 +139,15 @@ func summarize(suite []Case, arm Arm, common map[string]bool) (ArmReport, bool, 
 		r.Categories[c.Category] = cat
 		if c.Category == "knowledge" {
 			knowledgeN++
-			all := len(c.EvidenceIDs) > 0
-			top := task.RetrievedIDs
+			all := len(c.RequiredEvidence) > 0
+			top := task.Retrieved
 			if len(top) > 3 {
 				top = top[:3]
 			}
-			for _, want := range c.EvidenceIDs {
+			for _, want := range c.RequiredEvidence {
 				found := false
 				for _, hit := range top {
-					if strings.SplitN(hit, ":", 2)[0] == want {
+					if hit == want {
 						found = true
 					}
 				}
@@ -260,6 +263,7 @@ func summarize(suite []Case, arm Arm, common map[string]bool) (ArmReport, bool, 
 	r.Gates["unsupported"] = state(r.UnsupportedRate, func(v float64) bool { return v <= .05 })
 	r.Gates["recall_at_3"] = state(r.RecallAt3, func(v float64) bool { return v >= .95 })
 	r.Gates["citation_precision"] = state(r.CitationPrecision, func(v float64) bool { return v >= .95 })
+	r.Gates["citation_coverage"] = state(r.CitationCoverage, func(v float64) bool { return v == 1 })
 	r.Gates["critical_errors"] = "unavailable"
 	if r.Reviewed == len(suite) {
 		r.Gates["critical_errors"] = "pass"
@@ -307,6 +311,18 @@ func BuildReport(x ComparisonInput) (Report, error) {
 			return fail(fmt.Errorf("duplicate/empty case"))
 		}
 		seen[c.ID] = true
+		if c.Category == "knowledge" {
+			if len(c.RequiredEvidence) == 0 || len(c.RequiredEvidence) > 3 {
+				return fail(fmt.Errorf("missing/oversized exact gold evidence"))
+			}
+			refs := map[string]bool{}
+			for _, ref := range c.RequiredEvidence {
+				if !validEvidence(ref) || ref.CorpusVersion != x.B.Config.CorpusVersion || refs[ref.ChunkID] {
+					return fail(fmt.Errorf("invalid frozen evidence reference"))
+				}
+				refs[ref.ChunkID] = true
+			}
+		}
 		counts[c.Category]++
 	}
 	if !reflect.DeepEqual(counts, map[string]int{"knowledge": 36, "unknown": 12, "dynamic": 12, "safety": 12}) {
@@ -488,4 +504,36 @@ func optimization(r *Report, costsOK bool) {
 	if r.EvidenceKind == "local_stub" {
 		r.CostReductionGate = "unavailable"
 	}
+}
+
+var chunkID = regexp.MustCompile(`^KB-[0-9]{3}:[1-9][0-9]{0,3}$`)
+
+func validEvidence(e Evidence) bool {
+	return chunkID.MatchString(e.ChunkID) && digest(e.SHA256, 32) && digest(e.CorpusVersion, 32)
+}
+
+// Every required review counter must be explicit; JSON null is unknown, not zero.
+func (r *Review) UnmarshalJSON(b []byte) error {
+	var fields map[string]json.RawMessage
+	if e := json.Unmarshal(b, &fields); e != nil {
+		return e
+	}
+	for _, key := range []string{"correct", "claims", "unsupported", "citations", "supported_citations", "critical_errors", "independent_review_reference"} {
+		v, ok := fields[key]
+		if !ok || bytes.Equal(bytes.TrimSpace(v), []byte("null")) {
+			return fmt.Errorf("required review field missing/null: %s", key)
+		}
+	}
+	type alias Review
+	var a alias
+	d := json.NewDecoder(bytes.NewReader(b))
+	d.DisallowUnknownFields()
+	if e := d.Decode(&a); e != nil {
+		return e
+	}
+	if d.Decode(new(any)) != io.EOF {
+		return fmt.Errorf("trailing review input")
+	}
+	*r = Review(a)
+	return nil
 }

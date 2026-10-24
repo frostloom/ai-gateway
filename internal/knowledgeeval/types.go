@@ -15,14 +15,19 @@ type Config struct {
 	OutputBudget  int    `json:"output_budget"`
 	ThinkingMode  string `json:"thinking_mode"`
 }
+type Evidence struct {
+	ChunkID       string `json:"chunk_id"`
+	SHA256        string `json:"sha256"`
+	CorpusVersion string `json:"corpus_version"`
+}
 type Case struct {
-	ID              string   `json:"id"`
-	Category        string   `json:"category"`
-	Question        string   `json:"question"`
-	EvidenceIDs     []string `json:"evidence_ids"`
-	RequiredFacts   []string `json:"required_facts"`
-	ForbiddenClaims []string `json:"forbidden_claims"`
-	ExpectedTools   []string `json:"expected_tools"`
+	ID               string     `json:"id"`
+	Category         string     `json:"category"`
+	Question         string     `json:"question"`
+	RequiredEvidence []Evidence `json:"required_evidence"`
+	RequiredFacts    []string   `json:"required_facts"`
+	ForbiddenClaims  []string   `json:"forbidden_claims"`
+	ExpectedTools    []string   `json:"expected_tools"`
 }
 type Price struct {
 	Input         *int64 `json:"input_micro_per_million"`
@@ -53,13 +58,13 @@ type Review struct {
 	Reference          string `json:"independent_review_reference"`
 }
 type Task struct {
-	CaseID           string    `json:"case_id"`
-	Review           *Review   `json:"review"`
-	RetrievedIDs     []string  `json:"retrieved_ids"`
-	ActualTools      []string  `json:"actual_tools"`
-	DurationMS       *float64  `json:"duration_ms"`
-	AttemptsComplete bool      `json:"attempts_complete"`
-	Attempts         []Attempt `json:"attempts"`
+	CaseID           string     `json:"case_id"`
+	Review           *Review    `json:"review"`
+	Retrieved        []Evidence `json:"retrieved"`
+	ActualTools      []string   `json:"actual_tools"`
+	DurationMS       *float64   `json:"duration_ms"`
+	AttemptsComplete bool       `json:"attempts_complete"`
+	Attempts         []Attempt  `json:"attempts"`
 }
 type Arm struct {
 	Config Config `json:"config"`
