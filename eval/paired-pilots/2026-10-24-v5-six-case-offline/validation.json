@@ -1,0 +1,61 @@
+{
+  "schema": "v5-six-case-offline-validation.v1",
+  "targeted_capture_exit_code": 0,
+  "targeted_current_six_case_test_in_full_regression": "passed",
+  "first_full_go_regression": {
+    "command": "SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX26.5.sdk go test ./... -count=1 -json",
+    "exit_code": 1,
+    "passed_packages": [
+      "github.com/frostloom/ai-gateway/cmd/conversation-eval",
+      "github.com/frostloom/ai-gateway/cmd/eval",
+      "github.com/frostloom/ai-gateway/cmd/agent",
+      "github.com/frostloom/ai-gateway/cmd/task-eval",
+      "github.com/frostloom/ai-gateway/cmd/paired-eval",
+      "github.com/frostloom/ai-gateway/internal/billing/outbox",
+      "github.com/frostloom/ai-gateway/internal/billing/admin",
+      "github.com/frostloom/ai-gateway/cmd/paired-live",
+      "github.com/frostloom/ai-gateway/internal/gateway/handler",
+      "github.com/frostloom/ai-gateway/internal/gateway/middleware",
+      "github.com/frostloom/ai-gateway/internal/jev",
+      "github.com/frostloom/ai-gateway/internal/observability",
+      "github.com/frostloom/ai-gateway/internal/pkg/controlplane",
+      "github.com/frostloom/ai-gateway/internal/router",
+      "github.com/frostloom/ai-gateway/internal/agent",
+      "github.com/frostloom/ai-gateway/internal/billing/store",
+      "github.com/frostloom/ai-gateway/internal/taskbench"
+    ],
+    "failure_events": [
+      {
+        "package": "github.com/frostloom/ai-gateway/internal/billing/consumer",
+        "test": "TestConsumerKafkaE2E"
+      },
+      {
+        "package": "github.com/frostloom/ai-gateway/internal/billing/consumer",
+        "test": null
+      }
+    ],
+    "failure": "KafkaE2E publish reserve: Not Leader For Partition",
+    "taskbench_elapsed_seconds": 401.533,
+    "standard_parallelism": true,
+    "default_timeout": true
+  },
+  "bounded_kafka_retest": {
+    "command": "SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX26.5.sdk go test ./internal/billing/consumer -run ^TestConsumerKafkaE2E$ -count=1 -v",
+    "exit_code": 0,
+    "test_elapsed_seconds": 12.26,
+    "package_elapsed_seconds": 13.365,
+    "skip": false,
+    "code_or_service_config_changed": false
+  },
+  "full_suite_all_green_claim": false,
+  "kafka_failure_root_cause_confirmed": false,
+  "current_gate": "offline_six_case_acceptance_passed; full_project_initial_regression_failure_retained; future_paid_entry_requires_full_validation",
+  "independent_review": "no P1/P2; reviewer MySQL access unavailable under sandbox, primary integration capture/full test used",
+  "historical_files_checked": 3263,
+  "historical_hashes_changed": 0,
+  "remaining_isolated_databases": 0,
+  "new_paid_model_calls": 0,
+  "new_paid_jev_calls": 0,
+  "new_claims": 0,
+  "deployed": false
+}

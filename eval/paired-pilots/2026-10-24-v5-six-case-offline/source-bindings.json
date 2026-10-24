@@ -1,0 +1,40 @@
+{
+  "schema": "v5-six-case-offline-source-bindings.v1",
+  "files": {
+    "internal/agent/cash_read_recovery.go": "c1759126b37852efa8351ec31b9ec144966ed10912e2e648b0aecdc844fa38b5",
+    "internal/agent/chat.go": "8ed51e6db31f24bcb33763b9411dccacf2c8229b2146ccfb1360f4e9da7dbb5b",
+    "internal/agent/evalcore.go": "ec3846fd8ebe144f783ed1ebee15a64d15047b267f607cc581f87231034f9a34",
+    "internal/agent/fast_path.go": "f962e2d7e3760f68f976a68354ebf14562212f91427b267fe6333d0aaf975ddb",
+    "internal/agent/guard.go": "a1c770b0434a3021a9ec574ced4880b76695cd4252ee28d9287dd1321abfc20f",
+    "internal/agent/intentsuite.go": "7f33af8037acec75560e74d14bace4033cb32e90d7496968f31547283ef44ae2",
+    "internal/agent/llm.go": "ab6af51fe69b2a0c41b21ce3d82b8b97e80e362ec42efe745b84156e0e88a96f",
+    "internal/agent/llm_protocol.go": "78beb6894cecaac9ba1923a3b7c9cf8f2798633445f5b2e641c3e96a85dbf37b",
+    "internal/agent/observability.go": "bdfe917d3bcfc4b35c1822355764c3fdf09f07b0b6a1218d3c292217ac41abf3",
+    "internal/agent/policy.go": "bdc3e4cccefeaad9f662739c576587f6631acea7d13f798145b538d171c3362e",
+    "internal/agent/prompt.go": "0fb4c7aa7cd4eab195971d5f1e63995789a94fea37ec671e773dc728ad56d6c5",
+    "internal/agent/reply_boundary.go": "cac12aae0f8daf91b6144b8e67ced5791f8ae7795cd47f3d738b83b38d52d0ec",
+    "internal/agent/runtime_metadata.go": "c2715df9b7b9d80486e9a24f5a914b503c31d910643905a0de6cdcb36eaf253c",
+    "internal/agent/telemetry.go": "e84e8099f67e320e1ab870c0a542977e102ac62887ef35c954446ac8833ba03e",
+    "internal/agent/tools.go": "3a12c8ae187f265e6d63bf6868d906c5e847ca1ecbe3c1428efc0579d550d082",
+    "internal/taskbench/six_case_v5_offline_test.go": "7269c2c14b9581b42c65d9ea29b2b126e3d1513787aee9739f5077693323aa41",
+    "internal/taskbench/paired_adapter.go": "405d0ee4616a747ab98a098120e8d0ec50f8a33f1244e7d276654951baa60cc4",
+    "internal/taskbench/paired_runner.go": "3cc8093d26ad6b622c95abce9f9334b81abdce763a49c84e725ae30d6ddb6778",
+    "internal/taskbench/paired_report.go": "8ae0b09f99e6abca836f2d6409e317eec1902a2cbcdc3b448edc4b11c96422c3",
+    "internal/taskbench/paired_prepare.go": "a7c0f0de7f2a633518eb735d886be6ccbea46c69b54561e95655ba0cabf2df80",
+    "internal/taskbench/paired_oracle.go": "8773429c2fc91f0ba3802c00fdc06bf77f1a6500d061a3f94ccc538180a29001",
+    "internal/taskbench/paired_jev_budget.go": "88cba1da5dfd117478a01d85bb423cf44c7a4440e99e5e82ea16e56d090155c2",
+    "internal/taskbench/conversation_runner.go": "c5a4e1912b344d7cd5185e52c0444e641e27cfabb658191a743d2e68a9b018d4",
+    "internal/taskbench/conversation_facts.go": "cf1bf3549cbc88b45f336580a3f92ddbdc6df4aa2e9908a69a94220a06883a5e",
+    "internal/taskbench/conversation_state.go": "3dd6fd13def35390881d0b22d14428913da1d545d56b1e319376b7ca01041318"
+  },
+  "customer_non_test_agent_go_sources_match_revision": "50e3c8dab14b4b6cc25322fd340a274e6970200b",
+  "frozen_definition_sha256": "50848e347b985669e3424688f5f1e57b369d6c5577f3aa7e5de25e03144b7ebd",
+  "frozen_manifest_sha256": "afaf5fba49893d2c20e91dc8b0e84c998608b82194d6613a6b6549e289ac4181",
+  "frozen_profile_sha256": {
+    "active_standard": "83a78d7492c75e0d153cbb9ca4a1a87aa2f15714ad1e855534a084f4848e257d",
+    "low_balance": "83a78d7492c75e0d153cbb9ca4a1a87aa2f15714ad1e855534a084f4848e257d",
+    "no_subscription": "83a78d7492c75e0d153cbb9ca4a1a87aa2f15714ad1e855534a084f4848e257d"
+  },
+  "prompt_sha256": "731344ccef1bfc40456b6797e9c7cb5c5c3d628799d3e5ee8ab05f3142c6f7fa",
+  "tools_sha256": "3962937d7fd08af4794758a56070b7bbadfb5c3e188cf1fa539355780b9e0e17"
+}
