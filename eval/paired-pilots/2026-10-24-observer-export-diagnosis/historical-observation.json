@@ -1,0 +1,54 @@
+{
+  "schema": "observer-export-historical-observation.v1",
+  "execution_revision": "9ff31b162ebb02b1f89ad7ae1d8c2fe914965d33",
+  "execution_command": {
+    "started_at_utc": "2026-10-24T15:07:28.287216+00:00",
+    "finished_at_utc": "2026-10-24T15:09:19.490720+00:00",
+    "exit_code": 1,
+    "automatic_retry": false,
+    "execution_revision": "9ff31b162ebb02b1f89ad7ae1d8c2fe914965d33"
+  },
+  "original_stats": {
+    "Accepted": 232,
+    "Dropped": 0,
+    "Exported": 229,
+    "Failed": 3,
+    "Batches": 115,
+    "Turns": 72,
+    "SampledTurns": 72,
+    "QueueDepth": 0
+  },
+  "receipt_stage": "batch_execution",
+  "batch_016_status": "failed",
+  "entry_outcome": {
+    "cleanup_and_receipt_succeeded": false,
+    "execution_receipt": "receipt.json",
+    "schema": "paired-live-entry-outcome.v1",
+    "status": "stopped"
+  },
+  "subsequent_readback_observations": 232,
+  "readback_observation_types": {
+    "llm.attempt": 57,
+    "tool.get_balance": 12,
+    "agent.turn": 72,
+    "evaluation.task": 32,
+    "jev.intent": 16,
+    "tool.recharge": 12,
+    "tool.preview.recharge": 18,
+    "tool.refund_recharge": 6,
+    "tool.preview.refund_recharge": 6,
+    "tool.get_my_subscription": 1
+  },
+  "expected_and_actual_traces": 32,
+  "turns_with_exact_content_readback": 72,
+  "failed_count_unit": "spans in exporter calls that returned error; not failed HTTP request count or proven lost spans",
+  "historical_failed_request_count": null,
+  "historical_failed_span_ids": null,
+  "historical_http_status": null,
+  "historical_error_class": null,
+  "historical_failure_cause": "unknown",
+  "no_original_ack_response_or_transport_cause_persisted": true,
+  "actual_model_calls_this_diagnosis": 0,
+  "actual_jev_calls_this_diagnosis": 0,
+  "telemetry_reexported": false
+}

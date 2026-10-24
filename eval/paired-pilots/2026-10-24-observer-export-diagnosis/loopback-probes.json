@@ -1,0 +1,115 @@
+{
+  "schema": "observer-export-ack-probes.v1",
+  "synthetic_only": true,
+  "literal_loopback_receivers_only": true,
+  "uses_real_observer_and_otlp_exporter": true,
+  "actual_model_calls": 0,
+  "actual_jev_calls": 0,
+  "shared_langfuse_writes": 0,
+  "requests": [
+    {
+      "client_stats": {
+        "Accepted": 3,
+        "Dropped": 0,
+        "Exported": 3,
+        "Failed": 0,
+        "Batches": 1,
+        "Turns": 1,
+        "SampledTurns": 1,
+        "QueueDepth": 0
+      },
+      "flush_failed": false,
+      "historical_cause_proven": false,
+      "jev_calls": 0,
+      "model_calls": 0,
+      "receiver_complete_body_spans": 3,
+      "requests": 1,
+      "scenario": "normal_ack",
+      "shutdown_failed": false
+    },
+    {
+      "client_stats": {
+        "Accepted": 3,
+        "Dropped": 0,
+        "Exported": 0,
+        "Failed": 3,
+        "Batches": 1,
+        "Turns": 1,
+        "SampledTurns": 1,
+        "QueueDepth": 0
+      },
+      "flush_failed": true,
+      "historical_cause_proven": false,
+      "jev_calls": 0,
+      "model_calls": 0,
+      "receiver_complete_body_spans": 3,
+      "requests": 1,
+      "scenario": "response_timeout",
+      "shutdown_failed": true
+    },
+    {
+      "client_stats": {
+        "Accepted": 3,
+        "Dropped": 0,
+        "Exported": 0,
+        "Failed": 3,
+        "Batches": 1,
+        "Turns": 1,
+        "SampledTurns": 1,
+        "QueueDepth": 0
+      },
+      "flush_failed": true,
+      "historical_cause_proven": false,
+      "jev_calls": 0,
+      "model_calls": 0,
+      "receiver_complete_body_spans": 3,
+      "requests": 1,
+      "scenario": "http_503",
+      "shutdown_failed": true
+    },
+    {
+      "client_stats": {
+        "Accepted": 3,
+        "Dropped": 0,
+        "Exported": 0,
+        "Failed": 3,
+        "Batches": 1,
+        "Turns": 1,
+        "SampledTurns": 1,
+        "QueueDepth": 0
+      },
+      "flush_failed": true,
+      "historical_cause_proven": false,
+      "jev_calls": 0,
+      "model_calls": 0,
+      "receiver_complete_body_spans": 3,
+      "requests": 1,
+      "scenario": "connection_close",
+      "shutdown_failed": true
+    },
+    {
+      "client_stats": {
+        "Accepted": 3,
+        "Dropped": 0,
+        "Exported": 0,
+        "Failed": 3,
+        "Batches": 1,
+        "Turns": 1,
+        "SampledTurns": 1,
+        "QueueDepth": 0
+      },
+      "flush_failed": true,
+      "historical_cause_proven": false,
+      "jev_calls": 0,
+      "model_calls": 0,
+      "receiver_complete_body_spans": 3,
+      "requests": 1,
+      "scenario": "malformed_protobuf",
+      "shutdown_failed": true
+    }
+  ],
+  "receiver_read_is_not_durable_storage": true,
+  "historical_cause_proven": false,
+  "test_only_export_timeout_ms": 1000,
+  "production_export_timeout_unchanged_ms": 2000
+}

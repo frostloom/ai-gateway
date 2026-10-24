@@ -1,0 +1,18 @@
+{
+  "schema": "observer-export-diagnosis-independent-review.v1",
+  "reviewer": "/root/review_observer_diagnosis",
+  "p1_p2_findings": [],
+  "required_corrections": [],
+  "source_sha_bindings_checked": 20,
+  "production_go_unchanged": true,
+  "historical_cause_and_durability_limits_checked": true,
+  "independent_focused_exit_code": 0,
+  "independent_focused_seconds": 1.494,
+  "independent_environment_failures_retained": [
+    "Default MacOSX27 SDK linker architecture incompatibility before tests",
+    "MacOSX26.5 first run sandbox denied loopback listener"
+  ],
+  "final_independent_environment": "Process SDKROOT=MacOSX26.5.sdk; approved temporary loopback ports; no persistent configuration change",
+  "full_go_authority": "Primary18package standard full regression, not re-run by reviewer",
+  "model_jev_calls_during_review": 0
+}
