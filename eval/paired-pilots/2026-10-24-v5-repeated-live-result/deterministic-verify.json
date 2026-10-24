@@ -1,0 +1,329 @@
+{
+  "jev_calls": 0,
+  "kind": "verified",
+  "model_calls": 0,
+  "plan_sha256": "b025720ca4688c1b429e735cd00e78a363120495b729a954da76b887622d210a",
+  "score_count": 224,
+  "trace_summaries": [
+    {
+      "arm": "model",
+      "case_key": "balance-001/answer_complete",
+      "content_turns": 1,
+      "evidence_kind": "recorded_run",
+      "expected_turns": 1,
+      "require_answers": true,
+      "trace_id": "779240bd1b8faed3f326f3ddca70b884",
+      "turns": 1
+    },
+    {
+      "arm": "jev_selective",
+      "case_key": "balance-001/answer_complete",
+      "content_turns": 1,
+      "evidence_kind": "recorded_run",
+      "expected_turns": 1,
+      "require_answers": true,
+      "trace_id": "4e3ce2a205f2029fe7cac7ff943bc81b",
+      "turns": 1
+    },
+    {
+      "arm": "model",
+      "case_key": "balance-020/explicit_scope_followup",
+      "content_turns": 2,
+      "evidence_kind": "recorded_run",
+      "expected_turns": 2,
+      "require_answers": true,
+      "trace_id": "8877a1a45d15e41cbef1a0ad70aec7a9",
+      "turns": 2
+    },
+    {
+      "arm": "jev_selective",
+      "case_key": "balance-020/explicit_scope_followup",
+      "content_turns": 2,
+      "evidence_kind": "recorded_run",
+      "expected_turns": 2,
+      "require_answers": true,
+      "trace_id": "f11d2704b1baa02a61655a6e5d5204df",
+      "turns": 2
+    },
+    {
+      "arm": "model",
+      "case_key": "recharge-002/confirm",
+      "content_turns": 2,
+      "evidence_kind": "recorded_run",
+      "expected_turns": 2,
+      "require_answers": true,
+      "trace_id": "daff0a07cf392906fad034f1e2ba9d1c",
+      "turns": 2
+    },
+    {
+      "arm": "jev_selective",
+      "case_key": "recharge-002/confirm",
+      "content_turns": 2,
+      "evidence_kind": "recorded_run",
+      "expected_turns": 2,
+      "require_answers": true,
+      "trace_id": "1f1f7ad62779f0c1409e5ec79c3d1172",
+      "turns": 2
+    },
+    {
+      "arm": "model",
+      "case_key": "recharge-002/cancel",
+      "content_turns": 2,
+      "evidence_kind": "recorded_run",
+      "expected_turns": 2,
+      "require_answers": true,
+      "trace_id": "d8c4ca3a2597bdeb0d4aecd954a8bf4b",
+      "turns": 2
+    },
+    {
+      "arm": "jev_selective",
+      "case_key": "recharge-002/cancel",
+      "content_turns": 2,
+      "evidence_kind": "recorded_run",
+      "expected_turns": 2,
+      "require_answers": true,
+      "trace_id": "95af8b47624704ecbc57ea0667feea80",
+      "turns": 2
+    },
+    {
+      "arm": "model",
+      "case_key": "recharge-001/supplement_then_confirm",
+      "content_turns": 3,
+      "evidence_kind": "recorded_run",
+      "expected_turns": 3,
+      "require_answers": true,
+      "trace_id": "3a75d07bad538da44697b2375b9d8c13",
+      "turns": 3
+    },
+    {
+      "arm": "jev_selective",
+      "case_key": "recharge-001/supplement_then_confirm",
+      "content_turns": 3,
+      "evidence_kind": "recorded_run",
+      "expected_turns": 3,
+      "require_answers": true,
+      "trace_id": "d3ca35383aedfa56c024065272d5d898",
+      "turns": 3
+    },
+    {
+      "arm": "model",
+      "case_key": "refund-001/balance_cap",
+      "content_turns": 3,
+      "evidence_kind": "recorded_run",
+      "expected_turns": 3,
+      "require_answers": true,
+      "trace_id": "6811897055c4af457468b26ccf7e83c1",
+      "turns": 3
+    },
+    {
+      "arm": "jev_selective",
+      "case_key": "refund-001/balance_cap",
+      "content_turns": 3,
+      "evidence_kind": "recorded_run",
+      "expected_turns": 3,
+      "require_answers": true,
+      "trace_id": "1ccaac818f26f496e3903f5a3a1c5342",
+      "turns": 3
+    },
+    {
+      "arm": "model",
+      "case_key": "balance-020/explicit_scope_followup",
+      "content_turns": 2,
+      "evidence_kind": "recorded_run",
+      "expected_turns": 2,
+      "require_answers": true,
+      "trace_id": "710c4be617a5d7c3b7e0bf73b8069d18",
+      "turns": 2
+    },
+    {
+      "arm": "jev_selective",
+      "case_key": "balance-020/explicit_scope_followup",
+      "content_turns": 2,
+      "evidence_kind": "recorded_run",
+      "expected_turns": 2,
+      "require_answers": true,
+      "trace_id": "5c0aa1b09929ba07567b91af8106fde8",
+      "turns": 2
+    },
+    {
+      "arm": "model",
+      "case_key": "recharge-002/confirm",
+      "content_turns": 2,
+      "evidence_kind": "recorded_run",
+      "expected_turns": 2,
+      "require_answers": true,
+      "trace_id": "23f163e4d7f35a91944a21508f17afa3",
+      "turns": 2
+    },
+    {
+      "arm": "jev_selective",
+      "case_key": "recharge-002/confirm",
+      "content_turns": 2,
+      "evidence_kind": "recorded_run",
+      "expected_turns": 2,
+      "require_answers": true,
+      "trace_id": "5536336101e7c5ae845d11ce45878756",
+      "turns": 2
+    },
+    {
+      "arm": "model",
+      "case_key": "recharge-002/cancel",
+      "content_turns": 2,
+      "evidence_kind": "recorded_run",
+      "expected_turns": 2,
+      "require_answers": true,
+      "trace_id": "8ed0ab7223c414be1d66c685485284f5",
+      "turns": 2
+    },
+    {
+      "arm": "jev_selective",
+      "case_key": "recharge-002/cancel",
+      "content_turns": 2,
+      "evidence_kind": "recorded_run",
+      "expected_turns": 2,
+      "require_answers": true,
+      "trace_id": "5d0249874b820fdb11eb689ec0dfff50",
+      "turns": 2
+    },
+    {
+      "arm": "model",
+      "case_key": "recharge-001/supplement_then_confirm",
+      "content_turns": 3,
+      "evidence_kind": "recorded_run",
+      "expected_turns": 3,
+      "require_answers": true,
+      "trace_id": "9b9b5ea42fe5d754f612240e79b3d2e4",
+      "turns": 3
+    },
+    {
+      "arm": "jev_selective",
+      "case_key": "recharge-001/supplement_then_confirm",
+      "content_turns": 3,
+      "evidence_kind": "recorded_run",
+      "expected_turns": 3,
+      "require_answers": true,
+      "trace_id": "f575aa3d413c7df8f9866c2831a0981d",
+      "turns": 3
+    },
+    {
+      "arm": "model",
+      "case_key": "refund-001/balance_cap",
+      "content_turns": 3,
+      "evidence_kind": "recorded_run",
+      "expected_turns": 3,
+      "require_answers": true,
+      "trace_id": "46ea355f9e07671652a8c0e25023a9de",
+      "turns": 3
+    },
+    {
+      "arm": "jev_selective",
+      "case_key": "refund-001/balance_cap",
+      "content_turns": 3,
+      "evidence_kind": "recorded_run",
+      "expected_turns": 3,
+      "require_answers": true,
+      "trace_id": "cae012972ab9759a9b01bb9d3b1ade36",
+      "turns": 3
+    },
+    {
+      "arm": "model",
+      "case_key": "balance-001/answer_complete",
+      "content_turns": 1,
+      "evidence_kind": "recorded_run",
+      "expected_turns": 1,
+      "require_answers": true,
+      "trace_id": "48ceb0dafb936ca4f47f15ac76fa0b19",
+      "turns": 1
+    },
+    {
+      "arm": "jev_selective",
+      "case_key": "balance-001/answer_complete",
+      "content_turns": 1,
+      "evidence_kind": "recorded_run",
+      "expected_turns": 1,
+      "require_answers": true,
+      "trace_id": "eb1093b917ff5ab56bb9afc8a7d0d167",
+      "turns": 1
+    },
+    {
+      "arm": "model",
+      "case_key": "recharge-002/confirm",
+      "content_turns": 2,
+      "evidence_kind": "recorded_run",
+      "expected_turns": 2,
+      "require_answers": true,
+      "trace_id": "4d2e5e54f8c25f7891d3849e1f1caf48",
+      "turns": 2
+    },
+    {
+      "arm": "jev_selective",
+      "case_key": "recharge-002/confirm",
+      "content_turns": 2,
+      "evidence_kind": "recorded_run",
+      "expected_turns": 2,
+      "require_answers": true,
+      "trace_id": "66916932dc776dfff2886d85c2116de2",
+      "turns": 2
+    },
+    {
+      "arm": "model",
+      "case_key": "recharge-002/cancel",
+      "content_turns": 2,
+      "evidence_kind": "recorded_run",
+      "expected_turns": 2,
+      "require_answers": true,
+      "trace_id": "be2216076129ed35fe77f255d917efa1",
+      "turns": 2
+    },
+    {
+      "arm": "jev_selective",
+      "case_key": "recharge-002/cancel",
+      "content_turns": 2,
+      "evidence_kind": "recorded_run",
+      "expected_turns": 2,
+      "require_answers": true,
+      "trace_id": "2dd56a59bda443e42ca1c92d34e50e03",
+      "turns": 2
+    },
+    {
+      "arm": "model",
+      "case_key": "recharge-001/supplement_then_confirm",
+      "content_turns": 3,
+      "evidence_kind": "recorded_run",
+      "expected_turns": 3,
+      "require_answers": true,
+      "trace_id": "a3ca6be8507df270aa6903ac6dadfb73",
+      "turns": 3
+    },
+    {
+      "arm": "jev_selective",
+      "case_key": "recharge-001/supplement_then_confirm",
+      "content_turns": 3,
+      "evidence_kind": "recorded_run",
+      "expected_turns": 3,
+      "require_answers": true,
+      "trace_id": "f13e866cbb69408ffa09c6d68308e75a",
+      "turns": 3
+    },
+    {
+      "arm": "model",
+      "case_key": "refund-001/balance_cap",
+      "content_turns": 3,
+      "evidence_kind": "recorded_run",
+      "expected_turns": 3,
+      "require_answers": true,
+      "trace_id": "355439fcf07bc7da3c972fa28c234c59",
+      "turns": 3
+    },
+    {
+      "arm": "jev_selective",
+      "case_key": "refund-001/balance_cap",
+      "content_turns": 3,
+      "evidence_kind": "recorded_run",
+      "expected_turns": 3,
+      "require_answers": true,
+      "trace_id": "2cccaaab8e7aae3083820dd3b542a645",
+      "turns": 3
+    }
+  ]
+}

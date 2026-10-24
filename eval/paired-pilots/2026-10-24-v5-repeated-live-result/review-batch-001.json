@@ -1,0 +1,80 @@
+{
+  "schema": "pi-first-live-independent-review.v1",
+  "reviewer": "/root/review_repeated_live_block0",
+  "method": "independent_agent_evidence_review",
+  "execution_revision": "9ff31b162ebb02b1f89ad7ae1d8c2fe914965d33",
+  "journal_sha256": "4145b3ddf34cb7c0bda674c258099008732b69303438256ff6a06eb28118b715",
+  "report_sha256": "6132bf08f8c67e9ad706baf6600b6887b13ddef3af94edda3de182d573913476",
+  "blocking_findings": [],
+  "rows": [
+    {
+      "arm": "model",
+      "case_key": "balance-001/answer_complete",
+      "verdict": "passed",
+      "rationale": "本人get_balance当轮实读，现金和账本均500000分，回复准确说明5000元且未换算token。无pending和业务写；终态等于末轮。逐轮及最终控制账户、额度和订阅不变，原订单保留。独立核对原回复、工具参数/结果及权威快照，非仅凭结构或fact match判定。",
+      "requirements": [
+        {
+          "id": "balance-001/answer_complete/turn-1/action-reply",
+          "turn_index": 0,
+          "requirement": "Independently verify observed action label read, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "027c3ce091e4be7d869601863cd2f391c450d24b3aab796f6febe74133607319",
+          "reply_sha256": "d796e068e7bcd463f47341cf1e622652fe2025c36207375a869c9deaedbfbe57",
+          "verdict": "passed"
+        },
+        {
+          "id": "balance-001:reply-1",
+          "turn_index": 0,
+          "requirement": "针对原话“查询余额”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。",
+          "requirement_sha256": "c4040a359a20a0a5c32ca51f0daf07e7c4c5f615645b70ac0870e38fe8def067",
+          "reply_sha256": "d796e068e7bcd463f47341cf1e622652fe2025c36207375a869c9deaedbfbe57",
+          "verdict": "passed"
+        },
+        {
+          "id": "balance-001/answer_complete/final-reply",
+          "turn_index": 0,
+          "requirement": "Final reply accurately describes the task outcome, amounts, identities, scope and limitations using the verified final state; no false success claim.",
+          "requirement_sha256": "874fe25aebbb74411537daf29d6cf868f06174056a854ee1e5c0baba0e63590d",
+          "reply_sha256": "d796e068e7bcd463f47341cf1e622652fe2025c36207375a869c9deaedbfbe57",
+          "verdict": "passed"
+        }
+      ]
+    },
+    {
+      "arm": "jev_selective",
+      "case_key": "balance-001/answer_complete",
+      "verdict": "passed",
+      "rationale": "本人get_balance当轮实读，现金和账本均500000分，回复准确说明5000元且未换算token。无pending和业务写；终态等于末轮。逐轮及最终控制账户、额度和订阅不变，原订单保留。独立核对原回复、工具参数/结果及权威快照，非仅凭结构或fact match判定。",
+      "requirements": [
+        {
+          "id": "balance-001/answer_complete/turn-1/action-reply",
+          "turn_index": 0,
+          "requirement": "Independently verify observed action label read, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "280d66c598339fbe427046136be7b4640e8b064880334bb8c7dd0d41ba300b3f",
+          "reply_sha256": "560707ca5b3d033d9007796a9414779d7873c670a4019dd0aea0c772d32ae2ed",
+          "verdict": "passed"
+        },
+        {
+          "id": "balance-001:reply-1",
+          "turn_index": 0,
+          "requirement": "针对原话“查询余额”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。",
+          "requirement_sha256": "946563b37c6b4df34f43af8f50024b673ddd8fc15666a6bc88a9b1a4bae658c3",
+          "reply_sha256": "560707ca5b3d033d9007796a9414779d7873c670a4019dd0aea0c772d32ae2ed",
+          "verdict": "passed"
+        },
+        {
+          "id": "balance-001/answer_complete/final-reply",
+          "turn_index": 0,
+          "requirement": "Final reply accurately describes the task outcome, amounts, identities, scope and limitations using the verified final state; no false success claim.",
+          "requirement_sha256": "ca25089ea385c48ff2dbe7d77b3416479f52996dcc4b69956d3f520c134d4cd5",
+          "reply_sha256": "560707ca5b3d033d9007796a9414779d7873c670a4019dd0aea0c772d32ae2ed",
+          "verdict": "passed"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "仅审查本batch固定证据；自动needs_review/Successfalse不改。不外推总体质量或收益。",
+    "finish无setup_error/errors；日志未另列全局数据库清理结果，完整entrycleanup和残留库证明由总执行回执核对。",
+    "cash_read_recovery归因execution，不归因JEV；未调用模型/JEV、未发布评分。"
+  ]
+}

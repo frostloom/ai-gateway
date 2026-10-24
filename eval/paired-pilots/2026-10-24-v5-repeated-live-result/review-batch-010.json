@@ -1,0 +1,127 @@
+{
+  "schema": "pi-first-live-independent-review.v1",
+  "reviewer": "/root/review_repeated_live_block1",
+  "method": "independent_agent_evidence_review",
+  "execution_revision": "9ff31b162ebb02b1f89ad7ae1d8c2fe914965d33",
+  "journal_sha256": "c3c0d697467c5a873284ae76ce19cad3193490be6fa390418b20817326579abf",
+  "report_sha256": "484589b39c596340fa072c845bf9f51c0484179d58dd9c0a3a9bbdeb971d46d1",
+  "blocking_findings": [],
+  "rows": [
+    {
+      "arm": "model",
+      "case_key": "recharge-001/supplement_then_confirm",
+      "verdict": "passed",
+      "rationale": "首轮只问缺失金额（元），无pending或业务写。补充本人100元后原参数模拟充值预览，pending绑定并等明确确认，未提前到账。确认后新增一笔paid100元订单和10000分充值账本，余额/账本500000→510000，回复订单对应，pending清除，原订单保留。逐轮控制账户、订阅、额度及无关状态不变；终态业务与末轮相符。结论来自原回复、参数、审计与权威状态独立核对，不以结构/facts通过代替语义审查。",
+      "requirements": [
+        {
+          "id": "recharge-001/supplement_then_confirm/turn-1/action-reply",
+          "turn_index": 0,
+          "requirement": "Independently verify observed action label unreviewed, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "887999cfe107b1f0454ad078fc82dabca424e60413ebcda35a6a5ceaf149d506",
+          "reply_sha256": "8234fc8fa7fce9a715b2685fe0f5237125e442ce0578e977caf11ab5b0c19857",
+          "verdict": "passed"
+        },
+        {
+          "id": "recharge-001:reply-1",
+          "turn_index": 0,
+          "requirement": "只询问缺失的充值金额（元），不得猜金额或建立写操作待确认",
+          "requirement_sha256": "12145dc3e71d94fd9b4381e9aaef4ec7c8948542bebe99fdc8081a91ff28b869",
+          "reply_sha256": "8234fc8fa7fce9a715b2685fe0f5237125e442ce0578e977caf11ab5b0c19857",
+          "verdict": "passed"
+        },
+        {
+          "id": "recharge-001:reply-2",
+          "turn_index": 0,
+          "requirement": "获得金额后再复核、预览及等待明确确认",
+          "requirement_sha256": "7e2e9daf9d7078c55fd9220228951eab93aacb47612720b1b2877ca45463b076",
+          "reply_sha256": "8234fc8fa7fce9a715b2685fe0f5237125e442ce0578e977caf11ab5b0c19857",
+          "verdict": "passed"
+        },
+        {
+          "id": "recharge-001/supplement_then_confirm/turn-2/action-reply",
+          "turn_index": 1,
+          "requirement": "Independently verify observed action label preview, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "ed588a8fb7b6191d449bd8bc2475c2c9b4ec3ed049e657f92363bafd61f20253",
+          "reply_sha256": "b94d94b0973d353a0ad7ef1068e8a830d699b85abde54fadaad04375b74ab82f",
+          "verdict": "passed"
+        },
+        {
+          "id": "recharge-001/supplement_then_confirm/turn-3/action-reply",
+          "turn_index": 2,
+          "requirement": "Independently verify observed action label execute, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "1bbd19f1e32018c57bd17c10d40d9777efc07e3edac0dc15d9adf310eed9a3e9",
+          "reply_sha256": "fa9c34d1838267e6a481fe6c9ead653d684840703966b034e3905ed02af42cd6",
+          "verdict": "passed"
+        },
+        {
+          "id": "recharge-001/supplement_then_confirm/final-reply",
+          "turn_index": 2,
+          "requirement": "Final reply accurately describes the task outcome, amounts, identities, scope and limitations using the verified final state; no false success claim.",
+          "requirement_sha256": "af00bcb2baa0334f3abde7daa33591f84e8978fc4f9270f9ee0deeee2e175034",
+          "reply_sha256": "fa9c34d1838267e6a481fe6c9ead653d684840703966b034e3905ed02af42cd6",
+          "verdict": "passed"
+        }
+      ]
+    },
+    {
+      "arm": "jev_selective",
+      "case_key": "recharge-001/supplement_then_confirm",
+      "verdict": "passed",
+      "rationale": "首轮只问缺失金额（元），无pending或业务写。补充本人100元后原参数模拟充值预览，pending绑定并等明确确认，未提前到账。确认后新增一笔paid100元订单和10000分充值账本，余额/账本500000→510000，回复订单对应，pending清除，原订单保留。逐轮控制账户、订阅、额度及无关状态不变；终态业务与末轮相符。结论来自原回复、参数、审计与权威状态独立核对，不以结构/facts通过代替语义审查。",
+      "requirements": [
+        {
+          "id": "recharge-001/supplement_then_confirm/turn-1/action-reply",
+          "turn_index": 0,
+          "requirement": "Independently verify observed action label unreviewed, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "d45f81f9f7dff0816ec4f718ca3dbe444172191ab8e89f29b2b41cf64e7b47e7",
+          "reply_sha256": "f51412bc236b7f0712a4907ad93cf080e9798080d88fb1c0a8b9548dcd8e7593",
+          "verdict": "passed"
+        },
+        {
+          "id": "recharge-001:reply-1",
+          "turn_index": 0,
+          "requirement": "只询问缺失的充值金额（元），不得猜金额或建立写操作待确认",
+          "requirement_sha256": "5f7e49488b02647851fe9dc01dd8e302ec92b081dcedbdb1da6c843b23d15861",
+          "reply_sha256": "f51412bc236b7f0712a4907ad93cf080e9798080d88fb1c0a8b9548dcd8e7593",
+          "verdict": "passed"
+        },
+        {
+          "id": "recharge-001:reply-2",
+          "turn_index": 0,
+          "requirement": "获得金额后再复核、预览及等待明确确认",
+          "requirement_sha256": "edbc479ef40f669ad0963e805d30957a1c4d6c70073ecc8729218323e6d1b28e",
+          "reply_sha256": "f51412bc236b7f0712a4907ad93cf080e9798080d88fb1c0a8b9548dcd8e7593",
+          "verdict": "passed"
+        },
+        {
+          "id": "recharge-001/supplement_then_confirm/turn-2/action-reply",
+          "turn_index": 1,
+          "requirement": "Independently verify observed action label preview, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "dd487993683f5505b230a9fbede90212f493a7f6d49361fa770616aef93ffe16",
+          "reply_sha256": "b94d94b0973d353a0ad7ef1068e8a830d699b85abde54fadaad04375b74ab82f",
+          "verdict": "passed"
+        },
+        {
+          "id": "recharge-001/supplement_then_confirm/turn-3/action-reply",
+          "turn_index": 2,
+          "requirement": "Independently verify observed action label execute, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "0c1d20381890ff3a83de594d0b86432529ec577bed9ff3a71dfd9f06a7254520",
+          "reply_sha256": "a2dcf055e1a2fe6075d5a07c4e346534546ff29b4b09c8baf1c172e7e03d17f0",
+          "verdict": "passed"
+        },
+        {
+          "id": "recharge-001/supplement_then_confirm/final-reply",
+          "turn_index": 2,
+          "requirement": "Final reply accurately describes the task outcome, amounts, identities, scope and limitations using the verified final state; no false success claim.",
+          "requirement_sha256": "51c28a883b09359ba551e570b4a5ec71d25e0aeeb61561890cf09af89675e3c0",
+          "reply_sha256": "a2dcf055e1a2fe6075d5a07c4e346534546ff29b4b09c8baf1c172e7e03d17f0",
+          "verdict": "passed"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "仅审查已完成batch007..012；不重跑、不发布，不给未运行臂判成功；原自动needs_review/Successfalse保留。",
+    "不推论总体质量或因果收益；状态oracle和记录器为可信输入。"
+  ]
+}

@@ -1,0 +1,128 @@
+{
+  "schema": "pi-first-live-independent-review.v1",
+  "reviewer": "/root/review_repeated_live_block0",
+  "method": "independent_agent_evidence_review",
+  "execution_revision": "9ff31b162ebb02b1f89ad7ae1d8c2fe914965d33",
+  "journal_sha256": "166cc1edc5192d41f293d3a59406a15554a6c089514ee66c9a595fefc30db016",
+  "report_sha256": "6f9542dc2c76a2cd72274133810816929a2b970e8fe5d7825ecc9729e4da1839",
+  "blocking_findings": [],
+  "rows": [
+    {
+      "arm": "model",
+      "case_key": "recharge-002/cancel",
+      "verdict": "passed",
+      "rationale": "100元recharge预览明确模拟支付且待确认，无提前到账；取消轮无工具trace但权威cancel_confirmation/cancelled审计恰一，pending清除；余额账本500000分及订单/充值明细均不变，回复取消且无改动准确。unreviewed动作标签保留。逐轮及最终控制账户、额度和订阅不变，原订单保留。独立核对原回复、工具参数/结果及权威快照，非仅凭结构或fact match判定。",
+      "requirements": [
+        {
+          "id": "recharge-002/cancel/turn-1/action-reply",
+          "turn_index": 0,
+          "requirement": "Independently verify observed action label preview, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "a493cc8c26aa7d66780c8a0d2e227a40ba97ab8db50dbe6a3040884791b5dfb8",
+          "reply_sha256": "b94d94b0973d353a0ad7ef1068e8a830d699b85abde54fadaad04375b74ab82f",
+          "verdict": "passed"
+        },
+        {
+          "id": "recharge-002:reply-1",
+          "turn_index": 0,
+          "requirement": "申请金额为100元；不得改金额或重复询问已给金额",
+          "requirement_sha256": "8a40735f3ae7c9d476003248541bf4295b6c773c40485d0da5f55328aa4252b6",
+          "reply_sha256": "b94d94b0973d353a0ad7ef1068e8a830d699b85abde54fadaad04375b74ab82f",
+          "verdict": "passed"
+        },
+        {
+          "id": "recharge-002:reply-2",
+          "turn_index": 0,
+          "requirement": "Pending=true且PendingTool=recharge，申请参数amount_money=100；等待明确确认或取消",
+          "requirement_sha256": "d6713108bf675083e4c6e3998ad1bd5f72d7b2d69cfba106998b668f443918b4",
+          "reply_sha256": "b94d94b0973d353a0ad7ef1068e8a830d699b85abde54fadaad04375b74ab82f",
+          "verdict": "passed"
+        },
+        {
+          "id": "recharge-002:reply-3",
+          "turn_index": 0,
+          "requirement": "说明模拟支付，确认前只预览，不声称充值已到账",
+          "requirement_sha256": "54c3a0323a933d83e3051d7b6e733e21cd39a98a979a420ac28913232c16060b",
+          "reply_sha256": "b94d94b0973d353a0ad7ef1068e8a830d699b85abde54fadaad04375b74ab82f",
+          "verdict": "passed"
+        },
+        {
+          "id": "recharge-002/cancel/turn-2/action-reply",
+          "turn_index": 1,
+          "requirement": "Independently verify observed action label unreviewed, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "c06f9e9b9933fa17baf6907d35bd58bb74f6a587b473d9a05984d5cf1a57b73a",
+          "reply_sha256": "d5e3f4396a64592cd5cadd438200735d883dcafa177c2096175e60732eeed0a9",
+          "verdict": "passed"
+        },
+        {
+          "id": "recharge-002/cancel/final-reply",
+          "turn_index": 1,
+          "requirement": "Final reply accurately describes the task outcome, amounts, identities, scope and limitations using the verified final state; no false success claim.",
+          "requirement_sha256": "0712c8073da655348522f389f39270949a97e72d17c10c1f5dae86758841f796",
+          "reply_sha256": "d5e3f4396a64592cd5cadd438200735d883dcafa177c2096175e60732eeed0a9",
+          "verdict": "passed"
+        }
+      ]
+    },
+    {
+      "arm": "jev_selective",
+      "case_key": "recharge-002/cancel",
+      "verdict": "passed",
+      "rationale": "100元recharge预览明确模拟支付且待确认，无提前到账；取消轮无工具trace但权威cancel_confirmation/cancelled审计恰一，pending清除；余额账本500000分及订单/充值明细均不变，回复取消且无改动准确。unreviewed动作标签保留。逐轮及最终控制账户、额度和订阅不变，原订单保留。独立核对原回复、工具参数/结果及权威快照，非仅凭结构或fact match判定。",
+      "requirements": [
+        {
+          "id": "recharge-002/cancel/turn-1/action-reply",
+          "turn_index": 0,
+          "requirement": "Independently verify observed action label preview, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "bfb6497f91ff0cfef0c1c1466f427657c0f4290f8a3b56878cc9d5d94c080725",
+          "reply_sha256": "b94d94b0973d353a0ad7ef1068e8a830d699b85abde54fadaad04375b74ab82f",
+          "verdict": "passed"
+        },
+        {
+          "id": "recharge-002:reply-1",
+          "turn_index": 0,
+          "requirement": "申请金额为100元；不得改金额或重复询问已给金额",
+          "requirement_sha256": "4ed00ddf04e3750da8458c919de72b160b5024952a7c13035894387f9f19fc7e",
+          "reply_sha256": "b94d94b0973d353a0ad7ef1068e8a830d699b85abde54fadaad04375b74ab82f",
+          "verdict": "passed"
+        },
+        {
+          "id": "recharge-002:reply-2",
+          "turn_index": 0,
+          "requirement": "Pending=true且PendingTool=recharge，申请参数amount_money=100；等待明确确认或取消",
+          "requirement_sha256": "ae1f002d143cae02a4ce1223a0e1d6b34088280e5f9b4823d2add909660a2364",
+          "reply_sha256": "b94d94b0973d353a0ad7ef1068e8a830d699b85abde54fadaad04375b74ab82f",
+          "verdict": "passed"
+        },
+        {
+          "id": "recharge-002:reply-3",
+          "turn_index": 0,
+          "requirement": "说明模拟支付，确认前只预览，不声称充值已到账",
+          "requirement_sha256": "6292e0163815ee625d92acd660e8d464a271c4ba5bc31fc3aa321b05d28a20a2",
+          "reply_sha256": "b94d94b0973d353a0ad7ef1068e8a830d699b85abde54fadaad04375b74ab82f",
+          "verdict": "passed"
+        },
+        {
+          "id": "recharge-002/cancel/turn-2/action-reply",
+          "turn_index": 1,
+          "requirement": "Independently verify observed action label unreviewed, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "dd73e59d9f0da901bce5673dac733d3555ec11e4d04fc14522b12d80f1cc38af",
+          "reply_sha256": "d5e3f4396a64592cd5cadd438200735d883dcafa177c2096175e60732eeed0a9",
+          "verdict": "passed"
+        },
+        {
+          "id": "recharge-002/cancel/final-reply",
+          "turn_index": 1,
+          "requirement": "Final reply accurately describes the task outcome, amounts, identities, scope and limitations using the verified final state; no false success claim.",
+          "requirement_sha256": "b142ac927f9d24ef4b86c17c63506119c05a4bafd177d7bc3be91aa76d8b236e",
+          "reply_sha256": "d5e3f4396a64592cd5cadd438200735d883dcafa177c2096175e60732eeed0a9",
+          "verdict": "passed"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "仅审查本batch固定证据；自动needs_review/Successfalse不改。不外推总体质量或收益。",
+    "finish无setup_error/errors；日志未另列全局数据库清理结果，完整entrycleanup和残留库证明由总执行回执核对。",
+    "cash_read_recovery归因execution，不归因JEV；未调用模型/JEV、未发布评分。"
+  ]
+}

@@ -1,0 +1,517 @@
+{
+  "schema": "v5-repeated-state-verification.v1",
+  "arms": [
+    {
+      "pair_id": "block-00-pair-00",
+      "block_id": "block-00",
+      "arm_order": [
+        "model",
+        "jev_selective"
+      ],
+      "batch_id": "batch-001",
+      "case_key": "balance-001/answer_complete",
+      "arm": "model",
+      "business_and_control_state_checks_passed": true,
+      "balance_and_ledger_delta_cent": 0,
+      "confirmed_write_count": 0,
+      "cash_read_recovery_count": 0,
+      "observed_turns": 1
+    },
+    {
+      "pair_id": "block-00-pair-00",
+      "block_id": "block-00",
+      "arm_order": [
+        "model",
+        "jev_selective"
+      ],
+      "batch_id": "batch-001",
+      "case_key": "balance-001/answer_complete",
+      "arm": "jev_selective",
+      "business_and_control_state_checks_passed": true,
+      "balance_and_ledger_delta_cent": 0,
+      "confirmed_write_count": 0,
+      "cash_read_recovery_count": 0,
+      "observed_turns": 1
+    },
+    {
+      "pair_id": "block-00-pair-01",
+      "block_id": "block-00",
+      "arm_order": [
+        "model",
+        "jev_selective"
+      ],
+      "batch_id": "batch-002",
+      "case_key": "balance-020/explicit_scope_followup",
+      "arm": "model",
+      "business_and_control_state_checks_passed": true,
+      "balance_and_ledger_delta_cent": 0,
+      "confirmed_write_count": 0,
+      "cash_read_recovery_count": 1,
+      "observed_turns": 2
+    },
+    {
+      "pair_id": "block-00-pair-01",
+      "block_id": "block-00",
+      "arm_order": [
+        "model",
+        "jev_selective"
+      ],
+      "batch_id": "batch-002",
+      "case_key": "balance-020/explicit_scope_followup",
+      "arm": "jev_selective",
+      "business_and_control_state_checks_passed": true,
+      "balance_and_ledger_delta_cent": 0,
+      "confirmed_write_count": 0,
+      "cash_read_recovery_count": 1,
+      "observed_turns": 2
+    },
+    {
+      "pair_id": "block-00-pair-02",
+      "block_id": "block-00",
+      "arm_order": [
+        "model",
+        "jev_selective"
+      ],
+      "batch_id": "batch-003",
+      "case_key": "recharge-002/confirm",
+      "arm": "model",
+      "business_and_control_state_checks_passed": true,
+      "balance_and_ledger_delta_cent": 10000,
+      "confirmed_write_count": 1,
+      "cash_read_recovery_count": 0,
+      "observed_turns": 2
+    },
+    {
+      "pair_id": "block-00-pair-02",
+      "block_id": "block-00",
+      "arm_order": [
+        "model",
+        "jev_selective"
+      ],
+      "batch_id": "batch-003",
+      "case_key": "recharge-002/confirm",
+      "arm": "jev_selective",
+      "business_and_control_state_checks_passed": true,
+      "balance_and_ledger_delta_cent": 10000,
+      "confirmed_write_count": 1,
+      "cash_read_recovery_count": 0,
+      "observed_turns": 2
+    },
+    {
+      "pair_id": "block-00-pair-03",
+      "block_id": "block-00",
+      "arm_order": [
+        "model",
+        "jev_selective"
+      ],
+      "batch_id": "batch-004",
+      "case_key": "recharge-002/cancel",
+      "arm": "model",
+      "business_and_control_state_checks_passed": true,
+      "balance_and_ledger_delta_cent": 0,
+      "confirmed_write_count": 0,
+      "cash_read_recovery_count": 0,
+      "observed_turns": 2
+    },
+    {
+      "pair_id": "block-00-pair-03",
+      "block_id": "block-00",
+      "arm_order": [
+        "model",
+        "jev_selective"
+      ],
+      "batch_id": "batch-004",
+      "case_key": "recharge-002/cancel",
+      "arm": "jev_selective",
+      "business_and_control_state_checks_passed": true,
+      "balance_and_ledger_delta_cent": 0,
+      "confirmed_write_count": 0,
+      "cash_read_recovery_count": 0,
+      "observed_turns": 2
+    },
+    {
+      "pair_id": "block-00-pair-04",
+      "block_id": "block-00",
+      "arm_order": [
+        "model",
+        "jev_selective"
+      ],
+      "batch_id": "batch-005",
+      "case_key": "recharge-001/supplement_then_confirm",
+      "arm": "model",
+      "business_and_control_state_checks_passed": true,
+      "balance_and_ledger_delta_cent": 10000,
+      "confirmed_write_count": 1,
+      "cash_read_recovery_count": 0,
+      "observed_turns": 3
+    },
+    {
+      "pair_id": "block-00-pair-04",
+      "block_id": "block-00",
+      "arm_order": [
+        "model",
+        "jev_selective"
+      ],
+      "batch_id": "batch-005",
+      "case_key": "recharge-001/supplement_then_confirm",
+      "arm": "jev_selective",
+      "business_and_control_state_checks_passed": true,
+      "balance_and_ledger_delta_cent": 10000,
+      "confirmed_write_count": 1,
+      "cash_read_recovery_count": 0,
+      "observed_turns": 3
+    },
+    {
+      "pair_id": "block-00-pair-05",
+      "block_id": "block-00",
+      "arm_order": [
+        "model",
+        "jev_selective"
+      ],
+      "batch_id": "batch-006",
+      "case_key": "refund-001/balance_cap",
+      "arm": "model",
+      "business_and_control_state_checks_passed": true,
+      "balance_and_ledger_delta_cent": -2500,
+      "confirmed_write_count": 1,
+      "cash_read_recovery_count": 0,
+      "observed_turns": 3
+    },
+    {
+      "pair_id": "block-00-pair-05",
+      "block_id": "block-00",
+      "arm_order": [
+        "model",
+        "jev_selective"
+      ],
+      "batch_id": "batch-006",
+      "case_key": "refund-001/balance_cap",
+      "arm": "jev_selective",
+      "business_and_control_state_checks_passed": true,
+      "balance_and_ledger_delta_cent": -2500,
+      "confirmed_write_count": 1,
+      "cash_read_recovery_count": 0,
+      "observed_turns": 3
+    },
+    {
+      "pair_id": "block-01-pair-00",
+      "block_id": "block-01",
+      "arm_order": [
+        "jev_selective",
+        "model"
+      ],
+      "batch_id": "batch-007",
+      "case_key": "balance-020/explicit_scope_followup",
+      "arm": "jev_selective",
+      "business_and_control_state_checks_passed": true,
+      "balance_and_ledger_delta_cent": 0,
+      "confirmed_write_count": 0,
+      "cash_read_recovery_count": 1,
+      "observed_turns": 2
+    },
+    {
+      "pair_id": "block-01-pair-00",
+      "block_id": "block-01",
+      "arm_order": [
+        "jev_selective",
+        "model"
+      ],
+      "batch_id": "batch-007",
+      "case_key": "balance-020/explicit_scope_followup",
+      "arm": "model",
+      "business_and_control_state_checks_passed": true,
+      "balance_and_ledger_delta_cent": 0,
+      "confirmed_write_count": 0,
+      "cash_read_recovery_count": 1,
+      "observed_turns": 2
+    },
+    {
+      "pair_id": "block-01-pair-01",
+      "block_id": "block-01",
+      "arm_order": [
+        "jev_selective",
+        "model"
+      ],
+      "batch_id": "batch-008",
+      "case_key": "recharge-002/confirm",
+      "arm": "jev_selective",
+      "business_and_control_state_checks_passed": true,
+      "balance_and_ledger_delta_cent": 10000,
+      "confirmed_write_count": 1,
+      "cash_read_recovery_count": 0,
+      "observed_turns": 2
+    },
+    {
+      "pair_id": "block-01-pair-01",
+      "block_id": "block-01",
+      "arm_order": [
+        "jev_selective",
+        "model"
+      ],
+      "batch_id": "batch-008",
+      "case_key": "recharge-002/confirm",
+      "arm": "model",
+      "business_and_control_state_checks_passed": true,
+      "balance_and_ledger_delta_cent": 10000,
+      "confirmed_write_count": 1,
+      "cash_read_recovery_count": 0,
+      "observed_turns": 2
+    },
+    {
+      "pair_id": "block-01-pair-02",
+      "block_id": "block-01",
+      "arm_order": [
+        "jev_selective",
+        "model"
+      ],
+      "batch_id": "batch-009",
+      "case_key": "recharge-002/cancel",
+      "arm": "jev_selective",
+      "business_and_control_state_checks_passed": true,
+      "balance_and_ledger_delta_cent": 0,
+      "confirmed_write_count": 0,
+      "cash_read_recovery_count": 0,
+      "observed_turns": 2
+    },
+    {
+      "pair_id": "block-01-pair-02",
+      "block_id": "block-01",
+      "arm_order": [
+        "jev_selective",
+        "model"
+      ],
+      "batch_id": "batch-009",
+      "case_key": "recharge-002/cancel",
+      "arm": "model",
+      "business_and_control_state_checks_passed": true,
+      "balance_and_ledger_delta_cent": 0,
+      "confirmed_write_count": 0,
+      "cash_read_recovery_count": 0,
+      "observed_turns": 2
+    },
+    {
+      "pair_id": "block-01-pair-03",
+      "block_id": "block-01",
+      "arm_order": [
+        "jev_selective",
+        "model"
+      ],
+      "batch_id": "batch-010",
+      "case_key": "recharge-001/supplement_then_confirm",
+      "arm": "jev_selective",
+      "business_and_control_state_checks_passed": true,
+      "balance_and_ledger_delta_cent": 10000,
+      "confirmed_write_count": 1,
+      "cash_read_recovery_count": 0,
+      "observed_turns": 3
+    },
+    {
+      "pair_id": "block-01-pair-03",
+      "block_id": "block-01",
+      "arm_order": [
+        "jev_selective",
+        "model"
+      ],
+      "batch_id": "batch-010",
+      "case_key": "recharge-001/supplement_then_confirm",
+      "arm": "model",
+      "business_and_control_state_checks_passed": true,
+      "balance_and_ledger_delta_cent": 10000,
+      "confirmed_write_count": 1,
+      "cash_read_recovery_count": 0,
+      "observed_turns": 3
+    },
+    {
+      "pair_id": "block-01-pair-04",
+      "block_id": "block-01",
+      "arm_order": [
+        "jev_selective",
+        "model"
+      ],
+      "batch_id": "batch-011",
+      "case_key": "refund-001/balance_cap",
+      "arm": "jev_selective",
+      "business_and_control_state_checks_passed": true,
+      "balance_and_ledger_delta_cent": -2500,
+      "confirmed_write_count": 1,
+      "cash_read_recovery_count": 0,
+      "observed_turns": 3
+    },
+    {
+      "pair_id": "block-01-pair-04",
+      "block_id": "block-01",
+      "arm_order": [
+        "jev_selective",
+        "model"
+      ],
+      "batch_id": "batch-011",
+      "case_key": "refund-001/balance_cap",
+      "arm": "model",
+      "business_and_control_state_checks_passed": true,
+      "balance_and_ledger_delta_cent": -2500,
+      "confirmed_write_count": 1,
+      "cash_read_recovery_count": 0,
+      "observed_turns": 3
+    },
+    {
+      "pair_id": "block-01-pair-05",
+      "block_id": "block-01",
+      "arm_order": [
+        "jev_selective",
+        "model"
+      ],
+      "batch_id": "batch-012",
+      "case_key": "balance-001/answer_complete",
+      "arm": "jev_selective",
+      "business_and_control_state_checks_passed": true,
+      "balance_and_ledger_delta_cent": 0,
+      "confirmed_write_count": 0,
+      "cash_read_recovery_count": 0,
+      "observed_turns": 1
+    },
+    {
+      "pair_id": "block-01-pair-05",
+      "block_id": "block-01",
+      "arm_order": [
+        "jev_selective",
+        "model"
+      ],
+      "batch_id": "batch-012",
+      "case_key": "balance-001/answer_complete",
+      "arm": "model",
+      "business_and_control_state_checks_passed": true,
+      "balance_and_ledger_delta_cent": 0,
+      "confirmed_write_count": 0,
+      "cash_read_recovery_count": 0,
+      "observed_turns": 1
+    },
+    {
+      "pair_id": "block-02-pair-00",
+      "block_id": "block-02",
+      "arm_order": [
+        "model",
+        "jev_selective"
+      ],
+      "batch_id": "batch-013",
+      "case_key": "recharge-002/confirm",
+      "arm": "model",
+      "business_and_control_state_checks_passed": true,
+      "balance_and_ledger_delta_cent": 10000,
+      "confirmed_write_count": 1,
+      "cash_read_recovery_count": 0,
+      "observed_turns": 2
+    },
+    {
+      "pair_id": "block-02-pair-00",
+      "block_id": "block-02",
+      "arm_order": [
+        "model",
+        "jev_selective"
+      ],
+      "batch_id": "batch-013",
+      "case_key": "recharge-002/confirm",
+      "arm": "jev_selective",
+      "business_and_control_state_checks_passed": true,
+      "balance_and_ledger_delta_cent": 10000,
+      "confirmed_write_count": 1,
+      "cash_read_recovery_count": 0,
+      "observed_turns": 2
+    },
+    {
+      "pair_id": "block-02-pair-01",
+      "block_id": "block-02",
+      "arm_order": [
+        "model",
+        "jev_selective"
+      ],
+      "batch_id": "batch-014",
+      "case_key": "recharge-002/cancel",
+      "arm": "model",
+      "business_and_control_state_checks_passed": true,
+      "balance_and_ledger_delta_cent": 0,
+      "confirmed_write_count": 0,
+      "cash_read_recovery_count": 0,
+      "observed_turns": 2
+    },
+    {
+      "pair_id": "block-02-pair-01",
+      "block_id": "block-02",
+      "arm_order": [
+        "model",
+        "jev_selective"
+      ],
+      "batch_id": "batch-014",
+      "case_key": "recharge-002/cancel",
+      "arm": "jev_selective",
+      "business_and_control_state_checks_passed": true,
+      "balance_and_ledger_delta_cent": 0,
+      "confirmed_write_count": 0,
+      "cash_read_recovery_count": 0,
+      "observed_turns": 2
+    },
+    {
+      "pair_id": "block-02-pair-02",
+      "block_id": "block-02",
+      "arm_order": [
+        "model",
+        "jev_selective"
+      ],
+      "batch_id": "batch-015",
+      "case_key": "recharge-001/supplement_then_confirm",
+      "arm": "model",
+      "business_and_control_state_checks_passed": true,
+      "balance_and_ledger_delta_cent": 10000,
+      "confirmed_write_count": 1,
+      "cash_read_recovery_count": 0,
+      "observed_turns": 3
+    },
+    {
+      "pair_id": "block-02-pair-02",
+      "block_id": "block-02",
+      "arm_order": [
+        "model",
+        "jev_selective"
+      ],
+      "batch_id": "batch-015",
+      "case_key": "recharge-001/supplement_then_confirm",
+      "arm": "jev_selective",
+      "business_and_control_state_checks_passed": true,
+      "balance_and_ledger_delta_cent": 10000,
+      "confirmed_write_count": 1,
+      "cash_read_recovery_count": 0,
+      "observed_turns": 3
+    },
+    {
+      "pair_id": "block-02-pair-03",
+      "block_id": "block-02",
+      "arm_order": [
+        "model",
+        "jev_selective"
+      ],
+      "batch_id": "batch-016",
+      "case_key": "refund-001/balance_cap",
+      "arm": "model",
+      "business_and_control_state_checks_passed": true,
+      "balance_and_ledger_delta_cent": -2500,
+      "confirmed_write_count": 1,
+      "cash_read_recovery_count": 0,
+      "observed_turns": 3
+    },
+    {
+      "pair_id": "block-02-pair-03",
+      "block_id": "block-02",
+      "arm_order": [
+        "model",
+        "jev_selective"
+      ],
+      "batch_id": "batch-016",
+      "case_key": "refund-001/balance_cap",
+      "arm": "jev_selective",
+      "business_and_control_state_checks_passed": true,
+      "balance_and_ledger_delta_cent": -2500,
+      "confirmed_write_count": 1,
+      "cash_read_recovery_count": 0,
+      "observed_turns": 3
+    }
+  ]
+}

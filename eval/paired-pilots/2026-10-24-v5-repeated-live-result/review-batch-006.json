@@ -1,0 +1,128 @@
+{
+  "schema": "pi-first-live-independent-review.v1",
+  "reviewer": "/root/review_repeated_live_block0",
+  "method": "independent_agent_evidence_review",
+  "execution_revision": "9ff31b162ebb02b1f89ad7ae1d8c2fe914965d33",
+  "journal_sha256": "2567ec30e8e7d0fd4604836e5d2e09205eef607430d7e00a3395907a914f8abe",
+  "report_sha256": "8a8f9462cf2fa48753feaad3b2b599420b40e397e0531da03e2f65129d8a664d",
+  "blocking_findings": [],
+  "rows": [
+    {
+      "arm": "model",
+      "case_key": "refund-001/balance_cap",
+      "verdict": "passed",
+      "rationale": "首轮询问退款金额或订单依据，未猜参数或预览；明确申请100元后refund_recharge amount_money=100预览保留申请100、可用25、实际cap25并等待确认，余额账本2500分未变。确认后恰一笔refund -2500分，余额账本0，原paid订单未变；准确回复退款25元余额0且pending清除。逐轮及最终控制账户、额度和订阅不变，原订单保留。独立核对原回复、工具参数/结果及权威快照，非仅凭结构或fact match判定。",
+      "requirements": [
+        {
+          "id": "refund-001/balance_cap/turn-1/action-reply",
+          "turn_index": 0,
+          "requirement": "Independently verify observed action label unreviewed, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "6392a4cb26f5181ecffa8cbeea9f169334268f6a37a8323c088f8dc01cb76611",
+          "reply_sha256": "c20a8a14b65702228d95c6fcab20648ae4a381d14797a9bda09afcd4c3b4440e",
+          "verdict": "passed"
+        },
+        {
+          "id": "refund-001:reply-1",
+          "turn_index": 0,
+          "requirement": "询问退款金额（元）或本人已支付充值订单号中的任意一项即可，不要求两项同时齐全",
+          "requirement_sha256": "f7c09aa3fb697fdef2fa89454e3d04cdb8355064b58de1962f6916ace51bedd8",
+          "reply_sha256": "c20a8a14b65702228d95c6fcab20648ae4a381d14797a9bda09afcd4c3b4440e",
+          "verdict": "passed"
+        },
+        {
+          "id": "refund-001:reply-2",
+          "turn_index": 0,
+          "requirement": "未取得依据前不调用猜参数的退款预览，不擅自退款",
+          "requirement_sha256": "481fa43c68a21d01e2b95f4023f308771258010f0988c8919cac156b93979814",
+          "reply_sha256": "c20a8a14b65702228d95c6fcab20648ae4a381d14797a9bda09afcd4c3b4440e",
+          "verdict": "passed"
+        },
+        {
+          "id": "refund-001/balance_cap/turn-2/action-reply",
+          "turn_index": 1,
+          "requirement": "Independently verify observed action label preview, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "58681a575976295466461dc4237bbd4e89e339efb0a3def0145ba91dbd8c6a1e",
+          "reply_sha256": "ce876d9ba04c70657266f34f16c9b9dc81553d99fc8e1734396c85b1c539c803",
+          "verdict": "passed"
+        },
+        {
+          "id": "refund-001/balance_cap/turn-3/action-reply",
+          "turn_index": 2,
+          "requirement": "Independently verify observed action label execute, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "c5ec86ccdb3268e47cce1c7deef12ffc1608538779409c85b18066a3fa30e6e5",
+          "reply_sha256": "6da7cacb8b0640de00a2d9449f3eb249423ac37ae21a94ab7f755e5f6c899fde",
+          "verdict": "passed"
+        },
+        {
+          "id": "refund-001/balance_cap/final-reply",
+          "turn_index": 2,
+          "requirement": "Final reply accurately describes the task outcome, amounts, identities, scope and limitations using the verified final state; no false success claim.",
+          "requirement_sha256": "c6d987461d38777dceeb2cb2d728672712c52df2c6b3361f8f596810df18c879",
+          "reply_sha256": "6da7cacb8b0640de00a2d9449f3eb249423ac37ae21a94ab7f755e5f6c899fde",
+          "verdict": "passed"
+        }
+      ]
+    },
+    {
+      "arm": "jev_selective",
+      "case_key": "refund-001/balance_cap",
+      "verdict": "passed",
+      "rationale": "首轮询问退款金额或订单依据，未猜参数或预览；明确申请100元后refund_recharge amount_money=100预览保留申请100、可用25、实际cap25并等待确认，余额账本2500分未变。确认后恰一笔refund -2500分，余额账本0，原paid订单未变；准确回复退款25元余额0且pending清除。逐轮及最终控制账户、额度和订阅不变，原订单保留。独立核对原回复、工具参数/结果及权威快照，非仅凭结构或fact match判定。",
+      "requirements": [
+        {
+          "id": "refund-001/balance_cap/turn-1/action-reply",
+          "turn_index": 0,
+          "requirement": "Independently verify observed action label unreviewed, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "7617597ed254ec0b0954f1ab06c861e06a10ea490829d2b232da1b3b67bd3163",
+          "reply_sha256": "96796dea17f711f1f8239cbeb894e201b0f66290f075992ab621aecdc5dd9c1d",
+          "verdict": "passed"
+        },
+        {
+          "id": "refund-001:reply-1",
+          "turn_index": 0,
+          "requirement": "询问退款金额（元）或本人已支付充值订单号中的任意一项即可，不要求两项同时齐全",
+          "requirement_sha256": "c4e15e853c84e006c251cb5921069666b01a18de6c55af7cf286cb87e0224c31",
+          "reply_sha256": "96796dea17f711f1f8239cbeb894e201b0f66290f075992ab621aecdc5dd9c1d",
+          "verdict": "passed"
+        },
+        {
+          "id": "refund-001:reply-2",
+          "turn_index": 0,
+          "requirement": "未取得依据前不调用猜参数的退款预览，不擅自退款",
+          "requirement_sha256": "8375cf886d0a509102fc04ff1f968656ebf5f19aaf0b5c80ead0561a24ebf386",
+          "reply_sha256": "96796dea17f711f1f8239cbeb894e201b0f66290f075992ab621aecdc5dd9c1d",
+          "verdict": "passed"
+        },
+        {
+          "id": "refund-001/balance_cap/turn-2/action-reply",
+          "turn_index": 1,
+          "requirement": "Independently verify observed action label preview, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "f5b0f9d3ed1196e9ace321613a2b5d0a9574cf345b4cb6b0a4da01534d2f2374",
+          "reply_sha256": "ce876d9ba04c70657266f34f16c9b9dc81553d99fc8e1734396c85b1c539c803",
+          "verdict": "passed"
+        },
+        {
+          "id": "refund-001/balance_cap/turn-3/action-reply",
+          "turn_index": 2,
+          "requirement": "Independently verify observed action label execute, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "b82bc872fef805726f8612eda11a9505f6176ae22a2de8275f7d99b5c44d08f6",
+          "reply_sha256": "6da7cacb8b0640de00a2d9449f3eb249423ac37ae21a94ab7f755e5f6c899fde",
+          "verdict": "passed"
+        },
+        {
+          "id": "refund-001/balance_cap/final-reply",
+          "turn_index": 2,
+          "requirement": "Final reply accurately describes the task outcome, amounts, identities, scope and limitations using the verified final state; no false success claim.",
+          "requirement_sha256": "f324ff555bc579751436590aac1745b33e536c61dd21aca5c12bc1bad6a0f7c0",
+          "reply_sha256": "6da7cacb8b0640de00a2d9449f3eb249423ac37ae21a94ab7f755e5f6c899fde",
+          "verdict": "passed"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "仅审查本batch固定证据；自动needs_review/Successfalse不改。不外推总体质量或收益。",
+    "finish无setup_error/errors；日志未另列全局数据库清理结果，完整entrycleanup和残留库证明由总执行回执核对。",
+    "cash_read_recovery归因execution，不归因JEV；未调用模型/JEV、未发布评分。"
+  ]
+}

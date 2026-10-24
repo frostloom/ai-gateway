@@ -1,0 +1,57 @@
+{
+  "jev_calls": 0,
+  "kind": "verified",
+  "model_calls": 0,
+  "plan_sha256": "a2c8ef15af1636c2dc2bb9e556240720034971e20feab9e2b120714a361efb66",
+  "score_count": 4,
+  "trace_summaries": [
+    {
+      "arm": "model",
+      "case_key": "recharge-001/supplement_then_confirm",
+      "content_turns": 3,
+      "evidence_kind": "recorded_run",
+      "expected_content": [
+        {
+          "input_sha256": "11500383ff341ba2d4c022c5de81b627c4a3504b8bc5d884616a01c1c79d1cd3",
+          "reply_sha256": "ce78a9cf2f96eeb696c5e874a07f7a37f46abadae3c64061ad9e6e64fc8a5185"
+        },
+        {
+          "input_sha256": "2205a0a2b1a86363ff963fefb46c32e7cf3379bff5447e1f00a8af322457ddbd",
+          "reply_sha256": "b94d94b0973d353a0ad7ef1068e8a830d699b85abde54fadaad04375b74ab82f"
+        },
+        {
+          "input_sha256": "36f33adaf0942634a8ece1eec4a6f30d44dec73e1ef8704b29d983a57f2e09ae",
+          "reply_sha256": "b474f805ec47c11e095ec8c7f3e7263e58741830718714eab8fc7fac62820f16"
+        }
+      ],
+      "expected_turns": 3,
+      "require_answers": true,
+      "trace_id": "3a75d07bad538da44697b2375b9d8c13",
+      "turns": 3
+    },
+    {
+      "arm": "jev_selective",
+      "case_key": "recharge-001/supplement_then_confirm",
+      "content_turns": 3,
+      "evidence_kind": "recorded_run",
+      "expected_content": [
+        {
+          "input_sha256": "11500383ff341ba2d4c022c5de81b627c4a3504b8bc5d884616a01c1c79d1cd3",
+          "reply_sha256": "2bf4f3827694404619123a6c913d5d2456f385b41f9d5469d6c064ca00001587"
+        },
+        {
+          "input_sha256": "2205a0a2b1a86363ff963fefb46c32e7cf3379bff5447e1f00a8af322457ddbd",
+          "reply_sha256": "b94d94b0973d353a0ad7ef1068e8a830d699b85abde54fadaad04375b74ab82f"
+        },
+        {
+          "input_sha256": "36f33adaf0942634a8ece1eec4a6f30d44dec73e1ef8704b29d983a57f2e09ae",
+          "reply_sha256": "02262f6bf9cbf23129474f53e8fc59d7a705808fea8e7866b2c9e4b27c04c910"
+        }
+      ],
+      "expected_turns": 3,
+      "require_answers": true,
+      "trace_id": "d3ca35383aedfa56c024065272d5d898",
+      "turns": 3
+    }
+  ]
+}

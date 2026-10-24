@@ -1,0 +1,79 @@
+{
+  "schema": "pi-first-live-independent-review.v1",
+  "reviewer": "/root/review_repeated_live_block1",
+  "method": "independent_agent_evidence_review",
+  "execution_revision": "9ff31b162ebb02b1f89ad7ae1d8c2fe914965d33",
+  "journal_sha256": "677febc837272a365fb992f7675edd253c62d24fb551a4c7d10886ee71df06df",
+  "report_sha256": "de372361783fba0e0d8585d32d122849de1927b9e225aeb4b864f81ae794f15a",
+  "blocking_findings": [],
+  "rows": [
+    {
+      "arm": "model",
+      "case_key": "balance-001/answer_complete",
+      "verdict": "passed",
+      "rationale": "本人get_balance当轮实读现金/账本500000分一致，准确回复人民币5000元，无token或调用次数折算。无pending或写。selective审计fast_read engine=jev；model正常工具读取。逐轮控制账户、订阅、额度及无关状态不变；终态业务与末轮相符。结论来自原回复、参数、审计与权威状态独立核对，不以结构/facts通过代替语义审查。",
+      "requirements": [
+        {
+          "id": "balance-001/answer_complete/turn-1/action-reply",
+          "turn_index": 0,
+          "requirement": "Independently verify observed action label read, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "bb44454521f984d4cb3d8b5b7423b8b9ed2aec9c97da68af4395f8c4e52557b1",
+          "reply_sha256": "ff8b9bc0f031fdf17bd69d3bde9c4d0c82da4ce5a40e82ca53a2ed681a05ac7f",
+          "verdict": "passed"
+        },
+        {
+          "id": "balance-001:reply-1",
+          "turn_index": 0,
+          "requirement": "针对原话“查询余额”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。",
+          "requirement_sha256": "072f10cf41bb740f9fe53f9155f2bc148b81461432924e8986b6d45bb4061a00",
+          "reply_sha256": "ff8b9bc0f031fdf17bd69d3bde9c4d0c82da4ce5a40e82ca53a2ed681a05ac7f",
+          "verdict": "passed"
+        },
+        {
+          "id": "balance-001/answer_complete/final-reply",
+          "turn_index": 0,
+          "requirement": "Final reply accurately describes the task outcome, amounts, identities, scope and limitations using the verified final state; no false success claim.",
+          "requirement_sha256": "d780610eb616848b66c112b305ade39be2b2a060c9766e3ac719e3b6b7350c67",
+          "reply_sha256": "ff8b9bc0f031fdf17bd69d3bde9c4d0c82da4ce5a40e82ca53a2ed681a05ac7f",
+          "verdict": "passed"
+        }
+      ]
+    },
+    {
+      "arm": "jev_selective",
+      "case_key": "balance-001/answer_complete",
+      "verdict": "passed",
+      "rationale": "本人get_balance当轮实读现金/账本500000分一致，准确回复人民币5000元，无token或调用次数折算。无pending或写。selective审计fast_read engine=jev；model正常工具读取。逐轮控制账户、订阅、额度及无关状态不变；终态业务与末轮相符。结论来自原回复、参数、审计与权威状态独立核对，不以结构/facts通过代替语义审查。",
+      "requirements": [
+        {
+          "id": "balance-001/answer_complete/turn-1/action-reply",
+          "turn_index": 0,
+          "requirement": "Independently verify observed action label read, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "721d765bcd1874aa3796a4d2d293ef63c8a08fbff2725bab30b1a8fcb4b78351",
+          "reply_sha256": "560707ca5b3d033d9007796a9414779d7873c670a4019dd0aea0c772d32ae2ed",
+          "verdict": "passed"
+        },
+        {
+          "id": "balance-001:reply-1",
+          "turn_index": 0,
+          "requirement": "针对原话“查询余额”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。",
+          "requirement_sha256": "a3e7e53faff9881fe1d2f75befce53022bb1d8bafc2e6da214cdc10da5291dd3",
+          "reply_sha256": "560707ca5b3d033d9007796a9414779d7873c670a4019dd0aea0c772d32ae2ed",
+          "verdict": "passed"
+        },
+        {
+          "id": "balance-001/answer_complete/final-reply",
+          "turn_index": 0,
+          "requirement": "Final reply accurately describes the task outcome, amounts, identities, scope and limitations using the verified final state; no false success claim.",
+          "requirement_sha256": "543a72f5d8566e630694b1f2fef5b3677feaaa87be69d3781aecac1446704fb2",
+          "reply_sha256": "560707ca5b3d033d9007796a9414779d7873c670a4019dd0aea0c772d32ae2ed",
+          "verdict": "passed"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "仅审查已完成batch007..012；不重跑、不发布，不给未运行臂判成功；原自动needs_review/Successfalse保留。",
+    "不推论总体质量或因果收益；状态oracle和记录器为可信输入。"
+  ]
+}
