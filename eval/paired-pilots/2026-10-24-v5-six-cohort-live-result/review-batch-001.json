@@ -1,0 +1,80 @@
+{
+  "schema": "pi-first-live-independent-review.v1",
+  "reviewer": "/root/review_v5_cohort_live",
+  "method": "independent_agent_evidence_review",
+  "execution_revision": "cb71495428543d529785956984bfbfbb6524d45a",
+  "journal_sha256": "31bfe81fd56dc7f4cd6af01c44adbaf779764fd8d2c7a6696d78821eab43a27f",
+  "report_sha256": "cb80341f6efb2676a423ee58899e16f27ab77d80bdcbd6232ef22eb64fd90828",
+  "blocking_findings": [],
+  "rows": [
+    {
+      "arm": "model",
+      "case_key": "balance-001/answer_complete",
+      "verdict": "passed",
+      "rationale": "逐轮独立核对本人get_balance当轮实读及回复：可用余额与账本均500000分，准确表述人民币5000元，未换算token。无pending及业务写；每轮控制账户、额度、订阅、原订单及权威数据不变，终态等于末轮。",
+      "requirements": [
+        {
+          "id": "balance-001/answer_complete/turn-1/action-reply",
+          "turn_index": 0,
+          "requirement": "Independently verify observed action label read, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "aaf5ace51ec71ab92f120d5947611510c73fa008e6335a3bd9099a6dad1faff8",
+          "reply_sha256": "9d2e83d97ee7b1f59f92324ea74fbb877ec84037c8bb438953dbc31fc733580b",
+          "verdict": "passed"
+        },
+        {
+          "id": "balance-001:reply-1",
+          "turn_index": 0,
+          "requirement": "针对原话“查询余额”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。",
+          "requirement_sha256": "f52ff2438cc0b6523dd992f7b825c9295df1fa6067e640dc642b8430b1567abd",
+          "reply_sha256": "9d2e83d97ee7b1f59f92324ea74fbb877ec84037c8bb438953dbc31fc733580b",
+          "verdict": "passed"
+        },
+        {
+          "id": "balance-001/answer_complete/final-reply",
+          "turn_index": 0,
+          "requirement": "Final reply accurately describes the task outcome, amounts, identities, scope and limitations using the verified final state; no false success claim.",
+          "requirement_sha256": "ec466b65dc466326970b84361b3c8f16ed3cb847a2f4578ed69b68ed5872826d",
+          "reply_sha256": "9d2e83d97ee7b1f59f92324ea74fbb877ec84037c8bb438953dbc31fc733580b",
+          "verdict": "passed"
+        }
+      ]
+    },
+    {
+      "arm": "jev_selective",
+      "case_key": "balance-001/answer_complete",
+      "verdict": "passed",
+      "rationale": "逐轮独立核对本人get_balance当轮实读及回复：可用余额与账本均500000分，准确表述人民币5000元，未换算token。无pending及业务写；每轮控制账户、额度、订阅、原订单及权威数据不变，终态等于末轮。",
+      "requirements": [
+        {
+          "id": "balance-001/answer_complete/turn-1/action-reply",
+          "turn_index": 0,
+          "requirement": "Independently verify observed action label read, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "6142ab70639a9dba56784848d370b44e7ceaed83fb66b5b5e80bd493fa2c961f",
+          "reply_sha256": "560707ca5b3d033d9007796a9414779d7873c670a4019dd0aea0c772d32ae2ed",
+          "verdict": "passed"
+        },
+        {
+          "id": "balance-001:reply-1",
+          "turn_index": 0,
+          "requirement": "针对原话“查询余额”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。",
+          "requirement_sha256": "a2815d6016e38b8a17e27d27c335b6106da2ad720eb32d643244e8b73d774a42",
+          "reply_sha256": "560707ca5b3d033d9007796a9414779d7873c670a4019dd0aea0c772d32ae2ed",
+          "verdict": "passed"
+        },
+        {
+          "id": "balance-001/answer_complete/final-reply",
+          "turn_index": 0,
+          "requirement": "Final reply accurately describes the task outcome, amounts, identities, scope and limitations using the verified final state; no false success claim.",
+          "requirement_sha256": "1c0c8a6f3d5f0734de4bedf598d270dd5bfd4e021619acf234c5f75d113125b5",
+          "reply_sha256": "560707ca5b3d033d9007796a9414779d7873c670a4019dd0aea0c772d32ae2ed",
+          "verdict": "passed"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "固定六案例各一次的独立语义审查，自动needs_review和Successfalse保持原样；不外推总体质量、成本或耗时收益。",
+    "依赖原记录器和状态oracle，非供应商账单或密码学执行证明；现金恢复归因execution。",
+    "未重放、未调用模型/JEV、未发布评分；claim永久消耗不得重试或释放。"
+  ]
+}

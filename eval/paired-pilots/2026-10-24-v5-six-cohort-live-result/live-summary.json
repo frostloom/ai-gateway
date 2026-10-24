@@ -1,0 +1,292 @@
+{
+  "schema": "v5-six-cohort-live-summary.v1",
+  "execution_revision": "cb71495428543d529785956984bfbfbb6524d45a",
+  "status": "checkpoint_pending",
+  "model_attempts": 23,
+  "model_input_tokens": 41785,
+  "model_output_tokens": 805,
+  "model_config_priced_micro_cny": 90010,
+  "jev_attempts": 6,
+  "jev_input_tokens": 7216,
+  "jev_output_tokens": 1117,
+  "jev_config_priced_usd": 0.000303072,
+  "rows": [
+    {
+      "key": "balance-001/answer_complete",
+      "arm": "model",
+      "status": "needs_review",
+      "structural_pass": true,
+      "observed_turns": 1,
+      "runner_elapsed_ms": 2065.636917,
+      "telemetry": {
+        "completion_rate": null,
+        "response_latency_ms": 1767.833542,
+        "llm_calls": 2,
+        "jev_calls": 0,
+        "tokens": {
+          "llm_input": 3562,
+          "llm_output": 45,
+          "jev_input": 0,
+          "jev_output": 0
+        }
+      },
+      "guarded_upstream_model_attempts": 2,
+      "priced_model_usage_micro_cny": 7484
+    },
+    {
+      "key": "balance-001/answer_complete",
+      "arm": "jev_selective",
+      "status": "needs_review",
+      "structural_pass": true,
+      "observed_turns": 1,
+      "runner_elapsed_ms": 1268.695542,
+      "telemetry": {
+        "completion_rate": null,
+        "response_latency_ms": 919.40225,
+        "llm_calls": 0,
+        "jev_calls": 1,
+        "tokens": {
+          "llm_input": 0,
+          "llm_output": 0,
+          "jev_input": 1201,
+          "jev_output": 186
+        }
+      },
+      "guarded_upstream_model_attempts": 0,
+      "priced_model_usage_micro_cny": 0
+    },
+    {
+      "key": "balance-020/explicit_scope_followup",
+      "arm": "model",
+      "status": "needs_review",
+      "structural_pass": true,
+      "observed_turns": 2,
+      "runner_elapsed_ms": 4529.793333,
+      "telemetry": {
+        "completion_rate": null,
+        "response_latency_ms": 4219.975666,
+        "llm_calls": 5,
+        "jev_calls": 0,
+        "tokens": {
+          "llm_input": 9580,
+          "llm_output": 191,
+          "jev_input": 0,
+          "jev_output": 0
+        }
+      },
+      "guarded_upstream_model_attempts": 5,
+      "priced_model_usage_micro_cny": 20688
+    },
+    {
+      "key": "balance-020/explicit_scope_followup",
+      "arm": "jev_selective",
+      "status": "needs_review",
+      "structural_pass": true,
+      "observed_turns": 2,
+      "runner_elapsed_ms": 4375.489375,
+      "telemetry": {
+        "completion_rate": null,
+        "response_latency_ms": 4142.013667,
+        "llm_calls": 4,
+        "jev_calls": 1,
+        "tokens": {
+          "llm_input": 7417,
+          "llm_output": 173,
+          "jev_input": 1205,
+          "jev_output": 186
+        }
+      },
+      "guarded_upstream_model_attempts": 4,
+      "priced_model_usage_micro_cny": 16218
+    },
+    {
+      "key": "recharge-002/confirm",
+      "arm": "model",
+      "status": "needs_review",
+      "structural_pass": true,
+      "observed_turns": 2,
+      "runner_elapsed_ms": 1221.456375,
+      "telemetry": {
+        "completion_rate": null,
+        "response_latency_ms": 970.878792,
+        "llm_calls": 1,
+        "jev_calls": 0,
+        "tokens": {
+          "llm_input": 1757,
+          "llm_output": 39,
+          "jev_input": 0,
+          "jev_output": 0
+        }
+      },
+      "guarded_upstream_model_attempts": 1,
+      "priced_model_usage_micro_cny": 3826
+    },
+    {
+      "key": "recharge-002/confirm",
+      "arm": "jev_selective",
+      "status": "needs_review",
+      "structural_pass": true,
+      "observed_turns": 2,
+      "runner_elapsed_ms": 1231.743708,
+      "telemetry": {
+        "completion_rate": null,
+        "response_latency_ms": 986.538125,
+        "llm_calls": 1,
+        "jev_calls": 1,
+        "tokens": {
+          "llm_input": 1757,
+          "llm_output": 39,
+          "jev_input": 1204,
+          "jev_output": 186
+        }
+      },
+      "guarded_upstream_model_attempts": 1,
+      "priced_model_usage_micro_cny": 3826
+    },
+    {
+      "key": "recharge-002/cancel",
+      "arm": "model",
+      "status": "needs_review",
+      "structural_pass": true,
+      "observed_turns": 2,
+      "runner_elapsed_ms": 935.406458,
+      "telemetry": {
+        "completion_rate": null,
+        "response_latency_ms": 671.163416,
+        "llm_calls": 1,
+        "jev_calls": 0,
+        "tokens": {
+          "llm_input": 1757,
+          "llm_output": 39,
+          "jev_input": 0,
+          "jev_output": 0
+        }
+      },
+      "guarded_upstream_model_attempts": 1,
+      "priced_model_usage_micro_cny": 3826
+    },
+    {
+      "key": "recharge-002/cancel",
+      "arm": "jev_selective",
+      "status": "needs_review",
+      "structural_pass": true,
+      "observed_turns": 2,
+      "runner_elapsed_ms": 1298.665,
+      "telemetry": {
+        "completion_rate": null,
+        "response_latency_ms": 976.5589590000001,
+        "llm_calls": 1,
+        "jev_calls": 1,
+        "tokens": {
+          "llm_input": 1757,
+          "llm_output": 39,
+          "jev_input": 1204,
+          "jev_output": 186
+        }
+      },
+      "guarded_upstream_model_attempts": 1,
+      "priced_model_usage_micro_cny": 3826
+    },
+    {
+      "key": "recharge-001/supplement_then_confirm",
+      "arm": "model",
+      "status": "needs_review",
+      "structural_pass": true,
+      "observed_turns": 3,
+      "runner_elapsed_ms": 2201.29225,
+      "telemetry": {
+        "completion_rate": null,
+        "response_latency_ms": 1828.1372900000001,
+        "llm_calls": 2,
+        "jev_calls": 0,
+        "tokens": {
+          "llm_input": 3543,
+          "llm_output": 56,
+          "jev_input": 0,
+          "jev_output": 0
+        }
+      },
+      "guarded_upstream_model_attempts": 2,
+      "priced_model_usage_micro_cny": 7534
+    },
+    {
+      "key": "recharge-001/supplement_then_confirm",
+      "arm": "jev_selective",
+      "status": "needs_review",
+      "structural_pass": true,
+      "observed_turns": 3,
+      "runner_elapsed_ms": 2415.537667,
+      "telemetry": {
+        "completion_rate": null,
+        "response_latency_ms": 2060.480625,
+        "llm_calls": 2,
+        "jev_calls": 1,
+        "tokens": {
+          "llm_input": 3532,
+          "llm_output": 45,
+          "jev_input": 1201,
+          "jev_output": 186
+        }
+      },
+      "guarded_upstream_model_attempts": 2,
+      "priced_model_usage_micro_cny": 7424
+    },
+    {
+      "key": "refund-001/balance_cap",
+      "arm": "model",
+      "status": "needs_review",
+      "structural_pass": true,
+      "observed_turns": 3,
+      "runner_elapsed_ms": 1927.967833,
+      "telemetry": {
+        "completion_rate": null,
+        "response_latency_ms": 1574.003791,
+        "llm_calls": 2,
+        "jev_calls": 0,
+        "tokens": {
+          "llm_input": 3564,
+          "llm_output": 72,
+          "jev_input": 0,
+          "jev_output": 0
+        }
+      },
+      "guarded_upstream_model_attempts": 2,
+      "priced_model_usage_micro_cny": 7704
+    },
+    {
+      "key": "refund-001/balance_cap",
+      "arm": "jev_selective",
+      "status": "needs_review",
+      "structural_pass": true,
+      "observed_turns": 3,
+      "runner_elapsed_ms": 2580.669792,
+      "telemetry": {
+        "completion_rate": null,
+        "response_latency_ms": 2228.979417,
+        "llm_calls": 2,
+        "jev_calls": 1,
+        "tokens": {
+          "llm_input": 3559,
+          "llm_output": 67,
+          "jev_input": 1201,
+          "jev_output": 187
+        }
+      },
+      "guarded_upstream_model_attempts": 2,
+      "priced_model_usage_micro_cny": 7654
+    }
+  ],
+  "observer_stats": {
+    "Accepted": 88,
+    "Dropped": 0,
+    "Exported": 88,
+    "Failed": 0,
+    "Batches": 35,
+    "Turns": 26,
+    "SampledTurns": 26,
+    "QueueDepth": 0
+  },
+  "vendor_invoice_not_verified": true,
+  "cumulative_actual_model_calls": 60,
+  "cumulative_actual_jev_calls": 15
+}

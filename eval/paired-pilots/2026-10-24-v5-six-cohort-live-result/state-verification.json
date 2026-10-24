@@ -1,0 +1,125 @@
+{
+  "schema": "v5-six-cohort-state-verification.v1",
+  "arms": [
+    {
+      "batch_id": "batch-001",
+      "case_key": "balance-001/answer_complete",
+      "arm": "model",
+      "business_and_control_state_checks_passed": true,
+      "balance_and_ledger_delta_cent": 0,
+      "confirmed_write_count": 0,
+      "cash_read_recovery_count": 0,
+      "observed_turns": 1
+    },
+    {
+      "batch_id": "batch-001",
+      "case_key": "balance-001/answer_complete",
+      "arm": "jev_selective",
+      "business_and_control_state_checks_passed": true,
+      "balance_and_ledger_delta_cent": 0,
+      "confirmed_write_count": 0,
+      "cash_read_recovery_count": 0,
+      "observed_turns": 1
+    },
+    {
+      "batch_id": "batch-002",
+      "case_key": "balance-020/explicit_scope_followup",
+      "arm": "model",
+      "business_and_control_state_checks_passed": true,
+      "balance_and_ledger_delta_cent": 0,
+      "confirmed_write_count": 0,
+      "cash_read_recovery_count": 1,
+      "observed_turns": 2
+    },
+    {
+      "batch_id": "batch-002",
+      "case_key": "balance-020/explicit_scope_followup",
+      "arm": "jev_selective",
+      "business_and_control_state_checks_passed": true,
+      "balance_and_ledger_delta_cent": 0,
+      "confirmed_write_count": 0,
+      "cash_read_recovery_count": 1,
+      "observed_turns": 2
+    },
+    {
+      "batch_id": "batch-003",
+      "case_key": "recharge-002/confirm",
+      "arm": "model",
+      "business_and_control_state_checks_passed": true,
+      "balance_and_ledger_delta_cent": 10000,
+      "confirmed_write_count": 1,
+      "cash_read_recovery_count": 0,
+      "observed_turns": 2
+    },
+    {
+      "batch_id": "batch-003",
+      "case_key": "recharge-002/confirm",
+      "arm": "jev_selective",
+      "business_and_control_state_checks_passed": true,
+      "balance_and_ledger_delta_cent": 10000,
+      "confirmed_write_count": 1,
+      "cash_read_recovery_count": 0,
+      "observed_turns": 2
+    },
+    {
+      "batch_id": "batch-004",
+      "case_key": "recharge-002/cancel",
+      "arm": "model",
+      "business_and_control_state_checks_passed": true,
+      "balance_and_ledger_delta_cent": 0,
+      "confirmed_write_count": 0,
+      "cash_read_recovery_count": 0,
+      "observed_turns": 2
+    },
+    {
+      "batch_id": "batch-004",
+      "case_key": "recharge-002/cancel",
+      "arm": "jev_selective",
+      "business_and_control_state_checks_passed": true,
+      "balance_and_ledger_delta_cent": 0,
+      "confirmed_write_count": 0,
+      "cash_read_recovery_count": 0,
+      "observed_turns": 2
+    },
+    {
+      "batch_id": "batch-005",
+      "case_key": "recharge-001/supplement_then_confirm",
+      "arm": "model",
+      "business_and_control_state_checks_passed": true,
+      "balance_and_ledger_delta_cent": 10000,
+      "confirmed_write_count": 1,
+      "cash_read_recovery_count": 0,
+      "observed_turns": 3
+    },
+    {
+      "batch_id": "batch-005",
+      "case_key": "recharge-001/supplement_then_confirm",
+      "arm": "jev_selective",
+      "business_and_control_state_checks_passed": true,
+      "balance_and_ledger_delta_cent": 10000,
+      "confirmed_write_count": 1,
+      "cash_read_recovery_count": 0,
+      "observed_turns": 3
+    },
+    {
+      "batch_id": "batch-006",
+      "case_key": "refund-001/balance_cap",
+      "arm": "model",
+      "business_and_control_state_checks_passed": true,
+      "balance_and_ledger_delta_cent": -2500,
+      "confirmed_write_count": 1,
+      "cash_read_recovery_count": 0,
+      "observed_turns": 3
+    },
+    {
+      "batch_id": "batch-006",
+      "case_key": "refund-001/balance_cap",
+      "arm": "jev_selective",
+      "business_and_control_state_checks_passed": true,
+      "balance_and_ledger_delta_cent": -2500,
+      "confirmed_write_count": 1,
+      "cash_read_recovery_count": 0,
+      "observed_turns": 3
+    }
+  ]
+}

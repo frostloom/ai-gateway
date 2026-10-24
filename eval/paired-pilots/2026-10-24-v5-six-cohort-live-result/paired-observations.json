@@ -1,0 +1,212 @@
+{
+  "schema": "v5-six-cohort-paired-observations.v1",
+  "cases": [
+    {
+      "batch_id": "batch-001",
+      "case_key": "balance-001/answer_complete",
+      "arms": {
+        "model": {
+          "model_attempts": 2,
+          "jev_attempts": 0,
+          "model_config_priced_micro_cny": 7484,
+          "jev_config_priced_micro_usd": 0.0,
+          "server_telemetry_sum_ms": 1767.833542,
+          "http_roundtrip_sum_ms": 1810.226292,
+          "conversation_duration_ms": 1849.179833,
+          "runner_elapsed_ms": 2065.636917,
+          "reply_repairs": 0,
+          "cash_read_recoveries": 0
+        },
+        "jev_selective": {
+          "model_attempts": 0,
+          "jev_attempts": 1,
+          "model_config_priced_micro_cny": 0,
+          "jev_config_priced_micro_usd": 50.442,
+          "server_telemetry_sum_ms": 919.40225,
+          "http_roundtrip_sum_ms": 1055.151375,
+          "conversation_duration_ms": 1143.096,
+          "runner_elapsed_ms": 1268.695542,
+          "reply_repairs": 0,
+          "cash_read_recoveries": 0
+        }
+      }
+    },
+    {
+      "batch_id": "batch-002",
+      "case_key": "balance-020/explicit_scope_followup",
+      "arms": {
+        "model": {
+          "model_attempts": 5,
+          "jev_attempts": 0,
+          "model_config_priced_micro_cny": 20688,
+          "jev_config_priced_micro_usd": 0.0,
+          "server_telemetry_sum_ms": 4219.975666,
+          "http_roundtrip_sum_ms": 4304.12775,
+          "conversation_duration_ms": 4346.423542,
+          "runner_elapsed_ms": 4529.793333,
+          "reply_repairs": 1,
+          "cash_read_recoveries": 1
+        },
+        "jev_selective": {
+          "model_attempts": 4,
+          "jev_attempts": 1,
+          "model_config_priced_micro_cny": 16218,
+          "jev_config_priced_micro_usd": 50.61000000000001,
+          "server_telemetry_sum_ms": 4142.013667,
+          "http_roundtrip_sum_ms": 4229.21775,
+          "conversation_duration_ms": 4274.137042,
+          "runner_elapsed_ms": 4375.489375,
+          "reply_repairs": 1,
+          "cash_read_recoveries": 1
+        }
+      }
+    },
+    {
+      "batch_id": "batch-003",
+      "case_key": "recharge-002/confirm",
+      "arms": {
+        "model": {
+          "model_attempts": 1,
+          "jev_attempts": 0,
+          "model_config_priced_micro_cny": 3826,
+          "jev_config_priced_micro_usd": 0.0,
+          "server_telemetry_sum_ms": 970.878792,
+          "http_roundtrip_sum_ms": 1053.5690419999999,
+          "conversation_duration_ms": 1106.239542,
+          "runner_elapsed_ms": 1221.456375,
+          "reply_repairs": 0,
+          "cash_read_recoveries": 0
+        },
+        "jev_selective": {
+          "model_attempts": 1,
+          "jev_attempts": 1,
+          "model_config_priced_micro_cny": 3826,
+          "jev_config_priced_micro_usd": 50.568000000000005,
+          "server_telemetry_sum_ms": 986.538125,
+          "http_roundtrip_sum_ms": 1073.5871670000001,
+          "conversation_duration_ms": 1122.995334,
+          "runner_elapsed_ms": 1231.743708,
+          "reply_repairs": 0,
+          "cash_read_recoveries": 0
+        }
+      }
+    },
+    {
+      "batch_id": "batch-004",
+      "case_key": "recharge-002/cancel",
+      "arms": {
+        "model": {
+          "model_attempts": 1,
+          "jev_attempts": 0,
+          "model_config_priced_micro_cny": 3826,
+          "jev_config_priced_micro_usd": 0.0,
+          "server_telemetry_sum_ms": 671.163416,
+          "http_roundtrip_sum_ms": 768.185,
+          "conversation_duration_ms": 818.119667,
+          "runner_elapsed_ms": 935.406458,
+          "reply_repairs": 0,
+          "cash_read_recoveries": 0
+        },
+        "jev_selective": {
+          "model_attempts": 1,
+          "jev_attempts": 1,
+          "model_config_priced_micro_cny": 3826,
+          "jev_config_priced_micro_usd": 50.568000000000005,
+          "server_telemetry_sum_ms": 976.5589590000001,
+          "http_roundtrip_sum_ms": 1129.0257510000001,
+          "conversation_duration_ms": 1196.63625,
+          "runner_elapsed_ms": 1298.665,
+          "reply_repairs": 0,
+          "cash_read_recoveries": 0
+        }
+      }
+    },
+    {
+      "batch_id": "batch-005",
+      "case_key": "recharge-001/supplement_then_confirm",
+      "arms": {
+        "model": {
+          "model_attempts": 2,
+          "jev_attempts": 0,
+          "model_config_priced_micro_cny": 7534,
+          "jev_config_priced_micro_usd": 0.0,
+          "server_telemetry_sum_ms": 1828.1372900000001,
+          "http_roundtrip_sum_ms": 2041.687958,
+          "conversation_duration_ms": 2084.473458,
+          "runner_elapsed_ms": 2201.29225,
+          "reply_repairs": 0,
+          "cash_read_recoveries": 0
+        },
+        "jev_selective": {
+          "model_attempts": 2,
+          "jev_attempts": 1,
+          "model_config_priced_micro_cny": 7424,
+          "jev_config_priced_micro_usd": 50.442,
+          "server_telemetry_sum_ms": 2060.480625,
+          "http_roundtrip_sum_ms": 2245.770417,
+          "conversation_duration_ms": 2297.37775,
+          "runner_elapsed_ms": 2415.537667,
+          "reply_repairs": 0,
+          "cash_read_recoveries": 0
+        }
+      }
+    },
+    {
+      "batch_id": "batch-006",
+      "case_key": "refund-001/balance_cap",
+      "arms": {
+        "model": {
+          "model_attempts": 2,
+          "jev_attempts": 0,
+          "model_config_priced_micro_cny": 7704,
+          "jev_config_priced_micro_usd": 0.0,
+          "server_telemetry_sum_ms": 1574.003791,
+          "http_roundtrip_sum_ms": 1724.8515,
+          "conversation_duration_ms": 1772.8605,
+          "runner_elapsed_ms": 1927.967833,
+          "reply_repairs": 0,
+          "cash_read_recoveries": 0
+        },
+        "jev_selective": {
+          "model_attempts": 2,
+          "jev_attempts": 1,
+          "model_config_priced_micro_cny": 7654,
+          "jev_config_priced_micro_usd": 50.442,
+          "server_telemetry_sum_ms": 2228.979417,
+          "http_roundtrip_sum_ms": 2393.9678750000003,
+          "conversation_duration_ms": 2447.035416,
+          "runner_elapsed_ms": 2580.669792,
+          "reply_repairs": 0,
+          "cash_read_recoveries": 0
+        }
+      }
+    }
+  ],
+  "totals": {
+    "model": {
+      "model_attempts": 13,
+      "jev_attempts": 0,
+      "model_config_priced_micro_cny": 51062,
+      "jev_config_priced_micro_usd": 0.0,
+      "server_telemetry_sum_ms": 11031.992497000001,
+      "http_roundtrip_sum_ms": 11702.647541999999,
+      "conversation_duration_ms": 11977.296542,
+      "runner_elapsed_ms": 12881.553166,
+      "reply_repairs": 1,
+      "cash_read_recoveries": 1
+    },
+    "jev_selective": {
+      "model_attempts": 10,
+      "jev_attempts": 6,
+      "model_config_priced_micro_cny": 38948,
+      "jev_config_priced_micro_usd": 303.072,
+      "server_telemetry_sum_ms": 11313.973043,
+      "http_roundtrip_sum_ms": 12126.720335,
+      "conversation_duration_ms": 12481.277792,
+      "runner_elapsed_ms": 13170.801084,
+      "reply_repairs": 1,
+      "cash_read_recoveries": 1
+    }
+  },
+  "limits": "Fixed model-first order, one pair per case; case mix is selected, no order balancing, repeats or population/statistical effect claim. Separate currencies, configuration prices are not invoices. Runner includes arm setup/oracle/cleanup but excludes global fixture and final export/score readback, not user end-to-end."
+}

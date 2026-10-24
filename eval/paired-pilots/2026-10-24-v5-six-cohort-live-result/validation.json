@@ -1,0 +1,40 @@
+{
+  "schema": "v5-six-cohort-live-validation.v1",
+  "single_execution_exit_code": 0,
+  "status": "checkpoint_pending",
+  "independently_passed_arms": 12,
+  "independently_passed_frozen_requirements": 66,
+  "observed_turns": 26,
+  "observer_stats": {
+    "Accepted": 88,
+    "Dropped": 0,
+    "Exported": 88,
+    "Failed": 0,
+    "Batches": 35,
+    "Turns": 26,
+    "SampledTurns": 26,
+    "QueueDepth": 0
+  },
+  "exact_content_readback_trace_count": 12,
+  "deterministic_score_readback_count": 84,
+  "independent_score_readback_count": 24,
+  "publish_immediate_verify_exit_code": 2,
+  "subsequent_readonly_verify_all_exit_codes": 0,
+  "all_score_writes_accepted_once": true,
+  "publish_repeated": false,
+  "cleanup_and_receipt_succeeded": true,
+  "isolated_schema_remaining": 0,
+  "historical_files_unchanged": 3980,
+  "source_files_unchanged": 30,
+  "customer_deployed": false,
+  "paid_retry": false,
+  "paid_scope_expanded": false,
+  "prior_failed_runs_and_preparation_evidence_preserved": true,
+  "tooling_adjustments": [
+    "Prepare helper initially expected empty list instead of null blockers; corrected only helper before execution",
+    "Readback helper case and telemetry field assumptions corrected without replay",
+    "Independent review initial aggregate arithmetic corrected against journal/report to 13 vs 10"
+  ],
+  "general_population_or_statistical_effect_claim": false,
+  "invoice_verified": false
+}

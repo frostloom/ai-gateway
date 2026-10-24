@@ -1,0 +1,49 @@
+{
+  "jev_calls": 0,
+  "kind": "verified",
+  "model_calls": 0,
+  "plan_sha256": "44959e8447909b2444c506a83664f6134ed172b96ab286f5ab00f0727317fc2c",
+  "score_count": 4,
+  "trace_summaries": [
+    {
+      "arm": "model",
+      "case_key": "recharge-002/cancel",
+      "content_turns": 2,
+      "evidence_kind": "recorded_run",
+      "expected_content": [
+        {
+          "input_sha256": "5b31afa5bb58f21534867f3bea04f2379661f3a6fbd71118643f6561695c572e",
+          "reply_sha256": "b94d94b0973d353a0ad7ef1068e8a830d699b85abde54fadaad04375b74ab82f"
+        },
+        {
+          "input_sha256": "1b00bff1e300dbab5e93239d0a65241db96d31108c53a511a21833e209ed2ed5",
+          "reply_sha256": "d5e3f4396a64592cd5cadd438200735d883dcafa177c2096175e60732eeed0a9"
+        }
+      ],
+      "expected_turns": 2,
+      "require_answers": true,
+      "trace_id": "65317bf45522528a2de1fdd5c0b55e42",
+      "turns": 2
+    },
+    {
+      "arm": "jev_selective",
+      "case_key": "recharge-002/cancel",
+      "content_turns": 2,
+      "evidence_kind": "recorded_run",
+      "expected_content": [
+        {
+          "input_sha256": "5b31afa5bb58f21534867f3bea04f2379661f3a6fbd71118643f6561695c572e",
+          "reply_sha256": "b94d94b0973d353a0ad7ef1068e8a830d699b85abde54fadaad04375b74ab82f"
+        },
+        {
+          "input_sha256": "1b00bff1e300dbab5e93239d0a65241db96d31108c53a511a21833e209ed2ed5",
+          "reply_sha256": "d5e3f4396a64592cd5cadd438200735d883dcafa177c2096175e60732eeed0a9"
+        }
+      ],
+      "expected_turns": 2,
+      "require_answers": true,
+      "trace_id": "1fe37506a59eb5c39d5ae53ae6729fe2",
+      "turns": 2
+    }
+  ]
+}
