@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/frostloom/ai-gateway/internal/agent"
+	"github.com/frostloom/ai-gateway/internal/observability"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -16,6 +17,10 @@ import (
 )
 
 func runLocal(t *testing.T, ids []string, handler http.HandlerFunc) (Receipt, error) {
+	t.Helper()
+	return runLocalObserved(t, ids, handler, nil)
+}
+func runLocalObserved(t *testing.T, ids []string, handler http.HandlerFunc, observer *observability.Observer) (Receipt, error) {
 	t.Helper()
 	srv := httptest.NewServer(handler)
 	defer srv.Close()
@@ -36,7 +41,7 @@ func runLocal(t *testing.T, ids []string, handler http.HandlerFunc) (Receipt, er
 	tr := NewTransport(http.DefaultTransport, c, s.Limits, j)
 	ctx, cancel := context.WithTimeout(context.Background(), 90*time.Second)
 	defer cancel()
-	return Run(ctx, RunOptions{AllowExecution: true, Root: "../..", Inputs: in, Claim: c, Transport: tr, AdminDSN: "root:root@tcp(127.0.0.1:3307)/", Out: filepath.Join(t.TempDir(), "run"), CaseIDs: ids})
+	return Run(ctx, RunOptions{Observer: observer, AllowExecution: true, Root: "../..", Inputs: in, Claim: c, Transport: tr, AdminDSN: "root:root@tcp(127.0.0.1:3307)/", Out: filepath.Join(t.TempDir(), "run"), CaseIDs: ids})
 }
 func modelAnswer(w http.ResponseWriter, msg agent.Message) {
 	json.NewEncoder(w).Encode(map[string]any{"choices": []any{map[string]any{"message": msg}}, "usage": map[string]any{"prompt_tokens": 100, "completion_tokens": 10, "prompt_tokens_details": map[string]any{"cached_tokens": 0}}, "model": "local-synthetic"})
