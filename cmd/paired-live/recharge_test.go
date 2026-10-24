@@ -9,10 +9,11 @@ import (
 	"testing"
 )
 
+// Storage-only; permission rejection is tested separately.
 func TestRechargeEntryClaimPermanentAndIndependent(t *testing.T) {
 	root := t.TempDir()
 	p := syntheticRetestPilotAt(t, "../../eval/paired-pilots/2026-10-23-recharge-confirm-entry", strings.Repeat("a", 40), false)
-	if err := claimRetest(root, p, "first"); err != nil {
+	if err := persistRetestClaim(root, p.CampaignID(), p.ExecutionRevision(), "first"); err != nil {
 		t.Fatal(err)
 	}
 	path := filepath.Join(root, ".tmp", "paired-live-retests", "recharge-confirm-20261023.json")
@@ -26,7 +27,7 @@ func TestRechargeEntryClaimPermanentAndIndependent(t *testing.T) {
 		t.Fatal("claim lost permanent cumulative reservation", m)
 	}
 	changed := syntheticRetestPilotAt(t, "../../eval/paired-pilots/2026-10-23-recharge-confirm-entry", strings.Repeat("b", 40), true)
-	if claimRetest(root, changed, "second") == nil {
+	if persistRetestClaim(root, changed.CampaignID(), changed.ExecutionRevision(), "second") == nil {
 		t.Fatal("changed version/output reset claim")
 	}
 	after, _ := os.ReadFile(path)

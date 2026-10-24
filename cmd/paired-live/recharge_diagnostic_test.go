@@ -9,12 +9,13 @@ import (
 	"testing"
 )
 
+// Storage-only; permission rejection is tested separately.
 func TestDiagnosticRechargeClaimPredecessorAndPermanentBudget(t *testing.T) {
 	root := t.TempDir()
 	base := "../../eval/paired-pilots/2026-10-23-recharge-diagnostic-retest-entry"
 	p := syntheticRetestPilotAt(t, base, strings.Repeat("a", 40), false)
 	newPath := filepath.Join(root, ".tmp", "paired-live-retests", "recharge-confirm-diagnostic-retest-20261023.json")
-	if claimRetest(root, p, "first") == nil {
+	if persistRetestClaim(root, p.CampaignID(), p.ExecutionRevision(), "first") == nil {
 		t.Fatal("missing parent claim accepted")
 	}
 	if _, err := os.Stat(newPath); !os.IsNotExist(err) {
@@ -23,7 +24,7 @@ func TestDiagnosticRechargeClaimPredecessorAndPermanentBudget(t *testing.T) {
 	parent := filepath.Join(root, ".tmp", "paired-live-retests", "recharge-confirm-20261023.json")
 	os.MkdirAll(filepath.Dir(parent), 0700)
 	os.WriteFile(parent, []byte("tampered"), 0600)
-	if claimRetest(root, p, "first") == nil {
+	if persistRetestClaim(root, p.CampaignID(), p.ExecutionRevision(), "first") == nil {
 		t.Fatal("tampered parent claim accepted")
 	}
 	raw, err := os.ReadFile(filepath.Join(base, "prior-claim.json"))
@@ -31,7 +32,7 @@ func TestDiagnosticRechargeClaimPredecessorAndPermanentBudget(t *testing.T) {
 		t.Fatal(err)
 	}
 	os.WriteFile(parent, raw, 0600)
-	if err := claimRetest(root, p, "first"); err != nil {
+	if err := persistRetestClaim(root, p.CampaignID(), p.ExecutionRevision(), "first"); err != nil {
 		t.Fatal(err)
 	}
 	got, err := os.ReadFile(newPath)
@@ -44,7 +45,7 @@ func TestDiagnosticRechargeClaimPredecessorAndPermanentBudget(t *testing.T) {
 		t.Fatal("cumulative permanent reservation lost", m)
 	}
 	changed := syntheticRetestPilotAt(t, base, strings.Repeat("b", 40), true)
-	if claimRetest(root, changed, "new-output") == nil {
+	if persistRetestClaim(root, changed.CampaignID(), changed.ExecutionRevision(), "new-output") == nil {
 		t.Fatal("new output/revision reset claim")
 	}
 	after, _ := os.ReadFile(parent)

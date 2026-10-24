@@ -129,7 +129,7 @@ func syntheticRetestPilotAt(t *testing.T, base, revision string, reformat bool) 
 	if err != nil {
 		t.Fatalf("synthetic scope %v", err)
 	}
-	if p.CampaignID() == taskbench.CashReadRecoveryRetestID {
+	if p.CampaignID() == taskbench.CashReadRecoveryRetestID || p.CampaignID() == taskbench.RechargeConfirmID || p.CampaignID() == taskbench.RechargeDiagnosticRetestID || p.CampaignID() == taskbench.RechargeCancelID {
 		if p.Ready() || !strings.Contains(strings.Join(p.Blockers(), ","), "runtime_contract_mismatch") {
 			t.Fatal("historical contract accepted execution")
 		}
@@ -214,6 +214,19 @@ func TestRecoveryRetestClaimRejectsUnknownIdentityBeforeIO(t *testing.T) {
 		}
 		if _, err := os.Stat(filepath.Join(root, ".tmp")); !os.IsNotExist(err) {
 			t.Fatal("rejected scope created directory")
+		}
+	}
+}
+
+func TestHistoricalRechargeCannotClaimNewRuntime(t *testing.T) {
+	for _, base := range []string{"2026-10-23-recharge-confirm-entry", "2026-10-23-recharge-diagnostic-retest-entry", "2026-10-24-recharge-cancel-entry"} {
+		p := syntheticRetestPilotAt(t, "../../eval/paired-pilots/"+base, strings.Repeat("a", 40), false)
+		root := t.TempDir()
+		if claimRetest(root, p, "absent") == nil {
+			t.Fatal("historical scope claimed changed runtime")
+		}
+		if _, err := os.Stat(filepath.Join(root, ".tmp")); !os.IsNotExist(err) {
+			t.Fatal("claim path created")
 		}
 	}
 }

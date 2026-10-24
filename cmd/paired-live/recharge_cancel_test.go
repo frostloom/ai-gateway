@@ -9,6 +9,7 @@ import (
 	"testing"
 )
 
+// Storage-only; permission rejection is tested separately.
 func TestCancelRechargeClaimPredecessorsAndPermanentBudget(t *testing.T) {
 	base := "../../eval/paired-pilots/2026-10-24-recharge-cancel-entry"
 	p := syntheticRetestPilotAt(t, base, strings.Repeat("a", 40), false)
@@ -34,7 +35,7 @@ func TestCancelRechargeClaimPredecessorsAndPermanentBudget(t *testing.T) {
 						t.Fatal(err)
 					}
 				}
-				if claimRetest(root, p, "first") == nil {
+				if persistRetestClaim(root, p.CampaignID(), p.ExecutionRevision(), "first") == nil {
 					t.Fatal("broken predecessor accepted")
 				}
 				if _, err := os.Stat(filepath.Join(dir, "recharge-cancel-20261024.json")); !os.IsNotExist(err) {
@@ -55,7 +56,7 @@ func TestCancelRechargeClaimPredecessorsAndPermanentBudget(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	if err := claimRetest(root, p, "first-failed-run"); err != nil {
+	if err := persistRetestClaim(root, p.CampaignID(), p.ExecutionRevision(), "first-failed-run"); err != nil {
 		t.Fatal(err)
 	}
 	path := filepath.Join(dir, "recharge-cancel-20261024.json")
@@ -74,7 +75,7 @@ func TestCancelRechargeClaimPredecessorsAndPermanentBudget(t *testing.T) {
 		t.Fatal("prior hashes lost")
 	}
 	changed := syntheticRetestPilotAt(t, base, strings.Repeat("b", 40), true)
-	if claimRetest(root, changed, "new-output") == nil {
+	if persistRetestClaim(root, changed.CampaignID(), changed.ExecutionRevision(), "new-output") == nil {
 		t.Fatal("new revision/output reset consumed claim")
 	}
 	after, _ := os.ReadFile(path)

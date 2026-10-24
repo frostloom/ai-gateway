@@ -1,0 +1,70 @@
+{
+  "schema": "recharge-supplement-fix-acceptance.v1",
+  "runtime_contract_sha256": "624a53c69b2fece1f705332ca208ee854be0588decad986d4dee42355ad46477",
+  "paths": [
+    {
+      "path": "normal",
+      "arms": [
+        {
+          "arm": "model",
+          "status": "needs_review",
+          "structural_pass": true,
+          "model_calls": 2,
+          "jev_calls": 0
+        },
+        {
+          "arm": "jev_selective",
+          "status": "needs_review",
+          "structural_pass": true,
+          "model_calls": 2,
+          "jev_calls": 1
+        }
+      ]
+    },
+    {
+      "path": "repair",
+      "arms": [
+        {
+          "arm": "model",
+          "status": "needs_review",
+          "structural_pass": true,
+          "model_calls": 3,
+          "jev_calls": 0
+        },
+        {
+          "arm": "jev_selective",
+          "status": "needs_review",
+          "structural_pass": true,
+          "model_calls": 3,
+          "jev_calls": 1
+        }
+      ]
+    },
+    {
+      "path": "insufficient-cap",
+      "arms": [
+        {
+          "arm": "model",
+          "status": "needs_review",
+          "structural_pass": true,
+          "model_calls": 2,
+          "jev_calls": 0
+        },
+        {
+          "arm": "jev_selective",
+          "status": "failed",
+          "structural_pass": false,
+          "model_calls": 2,
+          "jev_calls": 1
+        }
+      ]
+    }
+  ],
+  "offline_structural_gate": "passed",
+  "semantic_quality_proven": false,
+  "actual_model_calls": 0,
+  "actual_jev_calls": 0,
+  "deployed": false,
+  "new_paid_scope_created": false,
+  "old_scopes_runtime_contract_mismatch": true
+}

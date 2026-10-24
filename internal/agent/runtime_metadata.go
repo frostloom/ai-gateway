@@ -25,7 +25,7 @@ type RuntimeMetadata struct {
 	ReplyRepairLimit int                `json:"reply_repair_limit"`
 }
 
-const runtimeContract = "customer-contract-v3;tenant-auth;read-only-four-first-independent-no-params;intent-shape>=0.90;legit>=0.85;risk<0.5;risk_conf>=0.8;shared-preview-confirm;no-pending-overwrite;empty-pending-confirm-noop;finite-recharge-completion-needs-execution;reply-repair-max-one;explicit-own-cash-read-recovery-once-after-repair;no-numeric-inference;one-tool-per-iteration;loop-max-five"
+const runtimeContract = "customer-contract-v4;tenant-auth;read-only-four-first-independent-no-params;intent-shape>=0.90;legit>=0.85;risk<0.5;risk_conf>=0.8;shared-preview-confirm;no-pending-overwrite;empty-pending-confirm-noop;finite-recharge-completion-needs-execution;finite-explicit-own-recharge-preview-application;reply-repair-max-one;explicit-own-cash-read-recovery-once-after-repair;no-numeric-inference;one-tool-per-iteration;loop-max-five"
 
 // EvaluationRuntimeMetadata captures configured hashes and bounds before an
 // evaluation sends any model request. It performs no network/environment access

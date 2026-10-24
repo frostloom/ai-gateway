@@ -3,10 +3,6 @@ package taskbench
 import (
 	"context"
 	"encoding/json"
-	"github.com/frostloom/ai-gateway/internal/jev"
-	"io"
-	"net/http"
-	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"strings"
@@ -39,11 +35,11 @@ func rechargeEntryInputs(t *testing.T) ([]byte, []byte, []byte, []byte) {
 func TestRechargeEntryFixedScope(t *testing.T) {
 	a, p, b, e := rechargeEntryInputs(t)
 	pilot, err := CheckAuthorizedRetest(a, p, b, e)
-	if err != nil || !pilot.Ready() || pilot.CampaignID() != "recharge-confirm-20261023" {
+	if err != nil || pilot.Ready() || !hasString(pilot.Blockers(), "runtime_contract_mismatch") || pilot.CampaignID() != "recharge-confirm-20261023" {
 		t.Fatalf("new scope not ready: %v %v", err, pilot.Blockers())
 	}
-	if err = pilot.ValidateFrozenInputs("../../eval/task-definitions/2026-10-12-full-dev-v1", "../../eval/runtime-profiles/2026-10-13-six-profiles-v1", strings.Repeat("a", 40)); err != nil {
-		t.Fatal(err)
+	if err = pilot.ValidateFrozenInputs("../../eval/task-definitions/2026-10-12-full-dev-v1", "../../eval/runtime-profiles/2026-10-13-six-profiles-v1", strings.Repeat("a", 40)); err == nil {
+		t.Fatal("historical contract accepted execution")
 	}
 	no, err := CheckAuthorizedRetest(alteredJSON(a, "human_authorized", false), p, b, e)
 	if err != nil || no.Ready() || no.HumanAuthorized() {
@@ -91,128 +87,16 @@ func TestRechargeEntryFixedScope(t *testing.T) {
 func TestRechargeEntryLocalRunner(t *testing.T) {
 	testRechargeScopeLocalRunner(t, rechargeEntryInputs, "authorized-recharge-confirm.v1")
 }
-func testRechargeScopeLocalRunner(t *testing.T, inputs func(*testing.T) ([]byte, []byte, []byte, []byte), receiptSchema string) {
-	for _, mode := range []string{"complete", "provider-failure", "jev-failure"} {
-		t.Run(mode, func(t *testing.T) {
-			o := localCampaignOptions(t)
-			a, p, b, e := inputs(t)
-			pilot, err := CheckAuthorizedRetest(a, p, b, e)
-			if err != nil {
-				t.Fatal(err)
-			}
-			deps, err := newLocalCampaignDependencies(context.Background())
-			if err != nil {
-				t.Fatal(err)
-			}
-			defer deps.close()
-			var transportServer *httptest.Server
-			if receiptSchema == "authorized-recharge-confirm.v2" && mode == "jev-failure" {
-				transportServer = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-					conn, _, err := w.(http.Hijacker).Hijack()
-					if err != nil {
-						t.Error(err)
-						return
-					}
-					conn.Close()
-				}))
-				defer transportServer.Close()
-			}
-			calls := 0
-			up := pairedRoundTripFunc(func(req *http.Request) (*http.Response, error) {
-				calls++
-				if req.URL.String() != "https://api.deepseek.com/v1/chat/completions" {
-					t.Fatal("wrong provider target")
-				}
-				if mode == "provider-failure" {
-					return &http.Response{StatusCode: 503, Body: io.NopCloser(strings.NewReader(`{"error":"synthetic"}`))}, nil
-				}
-				var body struct {
-					Max int `json:"max_tokens"`
-				}
-				if json.NewDecoder(req.Body).Decode(&body) != nil || body.Max != 128 {
-					t.Fatal("unbounded output")
-				}
-				msg := `{"choices":[{"message":{"role":"assistant","content":"","tool_calls":[{"id":"recharge","type":"function","function":{"name":"recharge","arguments":"{\"amount_money\":100}"}}]}}],"usage":{"prompt_tokens":100,"completion_tokens":8}}`
-				return &http.Response{StatusCode: 200, Body: io.NopCloser(strings.NewReader(msg))}, nil
-			})
-			opts := AuthorizedFirstBatchOptions{Pilot: pilot, DefinitionsDir: o.DefinitionsDir, Environment: o.Environment, Revision: strings.Repeat("a", 40), Observer: deps.observer, Model: pilot.ModelSettings(), Upstream: up, JEVFactory: func() jev.Evaluator {
-				if mode == "jev-failure" {
-					if transportServer != nil {
-						return jev.NewClient(transportServer.URL, "synthetic", "jev-1.13.0")
-					}
-					return policyFailureJEV{}
-				}
-				return authorizedTestJEV{jev.NewFake(localJevScript("recharge", .99)), true}
-			}}
-			opts.Model.APIKey = "synthetic-only"
-			dir := filepath.Join(t.TempDir(), "run")
-			r, err := RunAuthorizedRetest(context.Background(), dir, opts)
-			if mode != "complete" {
-				if err == nil || r.Status != "stopped" {
-					t.Fatalf("failure did not stop: %v %s", err, r.Status)
-				}
-			} else {
-				if err != nil || r.Status != "checkpoint_pending" || r.Report == nil || r.Report.FinishedArms != 2 || r.Schema != receiptSchema {
-					t.Fatalf("incomplete run %v %+v", err, r)
-				}
-				if r.ModelState.Calls != 2 || r.JEVAttempts != 1 || r.CampaignReservedModelCalls != 10 || r.CampaignReservedMicroCNY != 337920 || r.CampaignReservedMicroUSD != 2688 {
-					t.Fatalf("wrong reservation/usage %+v", r)
-				}
-				if r.BudgetCeilingSHA != "4669a31fe6f74f7f6901ed9a4dcb114016d7ed4aac85be949d9b0b6e74c0c00b" || r.OfflineManifestSHA == "" || r.OfflineAcceptanceSHA == "" {
-					t.Fatal("receipt lost provenance")
-				}
-				journal, err := loadPairJournal(filepath.Join(dir, "campaign", "batch-001", "run.jsonl"))
-				if err != nil {
-					t.Fatal(err)
-				}
-				for _, event := range journal.finished {
-					if event.Result == nil || len(event.Result.Observations) != 2 {
-						t.Fatal("missing two turns")
-					}
-					executed := 0
-					for _, obs := range event.Result.Observations {
-						for _, trace := range obs.Turn.Response.Trace {
-							if trace.Tool == "recharge" && trace.Outcome == "success" {
-								executed++
-							}
-						}
-					}
-					if executed != 1 {
-						t.Fatalf("expected one real fixture recharge per arm, got %d", executed)
-					}
-				}
-			}
-			if mode == "jev-failure" && r.JEVAttempts != 1 {
-				t.Fatal("JEV retried")
-			}
-			if receiptSchema == "authorized-recharge-confirm.v2" {
-				if r.DiagnosticSourceRevision != "5c2f669413c0787ba1bd3a429c9552d628e1a44c" || r.PriorJournalSHA != "c7008d7345bee7a04783dff93fae86586135c6e95fffe7210edda93a15b591ea" {
-					t.Fatal("diagnostic/prior evidence lost in receipt")
-				}
-				if mode == "jev-failure" {
-					raw, err := os.ReadFile(filepath.Join(dir, "campaign", "batch-001", "run.jsonl.jev.jsonl"))
-					if err != nil {
-						t.Fatal(err)
-					}
-					found := false
-					for _, line := range strings.Split(strings.TrimSpace(string(raw)), "\n") {
-						var e map[string]any
-						json.Unmarshal([]byte(line), &e)
-						if f, ok := e["failure"].(map[string]any); ok && f["transport_cause"] == "eof" && e["Failed"] == true {
-							found = true
-						}
-					}
-					if !found {
-						t.Fatal("actual local transport cause not persisted")
-					}
-				}
-			}
 
-			before := calls
-			if _, err := RunAuthorizedRetest(context.Background(), dir, opts); err == nil || calls != before {
-				t.Fatal("reused output touched upstream")
-			}
-		})
+// Historical scopes remain inspectable but cannot invoke the changed Handler.
+func testRechargeScopeLocalRunner(t *testing.T, inputs func(*testing.T) ([]byte, []byte, []byte, []byte), _ string) {
+	a, p, b, e := inputs(t)
+	pilot, err := CheckAuthorizedRetest(a, p, b, e)
+	if err != nil || pilot.Ready() || !hasString(pilot.Blockers(), "runtime_contract_mismatch") {
+		t.Fatal("historical execution enabled", err)
+	}
+	if _, err := RunAuthorizedRetest(context.Background(), filepath.Join(t.TempDir(), "absent"), AuthorizedFirstBatchOptions{Pilot: pilot}); err == nil || !strings.Contains(err.Error(), "verified authorized pilot required") {
+		t.Fatal("old scope reached dependencies", err)
 	}
 }
 

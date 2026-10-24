@@ -29,11 +29,11 @@ func diagnosticRechargeInputs(t *testing.T) ([]byte, []byte, []byte, []byte) {
 func TestDiagnosticRechargeScopeBinding(t *testing.T) {
 	a, p, b, e := diagnosticRechargeInputs(t)
 	pilot, err := CheckAuthorizedRetest(a, p, b, e)
-	if err != nil || !pilot.Ready() || pilot.CampaignID() != "recharge-confirm-diagnostic-retest-20261023" {
+	if err != nil || pilot.Ready() || !hasString(pilot.Blockers(), "runtime_contract_mismatch") || pilot.CampaignID() != "recharge-confirm-diagnostic-retest-20261023" {
 		t.Fatalf("new scope rejected: %v %v", err, pilot.Blockers())
 	}
-	if err := pilot.ValidateFrozenInputs("../../eval/task-definitions/2026-10-12-full-dev-v1", "../../eval/runtime-profiles/2026-10-13-six-profiles-v1", strings.Repeat("a", 40)); err != nil {
-		t.Fatal(err)
+	if err := pilot.ValidateFrozenInputs("../../eval/task-definitions/2026-10-12-full-dev-v1", "../../eval/runtime-profiles/2026-10-13-six-profiles-v1", strings.Repeat("a", 40)); err == nil {
+		t.Fatal("historical contract accepted execution")
 	}
 	for _, key := range []string{"schema", "campaign_id", "diagnostic_source_revision", "diagnostic_manifest_sha256", "prior_journal_sha256", "prior_review_sha256", "budget_ceiling_sha256", "runtime_contract_sha256", "prior_offline_manifest_sha256", "prior_offline_acceptance_sha256"} {
 		if _, err := CheckAuthorizedRetest(alteredJSON(a, key, "changed"), p, b, e); err == nil {

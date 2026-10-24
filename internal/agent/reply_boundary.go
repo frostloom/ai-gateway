@@ -9,6 +9,10 @@ var confirmationInvitation = regexp.MustCompile(`(?:回复|请确认|确认即�
 
 // Finite current-application forms, not a semantic/history completion judge.
 var rechargeApplication = regexp.MustCompile(`^(?:请\s*)?(?:(?:帮我|给我|替我|我要|我想|现在|立即)\s*)?(?:充值|充钱|充)\s*(?:[0-9]+(?:\.[0-9]+)?\s*(?:元|块|人民币|rmb|yuan)?)?\s*[。.!！]?$`)
+
+// An explicit own-account application, with a bounded optional preview suffix.
+// Whole-string matching excludes history, quotations, other owners and compounds.
+var ownRechargeApplication = regexp.MustCompile(`^(?:明确申请|请)?\s*给我本人账户充值\s*[0-9]+(?:\.[0-9]+)?\s*(?:元人民币|元|人民币|rmb|yuan)\s*(?:[，,]\s*请先预览)?[。.!！]?$`)
 var rechargeCompletion = regexp.MustCompile(`^\s*(?:已)?充值成功(?:[：:。！!，,]|$)`)
 var explicitMoney = regexp.MustCompile(`(?:\d+\s*(?:元|块|rmb|yuan)|(?:充值|退款|退|充)\s*\d+)`)
 var asksMoney = regexp.MustCompile(`^(?:请问|请告诉|请提供|麻烦|您|你).{0,16}(?:充|退).{0,12}(?:多少|金额)`)
@@ -33,7 +37,8 @@ var explicitApplicationPatterns = map[string]*regexp.Regexp{
 // is limited to an explicit own-cash read. Both arms share these bounds and
 // count actual upstream calls/usage. Do not replace necessary questions.
 func replyRepairReason(reply, user string, pending *pendingAction) string {
-	if rechargeApplication.MatchString(strings.ToLower(strings.TrimSpace(user))) && rechargeCompletion.MatchString(reply) {
+	application := strings.ToLower(strings.TrimSpace(user))
+	if (rechargeApplication.MatchString(application) || ownRechargeApplication.MatchString(application)) && rechargeCompletion.MatchString(reply) {
 		return "本轮尚未执行已确认的充值，不能声称充值成功或到账。明确申请应先调用充值工具生成真实预览，等待用户确认后才执行；不能生成预览就说明未执行。"
 	}
 	if pending == nil && strings.Contains(reply, "确认") && confirmationInvitation.MatchString(reply) {

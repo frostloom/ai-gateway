@@ -17,6 +17,12 @@ import (
 // Pins the complete frozen clarification/preview/confirmation flow, including
 // real fixture state; dependency scripts never count as semantic quality proof.
 func TestRechargeSupplementOfflineAcceptance(t *testing.T) {
+	testRechargeSupplementOfflineAcceptance(t, false)
+}
+func TestRechargeSupplementRepairRequired(t *testing.T) {
+	testRechargeSupplementOfflineAcceptance(t, true)
+}
+func testRechargeSupplementOfflineAcceptance(t *testing.T, requireRepair bool) {
 	for _, mode := range []string{"normal", "repair", "insufficient-cap"} {
 		t.Run(mode, func(t *testing.T) {
 			o := localCampaignOptions(t)
@@ -118,6 +124,9 @@ func TestRechargeSupplementOfflineAcceptance(t *testing.T) {
 				}
 				if !reflect.DeepEqual(r.Initial.Controls, r.Final.Controls) || !reflect.DeepEqual(r.Initial.Allowance, r.Final.Allowance) {
 					t.Fatal("unrelated state changed")
+				}
+				if mode == "repair" && requireRepair && !r.StructuralPass {
+					t.Fatalf("required correction missing: %v", r.Errors)
 				}
 				if mode == "repair" && !r.StructuralPass {
 					if len(r.Observations) != 3 {
