@@ -42,6 +42,9 @@ func (p CampaignPreparationPlan) validateTarget(model PairModelSettings, jevMode
 		if !ok {
 			scope, ok = checkedRechargeCancelScope("recharge-cancel-authorization.v1", p.CampaignID)
 		}
+		if !ok {
+			scope, ok = checkedRechargeSupplementScope("recharge-supplement-authorization.v1", p.CampaignID)
+		}
 		if !ok || p.CustomerRevision != scope.CustomerRevision || p.RuntimeContractSHA != scope.RuntimeContractSHA || p.Schema != "campaign-preflight-plan.v2" {
 			return fmt.Errorf("recovery retest plan markers differ")
 		}

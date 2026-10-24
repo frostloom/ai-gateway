@@ -7,7 +7,7 @@ const RechargeDiagnosticClaimSHA = "23047a143039f719531cfe403f1769abda7a6091b2ee
 // It is a new case, not permission to retry either previous evaluation.
 func checkedRechargeCancelScope(schema, id string) (cashRetestScope, bool) {
 	if schema != "recharge-cancel-authorization.v1" || id != RechargeCancelID {
-		return cashRetestScope{}, false
+		return checkedRechargeSupplementScope(schema, id)
 	}
 	return cashRetestScope{
 		ID: id, BillingSchema: "recharge-cancel-billing-attestation.v1", ReceiptSchema: "authorized-recharge-cancel.v1",

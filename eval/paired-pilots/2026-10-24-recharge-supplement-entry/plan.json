@@ -1,0 +1,35 @@
+{
+  "schema": "campaign-preflight-plan.v2",
+  "target": {
+    "base_url": "https://api.deepseek.com/v1",
+    "model": "deepseek-flash",
+    "protocol": "openai",
+    "jev_model": "jev-1.13.0"
+  },
+  "campaign_limits": {
+    "max_batches": 1,
+    "max_model_calls": 12,
+    "max_model_micro_cny": 405504,
+    "max_jev_calls": 1,
+    "max_jev_micro_usd": 2688,
+    "jev_micro_usd_per_attempt": 2688
+  },
+  "batches": [
+    {
+      "key": "recharge-001/supplement_then_confirm",
+      "model_limits": {
+        "max_calls": 12,
+        "max_output_tokens": 128,
+        "max_request_bytes": 16384,
+        "input_token_ceiling": 16384,
+        "max_micro_cny": 405504,
+        "input_micro_cny_per_million": 2000000,
+        "output_micro_cny_per_million": 8000000
+      },
+      "max_jev_calls": 1
+    }
+  ],
+  "campaign_id": "recharge-supplement-20261024",
+  "customer_source_revision": "262a47f25572ad77ef38f68d00fb8703d0f45e53",
+  "runtime_contract_sha256": "624a53c69b2fece1f705332ca208ee854be0588decad986d4dee42355ad46477"
+}

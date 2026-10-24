@@ -1,0 +1,28 @@
+{
+  "settings": {
+    "settings_valid": true,
+    "checks": {
+      "monitor_enabled": true,
+      "content_enabled": true,
+      "evaluation_environment": true,
+      "full_sampling": true,
+      "identity_hash_key_valid": true,
+      "chosen_channel": true,
+      "chosen_model": true,
+      "chosen_protocol": true,
+      "model_key_present": true,
+      "jev_key_present": true,
+      "pinned_jev_model": true
+    },
+    "ready_for_paid_run": false,
+    "model_calls": 0,
+    "jev_calls": 0,
+    "remaining_gates": [
+      "Per-batch Observer injection, coverage and score readback",
+      "Target-bound execution authorization and billing evidence",
+      "Account invoice unknown; public peak rates are not a bill"
+    ]
+  },
+  "health": "passed",
+  "auth": "passed"
+}

@@ -1,0 +1,22 @@
+{
+  "schema": "recharge-supplement-budget-allocation.v1",
+  "budget_ceiling_sha256": "4669a31fe6f74f7f6901ed9a4dcb114016d7ed4aac85be949d9b0b6e74c0c00b",
+  "ceiling_micro_cny": 100000000,
+  "ceiling_micro_usd": 1000000,
+  "consumed_predecessor_scopes": [
+    "recharge-confirm-20261023",
+    "recharge-confirm-diagnostic-retest-20261023",
+    "recharge-cancel-20261024"
+  ],
+  "existing_permanent_reserved_micro_cny": 1013760,
+  "existing_permanent_reserved_micro_usd": 8064,
+  "new_claim_currently_exists": false,
+  "new_allocation_micro_cny": 405504,
+  "new_allocation_micro_usd": 2688,
+  "permanent_reserved_if_claimed_micro_cny": 1419264,
+  "permanent_reserved_if_claimed_micro_usd": 10752,
+  "unallocated_if_claimed_micro_cny": 98580736,
+  "unallocated_if_claimed_micro_usd": 989248,
+  "release_on_failure": false,
+  "general_budget_manager": false
+}

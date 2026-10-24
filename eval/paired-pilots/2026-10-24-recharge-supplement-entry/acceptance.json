@@ -1,0 +1,35 @@
+{
+  "schema": "recharge-supplement-entry-acceptance.v1",
+  "modes": {
+    "complete": {
+      "synthetic_model_calls": 4,
+      "synthetic_jev_attempts": 1,
+      "status": "checkpoint_pending",
+      "business_write_after_confirm_only": true
+    },
+    "repair": {
+      "synthetic_model_calls": 6,
+      "synthetic_jev_attempts": 1,
+      "status": "checkpoint_pending",
+      "business_write_after_confirm_only": true
+    },
+    "provider-failure": {
+      "synthetic_model_calls": 1,
+      "synthetic_jev_attempts": 0,
+      "status": "stopped"
+    },
+    "jev-failure": {
+      "synthetic_model_calls": 2,
+      "synthetic_jev_attempts": 1,
+      "status": "stopped",
+      "transport_cause": "eof",
+      "fallback_or_retry": false
+    }
+  },
+  "semantic_quality_proven": false,
+  "actual_new_model_calls": 0,
+  "actual_new_jev_calls": 0,
+  "new_real_claim_created": false,
+  "deployed": false,
+  "completed_path_report_status": "needs_review"
+}

@@ -1,0 +1,15 @@
+{
+  "schema": "recharge-supplement-entry-code-review.v1",
+  "reviewer": "review_supplement_entry",
+  "base_revision": "2dce93eae877240d2a1e4adea762c08c19d93730",
+  "p1_p2_findings": [],
+  "targeted_gate_tests_independently_passed": true,
+  "material_consistency_reviewed": true,
+  "nonblocking_gap": "No new direct concurrent-claim test; unchanged O_EXCL mutex and sequential reclaim tests retained",
+  "declined_to_judge": [
+    "Full regression result",
+    "Private captures and public price freshness independently",
+    "Real model quality and deployment"
+  ],
+  "requires_final_validation_file": true
+}

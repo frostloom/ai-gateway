@@ -1,0 +1,127 @@
+{
+  "schema": "recharge-supplement-entry-validation.v1",
+  "initial_full_regression": {
+    "exit_code": 1,
+    "passed_packages": [
+      "github.com/frostloom/ai-gateway/cmd/agent",
+      "github.com/frostloom/ai-gateway/cmd/eval",
+      "github.com/frostloom/ai-gateway/cmd/conversation-eval",
+      "github.com/frostloom/ai-gateway/cmd/task-eval",
+      "github.com/frostloom/ai-gateway/cmd/paired-eval",
+      "github.com/frostloom/ai-gateway/internal/billing/outbox",
+      "github.com/frostloom/ai-gateway/internal/gateway/handler",
+      "github.com/frostloom/ai-gateway/cmd/paired-live",
+      "github.com/frostloom/ai-gateway/internal/jev",
+      "github.com/frostloom/ai-gateway/internal/gateway/middleware",
+      "github.com/frostloom/ai-gateway/internal/pkg/controlplane",
+      "github.com/frostloom/ai-gateway/internal/observability",
+      "github.com/frostloom/ai-gateway/internal/router",
+      "github.com/frostloom/ai-gateway/internal/billing/admin",
+      "github.com/frostloom/ai-gateway/internal/billing/consumer",
+      "github.com/frostloom/ai-gateway/internal/agent"
+    ],
+    "failed_packages": [
+      "github.com/frostloom/ai-gateway/internal/billing/store",
+      "github.com/frostloom/ai-gateway/internal/taskbench"
+    ],
+    "failed_tests": [
+      {
+        "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+        "test": "TestAuthorizedFirstBatchOneShotAndFailureStop"
+      },
+      {
+        "package": "github.com/frostloom/ai-gateway/internal/billing/store",
+        "test": "TestReserveConcurrentNoOversell"
+      }
+    ],
+    "taskbench_default_ten_minute_timeout": true,
+    "cleanup_remaining_databases_after_run": 0,
+    "configuration_or_timeout_changed": false
+  },
+  "bounded_rechecks": {
+    "original_first_batch": {
+      "exit_code": 0,
+      "test_seconds": 7.82
+    },
+    "original_store_first_recheck": {
+      "exit_code": 1,
+      "insufficient": 37,
+      "expected": 90,
+      "failure": "cash lock request lock timed out"
+    },
+    "store_test_only_profile": {
+      "exit_code": 0,
+      "unchanged_concurrency": 100,
+      "unchanged_lock_seconds": 5,
+      "tenant_lock_max_ms": 871.963042,
+      "sql_redis_errors": 0,
+      "pool_wait_cumulative_ms": 47391.831956
+    },
+    "original_store_post_profile": {
+      "exit_code": 0,
+      "test_seconds": 5.54
+    }
+  },
+  "current_full_regression": {
+    "exit_code": 0,
+    "command": "SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX26.5.sdk go test ./... -count=1 -json",
+    "passed_packages": [
+      "github.com/frostloom/ai-gateway/cmd/agent",
+      "github.com/frostloom/ai-gateway/cmd/eval",
+      "github.com/frostloom/ai-gateway/cmd/conversation-eval",
+      "github.com/frostloom/ai-gateway/cmd/task-eval",
+      "github.com/frostloom/ai-gateway/internal/billing/outbox",
+      "github.com/frostloom/ai-gateway/cmd/paired-live",
+      "github.com/frostloom/ai-gateway/cmd/paired-eval",
+      "github.com/frostloom/ai-gateway/internal/gateway/handler",
+      "github.com/frostloom/ai-gateway/internal/jev",
+      "github.com/frostloom/ai-gateway/internal/gateway/middleware",
+      "github.com/frostloom/ai-gateway/internal/observability",
+      "github.com/frostloom/ai-gateway/internal/pkg/controlplane",
+      "github.com/frostloom/ai-gateway/internal/router",
+      "github.com/frostloom/ai-gateway/internal/billing/admin",
+      "github.com/frostloom/ai-gateway/internal/billing/consumer",
+      "github.com/frostloom/ai-gateway/internal/agent",
+      "github.com/frostloom/ai-gateway/internal/billing/store",
+      "github.com/frostloom/ai-gateway/internal/taskbench"
+    ],
+    "package_elapsed_seconds": {
+      "github.com/frostloom/ai-gateway/cmd/agent": 1.047,
+      "github.com/frostloom/ai-gateway/cmd/eval": 2.273,
+      "github.com/frostloom/ai-gateway/cmd/conversation-eval": 5.487,
+      "github.com/frostloom/ai-gateway/cmd/task-eval": 8.374,
+      "github.com/frostloom/ai-gateway/internal/billing/outbox": 1.587,
+      "github.com/frostloom/ai-gateway/cmd/paired-live": 18.57,
+      "github.com/frostloom/ai-gateway/cmd/paired-eval": 30.808,
+      "github.com/frostloom/ai-gateway/internal/gateway/handler": 1.01,
+      "github.com/frostloom/ai-gateway/internal/jev": 1.787,
+      "github.com/frostloom/ai-gateway/internal/gateway/middleware": 3.6870000000000003,
+      "github.com/frostloom/ai-gateway/internal/observability": 1.036,
+      "github.com/frostloom/ai-gateway/internal/pkg/controlplane": 1.262,
+      "github.com/frostloom/ai-gateway/internal/router": 0.837,
+      "github.com/frostloom/ai-gateway/internal/billing/admin": 56.499,
+      "github.com/frostloom/ai-gateway/internal/billing/consumer": 50.497,
+      "github.com/frostloom/ai-gateway/internal/agent": 199.886,
+      "github.com/frostloom/ai-gateway/internal/billing/store": 206.583,
+      "github.com/frostloom/ai-gateway/internal/taskbench": 299.419
+    },
+    "failure_events": 0,
+    "standard_parallelism": true,
+    "default_timeout": true
+  },
+  "root_cause_confirmed": false,
+  "permanent_repair_claimed": false,
+  "historical_files_verified": 2962,
+  "historical_hashes_changed": 0,
+  "remaining_isolated_databases": 0,
+  "independent_review_p1_p2": 0,
+  "source_files_bound": 278,
+  "actual_new_model_calls": 0,
+  "actual_new_jev_calls": 0,
+  "cumulative_actual_model_calls": 29,
+  "cumulative_actual_jev_calls": 7,
+  "new_real_claim_created": false,
+  "deployed": false,
+  "example_authorization": false,
+  "example_tariff_and_token_evidence": false
+}

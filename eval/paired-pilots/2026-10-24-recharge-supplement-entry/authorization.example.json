@@ -1,0 +1,33 @@
+{
+  "schema": "recharge-supplement-authorization.v1",
+  "campaign_id": "recharge-supplement-20261024",
+  "human_authorized": false,
+  "scope_plan_sha256": "2cb88dafc52fe58f0c36b820a868cc9bf7cbdcbbeb95ba4fe0c1a42d97704812",
+  "target": {
+    "base_url": "https://api.deepseek.com/v1",
+    "model": "deepseek-flash",
+    "protocol": "openai",
+    "jev_model": "jev-1.13.0"
+  },
+  "authorized_spending": {
+    "max_batches": 1,
+    "max_model_calls": 12,
+    "max_model_micro_cny": 405504,
+    "max_jev_calls": 1,
+    "max_jev_micro_usd": 2688,
+    "jev_micro_usd_per_attempt": 2688
+  },
+  "case_key": "recharge-001/supplement_then_confirm",
+  "execution_revision": "0000000000000000000000000000000000000000",
+  "automatic_scope_expansion": false,
+  "automatic_paid_retries": false,
+  "customer_source_revision": "262a47f25572ad77ef38f68d00fb8703d0f45e53",
+  "runtime_contract_sha256": "624a53c69b2fece1f705332ca208ee854be0588decad986d4dee42355ad46477",
+  "budget_ceiling_sha256": "4669a31fe6f74f7f6901ed9a4dcb114016d7ed4aac85be949d9b0b6e74c0c00b",
+  "prior_offline_manifest_sha256": "6c8a04a705931816c74425effb17a4856c507ba48ce77dcad17d31182119b578",
+  "prior_offline_acceptance_sha256": "f06c40c02c99f182c86d845e74750b50135a4dfed07c107ad0ed48de2a686845",
+  "prior_journal_sha256": "",
+  "prior_review_sha256": "",
+  "diagnostic_source_revision": "5c2f669413c0787ba1bd3a429c9552d628e1a44c",
+  "diagnostic_manifest_sha256": "8731a95fc1efd01abd76d6448335f86f84ffaa1137165a9bbc446cfffd0cf8b3"
+}
