@@ -35,9 +35,11 @@
 - [x] Run `go test ./internal/taskbench ./cmd/paired-live -run 'TestCancelRecharge' -count=1`; expected fail on unknown new scope.
 - [x] Add minimal dispatch, billing schema and claim predecessor checks; run targeted tests, expected pass.
 - [x] Add real Handler runner integration for complete, provider-failure and JEV-failure; inspect cancel audit/state and no retries; run targeted tests, expected pass.
-- [ ] Run `go test ./... -count=1` with process SDKROOT MacOSX26.5.sdk; report actual failures without hiding them.
-- [ ] Independent review, archive verification and evidence integrity; commit exact files, fetch/check remote, push normally, verify remote SHA. Record durable project facts in Hindsight and actually recall.
+- [x] Run `go test ./... -count=1` with process SDKROOT MacOSX26.5.sdk; report actual failures without hiding them.
+- [x] Independent review, archive verification and evidence integrity; commit exact files, fetch/check remote, push normally, verify remote SHA. Record durable project facts in Hindsight and actually recall.
 
 ## Execution record
 
 Target scope RED→GREEN and final focused regression passed. Initial full suite:16 packages passed, store concurrent reserve failure and taskbench package10m timeout. Bounded rechecks:store failure persists; timed taskbench test passes. Full suite gate remains blocked; no production lock/config changes. Reviewer matching-digest budget-expansion gap addressed and reverified. Exact owned orphan fixture dropped, final residual0;2780 old local files unchanged. New paid claim absent. Integration/paid readiness explicitly withheld pending regression diagnosis.
+
+Subsequent goal-mode iteration: unchanged code passed a fresh standard full18-package regression after diagnostic measurements; original failures retained, cause unconfirmed. Current execution preparation and limits are in docs/recharge-cancel-execution-preparation-2026-10-24.md; do not interpret the historical blocked state above as the current regression gate.

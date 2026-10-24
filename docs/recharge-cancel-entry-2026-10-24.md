@@ -1,5 +1,7 @@
 # 充值取消独立受控入口
 
+后续自主迭代已经获得新的18包完整回归通过结果，并补齐实际请求包络和计费准备，见[后续准备记录](recharge-cancel-execution-preparation-2026-10-24.md)。以下blocked及首次失败记录保留为入口交付当时事实。
+
 本轮接续[充值取消离线验收](recharge-cancel-offline-2026-10-24.md)，为原 `recharge-002/cancel` 增加固定独立入口 `recharge-cancel-20261024`。没有新增真实推理、实际claim或部署，累计仍为27模型/6JEV尝试。客服运行逻辑不变。
 
 ## 范围和绑定

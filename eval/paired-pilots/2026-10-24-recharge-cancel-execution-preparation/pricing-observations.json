@@ -1,0 +1,23 @@
+{
+  "reviewed_on": "2026-10-24",
+  "method": "Official pages actually opened through web tool; observations, not invoice/negotiated tariff",
+  "deepseek": {
+    "url": "https://api-docs.deepseek.com/zh-cn/quick_start/pricing/",
+    "model": "deepseek-flash",
+    "conservative_peak_cache_miss_input_cny_per_million": 2,
+    "conservative_peak_output_cny_per_million": 8,
+    "nonthinking": true,
+    "discount_not_assumed": true
+  },
+  "jev": {
+    "url": "https://docs.typesafe.ai/models",
+    "model": "jev-1.13.0",
+    "input_usd_per_million": 0.042,
+    "output_usd_per_million": 0,
+    "per_request_context": 64000,
+    "long_context_enabled": false,
+    "latest_alias_not_used": true
+  },
+  "vendor_failure_charge_guarantee_verified": false,
+  "failure_policy": "reserve_full_attempt_stop_on_failure"
+}

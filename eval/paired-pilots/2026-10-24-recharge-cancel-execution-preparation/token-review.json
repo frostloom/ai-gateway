@@ -1,0 +1,54 @@
+{
+  "schema": "recharge-cancel-token-review.v1",
+  "candidate_source_revision": "84b49fb499a09bceed5e1dc95da1f054641fd432",
+  "request_count": 6,
+  "requests": [
+    {
+      "file": "captures/complete-request-1.json",
+      "bytes": 6522,
+      "serialized_text_tokens": 1547,
+      "sha256": "ca49f58833f3a7ac8b38fc146d7bc85cda4b3f1ae8b735d969d24dbd7b9949bb"
+    },
+    {
+      "file": "captures/complete-request-2.json",
+      "bytes": 6522,
+      "serialized_text_tokens": 1547,
+      "sha256": "ca49f58833f3a7ac8b38fc146d7bc85cda4b3f1ae8b735d969d24dbd7b9949bb"
+    },
+    {
+      "file": "captures/repair-request-1.json",
+      "bytes": 6522,
+      "serialized_text_tokens": 1547,
+      "sha256": "ca49f58833f3a7ac8b38fc146d7bc85cda4b3f1ae8b735d969d24dbd7b9949bb"
+    },
+    {
+      "file": "captures/repair-request-2.json",
+      "bytes": 6740,
+      "serialized_text_tokens": 1592,
+      "sha256": "636f06183144d028eed5f8dec297d80a5a63bbf399136a1e83c983d84bff126d"
+    },
+    {
+      "file": "captures/repair-request-3.json",
+      "bytes": 6522,
+      "serialized_text_tokens": 1547,
+      "sha256": "ca49f58833f3a7ac8b38fc146d7bc85cda4b3f1ae8b735d969d24dbd7b9949bb"
+    },
+    {
+      "file": "captures/repair-request-4.json",
+      "bytes": 6740,
+      "serialized_text_tokens": 1592,
+      "sha256": "636f06183144d028eed5f8dec297d80a5a63bbf399136a1e83c983d84bff126d"
+    }
+  ],
+  "max_request_bytes_observed": 6740,
+  "max_serialized_text_tokens_observed": 1592,
+  "tokenizer_sha256": "89085f12ef79460ac5f66d1119325ddfc694b4ab209d80bbd81d35f081dc9614",
+  "max_request_bytes": 16384,
+  "input_reservation": 16384,
+  "output_cap": 128,
+  "thinking": "disabled",
+  "exact_server_billing_count": false,
+  "operator_judgment": "Actual controlled runner/Handler normal and correction requests under a local transport are within the declared reservation. Local tokenization cannot prove vendor framing or every possible response; missing/out-of-envelope usage must stop. Not supplier invoice proof.",
+  "model_calls": 0,
+  "jev_calls": 0
+}
