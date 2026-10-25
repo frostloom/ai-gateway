@@ -1,0 +1,27 @@
+{
+  "schema": "v5-repeated-export-diagnostic-acceptance.v1",
+  "synthetic_only": true,
+  "real_evaluation_calls": 0,
+  "normal": {"model_calls": 88, "jev_attempts": 24, "turns": 104, "accounts": 48, "traces": 48, "status": "checkpoint_pending"},
+  "repair": {"model_calls": 120, "jev_attempts": 24, "turns": 104, "status": "checkpoint_pending"},
+  "stops": {
+    "observer_503": {"model_calls": 6, "jev_attempts": 1, "error_kind": "http_status", "http_status": 503},
+    "truncated_200": {"model_calls": 6, "jev_attempts": 1, "error_kind": "response_decode", "http_status": 200},
+    "provider": {"model_calls": 3, "jev_attempts": 1},
+    "jev_eof": {"model_calls": 6, "jev_attempts": 2},
+    "structural": {"model_calls": 5, "jev_attempts": 1},
+    "usage": {"model_calls": 3, "jev_attempts": 1, "cost_known": false},
+    "fact": {"model_calls": 2, "jev_attempts": 0, "finished_arms": 1, "unrun_arms": 1},
+    "receipt": {"model_calls": 88, "jev_attempts": 24, "failed_stage": "receipt_write"},
+    "reverse_provider": {"model_calls": 23, "jev_attempts": 7},
+    "reverse_jev": {"model_calls": 22, "jev_attempts": 7},
+    "reverse_structural": {"model_calls": 25, "jev_attempts": 7},
+    "reverse_usage": {"model_calls": 23, "jev_attempts": 7, "cost_known": false},
+    "reverse_fact": {"model_calls": 26, "jev_attempts": 7},
+    "cleanup_both_orders": {"arms_started": 1, "unrun_arms": 1}
+  },
+  "scope_reserved_model_calls": 248,
+  "scope_reserved_jev_calls": 24,
+  "export_replay_on_second_run": false,
+  "needs_review_promoted": false
+}

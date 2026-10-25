@@ -1,8 +1,8 @@
 {
   "schema": "repeated-export-diagnostic-design.v1",
   "candidate_id": "v5-repeated-export-diagnostic-20261025",
-  "design_only": true,
-  "implemented": false,
+  "design_only": false,
+  "implemented": true,
   "human_authorized": false,
   "allow_paid": false,
   "ready_for_paid_run": false,
@@ -505,7 +505,7 @@
   },
   "actual_reservation_changed": false,
   "current_rates_verified": false,
-  "token_envelope_rechecked": false,
+  "token_envelope_rechecked": true,
   "source_sha256": {
     "eval/paired-pilots/2026-10-24-v5-repeated-entry/plan.json": "527334cf64842106d8b28003f7b40c1010bca02455fab20572f79affb7ccc8bf",
     "eval/paired-pilots/2026-10-25-observer-export-diagnostics/source-sha256.json": "16121832bb7f1850e699aab4b005bc9e3755016dc430002a490406352c6f3ba9",

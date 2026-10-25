@@ -1,0 +1,36 @@
+{
+  "schema": "v5-repeated-export-diagnostic-request-envelope.v1",
+  "model_posts": 0,
+  "official_tokenizer_url": "https://cdn.deepseek.com/api-docs/deepseek_v4_tokenizer.zip",
+  "official_tokenizer_zip_sha256": "e7310d1dafe0a86d8a5629fe78a7c763760f651db9b8682718a1781dcd6fe495",
+  "official_tokenizer_json_sha256": "89085f12ef79460ac5f66d1119325ddfc694b4ab209d80bbd81d35f081dc9614",
+  "tokenizer_matches_prior_repeated_readiness": true,
+  "max_output_tokens": 128,
+  "thinking_mode": "disabled",
+  "model_input_token_ceiling": 16384,
+  "model_max_request_bytes": 16384,
+  "prior_captured_request_count": 208,
+  "prior_max_request_bytes": 7311,
+  "prior_max_serialized_text_tokens": 1754,
+  "customer_non_test_go_unchanged_from": "50e3c8dab14b4b6cc25322fd340a274e6970200b",
+  "public_rates": {
+    "source": "https://api-docs.deepseek.com/zh-cn/quick_start/pricing",
+    "model": "deepseek-flash",
+    "peak_cache_miss_input_cny_per_million": 2,
+    "peak_output_cny_per_million": 8,
+    "reserved_input_micro_cny_per_million": 2000000,
+    "reserved_output_micro_cny_per_million": 8000000,
+    "jev_source": "https://docs.typesafe.ai/models",
+    "jev_model": "jev-1.13.0",
+    "jev_input_usd_per_million": 0.042,
+    "jev_reserved_micro_usd_per_million": 42000,
+    "jev_context_tokens": 64000,
+    "long_context": false,
+    "invoice_verified": false
+  },
+  "limitations": [
+    "No model POST was sent while rechecking the tokenizer and public rate pages.",
+    "The 208-request envelope is the already archived repeated-entry capture; customer non-test Go is unchanged from 50e3c8d, so this entry does not recapture those bodies.",
+    "Serialized JSON token counts are a local estimate. Missing usage still stops the run. Synthetic 100/8 usage is not a supplier invoice."
+  ]
+}

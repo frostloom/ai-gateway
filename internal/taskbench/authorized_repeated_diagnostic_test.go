@@ -98,6 +98,10 @@ func TestRepeatedDiagnosticScopeIsSeparate(t *testing.T) {
 	if _, err = CheckAuthorizedPilot(a, p, b, e); err == nil {
 		t.Fatal("diagnostic through legacy checker")
 	}
+	oa, op, ob, oe := diagnosticMaterials(true, wantBinding.ObserverRevision)
+	if _, err = CheckAuthorizedRepeatedDiagnostic(oa, op, ob, oe); err == nil {
+		t.Fatal("observer revision accepted as execution revision")
+	}
 	opts := AuthorizedFirstBatchOptions{Pilot: pilot, Revision: wantBinding.ObserverRevision}
 	if _, err = RunAuthorizedRepeatedDiagnostic(context.Background(), "absent", opts); err == nil {
 		t.Fatal("observer revision executed as current revision")

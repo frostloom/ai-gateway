@@ -1,0 +1,20 @@
+{
+  "schema": "v5-repeated-export-diagnostic-review.v1",
+  "reviewer": "independent_diff_review",
+  "initial_p1": 0,
+  "initial_p2": [
+    "Checker accepted observer revision 4d887382300a906ae6d1a33972f3fe4d4aca4e0d as a 40-hex execution_revision"
+  ],
+  "fix": "CheckAuthorizedRepeatedDiagnostic rejects that exact observer revision before billing or claim creation",
+  "recheck_remaining_p1": 0,
+  "recheck_remaining_p2": 0,
+  "checked": [
+    "new schema and -repeated-diagnostic are rejected by historical checkers before credentials",
+    "recomputed plan hash cannot change case, order, block, pair, caps, refund amount, or target",
+    "missing or tampered c7f14ee3 predecessor does not create the new claim",
+    "historical six-predecessor claim cumulative stays 12300288/94080 without prior_repeated_claim_sha256",
+    "first-arm 503 and truncated 200 persist export diagnostics and leave the next arm unrun",
+    "zero binding omits observer_revision on historical receipts",
+    "new runner does not reopen the stopped v5-repeated-cohort-20261024 output"
+  ]
+}
