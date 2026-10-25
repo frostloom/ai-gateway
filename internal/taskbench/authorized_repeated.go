@@ -42,12 +42,18 @@ func v5RepeatedBatches() []CampaignPreparationBatch {
 	}
 	return out
 }
-func validateRepeatedPlan(p CampaignPreparationPlan) error {
+func validateRepeatedSchedule(p CampaignPreparationPlan) error {
 	scope := v5RepeatedScope()
-	if p.Schema != "campaign-preflight-plan.v2" || p.CampaignID != V5RepeatedID || p.CustomerRevision != scope.CustomerRevision || p.RuntimeContractSHA != scope.RuntimeContractSHA || p.Limits != v5RepeatedLimits() || !reflect.DeepEqual(p.Batches, v5RepeatedBatches()) {
+	if (p.CampaignID != V5RepeatedID && p.CampaignID != V5RepeatedDiagnosticID) || p.Schema != "campaign-preflight-plan.v2" || p.CustomerRevision != scope.CustomerRevision || p.RuntimeContractSHA != scope.RuntimeContractSHA || p.Limits != v5RepeatedLimits() || !reflect.DeepEqual(p.Batches, v5RepeatedBatches()) {
 		return fmt.Errorf("fixed repeated schedule required")
 	}
 	return nil
+}
+func validateRepeatedPlan(p CampaignPreparationPlan) error {
+	if p.CampaignID != V5RepeatedID {
+		return fmt.Errorf("fixed repeated schedule required")
+	}
+	return validateRepeatedSchedule(p)
 }
 func v5RepeatedLimits() CampaignLimits {
 	return CampaignLimits{MaxBatches: 24, MaxModelCalls: 248, MaxModelMicroCNY: 8380416, MaxJEVCalls: 24, MaxJEVMicroUSD: 64512, JEVMicroUSDPerAttempt: 2688}

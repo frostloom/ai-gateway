@@ -60,10 +60,11 @@ type AuthorizedFirstBatchReceipt struct {
 	EvidenceSHA                  string                      `json:"billing_evidence_sha256"`
 	Revision                     string                      `json:"execution_revision"`
 	Batches                      []LocalCampaignBatchReceipt `json:"batches"`
-	ModelState                   PairBudgetState             `json:"model_budget"`
-	JEVAttempts                  int                         `json:"jev_attempts"`
-	Report                       *SmallPairReport            `json:"report,omitempty"`
-	ObserverStats                observability.Stats         `json:"observer_stats"`
+	RepeatedDiagnosticBinding
+	ModelState    PairBudgetState     `json:"model_budget"`
+	JEVAttempts   int                 `json:"jev_attempts"`
+	Report        *SmallPairReport    `json:"report,omitempty"`
+	ObserverStats observability.Stats `json:"observer_stats"`
 }
 
 // RunAuthorizedFirstBatch never advances to batch-002 or resumes any directory.

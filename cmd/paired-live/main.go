@@ -62,6 +62,7 @@ func runWithOutput(args []string, out io.Writer) int {
 	permission := f.String("continuation-authorization", "", "explicit batch-002 permission; required only for execution")
 	retest := f.Bool("retest", false, "separate fixed one-case evaluation; requires independent scope and billing")
 	repeated := f.Bool("repeated", false, "fixed four-block repeated cohort; separate exact authorization")
+	repeatedDiagnostic := f.Bool("repeated-diagnostic", false, "fixed repeated cohort with export diagnostics; separate exact authorization")
 	cohort := f.Bool("cohort", false, "fixed current-v5 six-case cohort; separate exact authorization")
 	execute := f.Bool("execute", false, "explicitly run batch-001 only when all evidence is ready")
 	var files envFiles
@@ -70,6 +71,9 @@ func runWithOutput(args []string, out io.Writer) int {
 		return 2
 	}
 	fail := func(msg string) int { fmt.Fprintln(out, msg); return 2 }
+	if *repeatedDiagnostic && (*repeated || *cohort || *retest || *previous != "" || *review != "" || *permission != "") {
+		return fail("repeated diagnostic cannot use other modes or continuation")
+	}
 	if *repeated && (*cohort || *retest || *previous != "" || *review != "" || *permission != "") {
 		return fail("repeated cannot use other modes or continuation")
 	}
@@ -101,7 +105,9 @@ func runWithOutput(args []string, out io.Writer) int {
 		}
 	}
 	var pilot taskbench.AuthorizedPilot
-	if *repeated {
+	if *repeatedDiagnostic {
+		pilot, err = taskbench.CheckAuthorizedRepeatedDiagnostic(a, p, b, e)
+	} else if *repeated {
 		pilot, err = taskbench.CheckAuthorizedRepeated(a, p, b, e)
 	} else if *cohort {
 		pilot, err = taskbench.CheckAuthorizedCohort(a, p, b, e)
@@ -182,7 +188,9 @@ func runWithOutput(args []string, out io.Writer) int {
 		return fail("explicit owned-fixture administration configuration required")
 	}
 	var claimErr error
-	if pilot.IsRepeated() {
+	if pilot.IsRepeatedDiagnostic() {
+		claimErr = claimRepeatedDiagnostic(root, pilot, *dir)
+	} else if pilot.IsRepeated() {
 		claimErr = claimRepeated(root, pilot, *dir)
 	} else if pilot.IsCohort() {
 		claimErr = claimCohort(root, pilot, *dir)
@@ -205,6 +213,10 @@ func runWithOutput(args []string, out io.Writer) int {
 		fmt.Fprintln(out, "selected batch stopped; inspect private evidence, never automatically retry")
 		return 1
 	}
+	if pilot.IsRepeatedDiagnostic() {
+		fmt.Fprintf(out, "%s: fixed 24-pair repeated export diagnostic completed; inspect all evidence; no further execution\n", receipt.Status)
+		return 0
+	}
 	if pilot.IsRepeated() {
 		fmt.Fprintf(out, "%s: fixed 24-pair repeated cohort completed; inspect all evidence; no further execution\n", receipt.Status)
 		return 0
@@ -223,7 +235,9 @@ func runWithOutput(args []string, out io.Writer) int {
 func writeCheck(out io.Writer, p taskbench.AuthorizedPilot) int {
 	bound := p.ModelSettings()
 	scope := "batch-001 only, then checkpoint"
-	if p.IsRepeated() {
+	if p.IsRepeatedDiagnostic() {
+		scope = "fixed 24-pair repeated export diagnostic only, then checkpoint; any failure stops"
+	} else if p.IsRepeated() {
 		scope = "fixed 24-pair repeated cohort only, then checkpoint; any failure stops"
 	} else if p.IsCohort() {
 		scope = "fixed six-case cohort only, then checkpoint; first structural/provider/JEV/evidence failure stops"
@@ -310,6 +324,9 @@ func executeFirst(ctx context.Context, dir, defs, profiles, revision string, p t
 	opts := taskbench.AuthorizedFirstBatchOptions{Pilot: p, DefinitionsDir: defs, Environment: fixture, Revision: revision, Observer: observer, Model: model, Upstream: modelTransport, JEVFactory: func() jev.Evaluator { return judge }}
 	if len(continuation) > 0 && continuation[0] != nil {
 		return taskbench.RunAuthorizedSecondBatch(ctx, dir, opts, *continuation[0])
+	}
+	if p.IsRepeatedDiagnostic() {
+		return taskbench.RunAuthorizedRepeatedDiagnostic(ctx, dir, opts)
 	}
 	if p.IsRepeated() {
 		return taskbench.RunAuthorizedRepeated(ctx, dir, opts)
