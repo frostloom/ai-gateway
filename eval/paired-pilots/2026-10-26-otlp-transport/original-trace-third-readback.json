@@ -1,0 +1,22 @@
+{
+  "schema": "repeated-diagnostic-content-readback.v1",
+  "traces": [
+    {
+      "batch_id": "batch-001",
+      "pair_id": "block-00-pair-00",
+      "arm": "model",
+      "trace_id": "0a03704880b8e04f1c89021e2faeea97",
+      "expected_turns": 1,
+      "content_exact": false,
+      "repeated_metadata_exact": false,
+      "readback_error": "Trace is absent or belongs to different case/arm/evidence"
+    }
+  ],
+  "expected_trace_count": 1,
+  "exact_content_trace_count": 0,
+  "exact_metadata_trace_count": 0,
+  "expected_turns": 1,
+  "model_calls": 0,
+  "jev_calls": 0,
+  "no_reexport_or_replay": true
+}
