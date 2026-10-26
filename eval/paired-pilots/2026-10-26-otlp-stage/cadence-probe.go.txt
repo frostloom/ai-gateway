@@ -1,0 +1,49 @@
+package main
+import (
+ "context"
+ "encoding/json"
+ "errors"
+ "net/http"
+ "net/http/httptrace"
+ "net/url"
+ "os"
+ "strings"
+ "sync"
+ "time"
+ "github.com/frostloom/ai-gateway/internal/observability"
+ "go.opentelemetry.io/otel/trace"
+)
+type event struct { Name string `json:"name"`; MS float64 `json:"ms"`; OK bool `json:"ok"` }
+type capture struct { mu sync.Mutex; start time.Time; events []event; endpoint string; base http.RoundTripper; requests int; Proxy bool `json:"proxy_selected"`; Status int `json:"http_status,omitempty"` }
+func (c *capture) add(name string, ok bool) { c.mu.Lock(); defer c.mu.Unlock(); c.events=append(c.events,event{name,float64(time.Since(c.start))/float64(time.Millisecond),ok}) }
+func(c *capture) RoundTrip(r *http.Request)(*http.Response,error) {
+ c.mu.Lock(); c.requests++; n:=c.requests; c.mu.Unlock()
+ if n>5 || r.Method!="POST" || r.URL.String()!=c.endpoint { c.add("unexpected_request_refused",false); return nil,errors.New("unexpected request refused") }
+ proxy,e:=http.ProxyFromEnvironment(r); c.Proxy=proxy!=nil; c.add("proxy_lookup",e==nil)
+ if e!=nil{return nil,errors.New("proxy lookup failed")}
+ tr:=&httptrace.ClientTrace{GetConn:func(string){c.add("get_conn",true)},ConnectStart:func(string,string){c.add("connect_start",true)},ConnectDone:func(_, _ string,e error){c.add("connect_done",e==nil)},GotConn:func(httptrace.GotConnInfo){c.add("got_conn",true)},WroteRequest:func(x httptrace.WroteRequestInfo){c.add("wrote_request",x.Err==nil)},GotFirstResponseByte:func(){c.add("first_response_byte",true)}}
+ out,e:=c.base.RoundTrip(r.Clone(httptrace.WithClientTrace(r.Context(),tr)));c.add("round_trip_return",e==nil)
+ if out!=nil {c.Status=out.StatusCode};return out,e
+}
+func main(){
+ f,e:=os.OpenFile(".tmp/paired-live-private/otlp-stage-20261026/cadence-outcome.json",os.O_CREATE|os.O_EXCL|os.O_WRONLY,0600);if e!=nil{panic("exclusive output required")};defer f.Close()
+ raw,e:=os.ReadFile(".tmp/paired-live-private/regression-timing-20261026/evaluation.env");if e!=nil{panic("env unavailable")};env:=map[string]string{}
+ for _,l:=range strings.Split(string(raw),"\n"){k,v,ok:=strings.Cut(l,"=");if ok{env[strings.TrimSpace(k)]=strings.Trim(strings.TrimSpace(v),"\"'")}}
+ c,e:=observability.ConfigFromEnv(func(k string)string{return env[k]});if e!=nil || !c.Enabled || c.Environment!="evaluation" || c.ExportTimeout!=2*time.Second {panic("explicit config invalid")}
+ u,e:=url.Parse(c.Endpoint);if e!=nil || u.Scheme!="http" || u.Hostname()!="127.0.0.1" || u.Port()!="13000" {panic("frozen local endpoint required")}
+ c.CaptureContent=false;c.Release="otlp-stage-cadence-20261026";c.SampleRate=1
+ cap:=&capture{start:time.Now(),endpoint:c.Endpoint,base:http.DefaultTransport};http.DefaultTransport=cap
+ ctx,cancel:=context.WithTimeout(context.Background(),70*time.Second);defer cancel()
+ time.Sleep(45*time.Second)
+ o,e:=observability.New(ctx,c);if e!=nil{panic("observer init failed")}
+ tctx,t:=o.StartTurn(ctx,"diagnostic_zero_inference");id:=trace.SpanContextFromContext(tctx).TraceID().String()
+ rows:=[]map[string]any{};stopped:=false;gaps:=[]time.Duration{0,2*time.Second,3*time.Second,2*time.Second}
+ for i:=0;i<4;i++{if i>0{time.Sleep(gaps[i])};before:=o.Stats();cap.mu.Lock();requestsBefore:=cap.requests;cap.mu.Unlock()
+ if i==3{t.End(200,observability.Summary{Stage:"diagnostic_zero_inference"})}else{n:=1;if i==2{n=2};for j:=0;j<n;j++{_,op:=observability.Start(tctx,"diagnostic.synthetic.stage","span");op.End(nil)}}
+ start:=time.Now();e=o.ForceFlush(ctx);stats:=o.Stats();cap.mu.Lock();requestDelta:=cap.requests-requestsBefore;status:=cap.Status;cap.mu.Unlock()
+ rows=append(rows,map[string]any{"batch":i+1,"gap_before_ms":gaps[i].Milliseconds(),"flush_ms":float64(time.Since(start))/float64(time.Millisecond),"flush_ok":e==nil,"http_requests":requestDelta,"http_status":status,"accepted_delta":stats.Accepted-before.Accepted,"stats":stats})
+ if e!=nil || stats.Failed!=0 || stats.Dropped!=0 {stopped=true;break}
+ }
+ shutdown:=o.Shutdown(ctx);cap.mu.Lock();defer cap.mu.Unlock()
+ json.NewEncoder(f).Encode(map[string]any{"schema":"otlp-idle-cadence-probe.v1","trace_id":id,"model_calls":0,"jev_calls":0,"initial_wait_ms":45000,"new_synthetic_span_target":5,"batch_target":4,"stopped":stopped,"shutdown_ok":shutdown==nil,"stats":o.Stats(),"batches":rows,"events":cap.events,"requests":cap.requests,"proxy_selected":cap.Proxy,"export_timeout_ms":2000});f.Sync()
+}
