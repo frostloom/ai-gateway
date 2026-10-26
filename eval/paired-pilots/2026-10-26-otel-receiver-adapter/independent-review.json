@@ -1,0 +1,22 @@
+{
+  "schema": "otel-receiver-adapter-independent-review.v1",
+  "reviewer": "review_receiver_adapter",
+  "initial_p2": "Restore deleted backups before detecting unknown backup contents; cleanup failure was not resumable.",
+  "status": "fixed",
+  "fix": "Validate complete backup listing first; persist restored before deleting backup; resume validated partial cleanup, including install rollback cleanup.",
+  "review_regressions_red_then_green": 4,
+  "targeted_recheck_tests": 18,
+  "additional_packaging_findings": [
+    {
+      "problem": "umask narrowed0664 to0644",
+      "fix": "fchmod exclusive temporary fd before rename; exact mode validation retained",
+      "red_then_green": true
+    },
+    {
+      "problem": "root atomic replacement changed1001:1001 to0:0",
+      "fix": "retain uid/gid in records/manifest, fchown temp fd only when needed, then fchmod; restore validates ownership",
+      "red_then_green": true
+    }
+  ],
+  "targeted_mode_and_owner_recheck": "confirmed; host18 passed, root1001 scenario verified by final build and candidate inspection"
+}

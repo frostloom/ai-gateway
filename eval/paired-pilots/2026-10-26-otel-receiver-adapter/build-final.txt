@@ -1,0 +1,101 @@
+DEPRECATED: The legacy builder is deprecated and will be removed in a future release.
+            BuildKit is currently disabled; enable it by removing the DOCKER_BUILDKIT=0
+            environment-variable.
+
+Sending build context to Docker daemon  73.22kB
+Step 1/8 : FROM docker.langfuse.com/langfuse/langfuse@sha256:b5f4306480d844b2bce43ecd82960cefc0b219e5164ea588ea45ed806a41a4c9
+ ---> b5f4306480d8
+Step 2/8 : USER root
+ ---> Using cache
+ ---> ef0f53e8000f
+Step 3/8 : COPY zh/translate.cjs zh/translate.test.cjs zh/assets.cjs zh/assets.test.cjs zh/zh-CN.json /opt/langfuse-zh/
+ ---> Using cache
+ ---> 0fbc63e15ea7
+Step 4/8 : COPY diagnostics/otel-stages.cjs diagnostics/otel-stages.test.cjs diagnostics/receiver.cjs diagnostics/install.cjs diagnostics/install.test.cjs diagnostics/pinned-layout.json /opt/ai-gateway-otel-stages/
+ ---> 9b859e0326fd
+Step 5/8 : RUN node --test /opt/langfuse-zh/translate.test.cjs /opt/langfuse-zh/assets.test.cjs /opt/ai-gateway-otel-stages/otel-stages.test.cjs /opt/ai-gateway-otel-stages/install.test.cjs
+ ---> Running in e7535a6c0564
+✔ transform changes only three call sites and rejects missing/duplicate anchors (13.702375ms)
+✔ default-off adapter returns exact promise and enable requires literal1 in a fresh process (1147.339542ms)
+✔ patched handler and publisher preserve arguments, this, results and errors (12.632041ms)
+✔ install/restore round trip is byte exact and duplicate install is rejected (19.400042ms)
+✔ unsupported version fails before any write (4.49375ms)
+✔ unsupported hash fails before any write (5.02325ms)
+✔ unsupported missing fails before any write (7.674917ms)
+✔ symlink source is refused without altering its external target (11.710625ms)
+✔ restore refuses changed patched file or backup and does not overwrite changes (13.351542ms)
+✔ partial write failure rolls back all changed source bytes and own metadata (5.863958ms)
+✔ unexpected backup directory content refuses restore before mutation (6.5135ms)
+✔ restore handles a prepared mixed state after interrupted install (6.185708ms)
+✔ restore cleanup failure at publisher.js remains recoverable (8.6025ms)
+✔ restore cleanup failure at .otel-stage-diagnostics.json remains recoverable (10.398583ms)
+✔ install rollback with cleanup I/O failure keeps a resumable restored manifest (12.183834ms)
+✔ atomic replacement preserves original mode despite process umask (9.486208ms)
+✔ original ownership metadata is carried through atomic replacements (10.373666ms)
+✔ real source ownership remains intact including root-built non-root sources (8.208625ms)
+✔ disabled default preserves exact values, promises and error identity without inspecting result (6.982125ms)
+✔ fast success returns business result and does not emit or retain a timer (3.58375ms)
+✔ pending s3_upload identifies active phase without cancelling business work (5.686ms)
+✔ pending queue_add identifies active phase without cancelling business work (1.335458ms)
+✔ pending other identifies active phase without cancelling business work (0.713958ms)
+✔ stage failure preserves original error and emits no message, stack, body or header (4.799542ms)
+✔ unrelated final error after caught phase failure is other (0.294041ms)
+✔ synchronous errors and values preserve identity when enabled (1.032041ms)
+✔ logger exceptions cannot change resolved or rejected business results (2.234542ms)
+✔ concurrent requests have isolated sequence and phase (2.435208ms)
+✔ overlapping stages are reported as other, never arbitrarily assigned (1.037167ms)
+✔ unknown phase is not inspected or logged; operations outside context are unchanged (83.145458ms)
+✔ late observation callback is inert after completion (1.562666ms)
+✔ completion after threshold without timer firing still emits one slow completion (7.857708ms)
+✔ record and concurrency bounds are exact and snapshot is deeply detached (1.138709ms)
+✔ completed phase summaries stay bounded and never inspect successful results (8.8845ms)
+✔ undefined rejection remains undefined and is attributed to other (0.446958ms)
+✔ timer allocation failure falls back to untouched business work (0.181125ms)
+✔ after overlapping same-phase operations, remaining phase is conservative until all settle (0.140125ms)
+✔ native observation timer emits pending without cancelling a slow operation (2058.193251ms)
+✔ native Promise own then getter cannot introduce a run failure (2.545209ms)
+✔ native Promise own then getter cannot introduce a stage failure (0.780916ms)
+✔ skipped nested request cannot inherit and contaminate parent stages (0.879375ms)
+✔ translated assets have new URLs across HTML, Next config and lazy Turbopack loading (23.401708ms)
+✔ unsupported loader fails before changing the standalone server (3.640792ms)
+✔ translate only literal UI props, preserving dynamic values and enum values (15.027416ms)
+✔ translate static mixed children but preserve expressions and business text (4.132125ms)
+✔ code and pre examples are never translated (0.307792ms)
+✔ navigation display titles and table headers preserve route, IDs and filter labels (2.935959ms)
+✔ page header title supports nested headerProps without touching payload (0.997958ms)
+✔ idempotent and no substring translation (0.634541ms)
+✔ string literals and comments that resemble source code are unchanged (0.433416ms)
+✔ reject malformed program instead of producing broken bundle (0.854959ms)
+✔ component labels and header-derived column IDs retain original semantics (2.52475ms)
+✔ translate dynamic header at rendering boundary, preserving its original definition (12.866917ms)
+✔ known input/output display panel translates its label but never its value (0.380334ms)
+✔ dynamic display lookup preserves unknown/prototype names and functional headers (22.76625ms)
+✔ non-render calls and different header/context receivers stay unchanged (7.949959ms)
+✔ translate conditional display branches, preserving the condition and non-UI data (1.323084ms)
+✔ settings menu titles translate while slugs, keywords, and ordinary titles stay unchanged (0.449125ms)
+ℹ tests 58
+ℹ suites 0
+ℹ pass 58
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2687.202959
+ ---> Removed intermediate container e7535a6c0564
+ ---> e74d7aa4749a
+Step 6/8 : RUN node /opt/langfuse-zh/translate.cjs && node /opt/ai-gateway-otel-stages/install.cjs install /app/web
+ ---> Running in e3224b39cd1b
+{"version":"4.58.0","changed_files":232,"replacements":2277,"translated_terms":225}
+{"status":"installed","files":2,"enabled_by_default":false}
+ ---> Removed intermediate container e3224b39cd1b
+ ---> 014d9b430ed1
+Step 7/8 : ENV AI_GATEWAY_OTEL_STAGE_DIAGNOSTICS=0
+ ---> Running in dd1280eb4867
+ ---> Removed intermediate container dd1280eb4867
+ ---> 96f0ba8712df
+Step 8/8 : USER 1001
+ ---> Running in e7b4e1425822
+ ---> Removed intermediate container e7b4e1425822
+ ---> 677a486f0519
+Successfully built 677a486f0519
+Successfully tagged ai-gateway-langfuse-zh:4.58.0-otel-stages-v4
