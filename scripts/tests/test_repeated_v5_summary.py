@@ -201,4 +201,51 @@ class SummaryTests(unittest.TestCase):
         self.assertIsNone(result['pairs'][1]['arms']['model']['metrics'])
 
 
-if __name__=='__main__': unittest.main()
+
+
+class DiagnosticSummaryTests(unittest.TestCase):
+    put = SummaryTests.put
+    run_summary = SummaryTests.run_summary
+
+    def setUp(self):
+        SummaryTests.setUp(self)
+        self.plan = json.loads((ROOT / 'eval/paired-pilots/2026-10-26-repeated-diagnostic-entry/plan.json').read_text())
+        self.manifest['mode'] = 'repeated-export-diagnostic'
+        self.manifest['plan'] = self.put('plan.json', self.plan)
+        self.receipt.update(schema='authorized-v5-repeated-export-diagnostic.v1',
+                            campaign_id='v5-repeated-export-diagnostic-20261025',
+                            plan_sha256=self.manifest['plan']['sha256'])
+        self.binding = json.loads((ROOT / 'eval/paired-pilots/2026-10-25-repeated-diagnostic-design/candidate.json').read_text())['candidate_binding']
+        self.receipt.update(self.binding)
+
+    def test_diagnostic_scope_keeps_24_pairs_clocks_and_no_population_claim(self):
+        result = self.run_summary()
+        self.assertEqual(result['eligible_pairs'], 24)
+        self.assertEqual(len(result['strata']), 12)
+        self.assertFalse(result['population_effect_claims_allowed'])
+        self.assertEqual(result['pairs'][0]['delta_selective_minus_model']['model_attempts'], '-1')
+
+    def test_diagnostic_receipt_cannot_reuse_old_schema_or_identity(self):
+        original = copy.deepcopy(self.receipt)
+        for key, value in [('schema', 'authorized-v5-repeated-cohort.v1'),
+                           ('campaign_id', 'v5-repeated-cohort-20261024')]:
+            with self.subTest(key=key):
+                self.receipt = {**original, key: value}
+                with self.assertRaises(ValueError): self.run_summary()
+
+    def test_all_four_diagnostic_evidence_bindings_are_required(self):
+        original = copy.deepcopy(self.receipt)
+        for key in self.binding:
+            with self.subTest(key=key):
+                self.receipt = {**original, key: 'changed'}
+                with self.assertRaisesRegex(ValueError, 'Diagnostic receipt binding'): self.run_summary()
+
+    def test_new_mode_does_not_allow_rehashed_arbitrary_plan(self):
+        self.plan['campaign_id'] = 'v5-repeated-cohort-20261024'
+        self.manifest['plan'] = self.put('changed-plan.json', self.plan)
+        self.receipt['plan_sha256'] = self.manifest['plan']['sha256']
+        with self.assertRaisesRegex(ValueError, 'Fixed repeated plan SHA'): self.run_summary()
+
+
+if __name__ == '__main__':
+    unittest.main()

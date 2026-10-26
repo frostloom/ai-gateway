@@ -1,0 +1,176 @@
+{
+  "schema": "repeated-diagnostic-entry-offline-validation.v1",
+  "allow_paid": false,
+  "ready": false,
+  "human_authorized": false,
+  "task1": "implemented_verified",
+  "task2": "local_matrix_verified_full_regression_blocked",
+  "task3": "not_frozen",
+  "full_go": {
+    "command": "SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX26.5.sdk go test ./... -count=1 -json",
+    "exit_code": 1,
+    "package_results": [
+      {
+        "Action": "pass",
+        "Package": "github.com/frostloom/ai-gateway/cmd/agent",
+        "Elapsed": 1.175
+      },
+      {
+        "Action": "pass",
+        "Package": "github.com/frostloom/ai-gateway/cmd/eval",
+        "Elapsed": 2.354
+      },
+      {
+        "Action": "pass",
+        "Package": "github.com/frostloom/ai-gateway/cmd/conversation-eval",
+        "Elapsed": 2.75
+      },
+      {
+        "Action": "pass",
+        "Package": "github.com/frostloom/ai-gateway/cmd/task-eval",
+        "Elapsed": 2.42
+      },
+      {
+        "Action": "pass",
+        "Package": "github.com/frostloom/ai-gateway/cmd/paired-eval",
+        "Elapsed": 6.372
+      },
+      {
+        "Action": "pass",
+        "Package": "github.com/frostloom/ai-gateway/internal/billing/outbox",
+        "Elapsed": 1.737
+      },
+      {
+        "Action": "pass",
+        "Package": "github.com/frostloom/ai-gateway/internal/billing/admin",
+        "Elapsed": 2.474
+      },
+      {
+        "Action": "pass",
+        "Package": "github.com/frostloom/ai-gateway/internal/gateway/handler",
+        "Elapsed": 2.19
+      },
+      {
+        "Action": "pass",
+        "Package": "github.com/frostloom/ai-gateway/cmd/paired-live",
+        "Elapsed": 6.127
+      },
+      {
+        "Action": "pass",
+        "Package": "github.com/frostloom/ai-gateway/internal/gateway/middleware",
+        "Elapsed": 2.324
+      },
+      {
+        "Action": "pass",
+        "Package": "github.com/frostloom/ai-gateway/internal/jev",
+        "Elapsed": 2.5540000000000003
+      },
+      {
+        "Action": "pass",
+        "Package": "github.com/frostloom/ai-gateway/internal/pkg/controlplane",
+        "Elapsed": 2.033
+      },
+      {
+        "Action": "pass",
+        "Package": "github.com/frostloom/ai-gateway/internal/observability",
+        "Elapsed": 3.5140000000000002
+      },
+      {
+        "Action": "pass",
+        "Package": "github.com/frostloom/ai-gateway/internal/router",
+        "Elapsed": 2.331
+      },
+      {
+        "Action": "pass",
+        "Package": "github.com/frostloom/ai-gateway/internal/billing/consumer",
+        "Elapsed": 12.46
+      },
+      {
+        "Action": "pass",
+        "Package": "github.com/frostloom/ai-gateway/internal/agent",
+        "Elapsed": 61.367
+      },
+      {
+        "Action": "pass",
+        "Package": "github.com/frostloom/ai-gateway/internal/billing/store",
+        "Elapsed": 85.383
+      },
+      {
+        "Action": "fail",
+        "Package": "github.com/frostloom/ai-gateway/internal/taskbench",
+        "Elapsed": 600.623
+      }
+    ],
+    "blocking_test": "TestPreparedDefinitionsInstantiateIsolatedLiveAccounts",
+    "default_timeout_seconds": 600,
+    "new_diagnostic_matrix_passed_seconds": 216.99,
+    "source_changes_after_freeze": false
+  },
+  "python": {
+    "tests_run": 186,
+    "conditional_skipped": 15,
+    "exit_code": 0,
+    "elapsed_seconds": 56.405,
+    "sandbox_loopback_bind_failure_preserved": true,
+    "direct_summary_tests": 15
+  },
+  "independent_review": {
+    "p1": 0,
+    "p2": 0,
+    "p3_direct_launcher_fixed": true,
+    "no_go_infrastructure_validation_by_reviewer": true
+  },
+  "request_envelope": {
+    "schema": "repeated-diagnostic-request-review.v1",
+    "model_posts": 0,
+    "full_request_count": 208,
+    "max_request_bytes": 7311,
+    "max_serialized_text_tokens": 1754,
+    "model_input_token_ceiling": 16384,
+    "max_output_tokens": 128,
+    "thinking": "disabled",
+    "tokenizer_zip_sha256": "e7310d1dafe0a86d8a5629fe78a7c763760f651db9b8682718a1781dcd6fe495",
+    "tokenizer_json_sha256": "89085f12ef79460ac5f66d1119325ddfc694b4ab209d80bbd81d35f081dc9614",
+    "tokenizer_version": "0.23.3",
+    "usage_is_synthetic_not_billable": true
+  },
+  "aggregator_actual_local_captures": {
+    "normal_pairs": 24,
+    "repair_pairs": 24,
+    "eligible_each": 0,
+    "independent_quality_review": false
+  },
+  "integrity": {
+    "old_private_files_unchanged": 8029,
+    "old_public_files_unchanged": 459,
+    "frozen_go_files": 184
+  },
+  "test_schema_final_check": {
+    "fixture_schemas": 0,
+    "pair_schemas": 0,
+    "evidence_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "late_drop_completion_does_not_change_failed_test_status": true
+  },
+  "external_authenticated_get": {
+    "executed": false,
+    "auto_review_rejected": true,
+    "health_gate_verified": false
+  },
+  "new_project_claim_created": false,
+  "real_model_calls_added": 0,
+  "real_jev_calls_added": 0,
+  "deployments": 0,
+  "score_publications": 0,
+  "current_permanent_reservation": {
+    "model_micro_cny": 12300288,
+    "jev_micro_usd": 94080
+  },
+  "conditional_new_reservation": {
+    "model_micro_cny": 8380416,
+    "jev_micro_usd": 64512
+  },
+  "conditional_cumulative_reservation": {
+    "model_micro_cny": 20680704,
+    "jev_micro_usd": 158592
+  }
+}

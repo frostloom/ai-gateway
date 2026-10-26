@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"github.com/frostloom/ai-gateway/internal/agent"
 	"github.com/frostloom/ai-gateway/internal/jev"
 	"github.com/frostloom/ai-gateway/internal/observability"
@@ -20,12 +21,22 @@ import (
 	"time"
 )
 
-func TestRepeatedLocalRunnerStopsAndAccounts(t *testing.T) {
-	for _, mode := range []string{"normal", "repair", "provider-failure", "jev-failure", "structural-failure", "usage-failure", "receipt-failure", "reverse-provider-failure", "reverse-jev-failure", "cancelled", "observer-failure"} {
+func TestRepeatedLocalRunnerStopsAndAccounts(t *testing.T) { testRepeatedRunner(t, false) }
+
+func testRepeatedRunner(t *testing.T, diagnostic bool) {
+	modes := []string{"normal", "repair", "provider-failure", "jev-failure", "structural-failure", "usage-failure", "receipt-failure", "reverse-provider-failure", "reverse-jev-failure", "cancelled", "observer-failure"}
+	if diagnostic {
+		modes = append(modes, "truncated-observer", "reverse-structural-failure", "reverse-usage-failure", "fact-failure", "reverse-fact-failure")
+	}
+	for _, mode := range modes {
 		t.Run(mode, func(t *testing.T) {
 			o := localCampaignOptions(t)
 			a, p, b, e := repeatedInputs(t)
 			pilot, err := CheckAuthorizedRepeated(a, p, b, e)
+			if diagnostic {
+				a, p, b, e = diagnosticInputs(t)
+				pilot, err = CheckAuthorizedRepeatedDiagnostic(a, p, b, e)
+			}
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -44,11 +55,23 @@ func TestRepeatedLocalRunnerStopsAndAccounts(t *testing.T) {
 			defer deps.close()
 			runCtx, cancelRun := context.WithCancel(context.Background())
 			defer cancelRun()
+			var exportRequests atomic.Int64
 			var observerBroken atomic.Bool
 			observer := deps.observer
-			if mode == "observer-failure" {
+			exportFault := mode == "observer-failure" || mode == "truncated-observer"
+			if exportFault {
 				bad := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					exportRequests.Add(1)
 					if observerBroken.Load() {
+						io.Copy(io.Discard, r.Body)
+						r.Body.Close()
+						if mode == "truncated-observer" {
+							w.Header().Set("Content-Type", "application/x-protobuf")
+							w.Header().Set("Content-Length", "2")
+							w.WriteHeader(200)
+							w.Write([]byte{0x0a})
+							return
+						}
 						w.WriteHeader(503)
 					} else {
 						deps.capture.ServeHTTP(w, r)
@@ -70,6 +93,13 @@ func TestRepeatedLocalRunnerStopsAndAccounts(t *testing.T) {
 				c.Close()
 			}))
 			defer broken.Close()
+			captureRoot := ""
+			if diagnostic {
+				captureRoot = os.Getenv("AI_GATEWAY_REPEATED_DIAGNOSTIC_CAPTURE")
+				if captureRoot != "" {
+					captureDiagnosticSources(t, captureRoot, mode)
+				}
+			}
 			calls := 0
 			factories := 0
 			var runDir string
@@ -91,6 +121,9 @@ func TestRepeatedLocalRunnerStopsAndAccounts(t *testing.T) {
 					t.Fatal("request envelope not fixed")
 				}
 				calls++
+				if captureRoot != "" {
+					captureDiagnosticFile(t, filepath.Join(captureRoot, mode, "requests", fmt.Sprintf("request-%03d.json", calls)), raw)
+				}
 				if mode == "cancelled" {
 					cancelRun()
 					return nil, context.Canceled
@@ -121,7 +154,7 @@ func TestRepeatedLocalRunnerStopsAndAccounts(t *testing.T) {
 					t.Fatal("unknown frozen message")
 				}
 				cash := chosen.Key() == "balance-020/explicit_scope_followup"
-				if mode == "observer-failure" && cash {
+				if exportFault && cash {
 					observerBroken.Store(true)
 				}
 				if (mode == "provider-failure" || (mode == "reverse-provider-failure" && factories == 7)) && cash {
@@ -132,10 +165,12 @@ func TestRepeatedLocalRunnerStopsAndAccounts(t *testing.T) {
 					tool = chosen.Scenario.Operation.Tool
 				}
 				msg := contentV5("未执行")
-				if body.Messages[len(body.Messages)-1].Role == "tool" {
+				if (mode == "fact-failure" && chosen.Key() == "balance-001/answer_complete" || mode == "reverse-fact-failure" && cash && factories == 7) && body.Messages[len(body.Messages)-1].Role == "tool" {
+					msg = contentV5("当前现金余额为 ¥1.00。")
+				} else if body.Messages[len(body.Messages)-1].Role == "tool" {
 					msg = contentV5(body.Messages[len(body.Messages)-1].Content)
 				} else if tool == "get_balance" {
-					if cash && last != first && mode == "structural-failure" {
+					if cash && last != first && (mode == "structural-failure" || mode == "reverse-structural-failure" && factories == 7) {
 						msg = contentV5("本轮未查询，请沿用前述结果。")
 					} else if cash && last != first && mode == "repair" {
 						msg = contentV5("当前现金余额为 ¥5000.00。")
@@ -158,7 +193,7 @@ func TestRepeatedLocalRunnerStopsAndAccounts(t *testing.T) {
 					msg = localToolMessage(tool, map[string]any{"amount_money": 100})
 				}
 				resp := map[string]any{"choices": []any{map[string]any{"message": msg}}}
-				if mode != "usage-failure" || !cash {
+				if !((mode == "usage-failure" || mode == "reverse-usage-failure" && factories == 7) && cash) {
 					resp["usage"] = map[string]int{"prompt_tokens": 100, "completion_tokens": 8}
 				}
 				out, err := json.Marshal(resp)
@@ -192,8 +227,19 @@ func TestRepeatedLocalRunnerStopsAndAccounts(t *testing.T) {
 			opts.Model.APIKey = "synthetic-only"
 			dir := filepath.Join(t.TempDir(), "run")
 			runDir = dir
-			r, err := RunAuthorizedRepeated(runCtx, dir, opts)
-			if r.Schema != "authorized-v5-repeated-cohort.v1" || r.CampaignID != V5RepeatedID || len(r.Batches) != 24 {
+			runner := RunAuthorizedRepeated
+			if diagnostic {
+				runner = RunAuthorizedRepeatedDiagnostic
+			}
+			r, err := runner(runCtx, dir, opts)
+			wantID, wantSchema := V5RepeatedID, "authorized-v5-repeated-cohort.v1"
+			if diagnostic {
+				wantID, wantSchema = V5RepeatedDiagnosticID, "authorized-v5-repeated-export-diagnostic.v1"
+			}
+			if diagnostic && r.RepeatedDiagnosticBinding != v5RepeatedDiagnosticBinding() {
+				t.Fatal("new receipt lost pinned diagnostic binding", r.RepeatedDiagnosticBinding)
+			}
+			if r.Schema != wantSchema || r.CampaignID != wantID || len(r.Batches) != 24 {
 				t.Fatalf("receipt identity: %v %+v", err, r)
 			}
 			raw, _ := json.Marshal(r)
@@ -221,8 +267,8 @@ func TestRepeatedLocalRunnerStopsAndAccounts(t *testing.T) {
 				}
 				expectedRoots := map[string]CampaignPreparationBatch{}
 				for i, batch := range r.Batches {
-					if batch.Report == nil {
-						t.Fatal("missing pair report")
+					if batch.Report == nil || batch.Report.EffectClaimsAllowed {
+						t.Fatal("missing pair report or synthetic benefit claimed")
 					}
 					if batch.Report.PairID != v5RepeatedBatches()[i].PairID || batch.Report.BlockID != v5RepeatedBatches()[i].BlockID {
 						t.Fatal("report identity mismatch")
@@ -243,7 +289,7 @@ func TestRepeatedLocalRunnerStopsAndAccounts(t *testing.T) {
 						attrs[a.Key] = a.Value.GetStringValue()
 					}
 					expected, ok := expectedRoots[hex.EncodeToString(span.TraceId)]
-					if !ok || attrs["langfuse.observation.metadata.pair_id"] != expected.PairID || attrs["langfuse.observation.metadata.block_id"] != expected.BlockID || attrs["langfuse.observation.metadata.arm_order"] != strings.Join(expected.ArmOrder, ",") {
+					if !ok || attrs["langfuse.observation.metadata.pair_id"] != expected.PairID || attrs["langfuse.observation.metadata.block_id"] != expected.BlockID || attrs["langfuse.observation.metadata.arm_order"] != strings.Join(expected.ArmOrder, ",") || attrs["langfuse.observation.metadata.task_success"] != "unknown" {
 						t.Fatal("missing repeated trace identity", hex.EncodeToString(span.TraceId))
 					}
 				}
@@ -292,7 +338,7 @@ func TestRepeatedLocalRunnerStopsAndAccounts(t *testing.T) {
 				}
 			} else {
 				failedIndex := 1
-				firstPairFailure := mode == "cancelled"
+				firstPairFailure := mode == "cancelled" || mode == "fact-failure"
 				wantCalls, wantJEV := 3, 1
 				if firstPairFailure {
 					failedIndex = 0
@@ -300,7 +346,7 @@ func TestRepeatedLocalRunnerStopsAndAccounts(t *testing.T) {
 					wantCalls = 1
 
 				}
-				if mode == "observer-failure" {
+				if exportFault {
 					wantCalls = 6
 					wantJEV = 1
 				}
@@ -317,6 +363,12 @@ func TestRepeatedLocalRunnerStopsAndAccounts(t *testing.T) {
 					wantCalls, wantJEV = 6, 2
 				case "structural-failure":
 					wantCalls = 5
+				case "fact-failure":
+					wantCalls, wantJEV = 2, 0
+				case "reverse-structural-failure":
+					wantCalls = 25
+				case "reverse-fact-failure":
+					wantCalls = 26
 				}
 				if err == nil || r.Status != "stopped" || calls != wantCalls || r.ModelState.Calls != calls || r.JEVAttempts != wantJEV || (!firstPairFailure && r.Batches[0].Status != "completed_pending_review") || r.Batches[failedIndex].Status != "failed" {
 					t.Fatalf("failure did not halt exactly: %v calls%d receipt%+v", err, calls, r)
@@ -329,16 +381,21 @@ func TestRepeatedLocalRunnerStopsAndAccounts(t *testing.T) {
 						t.Fatal("later batch dir created")
 					}
 				}
-				if mode == "usage-failure" && r.ModelState.CostMicroCNY != nil {
+				wantReserved := map[int]int{0: 6, 1: 18, 6: 74}[failedIndex]
+				wantReservedJEV := map[int]int{0: 1, 1: 2, 6: 7}[failedIndex]
+				if r.CampaignReservedModelCalls != wantReserved || r.CampaignReservedJEVCalls != wantReservedJEV || r.CampaignReservedMicroCNY != int64(wantReserved)*33792 || r.CampaignReservedMicroUSD != int64(wantReservedJEV)*2688 {
+					t.Fatal("prefix lease differs from fixed started batches", r.CampaignReservedModelCalls, r.CampaignReservedJEVCalls)
+				}
+				if (mode == "usage-failure" || mode == "reverse-usage-failure") && r.ModelState.CostMicroCNY != nil {
 					t.Fatal("unknown charge presented as known")
 				}
-				if mode == "structural-failure" || mode == "observer-failure" {
-					rep := r.Batches[1].Report
+				if mode == "structural-failure" || mode == "reverse-structural-failure" || mode == "fact-failure" || mode == "reverse-fact-failure" || exportFault {
+					rep := r.Batches[failedIndex].Report
 					if rep == nil || rep.FinishedArms != 1 || rep.UnrunArms != 1 {
 						t.Fatal("structural failure did not persist firstarm/unrun denominator")
 					}
 				}
-				if mode == "observer-failure" {
+				if exportFault {
 					persisted, readErr := os.ReadFile(filepath.Join(dir, "receipt.json"))
 					if readErr != nil {
 						t.Fatal(readErr)
@@ -357,9 +414,13 @@ func TestRepeatedLocalRunnerStopsAndAccounts(t *testing.T) {
 						t.Fatal("diagnostic bound/count invalid", diagnostics)
 					}
 					failedSpans := float64(0)
+					expectedKind, expectedStatus := "http_status", float64(503)
+					if mode == "truncated-observer" {
+						expectedKind, expectedStatus = "response_read", 200
+					}
 					for _, value := range records {
 						record := value.(map[string]any)
-						if record["error_kind"] != "http_status" || record["http_status"] != float64(503) || record["http_round_trips"] != float64(1) {
+						if record["error_kind"] != expectedKind || record["http_status"] != expectedStatus || record["http_round_trips"] != float64(1) {
 							t.Fatal("wrong stopped receipt cause", record)
 						}
 						failedSpans += record["span_count"].(float64)
@@ -381,9 +442,30 @@ func TestRepeatedLocalRunnerStopsAndAccounts(t *testing.T) {
 					}
 				}
 			}
+			if captureRoot != "" {
+				captureDiagnosticRun(t, dir, filepath.Join(captureRoot, mode, "run"))
+				captureDiagnosticFile(t, filepath.Join(captureRoot, mode, "returned-receipt.json"), raw)
+			}
+			// Cancellation returns before the first execution's asynchronous export.
+			// Drain those already accepted spans before measuring a second call.
+			if mode == "cancelled" {
+				if err := observer.ForceFlush(context.Background()); err != nil {
+					t.Fatal("initial cancellation drain failed", err)
+				}
+			}
+			exportsBefore := exportRequests.Load()
+			deps.capture.Lock()
+			spansBefore := len(deps.capture.spans)
+			deps.capture.Unlock()
 			before := calls
-			if _, err = RunAuthorizedRepeated(context.Background(), dir, opts); err == nil || calls != before {
-				t.Fatal("cohort output reuse called upstream")
+			if _, err = runner(context.Background(), dir, opts); err == nil || calls != before || exportRequests.Load() != exportsBefore {
+				t.Fatal("cohort output reuse called upstream or exported again")
+			}
+			deps.capture.Lock()
+			spansAfter := len(deps.capture.spans)
+			deps.capture.Unlock()
+			if spansAfter != spansBefore {
+				t.Fatal("output reuse replayed export")
 			}
 			t.Logf("mode=%s model=%d FakeOrLocalJEV=%d status=%s actual_external=0", mode, calls, r.JEVAttempts, r.Status)
 		})

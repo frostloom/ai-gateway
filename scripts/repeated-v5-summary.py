@@ -17,6 +17,9 @@ CASES = ['balance-001/answer_complete', 'balance-020/explicit_scope_followup',
          'recharge-001/supplement_then_confirm', 'refund-001/balance_cap']
 ARMS = ['model', 'jev_selective']
 PLAN_SHA = '527334cf64842106d8b28003f7b40c1010bca02455fab20572f79affb7ccc8bf'
+DIAGNOSTIC_PLAN_SHA = 'c15822b2f8705bb009da07e06c98c3b472121f6529d7bcbc3b6705ec2604d6b0'
+DIAGNOSTIC_ID = "v5-repeated-export-diagnostic-20261025"
+DIAGNOSTIC_BINDING = {'observer_revision': '4d887382300a906ae6d1a33972f3fe4d4aca4e0d', 'observer_source_sha256': '16121832bb7f1850e699aab4b005bc9e3755016dc430002a490406352c6f3ba9', 'synthetic_provenance_sha256': '08f6badd79c44bf2d9648ae0698f2c5a324144bbede791e4de5606017d331409', 'prior_result_manifest_sha256': '41b2560c7f4230cad1c8b22df4123544f2687a6c2a275a3c2fe7bcf66cf781e8'}
 CUSTOMER = '50e3c8dab14b4b6cc25322fd340a274e6970200b'
 CONTRACT = 'a95cacd041830012619a0f4d7fd8208c184aa9e8d45b7ee05afaa239a30e1e8f'
 CLOCKS = {'server_ms': 'Sum of turn.response.telemetry.total_latency_ms',
@@ -138,7 +141,7 @@ def summarize(manifest, base):
     base = Path(base)
     require(manifest.get('schema') == 'repeated-v5-summary-input.v1', 'Unknown input schema')
     mode = manifest.get('mode')
-    require(mode in ('repeated', 'historical-single-block'), 'Explicit evidence mode required')
+    require(mode in ('repeated', 'repeated-export-diagnostic', 'historical-single-block'), 'Explicit evidence mode required')
     require(manifest.get('evidence_origin') in ('synthetic_test', 'actual'), 'Explicit evidence origin required')
     revision = manifest.get('execution_revision', '')
     require(re.fullmatch('[a-f0-9]{40}', revision) is not None, 'Execution revision required')
@@ -146,12 +149,20 @@ def summarize(manifest, base):
             'Customer source/runtime version mismatch')
     plan_raw = read_ref(manifest['plan'], base)
     plan = decode(plan_raw)
-    repeated = mode == 'repeated'
+    diagnostic = mode == 'repeated-export-diagnostic'
+    repeated = mode != 'historical-single-block'
     count = 24 if repeated else 6
-    require(not repeated or sha(plan_raw) == PLAN_SHA, 'Fixed repeated plan SHA mismatch')
+    require(not repeated or sha(plan_raw) == (DIAGNOSTIC_PLAN_SHA if diagnostic else PLAN_SHA), 'Fixed repeated plan SHA mismatch')
     require(len(plan['batches']) == count and len(manifest['pairs']) == count, f'Exactly {count} explicit pairs required')
     receipt = decode(read_ref(manifest['receipt'], base))
-    require(receipt.get('schema') == ('authorized-v5-repeated-cohort.v1' if repeated else 'authorized-v5-six-case-cohort.v1'), 'Receipt schema mismatch')
+    expected_schema = ('authorized-v5-repeated-export-diagnostic.v1' if diagnostic else
+                       'authorized-v5-repeated-cohort.v1' if repeated else 'authorized-v5-six-case-cohort.v1')
+    require(receipt.get('schema') == expected_schema, 'Receipt schema mismatch')
+    if diagnostic:
+        require(receipt.get('campaign_id') == DIAGNOSTIC_ID and plan.get('campaign_id') == DIAGNOSTIC_ID,
+                'Diagnostic receipt identity mismatch')
+        require(all(receipt.get(key) == value for key, value in DIAGNOSTIC_BINDING.items()),
+                'Diagnostic receipt binding mismatch')
     require(receipt.get('execution_revision') == revision and receipt.get('customer_source_revision') == CUSTOMER
             and receipt.get('runtime_contract_sha256') == CONTRACT and receipt.get('plan_sha256') == sha(plan_raw), 'Receipt binding mismatch')
     require(receipt.get('status') in ('checkpoint_pending', 'stopped') and len(receipt['batches']) == count, 'Receipt status/batch count mismatch')
