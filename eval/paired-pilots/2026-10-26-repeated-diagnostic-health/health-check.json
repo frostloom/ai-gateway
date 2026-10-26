@@ -1,0 +1,46 @@
+{
+  "schema": "repeated-diagnostic-readonly-health.v1",
+  "explicit_user_authorization": "2026-10-26 允许，继续吧",
+  "checks": [
+    {
+      "method": "GET",
+      "destination": "DeepSeek /v1/models",
+      "automatic_retries": 0,
+      "http_status": 200,
+      "configured_model_listed": true,
+      "success": true,
+      "elapsed_ms": 145.531
+    },
+    {
+      "method": "GET",
+      "destination": "TypeSafe /v1/models",
+      "automatic_retries": 0,
+      "http_status": 200,
+      "configured_model_listed": false,
+      "success": true,
+      "elapsed_ms": 4087.904
+    },
+    {
+      "method": "GET",
+      "destination": "local Langfuse health",
+      "automatic_retries": 0,
+      "error_type": "URLError",
+      "success": false,
+      "elapsed_ms": 2.437
+    },
+    {
+      "method": "GET",
+      "destination": "local Langfuse authenticated projects",
+      "automatic_retries": 0,
+      "error_type": "URLError",
+      "success": false,
+      "elapsed_ms": 2.219
+    }
+  ],
+  "model_posts": 0,
+  "jev_posts": 0,
+  "configuration_changed": false,
+  "credentials_or_response_bodies_recorded": false,
+  "redirects_followed": false,
+  "paid_quality_or_billing_success_proven": false
+}

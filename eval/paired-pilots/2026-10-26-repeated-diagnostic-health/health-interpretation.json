@@ -1,0 +1,14 @@
+{
+  "schema": "readonly-health-interpretation.v1",
+  "original_health_check_retained": true,
+  "deepseek_auth_get_200": true,
+  "typesafe_auth_get_200": true,
+  "typesafe_configured_model_listed_projection_valid": false,
+  "reason": "Initial helper incorrectly used data[].id; TypeSafe documents models[].name and lists aliases, accepting versioned IDs whether listed or not. No second external request performed.",
+  "official_reference": "https://docs.typesafe.ai/models",
+  "pinned_jev_1_13_documented": true,
+  "pinned_model_unchanged": true,
+  "model_post_performed": false,
+  "local_service_connection_failure_confirmed_stopped_containers": true,
+  "fixture_exit0_was_skip_not_pass": true
+}

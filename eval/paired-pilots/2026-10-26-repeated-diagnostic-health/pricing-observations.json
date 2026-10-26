@@ -1,0 +1,29 @@
+{
+  "schema": "repeated-diagnostic-current-public-pricing.v1",
+  "checked_date": "2026-10-26",
+  "deepseek": {
+    "url": "https://api-docs.deepseek.com/zh-cn/quick_start/pricing/",
+    "model": "deepseek-flash",
+    "peak_input_cache_miss_micro_cny_per_million": 2000000,
+    "peak_output_micro_cny_per_million": 8000000,
+    "input_ceiling": 16384,
+    "output_ceiling": 128,
+    "full_attempt_micro_cny": 33792,
+    "max_attempts": 248,
+    "reserved_micro_cny": 8380416
+  },
+  "typesafe": {
+    "url": "https://docs.typesafe.ai/models",
+    "model": "jev-1.13.0",
+    "input_micro_usd_per_million": 42000,
+    "output_free": true,
+    "max_input_per_attempt": 64000,
+    "full_attempt_micro_usd": 2688,
+    "max_attempts": 24,
+    "reserved_micro_usd": 64512,
+    "long_context": false
+  },
+  "provider_invoice_guarantee": false,
+  "currencies_combined": false,
+  "get_auth_does_not_prove_inference_or_account_balance": true
+}

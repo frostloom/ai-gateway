@@ -1,0 +1,277 @@
+{
+  "schema": "repeated-diagnostic-auth-health-validation.v1",
+  "ready": false,
+  "allow_paid": false,
+  "human_authorized": false,
+  "external_auth_gets": [
+    {
+      "destination": "DeepSeek /v1/models",
+      "requests": 1,
+      "http_status": 200
+    },
+    {
+      "destination": "TypeSafe /v1/models",
+      "requests": 1,
+      "http_status": 200
+    }
+  ],
+  "typesafe_original_projection_invalid_explained": true,
+  "model_or_jev_posts": 0,
+  "configuration_changes": 0,
+  "customer_deployments": 0,
+  "new_claim_created": false,
+  "new_real_model_calls": 0,
+  "new_real_jev_calls": 0,
+  "score_publications": 0,
+  "historical_actual_model_calls": 117,
+  "historical_actual_jev_calls": 31,
+  "current_reserved_model_micro_cny": 12300288,
+  "current_reserved_jev_micro_usd": 94080,
+  "fixture_initial_exit0_was_skip": true,
+  "fixture_actual_isolated_pass_seconds": 42.98,
+  "full_go_experiments": [
+    {
+      "evidence": "full-go-services-running.jsonl",
+      "sha256": "94cf2897bac1c83505165a534b72297bf438d2eaa6874e64942011e4301838ec",
+      "exit_code": 1,
+      "packages": [
+        {
+          "Action": "pass",
+          "Package": "github.com/frostloom/ai-gateway/cmd/agent",
+          "Elapsed": 1.021
+        },
+        {
+          "Action": "pass",
+          "Package": "github.com/frostloom/ai-gateway/cmd/conversation-eval",
+          "Elapsed": 2.6630000000000003
+        },
+        {
+          "Action": "pass",
+          "Package": "github.com/frostloom/ai-gateway/cmd/eval",
+          "Elapsed": 2.747
+        },
+        {
+          "Action": "pass",
+          "Package": "github.com/frostloom/ai-gateway/cmd/paired-eval",
+          "Elapsed": 5.271
+        },
+        {
+          "Action": "pass",
+          "Package": "github.com/frostloom/ai-gateway/cmd/task-eval",
+          "Elapsed": 4.408
+        },
+        {
+          "Action": "pass",
+          "Package": "github.com/frostloom/ai-gateway/internal/billing/outbox",
+          "Elapsed": 2.608
+        },
+        {
+          "Action": "pass",
+          "Package": "github.com/frostloom/ai-gateway/internal/billing/admin",
+          "Elapsed": 5.247
+        },
+        {
+          "Action": "pass",
+          "Package": "github.com/frostloom/ai-gateway/internal/gateway/handler",
+          "Elapsed": 2.741
+        },
+        {
+          "Action": "pass",
+          "Package": "github.com/frostloom/ai-gateway/internal/gateway/middleware",
+          "Elapsed": 3.2359999999999998
+        },
+        {
+          "Action": "pass",
+          "Package": "github.com/frostloom/ai-gateway/internal/jev",
+          "Elapsed": 3.386
+        },
+        {
+          "Action": "pass",
+          "Package": "github.com/frostloom/ai-gateway/cmd/paired-live",
+          "Elapsed": 9.553
+        },
+        {
+          "Action": "pass",
+          "Package": "github.com/frostloom/ai-gateway/internal/pkg/controlplane",
+          "Elapsed": 1.9889999999999999
+        },
+        {
+          "Action": "pass",
+          "Package": "github.com/frostloom/ai-gateway/internal/observability",
+          "Elapsed": 2.786
+        },
+        {
+          "Action": "pass",
+          "Package": "github.com/frostloom/ai-gateway/internal/router",
+          "Elapsed": 1.871
+        },
+        {
+          "Action": "pass",
+          "Package": "github.com/frostloom/ai-gateway/internal/billing/consumer",
+          "Elapsed": 14.986
+        },
+        {
+          "Action": "pass",
+          "Package": "github.com/frostloom/ai-gateway/internal/agent",
+          "Elapsed": 82.016
+        },
+        {
+          "Action": "pass",
+          "Package": "github.com/frostloom/ai-gateway/internal/billing/store",
+          "Elapsed": 123.854
+        },
+        {
+          "Action": "fail",
+          "Package": "github.com/frostloom/ai-gateway/internal/taskbench",
+          "Elapsed": 601.033
+        }
+      ],
+      "critical_tests": [
+        {
+          "Action": "pass",
+          "Test": "TestRepeatedDiagnosticLocalRunner",
+          "Elapsed": 158.18
+        },
+        {
+          "Action": "pass",
+          "Test": "TestPreparedDefinitionsInstantiateIsolatedLiveAccounts",
+          "Elapsed": 17.82
+        }
+      ]
+    },
+    {
+      "evidence": "full-go.jsonl",
+      "sha256": "69df76f122c383058c19f8ff025a868a532f49a67181fcee227a0e9ce6168265",
+      "exit_code": 1,
+      "packages": [
+        {
+          "Action": "pass",
+          "Package": "github.com/frostloom/ai-gateway/cmd/agent",
+          "Elapsed": 1.231
+        },
+        {
+          "Action": "pass",
+          "Package": "github.com/frostloom/ai-gateway/cmd/eval",
+          "Elapsed": 2.133
+        },
+        {
+          "Action": "pass",
+          "Package": "github.com/frostloom/ai-gateway/cmd/conversation-eval",
+          "Elapsed": 2.5
+        },
+        {
+          "Action": "pass",
+          "Package": "github.com/frostloom/ai-gateway/cmd/task-eval",
+          "Elapsed": 6.915
+        },
+        {
+          "Action": "pass",
+          "Package": "github.com/frostloom/ai-gateway/internal/billing/outbox",
+          "Elapsed": 1.494
+        },
+        {
+          "Action": "pass",
+          "Package": "github.com/frostloom/ai-gateway/cmd/paired-live",
+          "Elapsed": 15.834
+        },
+        {
+          "Action": "pass",
+          "Package": "github.com/frostloom/ai-gateway/cmd/paired-eval",
+          "Elapsed": 22.407
+        },
+        {
+          "Action": "pass",
+          "Package": "github.com/frostloom/ai-gateway/internal/gateway/handler",
+          "Elapsed": 0.746
+        },
+        {
+          "Action": "pass",
+          "Package": "github.com/frostloom/ai-gateway/internal/jev",
+          "Elapsed": 1.51
+        },
+        {
+          "Action": "pass",
+          "Package": "github.com/frostloom/ai-gateway/internal/gateway/middleware",
+          "Elapsed": 1.963
+        },
+        {
+          "Action": "pass",
+          "Package": "github.com/frostloom/ai-gateway/internal/pkg/controlplane",
+          "Elapsed": 1.027
+        },
+        {
+          "Action": "pass",
+          "Package": "github.com/frostloom/ai-gateway/internal/observability",
+          "Elapsed": 1.881
+        },
+        {
+          "Action": "pass",
+          "Package": "github.com/frostloom/ai-gateway/internal/router",
+          "Elapsed": 0.809
+        },
+        {
+          "Action": "pass",
+          "Package": "github.com/frostloom/ai-gateway/internal/billing/admin",
+          "Elapsed": 23.186
+        },
+        {
+          "Action": "pass",
+          "Package": "github.com/frostloom/ai-gateway/internal/billing/consumer",
+          "Elapsed": 28.122
+        },
+        {
+          "Action": "pass",
+          "Package": "github.com/frostloom/ai-gateway/internal/agent",
+          "Elapsed": 174.298
+        },
+        {
+          "Action": "pass",
+          "Package": "github.com/frostloom/ai-gateway/internal/billing/store",
+          "Elapsed": 331.414
+        },
+        {
+          "Action": "fail",
+          "Package": "github.com/frostloom/ai-gateway/internal/taskbench",
+          "Elapsed": 600.885
+        }
+      ],
+      "critical_tests": [
+        {
+          "Action": "pass",
+          "Test": "TestRepeatedDiagnosticLocalRunner",
+          "Elapsed": 378.45
+        }
+      ]
+    }
+  ],
+  "parallel_experiment": {
+    "kept": false,
+    "race_passed": false,
+    "stopped_after_original_cleanup_timeout": true,
+    "final_source_unchanged": true
+  },
+  "protected_old_private_files": 8690,
+  "frozen_go_files_unchanged": 184,
+  "previous_entry_manifest_unchanged": true,
+  "final_services_restored": {
+    "count": 9,
+    "all_healthy": true,
+    "configuration_changed": false
+  },
+  "final_test_schemas": {
+    "fixture": 0,
+    "pair": 0,
+    "exact_owned_timeout_schemas_removed": 4
+  },
+  "final_execution_package_frozen": false,
+  "memory_read": {
+    "method": "local scoped keyword-list fallback",
+    "success": true,
+    "semantic_recall_timeout_retained": true
+  },
+  "memory_write": {
+    "completed": true,
+    "facts_read_back": 11,
+    "overstrong_causal_wording_corrected_and_read_back": true
+  }
+}

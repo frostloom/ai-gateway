@@ -1,0 +1,26 @@
+{
+  "schema": "repeated-diagnostic-local-health-restored.v1",
+  "checks": [
+    {
+      "method": "GET",
+      "destination": "local Langfuse health",
+      "automatic_retries": 0,
+      "http_status": 200,
+      "success": true,
+      "elapsed_ms": 27.143
+    },
+    {
+      "method": "GET",
+      "destination": "local Langfuse authenticated projects",
+      "automatic_retries": 0,
+      "http_status": 200,
+      "success": true,
+      "elapsed_ms": 306.799
+    }
+  ],
+  "external_requests": 0,
+  "model_posts": 0,
+  "jev_posts": 0,
+  "configuration_changed": false,
+  "old_traces_reexported": false
+}
