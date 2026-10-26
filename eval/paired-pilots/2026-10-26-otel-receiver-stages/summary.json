@@ -1,0 +1,37 @@
+{
+  "schema": "otel-receiver-stages-offline.v1",
+  "module_tests": 23,
+  "langfuse_all_node_tests": 40,
+  "module_default_enabled": false,
+  "receiver_module_loaded": false,
+  "customer_deployments": 0,
+  "image_builds": 0,
+  "shared_config_changes": 0,
+  "model_calls": 0,
+  "jev_calls": 0,
+  "claims_created": 0,
+  "scores_published": 0,
+  "isolated_publisher_runs": 2,
+  "consumers_started": 0,
+  "both_isolated_prefixes_empty": true,
+  "observation_threshold_ms": 2000,
+  "record_limit": 8,
+  "concurrent_tracking_limit": 8,
+  "phase_summary_limit": 2,
+  "business_cancellation_or_retry_added": false,
+  "physical_root_cause_confirmed": false,
+  "paid_run_ready": false,
+  "actual_cumulative_model_jev": [
+    119,
+    31
+  ],
+  "permanent_reserve_micro_cny": 20680704,
+  "permanent_reserve_micro_usd": 158592,
+  "initial_failures_preserved": [
+    "module missing RED",
+    "3 hardening regressions RED",
+    "host translation parser missing",
+    "virtual source __filename ENOENT",
+    "3 reviewer regressions RED"
+  ]
+}

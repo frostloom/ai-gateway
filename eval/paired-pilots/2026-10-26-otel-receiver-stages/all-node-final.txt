@@ -1,0 +1,48 @@
+✔ disabled default preserves exact values, promises and error identity without inspecting result (5.337542ms)
+✔ fast success returns business result and does not emit or retain a timer (0.596542ms)
+✔ pending s3_upload identifies active phase without cancelling business work (1.051833ms)
+✔ pending queue_add identifies active phase without cancelling business work (0.558167ms)
+✔ pending other identifies active phase without cancelling business work (1.88025ms)
+✔ stage failure preserves original error and emits no message, stack, body or header (0.865875ms)
+✔ unrelated final error after caught phase failure is other (0.570625ms)
+✔ synchronous errors and values preserve identity when enabled (0.482834ms)
+✔ logger exceptions cannot change resolved or rejected business results (1.957709ms)
+✔ concurrent requests have isolated sequence and phase (0.607875ms)
+✔ overlapping stages are reported as other, never arbitrarily assigned (0.409458ms)
+✔ unknown phase is not inspected or logged; operations outside context are unchanged (0.461833ms)
+✔ late observation callback is inert after completion (1.149208ms)
+✔ completion after threshold without timer firing still emits one slow completion (0.678208ms)
+✔ record and concurrency bounds are exact and snapshot is deeply detached (2.482ms)
+✔ completed phase summaries stay bounded and never inspect successful results (3.168667ms)
+✔ undefined rejection remains undefined and is attributed to other (0.344875ms)
+✔ timer allocation failure falls back to untouched business work (0.32775ms)
+✔ after overlapping same-phase operations, remaining phase is conservative until all settle (0.292417ms)
+✔ native observation timer emits pending without cancelling a slow operation (2052.956126ms)
+✔ native Promise own then getter cannot introduce a run failure (2.218166ms)
+✔ native Promise own then getter cannot introduce a stage failure (0.581167ms)
+✔ skipped nested request cannot inherit and contaminate parent stages (0.951542ms)
+✔ translated assets have new URLs across HTML, Next config and lazy Turbopack loading (40.022292ms)
+✔ unsupported loader fails before changing the standalone server (6.407083ms)
+✔ translate only literal UI props, preserving dynamic values and enum values (31.009208ms)
+✔ translate static mixed children but preserve expressions and business text (6.354416ms)
+✔ code and pre examples are never translated (0.396917ms)
+✔ navigation display titles and table headers preserve route, IDs and filter labels (4.003083ms)
+✔ page header title supports nested headerProps without touching payload (0.478292ms)
+✔ idempotent and no substring translation (1.09975ms)
+✔ string literals and comments that resemble source code are unchanged (0.396791ms)
+✔ reject malformed program instead of producing broken bundle (0.733042ms)
+✔ component labels and header-derived column IDs retain original semantics (0.949458ms)
+✔ translate dynamic header at rendering boundary, preserving its original definition (1.588542ms)
+✔ known input/output display panel translates its label but never its value (0.383292ms)
+✔ dynamic display lookup preserves unknown/prototype names and functional headers (4.950708ms)
+✔ non-render calls and different header/context receivers stay unchanged (0.475083ms)
+✔ translate conditional display branches, preserving the condition and non-UI data (0.353166ms)
+✔ settings menu titles translate while slugs, keywords, and ordinary titles stay unchanged (0.39725ms)
+ℹ tests 40
+ℹ suites 0
+ℹ pass 40
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2271.450126
