@@ -51,6 +51,10 @@ func runAuthorizedFixedCohort(ctx context.Context, dir string, o AuthorizedFirst
 	limits := o.Pilot.plan.Limits
 	cost := int64(0)
 	r = AuthorizedFirstBatchReceipt{Schema: scope.ReceiptSchema, Status: "stopped", AuthorizationSHA: o.Pilot.authorizationSHA, PlanSHA: o.Pilot.planSHA, BillingSHA: o.Pilot.billingSHA, EvidenceSHA: o.Pilot.evidenceSHA, Revision: o.Revision, CampaignID: scope.ID, CustomerRevision: scope.CustomerRevision, RuntimeContractSHA: scope.RuntimeContractSHA, BudgetCeilingSHA: scope.BudgetCeilingSHA, OfflineManifestSHA: scope.OfflineManifestSHA, OfflineAcceptanceSHA: scope.OfflineAcceptanceSHA, DiagnosticSourceRevision: scope.DiagnosticSourceRevision, DiagnosticManifestSHA: scope.DiagnosticManifestSHA, JEVFailurePolicy: o.Pilot.JEVFailurePolicy(), VendorFailureChargesVerified: o.Pilot.JEVFailureChargesVerified(), ScopeReservedModelCalls: limits.MaxModelCalls, ScopeReservedJEVCalls: limits.MaxJEVCalls, ScopeReservedMicroCNY: limits.MaxModelMicroCNY, ScopeReservedMicroUSD: limits.MaxJEVMicroUSD, ModelState: PairBudgetState{CostMicroCNY: &cost}}
+	if o.Pilot.IsReceiverRepeated() {
+		r.ReceiverRepeatedBinding = o.Pilot.ReceiverRepeatedBinding()
+		r.RepeatedDiagnosticBinding = o.Pilot.RepeatedDiagnosticBinding()
+	}
 	if o.Pilot.IsRepeatedDiagnostic() {
 		r.RepeatedDiagnosticBinding = o.Pilot.RepeatedDiagnosticBinding()
 	}

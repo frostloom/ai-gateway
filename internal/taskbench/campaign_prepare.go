@@ -52,6 +52,10 @@ func (p CampaignPreparationPlan) validateTarget(model PairModelSettings, jevMode
 			scope = v5RepeatedScope()
 			ok = true
 		}
+		if !ok && p.CampaignID == V5ReceiverRepeatedID {
+			scope = v5ReceiverRepeatedScope()
+			ok = true
+		}
 		if !ok && p.CampaignID == V5RepeatedDiagnosticID {
 			scope = v5RepeatedDiagnosticScope()
 			ok = true
@@ -124,7 +128,7 @@ type CampaignProposal struct {
 // and disabled-provider configuration preparation. It creates no execution
 // lease, journal, database connection or network request.
 func PrepareCampaignProposal(source ConversationSuite, profiles PairedProfiles, model PairModelSettings, revision, jevModel string, plan CampaignPreparationPlan) (CampaignProposal, error) {
-	repeated := plan.CampaignID == V5RepeatedID || plan.CampaignID == V5RepeatedDiagnosticID
+	repeated := plan.CampaignID == V5RepeatedID || plan.CampaignID == V5RepeatedDiagnosticID || plan.CampaignID == V5ReceiverRepeatedID
 	if repeated {
 		if err := validateRepeatedSchedule(plan, plan.CampaignID); err != nil {
 			return CampaignProposal{}, err

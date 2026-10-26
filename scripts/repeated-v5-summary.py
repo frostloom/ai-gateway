@@ -20,6 +20,9 @@ PLAN_SHA = '527334cf64842106d8b28003f7b40c1010bca02455fab20572f79affb7ccc8bf'
 DIAGNOSTIC_PLAN_SHA = 'c15822b2f8705bb009da07e06c98c3b472121f6529d7bcbc3b6705ec2604d6b0'
 DIAGNOSTIC_ID = "v5-repeated-export-diagnostic-20261025"
 DIAGNOSTIC_BINDING = {'observer_revision': '4d887382300a906ae6d1a33972f3fe4d4aca4e0d', 'observer_source_sha256': '16121832bb7f1850e699aab4b005bc9e3755016dc430002a490406352c6f3ba9', 'synthetic_provenance_sha256': '08f6badd79c44bf2d9648ae0698f2c5a324144bbede791e4de5606017d331409', 'prior_result_manifest_sha256': '41b2560c7f4230cad1c8b22df4123544f2687a6c2a275a3c2fe7bcf66cf781e8'}
+RECEIVER_ID = 'v5-repeated-receiver-20261027'
+RECEIVER_PLAN_SHA = 'b5316c9979f5f51bb10238530f4c5e1806c91b006b79dd4558dd2bd03e5d659b'
+RECEIVER_BINDING = {'receiver_image_id': 'sha256:677a486f0519c772b5db1217b028d4b2c8a9db7cd960468aadf6f71e944f532f', 'receiver_deployment_revision': '416a4a20625d51f5b2735c7bbcea3d6f29bbebbc', 'receiver_deployment_manifest_sha256': '4e56dd73f1326423bc7c3f90dcfd53827d1b4fe72f655d9f2985ee94585db314', 'receiver_adapter_manifest_sha256': '0c374bfad1a3afb0c64582b76dc1ac63fa23292c20e152c0d91b1dc047d5903f', 'prior_receiver_diagnostic_result_manifest_sha256': 'ce872ae265498687e630a9bb1937553be5d96263957c748c1b4005c048f2290a', 'user_preauthorization_sha256': '8f428b68f0f9f5c2821c03da8c41ee220dbc4e18741ace3982a4cfcb93b52a95'}
 CUSTOMER = '50e3c8dab14b4b6cc25322fd340a274e6970200b'
 CONTRACT = 'a95cacd041830012619a0f4d7fd8208c184aa9e8d45b7ee05afaa239a30e1e8f'
 CLOCKS = {'server_ms': 'Sum of turn.response.telemetry.total_latency_ms',
@@ -141,7 +144,7 @@ def summarize(manifest, base):
     base = Path(base)
     require(manifest.get('schema') == 'repeated-v5-summary-input.v1', 'Unknown input schema')
     mode = manifest.get('mode')
-    require(mode in ('repeated', 'repeated-export-diagnostic', 'historical-single-block'), 'Explicit evidence mode required')
+    require(mode in ('repeated', 'repeated-export-diagnostic', 'receiver-repeated', 'historical-single-block'), 'Explicit evidence mode required')
     require(manifest.get('evidence_origin') in ('synthetic_test', 'actual'), 'Explicit evidence origin required')
     revision = manifest.get('execution_revision', '')
     require(re.fullmatch('[a-f0-9]{40}', revision) is not None, 'Execution revision required')
@@ -149,20 +152,25 @@ def summarize(manifest, base):
             'Customer source/runtime version mismatch')
     plan_raw = read_ref(manifest['plan'], base)
     plan = decode(plan_raw)
-    diagnostic = mode == 'repeated-export-diagnostic'
+    receiver = mode == 'receiver-repeated'
+    diagnostic = mode in ('repeated-export-diagnostic','receiver-repeated')
     repeated = mode != 'historical-single-block'
     count = 24 if repeated else 6
-    require(not repeated or sha(plan_raw) == (DIAGNOSTIC_PLAN_SHA if diagnostic else PLAN_SHA), 'Fixed repeated plan SHA mismatch')
+    require(not repeated or sha(plan_raw) == (RECEIVER_PLAN_SHA if receiver else DIAGNOSTIC_PLAN_SHA if diagnostic else PLAN_SHA), 'Fixed repeated plan SHA mismatch')
     require(len(plan['batches']) == count and len(manifest['pairs']) == count, f'Exactly {count} explicit pairs required')
     receipt = decode(read_ref(manifest['receipt'], base))
-    expected_schema = ('authorized-v5-repeated-export-diagnostic.v1' if diagnostic else
+    expected_schema = ('authorized-v5-receiver-repeated.v1' if receiver else
+                       'authorized-v5-repeated-export-diagnostic.v1' if diagnostic else
                        'authorized-v5-repeated-cohort.v1' if repeated else 'authorized-v5-six-case-cohort.v1')
     require(receipt.get('schema') == expected_schema, 'Receipt schema mismatch')
     if diagnostic:
-        require(receipt.get('campaign_id') == DIAGNOSTIC_ID and plan.get('campaign_id') == DIAGNOSTIC_ID,
+        expected_id = RECEIVER_ID if receiver else DIAGNOSTIC_ID
+        require(receipt.get('campaign_id') == expected_id and plan.get('campaign_id') == expected_id,
                 'Diagnostic receipt identity mismatch')
         require(all(receipt.get(key) == value for key, value in DIAGNOSTIC_BINDING.items()),
                 'Diagnostic receipt binding mismatch')
+    if receiver:
+        require(all(receipt.get(key) == value for key,value in RECEIVER_BINDING.items()),'Receiver receipt binding mismatch')
     require(receipt.get('execution_revision') == revision and receipt.get('customer_source_revision') == CUSTOMER
             and receipt.get('runtime_contract_sha256') == CONTRACT and receipt.get('plan_sha256') == sha(plan_raw), 'Receipt binding mismatch')
     require(receipt.get('status') in ('checkpoint_pending', 'stopped') and len(receipt['batches']) == count, 'Receipt status/batch count mismatch')
@@ -263,7 +271,7 @@ def summarize(manifest, base):
                 values = [Decimal(p['delta_selective_minus_model'][metric]) for p in eligible]
                 stats[metric] = {k:textnum(v) for k,v in [('median',statistics.median(values)),('min',min(values)),('max',max(values))]}
             strata.append({'case_key':key,'arm_order':order,'eligible_pairs':len(eligible),'delta_descriptive':stats})
-    return {'schema':'repeated-v5-summary.v1','mode':mode,'evidence_origin':manifest['evidence_origin'],
+    result = {'schema':'repeated-v5-summary.v1','mode':mode,'evidence_origin':manifest['evidence_origin'],
             'execution_revision':revision,'receipt_status':receipt['status'],
             'receipt_accounting':{k:receipt.get(k) for k in ('model_budget','jev_attempts',
                 'scope_reserved_model_calls','scope_reserved_jev_calls','scope_reserved_micro_cny','scope_reserved_micro_usd')},
@@ -273,6 +281,9 @@ def summarize(manifest, base):
                            'Prices are frozen configuration estimates in separate currencies, not invoices.',
                            'Synthetic evidence validates tooling only; historical-single-block is not a repeated sample.',
                            'Unknown and unrun metrics remain null; excluded pairs remain visible; no user E2E clock.']}
+    if receiver:
+        result['receiver_binding'] = {key:receipt[key] for key in RECEIVER_BINDING}
+    return result
 
 
 def main():

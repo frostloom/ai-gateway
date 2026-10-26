@@ -44,7 +44,7 @@ func v5RepeatedBatches() []CampaignPreparationBatch {
 }
 func validateRepeatedSchedule(p CampaignPreparationPlan, id string) error {
 	scope := v5RepeatedScope()
-	if p.Schema != "campaign-preflight-plan.v2" || (id != V5RepeatedID && id != V5RepeatedDiagnosticID) || p.CampaignID != id || p.CustomerRevision != scope.CustomerRevision || p.RuntimeContractSHA != scope.RuntimeContractSHA || p.Limits != v5RepeatedLimits() || !reflect.DeepEqual(p.Batches, v5RepeatedBatches()) {
+	if p.Schema != "campaign-preflight-plan.v2" || (id != V5RepeatedID && id != V5RepeatedDiagnosticID && id != V5ReceiverRepeatedID) || p.CampaignID != id || p.CustomerRevision != scope.CustomerRevision || p.RuntimeContractSHA != scope.RuntimeContractSHA || p.Limits != v5RepeatedLimits() || !reflect.DeepEqual(p.Batches, v5RepeatedBatches()) {
 		return fmt.Errorf("fixed repeated schedule required")
 	}
 	return nil

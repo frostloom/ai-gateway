@@ -23,7 +23,8 @@ import (
 
 func TestRepeatedLocalRunnerStopsAndAccounts(t *testing.T) { testRepeatedRunner(t, false) }
 
-func testRepeatedRunner(t *testing.T, diagnostic bool) {
+func testRepeatedRunner(t *testing.T, diagnostic bool, receiver ...bool) {
+	receiverMode := len(receiver) > 0 && receiver[0]
 	modes := []string{"normal", "repair", "provider-failure", "jev-failure", "structural-failure", "usage-failure", "receipt-failure", "reverse-provider-failure", "reverse-jev-failure", "cancelled", "observer-failure"}
 	if diagnostic {
 		modes = append(modes, "truncated-observer", "reverse-structural-failure", "reverse-usage-failure", "fact-failure", "reverse-fact-failure")
@@ -36,6 +37,10 @@ func testRepeatedRunner(t *testing.T, diagnostic bool) {
 			if diagnostic {
 				a, p, b, e = diagnosticInputs(t)
 				pilot, err = CheckAuthorizedRepeatedDiagnostic(a, p, b, e)
+			}
+			if receiverMode {
+				a, p, b, e = receiverInputs(t)
+				pilot, err = CheckAuthorizedReceiverRepeated(a, p, b, e)
 			}
 			if err != nil {
 				t.Fatal(err)
@@ -231,10 +236,19 @@ func testRepeatedRunner(t *testing.T, diagnostic bool) {
 			if diagnostic {
 				runner = RunAuthorizedRepeatedDiagnostic
 			}
+			if receiverMode {
+				runner = RunAuthorizedReceiverRepeated
+			}
 			r, err := runner(runCtx, dir, opts)
 			wantID, wantSchema := V5RepeatedID, "authorized-v5-repeated-cohort.v1"
 			if diagnostic {
 				wantID, wantSchema = V5RepeatedDiagnosticID, "authorized-v5-repeated-export-diagnostic.v1"
+			}
+			if receiverMode {
+				wantID, wantSchema = V5ReceiverRepeatedID, "authorized-v5-receiver-repeated.v1"
+				if r.ReceiverRepeatedBinding != v5ReceiverRepeatedBinding() {
+					t.Fatal("receiver binding lost", r.ReceiverRepeatedBinding)
+				}
 			}
 			if diagnostic && r.RepeatedDiagnosticBinding != v5RepeatedDiagnosticBinding() {
 				t.Fatal("new receipt lost pinned diagnostic binding", r.RepeatedDiagnosticBinding)

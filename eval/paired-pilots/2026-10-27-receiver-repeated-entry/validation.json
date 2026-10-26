@@ -1,0 +1,136 @@
+{
+  "schema": "receiver-repeated-offline-validation.v1",
+  "campaign_id": "v5-repeated-receiver-20261027",
+  "packages": [
+    {
+      "package": "github.com/frostloom/ai-gateway/cmd/conversation-eval",
+      "elapsed_seconds": 1.193
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/cmd/eval",
+      "elapsed_seconds": 1.349
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/cmd/agent",
+      "elapsed_seconds": 2.01
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/cmd/task-eval",
+      "elapsed_seconds": 3.181
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/cmd/paired-eval",
+      "elapsed_seconds": 4.167
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/billing/outbox",
+      "elapsed_seconds": 2.7199999999999998
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/billing/admin",
+      "elapsed_seconds": 3.963
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/gateway/handler",
+      "elapsed_seconds": 2.924
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/gateway/middleware",
+      "elapsed_seconds": 3.059
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/cmd/paired-live",
+      "elapsed_seconds": 8.226
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/jev",
+      "elapsed_seconds": 3.343
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/pkg/controlplane",
+      "elapsed_seconds": 1.895
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/observability",
+      "elapsed_seconds": 3.933
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/router",
+      "elapsed_seconds": 1.7570000000000001
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/billing/consumer",
+      "elapsed_seconds": 14.388
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/agent",
+      "elapsed_seconds": 39.498
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/billing/store",
+      "elapsed_seconds": 51.734
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+      "elapsed_seconds": 410.623
+    }
+  ],
+  "handler_paths": [
+    "normal",
+    "repair",
+    "provider-failure",
+    "jev-failure",
+    "structural-failure",
+    "usage-failure",
+    "receipt-failure",
+    "reverse-provider-failure",
+    "reverse-jev-failure",
+    "cancelled",
+    "observer-failure",
+    "truncated-observer",
+    "reverse-structural-failure",
+    "reverse-usage-failure",
+    "fact-failure",
+    "reverse-fact-failure"
+  ],
+  "normal_synthetic_model_attempts": 88,
+  "repair_synthetic_model_attempts": 120,
+  "fake_jev_per_path": 24,
+  "planned_pairs": 24,
+  "planned_arms": 48,
+  "planned_user_turns": 104,
+  "python_total": 190,
+  "python_original_conditional_skips": 15,
+  "summary_tests": 19,
+  "normal_and_repair_raw_summary_pairs": 24,
+  "synthetic_independent_quality_review_missing_eligible_pairs": 0,
+  "customer_non_test_go_files_unchanged": 15,
+  "old_protected_files_unchanged": 9277,
+  "prior_claim_chain": {
+    "recharge-confirm-20261023": "2c9d64b98bd985a24da5aed31c049d63311ebdd7f8dc4c862600ccd77e80dcbc",
+    "recharge-confirm-diagnostic-retest-20261023": "23047a143039f719531cfe403f1769abda7a6091b2ee51cecf6184eb4768e654",
+    "recharge-cancel-20261024": "a9ce7a22d79e4e42e8ded0b932c34648df3db0d0574ad0710c098d2b02cbc8f4",
+    "recharge-supplement-20261024": "824e1e44882b1043bba833ec6af5b88980d6d89b4ce8e4023fd12c68c98fb11c",
+    "refund-cap-20261024": "9a026381dea69bc1feb9712d58a41e305877701e1355ba2464543aaaa0857b30",
+    "v5-six-case-cohort-20261024": "b49808feb6a124c60c7f3fd88a7965589368a0ce8d8f4336e94ebaee9a025d34",
+    "v5-repeated-cohort-20261024": "c7f14ee3b310cec23cf71b7dc004fe73b29ec5e8efa4b6c4167eb91159c8dd58",
+    "v5-repeated-export-diagnostic-20261025": "8c63988dbd31b09cb523c7e0b067f5978ad0ee91f5736f0fc581752544161e6a"
+  },
+  "new_claim_exists": false,
+  "model_posts": 0,
+  "jev_posts": 0,
+  "human_authorized_public_example": false,
+  "total_budget_micro_cny": 100000000,
+  "total_budget_micro_usd": 1000000,
+  "current_permanent_reserved_micro_cny": 20680704,
+  "current_permanent_reserved_micro_usd": 158592,
+  "new_full_reservation_micro_cny": 8380416,
+  "new_full_reservation_micro_usd": 64512,
+  "if_claimed_cumulative_micro_cny": 29061120,
+  "if_claimed_cumulative_micro_usd": 223104,
+  "if_claimed_unallocated_micro_cny": 70938880,
+  "if_claimed_unallocated_micro_usd": 776896,
+  "go_overall_timeout_seconds": 1200,
+  "real_whole_command_timeout_seconds": 300,
+  "latest_user_preauthorization_allows_no_question_scope_freeze_and_execution": true
+}

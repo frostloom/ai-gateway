@@ -26,6 +26,7 @@ type AuthorizedFirstBatchOptions struct {
 	JEVFactory     func() jev.Evaluator
 }
 type AuthorizedFirstBatchReceipt struct {
+	ReceiverRepeatedBinding
 	RepeatedDiagnosticBinding
 	ScopeReservedModelCalls      int                         `json:"scope_reserved_model_calls,omitempty"`
 	ScopeReservedJEVCalls        int                         `json:"scope_reserved_jev_calls,omitempty"`

@@ -247,5 +247,45 @@ class DiagnosticSummaryTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'Fixed repeated plan SHA'): self.run_summary()
 
 
+class ReceiverSummaryTests(unittest.TestCase):
+    put = SummaryTests.put
+    run_summary = SummaryTests.run_summary
+
+    def setUp(self):
+        DiagnosticSummaryTests.setUp(self)
+        base=ROOT/'eval/paired-pilots/2026-10-27-receiver-repeated-entry'
+        self.plan=json.loads((base/'plan.json').read_text())
+        self.manifest['mode']='receiver-repeated'
+        self.manifest['plan']=self.put('receiver-plan.json',self.plan)
+        self.receipt.update(schema='authorized-v5-receiver-repeated.v1',campaign_id='v5-repeated-receiver-20261027',plan_sha256=self.manifest['plan']['sha256'])
+        self.receiver_binding=json.loads((base/'receiver-binding.json').read_text())
+        self.receipt.update(self.receiver_binding)
+
+    def test_receiver_scope_keeps_exact24_and_binding_without_population_claim(self):
+        out=self.run_summary()
+        self.assertEqual(out['eligible_pairs'],24)
+        self.assertEqual(out['receiver_binding'],self.receiver_binding)
+        self.assertFalse(out['population_effect_claims_allowed'])
+        self.assertEqual(out['evidence_origin'],'synthetic_test')
+
+    def test_all_receiver_bindings_required(self):
+        original=copy.deepcopy(self.receipt)
+        for key in self.receiver_binding:
+            with self.subTest(key=key):
+                self.receipt={**original,key:'changed'}
+                with self.assertRaisesRegex(ValueError,'Receiver receipt binding'):self.run_summary()
+
+    def test_receiver_cannot_enter_historical_mode(self):
+        self.manifest['mode']='repeated-export-diagnostic'
+        with self.assertRaisesRegex(ValueError,'Fixed repeated plan SHA'):self.run_summary()
+
+    def test_receiver_failed_final_batch_excluded_despite_passed_review(self):
+        self.receipt['status']='stopped'
+        self.receipt['batches'][-1]['status']='failed'
+        out=self.run_summary()
+        self.assertEqual(out['eligible_pairs'],23)
+        self.assertIsNone(out['pairs'][-1]['delta_selective_minus_model'])
+
+
 if __name__ == '__main__':
     unittest.main()
