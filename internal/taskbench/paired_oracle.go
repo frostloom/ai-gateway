@@ -34,8 +34,8 @@ func (o *pairedStoreOracle) State(ctx context.Context, f Fixture, _ string) (Con
 		return s, fmt.Errorf("fixture identity mismatch")
 	}
 	b := &LiveBackend{db: o.env.db, rdb: o.env.rdb, st: o.env.st}
-	var err error
-	s.Own, err = b.Snapshot(ctx, f, "")
+	own, me, err := b.snapshotWithOverview(ctx, f)
+	s.Own = own
 	if err != nil {
 		return s, err
 	}
@@ -44,12 +44,8 @@ func (o *pairedStoreOracle) State(ctx context.Context, f Fixture, _ string) (Con
 		return s, err
 	}
 	s.Controls = map[uint64]Snapshot{o.foreign: other}
-	me, err := o.env.st.MeOverview(ctx, f.TenantID)
-	if err != nil {
-		return s, err
-	}
 	s.Allowance = me.Allowance
-	s.AnswerAuthority, err = CaptureConversationAnswerAuthority(ctx, o.env.st, f.TenantID, s.CapturedAt)
+	s.AnswerAuthority, err = captureAuthorityWithOverview(ctx, o.env.st, f.TenantID, s.CapturedAt, me)
 	return s, err
 }
 func (o *pairedStoreOracle) Pending(ctx context.Context, f Fixture, session string) (*Pending, error) {

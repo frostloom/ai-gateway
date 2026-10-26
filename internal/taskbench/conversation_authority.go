@@ -37,6 +37,11 @@ func CaptureConversationAnswerAuthority(ctx context.Context, st *store.Store, te
 	if err != nil {
 		return nil, err
 	}
+	return captureAuthorityWithOverview(ctx, st, tenant, at, me)
+}
+
+// The overview must come from this tenant's current capture, never a previous State call.
+func captureAuthorityWithOverview(ctx context.Context, st *store.Store, tenant uint64, at time.Time, me *store.MeView) (*ConversationAnswerAuthority, error) {
 	bills, total, err := st.ListBills(ctx, tenant, "settle", "settled", 10, 0)
 	if err != nil {
 		return nil, err

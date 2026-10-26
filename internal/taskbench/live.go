@@ -115,28 +115,34 @@ func (b *LiveBackend) Setup(ctx context.Context, runID string, c Case) (Fixture,
 	return f, nil
 }
 func (b *LiveBackend) Snapshot(ctx context.Context, f Fixture, session string) (Snapshot, error) {
+	out, _, err := b.snapshotWithOverview(ctx, f)
+	return out, err
+}
+
+// Return only this capture's fresh overview; callers must not reuse it for another tenant or capture.
+func (b *LiveBackend) snapshotWithOverview(ctx context.Context, f Fixture) (Snapshot, *store.MeView, error) {
 	out := Snapshot{Orders: []store.RechargeOrder{}, Subscriptions: []store.Subscription{}, Topups: []store.Topup{}, Audits: []store.AgentAuditLog{}}
 	me, err := b.st.MeOverview(ctx, f.TenantID)
 	if err != nil {
-		return out, err
+		return out, nil, err
 	}
 	out.BalanceCent = me.BalanceCent
 	out.LedgerBalance = me.LedgerBalance
 	out.Consistent = me.Consistent
 	db := b.db.WithContext(ctx)
 	if err = db.Where("tenant_id = ?", f.TenantID).Order("id asc").Find(&out.Orders).Error; err != nil {
-		return out, err
+		return out, nil, err
 	}
 	if err = db.Where("tenant_id = ?", f.TenantID).Order("id asc").Find(&out.Subscriptions).Error; err != nil {
-		return out, err
+		return out, nil, err
 	}
 	if err = db.Where("tenant_id = ?", f.TenantID).Order("id asc").Find(&out.Topups).Error; err != nil {
-		return out, err
+		return out, nil, err
 	}
 	if err = db.Where("tenant_id = ?", f.TenantID).Order("id asc").Find(&out.Audits).Error; err != nil {
-		return out, err
+		return out, nil, err
 	}
-	return out, nil
+	return out, me, nil
 }
 func (b *LiveBackend) Pending(ctx context.Context, session string) (Pending, error) {
 	if strings.TrimSpace(session) == "" {

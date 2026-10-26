@@ -1,0 +1,46 @@
+{
+  "schema": "oracle-overview-final-readonly-health.v1",
+  "checks": [
+    {
+      "method": "GET",
+      "destination": "DeepSeek /v1/models",
+      "automatic_retries": 0,
+      "http_status": 200,
+      "configured_model_listed": true,
+      "success": true,
+      "elapsed_ms": 172.105
+    },
+    {
+      "method": "GET",
+      "destination": "TypeSafe /v1/models",
+      "automatic_retries": 0,
+      "http_status": 200,
+      "configured_model_listed": false,
+      "success": true,
+      "elapsed_ms": 475.386
+    },
+    {
+      "method": "GET",
+      "destination": "local Langfuse health",
+      "automatic_retries": 0,
+      "http_status": 200,
+      "success": true,
+      "elapsed_ms": 95.436
+    },
+    {
+      "method": "GET",
+      "destination": "local Langfuse authenticated projects",
+      "automatic_retries": 0,
+      "http_status": 200,
+      "success": true,
+      "elapsed_ms": 158.33
+    }
+  ],
+  "typesafe_projection": "models/name",
+  "version_ids_need_not_be_listed": "https://docs.typesafe.ai/models",
+  "model_posts": 0,
+  "jev_posts": 0,
+  "redirects_followed": false,
+  "configuration_changed": false,
+  "paid_success_or_invoice_guaranteed": false
+}
