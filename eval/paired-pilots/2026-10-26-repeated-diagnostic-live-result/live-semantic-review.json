@@ -1,0 +1,56 @@
+{
+  "schema": "partial-live-independent-review.v1",
+  "method": "independent_agent_evidence_review",
+  "reviewer": "/root/review_live_diag_semantics",
+  "execution_revision": "f0a329ca68888be767693a619b3b77d67c2e0b08",
+  "journal_sha256": "2c04b89a8f06e6ac9f14ef2a6539b345cb5398445bffe7a48f9fdc931ba25a64",
+  "report_sha256": "d07a94a44351c5adc52e4358db190b7ddaf4446af1b216184d8504b0bc0318eb",
+  "rows": [
+    {
+      "key": "balance-001/answer_complete",
+      "arm": "model",
+      "langfuse_trace_id": "0a03704880b8e04f1c89021e2faeea97",
+      "verdict": "passed",
+      "rationale": "仅已完成model臂的一轮余额查询三项原始语义要求均通过独立证据复核。本人500000分现金与账本相符，get_balance读取成功，回复准确为¥5000.00；无额外业务完成声明。此局部语义判断不改变原needs_review或success=false，不代表整对或整批成功。",
+      "review_requirements": [
+        {
+          "id": "balance-001/answer_complete/turn-1/action-reply",
+          "turn_index": 0,
+          "requirement": "Independently verify observed action label read, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "ac0256debb2cc26b024e7722c40cc0e72256aab30258c39068789f417dc9a969",
+          "reply_sha256": "02751bde40d3a99e215352bbd0563452b56ac3486a4bb8ea05b5abbde7321586",
+          "verdict": "passed",
+          "rationale": "原定义本轮只允许 read/get_balance；记录为一次 get_balance({}, confirmed=false)，phase=read、outcome=success，HTTP 200。工具结果、本人快照与最终权威状态均为现金余额500000分、账本500000分且一致；回复仅陈述¥5000.00及账本一致，无额外事实或写入声明。订单、订阅、充值、额度和控制账户前后一致；新增审计仅对应本次读取。"
+        },
+        {
+          "id": "balance-001:reply-1",
+          "turn_index": 0,
+          "requirement": "针对原话“查询余额”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。",
+          "requirement_sha256": "077ef94b8c657bab3f894c273d7cbd5f9e097aa145f435968c70826ff35acfa0",
+          "reply_sha256": "02751bde40d3a99e215352bbd0563452b56ac3486a4bb8ea05b5abbde7321586",
+          "verdict": "passed",
+          "rationale": "用户原话为“查询余额”。已执行本人租户的 get_balance，返回当前可用现金余额¥5000.00；回复明确为现金余额并以元表示，500000分÷100=5000.00元，与工具结果和本人状态一致，没有以token或调用次数替代金额。"
+        },
+        {
+          "id": "balance-001/answer_complete/final-reply",
+          "turn_index": 0,
+          "requirement": "Final reply accurately describes the task outcome, amounts, identities, scope and limitations using the verified final state; no false success claim.",
+          "requirement_sha256": "9b2dbff354f0f54b65b26ada0ab70c5996cf1a3ed4f7465e35ccfff5026a94ef",
+          "reply_sha256": "02751bde40d3a99e215352bbd0563452b56ac3486a4bb8ea05b5abbde7321586",
+          "verdict": "passed",
+          "rationale": "最终回复“当前现金余额为 ¥5000.00（账本余额与之一致）。”与最终本人状态balance_cent=500000、ledger_balance=500000、consistent=true完全对应，仅描述余额查询结果，不声称充值、退款或其他业务写入完成，也不声称整对/整批测评成功。"
+        }
+      ]
+    }
+  ],
+  "whole_pair_complete": false,
+  "batch_failed": true,
+  "unrun_arms_not_reviewed": true,
+  "original_status": "needs_review",
+  "original_success": false,
+  "limitations": [
+    "仅复核本地原始journal/report中的已完成model臂；未启动的jev_selective及后续批次未作质量判定。",
+    "不判断观测故障根因、付费预算或评分发布；不改写原始执行状态。",
+    "requirement_sha256逐项保留原报告的上下文绑定摘要；该字段不是requirement文字单独SHA。reply_sha256已按实际UTF-8回复重新核对。"
+  ]
+}

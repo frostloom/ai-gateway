@@ -1,0 +1,673 @@
+{
+  "schema": "repeated-v5-summary.v1",
+  "mode": "repeated-export-diagnostic",
+  "evidence_origin": "actual",
+  "execution_revision": "f0a329ca68888be767693a619b3b77d67c2e0b08",
+  "receipt_status": "stopped",
+  "receipt_accounting": {
+    "model_budget": {
+      "attempts": 2,
+      "reserved_micro_cny": 67584,
+      "priced_usage_micro_cny": 7436,
+      "input_tokens": 3562,
+      "output_tokens": 39
+    },
+    "jev_attempts": 0,
+    "scope_reserved_model_calls": 248,
+    "scope_reserved_jev_calls": 24,
+    "scope_reserved_micro_cny": 8380416,
+    "scope_reserved_micro_usd": 64512
+  },
+  "eligible_pairs": 0,
+  "pairs": [
+    {
+      "batch_id": "batch-001",
+      "pair_id": "block-00-pair-00",
+      "block_id": "block-00",
+      "case_key": "balance-001/answer_complete",
+      "arm_order": [
+        "model",
+        "jev_selective"
+      ],
+      "status": "failed",
+      "arms": {
+        "model": {
+          "status": "needs_review",
+          "trace_id": "0a03704880b8e04f1c89021e2faeea97",
+          "metrics": {
+            "model_attempts": "2",
+            "model_micro_cny": "7436",
+            "jev_micro_usd": "0",
+            "server_ms": "6464.642208",
+            "http_ms": "14009.961541",
+            "conversation_ms": "15861.162292",
+            "runner_ms": "25130.317083"
+          }
+        },
+        "jev_selective": {
+          "status": "not_started",
+          "metrics": null
+        }
+      },
+      "exclusion_reasons": [
+        "batch_failed",
+        "incomplete_pair",
+        "independent_review_missing"
+      ],
+      "delta_selective_minus_model": null,
+      "independent_review": "missing"
+    },
+    {
+      "batch_id": "batch-002",
+      "pair_id": "block-00-pair-01",
+      "block_id": "block-00",
+      "case_key": "balance-020/explicit_scope_followup",
+      "arm_order": [
+        "model",
+        "jev_selective"
+      ],
+      "status": "not_started",
+      "arms": {
+        "model": {
+          "status": "not_started",
+          "metrics": null
+        },
+        "jev_selective": {
+          "status": "not_started",
+          "metrics": null
+        }
+      },
+      "exclusion_reasons": [
+        "not_started",
+        "cost_and_latency_unknown"
+      ],
+      "delta_selective_minus_model": null
+    },
+    {
+      "batch_id": "batch-003",
+      "pair_id": "block-00-pair-02",
+      "block_id": "block-00",
+      "case_key": "recharge-002/confirm",
+      "arm_order": [
+        "model",
+        "jev_selective"
+      ],
+      "status": "not_started",
+      "arms": {
+        "model": {
+          "status": "not_started",
+          "metrics": null
+        },
+        "jev_selective": {
+          "status": "not_started",
+          "metrics": null
+        }
+      },
+      "exclusion_reasons": [
+        "not_started",
+        "cost_and_latency_unknown"
+      ],
+      "delta_selective_minus_model": null
+    },
+    {
+      "batch_id": "batch-004",
+      "pair_id": "block-00-pair-03",
+      "block_id": "block-00",
+      "case_key": "recharge-002/cancel",
+      "arm_order": [
+        "model",
+        "jev_selective"
+      ],
+      "status": "not_started",
+      "arms": {
+        "model": {
+          "status": "not_started",
+          "metrics": null
+        },
+        "jev_selective": {
+          "status": "not_started",
+          "metrics": null
+        }
+      },
+      "exclusion_reasons": [
+        "not_started",
+        "cost_and_latency_unknown"
+      ],
+      "delta_selective_minus_model": null
+    },
+    {
+      "batch_id": "batch-005",
+      "pair_id": "block-00-pair-04",
+      "block_id": "block-00",
+      "case_key": "recharge-001/supplement_then_confirm",
+      "arm_order": [
+        "model",
+        "jev_selective"
+      ],
+      "status": "not_started",
+      "arms": {
+        "model": {
+          "status": "not_started",
+          "metrics": null
+        },
+        "jev_selective": {
+          "status": "not_started",
+          "metrics": null
+        }
+      },
+      "exclusion_reasons": [
+        "not_started",
+        "cost_and_latency_unknown"
+      ],
+      "delta_selective_minus_model": null
+    },
+    {
+      "batch_id": "batch-006",
+      "pair_id": "block-00-pair-05",
+      "block_id": "block-00",
+      "case_key": "refund-001/balance_cap",
+      "arm_order": [
+        "model",
+        "jev_selective"
+      ],
+      "status": "not_started",
+      "arms": {
+        "model": {
+          "status": "not_started",
+          "metrics": null
+        },
+        "jev_selective": {
+          "status": "not_started",
+          "metrics": null
+        }
+      },
+      "exclusion_reasons": [
+        "not_started",
+        "cost_and_latency_unknown"
+      ],
+      "delta_selective_minus_model": null
+    },
+    {
+      "batch_id": "batch-007",
+      "pair_id": "block-01-pair-00",
+      "block_id": "block-01",
+      "case_key": "balance-020/explicit_scope_followup",
+      "arm_order": [
+        "jev_selective",
+        "model"
+      ],
+      "status": "not_started",
+      "arms": {
+        "model": {
+          "status": "not_started",
+          "metrics": null
+        },
+        "jev_selective": {
+          "status": "not_started",
+          "metrics": null
+        }
+      },
+      "exclusion_reasons": [
+        "not_started",
+        "cost_and_latency_unknown"
+      ],
+      "delta_selective_minus_model": null
+    },
+    {
+      "batch_id": "batch-008",
+      "pair_id": "block-01-pair-01",
+      "block_id": "block-01",
+      "case_key": "recharge-002/confirm",
+      "arm_order": [
+        "jev_selective",
+        "model"
+      ],
+      "status": "not_started",
+      "arms": {
+        "model": {
+          "status": "not_started",
+          "metrics": null
+        },
+        "jev_selective": {
+          "status": "not_started",
+          "metrics": null
+        }
+      },
+      "exclusion_reasons": [
+        "not_started",
+        "cost_and_latency_unknown"
+      ],
+      "delta_selective_minus_model": null
+    },
+    {
+      "batch_id": "batch-009",
+      "pair_id": "block-01-pair-02",
+      "block_id": "block-01",
+      "case_key": "recharge-002/cancel",
+      "arm_order": [
+        "jev_selective",
+        "model"
+      ],
+      "status": "not_started",
+      "arms": {
+        "model": {
+          "status": "not_started",
+          "metrics": null
+        },
+        "jev_selective": {
+          "status": "not_started",
+          "metrics": null
+        }
+      },
+      "exclusion_reasons": [
+        "not_started",
+        "cost_and_latency_unknown"
+      ],
+      "delta_selective_minus_model": null
+    },
+    {
+      "batch_id": "batch-010",
+      "pair_id": "block-01-pair-03",
+      "block_id": "block-01",
+      "case_key": "recharge-001/supplement_then_confirm",
+      "arm_order": [
+        "jev_selective",
+        "model"
+      ],
+      "status": "not_started",
+      "arms": {
+        "model": {
+          "status": "not_started",
+          "metrics": null
+        },
+        "jev_selective": {
+          "status": "not_started",
+          "metrics": null
+        }
+      },
+      "exclusion_reasons": [
+        "not_started",
+        "cost_and_latency_unknown"
+      ],
+      "delta_selective_minus_model": null
+    },
+    {
+      "batch_id": "batch-011",
+      "pair_id": "block-01-pair-04",
+      "block_id": "block-01",
+      "case_key": "refund-001/balance_cap",
+      "arm_order": [
+        "jev_selective",
+        "model"
+      ],
+      "status": "not_started",
+      "arms": {
+        "model": {
+          "status": "not_started",
+          "metrics": null
+        },
+        "jev_selective": {
+          "status": "not_started",
+          "metrics": null
+        }
+      },
+      "exclusion_reasons": [
+        "not_started",
+        "cost_and_latency_unknown"
+      ],
+      "delta_selective_minus_model": null
+    },
+    {
+      "batch_id": "batch-012",
+      "pair_id": "block-01-pair-05",
+      "block_id": "block-01",
+      "case_key": "balance-001/answer_complete",
+      "arm_order": [
+        "jev_selective",
+        "model"
+      ],
+      "status": "not_started",
+      "arms": {
+        "model": {
+          "status": "not_started",
+          "metrics": null
+        },
+        "jev_selective": {
+          "status": "not_started",
+          "metrics": null
+        }
+      },
+      "exclusion_reasons": [
+        "not_started",
+        "cost_and_latency_unknown"
+      ],
+      "delta_selective_minus_model": null
+    },
+    {
+      "batch_id": "batch-013",
+      "pair_id": "block-02-pair-00",
+      "block_id": "block-02",
+      "case_key": "recharge-002/confirm",
+      "arm_order": [
+        "model",
+        "jev_selective"
+      ],
+      "status": "not_started",
+      "arms": {
+        "model": {
+          "status": "not_started",
+          "metrics": null
+        },
+        "jev_selective": {
+          "status": "not_started",
+          "metrics": null
+        }
+      },
+      "exclusion_reasons": [
+        "not_started",
+        "cost_and_latency_unknown"
+      ],
+      "delta_selective_minus_model": null
+    },
+    {
+      "batch_id": "batch-014",
+      "pair_id": "block-02-pair-01",
+      "block_id": "block-02",
+      "case_key": "recharge-002/cancel",
+      "arm_order": [
+        "model",
+        "jev_selective"
+      ],
+      "status": "not_started",
+      "arms": {
+        "model": {
+          "status": "not_started",
+          "metrics": null
+        },
+        "jev_selective": {
+          "status": "not_started",
+          "metrics": null
+        }
+      },
+      "exclusion_reasons": [
+        "not_started",
+        "cost_and_latency_unknown"
+      ],
+      "delta_selective_minus_model": null
+    },
+    {
+      "batch_id": "batch-015",
+      "pair_id": "block-02-pair-02",
+      "block_id": "block-02",
+      "case_key": "recharge-001/supplement_then_confirm",
+      "arm_order": [
+        "model",
+        "jev_selective"
+      ],
+      "status": "not_started",
+      "arms": {
+        "model": {
+          "status": "not_started",
+          "metrics": null
+        },
+        "jev_selective": {
+          "status": "not_started",
+          "metrics": null
+        }
+      },
+      "exclusion_reasons": [
+        "not_started",
+        "cost_and_latency_unknown"
+      ],
+      "delta_selective_minus_model": null
+    },
+    {
+      "batch_id": "batch-016",
+      "pair_id": "block-02-pair-03",
+      "block_id": "block-02",
+      "case_key": "refund-001/balance_cap",
+      "arm_order": [
+        "model",
+        "jev_selective"
+      ],
+      "status": "not_started",
+      "arms": {
+        "model": {
+          "status": "not_started",
+          "metrics": null
+        },
+        "jev_selective": {
+          "status": "not_started",
+          "metrics": null
+        }
+      },
+      "exclusion_reasons": [
+        "not_started",
+        "cost_and_latency_unknown"
+      ],
+      "delta_selective_minus_model": null
+    },
+    {
+      "batch_id": "batch-017",
+      "pair_id": "block-02-pair-04",
+      "block_id": "block-02",
+      "case_key": "balance-001/answer_complete",
+      "arm_order": [
+        "model",
+        "jev_selective"
+      ],
+      "status": "not_started",
+      "arms": {
+        "model": {
+          "status": "not_started",
+          "metrics": null
+        },
+        "jev_selective": {
+          "status": "not_started",
+          "metrics": null
+        }
+      },
+      "exclusion_reasons": [
+        "not_started",
+        "cost_and_latency_unknown"
+      ],
+      "delta_selective_minus_model": null
+    },
+    {
+      "batch_id": "batch-018",
+      "pair_id": "block-02-pair-05",
+      "block_id": "block-02",
+      "case_key": "balance-020/explicit_scope_followup",
+      "arm_order": [
+        "model",
+        "jev_selective"
+      ],
+      "status": "not_started",
+      "arms": {
+        "model": {
+          "status": "not_started",
+          "metrics": null
+        },
+        "jev_selective": {
+          "status": "not_started",
+          "metrics": null
+        }
+      },
+      "exclusion_reasons": [
+        "not_started",
+        "cost_and_latency_unknown"
+      ],
+      "delta_selective_minus_model": null
+    },
+    {
+      "batch_id": "batch-019",
+      "pair_id": "block-03-pair-00",
+      "block_id": "block-03",
+      "case_key": "recharge-002/cancel",
+      "arm_order": [
+        "jev_selective",
+        "model"
+      ],
+      "status": "not_started",
+      "arms": {
+        "model": {
+          "status": "not_started",
+          "metrics": null
+        },
+        "jev_selective": {
+          "status": "not_started",
+          "metrics": null
+        }
+      },
+      "exclusion_reasons": [
+        "not_started",
+        "cost_and_latency_unknown"
+      ],
+      "delta_selective_minus_model": null
+    },
+    {
+      "batch_id": "batch-020",
+      "pair_id": "block-03-pair-01",
+      "block_id": "block-03",
+      "case_key": "recharge-001/supplement_then_confirm",
+      "arm_order": [
+        "jev_selective",
+        "model"
+      ],
+      "status": "not_started",
+      "arms": {
+        "model": {
+          "status": "not_started",
+          "metrics": null
+        },
+        "jev_selective": {
+          "status": "not_started",
+          "metrics": null
+        }
+      },
+      "exclusion_reasons": [
+        "not_started",
+        "cost_and_latency_unknown"
+      ],
+      "delta_selective_minus_model": null
+    },
+    {
+      "batch_id": "batch-021",
+      "pair_id": "block-03-pair-02",
+      "block_id": "block-03",
+      "case_key": "refund-001/balance_cap",
+      "arm_order": [
+        "jev_selective",
+        "model"
+      ],
+      "status": "not_started",
+      "arms": {
+        "model": {
+          "status": "not_started",
+          "metrics": null
+        },
+        "jev_selective": {
+          "status": "not_started",
+          "metrics": null
+        }
+      },
+      "exclusion_reasons": [
+        "not_started",
+        "cost_and_latency_unknown"
+      ],
+      "delta_selective_minus_model": null
+    },
+    {
+      "batch_id": "batch-022",
+      "pair_id": "block-03-pair-03",
+      "block_id": "block-03",
+      "case_key": "balance-001/answer_complete",
+      "arm_order": [
+        "jev_selective",
+        "model"
+      ],
+      "status": "not_started",
+      "arms": {
+        "model": {
+          "status": "not_started",
+          "metrics": null
+        },
+        "jev_selective": {
+          "status": "not_started",
+          "metrics": null
+        }
+      },
+      "exclusion_reasons": [
+        "not_started",
+        "cost_and_latency_unknown"
+      ],
+      "delta_selective_minus_model": null
+    },
+    {
+      "batch_id": "batch-023",
+      "pair_id": "block-03-pair-04",
+      "block_id": "block-03",
+      "case_key": "balance-020/explicit_scope_followup",
+      "arm_order": [
+        "jev_selective",
+        "model"
+      ],
+      "status": "not_started",
+      "arms": {
+        "model": {
+          "status": "not_started",
+          "metrics": null
+        },
+        "jev_selective": {
+          "status": "not_started",
+          "metrics": null
+        }
+      },
+      "exclusion_reasons": [
+        "not_started",
+        "cost_and_latency_unknown"
+      ],
+      "delta_selective_minus_model": null
+    },
+    {
+      "batch_id": "batch-024",
+      "pair_id": "block-03-pair-05",
+      "block_id": "block-03",
+      "case_key": "recharge-002/confirm",
+      "arm_order": [
+        "jev_selective",
+        "model"
+      ],
+      "status": "not_started",
+      "arms": {
+        "model": {
+          "status": "not_started",
+          "metrics": null
+        },
+        "jev_selective": {
+          "status": "not_started",
+          "metrics": null
+        }
+      },
+      "exclusion_reasons": [
+        "not_started",
+        "cost_and_latency_unknown"
+      ],
+      "delta_selective_minus_model": null
+    }
+  ],
+  "strata": [],
+  "clock_definitions": {
+    "server_ms": "Sum of turn.response.telemetry.total_latency_ms",
+    "http_ms": "Sum of turn.latency_ms",
+    "conversation_ms": "result.duration_ms",
+    "runner_ms": "finish.runner_elapsed_ms; excludes global database preparation/deletion, final export and manual scoring"
+  },
+  "population_effect_claims_allowed": false,
+  "limitations": [
+    "Descriptive fixed-schedule observations only; no population, statistical or causal benefit claim.",
+    "Prices are frozen configuration estimates in separate currencies, not invoices.",
+    "Synthetic evidence validates tooling only; historical-single-block is not a repeated sample.",
+    "Unknown and unrun metrics remain null; excluded pairs remain visible; no user E2E clock."
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "Accepted": 5,
+  "Dropped": 0,
+  "Exported": 0,
+  "Failed": 5,
+  "Batches": 4,
+  "Turns": 1,
+  "SampledTurns": 1,
+  "QueueDepth": 0,
+  "export_diagnostics": {
+    "failed_batches": 4,
+    "omitted_failures": 0,
+    "failures": [
+      {
+        "batch_sequence": 1,
+        "span_count": 1,
+        "elapsed_ms": 2003.054542,
+        "error_kind": "deadline_exceeded",
+        "http_round_trips": 1,
+        "last_request_sequence": 1,
+        "stage": "round_trip",
+        "transport_cause": "deadline_exceeded"
+      },
+      {
+        "batch_sequence": 2,
+        "span_count": 1,
+        "elapsed_ms": 2003.021917,
+        "error_kind": "deadline_exceeded",
+        "http_round_trips": 1,
+        "last_request_sequence": 2,
+        "stage": "round_trip",
+        "transport_cause": "unknown"
+      },
+      {
+        "batch_sequence": 3,
+        "span_count": 2,
+        "elapsed_ms": 2009.812292,
+        "error_kind": "deadline_exceeded",
+        "http_round_trips": 1,
+        "last_request_sequence": 3,
+        "stage": "round_trip",
+        "transport_cause": "unknown"
+      },
+      {
+        "batch_sequence": 4,
+        "span_count": 1,
+        "elapsed_ms": 2004.196959,
+        "error_kind": "deadline_exceeded",
+        "http_round_trips": 1,
+        "last_request_sequence": 4,
+        "stage": "round_trip",
+        "transport_cause": "unknown"
+      }
+    ]
+  }
+}

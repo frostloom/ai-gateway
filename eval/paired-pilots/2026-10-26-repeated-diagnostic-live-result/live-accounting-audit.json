@@ -1,0 +1,297 @@
+{
+  "schema": "repeated-diagnostic-independent-accounting-audit.v1",
+  "created_at": "2026-10-26T10:49:17.459899+00:00",
+  "scope": "v5-repeated-export-diagnostic-20261025",
+  "source_sha256": {
+    ".tmp/paired-live-private/regression-timing-20261026/live-process-result.json": "c86cecec71383ddf69dc485d7d6fdd6c73230412fafa5840db2af8d3d8b05351",
+    ".tmp/paired-live-private/regression-timing-20261026/live-run/receipt.json": "b3e6d6f8e6d6aa9d33f11e941ddf65c5d675b18e1a0e23e150000dd6f33f5006",
+    ".tmp/paired-live-private/regression-timing-20261026/live-run/entry-outcome.json": "842b48028a8671f386624d6980eab0c75ca528b6399e840c8bb39a28dfe640d8",
+    ".tmp/paired-live-private/regression-timing-20261026/human-approval.json": "1f05e08663bae5fec4f77e691f8d367341ef3e662ee58264f7d0021eb5e61505",
+    ".tmp/paired-live-private/regression-timing-20261026/approved-binding-check.json": "c1c98d07b4898a21641ef58afc6e5f98540f98eb57a3c20e6b92a72655eda3ea",
+    ".tmp/paired-live-private/regression-timing-20261026/consumed-claim.json": "8c63988dbd31b09cb523c7e0b067f5978ad0ee91f5736f0fc581752544161e6a",
+    ".tmp/paired-live-private/regression-timing-20261026/approved-authorization.json": "23b96313fb9f229e21eb0c6ab5b1813dcf9550f03efafa5ea9ba65cc03b3b883",
+    ".tmp/paired-live-private/regression-timing-20261026/billing-attestation.json": "1a2901faf0947a62368ee8ac0f4b1524ab32378ac9f9353652e1e0a9684bd47d",
+    ".tmp/paired-live-private/regression-timing-20261026/billing-source.json": "cda8bb7c944f372411bb4aa952b96f6bb7f70513ca2dac1b1510cd622b8272ed",
+    ".tmp/paired-live-private/regression-timing-20261026/live-run/campaign/campaign.jsonl": "c3e7c919a5a3990f41c263d184bcd5394a0998ecde1c6456b0478af0db9f82ce",
+    ".tmp/paired-live-private/regression-timing-20261026/live-run/campaign/batch-001/budget.jsonl": "dc4fe4fd727e7a7feb88adf5d782bcd98435849c3d7e1db28a2a1fbc0f724d10",
+    ".tmp/paired-live-private/regression-timing-20261026/live-run/campaign/batch-001/reservation.json": "8d1e42c58a27ae1644a2a5d661e3b49b9a80753f1b111b227957fb17993649d4",
+    ".tmp/paired-live-private/regression-timing-20261026/live-run/campaign/batch-001/run.jsonl": "2c04b89a8f06e6ac9f14ef2a6539b345cb5398445bffe7a48f9fdc931ba25a64",
+    ".tmp/paired-live-private/regression-timing-20261026/live-run/campaign/batch-001/report.json": "d07a94a44351c5adc52e4358db190b7ddaf4446af1b216184d8504b0bc0318eb",
+    ".tmp/paired-live-private/regression-timing-20261026/live-run/campaign/batch-001/run.jsonl.jev.jsonl": "3af576f3904b8b8993d6f35439a1af60ca7c2f7b089de6ae2dd5c45000f1e9ab",
+    ".tmp/paired-live-retests/v5-repeated-export-diagnostic-20261025.json": "8c63988dbd31b09cb523c7e0b067f5978ad0ee91f5736f0fc581752544161e6a",
+    ".tmp/paired-live-retests/recharge-confirm-20261023.json": "2c9d64b98bd985a24da5aed31c049d63311ebdd7f8dc4c862600ccd77e80dcbc",
+    ".tmp/paired-live-retests/recharge-confirm-diagnostic-retest-20261023.json": "23047a143039f719531cfe403f1769abda7a6091b2ee51cecf6184eb4768e654",
+    ".tmp/paired-live-retests/recharge-cancel-20261024.json": "a9ce7a22d79e4e42e8ded0b932c34648df3db0d0574ad0710c098d2b02cbc8f4",
+    ".tmp/paired-live-retests/recharge-supplement-20261024.json": "824e1e44882b1043bba833ec6af5b88980d6d89b4ce8e4023fd12c68c98fb11c",
+    ".tmp/paired-live-retests/refund-cap-20261024.json": "9a026381dea69bc1feb9712d58a41e305877701e1355ba2464543aaaa0857b30",
+    ".tmp/paired-live-retests/v5-six-case-cohort-20261024.json": "b49808feb6a124c60c7f3fd88a7965589368a0ce8d8f4336e94ebaee9a025d34",
+    ".tmp/paired-live-retests/v5-repeated-cohort-20261024.json": "c7f14ee3b310cec23cf71b7dc004fe73b29ec5e8efa4b6c4167eb91159c8dd58"
+  },
+  "checks": [
+    {
+      "check": "new claim SHA and archived copy",
+      "passed": true,
+      "observed": "8c63988dbd31b09cb523c7e0b067f5978ad0ee91f5736f0fc581752544161e6a"
+    },
+    {
+      "check": "old confirm claim matches immutable bound SHA",
+      "passed": true,
+      "observed": "2c9d64b98bd985a24da5aed31c049d63311ebdd7f8dc4c862600ccd77e80dcbc"
+    },
+    {
+      "check": "old diagnostic claim matches immutable bound SHA",
+      "passed": true,
+      "observed": "23047a143039f719531cfe403f1769abda7a6091b2ee51cecf6184eb4768e654"
+    },
+    {
+      "check": "old cancel claim matches immutable bound SHA",
+      "passed": true,
+      "observed": "a9ce7a22d79e4e42e8ded0b932c34648df3db0d0574ad0710c098d2b02cbc8f4"
+    },
+    {
+      "check": "old supplement claim matches immutable bound SHA",
+      "passed": true,
+      "observed": "824e1e44882b1043bba833ec6af5b88980d6d89b4ce8e4023fd12c68c98fb11c"
+    },
+    {
+      "check": "old refund claim matches immutable bound SHA",
+      "passed": true,
+      "observed": "9a026381dea69bc1feb9712d58a41e305877701e1355ba2464543aaaa0857b30"
+    },
+    {
+      "check": "old cohort claim matches immutable bound SHA",
+      "passed": true,
+      "observed": "b49808feb6a124c60c7f3fd88a7965589368a0ce8d8f4336e94ebaee9a025d34"
+    },
+    {
+      "check": "old repeated claim matches immutable bound SHA",
+      "passed": true,
+      "observed": "c7f14ee3b310cec23cf71b7dc004fe73b29ec5e8efa4b6c4167eb91159c8dd58"
+    },
+    {
+      "check": "explicit once approval binding",
+      "passed": true,
+      "observed": "批准本轮一次实际执行"
+    },
+    {
+      "check": "authorization billing receipt SHA binding",
+      "passed": true,
+      "observed": {
+        "authorization": "23b96313fb9f229e21eb0c6ab5b1813dcf9550f03efafa5ea9ba65cc03b3b883",
+        "billing": "1a2901faf0947a62368ee8ac0f4b1524ab32378ac9f9353652e1e0a9684bd47d"
+      }
+    },
+    {
+      "check": "execution revision binding",
+      "passed": true,
+      "observed": "f0a329ca68888be767693a619b3b77d67c2e0b08"
+    },
+    {
+      "check": "scope permanent full reservation",
+      "passed": true,
+      "observed": {
+        "model_calls": 248,
+        "jev_calls": 24,
+        "micro_cny": 8380416,
+        "micro_usd": 64512
+      }
+    },
+    {
+      "check": "exit and bounded stop",
+      "passed": true,
+      "observed": {
+        "schema": "repeated-diagnostic-once-process-result.v1",
+        "scope": "v5-repeated-export-diagnostic-20261025",
+        "execution_revision": "f0a329ca68888be767693a619b3b77d67c2e0b08",
+        "returncode": 1,
+        "operator_timeout": false,
+        "elapsed_seconds": 63.995361,
+        "automatic_retries": 0,
+        "claim_exists_after": true
+      }
+    },
+    {
+      "check": "only batch001 lease reserved and failed",
+      "passed": true,
+      "observed": [
+        {
+          "kind": "config",
+          "contract": "b4d75a6b57cd6b3347a19f3a9525704e1d28517afd6637e18755c53863b2d071",
+          "limits": {
+            "max_batches": 24,
+            "max_model_calls": 248,
+            "max_model_micro_cny": 8380416,
+            "max_jev_calls": 24,
+            "max_jev_micro_usd": 64512,
+            "jev_micro_usd_per_attempt": 2688
+          }
+        },
+        {
+          "kind": "reserve",
+          "id": "batch-001",
+          "binding": "49a7179de31f4082c9c14f0c3631bb4bdcea56a1e66ebc359d6817d25b581ae4",
+          "model_calls": 6,
+          "model_micro_cny": 202752,
+          "jev_calls": 1,
+          "jev_micro_usd": 2688
+        },
+        {
+          "kind": "finish",
+          "id": "batch-001",
+          "failed": true
+        }
+      ]
+    },
+    {
+      "check": "started prefix lease distinct from full reservation",
+      "passed": true,
+      "observed": {
+        "kind": "reserve",
+        "id": "batch-001",
+        "binding": "49a7179de31f4082c9c14f0c3631bb4bdcea56a1e66ebc359d6817d25b581ae4",
+        "model_calls": 6,
+        "model_micro_cny": 202752,
+        "jev_calls": 1,
+        "jev_micro_usd": 2688
+      }
+    },
+    {
+      "check": "two model attempts settled usage reconciles",
+      "passed": true,
+      "observed": {
+        "attempts": 2,
+        "reserved_micro_cny": 67584,
+        "priced_usage_micro_cny": 7436,
+        "input_tokens": 3562,
+        "output_tokens": 39
+      }
+    },
+    {
+      "check": "zero JEV attempts",
+      "passed": true,
+      "observed": {
+        "receipt_jev_attempts": 0,
+        "jev_journal_records": 1
+      }
+    },
+    {
+      "check": "batch001 first arm finished second never started and other23 unrun",
+      "passed": true,
+      "observed": {
+        "finished_arms": 1,
+        "unrun_arms": 1,
+        "unrun_batches": 23
+      }
+    },
+    {
+      "check": "raw journal report binding",
+      "passed": true,
+      "observed": "2c04b89a8f06e6ac9f14ef2a6539b345cb5398445bffe7a48f9fdc931ba25a64"
+    },
+    {
+      "check": "observer failure counters and diagnostics",
+      "passed": true,
+      "observed": {
+        "Accepted": 5,
+        "Dropped": 0,
+        "Exported": 0,
+        "Failed": 5,
+        "Batches": 4,
+        "Turns": 1,
+        "SampledTurns": 1,
+        "QueueDepth": 0,
+        "export_diagnostics": {
+          "failed_batches": 4,
+          "omitted_failures": 0,
+          "failures": [
+            {
+              "batch_sequence": 1,
+              "span_count": 1,
+              "elapsed_ms": 2003.054542,
+              "error_kind": "deadline_exceeded",
+              "http_round_trips": 1,
+              "last_request_sequence": 1,
+              "stage": "round_trip",
+              "transport_cause": "deadline_exceeded"
+            },
+            {
+              "batch_sequence": 2,
+              "span_count": 1,
+              "elapsed_ms": 2003.021917,
+              "error_kind": "deadline_exceeded",
+              "http_round_trips": 1,
+              "last_request_sequence": 2,
+              "stage": "round_trip",
+              "transport_cause": "unknown"
+            },
+            {
+              "batch_sequence": 3,
+              "span_count": 2,
+              "elapsed_ms": 2009.812292,
+              "error_kind": "deadline_exceeded",
+              "http_round_trips": 1,
+              "last_request_sequence": 3,
+              "stage": "round_trip",
+              "transport_cause": "unknown"
+            },
+            {
+              "batch_sequence": 4,
+              "span_count": 1,
+              "elapsed_ms": 2004.196959,
+              "error_kind": "deadline_exceeded",
+              "http_round_trips": 1,
+              "last_request_sequence": 4,
+              "stage": "round_trip",
+              "transport_cause": "unknown"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "check": "preserve false cleanup original",
+      "passed": true,
+      "observed": {
+        "cleanup_and_receipt_succeeded": false,
+        "execution_receipt": "receipt.json",
+        "schema": "paired-live-entry-outcome.v1",
+        "status": "stopped"
+      }
+    },
+    {
+      "check": "no pair comparison or whole-answer success promoted",
+      "passed": true,
+      "observed": {
+        "comparison": null,
+        "effect_claims_allowed": false,
+        "model_status": "needs_review",
+        "raw_success": false
+      }
+    },
+    {
+      "check": "permanent cumulative reservation arithmetic",
+      "passed": true,
+      "observed": {
+        "cumulative_micro_cny": 20680704,
+        "cumulative_micro_usd": 158592,
+        "unallocated_micro_cny": 79319296,
+        "unallocated_micro_usd": 841408
+      }
+    }
+  ],
+  "findings": [],
+  "all_checks_passed": true,
+  "interpretation": {
+    "scope_claim": "Permanently consumed in full; never release or reuse approval, retry, or resume.",
+    "actual_model_calls": 2,
+    "actual_jev_calls": 0,
+    "priced_model_usage_micro_cny": 7436,
+    "supplier_invoice": false,
+    "historical_model_calls_117_plus_actual": 119,
+    "historical_jev_calls_31_plus_actual": 31,
+    "historical_baseline_basis": "Parent-provided historical total 117/31; this audit independently verifies only the current increment 2/0.",
+    "observer": "Five failed spans across four explicit diagnostic batches; do not infer HTTP request count from span count. Recorded http_round_trips are explicit instrumentation, not inferred from Failed. No HTTP response status recorded. Deadline and transport categories do not establish physical root cause or persistence/delivery outcome.",
+    "cleanup": "Original cleanup_and_receipt_succeeded=false retained. No standalone cleanup claim made.",
+    "quality": "No two-arm comparison; no overall effect claim; semantic review delegated separately."
+  }
+}
