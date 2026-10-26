@@ -1,0 +1,30 @@
+{
+  "schema": "receiver-deployment-acceptance.v1",
+  "deployed_image_id": "sha256:677a486f0519c772b5db1217b028d4b2c8a9db7cd960468aadf6f71e944f532f",
+  "configured_enabled": true,
+  "model_calls": 0,
+  "jev_calls": 0,
+  "claims_created": 0,
+  "new_synthetic_traces": 2,
+  "new_synthetic_spans": 6,
+  "http_export_requests": 5,
+  "observer_failed": 0,
+  "all_synthetic_observations_read_back": true,
+  "fast_success_diagnostic_records": 0,
+  "other_containers_unchanged": 27,
+  "root_env_unchanged": true,
+  "web_mounts_unchanged": true,
+  "rollback_prepared_not_executed": true,
+  "original_paid_scope_resumed": false,
+  "actual_cumulative_model_jev": [
+    119,
+    31
+  ],
+  "permanent_reserved_micro_cny": 20680704,
+  "permanent_reserved_micro_usd": 158592,
+  "total_budget_micro_cny": 100000000,
+  "total_budget_micro_usd": 1000000,
+  "new_user_preauthorization_sha256": "8f428b68f0f9f5c2821c03da8c41ee220dbc4e18741ace3982a4cfcb93b52a95",
+  "new_user_preauthorization": "2026-10-27 direct user authorization permits autonomously frozen new bounded scopes within prior total budget, without per-scope questions; no old-claim reuse or retry",
+  "physical_root_cause_confirmed": false
+}

@@ -1,0 +1,12 @@
+{
+  "schema": "receiver-deploy-preflight.v1",
+  "candidate_image_id": "sha256:677a486f0519c772b5db1217b028d4b2c8a9db7cd960468aadf6f71e944f532f",
+  "old_image_id": "sha256:d04cd20a224c98bc40d233af4d8b3e6465f425bdd502618c2c4dad2b8f8e60ed",
+  "explicit_env_changed": [
+    "AI_GATEWAY_OTEL_STAGE_DIAGNOSTICS"
+  ],
+  "candidate_has_build": false,
+  "private_env_sha256": "65433c9923e80090d61b567405ef2a70d993616de9f1310f0225a547e33783cf",
+  "other_services_to_recreate": 0,
+  "old_volumes_retained": true
+}

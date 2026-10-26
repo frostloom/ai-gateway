@@ -1,0 +1,7 @@
+# Use with compose.yml only; candidate already contains the same local Chinese UI.
+# Prebuilt, verified local artifact. Always use --no-build --pull never --no-deps.
+services:
+  langfuse-web:
+    image: ai-gateway-langfuse-zh:4.58.0-otel-stages-v4
+    environment:
+      AI_GATEWAY_OTEL_STAGE_DIAGNOSTICS: '1'
