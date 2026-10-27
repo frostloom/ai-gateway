@@ -33,11 +33,11 @@
 
 **Interfaces:** `FullLocalCampaignOptions{DefinitionsDir string, Environment *PairedFixtureEnvironment, Revision string, Keys []string}`; `RunFullLocalCustomerWindow(ctx context.Context,dir string,o FullLocalCampaignOptions) (FullLocalCampaignReceipt,error)`.
 
-- [ ] RED pure script tests cover all expected action families: read, preview, clarify, respond/consult/limited/reject; accept only local Anthropic128/disabled requests. Missing/malformed/unknown-turn input returns error, never uses http.DefaultTransport.
-- [ ] Read tool args are taken from the pinned source parameters_from_original layer (not guessed); plan_reference resolves to the pinned catalogue plan_name, never a guessed numeric ID. Case operation amount uses its frozen value. Tool-result prose is returned as synthetic text; ordinary no-tool script clearly remains unreviewed.
-- [ ] RED window tests: explicit1..100 primary keys only, duplicates/boundaries rejected before deps/output; real local cases spanning all12 source families and clarify/preview branches. Use RunFullCustomerCampaignBatch with all four guards and new full-selection hash.
-- [ ] Implement one case per temporary batch, fixed synthetic model/loopback identity and process-only transport; FakeJEV low-confidence fallback so no forced route quality claim. Model/JEV limits derive worst-case frozen turns, currencies explicitly synthetic. Capture checkpoint validates2 roots, actual turns/generations, case/arm/full contract and unknown task_success. Durable new-only receipt lists every requested case as checked_local/failed/not_started.
-- [ ] Add dependency/provider/observer/budget/receipt/cleanup failure and cancellation tests; preserve whole temporary reservation and stop next batch, no retry.
+- [x] RED pure script tests cover all expected action families: read, preview, clarify, respond/consult/limited/reject; accept only local Anthropic128/disabled requests. Missing/malformed/unknown-turn input returns error, never uses http.DefaultTransport.
+- [x] Read tool args are taken from the pinned source parameters_from_original layer (not guessed); plan_reference resolves to the pinned catalogue plan_name, never a guessed numeric ID. Case operation amount uses its frozen value. Tool-result prose is returned as synthetic text; ordinary no-tool script clearly remains unreviewed.
+- [x] RED window tests: explicit1..100 primary keys only, duplicates/boundaries rejected before deps/output; real local cases spanning all12 source families and clarify/preview branches. Use RunFullCustomerCampaignBatch with all four guards and new full-selection hash.
+- [x] Implement one case per temporary batch, fixed synthetic model/loopback identity and process-only transport; FakeJEV low-confidence fallback so no forced route quality claim. Model/JEV limits derive worst-case frozen turns, currencies explicitly synthetic. Capture checkpoint validates2 roots, actual turns/generations, case/arm/full contract and unknown task_success. Durable new-only receipt lists every requested case as checked_local/failed/not_started.
+- [x] Add dependency/provider/observer/budget/receipt/cleanup failure and cancellation tests; preserve whole temporary reservation and stop next batch, no retry.
 
 ### Task 2: Explicit local CLI and full1220 window aggregation
 
@@ -45,10 +45,10 @@
 
 **Interfaces:** CLI `-execute-local -keys <JSON array> -mysql-dsn <explicit loopback admin> -revision <40hex> -out <new dir>` plus frozen definitions/profiles paths; no provider/key/paid flags. Timeout fixed300s. Python exposes `prepare(root: Path) -> dict` and `aggregate(plan: dict,window_evidence: list) -> dict` with explicit SHA refs.
 
-- [ ] RED CLI tests default disabled, malformed/non-loopback/db-named DSNs and absent/over100 keys reject without fixture/output; never print or archive DSN/API credentials. Validate all selection inputs before creating owned fixture environment; cleanup via independent bounded context.
-- [ ] Implement CLI; pure Python plan matches original selector exactly and yields13 ordered windows (12x100+20),each source exactly once with original1220 denominator and selection identity.
-- [ ] RED aggregate tests duplicate/missing/tampered source/window/receipt or fake ready/semantic-success claims; incomplete evidence is unknown/unrun, not success. Successful local matrix status requires1220 distinct checked_local pairs,2440 arms/3924 observed turns and complete local trace counts; real evaluation remains incomplete.
-- [ ] Implement planning/aggregation only, no hidden subprocess retry/resume. Full run controller records actual command attempts and hash-bound stdout/receipt; stops after first nonzero/incomplete window, never reuses an old output directory. Private DSN not copied to public evidence.
+- [x] RED CLI tests default disabled, malformed/non-loopback/db-named DSNs and absent/over100 keys reject without fixture/output; never print or archive DSN/API credentials. Validate all selection inputs before creating owned fixture environment; cleanup via independent bounded context.
+- [x] Implement CLI; pure Python plan matches original selector exactly and yields13 ordered windows (12x100+20),each source exactly once with original1220 denominator and selection identity.
+- [x] RED aggregate tests duplicate/missing/tampered source/window/receipt or fake ready/semantic-success claims; incomplete evidence is unknown/unrun, not success. Successful local matrix status requires1220 distinct checked_local pairs,2440 arms/3924 observed turns and complete local trace counts; real evaluation remains incomplete.
+- [x] Implement planning/aggregation only, no hidden subprocess retry/resume. Full run controller records actual command attempts and hash-bound stdout/receipt; stops after first nonzero/incomplete window, never reuses an old output directory. Private DSN not copied to public evidence.
 
 ### Task 3: Execute actual full local matrix and deliver
 
