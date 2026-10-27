@@ -1,0 +1,140 @@
+{
+  "schema": "full1220-accounting-validation.v1",
+  "tests": {
+    "red": {
+      "sha256": "812e553c39bbc49d93cfe1cc3060664853636fc21e6314b7b0a478ec223fa1cd",
+      "top_level_pass": 0,
+      "pass_records": 0,
+      "fail_events": 5,
+      "skip": 0,
+      "packages": [
+        {
+          "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+          "elapsed_seconds": 1.226,
+          "action": "fail"
+        }
+      ]
+    },
+    "green": {
+      "sha256": "699ad5547f1ec9de2c70c889b074411f14add88a07d05dd4baafc48308fd5d2f",
+      "top_level_pass": 16,
+      "pass_records": 59,
+      "fail_events": 0,
+      "skip": 0,
+      "packages": [
+        {
+          "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+          "elapsed_seconds": 1.851,
+          "action": "pass"
+        }
+      ]
+    },
+    "race-verified": {
+      "sha256": "21f1ff76f9d57b2b319bd89cb2ae4af2fa3f237b4ebcb79a0eb949cf26fa17e5",
+      "top_level_pass": 16,
+      "pass_records": 59,
+      "fail_events": 0,
+      "skip": 0,
+      "packages": [
+        {
+          "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+          "elapsed_seconds": 2.857,
+          "action": "pass"
+        }
+      ]
+    },
+    "sealed-red": {
+      "sha256": "39038ddc92abf0e3189159b9dd9eb39fe263d4b7f971f4f4423021e28cf492cc",
+      "top_level_pass": 1,
+      "pass_records": 9,
+      "fail_events": 2,
+      "skip": 0,
+      "packages": [
+        {
+          "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+          "elapsed_seconds": 13.348,
+          "action": "fail"
+        }
+      ]
+    },
+    "sealed-green-race": {
+      "sha256": "65c199410d8f2a0ed47c52b162629d8997fbed46a35fcc4b16390f4afaf0db1d",
+      "top_level_pass": 18,
+      "pass_records": 69,
+      "fail_events": 0,
+      "skip": 0,
+      "packages": [
+        {
+          "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+          "elapsed_seconds": 16.994,
+          "action": "pass"
+        }
+      ]
+    },
+    "integrated": {
+      "sha256": "c36c7c494bcfce6ea31e7e8e58646b608755bdde2dca652f67e032e3ef713b94",
+      "top_level_pass": 38,
+      "pass_records": 162,
+      "fail_events": 0,
+      "skip": 0,
+      "packages": [
+        {
+          "package": "github.com/frostloom/ai-gateway/cmd/full-window-closed",
+          "elapsed_seconds": 0.873,
+          "action": "pass"
+        },
+        {
+          "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+          "elapsed_seconds": 35.959,
+          "action": "pass"
+        }
+      ]
+    },
+    "owned-tamper-race": {
+      "sha256": "310e9c577ad0b7899730674e7957a74ea21b331c5d0f7bfb7ecf4e650cc920a7",
+      "top_level_pass": 1,
+      "pass_records": 8,
+      "fail_events": 0,
+      "skip": 0,
+      "packages": [
+        {
+          "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+          "elapsed_seconds": 26.786,
+          "action": "pass"
+        }
+      ]
+    },
+    "current-replay-timing": {
+      "sha256": "e747fac95dbc7c3e3d3ed97cb9548e3172cedcfcb0832a52d1343e5dfb527ebe",
+      "top_level_pass": 0,
+      "pass_records": 0,
+      "fail_events": 2,
+      "skip": 0,
+      "packages": [
+        {
+          "package": "./internal/taskbench",
+          "elapsed_seconds": 0,
+          "action": "fail"
+        }
+      ]
+    },
+    "race": {
+      "sha256": "6cf5036bc45772c447c38f9a5851d22fde9db074960a1aad67be234823972923",
+      "top_level_pass": 0,
+      "pass_records": 0,
+      "fail_events": 2,
+      "skip": 0,
+      "packages": [
+        {
+          "package": "./internal/taskbench",
+          "elapsed_seconds": 0,
+          "action": "fail"
+        }
+      ]
+    }
+  },
+  "original_full_go_pass": false,
+  "original_full_go_required_before_paid_freeze": true,
+  "review": "Independent review of both small changes found no remaining P1/P2; read fresh logs; did not rerun tests.",
+  "timing_note": "Private overlay replays same first 5 sealed journals three times: old 448541us, precompiled regex only 54490us. Local comparison only, not full-campaign timing or a provider latency result."
+}

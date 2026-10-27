@@ -1,9 +1,12 @@
 package taskbench
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -386,8 +389,7 @@ func (c *windowCampaign) inventoryWindowCampaign() error {
 			continue
 		}
 		if sha, ok := c.ledgerAudits[name]; ok && entry.IsDir() {
-			audit, e := readWindowAccounting(filepath.Join(c.root, name))
-			if e != nil || audit.JournalSHA256 != sha {
+			if e := verifySealedWindowAccounting(filepath.Join(c.root, name), sha); e != nil {
 				return fmt.Errorf("previous ledger changed")
 			}
 			continue
@@ -400,6 +402,41 @@ func (c *windowCampaign) inventoryWindowCampaign() error {
 		if e != nil || conversationHash(raw) != h {
 			return fmt.Errorf("claim/checkpoint content changed")
 		}
+	}
+	return nil
+}
+
+// Only a ledger fully replayed and closed by advanceWindowCampaign enters
+// ledgerAudits. Rechecking its complete byte digest proves it is still exactly
+// that validated journal; repeating semantic replay cannot add evidence. This
+// check grants no execution or completion authority and never covers an active
+// ledger, whose live descriptor and bytes are checked separately.
+func verifySealedWindowAccounting(dir, expectedSHA string) error {
+	entries, err := os.ReadDir(dir)
+	if err != nil || len(entries) != 1 || entries[0].Name() != "accounting.jsonl" || !entries[0].Type().IsRegular() {
+		return fmt.Errorf("sealed ledger inventory changed")
+	}
+	path := filepath.Join(dir, "accounting.jsonl")
+	named, err := os.Lstat(path)
+	if err != nil || !named.Mode().IsRegular() || named.Size() < 1 || named.Size() > 64<<20 {
+		return fmt.Errorf("sealed ledger file changed")
+	}
+	file, err := os.Open(path)
+	if err != nil {
+		return err
+	}
+	opened, err := file.Stat()
+	if err != nil || !os.SameFile(named, opened) {
+		_ = file.Close()
+		return fmt.Errorf("sealed ledger identity changed while opening")
+	}
+	digest := sha256.New()
+	n, readErr := io.Copy(digest, io.LimitReader(file, (64<<20)+1))
+	if err := errors.Join(readErr, file.Close()); err != nil {
+		return err
+	}
+	if n != named.Size() || n > 64<<20 || hex.EncodeToString(digest.Sum(nil)) != expectedSHA {
+		return fmt.Errorf("sealed ledger bytes changed")
 	}
 	return nil
 }

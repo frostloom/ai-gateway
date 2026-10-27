@@ -119,11 +119,17 @@ type windowAccounting struct {
 	closeErr         error
 }
 
+var (
+	windowProviderModelPattern = regexp.MustCompile(`^[a-zA-Z0-9._/-]{1,128}$`)
+	windowIDPattern            = regexp.MustCompile(`^window-[0-9]{3,6}$`)
+	windowCaseKeyPattern       = regexp.MustCompile(`^[a-z0-9_./-]{1,256}$`)
+)
+
 func (p windowProviderLimits) cost(input, output int64) int64 {
 	return (input*p.InputRate+999999)/1000000 + (output*p.OutputRate+999999)/1000000
 }
 func (p windowProviderLimits) validate(model bool) error {
-	if !regexp.MustCompile(`^[a-zA-Z0-9._/-]{1,128}$`).MatchString(p.Model) || p.MaxAttempts < 1 || p.MaxAttempts > 10000 || p.MaxRequestBytes < 1 || p.MaxRequestBytes > 1<<20 || p.MaxInput < 1 || p.MaxInput > 10000000 || p.MaxOutput < 0 || p.MaxOutput > 1000000 || p.InputRate < 1 || p.InputRate > 1000000000 || p.OutputRate < 0 || p.OutputRate > 1000000000 {
+	if !windowProviderModelPattern.MatchString(p.Model) || p.MaxAttempts < 1 || p.MaxAttempts > 10000 || p.MaxRequestBytes < 1 || p.MaxRequestBytes > 1<<20 || p.MaxInput < 1 || p.MaxInput > 10000000 || p.MaxOutput < 0 || p.MaxOutput > 1000000 || p.InputRate < 1 || p.InputRate > 1000000000 || p.OutputRate < 0 || p.OutputRate > 1000000000 {
 		return fmt.Errorf("invalid provider bounds/rates")
 	}
 	if model && (p.MaxOutput < 1 || p.MaxOutput > 512 || p.OutputRate == 0) {
@@ -132,7 +138,7 @@ func (p windowProviderLimits) validate(model bool) error {
 	return nil
 }
 func (c windowAccountingContract) validate() error {
-	if c.Schema != "full-window-accounting.v1" || !regexp.MustCompile(`^window-[0-9]{3,6}$`).MatchString(c.WindowID) || c.ModelCap < 1 || c.ModelCap > 1000000000 || c.JEVCap < 1 || c.JEVCap > 1000000000 {
+	if c.Schema != "full-window-accounting.v1" || !windowIDPattern.MatchString(c.WindowID) || c.ModelCap < 1 || c.ModelCap > 1000000000 || c.JEVCap < 1 || c.JEVCap > 1000000000 {
 		return fmt.Errorf("invalid window declaration")
 	}
 	for _, h := range []string{c.ScopeSHA256, c.ScheduleSHA256, c.PolicySHA256, c.ClaimSHA256} {
@@ -171,7 +177,7 @@ func (c windowAccountingContract) validateRequest(r windowRequestIdentity) error
 	if err != nil {
 		return err
 	}
-	if r.Model != p.Model || !regexp.MustCompile(`^[a-z0-9_./-]{1,256}$`).MatchString(r.CaseKey) || r.Pass < 1 || r.Pass > 3 || (r.Arm != "model" && r.Arm != "jev_selective") || (r.Provider == "jev" && r.Arm != "jev_selective") || r.Turn < 1 || r.Turn > 32 || r.Attempt < 1 || r.Attempt > p.MaxAttempts || !comparisonDigest(r.BodySHA256) || r.Bytes < 1 || r.Bytes > p.MaxRequestBytes {
+	if r.Model != p.Model || !windowCaseKeyPattern.MatchString(r.CaseKey) || r.Pass < 1 || r.Pass > 3 || (r.Arm != "model" && r.Arm != "jev_selective") || (r.Provider == "jev" && r.Arm != "jev_selective") || r.Turn < 1 || r.Turn > 32 || r.Attempt < 1 || r.Attempt > p.MaxAttempts || !comparisonDigest(r.BodySHA256) || r.Bytes < 1 || r.Bytes > p.MaxRequestBytes {
 		return fmt.Errorf("invalid request identity/bounds")
 	}
 	return nil
