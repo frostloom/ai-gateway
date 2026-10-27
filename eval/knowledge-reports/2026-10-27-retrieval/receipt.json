@@ -1,0 +1,41 @@
+{
+  "schema": "knowledge-retrieval-evidence.v1",
+  "date": "2026-10-27",
+  "source_revision": "6e2e94b8c359c1b125478938d4412fef0dbf8f0d",
+  "suite_sha256": "f84cd60dec07cdb98e7514339c4fc56622c52cb3b456ba734e664c7c5eb11994",
+  "corpus_version": "fd64639a5c1e5af7b05fc4747089b675e92b9a3ea1ebb43e2d35b88737763aa4",
+  "customer_model_calls": 0,
+  "jev_calls": 0,
+  "paid_claims_created": 0,
+  "retrieval_or_corpus_changed": false,
+  "real_answer_quality_measured": false,
+  "measurements": {
+    "knowledge_complete_gold_top3": "23/36",
+    "knowledge_no_match": 12,
+    "knowledge_wrong_source_hit": 1,
+    "unknown_with_any_hit": "2/12",
+    "synthetic_search_calls": 24000,
+    "search_errors": 0
+  },
+  "race": {
+    "exit_code": 0,
+    "workers": 32,
+    "queries": 256,
+    "data_race_detected": false,
+    "timings_excluded_from_performance": true
+  },
+  "public_sha256": {
+    "results.json": "6dc39e36e96477fd17f2b8b72c921861e2ec59dd94777ab26fb5ae1ad35bbc34",
+    "short-queries.json": "8f17f578f4bf4c52aa27500b115cd17e77d59d91a41a57789ac9b87aba24e2a1"
+  },
+  "private_sha256": {
+    "probe.log": "8ac6d54187b12a9c2566a79200938ceabefbae5beab8664bcca426d44089cf1d",
+    "direct-retrieval.json": "6dc39e36e96477fd17f2b8b72c921861e2ec59dd94777ab26fb5ae1ad35bbc34",
+    "race.log": "ea2148d97ad6f1becd068a9e5571eb7b96b14ab1ff78362416b8ccf23cb7d909",
+    "race-check.json": "ef305fb8c45daa7f38bd81cfa77b4eb1d51aa8b49df2d2e164a8d1e118991645",
+    "short-queries.json": "8f17f578f4bf4c52aa27500b115cd17e77d59d91a41a57789ac9b87aba24e2a1",
+    "short-query/main.go": "8e62bedecd8b6a2b3a3e5b345a0cadd8ec47eb9cdbe4c229d4994a730127c8d6",
+    "probe/main.go": "bf4450eeb4e5f789dc943d5b7db5e9c44b6e67305787c2ab5809b6ec847e154a"
+  },
+  "live_execution_blocker": "Knowledge AcquireClaim refuses; main full1220 window foundation is not a general knowledge provider capability. No guard bypass or use of uncommitted foundations."
+}
