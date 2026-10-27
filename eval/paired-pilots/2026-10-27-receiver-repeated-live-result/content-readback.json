@@ -1,0 +1,132 @@
+{
+  "schema": "repeated-diagnostic-content-readback.v1",
+  "traces": [
+    {
+      "batch_id": "batch-001",
+      "pair_id": "block-00-pair-00",
+      "arm": "model",
+      "trace_id": "239428c6b1c10db35bed5ef5fb4071b4",
+      "expected_turns": 1,
+      "content_exact": true,
+      "repeated_metadata_exact": true,
+      "observations_read_back": 5
+    },
+    {
+      "batch_id": "batch-001",
+      "pair_id": "block-00-pair-00",
+      "arm": "jev_selective",
+      "trace_id": "356fdd4574bff1adc35386ab1512e70b",
+      "expected_turns": 1,
+      "content_exact": true,
+      "repeated_metadata_exact": true,
+      "observations_read_back": 4
+    },
+    {
+      "batch_id": "batch-002",
+      "pair_id": "block-00-pair-01",
+      "arm": "model",
+      "trace_id": "7fee528f551e37eb924051f67933042f",
+      "expected_turns": 2,
+      "content_exact": true,
+      "repeated_metadata_exact": true,
+      "observations_read_back": 9
+    },
+    {
+      "batch_id": "batch-002",
+      "pair_id": "block-00-pair-01",
+      "arm": "jev_selective",
+      "trace_id": "1bd3e857ebb67ec20d97106ec78973a4",
+      "expected_turns": 2,
+      "content_exact": true,
+      "repeated_metadata_exact": true,
+      "observations_read_back": 10
+    },
+    {
+      "batch_id": "batch-003",
+      "pair_id": "block-00-pair-02",
+      "arm": "model",
+      "trace_id": "53c226722963c25696594179d51c673d",
+      "expected_turns": 2,
+      "content_exact": true,
+      "repeated_metadata_exact": true,
+      "observations_read_back": 6
+    },
+    {
+      "batch_id": "batch-003",
+      "pair_id": "block-00-pair-02",
+      "arm": "jev_selective",
+      "trace_id": "9376ab7f924f844df226bd5c075a82c7",
+      "expected_turns": 2,
+      "content_exact": true,
+      "repeated_metadata_exact": true,
+      "observations_read_back": 7
+    },
+    {
+      "batch_id": "batch-004",
+      "pair_id": "block-00-pair-03",
+      "arm": "model",
+      "trace_id": "33d076f0f158c485d87b6a773be5c758",
+      "expected_turns": 2,
+      "content_exact": true,
+      "repeated_metadata_exact": true,
+      "observations_read_back": 5
+    },
+    {
+      "batch_id": "batch-004",
+      "pair_id": "block-00-pair-03",
+      "arm": "jev_selective",
+      "trace_id": "9a0bba99ee8f75262ca6785531b4c8e8",
+      "expected_turns": 2,
+      "content_exact": true,
+      "repeated_metadata_exact": true,
+      "observations_read_back": 6
+    },
+    {
+      "batch_id": "batch-005",
+      "pair_id": "block-00-pair-04",
+      "arm": "model",
+      "trace_id": "c09f39b617970d242fcbdf08e041455f",
+      "expected_turns": 3,
+      "content_exact": true,
+      "repeated_metadata_exact": true,
+      "observations_read_back": 8
+    },
+    {
+      "batch_id": "batch-005",
+      "pair_id": "block-00-pair-04",
+      "arm": "jev_selective",
+      "trace_id": "fd04913476c7c2adcea7dc5b4602acd9",
+      "expected_turns": 3,
+      "content_exact": true,
+      "repeated_metadata_exact": true,
+      "observations_read_back": 9
+    },
+    {
+      "batch_id": "batch-006",
+      "pair_id": "block-00-pair-05",
+      "arm": "model",
+      "trace_id": "55257e6b198e0f4b905fef3fe6f1b8c2",
+      "expected_turns": 3,
+      "content_exact": true,
+      "repeated_metadata_exact": true,
+      "observations_read_back": 8
+    },
+    {
+      "batch_id": "batch-006",
+      "pair_id": "block-00-pair-05",
+      "arm": "jev_selective",
+      "trace_id": "ff55f8b0d9ec4daeab54e09a196044fe",
+      "expected_turns": 3,
+      "content_exact": true,
+      "repeated_metadata_exact": true,
+      "observations_read_back": 10
+    }
+  ],
+  "expected_trace_count": 12,
+  "exact_content_trace_count": 12,
+  "exact_metadata_trace_count": 12,
+  "expected_turns": 26,
+  "model_calls": 0,
+  "jev_calls": 0,
+  "no_reexport_or_replay": true
+}

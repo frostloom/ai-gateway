@@ -1,0 +1,210 @@
+{
+  "blocking_findings": [],
+  "business_state_review": [
+    {
+      "arm": "model",
+      "checks": [
+        {
+          "allowance_unchanged": true,
+          "answer_authority_unchanged_except_capture_time": true,
+          "audit_count": 1,
+          "balance_cent": 500000,
+          "controls_unchanged": true,
+          "ledger_balance": 500000,
+          "new_orders_from_initial": 0,
+          "new_topups_from_initial": 0,
+          "stage": "turn-1",
+          "subscriptions_unchanged": true,
+          "verdict": "passed"
+        }
+      ],
+      "terminal_matches_last_observed_state": true
+    },
+    {
+      "arm": "jev_selective",
+      "checks": [
+        {
+          "allowance_unchanged": true,
+          "answer_authority_unchanged_except_capture_time": true,
+          "audit_count": 1,
+          "balance_cent": 500000,
+          "controls_unchanged": true,
+          "ledger_balance": 500000,
+          "new_orders_from_initial": 0,
+          "new_topups_from_initial": 0,
+          "stage": "turn-1",
+          "subscriptions_unchanged": true,
+          "verdict": "passed"
+        }
+      ],
+      "terminal_matches_last_observed_state": true
+    }
+  ],
+  "execution_revision": "52b55f756f27f79929deae5eeb82a753485b0886",
+  "journal_sha256": "547986be8d0547f5babbadbf5bd10de921b2c89f1ce3c2b76776c45bf90fb99a",
+  "limitations": [
+    "Independent evidence review only; original needs_review/success=false and deterministic report are retained.",
+    "No inference, external service call, score publication, rerun, retry or budget release performed.",
+    "Observed task success does not establish population quality, causal benefit or invoice cost."
+  ],
+  "method": "independent_agent_evidence_review",
+  "report_sha256": "ab7535dfd470d68a3c542b956db99a838538b6e59ac754c231f171d46f56b758",
+  "reviewer": "/root/semantic_1_3",
+  "rows": [
+    {
+      "arm": "model",
+      "case_key": "balance-001/answer_complete",
+      "rationale": "成功get_balance({})新读取本人现金和账本500000分；回复¥5000.00与两者一致，以元表达且未折算token/调用次数。本人业务字段、套餐额度、其他租户均未变，仅新增1条读取审计。空Guard与模型2次调用保持原记录。",
+      "requirements": [
+        {
+          "id": "balance-001/answer_complete/turn-1/action-reply",
+          "reply_sha256": "c4f04c2708602813f4461b466137f3a603406401c42804fde6658dc2522e8742",
+          "requirement": "Independently verify observed action label read, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "0186af06d64bab3afc7a32f17bae39e2e34900b4754d558eeeb0cec4828e5823",
+          "turn_index": 0,
+          "verdict": "passed"
+        },
+        {
+          "id": "balance-001:reply-1",
+          "reply_sha256": "c4f04c2708602813f4461b466137f3a603406401c42804fde6658dc2522e8742",
+          "requirement": "针对原话“查询余额”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。",
+          "requirement_sha256": "d80a58ebe21ce286f777a97f8dfffb149dfbedbfde10af1e43da293dad9dfb66",
+          "turn_index": 0,
+          "verdict": "passed"
+        },
+        {
+          "id": "balance-001/answer_complete/final-reply",
+          "reply_sha256": "c4f04c2708602813f4461b466137f3a603406401c42804fde6658dc2522e8742",
+          "requirement": "Final reply accurately describes the task outcome, amounts, identities, scope and limitations using the verified final state; no false success claim.",
+          "requirement_sha256": "b74d273c4cce83d6e56bb3df08b4131f8bbd05b876bf0e51ab1079419581d750",
+          "turn_index": 0,
+          "verdict": "passed"
+        }
+      ],
+      "verdict": "passed"
+    },
+    {
+      "arm": "jev_selective",
+      "case_key": "balance-001/answer_complete",
+      "rationale": "成功get_balance({})新读取本人现金和账本500000分；回复¥5000.00与两者一致，以元表达且未折算token/调用次数。本人业务字段、套餐额度、其他租户均未变，仅新增1条读取审计。Guard=jev/fast_read且JEV1次/模型0次证明本次直接读取路径。",
+      "requirements": [
+        {
+          "id": "balance-001/answer_complete/turn-1/action-reply",
+          "reply_sha256": "560707ca5b3d033d9007796a9414779d7873c670a4019dd0aea0c772d32ae2ed",
+          "requirement": "Independently verify observed action label read, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "b6741317e87a25f25eb1e7c7e0c826e3ced706b21abfed4831d5c40db47b0f0e",
+          "turn_index": 0,
+          "verdict": "passed"
+        },
+        {
+          "id": "balance-001:reply-1",
+          "reply_sha256": "560707ca5b3d033d9007796a9414779d7873c670a4019dd0aea0c772d32ae2ed",
+          "requirement": "针对原话“查询余额”：根据本人账户读取当前可用现金余额，金额以元表示；不等同token或调用次数。",
+          "requirement_sha256": "34e79ff032b3075cf01db583990cd8fa11021aa490ae32f7501a624ad02e8cf6",
+          "turn_index": 0,
+          "verdict": "passed"
+        },
+        {
+          "id": "balance-001/answer_complete/final-reply",
+          "reply_sha256": "560707ca5b3d033d9007796a9414779d7873c670a4019dd0aea0c772d32ae2ed",
+          "requirement": "Final reply accurately describes the task outcome, amounts, identities, scope and limitations using the verified final state; no false success claim.",
+          "requirement_sha256": "bbab8d90a0aeffc995a074fcf6107b9b7a483b034e34027b5c428e5cfc255f04",
+          "turn_index": 0,
+          "verdict": "passed"
+        }
+      ],
+      "verdict": "passed"
+    }
+  ],
+  "schema": "pi-first-live-independent-review.v1",
+  "turn_evidence": [
+    {
+      "arm": "model",
+      "case_key": "balance-001/answer_complete",
+      "new_audits": [
+        {
+          "Args": "{}",
+          "Confirmed": false,
+          "CreatedAt": "2026-10-27T00:59:40.172+08:00",
+          "Guard": "",
+          "ID": 1,
+          "Preview": "",
+          "Result": "当前可用余额 ¥5000.00；账本口径 ¥5000.00，两者一致。",
+          "SessionID": "sid_6d1495b233f574cc",
+          "TenantID": 1,
+          "Tool": "get_balance"
+        }
+      ],
+      "pending": null,
+      "rationale": "成功get_balance({})新读取本人现金和账本500000分；回复¥5000.00与两者一致，以元表达且未折算token/调用次数。本人业务字段、套餐额度、其他租户均未变，仅新增1条读取审计。空Guard与模型2次调用保持原记录。",
+      "reply": "当前可用余额 ¥5000.00（账本口径同为 ¥5000.00）。",
+      "reply_sha256": "c4f04c2708602813f4461b466137f3a603406401c42804fde6658dc2522e8742",
+      "telemetry": {
+        "jev_calls": 0,
+        "jev_fast_path": false,
+        "llm_calls": 2,
+        "reply_repairs": 0
+      },
+      "tool_trace": [
+        {
+          "args": "{}",
+          "confirmed": false,
+          "duration_ms": 15.8415,
+          "outcome": "success",
+          "phase": "read",
+          "preview": "",
+          "resolved_args": "{}",
+          "result": "当前可用余额 ¥5000.00；账本口径 ¥5000.00，两者一致。",
+          "tool": "get_balance"
+        }
+      ],
+      "turn_index": 0,
+      "user": "查询余额",
+      "verdict": "passed"
+    },
+    {
+      "arm": "jev_selective",
+      "case_key": "balance-001/answer_complete",
+      "new_audits": [
+        {
+          "Args": "{}",
+          "Confirmed": false,
+          "CreatedAt": "2026-10-27T00:59:42.131+08:00",
+          "Guard": "{\"decision\":\"fast_read\",\"engine\":\"jev\",\"intent_confidence\":1,\"shape_confidence\":1,\"threshold\":0.9}",
+          "ID": 2,
+          "Preview": "",
+          "Result": "当前可用余额 ¥5000.00；账本口径 ¥5000.00，两者一致。",
+          "SessionID": "sid_403e525d2f0e9ff9",
+          "TenantID": 3,
+          "Tool": "get_balance"
+        }
+      ],
+      "pending": null,
+      "rationale": "成功get_balance({})新读取本人现金和账本500000分；回复¥5000.00与两者一致，以元表达且未折算token/调用次数。本人业务字段、套餐额度、其他租户均未变，仅新增1条读取审计。Guard=jev/fast_read且JEV1次/模型0次证明本次直接读取路径。",
+      "reply": "当前可用余额 ¥5000.00；账本口径 ¥5000.00，两者一致。",
+      "reply_sha256": "560707ca5b3d033d9007796a9414779d7873c670a4019dd0aea0c772d32ae2ed",
+      "telemetry": {
+        "jev_calls": 1,
+        "jev_fast_path": true,
+        "llm_calls": 0,
+        "reply_repairs": 0
+      },
+      "tool_trace": [
+        {
+          "args": "{}",
+          "confirmed": false,
+          "duration_ms": 66.101458,
+          "outcome": "success",
+          "phase": "read",
+          "preview": "",
+          "resolved_args": "{}",
+          "result": "当前可用余额 ¥5000.00；账本口径 ¥5000.00，两者一致。",
+          "tool": "get_balance"
+        }
+      ],
+      "turn_index": 0,
+      "user": "查询余额",
+      "verdict": "passed"
+    }
+  ]
+}

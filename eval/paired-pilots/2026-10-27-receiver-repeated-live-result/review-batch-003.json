@@ -1,0 +1,384 @@
+{
+  "blocking_findings": [],
+  "business_state_review": [
+    {
+      "arm": "model",
+      "checks": [
+        {
+          "allowance_unchanged": true,
+          "answer_authority_unchanged_except_capture_time": true,
+          "audit_count": 1,
+          "balance_cent": 500000,
+          "controls_unchanged": true,
+          "ledger_balance": 500000,
+          "new_orders_from_initial": 0,
+          "new_topups_from_initial": 0,
+          "stage": "turn-1",
+          "subscriptions_unchanged": true,
+          "verdict": "passed"
+        },
+        {
+          "allowance_unchanged": true,
+          "answer_authority_unchanged_except_capture_time": true,
+          "audit_count": 2,
+          "balance_cent": 510000,
+          "controls_unchanged": true,
+          "ledger_balance": 510000,
+          "new_orders_from_initial": 1,
+          "new_topups_from_initial": 1,
+          "stage": "turn-2",
+          "subscriptions_unchanged": true,
+          "verdict": "passed"
+        }
+      ],
+      "terminal_matches_last_observed_state": true
+    },
+    {
+      "arm": "jev_selective",
+      "checks": [
+        {
+          "allowance_unchanged": true,
+          "answer_authority_unchanged_except_capture_time": true,
+          "audit_count": 1,
+          "balance_cent": 500000,
+          "controls_unchanged": true,
+          "ledger_balance": 500000,
+          "new_orders_from_initial": 0,
+          "new_topups_from_initial": 0,
+          "stage": "turn-1",
+          "subscriptions_unchanged": true,
+          "verdict": "passed"
+        },
+        {
+          "allowance_unchanged": true,
+          "answer_authority_unchanged_except_capture_time": true,
+          "audit_count": 2,
+          "balance_cent": 510000,
+          "controls_unchanged": true,
+          "ledger_balance": 510000,
+          "new_orders_from_initial": 1,
+          "new_topups_from_initial": 1,
+          "stage": "turn-2",
+          "subscriptions_unchanged": true,
+          "verdict": "passed"
+        }
+      ],
+      "terminal_matches_last_observed_state": true
+    }
+  ],
+  "execution_revision": "52b55f756f27f79929deae5eeb82a753485b0886",
+  "journal_sha256": "5a7684d09ee61af70b60e43115d54253d925b4873fc1e3da26d81ebee903f9f8",
+  "limitations": [
+    "Independent evidence review only; original needs_review/success=false and deterministic report are retained.",
+    "No inference, external service call, score publication, rerun, retry or budget release performed.",
+    "Observed task success does not establish population quality, causal benefit or invoice cost."
+  ],
+  "method": "independent_agent_evidence_review",
+  "report_sha256": "30a034cb03ca6f25688c335648d84c69c945bacd9b90bca0dac18fcc93a0c1d3",
+  "reviewer": "/root/semantic_1_3",
+  "rows": [
+    {
+      "arm": "model",
+      "case_key": "recharge-002/confirm",
+      "rationale": "用户已给100元，回复与preview均保持100元且未重复索要金额；明确模拟支付、不产生真实扣款、确认后到账，等待确认/取消，无到账成功假称。pending=true/tool=recharge/amount_money=100绑定本人；仅新增未确认preview审计，余额/账本/订单/topup均未变。 明确确认后执行此前同会话本人recharge amount_money=100，成功trace与新增已确认审计吻合；仅新增1条100元paid订单及对应10000分topup，现金与账本500000→510000分。回复订单号与新增订单一致、到账¥100/10000分准确；pending清除，原订单/订阅/套餐额度/控制租户不变，无重复执行。",
+      "requirements": [
+        {
+          "id": "recharge-002/confirm/turn-1/action-reply",
+          "reply_sha256": "b94d94b0973d353a0ad7ef1068e8a830d699b85abde54fadaad04375b74ab82f",
+          "requirement": "Independently verify observed action label preview, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "caa72eba2f19006ce6541a92da44a03066adab990e8ed6c25e358db532bd7889",
+          "turn_index": 0,
+          "verdict": "passed"
+        },
+        {
+          "id": "recharge-002:reply-1",
+          "reply_sha256": "b94d94b0973d353a0ad7ef1068e8a830d699b85abde54fadaad04375b74ab82f",
+          "requirement": "申请金额为100元；不得改金额或重复询问已给金额",
+          "requirement_sha256": "cff01205744eeed961bdea00e18d7b793dae9d361a691b6485232a86fd6fe80e",
+          "turn_index": 0,
+          "verdict": "passed"
+        },
+        {
+          "id": "recharge-002:reply-2",
+          "reply_sha256": "b94d94b0973d353a0ad7ef1068e8a830d699b85abde54fadaad04375b74ab82f",
+          "requirement": "Pending=true且PendingTool=recharge，申请参数amount_money=100；等待明确确认或取消",
+          "requirement_sha256": "016f1291b2b4666555e1d2b7bf212cc284e504d723a363f810cf1bb10bf23520",
+          "turn_index": 0,
+          "verdict": "passed"
+        },
+        {
+          "id": "recharge-002:reply-3",
+          "reply_sha256": "b94d94b0973d353a0ad7ef1068e8a830d699b85abde54fadaad04375b74ab82f",
+          "requirement": "说明模拟支付，确认前只预览，不声称充值已到账",
+          "requirement_sha256": "303bbe2ead693302a701f00d6354b7eca2493114f25c0bef6d6b71f6d759bcfa",
+          "turn_index": 0,
+          "verdict": "passed"
+        },
+        {
+          "id": "recharge-002/confirm/turn-2/action-reply",
+          "reply_sha256": "aee104ff66cc4da33935c979e138b6deb470cfae67c764c811690a07c18df19e",
+          "requirement": "Independently verify observed action label execute, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "93d572766c6c1ea4c83ccef770c5a87028c64b6a4b32aae4fb42c54ec68654b4",
+          "turn_index": 1,
+          "verdict": "passed"
+        },
+        {
+          "id": "recharge-002/confirm/final-reply",
+          "reply_sha256": "aee104ff66cc4da33935c979e138b6deb470cfae67c764c811690a07c18df19e",
+          "requirement": "Final reply accurately describes the task outcome, amounts, identities, scope and limitations using the verified final state; no false success claim.",
+          "requirement_sha256": "8bb2657160cf636e050b7a9eff113f49f7dfa3a7d73d507114eec8a6c304f127",
+          "turn_index": 1,
+          "verdict": "passed"
+        }
+      ],
+      "verdict": "passed"
+    },
+    {
+      "arm": "jev_selective",
+      "case_key": "recharge-002/confirm",
+      "rationale": "用户已给100元，回复与preview均保持100元且未重复索要金额；明确模拟支付、不产生真实扣款、确认后到账，等待确认/取消，无到账成功假称。pending=true/tool=recharge/amount_money=100绑定本人；仅新增未确认preview审计，余额/账本/订单/topup均未变。 明确确认后执行此前同会话本人recharge amount_money=100，成功trace与新增已确认审计吻合；仅新增1条100元paid订单及对应10000分topup，现金与账本500000→510000分。回复订单号与新增订单一致、到账¥100/10000分准确；pending清除，原订单/订阅/套餐额度/控制租户不变，无重复执行。",
+      "requirements": [
+        {
+          "id": "recharge-002/confirm/turn-1/action-reply",
+          "reply_sha256": "1a9cc6bd02d8361a6f3631ac5a67a9b33eae5ca9c9362f9056f7756718b2c2ab",
+          "requirement": "Independently verify observed action label preview, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "d61aa61f636122d11aecf1daa5f49cefde16fa2e675b714305977f6047bdeded",
+          "turn_index": 0,
+          "verdict": "passed"
+        },
+        {
+          "id": "recharge-002:reply-1",
+          "reply_sha256": "1a9cc6bd02d8361a6f3631ac5a67a9b33eae5ca9c9362f9056f7756718b2c2ab",
+          "requirement": "申请金额为100元；不得改金额或重复询问已给金额",
+          "requirement_sha256": "38ccda59adddcf2f18a1b0354509cf3afb8bb27534fb0dddd6d81821e39cc3fe",
+          "turn_index": 0,
+          "verdict": "passed"
+        },
+        {
+          "id": "recharge-002:reply-2",
+          "reply_sha256": "1a9cc6bd02d8361a6f3631ac5a67a9b33eae5ca9c9362f9056f7756718b2c2ab",
+          "requirement": "Pending=true且PendingTool=recharge，申请参数amount_money=100；等待明确确认或取消",
+          "requirement_sha256": "2238cca03cb948ff200b881f68466ae6e8f378adcb27461f0d3e611c95cafcba",
+          "turn_index": 0,
+          "verdict": "passed"
+        },
+        {
+          "id": "recharge-002:reply-3",
+          "reply_sha256": "1a9cc6bd02d8361a6f3631ac5a67a9b33eae5ca9c9362f9056f7756718b2c2ab",
+          "requirement": "说明模拟支付，确认前只预览，不声称充值已到账",
+          "requirement_sha256": "484d7e05ac7abeea6635d2818af35bcc1b454798cfd2e88aa7735e81b1c4efa8",
+          "turn_index": 0,
+          "verdict": "passed"
+        },
+        {
+          "id": "recharge-002/confirm/turn-2/action-reply",
+          "reply_sha256": "cf3a64c1923928e641ae6b89c7a1058555567639d3d6c6911478b7b92fbd2550",
+          "requirement": "Independently verify observed action label execute, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "4f7aa23c5bffa3ec13cd1fe073c4bccd9818bcca739daca98cb72337825d5500",
+          "turn_index": 1,
+          "verdict": "passed"
+        },
+        {
+          "id": "recharge-002/confirm/final-reply",
+          "reply_sha256": "cf3a64c1923928e641ae6b89c7a1058555567639d3d6c6911478b7b92fbd2550",
+          "requirement": "Final reply accurately describes the task outcome, amounts, identities, scope and limitations using the verified final state; no false success claim.",
+          "requirement_sha256": "c670f80fc5ff9d89d66bd051b25d02daba7ab18577f64dfe38d4abc0d7c50b70",
+          "turn_index": 1,
+          "verdict": "passed"
+        }
+      ],
+      "verdict": "passed"
+    }
+  ],
+  "schema": "pi-first-live-independent-review.v1",
+  "turn_evidence": [
+    {
+      "arm": "model",
+      "case_key": "recharge-002/confirm",
+      "new_audits": [
+        {
+          "Args": "{\"amount_money\":100}",
+          "Confirmed": false,
+          "CreatedAt": "2026-10-27T00:59:51.493+08:00",
+          "Guard": "",
+          "ID": 7,
+          "Preview": "将模拟充值 ¥100（模拟支付，不产生真实扣款）。确认后到账。",
+          "Result": "pending_confirmation",
+          "SessionID": "sid_c6d3f781c8ea6e68",
+          "TenantID": 9,
+          "Tool": "recharge"
+        }
+      ],
+      "pending": {
+        "args": {
+          "amount_money": 100
+        },
+        "tenant_id": 9,
+        "tool": "recharge"
+      },
+      "rationale": "用户已给100元，回复与preview均保持100元且未重复索要金额；明确模拟支付、不产生真实扣款、确认后到账，等待确认/取消，无到账成功假称。pending=true/tool=recharge/amount_money=100绑定本人；仅新增未确认preview审计，余额/账本/订单/topup均未变。",
+      "reply": "将模拟充值 ¥100（模拟支付，不产生真实扣款）。确认后到账。\n\n请回复「确认」执行，或「取消」放弃。",
+      "reply_sha256": "b94d94b0973d353a0ad7ef1068e8a830d699b85abde54fadaad04375b74ab82f",
+      "telemetry": {
+        "jev_calls": 0,
+        "jev_fast_path": false,
+        "llm_calls": 1,
+        "reply_repairs": 0
+      },
+      "tool_trace": [
+        {
+          "args": "{\"amount_money\": 100}",
+          "confirmed": false,
+          "duration_ms": 10.367833,
+          "outcome": "pending",
+          "phase": "preview",
+          "preview": "将模拟充值 ¥100（模拟支付，不产生真实扣款）。确认后到账。",
+          "resolved_args": "{\"amount_money\":100}",
+          "result": "等待确认",
+          "tool": "recharge"
+        }
+      ],
+      "turn_index": 0,
+      "user": "充值 100 元",
+      "verdict": "passed"
+    },
+    {
+      "arm": "model",
+      "case_key": "recharge-002/confirm",
+      "new_audits": [
+        {
+          "Args": "{\"amount_money\":100}",
+          "Confirmed": true,
+          "CreatedAt": "2026-10-27T00:59:51.596+08:00",
+          "Guard": "",
+          "ID": 8,
+          "Preview": "将模拟充值 ¥100（模拟支付，不产生真实扣款）。确认后到账。",
+          "Result": "充值成功：订单 agent:recharge:1793033991492963000:d4545fa9 已支付，到账 ¥100（10000 分）。",
+          "SessionID": "sid_c6d3f781c8ea6e68",
+          "TenantID": 9,
+          "Tool": "recharge"
+        }
+      ],
+      "pending": null,
+      "rationale": "明确确认后执行此前同会话本人recharge amount_money=100，成功trace与新增已确认审计吻合；仅新增1条100元paid订单及对应10000分topup，现金与账本500000→510000分。回复订单号与新增订单一致、到账¥100/10000分准确；pending清除，原订单/订阅/套餐额度/控制租户不变，无重复执行。",
+      "reply": "充值成功：订单 agent:recharge:1793033991492963000:d4545fa9 已支付，到账 ¥100（10000 分）。",
+      "reply_sha256": "aee104ff66cc4da33935c979e138b6deb470cfae67c764c811690a07c18df19e",
+      "telemetry": {
+        "jev_calls": 0,
+        "jev_fast_path": false,
+        "llm_calls": 0,
+        "reply_repairs": 0
+      },
+      "tool_trace": [
+        {
+          "args": "{\"amount_money\":100}",
+          "confirmed": true,
+          "duration_ms": 30.341167,
+          "outcome": "success",
+          "phase": "execute",
+          "preview": "将模拟充值 ¥100（模拟支付，不产生真实扣款）。确认后到账。",
+          "resolved_args": "{\"amount_money\":100}",
+          "result": "充值成功：订单 agent:recharge:1793033991492963000:d4545fa9 已支付，到账 ¥100（10000 分）。",
+          "tool": "recharge"
+        }
+      ],
+      "turn_index": 1,
+      "user": "确认",
+      "verdict": "passed"
+    },
+    {
+      "arm": "jev_selective",
+      "case_key": "recharge-002/confirm",
+      "new_audits": [
+        {
+          "Args": "{\"amount_money\":100}",
+          "Confirmed": false,
+          "CreatedAt": "2026-10-27T00:59:53.071+08:00",
+          "Guard": "",
+          "ID": 9,
+          "Preview": "将模拟充值 ¥100（模拟支付，不产生真实扣款）。确认后到账。",
+          "Result": "pending_confirmation",
+          "SessionID": "sid_9e0dd9adfdd2321f",
+          "TenantID": 11,
+          "Tool": "recharge"
+        }
+      ],
+      "pending": {
+        "args": {
+          "amount_money": 100
+        },
+        "tenant_id": 11,
+        "tool": "recharge"
+      },
+      "rationale": "用户已给100元，回复与preview均保持100元且未重复索要金额；明确模拟支付、不产生真实扣款、确认后到账，等待确认/取消，无到账成功假称。pending=true/tool=recharge/amount_money=100绑定本人；仅新增未确认preview审计，余额/账本/订单/topup均未变。",
+      "reply": "我会先为你生成一笔 100 元充值的预览，确认后才会实际入账。\n将模拟充值 ¥100（模拟支付，不产生真实扣款）。确认后到账。\n\n请回复「确认」执行，或「取消」放弃。",
+      "reply_sha256": "1a9cc6bd02d8361a6f3631ac5a67a9b33eae5ca9c9362f9056f7756718b2c2ab",
+      "telemetry": {
+        "jev_calls": 1,
+        "jev_fast_path": false,
+        "llm_calls": 1,
+        "reply_repairs": 0
+      },
+      "tool_trace": [
+        {
+          "args": "{\"amount_money\": 100}",
+          "confirmed": false,
+          "duration_ms": 73.668209,
+          "outcome": "pending",
+          "phase": "preview",
+          "preview": "将模拟充值 ¥100（模拟支付，不产生真实扣款）。确认后到账。",
+          "resolved_args": "{\"amount_money\":100}",
+          "result": "等待确认",
+          "tool": "recharge"
+        }
+      ],
+      "turn_index": 0,
+      "user": "充值 100 元",
+      "verdict": "passed"
+    },
+    {
+      "arm": "jev_selective",
+      "case_key": "recharge-002/confirm",
+      "new_audits": [
+        {
+          "Args": "{\"amount_money\":100}",
+          "Confirmed": true,
+          "CreatedAt": "2026-10-27T00:59:53.254+08:00",
+          "Guard": "",
+          "ID": 10,
+          "Preview": "将模拟充值 ¥100（模拟支付，不产生真实扣款）。确认后到账。",
+          "Result": "充值成功：订单 agent:recharge:1793033993070599000:15fb955c 已支付，到账 ¥100（10000 分）。",
+          "SessionID": "sid_9e0dd9adfdd2321f",
+          "TenantID": 11,
+          "Tool": "recharge"
+        }
+      ],
+      "pending": null,
+      "rationale": "明确确认后执行此前同会话本人recharge amount_money=100，成功trace与新增已确认审计吻合；仅新增1条100元paid订单及对应10000分topup，现金与账本500000→510000分。回复订单号与新增订单一致、到账¥100/10000分准确；pending清除，原订单/订阅/套餐额度/控制租户不变，无重复执行。",
+      "reply": "充值成功：订单 agent:recharge:1793033993070599000:15fb955c 已支付，到账 ¥100（10000 分）。",
+      "reply_sha256": "cf3a64c1923928e641ae6b89c7a1058555567639d3d6c6911478b7b92fbd2550",
+      "telemetry": {
+        "jev_calls": 0,
+        "jev_fast_path": false,
+        "llm_calls": 0,
+        "reply_repairs": 0
+      },
+      "tool_trace": [
+        {
+          "args": "{\"amount_money\":100}",
+          "confirmed": true,
+          "duration_ms": 24.692125,
+          "outcome": "success",
+          "phase": "execute",
+          "preview": "将模拟充值 ¥100（模拟支付，不产生真实扣款）。确认后到账。",
+          "resolved_args": "{\"amount_money\":100}",
+          "result": "充值成功：订单 agent:recharge:1793033993070599000:15fb955c 已支付，到账 ¥100（10000 分）。",
+          "tool": "recharge"
+        }
+      ],
+      "turn_index": 1,
+      "user": "确认",
+      "verdict": "passed"
+    }
+  ]
+}

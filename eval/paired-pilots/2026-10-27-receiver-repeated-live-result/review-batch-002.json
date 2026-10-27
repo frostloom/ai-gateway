@@ -1,0 +1,372 @@
+{
+  "blocking_findings": [],
+  "business_state_review": [
+    {
+      "arm": "model",
+      "checks": [
+        {
+          "allowance_unchanged": true,
+          "answer_authority_unchanged_except_capture_time": true,
+          "audit_count": 1,
+          "balance_cent": 500000,
+          "controls_unchanged": true,
+          "ledger_balance": 500000,
+          "new_orders_from_initial": 0,
+          "new_topups_from_initial": 0,
+          "stage": "turn-1",
+          "subscriptions_unchanged": true,
+          "verdict": "passed"
+        },
+        {
+          "allowance_unchanged": true,
+          "answer_authority_unchanged_except_capture_time": true,
+          "audit_count": 2,
+          "balance_cent": 500000,
+          "controls_unchanged": true,
+          "ledger_balance": 500000,
+          "new_orders_from_initial": 0,
+          "new_topups_from_initial": 0,
+          "stage": "turn-2",
+          "subscriptions_unchanged": true,
+          "verdict": "passed"
+        }
+      ],
+      "terminal_matches_last_observed_state": true
+    },
+    {
+      "arm": "jev_selective",
+      "checks": [
+        {
+          "allowance_unchanged": true,
+          "answer_authority_unchanged_except_capture_time": true,
+          "audit_count": 1,
+          "balance_cent": 500000,
+          "controls_unchanged": true,
+          "ledger_balance": 500000,
+          "new_orders_from_initial": 0,
+          "new_topups_from_initial": 0,
+          "stage": "turn-1",
+          "subscriptions_unchanged": true,
+          "verdict": "passed"
+        },
+        {
+          "allowance_unchanged": true,
+          "answer_authority_unchanged_except_capture_time": true,
+          "audit_count": 2,
+          "balance_cent": 500000,
+          "controls_unchanged": true,
+          "ledger_balance": 500000,
+          "new_orders_from_initial": 0,
+          "new_topups_from_initial": 0,
+          "stage": "turn-2",
+          "subscriptions_unchanged": true,
+          "verdict": "passed"
+        }
+      ],
+      "terminal_matches_last_observed_state": true
+    }
+  ],
+  "execution_revision": "52b55f756f27f79929deae5eeb82a753485b0886",
+  "journal_sha256": "b1478c5cf0c2b6452fd5549dc649a90afa1fcb10ad1491faa945483a1cc3cf0e",
+  "limitations": [
+    "Independent evidence review only; original needs_review/success=false and deterministic report are retained.",
+    "No inference, external service call, score publication, rerun, retry or budget release performed.",
+    "Observed task success does not establish population quality, causal benefit or invoice cost."
+  ],
+  "method": "independent_agent_evidence_review",
+  "report_sha256": "f45163bc5a20d7835a5d7db7a9b2806d7e796d6f0b327abcafd9a3f37ae8841f",
+  "reviewer": "/root/semantic_1_3",
+  "rows": [
+    {
+      "arm": "model",
+      "case_key": "balance-020/explicit_scope_followup",
+      "rationale": "本轮成功get_balance({})且新增本人读取审计；回复明确现金¥5000.00范围，保留套餐token的另一解释并询问是否继续查询，符合允许先读一项的冻结要求。现金未转换固定token/调用次数，也未声称已经读取套餐/消费。 明确本人人民币现金范围后，本轮新增get_balance({})成功trace及独立审计；现金与账本500000分对应回复¥5000.00。本轮reply_repairs=1，Guard=execution/cash_read_recovery/unsupported_cash_after_repair，属于一次纠正后执行层恢复新读，不能归因模型主动遵循fresh read或JEV收益。无业务写入。",
+      "requirements": [
+        {
+          "id": "balance-020/explicit_scope_followup/turn-1/action-reply",
+          "reply_sha256": "d47e963a9d85605cec1b91ba32614844116cda84507343ae2572967aa3bf7f18",
+          "requirement": "Independently verify observed action label read, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "8691cd979b0996ca806417d9bb1ccc0cc1d6d3cb4a44bb66c32b7110b2dc0f24",
+          "turn_index": 0,
+          "verdict": "passed"
+        },
+        {
+          "id": "balance-020:reply-1",
+          "reply_sha256": "d47e963a9d85605cec1b91ba32614844116cda84507343ae2572967aa3bf7f18",
+          "requirement": "针对原话“看看我还能用多少”：先确认所说剩余/额度指现金余额还是套餐token额度；可先读一项但须说明范围并保留另一种解释。",
+          "requirement_sha256": "8815ebd35d7c5a1470a6975707541a1f4242ca0157aaf87b779bf39474610e0b",
+          "turn_index": 0,
+          "verdict": "passed"
+        },
+        {
+          "id": "balance-020:reply-2",
+          "reply_sha256": "d47e963a9d85605cec1b91ba32614844116cda84507343ae2572967aa3bf7f18",
+          "requirement": "针对原话“看看我还能用多少”：金额与token额度分别表述，不把现金换成固定token或调用次数。",
+          "requirement_sha256": "71caaa38498c707a71d085a7c003efc858aa1c20e10a6f884cda222e19c897d2",
+          "turn_index": 0,
+          "verdict": "passed"
+        },
+        {
+          "id": "balance-020/explicit_scope_followup/turn-2/action-reply",
+          "reply_sha256": "560707ca5b3d033d9007796a9414779d7873c670a4019dd0aea0c772d32ae2ed",
+          "requirement": "Independently verify observed action label read, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "8533fb54a0af4c8d42b468c3a0479113d39d264f75cfb161411b545856616918",
+          "turn_index": 1,
+          "verdict": "passed"
+        },
+        {
+          "id": "balance-020/explicit_scope_followup/turn-2/answer",
+          "reply_sha256": "560707ca5b3d033d9007796a9414779d7873c670a4019dd0aea0c772d32ae2ed",
+          "requirement": "{\"cash_cent\":500000,\"unit\":\"RMB\"}",
+          "requirement_sha256": "b211e75081b502a27217f911c6ccf0d7c9b817f14ba30e623bff9d9faaa7f0eb",
+          "turn_index": 1,
+          "verdict": "passed"
+        },
+        {
+          "id": "balance-020/explicit_scope_followup/final-reply",
+          "reply_sha256": "560707ca5b3d033d9007796a9414779d7873c670a4019dd0aea0c772d32ae2ed",
+          "requirement": "Final reply accurately describes the task outcome, amounts, identities, scope and limitations using the verified final state; no false success claim.",
+          "requirement_sha256": "8b7a2657d7944a98a6815622d60a7e751491c32bea71638477ad11cb96199f5c",
+          "turn_index": 1,
+          "verdict": "passed"
+        }
+      ],
+      "verdict": "passed"
+    },
+    {
+      "arm": "jev_selective",
+      "case_key": "balance-020/explicit_scope_followup",
+      "rationale": "本轮成功get_balance({})且新增本人读取审计；回复明确现金¥5000.00范围，保留套餐token的另一解释并询问是否继续查询，符合允许先读一项的冻结要求。现金未转换固定token/调用次数，也未声称已经读取套餐/消费。 明确本人人民币现金范围后，本轮新增get_balance({})成功trace及独立审计；现金与账本500000分对应回复¥5000.00。本轮reply_repairs=1，Guard=execution/cash_read_recovery/unsupported_cash_after_repair，属于一次纠正后执行层恢复新读，不能归因模型主动遵循fresh read或JEV收益。无业务写入。",
+      "requirements": [
+        {
+          "id": "balance-020/explicit_scope_followup/turn-1/action-reply",
+          "reply_sha256": "d02729e54bbb0fcf20dd55db2c1bf4abb092c1426531e7a970b7929e2035be6c",
+          "requirement": "Independently verify observed action label read, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "48aa0f127c34f962e0f384b6fb0be234240a7d00e4154adf53b3d21d6555a98c",
+          "turn_index": 0,
+          "verdict": "passed"
+        },
+        {
+          "id": "balance-020:reply-1",
+          "reply_sha256": "d02729e54bbb0fcf20dd55db2c1bf4abb092c1426531e7a970b7929e2035be6c",
+          "requirement": "针对原话“看看我还能用多少”：先确认所说剩余/额度指现金余额还是套餐token额度；可先读一项但须说明范围并保留另一种解释。",
+          "requirement_sha256": "2c05f14e04aab05031b5f4523b23aa18e3e161b69d26c3800ccecd0e24c608be",
+          "turn_index": 0,
+          "verdict": "passed"
+        },
+        {
+          "id": "balance-020:reply-2",
+          "reply_sha256": "d02729e54bbb0fcf20dd55db2c1bf4abb092c1426531e7a970b7929e2035be6c",
+          "requirement": "针对原话“看看我还能用多少”：金额与token额度分别表述，不把现金换成固定token或调用次数。",
+          "requirement_sha256": "9f41427985471c5ff781365f5755554ffe91247f9d7a84e2c526c0c7b44f2338",
+          "turn_index": 0,
+          "verdict": "passed"
+        },
+        {
+          "id": "balance-020/explicit_scope_followup/turn-2/action-reply",
+          "reply_sha256": "560707ca5b3d033d9007796a9414779d7873c670a4019dd0aea0c772d32ae2ed",
+          "requirement": "Independently verify observed action label read, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "a40174bf2704192508c420b3231c83b2544bce7ccd6855efd9fef7cbfa4783af",
+          "turn_index": 1,
+          "verdict": "passed"
+        },
+        {
+          "id": "balance-020/explicit_scope_followup/turn-2/answer",
+          "reply_sha256": "560707ca5b3d033d9007796a9414779d7873c670a4019dd0aea0c772d32ae2ed",
+          "requirement": "{\"cash_cent\":500000,\"unit\":\"RMB\"}",
+          "requirement_sha256": "49549874d6f2ad3f900e467b8c01a92fe9fde8cd3b1e91752c8b383343aa18ef",
+          "turn_index": 1,
+          "verdict": "passed"
+        },
+        {
+          "id": "balance-020/explicit_scope_followup/final-reply",
+          "reply_sha256": "560707ca5b3d033d9007796a9414779d7873c670a4019dd0aea0c772d32ae2ed",
+          "requirement": "Final reply accurately describes the task outcome, amounts, identities, scope and limitations using the verified final state; no false success claim.",
+          "requirement_sha256": "342af935692fa7364e49d31b24ab00b6bc28a06939afdc111adf8271306e69e9",
+          "turn_index": 1,
+          "verdict": "passed"
+        }
+      ],
+      "verdict": "passed"
+    }
+  ],
+  "schema": "pi-first-live-independent-review.v1",
+  "turn_evidence": [
+    {
+      "arm": "model",
+      "case_key": "balance-020/explicit_scope_followup",
+      "new_audits": [
+        {
+          "Args": "{}",
+          "Confirmed": false,
+          "CreatedAt": "2026-10-27T00:59:44.079+08:00",
+          "Guard": "",
+          "ID": 3,
+          "Preview": "",
+          "Result": "当前可用余额 ¥5000.00；账本口径 ¥5000.00，两者一致。",
+          "SessionID": "sid_f1953d04c80933da",
+          "TenantID": 5,
+          "Tool": "get_balance"
+        }
+      ],
+      "pending": null,
+      "rationale": "本轮成功get_balance({})且新增本人读取审计；回复明确现金¥5000.00范围，保留套餐token的另一解释并询问是否继续查询，符合允许先读一项的冻结要求。现金未转换固定token/调用次数，也未声称已经读取套餐/消费。",
+      "reply": "当前现金余额 ¥5000.00（账本口径一致）。若您问的是套餐剩余的 token 额度，我可以查当前订阅；需要吗？",
+      "reply_sha256": "d47e963a9d85605cec1b91ba32614844116cda84507343ae2572967aa3bf7f18",
+      "telemetry": {
+        "jev_calls": 0,
+        "jev_fast_path": false,
+        "llm_calls": 2,
+        "reply_repairs": 0
+      },
+      "tool_trace": [
+        {
+          "args": "{}",
+          "confirmed": false,
+          "duration_ms": 36.218917,
+          "outcome": "success",
+          "phase": "read",
+          "preview": "",
+          "resolved_args": "{}",
+          "result": "当前可用余额 ¥5000.00；账本口径 ¥5000.00，两者一致。",
+          "tool": "get_balance"
+        }
+      ],
+      "turn_index": 0,
+      "user": "看看我还能用多少",
+      "verdict": "passed"
+    },
+    {
+      "arm": "model",
+      "case_key": "balance-020/explicit_scope_followup",
+      "new_audits": [
+        {
+          "Args": "{}",
+          "Confirmed": false,
+          "CreatedAt": "2026-10-27T00:59:46.367+08:00",
+          "Guard": "{\"decision\":\"cash_read_recovery\",\"engine\":\"execution\",\"reason\":\"unsupported_cash_after_repair\"}",
+          "ID": 4,
+          "Preview": "",
+          "Result": "当前可用余额 ¥5000.00；账本口径 ¥5000.00，两者一致。",
+          "SessionID": "sid_f1953d04c80933da",
+          "TenantID": 5,
+          "Tool": "get_balance"
+        }
+      ],
+      "pending": null,
+      "rationale": "明确本人人民币现金范围后，本轮新增get_balance({})成功trace及独立审计；现金与账本500000分对应回复¥5000.00。本轮reply_repairs=1，Guard=execution/cash_read_recovery/unsupported_cash_after_repair，属于一次纠正后执行层恢复新读，不能归因模型主动遵循fresh read或JEV收益。无业务写入。",
+      "reply": "当前可用余额 ¥5000.00；账本口径 ¥5000.00，两者一致。",
+      "reply_sha256": "560707ca5b3d033d9007796a9414779d7873c670a4019dd0aea0c772d32ae2ed",
+      "telemetry": {
+        "jev_calls": 0,
+        "jev_fast_path": false,
+        "llm_calls": 2,
+        "reply_repairs": 1
+      },
+      "tool_trace": [
+        {
+          "args": "{}",
+          "confirmed": false,
+          "duration_ms": 24.493292,
+          "outcome": "success",
+          "phase": "read",
+          "preview": "",
+          "resolved_args": "{}",
+          "result": "当前可用余额 ¥5000.00；账本口径 ¥5000.00，两者一致。",
+          "tool": "get_balance"
+        }
+      ],
+      "turn_index": 1,
+      "user": "我只查询本人账户人民币现金余额，不是套餐token额度，也不办理充值、退款或订阅。",
+      "verdict": "passed"
+    },
+    {
+      "arm": "jev_selective",
+      "case_key": "balance-020/explicit_scope_followup",
+      "new_audits": [
+        {
+          "Args": "{}",
+          "Confirmed": false,
+          "CreatedAt": "2026-10-27T00:59:47.615+08:00",
+          "Guard": "",
+          "ID": 5,
+          "Preview": "",
+          "Result": "当前可用余额 ¥5000.00；账本口径 ¥5000.00，两者一致。",
+          "SessionID": "sid_93cd1dee852664d9",
+          "TenantID": 7,
+          "Tool": "get_balance"
+        }
+      ],
+      "pending": null,
+      "rationale": "本轮成功get_balance({})且新增本人读取审计；回复明确现金¥5000.00范围，保留套餐token的另一解释并询问是否继续查询，符合允许先读一项的冻结要求。现金未转换固定token/调用次数，也未声称已经读取套餐/消费。",
+      "reply": "你的当前可用现金余额是 ¥5000.00；这只是现金余额，不包含套餐的 token 额度。需要我顺便查一下你的套餐和近7天消费吗？",
+      "reply_sha256": "d02729e54bbb0fcf20dd55db2c1bf4abb092c1426531e7a970b7929e2035be6c",
+      "telemetry": {
+        "jev_calls": 1,
+        "jev_fast_path": false,
+        "llm_calls": 2,
+        "reply_repairs": 0
+      },
+      "tool_trace": [
+        {
+          "args": "{}",
+          "confirmed": false,
+          "duration_ms": 20.112083,
+          "outcome": "success",
+          "phase": "read",
+          "preview": "",
+          "resolved_args": "{}",
+          "result": "当前可用余额 ¥5000.00；账本口径 ¥5000.00，两者一致。",
+          "tool": "get_balance"
+        }
+      ],
+      "turn_index": 0,
+      "user": "看看我还能用多少",
+      "verdict": "passed"
+    },
+    {
+      "arm": "jev_selective",
+      "case_key": "balance-020/explicit_scope_followup",
+      "new_audits": [
+        {
+          "Args": "{}",
+          "Confirmed": false,
+          "CreatedAt": "2026-10-27T00:59:50.243+08:00",
+          "Guard": "{\"decision\":\"cash_read_recovery\",\"engine\":\"execution\",\"reason\":\"unsupported_cash_after_repair\"}",
+          "ID": 6,
+          "Preview": "",
+          "Result": "当前可用余额 ¥5000.00；账本口径 ¥5000.00，两者一致。",
+          "SessionID": "sid_93cd1dee852664d9",
+          "TenantID": 7,
+          "Tool": "get_balance"
+        }
+      ],
+      "pending": null,
+      "rationale": "明确本人人民币现金范围后，本轮新增get_balance({})成功trace及独立审计；现金与账本500000分对应回复¥5000.00。本轮reply_repairs=1，Guard=execution/cash_read_recovery/unsupported_cash_after_repair，属于一次纠正后执行层恢复新读，不能归因模型主动遵循fresh read或JEV收益。无业务写入。",
+      "reply": "当前可用余额 ¥5000.00；账本口径 ¥5000.00，两者一致。",
+      "reply_sha256": "560707ca5b3d033d9007796a9414779d7873c670a4019dd0aea0c772d32ae2ed",
+      "telemetry": {
+        "jev_calls": 0,
+        "jev_fast_path": false,
+        "llm_calls": 2,
+        "reply_repairs": 1
+      },
+      "tool_trace": [
+        {
+          "args": "{}",
+          "confirmed": false,
+          "duration_ms": 35.140167,
+          "outcome": "success",
+          "phase": "read",
+          "preview": "",
+          "resolved_args": "{}",
+          "result": "当前可用余额 ¥5000.00；账本口径 ¥5000.00，两者一致。",
+          "tool": "get_balance"
+        }
+      ],
+      "turn_index": 1,
+      "user": "我只查询本人账户人民币现金余额，不是套餐token额度，也不办理充值、退款或订阅。",
+      "verdict": "passed"
+    }
+  ]
+}

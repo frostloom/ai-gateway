@@ -1,0 +1,95 @@
+{
+  "deterministic_scores": 84,
+  "independent_pass_scores": 20,
+  "negative_review_separate_not_pass_scored": true,
+  "original_scores_unchanged": true,
+  "immediate_publish_exit_codes": 2,
+  "subsequent_readonly_verification_exit_codes": 0,
+  "no_republication": true,
+  "receipts": [
+    {
+      "file": "deterministic-publish.json",
+      "sha256": "69b1f307ae8e5fe09ff4f09a4bf16aa28c65a770fad1ec391cb0225c6e18db5a",
+      "starts": 84,
+      "accepted": 84,
+      "immediate_verified": false,
+      "publish_invocations": 1
+    },
+    {
+      "file": "deterministic-verify.json",
+      "sha256": "ce093d2b56e2d263a91e379a0011d84b54de604cc5dd1470468b5bc16b697c0e",
+      "verified_count": 84,
+      "read_only": true
+    },
+    {
+      "file": "independent-batch-001-publish.json",
+      "sha256": "decbaec237f18027e19ada26d02c323733a9cc0fe7ed8bc6948a12c383c2fb77",
+      "starts": 4,
+      "accepted": 4,
+      "immediate_verified": false,
+      "publish_invocations": 1
+    },
+    {
+      "file": "independent-batch-001-verify.json",
+      "sha256": "8a58ad0c99f0fea55f3e2524d8fbcda8f450ca2a60e6d753925e5869ed6bf887",
+      "verified_count": 4,
+      "read_only": true
+    },
+    {
+      "file": "independent-batch-002-publish.json",
+      "sha256": "88b24b908ab4f4eb2b82b9ed15b49b1252a95e02e9974c5f552ecf0fbbcaf569",
+      "starts": 4,
+      "accepted": 4,
+      "immediate_verified": false,
+      "publish_invocations": 1
+    },
+    {
+      "file": "independent-batch-002-verify.json",
+      "sha256": "cfd56f63d99151b47ce19564d0683d8e00c44bb1cae2acbb971edfa8b74cd39f",
+      "verified_count": 4,
+      "read_only": true
+    },
+    {
+      "file": "independent-batch-003-publish.json",
+      "sha256": "93abe61e474d62bb26e81f5ccb9e87e7a7c0e16688e3fba0c78baf18f7fa45d3",
+      "starts": 4,
+      "accepted": 4,
+      "immediate_verified": false,
+      "publish_invocations": 1
+    },
+    {
+      "file": "independent-batch-003-verify.json",
+      "sha256": "712fc2f5201ad55588b6eebefe5b9070b7cb0329dc4a03deabb28fc89134e87d",
+      "verified_count": 4,
+      "read_only": true
+    },
+    {
+      "file": "independent-batch-004-publish.json",
+      "sha256": "e2327041722790fb164133709975848e6433992568ff7bd506eaa283ea1a4455",
+      "starts": 4,
+      "accepted": 4,
+      "immediate_verified": false,
+      "publish_invocations": 1
+    },
+    {
+      "file": "independent-batch-004-verify.json",
+      "sha256": "f1170ee8388ea2c0531897c6afd42c20ef8a9cac33e3de946bc90227aead57d6",
+      "verified_count": 4,
+      "read_only": true
+    },
+    {
+      "file": "independent-batch-005-publish.json",
+      "sha256": "76382c51a243eea317a541648d6ac60b4366fe7bf0cf381cd2198e1ab5f73340",
+      "starts": 4,
+      "accepted": 4,
+      "immediate_verified": false,
+      "publish_invocations": 1
+    },
+    {
+      "file": "independent-batch-005-verify.json",
+      "sha256": "0b242ff942f912c82610985051419fa5acbe2f53ef9aff1b54361cd409091c8d",
+      "verified_count": 4,
+      "read_only": true
+    }
+  ]
+}

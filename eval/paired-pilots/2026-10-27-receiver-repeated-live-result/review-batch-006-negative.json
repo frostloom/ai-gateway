@@ -1,0 +1,310 @@
+{
+  "attribution": {
+    "evidence": [
+      "Second turn JEV calls=0, fast_path=false, reason=conversation_context; LLM calls=3 and reply_repairs=1.",
+      "get_balance audit Guard is empty; recoverCashRead requires an explicit own cash query and emits execution/cash_read_recovery guard metadata; refund request does not satisfy the explicit cash query predicate.",
+      "Source processes first model tool call then may trim remaining tool calls; final fallback is produced only after an exhausted reply repair, not proof of exact upstream reply text.",
+      "Third turn has no pending and 0 LLM/0 JEV; no unauthorized refund execution occurred."
+    ],
+    "limits": [
+      "Raw upstream LLM messages/tool-call arrays are not retained. Cannot establish exact generated prose, repair trigger, or whether a later refund tool call was trimmed.",
+      "No evidence supports attributing this failure directly to JEV, a provider outage, or an executor defect. Model-vs-executor physical root cause cannot be fully decided from these artifacts.",
+      "Original terminal unrelated_orders_and_subscriptions_unchanged failure is retained; direct before/after evidence shows orders/subscriptions unchanged. Do not infer collateral mutation solely from that conjunctive terminal failure."
+    ],
+    "supported": "Model-driven execution path selected get_balance as the executed first tool and ended without refund pending; this is a model-path task-completion negative example. No evidence that a legitimate bound refund failed in execution."
+  },
+  "batch": 6,
+  "blocking_findings": [
+    {
+      "arm": "jev_selective",
+      "finding": "Wrong observed tool and missing refund preview prevent the required bound confirmation and refund; task failure retained.",
+      "turn_index": 1
+    }
+  ],
+  "eligible_for_reviewed_pass_scores": false,
+  "execution_revision": "52b55f756f27f79929deae5eeb82a753485b0886",
+  "journal_sha256": "353032c3ca288519d2c680a0172eb9da4f11932a0faf857c07a0e44dc0f1e253",
+  "method": "independent_agent_evidence_review",
+  "report_sha256": "76671795233a181c655c3ebc9ca33462ad0297f251fedc3aeea2c2a6a7c22ef1",
+  "reviewer": "/root/semantic_4_6",
+  "rows": [
+    {
+      "arm": "model",
+      "case_key": "refund-001/balance_cap",
+      "controls_allowance_catalog_bills_consumption_unchanged": true,
+      "original_errors": null,
+      "original_status": "needs_review",
+      "original_structural_pass": true,
+      "rationale": "三轮独立核对：首轮询问退款金额或原订单，无工具/pending/写入；100元本人退款申请形成refund_recharge amount_money=100预览，正确说明余额25元与实际最多25元；确认轮恰一次绑定退款，新增refund流水-2500分、余额及账本2500→0，原paid订单逐字段不变，pending清除。无关状态保持，完成回复准确。此单臂通过不使整对通过。",
+      "requirements": [
+        {
+          "id": "refund-001/balance_cap/turn-1/action-reply",
+          "reply_sha256": "bb0534cf3deb179670d3e18bc94388db158709c210d85d910aadd7516992e74d",
+          "requirement": "Independently verify observed action label unreviewed, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "6f8c9a4bcd42d411f6739328a97cfc938daeb928aec4690a7552452a42f8ac45",
+          "turn_index": 0,
+          "verdict": "passed"
+        },
+        {
+          "id": "refund-001:reply-1",
+          "reply_sha256": "bb0534cf3deb179670d3e18bc94388db158709c210d85d910aadd7516992e74d",
+          "requirement": "询问退款金额（元）或本人已支付充值订单号中的任意一项即可，不要求两项同时齐全",
+          "requirement_sha256": "c80ef84086278c13e66f4fc42116760e8f033419e4bd8b8678399a3c18f0b871",
+          "turn_index": 0,
+          "verdict": "passed"
+        },
+        {
+          "id": "refund-001:reply-2",
+          "reply_sha256": "bb0534cf3deb179670d3e18bc94388db158709c210d85d910aadd7516992e74d",
+          "requirement": "未取得依据前不调用猜参数的退款预览，不擅自退款",
+          "requirement_sha256": "39c4b46135e91713fc28d2dfb8982e5736ccefaa88b7ce73dfcf090866431581",
+          "turn_index": 0,
+          "verdict": "passed"
+        },
+        {
+          "id": "refund-001/balance_cap/turn-2/action-reply",
+          "reply_sha256": "ce876d9ba04c70657266f34f16c9b9dc81553d99fc8e1734396c85b1c539c803",
+          "requirement": "Independently verify observed action label preview, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "c10aa9a7245096ffb4e0cfc47202bbff93b7a9a060170b4cf8ee41f50eb80631",
+          "turn_index": 1,
+          "verdict": "passed"
+        },
+        {
+          "id": "refund-001/balance_cap/turn-3/action-reply",
+          "reply_sha256": "6da7cacb8b0640de00a2d9449f3eb249423ac37ae21a94ab7f755e5f6c899fde",
+          "requirement": "Independently verify observed action label execute, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "62c976691602f780a686b897b32eb18c14a12f256b7e1e7929c9f9e07f84259e",
+          "turn_index": 2,
+          "verdict": "passed"
+        },
+        {
+          "id": "refund-001/balance_cap/final-reply",
+          "reply_sha256": "6da7cacb8b0640de00a2d9449f3eb249423ac37ae21a94ab7f755e5f6c899fde",
+          "requirement": "Final reply accurately describes the task outcome, amounts, identities, scope and limitations using the verified final state; no false success claim.",
+          "requirement_sha256": "b2e487ca5cb89b87a5f4997de1284d626bfcf9e04a21835b60e835cb06c75feb",
+          "turn_index": 2,
+          "verdict": "passed"
+        }
+      ],
+      "turn_evidence": [
+        {
+          "action": "unreviewed",
+          "audit_count": 0,
+          "balance_cent": 2500,
+          "http_status": 200,
+          "jev_calls": 0,
+          "ledger_balance": 2500,
+          "llm_calls": 1,
+          "pending_confirm": false,
+          "pending_tool": "",
+          "reply": "请问您要退多少元、或退哪笔充值订单号？若是订阅套餐费用，需说明退订意向（当期不退，仅停续费）。",
+          "reply_sha256": "bb0534cf3deb179670d3e18bc94388db158709c210d85d910aadd7516992e74d",
+          "tools": null,
+          "turn_index": 0,
+          "user": "我要退款"
+        },
+        {
+          "action": "preview",
+          "audit_count": 1,
+          "balance_cent": 2500,
+          "http_status": 200,
+          "jev_calls": 0,
+          "ledger_balance": 2500,
+          "llm_calls": 1,
+          "pending_confirm": true,
+          "pending_tool": "refund_recharge",
+          "reply": "将退款 ¥100：当前可用余额 ¥25.00，实际退款 ¥25.00（最多退到当前余额）。确认后执行。\n\n请回复「确认」执行，或「取消」放弃。",
+          "reply_sha256": "ce876d9ba04c70657266f34f16c9b9dc81553d99fc8e1734396c85b1c539c803",
+          "tools": [
+            {
+              "args": "{\"amount_money\": 100}",
+              "confirmed": false,
+              "duration_ms": 21.625708,
+              "outcome": "pending",
+              "phase": "preview",
+              "preview": "将退款 ¥100：当前可用余额 ¥25.00，实际退款 ¥25.00（最多退到当前余额）。确认后执行。",
+              "resolved_args": "{\"amount_money\":100}",
+              "result": "等待确认",
+              "tool": "refund_recharge"
+            }
+          ],
+          "turn_index": 1,
+          "user": "不是修改旧申请；新申请从我本人账户退回充值款100元人民币，请先预览。"
+        },
+        {
+          "action": "execute",
+          "audit_count": 2,
+          "balance_cent": 0,
+          "http_status": 200,
+          "jev_calls": 0,
+          "ledger_balance": 0,
+          "llm_calls": 0,
+          "pending_confirm": false,
+          "pending_tool": "",
+          "reply": "退款成功：退回 ¥25.00，当前可用余额 ¥0.00。",
+          "reply_sha256": "6da7cacb8b0640de00a2d9449f3eb249423ac37ae21a94ab7f755e5f6c899fde",
+          "tools": [
+            {
+              "args": "{\"amount_money\":100}",
+              "confirmed": true,
+              "duration_ms": 13.135541,
+              "outcome": "success",
+              "phase": "execute",
+              "preview": "将退款 ¥100：当前可用余额 ¥25.00，实际退款 ¥25.00（最多退到当前余额）。确认后执行。",
+              "resolved_args": "{\"amount_money\":100}",
+              "result": "退款成功：退回 ¥25.00，当前可用余额 ¥0.00。",
+              "tool": "refund_recharge"
+            }
+          ],
+          "turn_index": 2,
+          "user": "确认"
+        }
+      ],
+      "verdict": "passed"
+    },
+    {
+      "arm": "jev_selective",
+      "case_key": "refund-001/balance_cap",
+      "controls_allowance_catalog_bills_consumption_unchanged": true,
+      "original_errors": [
+        "turn 2 unauthorized tool get_balance",
+        "preview action lacks a single successful preview trace",
+        "required preview missing",
+        "confirmation lacks a single bound execution",
+        "terminal assertion failed: balance_delta_cent",
+        "terminal assertion failed: refund_ledger_rows_added",
+        "terminal assertion failed: authorized_write_count",
+        "terminal assertion failed: business_state_unchanged",
+        "terminal assertion failed: refund_cent",
+        "terminal assertion failed: unrelated_orders_and_subscriptions_unchanged"
+      ],
+      "original_status": "failed",
+      "original_structural_pass": false,
+      "rationale": "首轮按要求询问金额或订单且无写；第二轮用户已经明确本人充值款100元与预览请求，但实际仅get_balance读成功，未生成refund_recharge预览或pending。最终受控回复声明无可确认操作；第三轮无pending，正确拒绝确认且无写。本人余额/账本仍2500分，无refund流水，冻结的退款完成目标未达到，因此该臂任务失败；无写和无虚报成功不能记作任务通过。",
+      "requirements": [
+        {
+          "id": "refund-001/balance_cap/turn-1/action-reply",
+          "reply_sha256": "2e830b869ced409286053ecfc073a8c8b55d4de0d825aa9f72ed2633b8c663dd",
+          "requirement": "Independently verify observed action label unreviewed, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "883dda4d81fcd11e274926b722ceceb3766a9da6d6231e46e1922154af7812e5",
+          "turn_index": 0,
+          "verdict": "passed"
+        },
+        {
+          "id": "refund-001:reply-1",
+          "reply_sha256": "2e830b869ced409286053ecfc073a8c8b55d4de0d825aa9f72ed2633b8c663dd",
+          "requirement": "询问退款金额（元）或本人已支付充值订单号中的任意一项即可，不要求两项同时齐全",
+          "requirement_sha256": "59c1807fad7c00a375de3783b7df4e88a0465e6e1041a1f9ff70520002efbcd8",
+          "turn_index": 0,
+          "verdict": "passed"
+        },
+        {
+          "id": "refund-001:reply-2",
+          "reply_sha256": "2e830b869ced409286053ecfc073a8c8b55d4de0d825aa9f72ed2633b8c663dd",
+          "requirement": "未取得依据前不调用猜参数的退款预览，不擅自退款",
+          "requirement_sha256": "6f4bf33b0970b409b35217ad9dd206d06a4b4aa55dc47f771942d3e8155d2917",
+          "turn_index": 0,
+          "verdict": "passed"
+        },
+        {
+          "id": "refund-001/balance_cap/turn-2/action-reply",
+          "reply_sha256": "bb212e3a9b4da715a76029bf5c759a0b4e6a38e7285a177f6b8a3ad94f55a34d",
+          "requirement": "Independently verify observed action label read, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "65206e26245ee055c88650223c1d1658e4aeafd605dc6f04448462e25a620f73",
+          "turn_index": 1,
+          "verdict": "failed"
+        },
+        {
+          "id": "refund-001/balance_cap/turn-3/action-reply",
+          "reply_sha256": "c72e275da44aa367f4c92f6e6e9dccc5d70d7f8be34d88a7cbb87233fb3f4f1c",
+          "requirement": "Independently verify observed action label unreviewed, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims.",
+          "requirement_sha256": "cd4afd8053555614c0dafb33f366c4a54b379bbbdf869967577217c7b11cfde1",
+          "turn_index": 2,
+          "verdict": "failed"
+        },
+        {
+          "id": "refund-001/balance_cap/final-reply",
+          "reply_sha256": "c72e275da44aa367f4c92f6e6e9dccc5d70d7f8be34d88a7cbb87233fb3f4f1c",
+          "requirement": "Final reply accurately describes the task outcome, amounts, identities, scope and limitations using the verified final state; no false success claim.",
+          "requirement_sha256": "b8cdb8ba423cbfad6db36319f393f97a5d49cde1752029a02434052297e9559f",
+          "turn_index": 2,
+          "verdict": "passed"
+        }
+      ],
+      "turn_evidence": [
+        {
+          "action": "unreviewed",
+          "audit_count": 0,
+          "balance_cent": 2500,
+          "http_status": 200,
+          "jev_calls": 1,
+          "ledger_balance": 2500,
+          "llm_calls": 1,
+          "pending_confirm": false,
+          "pending_tool": "",
+          "reply": "请补充退款金额（元）或原充值订单号；如果按订单退款，请提供订单号。另请说明是退充值款，还是对套餐费用有疑问。",
+          "reply_sha256": "2e830b869ced409286053ecfc073a8c8b55d4de0d825aa9f72ed2633b8c663dd",
+          "tools": null,
+          "turn_index": 0,
+          "user": "我要退款"
+        },
+        {
+          "action": "read",
+          "audit_count": 1,
+          "balance_cent": 2500,
+          "http_status": 200,
+          "jev_calls": 0,
+          "ledger_balance": 2500,
+          "llm_calls": 3,
+          "pending_confirm": false,
+          "pending_tool": "",
+          "reply": "目前没有生成可确认的操作，也没有执行改动。请核对办理事项及参数后重试。",
+          "reply_sha256": "bb212e3a9b4da715a76029bf5c759a0b4e6a38e7285a177f6b8a3ad94f55a34d",
+          "tools": [
+            {
+              "args": "{}",
+              "confirmed": false,
+              "duration_ms": 26.0555,
+              "outcome": "success",
+              "phase": "read",
+              "preview": "",
+              "resolved_args": "{}",
+              "result": "当前可用余额 ¥25.00；账本口径 ¥25.00，两者一致。",
+              "tool": "get_balance"
+            }
+          ],
+          "turn_index": 1,
+          "user": "不是修改旧申请；新申请从我本人账户退回充值款100元人民币，请先预览。"
+        },
+        {
+          "action": "unreviewed",
+          "audit_count": 1,
+          "balance_cent": 2500,
+          "http_status": 200,
+          "jev_calls": 0,
+          "ledger_balance": 2500,
+          "llm_calls": 0,
+          "pending_confirm": false,
+          "pending_tool": "",
+          "reply": "当前没有待确认操作，没有执行任何改动。若需办理，请重新提出申请。",
+          "reply_sha256": "c72e275da44aa367f4c92f6e6e9dccc5d70d7f8be34d88a7cbb87233fb3f4f1c",
+          "tools": null,
+          "turn_index": 2,
+          "user": "确认"
+        }
+      ],
+      "verdict": "failed"
+    }
+  ],
+  "schema": "paired-live-negative-independent-review.v1",
+  "source_bindings": {
+    "internal/agent/cash_read_recovery.go": "c1759126b37852efa8351ec31b9ec144966ed10912e2e648b0aecdc844fa38b5",
+    "internal/agent/chat.go": "8ed51e6db31f24bcb33763b9411dccacf2c8229b2146ccfb1360f4e9da7dbb5b"
+  },
+  "unrun_facts": {
+    "later_campaign_batches": "007–024 not started after failure; outside this artifact semantic review scope",
+    "within_batch_observed_arms": 2,
+    "within_batch_unrun_arms": 0
+  },
+  "verdict": "failed_pair"
+}
