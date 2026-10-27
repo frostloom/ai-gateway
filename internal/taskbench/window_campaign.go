@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"strings"
 	"sync"
 	"syscall"
 )
@@ -66,6 +67,7 @@ type windowCampaignPrepared struct {
 	contracts    []windowAccountingContract
 }
 type windowCampaignArmEvidence struct {
+	QualityEnd                   *windowQualityEndEvidence `json:",omitempty"`
 	Ordinal, Pass, ObservedTurns int
 	Key, Arm                     string
 	RecordingSHA256              string
@@ -73,8 +75,8 @@ type windowCampaignArmEvidence struct {
 }
 
 // Unexported ownership fields cannot be populated by JSON or journal replay.
-// Only in-package test fixtures currently mint tokens; trusted driver issuance
-// must be implemented and reviewed separately before any actual acquisition.
+// The trusted collector mints checkpoints only after validating live driver
+// proofs. Read-only data and JSON cannot populate the owner fields.
 type windowCampaignOwnedCheckpoint struct {
 	owner    *windowCampaign
 	ledger   *windowAccounting
@@ -439,9 +441,13 @@ func (c *windowCampaign) validateEvidenceWindowCampaign(p *windowCampaignOwnedCh
 		for _, arm := range slot.ArmOrder {
 			e := p.evidence[j]
 			j++
-			if e.Ordinal != slot.Ordinal || e.Pass != slot.Pass || e.Key != slot.CaseKey || e.Arm != arm || e.ObservedTurns != slot.UserTurns || !e.Cleanup || !e.Observer || !comparisonDigest(e.RecordingSHA256) {
+			if e.Ordinal != slot.Ordinal || e.Pass != slot.Pass || e.Key != slot.CaseKey || e.Arm != arm || (e.QualityEnd == nil && e.ObservedTurns != slot.UserTurns) || !e.Cleanup || !e.Observer || !comparisonDigest(e.RecordingSHA256) {
 				return fmt.Errorf("wrong/missing owned execution evidence")
 			}
+			if e.QualityEnd != nil && validateWindowQualityEndEvidence(c.prepared.scope.Bindings.PolicySHA256, slot, arm, e.ObservedTurns, e.QualityEnd) != nil {
+				return fmt.Errorf("invalid quality-end evidence")
+			}
+
 		}
 	}
 	return nil
@@ -503,4 +509,21 @@ func (c *windowCampaign) closeWindowCampaign() error {
 	}
 	c.closeErr = errors.Join(e, syscall.Flock(int(c.lock.Fd()), syscall.LOCK_UN), c.lock.Close())
 	return c.closeErr
+}
+
+// This validates checkpoint data after the collector checked its live proof.
+// It cannot mint a checkpoint or replace genuine driver/cleanup authority.
+func validateWindowQualityEndEvidence(policy string, slot fullWindowSlot, arm string, observed int, q *windowQualityEndEvidence) error {
+	if q == nil || policy != windowOwnedQualityPolicySHA() || q.PolicySHA256 != policy || observed < 1 || observed > slot.UserTurns || q.ObservedTurns != observed || q.UnrunTurns != slot.UserTurns-observed || !comparisonDigest(q.SourceSHA256) || !comparisonDigest(q.RuleSHA256) || !comparisonDigest(q.CandidateSHA256) || !comparisonDigest(q.CleanupSHA256) || !comparisonDigest(q.EnvelopeSHA256) || q.CandidateFile == q.CleanupFile {
+		return fmt.Errorf("invalid quality-end evidence")
+	}
+	for _, name := range []string{q.CandidateFile, q.CleanupFile} {
+		if filepath.Base(name) != name || !strings.HasSuffix(name, ".json") || name == ".json" || strings.ContainsAny(name, "/\\") {
+			return fmt.Errorf("invalid quality-end file")
+		}
+	}
+	if arm != "model" && arm != "jev_selective" {
+		return fmt.Errorf("invalid quality-end arm")
+	}
+	return nil
 }

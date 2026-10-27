@@ -1,0 +1,126 @@
+{
+  "full_go20m_still_required_before_paid_freeze": true,
+  "full_repository_go_regression_passed": false,
+  "historical_full_go_failures_preserved": true,
+  "integrated_race": {
+    "command": {
+      "command": [
+        "go",
+        "test",
+        "-race",
+        "./internal/taskbench",
+        "-run",
+        "^(TestWindowQualityCollectorOriginalMultiTurnSuffixUnrun|TestWindowQualityCheckpointRequiresExplicitTypedSuffix|TestWindowQualityCapture)",
+        "-count=1",
+        "-timeout=20m",
+        "-json"
+      ],
+      "elapsed_seconds": 183.0506358750281,
+      "exit_code": 0,
+      "external_timeout": false
+    },
+    "results": {
+      "failures": 0,
+      "packages": [
+        {
+          "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+          "seconds": 167.968
+        }
+      ],
+      "skips": 0,
+      "tests_and_subtests": 19,
+      "top_level_tests": 5
+    }
+  },
+  "normal": {
+    "command": {
+      "command": [
+        "go",
+        "test",
+        "./internal/taskbench",
+        "-run",
+        "^(TestWindowQuality|TestQualityPreview|TestCollectionPolicy|TestWindowCollector|TestWindowCampaign)",
+        "-count=1",
+        "-timeout=20m",
+        "-json"
+      ],
+      "elapsed_seconds": 117.15970954101067,
+      "exit_code": 0,
+      "external_timeout": false,
+      "sdkroot": "/Library/Developer/CommandLineTools/SDKs/MacOSX26.5.sdk",
+      "source_files": 362
+    },
+    "results": {
+      "failures": 0,
+      "packages": [
+        {
+          "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+          "seconds": 111.547
+        }
+      ],
+      "skips": 0,
+      "tests_and_subtests": 282,
+      "top_level_tests": 60
+    }
+  },
+  "one_normal_width14_closed_test": {
+    "affected_pairs_excluded_from_complete_task_efficiency": true,
+    "arms": 28,
+    "authentic_multiturn_case": "adv-014/supplement_then_confirm",
+    "cases": 14,
+    "closed_model_requests": 28,
+    "defined_turns": 32,
+    "explicit_quality_end_unrun_turns": 4,
+    "fake_jev_requests": 14,
+    "global_unrun_turns": 0,
+    "independent_semantic_quality_review": false,
+    "next_claim_synthetic_only": true,
+    "observed_turns": 28,
+    "original_failed_halt_preserved": true,
+    "per_multiturn_arm": {
+      "defined": 3,
+      "observed": 1,
+      "quality_unrun_suffix": 2
+    },
+    "test": "TestWindowQualityCollectorOriginalMultiTurnSuffixUnrun"
+  },
+  "owned_race": {
+    "failed": 0,
+    "passed": 21,
+    "skipped": 0,
+    "terminal": {
+      "Action": "pass",
+      "Elapsed": 170.372,
+      "Package": "github.com/frostloom/ai-gateway/internal/taskbench",
+      "Time": "2026-10-27T21:48:37.871777+08:00"
+    },
+    "top_level_passed": 7
+  },
+  "platform_linker_warning_retained": "LC_DYSYMTAB",
+  "predicate_checks": {
+    "green-session-final-2.jsonl": {
+      "failed": 0,
+      "package_result": {
+        "Action": "pass",
+        "Elapsed": 0.778,
+        "Package": "github.com/frostloom/ai-gateway/internal/taskbench",
+        "Time": "2026-10-27T21:44:49.706291+08:00"
+      },
+      "pass_including_subtests": 139,
+      "skipped": 0,
+      "top_level_pass": 25
+    },
+    "race-session-final.jsonl": {
+      "failed": 0,
+      "package_result": {
+        "Action": "pass",
+        "Elapsed": 2.556,
+        "Package": "github.com/frostloom/ai-gateway/internal/taskbench",
+        "Time": "2026-10-27T21:45:17.448795+08:00"
+      },
+      "pass_including_subtests": 139,
+      "skipped": 0,
+      "top_level_pass": 25
+    }
+  }
+}

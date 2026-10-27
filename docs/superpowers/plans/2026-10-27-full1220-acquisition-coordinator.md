@@ -27,3 +27,11 @@ Do not choose a numeric window width/cap until complete native envelope and timi
 3. Capture full native source/repair/loop bodies and measure bounded windows; verify official prices/models/tokenizer and derive actual envelopes/caps.
 4. Complete actual authorization/readiness issuer, original full regression, freeze/build and one new actual campaign under existing preauthorization.
 5. Execute bounded operations without retry or disk resume; independently review and read back Langfuse evidence, then publish the traceable full comparison.
+
+## Closed-session implementation boundary
+
+First add an opaque closed-only session API in taskbench: open validates original source/profiles and creates a new synthetic declaration/owner; status performs no inference; one RunWindow requires the expected index and prior receipt digest; Close never releases a claim or permits reopening. The session retains the same live owner between operations. Construct model/JEV transports internally with `newWindowClosedProviders`; accept no caller RoundTripper, provider URL or actual credential. Use an owned loopback OTLP sink and labelled local artifacts, not the shared actual Langfuse project. Preserve failed and unrun rows and stop on failure. This API must be separately named and typed from a future actual session.
+
+Closed accounting rates/usage are explicitly synthetic. It may predeclare per-window caps covering all synthetic maximum attempts (model five attempts per arm/turn, JEV one per selective turn); those synthetic fees never become verified real tariffs or actual budget consumption. Bodies and serialization are real protocol shapes, but injected usage is not token or billing evidence. Envelope analysis must subsequently inspect captured native bodies and repair/loop variants with the correct tokenizer/usage limitations. No numeric actual width/cap is selected by a closed run.
+
+Prove one ordinary bounded window and startup/status/duplicate-operation/foreign-root/poisoned-owner rejection before wider closed execution. Then preserve the live owner while collecting all three closed passes; do not replace the source with a smaller fixture or claim one normal window proves the full future envelope. Add a minimal stdin command adapter only after the closed API is verified, with no automatic paid loop or disk-resume path.

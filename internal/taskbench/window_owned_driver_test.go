@@ -62,10 +62,13 @@ type closedWindowOwnedRoundTripper func(*http.Request) (*http.Response, error)
 func (f closedWindowOwnedRoundTripper) RoundTrip(r *http.Request) (*http.Response, error) {
 	return f(r)
 }
-func fixtureWindowOwnedPermit(t *testing.T) (*windowAcquisitionPermit, ConversationSuite, func(ConversationCase) http.RoundTripper, *int) {
+func fixtureWindowOwnedPermit(t *testing.T, policy ...string) (*windowAcquisitionPermit, ConversationSuite, func(ConversationCase) http.RoundTripper, *int) {
 	t.Helper()
 	source, profiles, bindings, _, _, limits, root := inputFixtureWindowCampaign(t)
 	bindings.PolicySHA256 = collectionPolicySHA()
+	if len(policy) == 1 {
+		bindings.PolicySHA256 = policy[0]
+	}
 	caps := make([]fullWindowCaps, 37)
 	for i := range caps {
 		caps[i] = fullWindowCaps{10, 1}

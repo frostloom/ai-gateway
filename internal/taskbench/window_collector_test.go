@@ -19,9 +19,12 @@ import (
 )
 
 func testWindowCollectorAuthorization(t *testing.T, widths ...int) (*windowAcquisitionAuthorization, *int, *int) {
+	return testWindowCollectorAuthorizationPolicy(t, collectionPolicySHA(), widths...)
+}
+func testWindowCollectorAuthorizationPolicy(t *testing.T, policy string, widths ...int) (*windowAcquisitionAuthorization, *int, *int) {
 	t.Helper()
 	source, profiles, bindings := windowScopeInputs(t)
-	bindings.PolicySHA256 = collectionPolicySHA()
+	bindings.PolicySHA256 = policy
 	width := 1
 	if len(widths) > 0 {
 		width = widths[0]

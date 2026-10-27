@@ -7,6 +7,7 @@ import (
 	"github.com/frostloom/ai-gateway/internal/agent"
 	"github.com/frostloom/ai-gateway/internal/billing/admin"
 	"github.com/frostloom/ai-gateway/internal/observability"
+	"go.opentelemetry.io/otel/trace"
 	"io"
 	"log/slog"
 	"net/http"
@@ -20,6 +21,7 @@ import (
 // A trusted collector issues these only from a private higher authorization.
 // No public entry currently issues that acquisition authorization.
 type windowAcquisitionPermit struct {
+	acquisition      *windowAcquisitionRun
 	mu               sync.Mutex
 	campaign         *windowCampaign
 	ledger           *windowAccounting
@@ -73,9 +75,16 @@ type windowOwnedDriver struct {
 	runtime             *agent.RuntimeMetadata
 	observerStart       observability.Stats
 	retained            *collectionRecording
+	qualityCandidate    *qualityPreviewSidecar
+	qualityRetainedSHA  string
+	qualityAcquisition  *windowAcquisitionRun
+	policySHA           string
+	qualityRoot         trace.Span
 }
 
 type windowOwnedArmProof struct {
+	quality      *windowQualityOwnedEnd
+	qualitySHA   string
 	permit       *windowAcquisitionPermit
 	driver       *windowOwnedDriver
 	slot         fullWindowSlot
@@ -109,7 +118,7 @@ func newWindowOwnedDriver(permit *windowAcquisitionPermit, source ConversationSu
 	scope := c.prepared.scope
 	scopeSHA := c.prepared.scopeSHA
 	c.mu.Unlock()
-	if scope.Bindings.PolicySHA256 != collectionPolicySHA() {
+	if scope.Bindings.PolicySHA256 != collectionPolicySHA() && scope.Bindings.PolicySHA256 != windowOwnedQualityPolicySHA() {
 		return fail()
 	}
 	digest, _, e := validateFullWindowScope(scope, source, env.profiles, scope.Bindings)
@@ -132,7 +141,7 @@ func newWindowOwnedDriver(permit *windowAcquisitionPermit, source ConversationSu
 	if !found || len(actual.Scenario.Turns) != slot.UserTurns {
 		return fail()
 	}
-	d := &windowOwnedDriver{permit: permit, ledger: permit.ledger, slot: slot, arm: arm, environment: env, observer: observer, observerStart: observer.Stats()}
+	d := &windowOwnedDriver{permit: permit, ledger: permit.ledger, slot: slot, arm: arm, environment: env, observer: observer, observerStart: observer.Stats(), policySHA: scope.Bindings.PolicySHA256}
 	permit.active = d
 	if permit.guardWindowOwnedLocked(d) != nil {
 		permit.active = nil
@@ -221,6 +230,12 @@ func (d *windowOwnedDriver) Setup(ctx context.Context, c ConversationCase) (Fixt
 	if guard != nil {
 		return Fixture{}, ConversationState{}, d.stopWindowOwned()
 	}
+	if d.windowQualityMode() {
+		d.qualityRoot = trace.SpanFromContext(ctx)
+		if !d.qualityRoot.SpanContext().IsValid() || !d.qualityRoot.IsRecording() {
+			return Fixture{}, ConversationState{}, d.stopWindowOwned()
+		}
+	}
 	f, initial, e := d.base.Setup(ctx, d.caseDefinition)
 	if e != nil {
 		return f, initial, d.stopWindowOwned()
@@ -252,7 +267,10 @@ func (d *windowOwnedDriver) Step(ctx context.Context, f Fixture, session, messag
 	}
 	d.mu.Lock()
 	defer d.mu.Unlock()
-	if ctx == nil || ctx.Err() != nil || !d.setupDone || d.finished || d.finalDone || d.nextTurn >= len(d.caseDefinition.Scenario.Turns) || !reflect.DeepEqual(f, d.fixture) || session != d.session {
+	if ctx == nil || ctx.Err() != nil || !d.setupDone || d.finished || d.finalDone || d.qualityCandidate != nil || d.nextTurn >= len(d.caseDefinition.Scenario.Turns) || !reflect.DeepEqual(f, d.fixture) || session != d.session {
+		return ConversationObservation{}, d.stopWindowOwned()
+	}
+	if d.windowQualityMode() && (d.qualityRoot == nil || !d.qualityRoot.IsRecording() || !trace.SpanFromContext(ctx).SpanContext().Equal(d.qualityRoot.SpanContext())) {
 		return ConversationObservation{}, d.stopWindowOwned()
 	}
 	expected, e := resolveConversationMessage(d.caseDefinition.Scenario.Turns[d.nextTurn].User, d.fixture)
@@ -260,6 +278,25 @@ func (d *windowOwnedDriver) Step(ctx context.Context, f Fixture, session, messag
 		return ConversationObservation{}, d.stopWindowOwned()
 	}
 	p := d.permit
+	p.mu.Lock()
+	if p.guardWindowOwnedLocked(d) != nil {
+		p.mu.Unlock()
+		return ConversationObservation{}, d.stopWindowOwned()
+	}
+	p.mu.Unlock()
+	var before qualityEffectCapture
+	var previous json.RawMessage
+	if d.windowQualityMode() {
+		var err error
+		before, err = captureWindowQualityEffects(ctx, d)
+		if err != nil {
+			return ConversationObservation{}, d.stopWindowOwned()
+		}
+		previous, _, err = captureWindowQualitySession(ctx, d, true)
+		if err != nil {
+			return ConversationObservation{}, d.stopWindowOwned()
+		}
+	}
 	p.mu.Lock()
 	if p.guardWindowOwnedLocked(d) != nil {
 		p.mu.Unlock()
@@ -305,6 +342,11 @@ func (d *windowOwnedDriver) Step(ctx context.Context, f Fixture, session, messag
 		// Revoke the next phase immediately, while returning this actual observed
 		// turn without inventing a Step error. The outer core must retain the same
 		// origin-typed policy issues that replay derives from this raw observation.
+		if d.windowQualityMode() {
+			if d.latchWindowQualityCandidate(ctx, before, previous) == nil {
+				return obs, nil
+			}
+		}
 		_ = d.stopWindowOwned()
 		return obs, nil
 	}
@@ -354,6 +396,14 @@ func (p *windowAcquisitionPermit) stopWindowOwnedLocked() {
 func (p *windowAcquisitionPermit) guardWindowOwnedLocked(d *windowOwnedDriver) error {
 	if p == nil || p.stopped || p.campaign == nil || p.ledger == nil || p.active != d || d == nil || d.ledger != p.ledger || d.environment != p.environment || d.observer != p.observer || p.environment == nil || p.environment.closed {
 		return fmt.Errorf("owned acquisition stopped")
+	}
+	if d.policySHA != "" && (d.policySHA != p.campaign.prepared.scope.Bindings.PolicySHA256 || (d.policySHA != collectionPolicySHA() && d.policySHA != windowOwnedQualityPolicySHA())) {
+		return fmt.Errorf("owned acquisition policy changed")
+	}
+	if c := p.campaign; c != nil && c.prepared.scope.Bindings.PolicySHA256 == windowOwnedQualityPolicySHA() {
+		if p.acquisition == nil || p.acquisition.validateWindowQualityFiles() != nil {
+			return fmt.Errorf("owned quality acquisition persistence changed")
+		}
 	}
 	if d.observer != nil {
 		identity := d.observer.EvaluationIdentity()
@@ -463,6 +513,9 @@ func (d *windowOwnedDriver) finishWindowOwnedArm(ctx context.Context, record col
 	}
 	retained.Result.Fixture.APIKey = d.fixture.APIKey
 	d.retained = &retained
+	if d.qualityCandidate != nil {
+		return d.finishWindowQualityOwned(ctx, retained)
+	}
 	// Preserve the authentic final record (including a v1 global policy halt)
 	// before deleting the owned Redis session; only complete safe arms mint proof.
 	if d.nextTurn != len(d.caseDefinition.Scenario.Turns) || record.Disposition != "continue_recorded" || record.Result.SetupError || record.Result.HTTPFailures != 0 {
@@ -593,6 +646,9 @@ func validateWindowOwnedArmProof(permit *windowAcquisitionPermit, proof *windowO
 			raw, e := json.Marshal(proof.recording)
 			retained, e2 := json.Marshal(proof.driver.retained)
 			if e != nil || e2 != nil || conversationHash(raw) != permit.proofSHA[i] || conversationHash(retained) != permit.proofSHA[i] || proof.recordingSHA != permit.proofSHA[i] || proof.slot != slot || proof.slot != proof.driver.slot || proof.arm != slot.ArmOrder[i%2] || proof.arm != proof.driver.arm || proof.recording.Result.Case.Key() != slot.CaseKey {
+				return fail()
+			}
+			if _, err := windowQualityProofEvidence(proof); err != nil {
 				return fail()
 			}
 			return nil
