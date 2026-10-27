@@ -108,3 +108,46 @@ func TestCompletionCanRunOnlyNewSlotAndKeepsAggregateCap(t *testing.T) {
 		t.Fatal("aggregate budget/calls not inherited")
 	}
 }
+
+func TestCompletionChainRetainsAllClosedSegments(t *testing.T) {
+	c, p, r, j := completionFixture(t)
+	d := t.TempDir()
+	child := filepath.Join(d, "child.json")
+	cap, e := AcquireCompletion(child, c, auth(c), p, r, j)
+	if e != nil {
+		t.Fatal(e)
+	}
+	journal := filepath.Join(d, "second.jsonl")
+	g, e := NewGuard(journal, cap, roundFunc(func(req *http.Request) (*http.Response, error) {
+		return &http.Response{StatusCode: 200, Header: make(http.Header), Body: io.NopCloser(strings.NewReader(goodNative))}, nil
+	}))
+	if e != nil {
+		t.Fatal(e)
+	}
+	req, _ := http.NewRequestWithContext(WithTurn(context.Background(), "K001-b", 1), "POST", ProviderURL, strings.NewReader(wire))
+	resp, e := g.RoundTrip(req)
+	if e != nil {
+		t.Fatal(e)
+	}
+	resp.Body.Close()
+	g.externalStop("observation_flush")
+	g.Close()
+	s, _ := LoadSuite("../..")
+	prior := Result{Schema: "knowledge-answer100-recording.v1", Status: "stopped", EvidenceKind: "real_provider", Contract: c, Suite: s, Cleanup: true, PriorTasks: 1, PriorUserTurns: 1, ActualUserTurns: 1, Tasks: []Task{{CaseID: "K001", Arm: "b", BusinessUnchanged: true, OwnedCleanup: true, Turns: []Turn{{Index: 1, Question: s.Cases[0].Question, HTTPStatus: 200}}}}, Events: g.Events(), Budget: g.State()}
+	rb, _ := json.Marshal(prior)
+	rp := filepath.Join(d, "second.json")
+	os.WriteFile(rp, rb, 0600)
+	jb, _ := os.ReadFile(journal)
+	pb, _ := os.ReadFile(child)
+	next := c
+	next.PriorRecordingSHA = knowledgepilot.SHA(rb)
+	next.PriorJournalSHA = knowledgepilot.SHA(jb)
+	next.ParentClaimSHA = knowledgepilot.SHA(pb)
+	cp, e := AcquireCompletion(filepath.Join(d, "third-claim"), next, auth(next), child, rp, journal)
+	if e != nil {
+		t.Fatal(e)
+	}
+	if cp.inherited.Calls != 2 || cp.inherited.KnownUpper != 720 || len(cp.skip) != 2 || cp.priorTurns != 2 {
+		t.Fatal("ancestor accounting or coverage reset")
+	}
+}

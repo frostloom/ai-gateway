@@ -14,6 +14,7 @@ const CampaignID = "knowledge-answer100-independent-20261027"
 const ProviderURL = "https://api.deepseek.com/v1/chat/completions"
 
 type Contract struct {
+	ObserverTimeoutMS int    `json:"observer_timeout_ms,omitempty"`
 	PriorRecordingSHA string `json:"prior_recording_sha256,omitempty"`
 	PriorJournalSHA   string `json:"prior_journal_sha256,omitempty"`
 	ParentClaimSHA    string `json:"parent_claim_sha256,omitempty"`
@@ -38,6 +39,9 @@ type Contract struct {
 func (c Contract) SHA() string      { b, _ := json.Marshal(c); return knowledgepilot.SHA(b) }
 func validSHA(s string, n int) bool { b, e := hex.DecodeString(s); return e == nil && len(b) == n }
 func (c Contract) Validate() error {
+	if c.ObserverTimeoutMS != 0 && c.ObserverTimeoutMS != 10000 {
+		return fmt.Errorf("observer deadline rejected")
+	}
 	if c.Schema != "knowledge-answer100.v1" || c.ID != CampaignID || c.FundingPool != "knowledge-independent" || (c.MaxMicroCNY != 5000000 && c.MaxMicroCNY != 20000000) || c.MaxCalls != 1120 || c.MaxOutput != 512 || c.MaxBytes != 32768 || c.InputCeiling != 1048576 || c.InputRate != 2000000 || c.OutputRate != 8000000 {
 		return fmt.Errorf("contract bounds differ")
 	}

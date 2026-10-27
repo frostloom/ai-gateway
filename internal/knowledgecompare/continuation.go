@@ -39,16 +39,19 @@ func AcquireCompletion(path string, c Contract, a Approval, parent, prior, journ
 		return nil, e
 	}
 	var pc struct {
-		Schema   string   `json:"schema"`
-		Status   string   `json:"status"`
-		Contract Contract `json:"contract"`
-		Approval Approval `json:"approval"`
+		Schema         string          `json:"schema"`
+		Status         string          `json:"status"`
+		Contract       Contract        `json:"contract"`
+		Approval       Approval        `json:"approval"`
+		InheritedCalls int             `json:"inherited_calls,omitempty"`
+		InheritedUpper int64           `json:"inherited_upper_micro_cny,omitempty"`
+		Completed      map[string]bool `json:"completed_slots,omitempty"`
 	}
-	if knowledgepilot.StrictDecode(pb, &pc) != nil || pc.Schema != "knowledge-independent-claim.v1" || pc.Status != "consumed_before_execution" || CheckApproval(pc.Contract, pc.Approval) != nil {
+	if knowledgepilot.StrictDecode(pb, &pc) != nil || (pc.Schema != "knowledge-independent-claim.v1" && pc.Schema != "knowledge-completion-claim.v1") || pc.Status != "consumed_before_execution" || CheckApproval(pc.Contract, pc.Approval) != nil {
 		return nil, fmt.Errorf("parent claim invalid")
 	}
 	var r Result
-	if json.Unmarshal(rb, &r) != nil || r.Schema != "knowledge-answer100-recording.v1" || r.EvidenceKind != "real_provider" || r.Status != "stopped" || !r.Cleanup || r.Complete || r.Contract.SHA() != pc.Contract.SHA() || r.Contract.PriorRecordingSHA != "" {
+	if json.Unmarshal(rb, &r) != nil || r.Schema != "knowledge-answer100-recording.v1" || r.EvidenceKind != "real_provider" || r.Status != "stopped" || !r.Cleanup || r.Complete || r.Contract.SHA() != pc.Contract.SHA() {
 		return nil, fmt.Errorf("closed original segment required")
 	}
 	old := r.Contract
@@ -65,13 +68,32 @@ func AcquireCompletion(path string, c Contract, a Approval, parent, prior, journ
 		}
 		events = append(events, e)
 	}
-	if scan.Err() != nil || len(events) != len(r.Events) || len(events)%2 != 0 {
+	if scan.Err() != nil || len(events) != len(r.Events) || false {
 		return nil, fmt.Errorf("journal incomplete")
 	}
-	cost := int64(0)
-	calls := 0
+	cost := pc.InheritedUpper
+	calls := pc.InheritedCalls
+	if calls < 0 || cost < 0 || calls >= c.MaxCalls || cost >= c.MaxMicroCNY {
+		return nil, fmt.Errorf("invalid inherited allocation")
+	}
+	if pc.Schema == "knowledge-independent-claim.v1" && (calls != 0 || cost != 0 || len(pc.Completed) > 0) {
+		return nil, fmt.Errorf("original allocation has invalid inheritance")
+	}
+	for k := range events {
+		a, _ := json.Marshal(events[k])
+		b, _ := json.Marshal(r.Events[k])
+		if !bytes.Equal(a, b) {
+			return nil, fmt.Errorf("recording/journal differs")
+		}
+	}
 	counted := map[string]int{}
 	for i := 0; i < len(events); i += 2 {
+		if events[i].Kind == "external_halt" && (events[i].Failure == "observation_flush" || events[i].Failure == "observation_counters") && i == len(events)-1 {
+			break
+		}
+		if i+1 >= len(events) {
+			return nil, fmt.Errorf("unsettled journal tail")
+		}
 		intent, usage := events[i], events[i+1]
 		if intent.Kind != "intent" || usage.Kind != "usage" || intent.Sequence != calls+1 || usage.Sequence != intent.Sequence || intent.Task != usage.Task || intent.Turn != usage.Turn || intent.RequestSHA != knowledgepilot.SHA(intent.Request) {
 			return nil, fmt.Errorf("journal pairing differs")
@@ -100,6 +122,21 @@ func AcquireCompletion(path string, c Contract, a Approval, parent, prior, journ
 	}
 	skip := map[string]bool{}
 	turns := 0
+	for id, done := range pc.Completed {
+		if !done || len(id) < 3 {
+			return nil, fmt.Errorf("invalid prior slot")
+		}
+		def, ok := cases[id[:len(id)-2]]
+		arm := id[len(id)-1:]
+		if !ok || (arm != "a" && arm != "b") {
+			return nil, fmt.Errorf("unknown prior slot")
+		}
+		skip[id] = true
+		turns += len(def.Turns)
+	}
+	if len(skip) != r.PriorTasks || turns != r.PriorUserTurns {
+		return nil, fmt.Errorf("ancestral coverage differs")
+	}
 	for _, t := range r.Tasks {
 		id := t.CaseID + "-" + t.Arm
 		def, ok := cases[t.CaseID]
@@ -119,7 +156,7 @@ func AcquireCompletion(path string, c Contract, a Approval, parent, prior, journ
 			return nil, fmt.Errorf("unowned prior attempt")
 		}
 	}
-	if len(skip) == 0 || len(skip) >= 200 || turns != r.ActualUserTurns {
+	if len(skip) == 0 || len(skip) >= 200 || turns != r.ActualUserTurns+r.PriorUserTurns {
 		return nil, fmt.Errorf("prior coverage differs")
 	}
 	claim := struct {

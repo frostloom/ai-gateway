@@ -103,6 +103,15 @@ func run(args []string, out io.Writer) int {
 	// same campaign under a new working directory or executable.
 	claimDir := filepath.Join(common, "knowledge-independent-claims")
 	parentClaimPath := filepath.Join(claimDir, kc.CampaignID+".json")
+	if c.PriorRecordingSHA != "" {
+		var prev kc.Result
+		if readJSON(*prior, &prev) != nil {
+			return fail("prior recording rejected")
+		}
+		if prev.Contract.PriorRecordingSHA != "" {
+			parentClaimPath = filepath.Join(claimDir, kc.CampaignID+".continue-"+prev.Contract.PriorRecordingSHA+".json")
+		}
+	}
 	claimPath := parentClaimPath
 	if c.PriorRecordingSHA != "" {
 		if *prior == "" || *priorJournal == "" {
@@ -148,6 +157,9 @@ func run(args []string, out io.Writer) int {
 		tr.Proxy = http.ProxyURL(p)
 	}
 	defer tr.CloseIdleConnections()
+	if c.ObserverTimeoutMS != 0 {
+		oc.ExportTimeout = time.Duration(c.ObserverTimeoutMS) * time.Millisecond
+	}
 	obs, e := observability.New(ctx, oc)
 	if e != nil {
 		return fail("observer unavailable")
