@@ -1,0 +1,437 @@
+[
+  {
+    "case_id": "K001",
+    "a": {
+      "case_id": "K001",
+      "verdict": "passed",
+      "reason": "完整涵盖账户查询、目录与订阅查询和需预览确认的办理，未承诺越权操作。",
+      "unsupported_claim": false
+    },
+    "b": {
+      "case_id": "K001",
+      "verdict": "passed",
+      "reason": "覆盖账户/目录/订阅查询、平台规则咨询及需预览确认的各项办理，并准确说明相关限制。",
+      "unsupported_claim": false
+    }
+  },
+  {
+    "case_id": "K002",
+    "a": {
+      "case_id": "K002",
+      "verdict": "passed",
+      "reason": "清楚否定展示等于真实供应商接通，未将目录存在当作可调用证明。",
+      "unsupported_claim": false
+    },
+    "b": {
+      "case_id": "K002",
+      "verdict": "passed",
+      "reason": "明确目录存在不证明真实供应商已接通，并说明演示上游和模拟支付背景。",
+      "unsupported_claim": false
+    }
+  },
+  {
+    "case_id": "K003",
+    "a": {
+      "case_id": "K003",
+      "verdict": "failed",
+      "reason": "未说明资料中已明确的模拟支付和演示上游，仅称无信息并转向外部咨询，核心问题未得到回答。",
+      "unsupported_claim": false
+    },
+    "b": {
+      "case_id": "K003",
+      "verdict": "passed",
+      "reason": "完整说明模拟支付、不发生真实银行扣款以及演示上游，目录不等于真实接通。",
+      "unsupported_claim": false
+    }
+  },
+  {
+    "case_id": "K004",
+    "a": {
+      "case_id": "K004",
+      "verdict": "passed",
+      "reason": "明确订阅不入账现金，解释token与现金区别及退订当期不退；未提供未经核实的本人数字。",
+      "unsupported_claim": false
+    },
+    "b": {
+      "case_id": "K004",
+      "verdict": "passed",
+      "reason": "清楚区分订阅额度和现金余额，明确月费不是充值、不会增加现金余额。",
+      "unsupported_claim": false
+    }
+  },
+  {
+    "case_id": "K005",
+    "a": {
+      "case_id": "K005",
+      "verdict": "passed",
+      "reason": "明确零扣费不能推断零token，以可能存在套餐覆盖解释而非断言本人状态，核心事实正确。",
+      "unsupported_claim": false
+    },
+    "b": {
+      "case_id": "K005",
+      "verdict": "passed",
+      "reason": "直接指出零现金扣费不能推出零token用量，未编造本人用量。",
+      "unsupported_claim": false
+    }
+  },
+  {
+    "case_id": "K006",
+    "a": {
+      "case_id": "K006",
+      "verdict": "passed",
+      "reason": "解释元与token为两套计量体系，不能直接互换或将套餐额度折为现金。",
+      "unsupported_claim": false
+    },
+    "b": {
+      "case_id": "K006",
+      "verdict": "passed",
+      "reason": "明确元与token不同计量且不可互换；本人25元、推理5万/文本9.7万额度与5小时窗口均有盲态get_balance/get_my_subscription及业务快照支持。",
+      "unsupported_claim": false
+    }
+  },
+  {
+    "case_id": "K007",
+    "a": {
+      "case_id": "K007",
+      "verdict": "passed",
+      "reason": "明确输入输出分别按每百万token的不同单价计算，不采用统一合并单价。",
+      "unsupported_claim": false
+    },
+    "b": {
+      "case_id": "K007",
+      "verdict": "passed",
+      "reason": "说明输入输出分别按各自每百万token单价计价，并将具体价格交由实时模型目录查询。",
+      "unsupported_claim": false
+    }
+  },
+  {
+    "case_id": "K008",
+    "a": {
+      "case_id": "K008",
+      "verdict": "failed",
+      "reason": "虽否定仅凭报价并建议查账单，却说知道实际输入输出token即可算扣费，遗漏订阅/现金结算路径，可能把订阅覆盖调用算成现金扣费。",
+      "unsupported_claim": true
+    },
+    "b": {
+      "case_id": "K008",
+      "verdict": "failed",
+      "reason": "虽说明报价不能推出实际扣费且建议查账单，但遗漏订阅等结算路径，并断言缓存/阶梯影响本平台扣费，正文不支持未核实的缓存或阶梯优惠。",
+      "unsupported_claim": true
+    }
+  },
+  {
+    "case_id": "K009",
+    "a": {
+      "case_id": "K009",
+      "verdict": "passed",
+      "reason": "明确无法保证供应商同折扣，以实际账单核实，没有承诺未经核实的缓存费率。",
+      "unsupported_claim": false
+    },
+    "b": {
+      "case_id": "K009",
+      "verdict": "passed",
+      "reason": "明确不能确认或保证同等缓存折扣，没有承诺具体优惠；建议官方说明不构成平台同折扣保证。",
+      "unsupported_claim": false
+    }
+  },
+  {
+    "case_id": "K010",
+    "a": {
+      "case_id": "K010",
+      "verdict": "passed",
+      "reason": "明确套餐提供token资格而不增加现金余额；每N小时刷新为概括表述，不影响本题两种权益的核心区分。",
+      "unsupported_claim": false
+    },
+    "b": {
+      "case_id": "K010",
+      "verdict": "passed",
+      "reason": "明确购买周期内模型token使用资格，不是现金余额充值，回答核心问题。",
+      "unsupported_claim": false
+    }
+  },
+  {
+    "case_id": "K011",
+    "a": {
+      "case_id": "K011",
+      "verdict": "failed",
+      "reason": "虽否定银行卡直接扣款，却遗漏月费为模拟展示价、不实现真实收款；还声称确认订阅后才创建待确认操作，倒置预览确认顺序。",
+      "unsupported_claim": true
+    },
+    "b": {
+      "case_id": "K011",
+      "verdict": "failed",
+      "reason": "未说明月费是模拟展示价、订阅不实现真实收款，以资料不足回避已知规则；核心银行卡扣款问题没有明确解释。",
+      "unsupported_claim": false
+    }
+  },
+  {
+    "case_id": "K012",
+    "a": {
+      "case_id": "K012",
+      "verdict": "passed",
+      "reason": "正确回答当前不能新购一次性套餐；补充的两档定期套餐名称及20/50元价格与盲态业务证据list_plans和完整目录快照一致，不是编造当前价格。",
+      "unsupported_claim": false
+    },
+    "b": {
+      "case_id": "K012",
+      "verdict": "passed",
+      "reason": "说明新购只接受在售定期订阅，一次性套餐不能新买；一次性套餐不可退订有plan.go支撑。",
+      "unsupported_claim": false
+    }
+  },
+  {
+    "case_id": "K013",
+    "a": {
+      "case_id": "K013",
+      "verdict": "failed",
+      "reason": "以每N小时滚动一次的周期刷新解释恢复，仅称不一定零点；遗漏消费记录滑出连续滚动窗口的机制，容易使人误解为按批次周期重置。",
+      "unsupported_claim": true
+    },
+    "b": {
+      "case_id": "K013",
+      "verdict": "passed",
+      "reason": "明确非固定零点清零，解释消费滑出滚动窗口恢复，并补充未用不累积及不自动扣现金。",
+      "unsupported_claim": false
+    }
+  },
+  {
+    "case_id": "K014",
+    "a": {
+      "case_id": "K014",
+      "verdict": "failed",
+      "reason": "没有回答订阅超额会拒绝且不自动改扣钱包或降级，反而称无规则可查；附带本人状态虽经盲态业务工具和快照证实，不能弥补核心规则未回答。",
+      "unsupported_claim": false
+    },
+    "b": {
+      "case_id": "K014",
+      "verdict": "passed",
+      "reason": "完整说明订阅超额拒绝、不自动改扣现金或降级，并解释等待消费滑出窗口恢复。",
+      "unsupported_claim": false
+    }
+  },
+  {
+    "case_id": "K015",
+    "a": {
+      "case_id": "K015",
+      "verdict": "passed",
+      "reason": "明确未用token不累积；附带套餐编号、11月25日到期自动续费、5小时窗口及剩余量，与盲态get_my_subscription和业务快照一致。",
+      "unsupported_claim": false
+    },
+    "b": {
+      "case_id": "K015",
+      "verdict": "passed",
+      "reason": "明确未用额度不累积，并准确解释消费滑出滚动窗口恢复及超额拒绝。",
+      "unsupported_claim": false
+    }
+  },
+  {
+    "case_id": "K016",
+    "a": {
+      "case_id": "K016",
+      "verdict": "passed",
+      "reason": "明确退订后权益保留至本周期结束，并说明只停下期续费、当期不退。",
+      "unsupported_claim": false
+    },
+    "b": {
+      "case_id": "K016",
+      "verdict": "passed",
+      "reason": "明确退订只停下期续费，当期token权益保留到本期结束。",
+      "unsupported_claim": false
+    }
+  },
+  {
+    "case_id": "K017",
+    "a": {
+      "case_id": "K017",
+      "verdict": "passed",
+      "reason": "明确退订只停下期续费、当期不退款，与按充值订单或金额退款不同。",
+      "unsupported_claim": false
+    },
+    "b": {
+      "case_id": "K017",
+      "verdict": "passed",
+      "reason": "清楚区分停止下期续费与充值退款，并明确当期不退款及现金余额上限。",
+      "unsupported_claim": false
+    }
+  },
+  {
+    "case_id": "K018",
+    "a": {
+      "case_id": "K018",
+      "verdict": "passed",
+      "reason": "解释停下期续费、当期额度可用及当期不退，未办理，明确之后再生成预览供确认。",
+      "unsupported_claim": false
+    },
+    "b": {
+      "case_id": "K018",
+      "verdict": "passed",
+      "reason": "完整解释只停下期续费、当期不退与权益到期保留，并明确咨询不会办理。",
+      "unsupported_claim": false
+    }
+  },
+  {
+    "case_id": "K019",
+    "a": {
+      "case_id": "K019",
+      "verdict": "passed",
+      "reason": "直接说明下期生效、当期额度不变，完整回答换档是否立即改变配额。",
+      "unsupported_claim": false
+    },
+    "b": {
+      "case_id": "K019",
+      "verdict": "passed",
+      "reason": "明确改套餐下一期生效、当期配额不变，没有声称已经改档。",
+      "unsupported_claim": false
+    }
+  },
+  {
+    "case_id": "K020",
+    "a": {
+      "case_id": "K020",
+      "verdict": "passed",
+      "reason": "明确下架目标不可选择、只支持在售定期套餐，唯一名称匹配与工具实现相符；未承诺已办理。",
+      "unsupported_claim": false
+    },
+    "b": {
+      "case_id": "K020",
+      "verdict": "passed",
+      "reason": "明确已下架不能作为目标，须有效在售定期套餐，并保留本人状态和预览限制。",
+      "unsupported_claim": false
+    }
+  },
+  {
+    "case_id": "K021",
+    "a": {
+      "case_id": "K021",
+      "verdict": "passed",
+      "reason": "否定一定立即补退差价，并说明下期生效、当期额度不变；未承诺实际差价退款。",
+      "unsupported_claim": false
+    },
+    "b": {
+      "case_id": "K021",
+      "verdict": "failed",
+      "reason": "下期生效及不立即补退差价正确，但声称当期已扣月费、下期按新月费计费，给人真实收款印象；KB-004及plan.go明确当前不实现真实月费收款。",
+      "unsupported_claim": true
+    }
+  },
+  {
+    "case_id": "K022",
+    "a": {
+      "case_id": "K022",
+      "verdict": "passed",
+      "reason": "直接解释仅建单不等于完成或到账，须支付成功；未断言真实银行已扣款，虽未补充模拟支付背景但本题核心区分明确。",
+      "unsupported_claim": false
+    },
+    "b": {
+      "case_id": "K022",
+      "verdict": "failed",
+      "reason": "正确否定建单等于到账，但声称订单建立后才需要明确确认，倒置了先确认预览再建单并模拟支付的流程（KB-008）。",
+      "unsupported_claim": true
+    }
+  },
+  {
+    "case_id": "K023",
+    "a": {
+      "case_id": "K023",
+      "verdict": "passed",
+      "reason": "明确演示环境充值为模拟支付，不会真实扣取银行存款，并保留确认预览要求。",
+      "unsupported_claim": false
+    },
+    "b": {
+      "case_id": "K023",
+      "verdict": "passed",
+      "reason": "明确模拟支付、无真实银行扣款，以及先确认预览后建单模拟支付；末句不等于支付或到账按真实支付语境理解。",
+      "unsupported_claim": false
+    }
+  },
+  {
+    "case_id": "K024",
+    "a": {
+      "case_id": "K024",
+      "verdict": "passed",
+      "reason": "说明大于零的整数元输入，未办理、未生成待确认操作，仅解释后续确认流程；未明确声称真实银行扣款。",
+      "unsupported_claim": false
+    },
+    "b": {
+      "case_id": "K024",
+      "verdict": "passed",
+      "reason": "完整说明正整数元、确认预览后建单并模拟支付，且明确当前咨询不会办理与不会真实扣款。",
+      "unsupported_claim": false
+    }
+  },
+  {
+    "case_id": "K025",
+    "a": {
+      "case_id": "K025",
+      "verdict": "failed",
+      "reason": "准确说明退款现金余额上限且不动用token，但遗漏预览及明确确认才能执行的必要边界。",
+      "unsupported_claim": false
+    },
+    "b": {
+      "case_id": "K025",
+      "verdict": "failed",
+      "reason": "准确说明按申请金额与余额取小值，但未说明必须先预览并明确确认后执行，缺少本题要求的办理边界。",
+      "unsupported_claim": false
+    }
+  },
+  {
+    "case_id": "K026",
+    "a": {
+      "case_id": "K026",
+      "verdict": "passed",
+      "reason": "直接回答不能超过订单金额，并完整说明订单金额与当前现金余额双重限制。",
+      "unsupported_claim": false
+    },
+    "b": {
+      "case_id": "K026",
+      "verdict": "passed",
+      "reason": "完整说明订单金额与可用现金余额双上限，回答不能超过订单金额。",
+      "unsupported_claim": false
+    }
+  },
+  {
+    "case_id": "K027",
+    "a": {
+      "case_id": "K027",
+      "verdict": "passed",
+      "reason": "明确预览未执行、需明确确认，并以执行结果为准，覆盖本题完整流程边界。",
+      "unsupported_claim": false
+    },
+    "b": {
+      "case_id": "K027",
+      "verdict": "passed",
+      "reason": "明确预览仅待确认、未执行退款，必须明确确认才执行；未将预览视为到账完成。",
+      "unsupported_claim": false
+    }
+  },
+  {
+    "case_id": "K028",
+    "a": {
+      "case_id": "K028",
+      "verdict": "passed",
+      "reason": "明确最近账单最多10笔且不代表完整月汇总，核心范围判断正确。",
+      "unsupported_claim": false
+    },
+    "b": {
+      "case_id": "K028",
+      "verdict": "passed",
+      "reason": "指出最近几笔仅是部分记录，不能代表完整月合计；客服无完整月汇总/导出能力与工具说明一致。",
+      "unsupported_claim": false
+    }
+  },
+  {
+    "case_id": "K029",
+    "a": {
+      "case_id": "K029",
+      "verdict": "passed",
+      "reason": "正确区分每日扣费金额与token用量，说明最近明细最多10笔且非完整月份。",
+      "unsupported_claim": false
+    },
+    "b": {
+      "case_id": "K029",
+      "verdict": "passed",
+      "reason": "明确每日金额图不含token数量，并给出最多10笔账单的合理查询途径。",
+      "unsupported_claim": false
+    }
+  }
+]

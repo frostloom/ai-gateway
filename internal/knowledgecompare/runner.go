@@ -56,15 +56,17 @@ type Task struct {
 	TerminatedReason                           string `json:"terminated_reason,omitempty"`
 }
 type Result struct {
-	AllTasksDisposed                                bool       `json:"all_tasks_disposed"`
-	Schema                                          string     `json:"schema"`
-	Status                                          string     `json:"status"`
-	EvidenceKind                                    string     `json:"evidence_kind"`
-	Contract                                        Contract   `json:"contract"`
-	Suite                                           Suite      `json:"suite"`
-	Tasks                                           []Task     `json:"tasks"`
-	Events                                          []Event    `json:"events"`
-	Budget                                          GuardState `json:"budget"`
+	FailureStage                                    string               `json:"failure_stage,omitempty"`
+	ObserverStats                                   *observability.Stats `json:"observer_stats,omitempty"`
+	AllTasksDisposed                                bool                 `json:"all_tasks_disposed"`
+	Schema                                          string               `json:"schema"`
+	Status                                          string               `json:"status"`
+	EvidenceKind                                    string               `json:"evidence_kind"`
+	Contract                                        Contract             `json:"contract"`
+	Suite                                           Suite                `json:"suite"`
+	Tasks                                           []Task               `json:"tasks"`
+	Events                                          []Event              `json:"events"`
+	Budget                                          GuardState           `json:"budget"`
 	Cleanup, Complete                               bool
 	PlannedTasks, DefinedUserTurns, ActualUserTurns int
 	WallMS                                          float64 `json:"wall_ms"`
@@ -107,6 +109,10 @@ func Run(ctx context.Context, o Options) (r Result, runErr error) {
 	defer func() {
 		r.Events = o.Guard.Events()
 		r.Budget = o.Guard.State()
+		if o.Observer != nil {
+			stats := o.Observer.Stats()
+			r.ObserverStats = &stats
+		}
 		r.WallMS = float64(time.Since(start)) / float64(time.Millisecond)
 		if runErr != nil {
 			r.Status = "stopped"
@@ -142,6 +148,12 @@ func Run(ctx context.Context, o Options) (r Result, runErr error) {
 			r.Tasks = append(r.Tasks, task)
 			r.ActualUserTurns += len(task.Turns)
 			if e != nil {
+				var observation *observationFailure
+				if errors.As(e, &observation) {
+					r.FailureStage = observation.stage
+				} else {
+					r.FailureStage = "task_runtime"
+				}
 				return r, e
 			}
 		}
@@ -289,16 +301,18 @@ func runOne(ctx context.Context, o Options, env *taskbench.PairedFixtureEnvironm
 			}
 			task.StatePass = task.StatePass && found
 		}
-		if !o.LocalVerification {
+		if !o.LocalVerification || o.Observer != nil {
 			if turn.Telemetry.LangfuseTraceID == "" {
 				return task, fmt.Errorf("observation identity missing")
 			}
 			if e = o.Observer.ForceFlush(ctx); e != nil {
-				return task, e
+				o.Guard.externalStop("observation_flush")
+				return task, &observationFailure{stage: "observation_flush", cause: e}
 			}
 			stats := o.Observer.Stats()
 			if stats.Dropped != 0 || stats.Failed != 0 {
-				return task, fmt.Errorf("observation export failed")
+				o.Guard.externalStop("observation_counters")
+				return task, &observationFailure{stage: "observation_counters", cause: fmt.Errorf("observation export failed")}
 			}
 		}
 	}
@@ -402,3 +416,13 @@ func reviewSnapshot(raw json.RawMessage) json.RawMessage {
 	b, _ := json.Marshal(v)
 	return b
 }
+
+// Bounded stage labels preserve diagnosis without exposing provider errors,
+// URLs, request bodies or credentials. They do not backfill historical runs.
+type observationFailure struct {
+	stage string
+	cause error
+}
+
+func (e *observationFailure) Error() string { return e.stage }
+func (e *observationFailure) Unwrap() error { return e.cause }

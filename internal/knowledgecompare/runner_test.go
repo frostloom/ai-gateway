@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/frostloom/ai-gateway/internal/agent"
+	"github.com/frostloom/ai-gateway/internal/observability"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -11,6 +12,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 )
 
 func fixture(t *testing.T, fn func(*http.Request) string) (Options, *int) {
@@ -191,5 +193,26 @@ func TestAdminFaultBlocksFollowingModelRequest(t *testing.T) {
 	resp.Body.Close()
 	if _, e := call(g, 1); e == nil || *n != 0 || !g.State().Stopped {
 		t.Fatal("model called after business tool technical failure")
+	}
+}
+
+func TestObserverFaultStopsAndPersistsBoundedDiagnostics(t *testing.T) {
+	endpoint := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { http.Error(w, "synthetic receiver failure", 503) }))
+	defer endpoint.Close()
+	obs, e := observability.New(context.Background(), observability.Config{Enabled: true, Endpoint: endpoint.URL + "/api/public/otel/v1/traces", PublicKey: "synthetic-public", SecretKey: "synthetic-secret", HashKey: strings.Repeat("x", 32), Release: "synthetic-observer-stop", Environment: "evaluation", SampleRate: 1, ExportTimeout: 200 * time.Millisecond})
+	if e != nil {
+		t.Fatal(e)
+	}
+	defer obs.Shutdown(context.Background())
+	o, n := fixture(t, func(r *http.Request) string { return encode(agent.Message{Role: "assistant", Content: "SYNTHETIC"}) })
+	o.Observer = obs
+	o.CaseIDs = []string{"K001", "K002"}
+	result, e := Run(context.Background(), o)
+	if e == nil || *n != 1 || len(result.Tasks) != 1 || result.FailureStage != "observation_flush" || result.ObserverStats == nil || result.ObserverStats.Failed == 0 || !result.Budget.Stopped || !result.Cleanup {
+		t.Fatalf("observer failure not faithfully persisted: err%v calls%d stage%s", e, *n, result.FailureStage)
+	}
+	b, err := os.ReadFile(filepath.Join(o.Out, "recording.json"))
+	if err != nil || !strings.Contains(string(b), `"failure_stage": "observation_flush"`) {
+		t.Fatal("failure stage absent from recording")
 	}
 }

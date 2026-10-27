@@ -1,0 +1,180 @@
+{
+  "schema": "knowledge-answer100-partial-result.v1",
+  "source_revision": "9b0c6e1d4a0e3b4c8f1c91981c55ca511c1c57cd",
+  "status": "stopped",
+  "complete": false,
+  "planned_cases": 100,
+  "planned_tasks": 200,
+  "planned_user_turns": 224,
+  "actual_tasks": 59,
+  "actual_user_turns": 59,
+  "complete_pairs": 29,
+  "unpaired_cases": [
+    "K030"
+  ],
+  "unstarted_cases": 70,
+  "category_covered": "knowledge only; K001-K029 paired, K030 b only",
+  "arms_paired_only": {
+    "a": {
+      "tasks": 29,
+      "passed": 23,
+      "failed": 6,
+      "accuracy": 0.7931034482758621,
+      "unsupported_answers": 3,
+      "provider_calls": 33,
+      "tokens": {
+        "Input": 58669,
+        "Output": 1467,
+        "CacheHit": 51200,
+        "CacheMiss": 7469
+      },
+      "upper_cost_cny": 0.129074,
+      "configured_peak_cost_cny": "0.028722",
+      "configured_cost_per_correct": "0.001248782608695652173913043478",
+      "p50_request_ms": 1131.889458,
+      "p95_request_ms": 2439.685208
+    },
+    "b": {
+      "tasks": 29,
+      "passed": 24,
+      "failed": 5,
+      "accuracy": 0.8275862068965517,
+      "unsupported_answers": 3,
+      "provider_calls": 44,
+      "tokens": {
+        "Input": 92018,
+        "Output": 2434,
+        "CacheHit": 79232,
+        "CacheMiss": 12786
+      },
+      "upper_cost_cny": 0.203508,
+      "configured_peak_cost_cny": "0.04821328",
+      "configured_cost_per_correct": "0.002008886666666666666666666667",
+      "p50_request_ms": 1629.960042,
+      "p95_request_ms": 2398.223
+    }
+  },
+  "paired_outcomes": {
+    "both_pass": 21,
+    "b_only": 3,
+    "both_fail": 3,
+    "a_only": 2
+  },
+  "total_provider_calls": 78,
+  "total_tokens": {
+    "Input": 152644,
+    "Output": 3935,
+    "CacheHit": 132224,
+    "CacheMiss": 20420
+  },
+  "total_upper_cost_cny": 0.336768,
+  "total_configured_peak_cost_cny": "0.07760896",
+  "actual_invoice_cny": null,
+  "independent_cap_cny": 20,
+  "permanent_claim_retained": true,
+  "cleanup": true,
+  "business_unchanged_tasks": 59,
+  "owned_cleanup_tasks": 59,
+  "wall_seconds": 171.59515529200002,
+  "retrieval": [
+    {
+      "case_id": "K002",
+      "arm": "b",
+      "status": "ok",
+      "hits": 1
+    },
+    {
+      "case_id": "K003",
+      "arm": "b",
+      "status": "ok",
+      "hits": 3
+    },
+    {
+      "case_id": "K009",
+      "arm": "b",
+      "status": "no_match",
+      "hits": 0
+    },
+    {
+      "case_id": "K011",
+      "arm": "b",
+      "status": "no_match",
+      "hits": 0
+    },
+    {
+      "case_id": "K012",
+      "arm": "b",
+      "status": "ok",
+      "hits": 1
+    },
+    {
+      "case_id": "K013",
+      "arm": "b",
+      "status": "ok",
+      "hits": 3
+    },
+    {
+      "case_id": "K014",
+      "arm": "b",
+      "status": "ok",
+      "hits": 3
+    },
+    {
+      "case_id": "K015",
+      "arm": "b",
+      "status": "ok",
+      "hits": 2
+    },
+    {
+      "case_id": "K018",
+      "arm": "b",
+      "status": "ok",
+      "hits": 2
+    },
+    {
+      "case_id": "K020",
+      "arm": "b",
+      "status": "ok",
+      "hits": 1
+    },
+    {
+      "case_id": "K023",
+      "arm": "b",
+      "status": "ok",
+      "hits": 3
+    },
+    {
+      "case_id": "K024",
+      "arm": "b",
+      "status": "ok",
+      "hits": 1
+    },
+    {
+      "case_id": "K026",
+      "arm": "b",
+      "status": "ok",
+      "hits": 2
+    }
+  ],
+  "grade_sha256": "ec3370d626546aa6acf3f363ddc9279ca325a4f8beed71a4497188f458e43049",
+  "recording_sha256": "94739c2223b4a113972405bebd2c6e1ce7123128e9980c3c210ee488ceebaa8a",
+  "limitations": [
+    "observational stop stage inferred from frozen source and final task; exact original observer error/counters not recorded",
+    "partial knowledge-only, no unknown/dynamic/safety category coverage, no general accuracy conclusion",
+    "no replay or paid continuation; original stop and permanent claim unchanged",
+    "price estimates not provider invoice; cost comparison includes cache/order effects and small sample"
+  ],
+  "langfuse": {
+    "expected_actual_turns": 59,
+    "verified_turns": 59,
+    "unique_observations": 224,
+    "knowledge_queries": 13,
+    "knowledge_chunks": 22,
+    "failures": []
+  },
+  "claim_sha256": "d877f8b2f69ff29f1de2082420a870481adf0735b550341b0287d40c9ee160a1",
+  "contract_sha256": "e27d656947306cebede642eda035ff03be1bfdfbcc47cf8a832beb3e40e676f8",
+  "response_model_alias_counts": {
+    "deepseek-flash": 78
+  }
+}
