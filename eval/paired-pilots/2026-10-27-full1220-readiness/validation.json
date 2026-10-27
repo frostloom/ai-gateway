@@ -1,0 +1,105 @@
+{
+  "schema": "full1220-readiness-validation.v1",
+  "final_go_packages": [
+    {
+      "package": "github.com/frostloom/ai-gateway/cmd/agent",
+      "elapsed_seconds": 0.832
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/cmd/eval",
+      "elapsed_seconds": 1.19
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/cmd/conversation-eval",
+      "elapsed_seconds": 2.267
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/cmd/full-customer-preflight",
+      "elapsed_seconds": 2.67
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/cmd/task-eval",
+      "elapsed_seconds": 2.608
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/cmd/paired-eval",
+      "elapsed_seconds": 6.078
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/billing/outbox",
+      "elapsed_seconds": 2.422
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/gateway/handler",
+      "elapsed_seconds": 1.035
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/cmd/paired-live",
+      "elapsed_seconds": 7.182
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/billing/admin",
+      "elapsed_seconds": 5.447
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/gateway/middleware",
+      "elapsed_seconds": 1.6059999999999999
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/jev",
+      "elapsed_seconds": 1.476
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/pkg/controlplane",
+      "elapsed_seconds": 1.129
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/observability",
+      "elapsed_seconds": 1.733
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/router",
+      "elapsed_seconds": 1.353
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/billing/consumer",
+      "elapsed_seconds": 14.025
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/agent",
+      "elapsed_seconds": 43.245
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/billing/store",
+      "elapsed_seconds": 51.099
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+      "elapsed_seconds": 493.473
+    }
+  ],
+  "final_go_process": {
+    "exit_code": 0,
+    "operator_timeout": false,
+    "elapsed_seconds": 512.5143321670475,
+    "overall_timeout_seconds": 1200,
+    "original_parallelism": true
+  },
+  "final_go_jsonl_sha256": "2a55c0b0def10c746156fe8004ed00cb7e2da5ab054a3e83905efb7defe33c55",
+  "first_full_go_exit": 1,
+  "first_full_go_passing_packages": 18,
+  "first_full_go_failed_test": "TestConsumerKafkaE2E: Unknown Topic Or Partition",
+  "first_full_go_jsonl_sha256": "09730af8518795a1397fb5e90e2f3dfc93d3bc6903462ea9aaea589c8c253d30",
+  "kafka_independent_recheck_passed_seconds": 10.998,
+  "kafka_root_cause_confirmed": false,
+  "python_tests_run": 195,
+  "python_original_conditional_skips": 15,
+  "python_final_log_sha256": "b4b3f1f2faa75cf1a9b6391dc607571d63e00fa29de583590e598e7b76d37775",
+  "selector_and_cli_red_before_green": true,
+  "source_mutation_and_runtime_contract_review_red_before_green": true,
+  "all_1220_configs_prepared": true,
+  "actual_full1220_execution": false,
+  "new_model_calls": 0,
+  "new_jev_calls": 0,
+  "new_claims": 0
+}

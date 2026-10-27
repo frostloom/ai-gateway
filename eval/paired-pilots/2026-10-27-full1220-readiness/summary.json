@@ -1,0 +1,71 @@
+{
+  "schema": "full-customer-readiness-audit.v1",
+  "source_cases": 1220,
+  "paired_arms_per_pass": 2440,
+  "planned_turns_per_pass": 3924,
+  "boundary_scenarios_separate": 1851,
+  "source_revision_declared": "bd9ff30cbfd98eb9938cd9653adfb5ac7aefe52f",
+  "prepared_runtime": {
+    "routing_mode": "model",
+    "evidence_kind": "recorded_run",
+    "definition_sha256": "50848e347b985669e3424688f5f1e57b369d6c5577f3aa7e5de25e03144b7ebd",
+    "manifest_sha256": "afaf5fba49893d2c20e91dc8b0e84c998608b82194d6613a6b6549e289ac4181",
+    "profile_sha256": null,
+    "model": "deepseek-flash",
+    "provider_protocol": "openai",
+    "prompt_sha256": "731344ccef1bfc40456b6797e9c7cb5c5c3d628799d3e5ee8ab05f3142c6f7fa",
+    "tool_schema_sha256": "3962937d7fd08af4794758a56070b7bbadfb5c3e188cf1fa539355780b9e0e17",
+    "output_budget": 128,
+    "thinking_mode": "disabled",
+    "execution_revision": "bd9ff30cbfd98eb9938cd9653adfb5ac7aefe52f"
+  },
+  "pilot_whitelist_primary_count": 8,
+  "not_in_legacy_pilot_whitelist": 1212,
+  "allow_paid": false,
+  "ready_for_paid_run": false,
+  "full1220_evaluation_complete": false,
+  "model_calls": 0,
+  "jev_calls": 0,
+  "budget": {
+    "pricing_evidence_date": "2026-10-27",
+    "fresh_tariff_check": false,
+    "pricing_sha256": "66821a4b363b16f023b835c8eb73b2b10346475e5f6515eb6d2b9a6faa77d5bd",
+    "reservation_snapshot_sha256": "f09de5bb9ab4147f140f54db7a25c5f419b7a4e48137d63c1782ea7c38d768b3",
+    "remaining_micro_cny": 70938880,
+    "remaining_micro_usd": 776896,
+    "one_pass": {
+      "passes": 1,
+      "model_attempts": 19620,
+      "jev_attempts": 1962,
+      "model_micro_cny": 662999040,
+      "jev_micro_usd": 5273856,
+      "fits_existing_remaining_ceiling": false
+    },
+    "minimum_three_passes": {
+      "passes": 3,
+      "model_attempts": 58860,
+      "jev_attempts": 5886,
+      "model_micro_cny": 1988997120,
+      "jev_micro_usd": 15821568,
+      "fits_existing_remaining_ceiling": false
+    },
+    "actual_invoice_or_expected_spend": false,
+    "full_request_envelope_verified": false,
+    "permanent_reservations_released": false
+  },
+  "blockers": [
+    "Full-set execution is not accepted by the current pilot whitelist.",
+    "Per-case real Handler/fixture/scoring acceptance across the full set is unverified.",
+    "Full-set semantic standards and recorded-answer independent review remain required.",
+    "Full-set request envelope and new scope authorization/claims are not frozen.",
+    "Current conservative one- and three-pass envelopes exceed the remaining approved budget.",
+    "Full execution schedule, 300-second windows, and quality-failure versus infrastructure/safety-stop policy need explicit binding."
+  ],
+  "limitations": [
+    "Configuration preparation is not execution, task success, independent gold or provider validation.",
+    "Dated conservative envelopes are neither invoices nor a forecast of actual spend.",
+    "Three interleaved passes are required by the evaluation contract, not proved by repeated six-case samples.",
+    "No new paid scope, claim, credential lookup, database or network operation."
+  ],
+  "probe_sha256": "de67f64a4273da249ff3a5ddf2c3f1f27668bc39f58b32d0c183f405d3154d53"
+}
