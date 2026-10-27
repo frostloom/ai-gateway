@@ -1,0 +1,51 @@
+{
+  "schema": "refund-path-offline-diagnosis.v1",
+  "test_source_commit": "8fe18578d31390e78c20bad0ee57a7ec17cf4034",
+  "diagnostic_test": "TestReceiverRefundPathDiagnostic",
+  "subtests": [
+    {
+      "test": "TestReceiverRefundPathDiagnostic/model/direct-preview",
+      "elapsed_seconds": 4.97
+    },
+    {
+      "test": "TestReceiverRefundPathDiagnostic/model/read-then-preview",
+      "elapsed_seconds": 1.08
+    },
+    {
+      "test": "TestReceiverRefundPathDiagnostic/model/read-exhausted-repair",
+      "elapsed_seconds": 0.81
+    },
+    {
+      "test": "TestReceiverRefundPathDiagnostic/model/trim-then-preview",
+      "elapsed_seconds": 2.14
+    },
+    {
+      "test": "TestReceiverRefundPathDiagnostic/jev_selective/direct-preview",
+      "elapsed_seconds": 1.71
+    },
+    {
+      "test": "TestReceiverRefundPathDiagnostic/jev_selective/read-then-preview",
+      "elapsed_seconds": 0.46
+    },
+    {
+      "test": "TestReceiverRefundPathDiagnostic/jev_selective/read-exhausted-repair",
+      "elapsed_seconds": 0.39
+    },
+    {
+      "test": "TestReceiverRefundPathDiagnostic/jev_selective/trim-then-preview",
+      "elapsed_seconds": 0.28
+    }
+  ],
+  "package_elapsed_seconds": 12.88,
+  "model_real_calls": 0,
+  "jev_real_calls": 0,
+  "production_source_changed": false,
+  "test_fixture_balance_cent": 2000000,
+  "real_run_fixture_balance_cent": 2500,
+  "exact_live_model_output_replay": false,
+  "source_sha256": "25be1decee206c07d8d367e4b6c282078cac693db1009aa6040cff9de340f394",
+  "private_overlay_sha256": "59dc915c475154b6928bb734e4f471c5e76df87ef9d80431e2828e97ef5c0d3d",
+  "raw_go_jsonl_sha256": "461bcd3684b0ba829836cc705d704370a83321079950ffc1d6ed96feb3e0803e",
+  "raw_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "normal_mode_inference_count_guards_unchanged": true
+}

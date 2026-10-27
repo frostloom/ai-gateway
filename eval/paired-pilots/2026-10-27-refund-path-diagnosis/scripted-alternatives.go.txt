@@ -1,0 +1,130 @@
+package agent
+
+import (
+	"context"
+	"github.com/frostloom/ai-gateway/internal/jev"
+	"strings"
+	"testing"
+)
+
+func TestRefundCompletionNeedsActualExecution(t *testing.T) {
+	for _, mode := range []string{"model", "jev_selective"} {
+		for _, user := range []string{"退款 100 元", "不是修改旧申请；新申请从我本人账户退回充值款100元人民币，请先预览。"} {
+			for _, variant := range []string{"repair", "exhausted", "tool-explanation"} {
+				t.Run(mode+"/"+variant+"/"+user, func(t *testing.T) {
+					h, fa, _, done := newAgentHandler(t)
+					defer done()
+					if err := h.SetRoutingMode(mode); err != nil {
+						t.Fatal(err)
+					}
+					h.SetJev(jev.NewFake(fastVerdict("refund_recharge", .99)))
+					proposal := toolCallMsg("preview", "refund_recharge", `{"amount_money":100}`)
+					steps := []*Message{contentMsg("退款成功：退回 ¥100。"), proposal}
+					if variant == "exhausted" {
+						steps = []*Message{contentMsg("退款成功：退回 ¥100。"), contentMsg("退款成功：退回 ¥100。")}
+					}
+					if variant == "tool-explanation" {
+						proposal.Content = "退款成功：退回 ¥100。"
+						steps = []*Message{proposal}
+					}
+					model := &scriptedLLM{steps: steps}
+					h.llm = model
+					ses := &session{}
+					stats := &TurnTelemetry{}
+					ctx := context.WithValue(context.Background(), telemetryKey{}, stats)
+					reply, trace, err := h.process(ctx, "success-before-preview", 42, user, ses)
+					if err != nil || strings.Contains(reply, "退款成功") || len(fa.posts) != 0 || len(model.steps) != 0 {
+						t.Fatalf("false completion leaked: reply=%q trace=%+v pending=%+v err=%v", reply, trace, ses.PendingAction, err)
+					}
+					if variant == "exhausted" {
+						if ses.PendingAction != nil || len(trace) != 0 || stats.ReplyRepairs != 1 || !strings.Contains(reply, "没有执行") {
+							t.Fatal("unbounded or false exhausted repair")
+						}
+						return
+					}
+					wantRepairs := 1
+					if variant == "tool-explanation" {
+						wantRepairs = 0
+					}
+					if ses.PendingAction == nil || len(trace) != 1 || trace[0].Phase != "preview" || stats.ReplyRepairs != wantRepairs {
+						t.Fatal("real preview lost or extra calls")
+					}
+				})
+			}
+		}
+	}
+}
+
+func TestRefundCompletionFiniteForms(t *testing.T) {
+	for _, tc := range []struct {
+		user, reply string
+		repair      bool
+	}{
+		{"退款100元", "退款成功：退回 ¥100。", true},
+		{"请帮我退款100元", "已退款成功。", true},
+		{"请退款100元人民币", "退款成功：退回 ¥100。", true},
+		{"我要退款", "退款成功！", true},
+		{"不是修改旧申请；新申请从我本人账户退回充值款100元人民币，请先预览。", "退款成功：退回 ¥100。", true},
+		{"从我本人账户退回充值款100元人民币，请先预览。", "退款成功：退回 ¥100。", true},
+		{"不要退款100元", "退款成功：退回 ¥100。", false},
+		{"昨天退款100元成功了吗", "退款成功：退回 ¥100。", false},
+		{"如果退款100元", "退款成功：退回 ¥100。", false},
+		{"用户说：从我本人账户退回充值款100元人民币，请先预览。", "退款成功：退回 ¥100。", false},
+		{"从他本人账户退回充值款100元人民币，请先预览。", "退款成功：退回 ¥100。", false},
+		{"从我本人账户退回充值款100token，请先预览。", "退款成功：退回 ¥100。", false},
+		{"从我本人账户退回充值款100元人民币，请先预览，然后充值50元。", "退款成功：退回 ¥100。", false},
+		{"退款100元如何办理", "退款成功：退回 ¥100。", false},
+		{"退100到余额", "退款成功：退回 ¥100。", false},
+		{"提现100元", "退款成功：退回 ¥100。", false},
+		{"100元", "退款成功：退回 ¥100。", false},
+		{"退款100元", "如果退款成功：余额减少。", false},
+		{"退款100元", "“退款成功：退回 ¥100。”是示例。", false},
+		{"退款100元", "退款成功后可查记录。", false},
+	} {
+		if got := replyRepairReason(tc.reply, tc.user, nil) != ""; got != tc.repair {
+			t.Errorf("user=%q reply=%q got=%v want=%v", tc.user, tc.reply, got, tc.repair)
+		}
+	}
+}
+func TestRefundCompletionChangesRuntimeIdentity(t *testing.T) {
+	if (&Handler{}).EvaluationRuntimeMetadata().ContractSHA256 == "624a53c69b2fece1f705332ca208ee854be0588decad986d4dee42355ad46477" {
+		t.Fatal("refund boundary reused historical v4 contract")
+	}
+}
+
+// Diagnostic alternatives only: not a reconstruction of unrecorded live model output.
+func TestReceiverRefundPathDiagnostic(t *testing.T) {
+ for _, mode := range []string{"model", "jev_selective"} {
+  for _, scenario := range []string{"direct-preview", "read-then-preview", "read-exhausted-repair", "trim-then-preview"} {
+   t.Run(mode+"/"+scenario, func(t *testing.T) {
+    h, fa, _, done := newAgentHandler(t); defer done()
+    if err := h.SetRoutingMode(mode); err != nil { t.Fatal(err) }
+    h.SetJev(jev.NewFake(fastVerdict("refund_recharge", .99)))
+    read := toolCallMsg("read", "get_balance", `{}`)
+    proposal := toolCallMsg("refund", "refund_recharge", `{"amount_money":100}`)
+    steps := []*Message{proposal}
+    wantCalls := 1
+    if scenario == "read-then-preview" { steps = []*Message{read, proposal}; wantCalls=2 }
+    if scenario == "read-exhausted-repair" { steps = []*Message{read, contentMsg("退款成功：退回 ¥100。"), contentMsg("退款成功：退回 ¥100。")}; wantCalls=3 }
+    if scenario == "trim-then-preview" {
+     read.ToolCalls = append(read.ToolCalls, proposal.ToolCalls[0])
+     steps = []*Message{read, proposal}; wantCalls=2
+    }
+    model := &scriptedLLM{steps:steps}; h.llm=model
+    ses := &session{History:[]Message{{Role:"user", Content:"我要退款"},{Role:"assistant", Content:"请提供退款金额或订单号。"}}}
+    stats := &TurnTelemetry{}; ctx := context.WithValue(context.Background(),telemetryKey{},stats)
+    reply, trace, err := h.process(ctx,"receiver-refund-diagnostic",42,"不是修改旧申请；新申请从我本人账户退回充值款100元人民币，请先预览。",ses)
+    if err != nil || len(model.steps)!=0 || len(fa.posts)!=0 { t.Fatalf("err=%v remaining=%d writes=%d",err,len(model.steps),len(fa.posts)) }
+    if strings.Contains(reply,"退款成功") { t.Fatal("false completion leaked") }
+    if scenario == "read-exhausted-repair" {
+     if ses.PendingAction!=nil || len(trace)!=1 || trace[0].Tool!="get_balance" || stats.ReplyRepairs!=1 || !strings.Contains(reply,"没有执行") {t.Fatalf("wrong exhausted result trace=%+v pending=%+v repairs=%d reply=%q",trace,ses.PendingAction,stats.ReplyRepairs,reply)}
+     confirmation, confirmationTrace, err := h.process(ctx,"receiver-refund-diagnostic",42,"确认",ses)
+     if err!=nil || len(confirmationTrace)!=0 || len(fa.posts)!=0 || !strings.Contains(confirmation,"没有待确认操作") {t.Fatal("empty pending confirmation performed an operation")}
+    } else {
+     if ses.PendingAction==nil || ses.PendingAction.Tool!="refund_recharge" || len(trace)==0 || trace[len(trace)-1].Phase!="preview" || stats.ReplyRepairs!=0 {t.Fatalf("valid proposal lost: trace=%+v pending=%+v repairs=%d",trace,ses.PendingAction,stats.ReplyRepairs)}
+    }
+    t.Logf("scenario=%s scripted_calls=%d business_posts=%d repairs=%d pending=%t; synthetic alternative, no live-output reconstruction",scenario,wantCalls,len(fa.posts),stats.ReplyRepairs,ses.PendingAction!=nil)
+   })
+  }
+ }
+}

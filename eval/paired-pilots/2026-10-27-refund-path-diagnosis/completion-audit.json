@@ -1,0 +1,170 @@
+{
+  "schema": "evaluation-delivery-completion-audit.v1",
+  "checks": [
+    {
+      "requirement": "artifact integrity eval/paired-pilots/2026-10-27-receiver-deployment/manifest.json",
+      "verified": true,
+      "evidence": {
+        "manifest_sha256": "4e56dd73f1326423bc7c3f90dcfd53827d1b4fe72f655d9f2985ee94585db314",
+        "files": 15
+      }
+    },
+    {
+      "requirement": "artifact integrity eval/paired-pilots/2026-10-27-receiver-repeated-entry/manifest.json",
+      "verified": true,
+      "evidence": {
+        "manifest_sha256": "a93f668474559821ce203aab4fc4135c1de8cb95a8a49a9380083f5fdf1ae291",
+        "files": 23
+      }
+    },
+    {
+      "requirement": "artifact integrity eval/paired-pilots/2026-10-27-receiver-repeated-live-result/manifest.json",
+      "verified": true,
+      "evidence": {
+        "manifest_sha256": "5446f9b042d486dbc0add38be5002913bbbac77e6b17eae26a72e1dc96723ece",
+        "files": 25
+      }
+    },
+    {
+      "requirement": "artifact integrity eval/paired-pilots/2026-10-27-refund-path-diagnosis/manifest.json",
+      "verified": true,
+      "evidence": {
+        "manifest_sha256": "484022a6dd5a55c2e17ec87b07ba5dd6b43a5dfc5d89998b322cba1430d7d6c5",
+        "files": 4
+      }
+    },
+    {
+      "requirement": "verified executor Go source unchanged",
+      "verified": true,
+      "evidence": {
+        "go_files": 306,
+        "source_list_sha256": "f37e8b67c90e7a399fcb433c9eb68559902d1bcadd8e58f08fafad7abaf3877c"
+      }
+    },
+    {
+      "requirement": "historical evidence unchanged",
+      "verified": true,
+      "evidence": {
+        "files": 9277
+      }
+    },
+    {
+      "requirement": "all consumed predecessors unchanged",
+      "verified": true,
+      "evidence": {
+        "fixed_predecessors": 8
+      }
+    },
+    {
+      "requirement": "independent authorized scope executed once and stopped",
+      "verified": true,
+      "evidence": {
+        "receipt_sha256": "9031f137e08db8bd86f91714e22916a75223aa3693aa3a785972bf4673d0f062",
+        "process_sha256": "e063f76036f4343078c102698a10a19bff75d24547d9a606683081059f663379",
+        "finished_pairs": 6,
+        "unrun_pairs": 18,
+        "full_24_pair_completion": false
+      }
+    },
+    {
+      "requirement": "full permanent reservation within approved budget",
+      "verified": true,
+      "evidence": {
+        "schema": "receiver-repeated-accounting.v1",
+        "model_attempts": 24,
+        "model_input_tokens": 43273,
+        "model_output_tokens": 761,
+        "model_configured_micro_cny": 92634,
+        "jev_attempts": 6,
+        "jev_input_tokens": 7216,
+        "jev_output_tokens": 1117,
+        "jev_configured_micro_usd": "303.072",
+        "configured_prices_not_invoice": true,
+        "historical_plus_current_model_attempts": 143,
+        "historical_plus_current_jev_attempts": 37,
+        "full_scope_permanent_reserved_micro_cny": 8380416,
+        "full_scope_permanent_reserved_micro_usd": 64512,
+        "cumulative_reserved_micro_cny": 29061120,
+        "cumulative_reserved_micro_usd": 223104,
+        "remaining_ceiling_micro_cny": 70938880,
+        "remaining_ceiling_micro_usd": 776896,
+        "claim_sha256": "f09de5bb9ab4147f140f54db7a25c5f419b7a4e48137d63c1782ea7c38d768b3",
+        "observer_expected": 87,
+        "observer_read_back": 87
+      }
+    },
+    {
+      "requirement": "full Go regression for exact source",
+      "verified": true,
+      "evidence": {
+        "result_sha256": "37c981422a3af8c4b8bad691622093892c3b5e75d40afccdb75fcdcc38db31cd",
+        "jsonl_sha256": "b6980792a0b0cdb5dcde96b700f2bcd1e29d14a354996b47258118a1ed5b3f40",
+        "packages": 18
+      }
+    },
+    {
+      "requirement": "all real observation and turn content read back",
+      "verified": true,
+      "evidence": {
+        "content_readback_sha256": "5680bf067626a078cd8981bd2f33d9141c63f4c718248fa0452685a492abcb36",
+        "observations_private_sha256": "32e2535cec040383f481a54cd304f3c295661abb2f0947a1502c5514948156a5"
+      }
+    },
+    {
+      "requirement": "all delivered scores independently read back",
+      "verified": true,
+      "evidence": {
+        "deterministic": 84,
+        "independent_pass": 20,
+        "negative_review_separate": true,
+        "negative_independent_pass_scores": 0
+      }
+    },
+    {
+      "requirement": "independent review covers all executed arms and requirements",
+      "verified": true,
+      "evidence": {
+        "review_sha256": [
+          "e879cb25bcaf476b19c4abe3b7115a42bbfa583ff4222c2888cf0c1371a710f8",
+          "e64a508c741ea829eef698f6d142c8c5de04d214bec4a456fd33005158038eeb",
+          "97409f9052768948a8149927bc161795bd34d0f482764092cb6570e42d4ee2c6",
+          "1cd9d8066910e3d3e5605572b7f51f130d7d3366b3da9821e03170bb1a6490a0",
+          "aea9a544ee8f7c6032a4c76ef08ea0dc1b4c3879e3da8c773d77d385c24c3734",
+          "b9fae3198588f82d0cdaf598581fe5e6fa5a32d64b11527ed2990a25578695fb"
+        ],
+        "requirements": 66,
+        "failed_requirements": 2
+      }
+    },
+    {
+      "requirement": "Langfuse controlled deployment presently running fixed image",
+      "verified": true,
+      "evidence": {
+        "image_id": "sha256:677a486f0519c772b5db1217b028d4b2c8a9db7cd960468aadf6f71e944f532f",
+        "deployment_manifest_sha256": "4e56dd73f1326423bc7c3f90dcfd53827d1b4fe72f655d9f2985ee94585db314"
+      }
+    },
+    {
+      "requirement": "receiver diagnostics enabled",
+      "verified": true,
+      "evidence": {
+        "only_flag_projected": true
+      }
+    },
+    {
+      "requirement": "Hindsight result retained and read back",
+      "verified": true,
+      "evidence": {
+        "document_id": "receiver-repeated-live-result-20261027",
+        "readback_sha256": "71b8e1c68b81c6fa38ff49111d2b9e73bfa13bf4e6d02057cbccde8d3ce55c82"
+      }
+    }
+  ],
+  "original_goal_preserved": true,
+  "evaluation_result": "stopped_on_task_failure",
+  "full_24_pair_completion": false,
+  "overall_task_or_benefit_success_claim": false,
+  "followup_product_work_not_proven_fixed": true,
+  "remote_report_commit_verified": "8fe18578d31390e78c20bad0ee57a7ec17cf4034",
+  "zero_new_real_model_jev_claim": true
+}
