@@ -1,0 +1,264 @@
+{
+  "schema": "knowledge-resident-cost-result.v1",
+  "source_revision": "2aefb7f751901d461a58f4124fea9f8af5cb6ef4",
+  "corpus_unchanged": true,
+  "complete": true,
+  "cases": 100,
+  "tasks": 200,
+  "actual_user_turns": 224,
+  "labels": {
+    "a": "tool_rag",
+    "b": "resident"
+  },
+  "arms": {
+    "tool_rag": {
+      "cases": 100,
+      "passed": 96,
+      "failed": 4,
+      "accuracy": 0.96,
+      "unsupported_answers": 3,
+      "user_turns": 112,
+      "provider_calls": 159,
+      "tokens": {
+        "Input": 325583,
+        "Output": 8188,
+        "CacheHit": 292731,
+        "CacheMiss": 32852
+      },
+      "cache_hit_ratio": 0.8990979258745082,
+      "standardized_peak_cost_cny": "0.14291724",
+      "cost_per_correct": "0.00148872125",
+      "all_miss_cost_cny": "0.71667",
+      "p50_request_ms": 1258.1806245,
+      "p95_request_ms": 2227.61625,
+      "categories": {
+        "knowledge": {
+          "cases": 48,
+          "passed": 46
+        },
+        "unknown": {
+          "cases": 16,
+          "passed": 15
+        },
+        "dynamic": {
+          "cases": 16,
+          "passed": 16
+        },
+        "safety": {
+          "cases": 20,
+          "passed": 19
+        }
+      }
+    },
+    "resident": {
+      "cases": 100,
+      "passed": 97,
+      "failed": 3,
+      "accuracy": 0.97,
+      "unsupported_answers": 2,
+      "user_turns": 112,
+      "provider_calls": 132,
+      "tokens": {
+        "Input": 344505,
+        "Output": 6703,
+        "CacheHit": 318720,
+        "CacheMiss": 25785
+      },
+      "cache_hit_ratio": 0.9251534810815518,
+      "standardized_peak_cost_cny": "0.1179428",
+      "cost_per_correct": "0.001215905154639175257731958763",
+      "all_miss_cost_cny": "0.742634",
+      "p50_request_ms": 1130.264021,
+      "p95_request_ms": 2265.979334,
+      "categories": {
+        "knowledge": {
+          "cases": 48,
+          "passed": 47
+        },
+        "unknown": {
+          "cases": 16,
+          "passed": 15
+        },
+        "dynamic": {
+          "cases": 16,
+          "passed": 16
+        },
+        "safety": {
+          "cases": 20,
+          "passed": 19
+        }
+      }
+    }
+  },
+  "paired_outcomes": {
+    "both_pass": 94,
+    "resident_only": 3,
+    "tool_only": 2,
+    "both_fail": 1
+  },
+  "resident_cost_change_vs_concurrent_tool": "-0.1747475671934330665775521554",
+  "resident_cost_change_vs_historical_main": "-0.0462566665027804588986329303",
+  "cold_common_hit_ratio_cost_cny": {
+    "tool_rag": {
+      "0": "0.71667",
+      "0.5": "0.39759866",
+      "0.8": "0.206155856",
+      "0.9": "0.142341588",
+      "0.95": "0.110434454",
+      "1": "0.07852732"
+    },
+    "resident": {
+      "0": "0.742634",
+      "0.5": "0.4050191",
+      "0.8": "0.20245016",
+      "0.9": "0.13492718",
+      "0.95": "0.10116569",
+      "1": "0.0674042"
+    }
+  },
+  "common_hit_break_even_resident_vs_tool": "0.7000813220330939690113441001",
+  "resident_hit_ratio_for_historical_main_plus10_target": "0.8983677201450528397887652470",
+  "acceptance_point_estimates": {
+    "accuracy_not_below_current_tool": true,
+    "accuracy_at_least_historical_rag93": true,
+    "cost_below_current_tool": true,
+    "cost_at_most_historical_main_plus10percent": true,
+    "p50_not_above_tool": true,
+    "calls_not_above_tool": true
+  },
+  "new_provider_calls": 291,
+  "new_jev_calls": 0,
+  "inherited_provider_calls": 308,
+  "parent_cumulative_provider_calls": 599,
+  "parent_cap_cny": 20,
+  "new_allocation_cny": 0,
+  "parent_known_upper_cny": "2.771512",
+  "new_all_miss_upper_cny": "1.459304",
+  "new_standardized_peak_cost_cny": "0.26086004",
+  "actual_invoice": null,
+  "business_unchanged_tasks": 200,
+  "owned_cleanup_tasks": 200,
+  "cleanup": true,
+  "observer_stats": {
+    "Accepted": 2292,
+    "Dropped": 0,
+    "Exported": 2292,
+    "Failed": 0,
+    "Batches": 415,
+    "Turns": 224,
+    "SampledTurns": 224,
+    "QueueDepth": 0
+  },
+  "langfuse": {
+    "schema": "knowledge-answer100-complete-readback.v1",
+    "actual_turns": 224,
+    "queried_turns": 224,
+    "verified_turns": 224,
+    "unique_observations": 2292,
+    "retrieval_queries": 28,
+    "retrieval_chunks": 32,
+    "included_contexts": 35,
+    "resident_contexts": 1584,
+    "failures": []
+  },
+  "historical_reference": {
+    "main": {
+      "cases": 100,
+      "passed": 86,
+      "failed": 14,
+      "accuracy": 0.86,
+      "unsupported_answers": 7,
+      "user_turns": 112,
+      "provider_calls": 140,
+      "tokens": {
+        "Input": 252152,
+        "Output": 6265,
+        "CacheHit": 219776,
+        "CacheMiss": 32376
+      },
+      "upper_cost_cny": 0.554424,
+      "standardized_peak_cost_cny": "0.12366304",
+      "cost_per_correct": "0.001437942325581395348837209302",
+      "turn_p50_ms": 1205.481667,
+      "turn_p95_ms": 2480.170792,
+      "task_p50_ms": 1226.3341034999999,
+      "task_p95_ms": 3487.7597910000004,
+      "categories": {
+        "knowledge": {
+          "passed": 40,
+          "cases": 48
+        },
+        "unknown": {
+          "passed": 15,
+          "cases": 16
+        },
+        "dynamic": {
+          "passed": 16,
+          "cases": 16
+        },
+        "safety": {
+          "passed": 15,
+          "cases": 20
+        }
+      }
+    },
+    "rag": {
+      "cases": 100,
+      "passed": 93,
+      "failed": 7,
+      "accuracy": 0.93,
+      "unsupported_answers": 3,
+      "user_turns": 112,
+      "provider_calls": 168,
+      "tokens": {
+        "Input": 344856,
+        "Output": 8509,
+        "CacheHit": 302848,
+        "CacheMiss": 42008
+      },
+      "upper_cost_cny": 0.757784,
+      "standardized_peak_cost_cny": "0.16420192",
+      "cost_per_correct": "0.001765612043010752688172043011",
+      "turn_p50_ms": 1653.2207495,
+      "turn_p95_ms": 2925.364542,
+      "task_p50_ms": 1676.6926875,
+      "task_p95_ms": 3647.441083,
+      "categories": {
+        "knowledge": {
+          "passed": 43,
+          "cases": 48
+        },
+        "unknown": {
+          "passed": 16,
+          "cases": 16
+        },
+        "dynamic": {
+          "passed": 16,
+          "cases": 16
+        },
+        "safety": {
+          "passed": 18,
+          "cases": 20
+        }
+      }
+    },
+    "same_round": false
+  },
+  "grade_sha256": {
+    "grades-knowledge-unknown.json": "fbc74b9fc1948dfb10faf907aa17fc8423bae4e1fbde1ab89110c4c44841d63d",
+    "grades-dynamic-safety.json": "79a56e4ee2f8926c735e2f2721e42ee08f0c004b975bea7b622afde0e056525d"
+  },
+  "recording_sha256": "298906b8496871893170d3e791d8005b8bee7d62a1de9cc45acab63fb42e3cf3",
+  "limitations": [
+    "one reused100-case cycle; independent agent semantic review, not human adjudication or fully blinded",
+    "new tool96 vs resident97 are concurrent; old main86/rag93 remain historical, not overwritten",
+    "cold/common-cache costs are arithmetic counterfactuals, not additional real runs; savings depend on cache",
+    "small corpus <=4096bytes/16chunks; no generalized large-corpus/high-concurrency/1220 claim",
+    "resident changes both knowledge delivery and concise-answer guidance; no attribution to retrieval removal alone"
+  ],
+  "suite_sha256": "ee7954fea32df4ad2a80a72fb8e22a995e7ca67d29d8268e175848f7ee280f87",
+  "corpus_sha256": "fd64639a5c1e5af7b05fc4747089b675e92b9a3ea1ebb43e2d35b88737763aa4",
+  "contract_sha256": "f605448dce9dd9e1755d5f965cf9f3a5445a7116ffc38c23d98d56f86962e802",
+  "binary_sha256": "899ce94d550454d1d69df9329977abccb93001382df4baa1afb95da9f0a4f315",
+  "expected_runtime_sha256": "2829a27bf233c0fa5aa57b4a253d44e13e7a6970297f66094dd0f3c6aaef0874"
+}

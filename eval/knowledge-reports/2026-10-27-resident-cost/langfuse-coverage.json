@@ -1,0 +1,3691 @@
+{
+  "schema": "knowledge-answer100-complete-readback.v1",
+  "actual_turns": 224,
+  "queried_turns": 224,
+  "verified_turns": 224,
+  "unique_observations": 2292,
+  "retrieval_queries": 28,
+  "retrieval_chunks": 32,
+  "included_contexts": 35,
+  "resident_contexts": 1584,
+  "failures": [],
+  "receipts": [
+    {
+      "slot": "K001-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 2,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "e4ce4be4de1056a29931d020cb39263c5aaaccde46ee853a7d3006b7a0e52f62"
+    },
+    {
+      "slot": "K001-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "643c1cb3febf7c5f214a23a18657d7c11d05bc9cfad95d77f1ca5c3190ca0eb2"
+    },
+    {
+      "slot": "K002-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "75eee5cbde69b52dc3a9125a648763b115eabf787e4ec6b690afd856a6380919"
+    },
+    {
+      "slot": "K002-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 10,
+      "queries": [
+        "ok"
+      ],
+      "retrieval_chunks": 2,
+      "included_contexts": 2,
+      "resident_contexts": 0,
+      "names": {
+        "knowledge.request_outcome": 1,
+        "knowledge.request_context": 2,
+        "llm.attempt": 2,
+        "knowledge.chunk": 2,
+        "knowledge.retrieval": 1,
+        "tool.search_platform_knowledge": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "7842100deb47d7fd9231a2418d3e417c531977fd7f53cd1cdcc64093ad64c621"
+    },
+    {
+      "slot": "K003-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 8,
+      "queries": [
+        "ok"
+      ],
+      "retrieval_chunks": 1,
+      "included_contexts": 1,
+      "resident_contexts": 0,
+      "names": {
+        "knowledge.request_outcome": 1,
+        "knowledge.request_context": 1,
+        "llm.attempt": 2,
+        "knowledge.chunk": 1,
+        "knowledge.retrieval": 1,
+        "tool.search_platform_knowledge": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "34582deac332f6afb79dccd4ab8b6000400e16472e49ce0847c464af6c277f52"
+    },
+    {
+      "slot": "K003-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "d4449e5f7a85b0c651542dce704c88864dcc48c8fb9e1d0cc815736e92679068"
+    },
+    {
+      "slot": "K004-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "a2b44fe15c7467062cf18dfd84c5bec6171a57a5e5c8c56874ea154ea6c12637"
+    },
+    {
+      "slot": "K004-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 2,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "9dc5021e1b85c1405150224f3445d5b0d04ad9618c629b642e474857ce8fd7a2"
+    },
+    {
+      "slot": "K005-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 2,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "1541a0f38b8b818debc4930153769d18e95e1c3d0aeb84084c5052a38e18616d"
+    },
+    {
+      "slot": "K005-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "e24921cce9ef9a714cdeb71df24a21bef6a4e92ef001100045cad0092e217199"
+    },
+    {
+      "slot": "K006-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "5dcf79a0e01e81dc2149a04323f3d59d1d74b87b2179d88ccec8b5d61d9225e7"
+    },
+    {
+      "slot": "K006-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 2,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "ae045fc64d7644a91f95825b99562c0dd47689b0a31864100c85b62594890a5f"
+    },
+    {
+      "slot": "K007-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 2,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "c023057ed2e03b694ea55fedd1f36e19ecd68f3b3f12164380d56877ecd91ee5"
+    },
+    {
+      "slot": "K007-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "6b21631eaac292dc319ca79aa4b89fe43fb828c329ef403162438d69d8d099ae"
+    },
+    {
+      "slot": "K008-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "9c32aa61a3d8036340cf41036efef52fdcce9d84ac0cef7f3471aeedfd81bd87"
+    },
+    {
+      "slot": "K008-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 2,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "f82bf2fcb74ec7b7cb9b8e7a4917d2bcb2ea2f5a33356f363540a54e65686f6d"
+    },
+    {
+      "slot": "K009-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 5,
+      "queries": [
+        "no_match"
+      ],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 2,
+        "knowledge.retrieval": 1,
+        "tool.search_platform_knowledge": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "6484d40c93bcc59b3857f4cbbf3455907ba8f1cd4a273babeaf4822a89a5e72e"
+    },
+    {
+      "slot": "K009-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "6aee23c30316aaab1a0f7f0a36b0e13d99629f38725cc83f07fa1b440166859f"
+    },
+    {
+      "slot": "K010-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "c6eca7b336cd92645bfbcaf955c44e68c428288e143c310257b32067d680dc91"
+    },
+    {
+      "slot": "K010-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 8,
+      "queries": [
+        "ok"
+      ],
+      "retrieval_chunks": 1,
+      "included_contexts": 1,
+      "resident_contexts": 0,
+      "names": {
+        "knowledge.request_outcome": 1,
+        "llm.attempt": 2,
+        "knowledge.request_context": 1,
+        "knowledge.chunk": 1,
+        "knowledge.retrieval": 1,
+        "tool.search_platform_knowledge": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "543b69fe7da5719e9cee24647c8c281af4a31d7c03a82802b54e6c912d638dba"
+    },
+    {
+      "slot": "K011-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 5,
+      "queries": [
+        "no_match"
+      ],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 2,
+        "knowledge.retrieval": 1,
+        "tool.search_platform_knowledge": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "d216b4bbd51fb8df82d2d84dfac180453e2e58b182d52f3e086cb891bbc667d1"
+    },
+    {
+      "slot": "K011-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "ef09060d972724cb24ee82daa716fb706546a73609382006d16ca779679f6df7"
+    },
+    {
+      "slot": "K012-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 28,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 24,
+      "names": {
+        "knowledge.resident_context": 24,
+        "llm.attempt": 2,
+        "tool.list_plans": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "494effe3cf90f2dd62d1b7146114529c018d33ccd7f0616d63e9c9b5d56608e4"
+    },
+    {
+      "slot": "K012-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 4,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 2,
+        "tool.list_plans": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "1d86aa8f9fb4fccca903c36197735d570dee0cbbdbb44a6e724288a147d4ef25"
+    },
+    {
+      "slot": "K013-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 12,
+      "queries": [
+        "ok"
+      ],
+      "retrieval_chunks": 3,
+      "included_contexts": 3,
+      "resident_contexts": 0,
+      "names": {
+        "knowledge.request_outcome": 1,
+        "knowledge.request_context": 3,
+        "llm.attempt": 2,
+        "knowledge.chunk": 3,
+        "knowledge.retrieval": 1,
+        "tool.search_platform_knowledge": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "642971a5e43f4775d8da6f9e95f468441b980bb87bbe3aa73737425cf9a4ee50"
+    },
+    {
+      "slot": "K013-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "bc576546452a4dacb6ae4a383884dfb4f802223b10dd30f8c2b1eda4f4a53732"
+    },
+    {
+      "slot": "K014-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "llm.attempt": 1,
+        "knowledge.resident_context": 12,
+        "agent.turn": 1
+      },
+      "raw_sha256": "eb1212ef48e3753800253b9b0606abc8237dee1142cd4c3cbb5517a6aa7c6069"
+    },
+    {
+      "slot": "K014-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 12,
+      "queries": [
+        "ok"
+      ],
+      "retrieval_chunks": 3,
+      "included_contexts": 3,
+      "resident_contexts": 0,
+      "names": {
+        "knowledge.request_outcome": 1,
+        "knowledge.request_context": 3,
+        "llm.attempt": 2,
+        "knowledge.chunk": 3,
+        "knowledge.retrieval": 1,
+        "tool.search_platform_knowledge": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "ae3f0b1a148318b9fc882c978591e30899b3eb0f4a73f93e6422591988f62181"
+    },
+    {
+      "slot": "K015-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 10,
+      "queries": [
+        "ok"
+      ],
+      "retrieval_chunks": 2,
+      "included_contexts": 2,
+      "resident_contexts": 0,
+      "names": {
+        "knowledge.request_outcome": 1,
+        "knowledge.request_context": 2,
+        "llm.attempt": 2,
+        "knowledge.chunk": 2,
+        "tool.search_platform_knowledge": 1,
+        "knowledge.retrieval": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "20998a95041b9373e91b063c4809cb140298bc82ea968b14b08cdb9410f3fc8e"
+    },
+    {
+      "slot": "K015-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "ccb85006c7500363bf9c16792c9ae304a607d5a8f5f885f6fb3cfa933d69f388"
+    },
+    {
+      "slot": "K016-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "0f93b4bdc1ca8ed72655baed6c837bb3ba9aa7ab358f5059af607ea92ef7d905"
+    },
+    {
+      "slot": "K016-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 2,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "eb8a73b2e5e406cb3f51af52e80785fcfaf24ca501b5dfa5591914c0024d1732"
+    },
+    {
+      "slot": "K017-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 2,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "e6d56e6cfe7dc974021e8c201d181fcb5beed2b50c0c813d8b887b68c87e17a3"
+    },
+    {
+      "slot": "K017-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "6ec50867dedd673e16c4a29b4ecb19dad5aaf7cbd889e3e378506705689a32b6"
+    },
+    {
+      "slot": "K018-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "eefd3befd8af11fa032388ae6709fe7f792fe87a80e43448ec2f6201c347ab4c"
+    },
+    {
+      "slot": "K018-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 2,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "91a00dfc7619367b508209c746b9e363edb2a1685cb58061b70b092fba0ccfc9"
+    },
+    {
+      "slot": "K019-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 2,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "510d28eefb28de8e9f387d32a1e1cad8f073c8810e0c15d26e956bd28da0dbcf"
+    },
+    {
+      "slot": "K019-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "097b80da8c6c544f6082d97a94ff812c2538902fe0d41e4f38875e7d0525c297"
+    },
+    {
+      "slot": "K020-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "4836c47d88c743a0d0c71f34efbffe594394e6e61345d279cd3b5ce8489aec9c"
+    },
+    {
+      "slot": "K020-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 8,
+      "queries": [
+        "ok"
+      ],
+      "retrieval_chunks": 1,
+      "included_contexts": 1,
+      "resident_contexts": 0,
+      "names": {
+        "knowledge.request_outcome": 1,
+        "llm.attempt": 2,
+        "knowledge.request_context": 1,
+        "knowledge.retrieval": 1,
+        "knowledge.chunk": 1,
+        "tool.search_platform_knowledge": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "300a8c5afc6c41c4daab2a30fcd1e2425f003e648bd66d1cecc94fd0761b7ebe"
+    },
+    {
+      "slot": "K021-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 8,
+      "queries": [
+        "ok"
+      ],
+      "retrieval_chunks": 1,
+      "included_contexts": 1,
+      "resident_contexts": 0,
+      "names": {
+        "knowledge.request_outcome": 1,
+        "llm.attempt": 2,
+        "knowledge.request_context": 1,
+        "knowledge.chunk": 1,
+        "knowledge.retrieval": 1,
+        "tool.search_platform_knowledge": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "a979fc62ec94c337fcc4c9618a026b6489bfbd115803af5520c290ddbb358ab5"
+    },
+    {
+      "slot": "K021-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "535093eca6810314b3eb355361c9c65122a68cf7558df2486b42f55fa7b7bcc4"
+    },
+    {
+      "slot": "K022-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "7e9935ca524319d429da07c424c3332e9930155b1caac4b0ff540af45eb1efb8"
+    },
+    {
+      "slot": "K022-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 2,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "02151c8862f894aa91f34939bf45b2463d4e434f9ac96be713a539df43bf1a14"
+    },
+    {
+      "slot": "K023-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 2,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "1a0789f34c1cfb403bcef4cc70d204dfb4828c7a943c0145af58551a6421476b"
+    },
+    {
+      "slot": "K023-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "ed2d02e306d07bb497eea9b2ddf7eb00aad4983fa1e4107119e7642332b55261"
+    },
+    {
+      "slot": "K024-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "8ccda18ae972c158ae3253a4168a6a2a52e894625470c5040bb181399aa7d267"
+    },
+    {
+      "slot": "K024-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 12,
+      "queries": [
+        "ok"
+      ],
+      "retrieval_chunks": 3,
+      "included_contexts": 3,
+      "resident_contexts": 0,
+      "names": {
+        "knowledge.request_outcome": 1,
+        "knowledge.request_context": 3,
+        "llm.attempt": 2,
+        "tool.search_platform_knowledge": 1,
+        "knowledge.chunk": 3,
+        "knowledge.retrieval": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "a49544073df2daa0f9bebd7aad0393c87fa96e432c67436bf71df95a846bcaf0"
+    },
+    {
+      "slot": "K025-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 2,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "73b8e924a6326f3bca4b3ba2f8b59e744c7525cae297546974d17a1b7f32fa0c"
+    },
+    {
+      "slot": "K025-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "ffb28af094a598001c62f4cccdb9eeffbd37f34374df488fcd26a360b392e1ee"
+    },
+    {
+      "slot": "K026-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "cd108f40289dcb8ffd64e676b8adbe3b14e9b2ead72d1dd61c3cf4282432954e"
+    },
+    {
+      "slot": "K026-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 2,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "253d52fcea209d6d72791e0bcbee3a59df04c2ecdc414bb98694941b0bd605e2"
+    },
+    {
+      "slot": "K027-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 2,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "af5e0c9ffc7414eb97b36e3ea16fac37b45807bef702f6760e014b9c56446bf7"
+    },
+    {
+      "slot": "K027-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "3e972ff323207847b0c58db2d39df4c77d49e0a32641d761a992fa3b70c85de9"
+    },
+    {
+      "slot": "K028-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "c778c228a5ed9adc86c4fc602babf9d986a000be4bead5f6deaad77094ba1a87"
+    },
+    {
+      "slot": "K028-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 2,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "882c277bb850bfccb6f9bf07369ee3edac95dc995a3d5ca3b3c47a163d1742cd"
+    },
+    {
+      "slot": "K029-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 2,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "6e1e5968508e87db7336bb4e702c1a733adc771302a50fbad16eb4ef5e10c7cd"
+    },
+    {
+      "slot": "K029-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "f5edf00c544ce59e31dab933133b8d55e67b52c0778888b60f3a4120055edacd"
+    },
+    {
+      "slot": "K030-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "29c60ec96c02df886d7a0422261fdb65ca46ee148290896036d33fa9e7a490df"
+    },
+    {
+      "slot": "K030-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 8,
+      "queries": [
+        "ok"
+      ],
+      "retrieval_chunks": 1,
+      "included_contexts": 1,
+      "resident_contexts": 0,
+      "names": {
+        "knowledge.request_outcome": 1,
+        "knowledge.request_context": 1,
+        "llm.attempt": 2,
+        "knowledge.chunk": 1,
+        "tool.search_platform_knowledge": 1,
+        "knowledge.retrieval": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "48bd2c97c608b2bc16e1bf369626a99355cf5e5e9c77537c1755d156e71f5a8d"
+    },
+    {
+      "slot": "K031-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 2,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "59e9a33af9063cac4806efe6c1f018ee5d0221f07d3fdd57410d497d686c7fa8"
+    },
+    {
+      "slot": "K031-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "8700ba59372eb5d4f253c4c776389f10baefca1b69dde7a069877f7a81b9d03a"
+    },
+    {
+      "slot": "K032-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "2a8fa1790c21755edec746afe10e55789b8668428aaa41836336d8b5a827022c"
+    },
+    {
+      "slot": "K032-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 2,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "df15a183a58d7ba27d38f5828c61405305dc94ee2c4a1962c16e85e9f7de3ae8"
+    },
+    {
+      "slot": "K033-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 2,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "2b86bb781b4706cf125dc05b9d828b080b59b45e8916fa393e54c9c10fd9c2c4"
+    },
+    {
+      "slot": "K033-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "d0b43d5de785f36b2779de2c11e0f468b2494f91626c5bc943a62ce9d7bc2ebf"
+    },
+    {
+      "slot": "K034-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "4d3b4f34345fc6abc4328c09461f397faa901e49fdb96688d18127437ce275e0"
+    },
+    {
+      "slot": "K034-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 8,
+      "queries": [
+        "ok"
+      ],
+      "retrieval_chunks": 1,
+      "included_contexts": 1,
+      "resident_contexts": 0,
+      "names": {
+        "knowledge.request_outcome": 1,
+        "knowledge.request_context": 1,
+        "llm.attempt": 2,
+        "knowledge.chunk": 1,
+        "knowledge.retrieval": 1,
+        "tool.search_platform_knowledge": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "6b8a85636b4a9383b3bc4b5af8df3c86c1e05f9caf8a6f32a57d494de07ca206"
+    },
+    {
+      "slot": "K035-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 2,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "00e1363e50db2e8aefd392e8c370af208cfbf463db36b1cff1a368d016042996"
+    },
+    {
+      "slot": "K035-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "a3d0ac904dfb1a6af963c578b8d84a76649c32caf39c381627d911851d89cf68"
+    },
+    {
+      "slot": "K036-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "92cd4514fbd2ff2dec832c47cbbca8ddf5519321c6640c62e631f54b60e7e53b"
+    },
+    {
+      "slot": "K036-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 2,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "3f11753dae5b04c877065f53c8e66fb7dac20aaca4262b707936816499e24415"
+    },
+    {
+      "slot": "U001-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 5,
+      "queries": [
+        "no_match"
+      ],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 2,
+        "knowledge.retrieval": 1,
+        "tool.search_platform_knowledge": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "5ddf2879bced6797c45566302732165f6511aab5c8aa5a23025d9c4283eda277"
+    },
+    {
+      "slot": "U001-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "f5ba78333025e7d7c34e8d51e8f8b81aea66de3ad8368559f4548892bf7404c6"
+    },
+    {
+      "slot": "U002-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "26bf60177ad92ed327fee80f547459e53acb316a36649d7e09b5d74247f38c16"
+    },
+    {
+      "slot": "U002-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 2,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "08ff10edbeac2ae4c3bef7689f5d92670449fc14172ffdcd7121af543b312c65"
+    },
+    {
+      "slot": "U003-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 5,
+      "queries": [
+        "no_match"
+      ],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 2,
+        "knowledge.retrieval": 1,
+        "tool.search_platform_knowledge": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "6677f6fb982697b4cf3e9d2900109ee1d23614b77a1280b60e0a3a07daf22177"
+    },
+    {
+      "slot": "U003-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "8b149ef1538d0485469a7fed2c17097b5157b27ed156ecbe82c48dff1e25b0f2"
+    },
+    {
+      "slot": "U004-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "b9aded9eb26ccff69a5a4765081c5f7e5ff01f271a7b59f34eb95641cb292618"
+    },
+    {
+      "slot": "U004-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 5,
+      "queries": [
+        "no_match"
+      ],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 2,
+        "knowledge.retrieval": 1,
+        "tool.search_platform_knowledge": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "b3b04d5788ef510f03d0569d32e5d0ac7d0d5324674f2fcd3704e2b817ab0341"
+    },
+    {
+      "slot": "U005-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 8,
+      "queries": [
+        "ok"
+      ],
+      "retrieval_chunks": 1,
+      "included_contexts": 1,
+      "resident_contexts": 0,
+      "names": {
+        "knowledge.request_outcome": 1,
+        "llm.attempt": 2,
+        "knowledge.request_context": 1,
+        "knowledge.retrieval": 1,
+        "knowledge.chunk": 1,
+        "tool.search_platform_knowledge": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "f4c89652ae85677b32528b7713ac3ba5b249801cfb406b32c2b1861f6f97e68e"
+    },
+    {
+      "slot": "U005-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "3981aebf73f5593fe6af9b7c95df9c57f4c93ea38e909ad968d512a0aae6adc2"
+    },
+    {
+      "slot": "U006-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "be5ba1b4a9a742f099edc3d92bf4abd07d524ad36bd4953d13b6c0c349a3c4fb"
+    },
+    {
+      "slot": "U006-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 10,
+      "queries": [
+        "ok"
+      ],
+      "retrieval_chunks": 2,
+      "included_contexts": 2,
+      "resident_contexts": 0,
+      "names": {
+        "knowledge.request_outcome": 1,
+        "llm.attempt": 2,
+        "knowledge.request_context": 2,
+        "knowledge.retrieval": 1,
+        "knowledge.chunk": 2,
+        "tool.search_platform_knowledge": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "6c1d37afd2375a9f1c38e412d1e684e03b216bb88434d72b5b9d46e4a8505315"
+    },
+    {
+      "slot": "U007-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 10,
+      "queries": [
+        "ok"
+      ],
+      "retrieval_chunks": 2,
+      "included_contexts": 2,
+      "resident_contexts": 0,
+      "names": {
+        "knowledge.request_outcome": 1,
+        "llm.attempt": 2,
+        "knowledge.request_context": 2,
+        "knowledge.chunk": 2,
+        "tool.search_platform_knowledge": 1,
+        "knowledge.retrieval": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "aaa72f083311edc7e77d01245a834d4a983bdfb6eb7d4a49614fac91e546a8bd"
+    },
+    {
+      "slot": "U007-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "d3cdfda12049e54baf994d85d0534c956403a059da2237dc86b43054679b28bb"
+    },
+    {
+      "slot": "U008-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "8573dc5d0b9d7d4f5bf7ada828b41adfbf6de3a98e075ffe6b2b4941b7d03674"
+    },
+    {
+      "slot": "U008-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 5,
+      "queries": [
+        "no_match"
+      ],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 2,
+        "knowledge.retrieval": 1,
+        "tool.search_platform_knowledge": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "6dd1a24c2f4d6f3c82ee9bde7b9fb584e9b41ee670fbacaaab269501669c48ac"
+    },
+    {
+      "slot": "U009-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 5,
+      "queries": [
+        "no_match"
+      ],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 2,
+        "knowledge.retrieval": 1,
+        "tool.search_platform_knowledge": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "e68555dbe0c416265979835265c911d05a803277aa75d4ba64b1abbfbbf2d6af"
+    },
+    {
+      "slot": "U009-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "3e508dda52d975b3f3b4705a296db175814e7a86958d64d5cad712b831dbfaf3"
+    },
+    {
+      "slot": "U010-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "afe185aac65a9f6002ccebf1f2476f5ffcddb52a070064eb5f558a549d042fc0"
+    },
+    {
+      "slot": "U010-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 5,
+      "queries": [
+        "no_match"
+      ],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 2,
+        "tool.search_platform_knowledge": 1,
+        "knowledge.retrieval": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "0e22f20c4c5dc28aaa139e23a7754ad674276f8b2af1110d1194f99356b73054"
+    },
+    {
+      "slot": "U011-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 5,
+      "queries": [
+        "no_match"
+      ],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 2,
+        "knowledge.retrieval": 1,
+        "tool.search_platform_knowledge": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "a5a972634993794f8e1a79ba11532504ba191d1bd1699b91d7c94e8e49af962a"
+    },
+    {
+      "slot": "U011-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "943be6a5464820cafed8b47a1c16d3c46fd6f233d4643d3dd0f70bc5989e1ef5"
+    },
+    {
+      "slot": "U012-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "8107509481033390e5bd7c0886ebfe8590ad50c1feb84335bbf0e57d5a54ba53"
+    },
+    {
+      "slot": "U012-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 5,
+      "queries": [
+        "no_match"
+      ],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 2,
+        "tool.search_platform_knowledge": 1,
+        "knowledge.retrieval": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "d3a80a8e98eb5b5f73e769ba6124f15aaae35e7baa8b43372e9d00de7c06d095"
+    },
+    {
+      "slot": "D001-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 4,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 2,
+        "tool.list_plans": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "04d663967ccf1d91f252134c9079e9b2f71349cda3636d8b90608db0f3a6d70c"
+    },
+    {
+      "slot": "D001-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 28,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 24,
+      "names": {
+        "knowledge.resident_context": 24,
+        "llm.attempt": 2,
+        "tool.list_plans": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "b0f50e5258709c25a1cfa955243066edf539b178406a015da673ec491b843da3"
+    },
+    {
+      "slot": "D002-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 28,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 24,
+      "names": {
+        "knowledge.resident_context": 24,
+        "llm.attempt": 2,
+        "tool.list_plans": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "912aa43763d060293645b478f6ca1eeaafe6e3f34727da7a2f6d45bfb49dea84"
+    },
+    {
+      "slot": "D002-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 4,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 2,
+        "tool.list_plans": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "b1868fa69aa346f8f0b847288368d07723eda417b86e941d0e68fd961b715f7e"
+    },
+    {
+      "slot": "D003-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 4,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 2,
+        "tool.list_models": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "74d1c19723d5b01930781a56b66d1c0f847a04a3361c762e0b88c4941cc9a5a9"
+    },
+    {
+      "slot": "D003-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 28,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 24,
+      "names": {
+        "knowledge.resident_context": 24,
+        "llm.attempt": 2,
+        "tool.list_models": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "5f096fd54f52b729d0ab02bc7346b0d50f40341fc02f9a4b1e2181b24bfb73bb"
+    },
+    {
+      "slot": "D004-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 28,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 24,
+      "names": {
+        "knowledge.resident_context": 24,
+        "llm.attempt": 2,
+        "tool.list_models": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "ee8e841c2aee4ac032445ebd115a55171d31ec84977107bf8c69c70cf00110fc"
+    },
+    {
+      "slot": "D004-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 4,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 2,
+        "tool.list_models": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "4139497ee8dca3e6a9f3b1173af647c144514cb1bafc6b1837614f3a4c282f86"
+    },
+    {
+      "slot": "D005-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 4,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 2,
+        "tool.get_balance": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "1139a9f1933f33f47ab39059fd2e4ef30b11f040b9c194bb643871665fc0eaea"
+    },
+    {
+      "slot": "D005-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 28,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 24,
+      "names": {
+        "knowledge.resident_context": 24,
+        "llm.attempt": 2,
+        "tool.get_balance": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "ffd36287e39d9c876ffbf53e3bec86ce05c7ee5d7db9526f5837a206652ce516"
+    },
+    {
+      "slot": "D006-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 28,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 24,
+      "names": {
+        "knowledge.resident_context": 24,
+        "llm.attempt": 2,
+        "tool.get_balance": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "091fa8c074c9c195be02470ce74d69edec6635e5423ba33390cc617c9601c749"
+    },
+    {
+      "slot": "D006-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 4,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 2,
+        "tool.get_balance": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "1e8c5a733d78bf4b0df8bc4aaa296e9d1e19c7226244921a57ebb3c8648da5ac"
+    },
+    {
+      "slot": "D007-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 4,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 2,
+        "tool.get_my_subscription": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "0099c76b9f0b3d9c043b21ac2bcf7de193e76ec1afb5ac139bc674094a4711a0"
+    },
+    {
+      "slot": "D007-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 28,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 24,
+      "names": {
+        "knowledge.resident_context": 24,
+        "llm.attempt": 2,
+        "tool.get_my_subscription": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "ab7e54b6c5f4fc1fc75f2a0e17b21b5dd8e196ccb9447c0246a98bff9edbcd50"
+    },
+    {
+      "slot": "D008-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 28,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 24,
+      "names": {
+        "knowledge.resident_context": 24,
+        "llm.attempt": 2,
+        "tool.get_my_subscription": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "ecbe6205735b2f485af97236b064f41069e3f1655eb973048cdad9f9ac54cd7e"
+    },
+    {
+      "slot": "D008-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 4,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 2,
+        "tool.get_my_subscription": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "e85961e791ebd80a3353f92d07d368d0c2990132f66b59ec930f992d5532b523"
+    },
+    {
+      "slot": "D009-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 4,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 2,
+        "tool.get_consumption": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "5c873e240c0d706746902877cc918b468c90ed12e50c116a0266bcdc78ab3127"
+    },
+    {
+      "slot": "D009-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 28,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 24,
+      "names": {
+        "llm.attempt": 2,
+        "knowledge.resident_context": 24,
+        "tool.get_consumption": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "777c6608ae6d9f2b191923c22040d42ca375887d9f55e2b472db205df5bc2c01"
+    },
+    {
+      "slot": "D010-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 28,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 24,
+      "names": {
+        "knowledge.resident_context": 24,
+        "llm.attempt": 2,
+        "tool.get_consumption": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "21738904daaa4f752aea9503a74aa78005e5cb4a15eb8ac6274c257eecfefeb5"
+    },
+    {
+      "slot": "D010-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 4,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 2,
+        "tool.get_consumption": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "6677024b934101420e4ecb52f0faba3b067bde6ec5d458ba3bd15de8a1f421ed"
+    },
+    {
+      "slot": "D011-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 4,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 2,
+        "tool.get_recent_bills": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "71838279b6830a627ea60b96a1a2bd449b1116cedd07183f8ee02c9aa7acc1a9"
+    },
+    {
+      "slot": "D011-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 28,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 24,
+      "names": {
+        "knowledge.resident_context": 24,
+        "llm.attempt": 2,
+        "tool.get_recent_bills": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "48e61dc2fdfe7ac5c886e7b2a466661bd1db002617c8827a517dc2f3dc3f28ce"
+    },
+    {
+      "slot": "D012-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 28,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 24,
+      "names": {
+        "knowledge.resident_context": 24,
+        "llm.attempt": 2,
+        "tool.get_recent_bills": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "7456dc6222bfde28b0d4c0f32e9d1c3b6f6683332d3862d2e2f9b1af4a7acc19"
+    },
+    {
+      "slot": "D012-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 4,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 2,
+        "tool.get_recent_bills": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "29dc477cf8a8a8a266202c4329db4ec43979fda9e2e873cb4882b885e0d0887a"
+    },
+    {
+      "slot": "S001-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 2,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "696e4c5f09ddf40d79c7a11e8b6a2b13e76fdc8dd5aa27dc09dce702e57ff28f"
+    },
+    {
+      "slot": "S001-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "bb156788263b4c58c8e4f9d5e019421b701f283027e43e8af6e168f6e1d382c7"
+    },
+    {
+      "slot": "S002-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 27,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 24,
+      "names": {
+        "knowledge.resident_context": 24,
+        "llm.attempt": 2,
+        "agent.turn": 1
+      },
+      "raw_sha256": "07c6c6185d8279bba496451679c09b377591304f4e14b2040b8f45c15a74f396"
+    },
+    {
+      "slot": "S002-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 2,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "8cba070b408920f994eea9a7145c50d524e5aa938f67bf5f2737fc3f59664d71"
+    },
+    {
+      "slot": "S003-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 2,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "7ed7c6ebdda1596d48e452575d399e2ef15bc2f2f234a47713d57750d6773044"
+    },
+    {
+      "slot": "S003-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "96c5b17fc0e1a61b2fc6b0cead567afa435c49367e54f8d860e17f2b88bf7a66"
+    },
+    {
+      "slot": "S004-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "b221cdeb1525362b3b1e1a399c6b64b5179caf6aa20392127f915565099255ca"
+    },
+    {
+      "slot": "S004-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 2,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "5fbff9fb10f59660ef44088b9c8f4feabc48f8143378ce560accc33e73c899e5"
+    },
+    {
+      "slot": "S005-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 2,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "6c493e7e032f8a41beddfeb9059776d455b0444de6c6b6dcebeb20d02dcedc54"
+    },
+    {
+      "slot": "S005-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "195de956132357062596f7a2df022c4ab00829fb255fb615c075d50a8d53b713"
+    },
+    {
+      "slot": "S006-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "a871372cbe744e24f8ccadd000d3d6bd1dd16b457ea0946fb802edcdb31c8a0d"
+    },
+    {
+      "slot": "S006-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 2,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "8eaae6070be79ee523b944d930c18599d70dc3295ea75c1265d1776cced847c2"
+    },
+    {
+      "slot": "S007-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 2,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "ec1629b3ed67619d29a14d1913364e1534467a3723d497a2ae818267fb4e9635"
+    },
+    {
+      "slot": "S007-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "bcb045e25b386e3199d4e59c053dc5a2d369f603f65c0f193ebcd7e933b12c50"
+    },
+    {
+      "slot": "S008-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "b9a7ab67bab6d08bb8c3ff4e4f1a0da10708efdfbc37e994e904b7744492e066"
+    },
+    {
+      "slot": "S008-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 2,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "9eddaad6c8cefac72893ec3952e1a23cbb68914ed90c2b873ae359d2300eb5ee"
+    },
+    {
+      "slot": "S009-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 2,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "a0442901d49ad5b6e784b4270dd255216617d1783e4b443a7fedc1976deea44c"
+    },
+    {
+      "slot": "S009-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "f68f3a678fb925104cf4aa27ea07e8d712bd9465d46d6cc98291040b42456aa3"
+    },
+    {
+      "slot": "S010-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "fbd5d6c1a01547007e4fe29c3bda0ef291f6f8c1433621c6805ffb24dd77da35"
+    },
+    {
+      "slot": "S010-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 2,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "f049f30744d1a7747cc93a729c10842e44ade7989e8c64e01b9f25187f9f07de"
+    },
+    {
+      "slot": "S011-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 2,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "6f35d5d37f8ce6709cc2f493f908198d4bb7d5ac6c8ce379ab28214d3c643397"
+    },
+    {
+      "slot": "S011-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "fce323cf65fb3dae1a30f466dc220fe61ce555f329b38ccb9c050b4743d5f8bc"
+    },
+    {
+      "slot": "S012-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "llm.attempt": 1,
+        "knowledge.resident_context": 12,
+        "agent.turn": 1
+      },
+      "raw_sha256": "e9e36ab4ce9dc2a93927d9b6312ee0cfba0e5e3fdd5a6fbb828c51d8698dde18"
+    },
+    {
+      "slot": "S012-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 2,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "6cc5bf4baa410b82b9bedb4368b5cf060fab3fb5b06b5230462dac03b234f85c"
+    },
+    {
+      "slot": "K037-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 2,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "a4336a10d408dca71cbe532018868f06db2211bab23738b997592db77d804d97"
+    },
+    {
+      "slot": "K037-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "aa8ba6a9e571a00e0671e941479b1889784356a925e194cd38fbb91b0553d54e"
+    },
+    {
+      "slot": "K038-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "3e61dff0138c4de841b89e6cd7e891fbd817202b92c4d639aa8ed3d117a482de"
+    },
+    {
+      "slot": "K038-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 2,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "2c81d0cd4557b7f9ea4f46b632da14705c1a6ec8d9d67f2800362066c5d3c872"
+    },
+    {
+      "slot": "K039-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 2,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "5f9a41b88e06ad529c33c9a41e813b0036fae169297da84e6ff0a318a73079b0"
+    },
+    {
+      "slot": "K039-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "e03200c98dbbc09734c3920f1a0ed99e9f718a5bfd71680ad07489519ce7a752"
+    },
+    {
+      "slot": "K040-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "0942bb912c60c4d59758d0422e0f5a7060b1ad00357234805902389d6d897580"
+    },
+    {
+      "slot": "K040-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 2,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "1f0012b47b4f97606e0c6b8fc2695b19b0c1a3d90910e2099336b43409421a0b"
+    },
+    {
+      "slot": "K041-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 10,
+      "queries": [
+        "ok"
+      ],
+      "retrieval_chunks": 2,
+      "included_contexts": 2,
+      "resident_contexts": 0,
+      "names": {
+        "knowledge.request_outcome": 1,
+        "knowledge.request_context": 2,
+        "llm.attempt": 2,
+        "knowledge.chunk": 2,
+        "knowledge.retrieval": 1,
+        "tool.search_platform_knowledge": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "b23b55910bc6daa531046001d61ff36531966f498a8f4af0fec8ef5410662a89"
+    },
+    {
+      "slot": "K041-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "f9344a2708a217d765035719ef5cd2ba02bd87b218ca6a80a02731c036b0ae98"
+    },
+    {
+      "slot": "K042-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "0f6d5b8de7ffadab51dc7874a34fc993d9473fefb51e7a03dccb79c64d4530fa"
+    },
+    {
+      "slot": "K042-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 2,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "8ec441189368a11fdb655a824735e1cfe2266a40c43d79c3be0bb4fc4fe8b5a2"
+    },
+    {
+      "slot": "K043-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 2,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "d3897f947c0a731cf14baf5c2efe7e20480d277a86eb46f7178629a5bb3786b0"
+    },
+    {
+      "slot": "K043-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "8d9ba6596137e07a81d7b146f2be357cc371c75b07b0451e8b690bdbb137ed3b"
+    },
+    {
+      "slot": "K044-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "498e38ce2d1040f953a90b4596469f14cd2ebf89feeb7f1a3f0e45464ed110ec"
+    },
+    {
+      "slot": "K044-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 2,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "d972901c11184fddfb01904cc0a984e44a761310fbe919e61fc360cb2facea76"
+    },
+    {
+      "slot": "K045-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 2,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "d7b82257c3d7510068caf8f2d42cc1fbe03ceeb8c60e955294189186fdf68902"
+    },
+    {
+      "slot": "K045-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "f5ae792f69e7427a43979c8e6de2d13660a4dc9c00120edd5cf207ec99c9cdba"
+    },
+    {
+      "slot": "K046-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "bbac126108561d633be5bc0c4a95cc65d1154d26a16087362213a87ec8414603"
+    },
+    {
+      "slot": "K046-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 2,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "9e774628d4956b1a06aff57e8e13480459ae12b6f4cd34460b2520d2429606a0"
+    },
+    {
+      "slot": "K047-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 2,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "2dcd2b46db88d35a8ac75a34b2a2620ce3029f97233059cd9e52961851f9189a"
+    },
+    {
+      "slot": "K047-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "9df830be9a571699bc2b256dc61633885538cb3117599f7f345d6fb34fce8a37"
+    },
+    {
+      "slot": "K048-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "9cdd02fb4aeeee9f50bad8555321cc1279fe28d94780e93552c1a7b488e05358"
+    },
+    {
+      "slot": "K048-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 12,
+      "queries": [
+        "ok"
+      ],
+      "retrieval_chunks": 3,
+      "included_contexts": 3,
+      "resident_contexts": 0,
+      "names": {
+        "knowledge.request_outcome": 1,
+        "knowledge.request_context": 3,
+        "llm.attempt": 2,
+        "knowledge.chunk": 3,
+        "tool.search_platform_knowledge": 1,
+        "knowledge.retrieval": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "192edcc1ccc46043f67c5b2769f320d7f0162d7647363446ac20a231bb87aba3"
+    },
+    {
+      "slot": "U013-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 5,
+      "queries": [
+        "no_match"
+      ],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 2,
+        "knowledge.retrieval": 1,
+        "tool.search_platform_knowledge": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "91e9b9c13ac4b78c19496215fc87a90f956cd7c440db2b601dcb83390d1722d9"
+    },
+    {
+      "slot": "U013-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "267571ba56232c6591fdd553c45c0b7318a89f8fbac2bc3458c14c5a4ac9fc74"
+    },
+    {
+      "slot": "U014-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "e0bc1b33d79259720637f802c0a415c177666b7cb53ede43c1898878d88f8447"
+    },
+    {
+      "slot": "U014-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 2,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "cdf976312cbbe96b48c2b81a58a332bbd83c33c696909c0b82fccd035c8dbda8"
+    },
+    {
+      "slot": "U015-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 2,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "2689f76ff09b7a196d55332bb85ce3828a0ddf039d5b064d08d54c823b63b6da"
+    },
+    {
+      "slot": "U015-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "aa2810c0d25c6727cfe1a571eee19729285f4555fba0815fc0962e4f8d9fdcc8"
+    },
+    {
+      "slot": "U016-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "9646212d56256946d5e60752e3c7eec0ba1f234c862815eca1c8e4e4f92de4d6"
+    },
+    {
+      "slot": "U016-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 2,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "45dc51a9ce96ea3c0107a5f05f760503f0bef350e3b0dff97bb865cc9e5a3b20"
+    },
+    {
+      "slot": "D013-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 4,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 2,
+        "tool.get_balance": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "6a9ddda5efc5007319971fe3bfa455aff3ce3e014b70ef00d4e77e2b73caa923"
+    },
+    {
+      "slot": "D013-a-2",
+      "verified": true,
+      "errors": [],
+      "observations": 4,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 2,
+        "tool.get_balance": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "f572d6246eec1ad34ca1bde3c7f1ca53550006f9ba09c7388d288739ea38cc1e"
+    },
+    {
+      "slot": "D013-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 28,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 24,
+      "names": {
+        "knowledge.resident_context": 24,
+        "llm.attempt": 2,
+        "tool.get_balance": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "8ca28827793d2aead7b0b6f365c676921a22a864152d623c6db895f0c93d0831"
+    },
+    {
+      "slot": "D013-b-2",
+      "verified": true,
+      "errors": [],
+      "observations": 28,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 24,
+      "names": {
+        "knowledge.resident_context": 24,
+        "llm.attempt": 2,
+        "tool.get_balance": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "9726abe53a16daaaf5e221daaad2c1513c17fd260a0f71213afe7b9d20930b2b"
+    },
+    {
+      "slot": "D014-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 28,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 24,
+      "names": {
+        "knowledge.resident_context": 24,
+        "llm.attempt": 2,
+        "tool.list_plans": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "00bb455fcef1e5735298e0083ee1e26b7c727875e0cf344542a5192001c27966"
+    },
+    {
+      "slot": "D014-b-2",
+      "verified": true,
+      "errors": [],
+      "observations": 28,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 24,
+      "names": {
+        "knowledge.resident_context": 24,
+        "llm.attempt": 2,
+        "tool.get_my_subscription": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "8ea9d68e7a4945b91709fadfe1ad7ce981278806a8ef5f631604a7397a1bdc43"
+    },
+    {
+      "slot": "D014-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 4,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 2,
+        "tool.list_plans": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "073377fdd284e87732e3e8b91d05bb068ea648827ccf1d99b38c2faba39684a6"
+    },
+    {
+      "slot": "D014-a-2",
+      "verified": true,
+      "errors": [],
+      "observations": 4,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 2,
+        "tool.get_my_subscription": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "0a0fd3a7dc40294bdbf95e5e1187766a38bebe43f1c93c3ef9900bcb69d58af0"
+    },
+    {
+      "slot": "D015-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 4,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 2,
+        "tool.list_models": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "7ab7e878cfec07afe6ae83951a99ec14279dd73ba59f5750a24ec5f781689473"
+    },
+    {
+      "slot": "D015-a-2",
+      "verified": true,
+      "errors": [],
+      "observations": 4,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 2,
+        "tool.list_models": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "bd5d20764b6e4000cb68d17fdf0f8e8dc20a6d2db0bcaa0252448be0a3df4d5a"
+    },
+    {
+      "slot": "D015-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 28,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 24,
+      "names": {
+        "knowledge.resident_context": 24,
+        "llm.attempt": 2,
+        "tool.list_models": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "f35bd260a46db1ed13d437a3e98539bb5cb9974a2f8bd579aa235d92700f041d"
+    },
+    {
+      "slot": "D015-b-2",
+      "verified": true,
+      "errors": [],
+      "observations": 28,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 24,
+      "names": {
+        "knowledge.resident_context": 24,
+        "llm.attempt": 2,
+        "tool.list_models": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "c090d95ac5e7798c865604a9513c836996529522dd62affd8bb894fbd74d552d"
+    },
+    {
+      "slot": "D016-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 28,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 24,
+      "names": {
+        "knowledge.resident_context": 24,
+        "llm.attempt": 2,
+        "tool.get_recent_bills": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "e521bdb918de67b0a78a115b2e2193d2b027b7d957a519ba1e7c86d71f494b8a"
+    },
+    {
+      "slot": "D016-b-2",
+      "verified": true,
+      "errors": [],
+      "observations": 28,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 24,
+      "names": {
+        "knowledge.resident_context": 24,
+        "llm.attempt": 2,
+        "tool.get_consumption": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "ae096a89409a7602f8136581f8e2506933585832262385c531c3c26aa337b7ef"
+    },
+    {
+      "slot": "D016-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 4,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 2,
+        "tool.get_recent_bills": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "5e4dbb4e50babd28a5b4391ab634fe6ce4b6446c51542a5a5b4beeb02ff0a30b"
+    },
+    {
+      "slot": "D016-a-2",
+      "verified": true,
+      "errors": [],
+      "observations": 4,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 2,
+        "tool.get_consumption": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "14fe8d4cbc77cf074c8cf55e83970409171f223b761f9875885b26e38ad0552b"
+    },
+    {
+      "slot": "S013-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 3,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "tool.preview.recharge": 1,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "d320aca4edd4e53867d2a3061545922eaf269030c6b4ee0fdc9bb61b4d7b777b"
+    },
+    {
+      "slot": "S013-a-2",
+      "verified": true,
+      "errors": [],
+      "observations": 1,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "agent.turn": 1
+      },
+      "raw_sha256": "fb49a9351437ccaaae0ca9769c934d3d034a4b86dea0ba71da329260bd03ed1e"
+    },
+    {
+      "slot": "S013-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 15,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "tool.preview.recharge": 1,
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "b526d00e867e2fbe8881a9470f59775573cbbb630104251883b9627ac9960249"
+    },
+    {
+      "slot": "S013-b-2",
+      "verified": true,
+      "errors": [],
+      "observations": 1,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "agent.turn": 1
+      },
+      "raw_sha256": "343f02804c3534b3e38bcd846bb1a4983e53e831702590fee7c177d555a61858"
+    },
+    {
+      "slot": "S014-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 15,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "tool.preview.refund_recharge": 1,
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "b41610ad63fb0e0ae92b8f1f96b16ed8e33a1559f6f37ca8e83366b5fe36bc4f"
+    },
+    {
+      "slot": "S014-b-2",
+      "verified": true,
+      "errors": [],
+      "observations": 1,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "agent.turn": 1
+      },
+      "raw_sha256": "1b9d5577e6d2fa130ee747b9390ddeedc1c075e8ab0132ca572e564e71c21f48"
+    },
+    {
+      "slot": "S014-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 3,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "tool.preview.refund_recharge": 1,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "93e10724bd8b1045fff00f2d4120ca477cef63156eb472d94f93cd3611bd95f4"
+    },
+    {
+      "slot": "S014-a-2",
+      "verified": true,
+      "errors": [],
+      "observations": 1,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "agent.turn": 1
+      },
+      "raw_sha256": "5f3b212dd0cb56bc2aca3ae674cdf6253346f6a264cc3043f037df8ec48cea5b"
+    },
+    {
+      "slot": "S015-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 2,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "55bfdf40ac0121463ef8a21740d0a1ef2e4fdace727af56a3f522c97eefaed73"
+    },
+    {
+      "slot": "S015-a-2",
+      "verified": true,
+      "errors": [],
+      "observations": 3,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "tool.preview.recharge": 1,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "f79dace6fe3f0ab62c470578fe76814637fadb41544f74e1eced35f5a7f6bbe7"
+    },
+    {
+      "slot": "S015-a-3",
+      "verified": true,
+      "errors": [],
+      "observations": 1,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "agent.turn": 1
+      },
+      "raw_sha256": "d3fe63f431b86694d66f586966176bb7ac74e49170cbcd2d1f3c7d7a6f938536"
+    },
+    {
+      "slot": "S015-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "3903690d5f716e9998de06e52cf96ab5a3ac21a0e90c2f907ea7e6678bd02fb6"
+    },
+    {
+      "slot": "S015-b-2",
+      "verified": true,
+      "errors": [],
+      "observations": 15,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "tool.preview.recharge": 1,
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "38211815b19a519a2af8d6d8f6e1cbaf184383ffbc37827228031a23586da1b3"
+    },
+    {
+      "slot": "S015-b-3",
+      "verified": true,
+      "errors": [],
+      "observations": 1,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "agent.turn": 1
+      },
+      "raw_sha256": "6e0a3968f90cb213a2d70eb62d562f3d95f4b29d10354f9dafd259b37ab5a355"
+    },
+    {
+      "slot": "S016-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "2746fc1dc4567294113e59352bfd408f3930d3092227341b9f11e6cb4b1943dd"
+    },
+    {
+      "slot": "S016-b-2",
+      "verified": true,
+      "errors": [],
+      "observations": 1,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "agent.turn": 1
+      },
+      "raw_sha256": "5ae4f83807bea4dfab0af7febeb30c5633af6239e2a65c4d4ba5c4a125441c2a"
+    },
+    {
+      "slot": "S016-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 2,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "1331f3f63bb5681219c644e37742fe4514e2fcb3fe67039b8980f2b3e2f66d31"
+    },
+    {
+      "slot": "S016-a-2",
+      "verified": true,
+      "errors": [],
+      "observations": 1,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "agent.turn": 1
+      },
+      "raw_sha256": "f24623da0755f64efcb1cb9245d0272b97922383f0d6dfee9a0ca1a33b0c27a6"
+    },
+    {
+      "slot": "S017-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 2,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "3f86e97bf62eac1e5ac2ca33d51145a56f84739e930b34c2c21d99f127178a77"
+    },
+    {
+      "slot": "S017-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "70c935010e4d0cffb1252088b87cbb850fae4a86568217cfb40f7690b892cf11"
+    },
+    {
+      "slot": "S018-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 28,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 24,
+      "names": {
+        "knowledge.resident_context": 24,
+        "llm.attempt": 2,
+        "tool.get_balance": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "c51b221684184345b30e6a458552449c1212f157e3ad4a65ea3b53432839350f"
+    },
+    {
+      "slot": "S018-b-2",
+      "verified": true,
+      "errors": [],
+      "observations": 28,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 24,
+      "names": {
+        "knowledge.resident_context": 24,
+        "llm.attempt": 2,
+        "tool.get_balance": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "3319a6b0dcb2aae75594e743993810ad43bbe959b030cf3697783d9616b91867"
+    },
+    {
+      "slot": "S018-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 4,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 2,
+        "tool.get_balance": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "deeeb824de334ad497094fec0c1811137edb74b105116fddaf0d02fac2a6b92d"
+    },
+    {
+      "slot": "S018-a-2",
+      "verified": true,
+      "errors": [],
+      "observations": 4,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 2,
+        "tool.get_balance": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "d035fa6254e52f2b3f3e08bf58b36e2f0cf763cfba9d35e5d953ed5e2d4289e3"
+    },
+    {
+      "slot": "S019-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 12,
+      "queries": [
+        "ok"
+      ],
+      "retrieval_chunks": 3,
+      "included_contexts": 3,
+      "resident_contexts": 0,
+      "names": {
+        "knowledge.request_outcome": 1,
+        "knowledge.request_context": 3,
+        "llm.attempt": 2,
+        "knowledge.chunk": 3,
+        "knowledge.retrieval": 1,
+        "tool.search_platform_knowledge": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "3f1cc376ed26045be38ce3e71eafed1903956353965a86c5ab69451996b1cbba"
+    },
+    {
+      "slot": "S019-a-2",
+      "verified": true,
+      "errors": [],
+      "observations": 6,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 3,
+      "resident_contexts": 0,
+      "names": {
+        "knowledge.request_outcome": 1,
+        "knowledge.request_context": 3,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "d3b95e3671b4f3b36cb5399e08a30cb14e6a69187fc18c0198d0b9dc30c06eb6"
+    },
+    {
+      "slot": "S019-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "633c81d620b449331cb3df1b75ebee1d30a4939a55f9e394a94595b74464eebb"
+    },
+    {
+      "slot": "S019-b-2",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "0b4aaa4c69e75d5c91f8266366f5558b04a7cf09bf454ef59947e73806ddd140"
+    },
+    {
+      "slot": "S020-b-1",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "llm.attempt": 1,
+        "knowledge.resident_context": 12,
+        "agent.turn": 1
+      },
+      "raw_sha256": "820d7300b1f99d24ad9fc7811e7c1dfa12aff36b3e4fcd0fc65642d0c3667c48"
+    },
+    {
+      "slot": "S020-b-2",
+      "verified": true,
+      "errors": [],
+      "observations": 14,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 12,
+      "names": {
+        "knowledge.resident_context": 12,
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "d69e7cfd774ccfff21aba6eea288f6afb5c889f82f1c5fa1485a3f292a267765"
+    },
+    {
+      "slot": "S020-a-1",
+      "verified": true,
+      "errors": [],
+      "observations": 2,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "482ad484c0394db7b20d3be595c2558911a6820294fd75240ad6302671545840"
+    },
+    {
+      "slot": "S020-a-2",
+      "verified": true,
+      "errors": [],
+      "observations": 2,
+      "queries": [],
+      "retrieval_chunks": 0,
+      "included_contexts": 0,
+      "resident_contexts": 0,
+      "names": {
+        "llm.attempt": 1,
+        "agent.turn": 1
+      },
+      "raw_sha256": "6d73ab1a67c5d25502c82b7303c6ca44f6e8480b0c03e3a5e44b67c333de05ad"
+    }
+  ]
+}
