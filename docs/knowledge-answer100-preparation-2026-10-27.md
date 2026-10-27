@@ -50,3 +50,7 @@ knowledge-answer100 -root "$RAG_ROOT" -execute \
 主要取舍：独立额外预算需用户明确批准；最大上下文hold牺牲可用预算以获得安全上界；无类型工具failure保守停止可能减少完成量；当前RAG不先修召回以免失去原版本对照；本次没有真实确认写操作覆盖。任何真实运行失败均保留，不以更换scope或补跑伪装完整。
 
 最终验证：审查修复后完整闭网矩阵62.924秒，200任务/224实际回合，200无业务变更/owned清理，Complete与task disposition均完整；222次合成provider请求，不是实际推理。Go整套26包通过、0失败，taskbench287.645秒，命令窗口17:23:14至17:28:22。守卫/审阅race2.779秒通过，原macOS LC_DYSYMTAB链接警告保留。旧Python检查首次系统3.9报6个API不支持错误，原测试未改，内置较新运行时37项通过。知识manifest检查通过；knowledge、deploy/agent、internal/agent相对95c1318无diff。Langfuse合成检索内容读回测试8.644秒通过；官方models一次认证GET200、deepseek-flash列出，实际推理0。默认CLI检查输出100/224、approved=false、model_calls=0。
+
+## 用户后续批准20元
+
+用户明确回复“批准20元，开始做吧”。本次独立上限据此改为¥20，保留旧¥5合同验证以免改写准备证据；新真实合同只能选择已批准的¥20，其他范围/1120尝试/每回合5次/单在途/原停止策略不变。原¥5候选未领取，旧pending模板与冻结材料保留；固定canonical claim位置不变，不另开scope。执行前重新冻结源码/二进制/合同与原话授权SHA。

@@ -35,7 +35,7 @@ type Contract struct {
 func (c Contract) SHA() string      { b, _ := json.Marshal(c); return knowledgepilot.SHA(b) }
 func validSHA(s string, n int) bool { b, e := hex.DecodeString(s); return e == nil && len(b) == n }
 func (c Contract) Validate() error {
-	if c.Schema != "knowledge-answer100.v1" || c.ID != CampaignID || c.FundingPool != "knowledge-independent" || c.MaxMicroCNY != 5000000 || c.MaxCalls != 1120 || c.MaxOutput != 512 || c.MaxBytes != 32768 || c.InputCeiling != 1048576 || c.InputRate != 2000000 || c.OutputRate != 8000000 {
+	if c.Schema != "knowledge-answer100.v1" || c.ID != CampaignID || c.FundingPool != "knowledge-independent" || (c.MaxMicroCNY != 5000000 && c.MaxMicroCNY != 20000000) || c.MaxCalls != 1120 || c.MaxOutput != 512 || c.MaxBytes != 32768 || c.InputCeiling != 1048576 || c.InputRate != 2000000 || c.OutputRate != 8000000 {
 		return fmt.Errorf("contract bounds differ")
 	}
 	for _, h := range []string{c.SuiteSHA, c.CorpusSHA, c.MainSHA, c.BinarySHA, c.PriceSHA} {

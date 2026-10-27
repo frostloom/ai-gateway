@@ -45,7 +45,7 @@ func run(args []string, out io.Writer) int {
 		return fail("frozen suite rejected")
 	}
 	if !*execute {
-		json.NewEncoder(out).Encode(map[string]any{"mode": "check", "cases": len(s.Cases), "user_turns": 2 * s.UserTurns(), "suite_sha256": s.SHA, "funding_pool": "knowledge-independent", "proposed_extra_cny": 5, "approved": false, "model_calls": 0})
+		json.NewEncoder(out).Encode(map[string]any{"mode": "check", "cases": len(s.Cases), "user_turns": 2 * s.UserTurns(), "suite_sha256": s.SHA, "funding_pool": "knowledge-independent", "proposed_extra_cny": 20, "approved": false, "model_calls": 0})
 		return 0
 	}
 	var c kc.Contract

@@ -183,3 +183,18 @@ func TestGuardHTTPErrorAndEOFNeverRetry(t *testing.T) {
 		})
 	}
 }
+
+func TestExplicit20CNYApprovalWithinNewUserCap(t *testing.T) {
+	c := testContract()
+	c.MaxMicroCNY = 20000000
+	if e := c.Validate(); e != nil {
+		t.Fatal("user-approved 20CNY cap rejected", e)
+	}
+	if e := CheckApproval(c, auth(c)); e != nil {
+		t.Fatal(e)
+	}
+	c.MaxMicroCNY = 20000001
+	if e := c.Validate(); e == nil {
+		t.Fatal("above approved cap accepted")
+	}
+}
