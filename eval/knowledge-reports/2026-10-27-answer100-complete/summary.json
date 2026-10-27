@@ -1,0 +1,210 @@
+{
+  "schema": "knowledge-answer100-complete-result.v1",
+  "complete": true,
+  "cases": 100,
+  "tasks": 200,
+  "actual_user_turns": 224,
+  "arms": {
+    "a": {
+      "cases": 100,
+      "passed": 86,
+      "failed": 14,
+      "accuracy": 0.86,
+      "unsupported_answers": 7,
+      "user_turns": 112,
+      "provider_calls": 140,
+      "tokens": {
+        "Input": 252152,
+        "Output": 6265,
+        "CacheHit": 219776,
+        "CacheMiss": 32376
+      },
+      "upper_cost_cny": 0.554424,
+      "standardized_peak_cost_cny": "0.12366304",
+      "cost_per_correct": "0.001437942325581395348837209302",
+      "turn_p50_ms": 1205.481667,
+      "turn_p95_ms": 2480.170792,
+      "task_p50_ms": 1226.3341034999999,
+      "task_p95_ms": 3487.7597910000004,
+      "categories": {
+        "knowledge": {
+          "passed": 40,
+          "cases": 48
+        },
+        "unknown": {
+          "passed": 15,
+          "cases": 16
+        },
+        "dynamic": {
+          "passed": 16,
+          "cases": 16
+        },
+        "safety": {
+          "passed": 15,
+          "cases": 20
+        }
+      }
+    },
+    "b": {
+      "cases": 100,
+      "passed": 93,
+      "failed": 7,
+      "accuracy": 0.93,
+      "unsupported_answers": 3,
+      "user_turns": 112,
+      "provider_calls": 168,
+      "tokens": {
+        "Input": 344856,
+        "Output": 8509,
+        "CacheHit": 302848,
+        "CacheMiss": 42008
+      },
+      "upper_cost_cny": 0.757784,
+      "standardized_peak_cost_cny": "0.16420192",
+      "cost_per_correct": "0.001765612043010752688172043011",
+      "turn_p50_ms": 1653.2207495,
+      "turn_p95_ms": 2925.364542,
+      "task_p50_ms": 1676.6926875,
+      "task_p95_ms": 3647.441083,
+      "categories": {
+        "knowledge": {
+          "passed": 43,
+          "cases": 48
+        },
+        "unknown": {
+          "passed": 16,
+          "cases": 16
+        },
+        "dynamic": {
+          "passed": 16,
+          "cases": 16
+        },
+        "safety": {
+          "passed": 18,
+          "cases": 20
+        }
+      }
+    }
+  },
+  "paired_outcomes": {
+    "both_pass": 84,
+    "b_only": 9,
+    "both_fail": 5,
+    "a_only": 2
+  },
+  "provider_calls": 308,
+  "jev_calls": 0,
+  "total_tokens": {
+    "Input": 597008,
+    "Output": 14774,
+    "CacheHit": 522624,
+    "CacheMiss": 74384
+  },
+  "total_upper_cost_cny": 1.312208,
+  "total_standardized_peak_cost_cny": "0.28786496",
+  "actual_invoice": null,
+  "independent_total_cap_cny": 20,
+  "main_pool_consumed": 0,
+  "business_unchanged_tasks": 200,
+  "owned_cleanup_tasks": 200,
+  "runtime_same_as_frozen_preflight": true,
+  "langfuse": {
+    "schema": "knowledge-answer100-complete-readback.v1",
+    "actual_turns": 224,
+    "queried_turns": 224,
+    "verified_turns": 224,
+    "unique_observations": 749,
+    "retrieval_queries": 31,
+    "retrieval_chunks": 37,
+    "included_contexts": 39,
+    "failures": []
+  },
+  "segments": [
+    {
+      "segment": "live20",
+      "source_revision": "9b0c6e1d4a0e3b4c8f1c91981c55ca511c1c57cd",
+      "recording_sha256": "94739c2223b4a113972405bebd2c6e1ce7123128e9980c3c210ee488ceebaa8a",
+      "tasks": 59,
+      "turns": 59,
+      "status": "stopped",
+      "cleanup": true,
+      "failure_stage": null,
+      "observer_stats": null
+    },
+    {
+      "segment": "completion1",
+      "source_revision": "cad2f7cc2b833acf76e7a6a5bf0c2e56149f740f",
+      "recording_sha256": "0cd5ae51c56abda4a698f5eda4af1d5f80d3b551177ad2eac7bd932822fa8afc",
+      "tasks": 1,
+      "turns": 1,
+      "status": "stopped",
+      "cleanup": true,
+      "failure_stage": "observation_flush",
+      "observer_stats": {
+        "Accepted": 2,
+        "Dropped": 0,
+        "Exported": 0,
+        "Failed": 2,
+        "Batches": 1,
+        "Turns": 1,
+        "SampledTurns": 1,
+        "QueueDepth": 0
+      }
+    },
+    {
+      "segment": "completion2",
+      "source_revision": "44c9f2afff0ba03725e3b13149a9b4f23943cd2a",
+      "recording_sha256": "3a86a3ee9d9ab55d75c5ba71c6e3dcfb03bcadc15ce93c4986f705d3b86ef12b",
+      "tasks": 55,
+      "turns": 55,
+      "status": "stopped",
+      "cleanup": false,
+      "failure_stage": "observation_flush",
+      "observer_stats": {
+        "Accepted": 203,
+        "Dropped": 0,
+        "Exported": 201,
+        "Failed": 2,
+        "Batches": 98,
+        "Turns": 55,
+        "SampledTurns": 55,
+        "QueueDepth": 0
+      }
+    },
+    {
+      "segment": "completion3",
+      "source_revision": "6b923180827c20029a2ef2871413939797830903",
+      "recording_sha256": "52cb16148863934d11d606b061180b3aac98821f294cb59a0c0bf99abcc3678c",
+      "tasks": 85,
+      "turns": 109,
+      "status": "checkpoint_pending",
+      "cleanup": true,
+      "failure_stage": null,
+      "observer_stats": {
+        "Accepted": 320,
+        "Dropped": 0,
+        "Exported": 320,
+        "Failed": 0,
+        "Batches": 164,
+        "Turns": 109,
+        "SampledTurns": 109,
+        "QueueDepth": 0
+      }
+    }
+  ],
+  "reviewer_methods": {
+    "first59": "frozen independent masked review from original run",
+    "remaining141": "two independent domain reviewers; same arm-blinded question rubric, citations not mandatory; prior grades retained"
+  },
+  "grade_files_sha256": {
+    "live20/independent-grades.json": "ec3370d626546aa6acf3f363ddc9279ca325a4f8beed71a4497188f458e43049",
+    "combined/grades-knowledge-unknown.json": "34024f8c387da8e3b4e6c5f785dbd3354d55d224f2a4a6f1efc02bc253098beb",
+    "combined/grades-dynamic-safety.json": "08e1e0e80bd7276fe71783b00a053312f2c63de6d1decb132fbabd00e8b05089"
+  },
+  "limitations": [
+    "one 100-scenario cycle, no independent human adjudication; no population-wide or causal improvement claim",
+    "four execution segments; original three stop states retained; telemetry policy changed only in experiment collector, model/prompt/tools/corpus frozen unchanged",
+    "prices standardized at peak cache hit/miss rates for comparison, not provider invoice; run crossed tariff periods",
+    "original72 reused cases, not all unseen; valid preview/cancel/no-pending confirmation covered, no actual confirmed payment/refund effects"
+  ]
+}
