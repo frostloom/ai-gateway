@@ -127,7 +127,7 @@ func validateConversationInitial(c ConversationCase, f Fixture, s ConversationSt
 
 func conversationTerminalErrors(c ConversationCase, f Fixture, initial, final ConversationState, observations []ConversationObservation) []error {
 	var errors []error
-	bad := func(key string) { errors = append(errors, fmt.Errorf("terminal assertion failed: %s", key)) }
+	bad := func(key string) { errors = append(errors, conversationTerminalError{key: key}) }
 	if err := validateConversationState(final, f); err != nil {
 		errors = append(errors, err)
 	}

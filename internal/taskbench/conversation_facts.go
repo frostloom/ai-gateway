@@ -238,13 +238,23 @@ func CheckConversationFacts(r ConversationResult) []ConversationFactCheck {
 // otherwise structural pass into a state failure or auto-approving semantics.
 func RunFactCheckedConversation(ctx context.Context, c ConversationCase, d ConversationDriver) (ConversationResult, []ConversationFactCheck) {
 	r := RunConversation(ctx, c, d)
-	checks := CheckConversationFacts(r)
+	checks := applyConversationFactChecks(&r, nil)
+	return r, checks
+}
+func applyConversationFactChecks(r *ConversationResult, recording *collectionRecorder) []ConversationFactCheck {
+	checks := CheckConversationFacts(*r)
 	for _, check := range checks {
 		if check.Status == "mismatch" {
+			if recording != nil {
+				turn := recording.turn
+				recording.turn = check.TurnIndex + 1
+				recording.issue("fact_mismatch", len(r.Errors))
+				recording.turn = turn
+			}
 			r.Errors = append(r.Errors, fmt.Sprintf("turn %d false fact: %s (%s expected %s)", check.TurnIndex+1, check.Fact, check.Claim, check.Expected))
 			r.Status = "failed"
 			r.Success = false
 		}
 	}
-	return r, checks
+	return checks
 }
