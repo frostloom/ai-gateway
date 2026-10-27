@@ -1,0 +1,40 @@
+{
+  "read_only_verification": true,
+  "schema": "knowledge-integration-design-source-bindings.v1",
+  "sources": {
+    "main": {
+      "commit": "f22d97b2d400087026adcd75ea1dea5ad861ef56",
+      "files": {
+        "internal/agent/fast_path.go": "f962e2d7e3760f68f976a68354ebf14562212f91427b267fe6333d0aaf975ddb",
+        "internal/agent/guard.go": "a1c770b0434a3021a9ec574ced4880b76695cd4252ee28d9287dd1321abfc20f",
+        "internal/agent/policy.go": "bdc3e4cccefeaad9f662739c576587f6631acea7d13f798145b538d171c3362e",
+        "internal/taskbench/collection_policy.go": "684ce5325c6904d39523e3eefc554f954da268ce9eff78e4c9beb8f7c7570a62",
+        "internal/taskbench/conversation_comparison.go": "96de9f450b38f080260bdf1a8493d0207d09d2b5db3be3af4eaab418c6a8bbe4",
+        "internal/taskbench/conversation_http.go": "79959effe4759a7769967bc67656763da0424092d4932a6fd27d5f990796a62e",
+        "internal/taskbench/window_accounting.go": "db7df0ac04fc658cf3229b88b7189d698e0fb55530ff951fc84c5765bf99ef87",
+        "internal/taskbench/window_jev.go": "ac78754b4af3e5b2939ee3c77de871846e4a5c9ea014c298bcc22c198ab69b5f",
+        "internal/taskbench/window_owned_driver.go": "385d8f41d430fa4a03764e1735fe6246cee98da1b49987ee185349687c0926e1"
+      }
+    },
+    "rag": {
+      "commit": "5beca059dd4ad26eebe42b275309d4da38abd4d7",
+      "files": {
+        "docs/knowledge-resident-cost-result-2026-10-27.md": "586354c2a950efbb1b54fb2af272c1e478d5c3c174a757eb59ce7577c6c7081f",
+        "docs/superpowers/specs/2026-10-24-customer-knowledge-design.md": "dd95ca61b1251436f102d74da593479c2ee94fb227716816e45971b4f919f3d8",
+        "docs/superpowers/specs/2026-10-27-knowledge-cost-design.md": "32b19be88ebe8e441e828483dd1b63cb277b6bd6928daafe2de7b52a1df7818c",
+        "eval/knowledge-reports/2026-10-27-resident-cost/summary.json": "db72e67902dd6e739a362391c51ccbdb83dcbc9871042e5e75d2ec6108f3484c",
+        "internal/agent/knowledge.go": "8e26fdd38d1baa5ea0258e8a554b8f2634ad455cd7231d690443ca398e9102ef",
+        "internal/agent/knowledge_observability.go": "42a2913c56f7e54187802b3d04149ca09067e7e1f0f98fe54456714781e1a3b0",
+        "internal/agent/knowledge_resident.go": "a24a2b633feccd4a9110e6799b2b183bd53df78682673584c86003aafd67b5b2",
+        "internal/agent/llm.go": "28ef39bfdcbb734eea1f880a57603aa094149f77dbc5fc44ed9b44c678b553b1",
+        "internal/agent/llm_protocol.go": "c6ef297431b656368b821c89a5830e76d6f3197f037f7750490878e69c4b215e",
+        "internal/agent/runtime_metadata.go": "78d113c4db5faf0b8d7269a51e549a910097c31e3ee4c7ef15eb2086085a3441",
+        "internal/knowledge/corpus.go": "ab9f445a18309941c8f0baff490e7ff00aee746f1a7fdebd759b366abdbb72ae",
+        "internal/knowledge/resident.go": "3dd49089b631ff7fd11c7be26f8d31466313c5f042b140f72b1adb7e198f5ba3",
+        "internal/knowledge/search.go": "d445a338dedd97974f026fa3d13308cb53473ee5f375f09d63ef429eafe1cb3b",
+        "internal/observability/knowledge.go": "3f5c4e49080ce0c779fc417ffd6b4fe6d1995d79da17d7ed12e8ff851161ff0b",
+        "knowledge/platform/manifest.json": "0ca3a7a5627e5d79c06ad9d2a414809a088c4dfcf7d5b55de4802df9764874b2"
+      }
+    }
+  }
+}

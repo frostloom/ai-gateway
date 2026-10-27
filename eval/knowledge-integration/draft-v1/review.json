@@ -1,0 +1,30 @@
+{
+  "design_path": "docs/full1220-knowledge-integration-2026-10-27.md",
+  "design_sha256": "e1a042384809a725b3bfd27514bea580b0fb548246bcec8599f90698634efabc",
+  "final_design_sanity": {
+    "draft_not_independent_gold": true,
+    "draft_unique_cases": 20,
+    "fixed_source_bindings_verified": 24,
+    "material_corrections": 0,
+    "original1220_and_budget_preserved": true,
+    "shared_off_is_current_design_choice_not_new_user_approval": true
+  },
+  "new_actual_calls": 0,
+  "new_paid_scope_authorized_or_claimed": false,
+  "schema": "knowledge-integration-design-review.v1",
+  "spec": {
+    "method": "independent_read_only_spec_and_fixed_evidence_review",
+    "new_cost_study_spec_violations": 0,
+    "retained_limitations": [
+      "short Chinese query retrieval gate",
+      "routing=model JEV0 evidence does not prove JEV combination or1220 outcome"
+    ]
+  },
+  "standards": {
+    "branch_not_modified": true,
+    "finding": "knowledge outcome emitted before final HTTP/body/parse result and resident outcome absent",
+    "main_measurement_llm_failure_counters_claimed_lost": false,
+    "method": "independent_read_only_source_review",
+    "p2_findings": 1
+  }
+}
