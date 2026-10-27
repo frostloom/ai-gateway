@@ -1,0 +1,65 @@
+{
+  "cli_race": {
+    "package_seconds": [
+      2.103
+    ],
+    "skips": 0,
+    "tests_and_subtests": 13,
+    "top_level_tests": 5
+  },
+  "core_race": {
+    "exit_code": 0,
+    "including_subtests": 8,
+    "log": "race-bounded.log",
+    "package_seconds": 173.33,
+    "top_level_tests": 5
+  },
+  "core_targeted": {
+    "exit_code": 0,
+    "including_subtests": 25,
+    "log": "green-archived.log",
+    "package_seconds": 31.143,
+    "top_level_tests": 9
+  },
+  "full_go20m_required_before_paid_freeze": true,
+  "full_go_not_run_this_unit": true,
+  "joint_command": {
+    "command": [
+      "go",
+      "test",
+      "./internal/taskbench",
+      "./cmd/full-window-closed",
+      "-run",
+      "^(TestFullWindowClosed|TestClosedCLI)",
+      "-count=1",
+      "-timeout=20m",
+      "-json"
+    ],
+    "elapsed_seconds": 36.725515708036255,
+    "exit_code": 0,
+    "external_timeout": false,
+    "sdkroot": "/Library/Developer/CommandLineTools/SDKs/MacOSX26.5.sdk",
+    "source_files": 366
+  },
+  "joint_packages": [
+    {
+      "package": "github.com/frostloom/ai-gateway/cmd/full-window-closed",
+      "seconds": 1.488
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+      "seconds": 32.029
+    }
+  ],
+  "joint_skips": 0,
+  "joint_tests_and_subtests": 38,
+  "joint_top_level_tests": 14,
+  "retained_core_larger_race_timeout": {
+    "exit_code": 1,
+    "location": "third report-orphan subcase constructor validatePreparedWindowCampaign before fixture creation",
+    "log": "race-final.log",
+    "not_a_pass": true,
+    "package_seconds": 240.855,
+    "timeout_seconds": 240
+  }
+}
