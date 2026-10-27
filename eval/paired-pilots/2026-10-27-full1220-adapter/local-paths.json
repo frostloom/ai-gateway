@@ -1,0 +1,26 @@
+{
+  "schema": "full-primary-local-paths.v1",
+  "paths": [
+    "full_adapter_integration_test.go:31: full local key=models-001/answer_complete model_attempts=4 judge_factories=1; both arms structurally valid, needs_review retained; synthetic usage",
+    "full_adapter_integration_test.go:31: full local key=refund-001/supplement_then_confirm model_attempts=4 judge_factories=1; both arms structurally valid, needs_review retained; synthetic usage",
+    "full_adapter_integration_test.go:31: full local key=cancel_subscription-001/confirm model_attempts=2 judge_factories=1; both arms structurally valid, needs_review retained; synthetic usage",
+    "full_adapter_integration_test.go:31: full local fault=provider model_attempts=1 judge_factories=0; campaign stopped; no real inference",
+    "full_adapter_integration_test.go:31: full local fault=jev model_attempts=2 judge_factories=1; campaign stopped; no real inference",
+    "full_adapter_integration_test.go:31: full local fault=observer model_attempts=2 judge_factories=0; campaign stopped; no real inference",
+    "full_adapter_integration_test.go:31: full local fault=case model_attempts=0 judge_factories=0; campaign stopped; no real inference",
+    "full_adapter_integration_test.go:31: full local fault=selection model_attempts=0 judge_factories=0; campaign stopped; no real inference",
+    "full_adapter_integration_test.go:31: full local fault=legacy-budget model_attempts=0 judge_factories=0; campaign stopped; no real inference"
+  ],
+  "successful_pairs": 3,
+  "successful_arms": 6,
+  "successful_user_turns": 12,
+  "model_attempts_successful_local": 10,
+  "model_attempts_fault_local": 5,
+  "judge_factories_successful_local": 3,
+  "judge_factories_fault_local": 1,
+  "actual_external_model_calls": 0,
+  "actual_external_jev_calls": 0,
+  "semantic_success_established": false,
+  "all1220_actual_handler_rehearsal": false,
+  "original_needs_review_retained": true
+}

@@ -76,8 +76,18 @@ func PrepareAgentPairConfig(s ConversationSuite, p PairedProfiles, m PairModelSe
 // RunAgentPair uses the real handler and an owned fixture environment. Default
 // invocation cannot create a journal, construct dependencies or call providers.
 func RunAgentPair(ctx context.Context, path string, o AgentPairOptions) (runErr error) {
+	return runAgentPair(ctx, path, o, false)
+}
+
+func runAgentPair(ctx context.Context, path string, o AgentPairOptions, fullCustomer bool) (runErr error) {
 	if !o.AllowExecution {
 		return fmt.Errorf("agent pair execution disabled")
+	}
+	if (fullCustomer && (o.Config.SelectionScope != FullCustomerPrimaryScope || !comparisonDigest(o.Config.SelectionSHA256))) || (!fullCustomer && (o.Config.SelectionScope != "" || o.Config.SelectionSHA256 != "")) {
+		return fmt.Errorf("pair source selection differs from entry point")
+	}
+	if fullCustomer && (o.Observer == nil || !o.StopOnStructuralFailure || !o.StopOnObserverFailure || !o.StopOnFactFailure || !o.StopOnJEVFailure) {
+		return fmt.Errorf("full selection requires observer and all stop guards")
 	}
 	if o.Config.Model.EvidenceKind == "recorded_run" && o.Observer == nil {
 		return fmt.Errorf("recorded run requires an explicit Langfuse observer")
@@ -99,6 +109,19 @@ func RunAgentPair(ctx context.Context, path string, o AgentPairOptions) (runErr 
 		return err
 	}
 	want.AllowPaid = o.Config.AllowPaid
+	var frozenSuite ConversationSuite
+	if fullCustomer {
+		source, loadErr := LoadConversations(o.DefinitionsDir)
+		if loadErr != nil {
+			return loadErr
+		}
+		var digest string
+		frozenSuite, digest, err = fullCustomerSelection(source)
+		if err != nil {
+			return err
+		}
+		want.SelectionScope, want.SelectionSHA256 = FullCustomerPrimaryScope, digest
+	}
 	if err := validatePairRun(o.Config); err != nil {
 		return err
 	}
@@ -111,24 +134,30 @@ func RunAgentPair(ctx context.Context, path string, o AgentPairOptions) (runErr 
 	if o.Budget.contract != PairRunContract(o.Config) || o.Budget.limits.MaxOutputTokens != 128 {
 		return fmt.Errorf("agent budget contract differs")
 	}
-	source, err := LoadConversations(o.DefinitionsDir)
-	if err != nil {
-		return err
-	}
-	plan, err := PrepareSmallPair(source)
-	if err != nil {
-		return err
+	if !fullCustomer {
+		source, loadErr := LoadConversations(o.DefinitionsDir)
+		if loadErr != nil {
+			return loadErr
+		}
+		plan, prepareErr := PrepareSmallPair(source)
+		if prepareErr != nil {
+			return prepareErr
+		}
+		frozenSuite = plan.Suite
 	}
 	frozen := map[string]ConversationCase{}
-	for _, c := range plan.Suite.Cases {
+	for _, c := range frozenSuite.Cases {
 		frozen[c.Key()] = c
 	}
-	if o.Config.Suite.DefinitionSHA256 != plan.Suite.DefinitionSHA256 || o.Config.Suite.ManifestSHA256 != plan.Suite.ManifestSHA256 {
+	if o.Config.Suite.DefinitionSHA256 != frozenSuite.DefinitionSHA256 || o.Config.Suite.ManifestSHA256 != frozenSuite.ManifestSHA256 {
 		return fmt.Errorf("source digest differs")
 	}
 	for _, c := range o.Config.Suite.Cases {
 		if !reflect.DeepEqual(c, frozen[c.Key()]) {
-			return fmt.Errorf("case differs from frozen pilot")
+			if !fullCustomer {
+				return fmt.Errorf("case differs from frozen pilot")
+			}
+			return fmt.Errorf("case differs from frozen selection")
 		}
 	}
 	log := slog.New(slog.NewTextHandler(io.Discard, nil))

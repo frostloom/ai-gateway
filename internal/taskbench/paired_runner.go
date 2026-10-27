@@ -15,6 +15,8 @@ import (
 )
 
 type PairRunConfig struct {
+	SelectionScope         string                       `json:"selection_scope,omitempty"`
+	SelectionSHA256        string                       `json:"selection_sha256,omitempty"`
 	PairID                 string                       `json:"pair_id,omitempty"`
 	BlockID                string                       `json:"block_id,omitempty"`
 	Schema                 string                       `json:"schema"`
@@ -52,6 +54,9 @@ func PairRunContract(cfg PairRunConfig) string {
 	return conversationHash(raw)
 }
 func validatePairRun(cfg PairRunConfig) error {
+	if (cfg.SelectionScope == "" && cfg.SelectionSHA256 != "") || (cfg.SelectionScope != "" && (cfg.SelectionScope != FullCustomerPrimaryScope || !comparisonDigest(cfg.SelectionSHA256))) {
+		return fmt.Errorf("invalid pair source selection")
+	}
 	if cfg.PairID != "" || cfg.BlockID != "" {
 		if !validRepeatedIdentity(cfg.PairID, cfg.BlockID) || cfg.ArmOrder == nil {
 			return fmt.Errorf("complete repeated identity and explicit order required")

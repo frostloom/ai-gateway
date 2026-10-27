@@ -15,6 +15,10 @@ import (
 // supply authorized configuration, owned fixtures and guarded provider clients.
 // A lease binds one exact batch; any failure stops expansion of the campaign.
 func RunCampaignBatch(ctx context.Context, lease *CampaignBatchLease, o AgentPairOptions) (runErr error) {
+	return runCampaignBatch(ctx, lease, o, RunAgentPair)
+}
+
+func runCampaignBatch(ctx context.Context, lease *CampaignBatchLease, o AgentPairOptions, run func(context.Context, string, AgentPairOptions) error) (runErr error) {
 	if !o.AllowExecution || lease == nil {
 		return fmt.Errorf("campaign execution disabled")
 	}
@@ -45,7 +49,7 @@ func RunCampaignBatch(ctx context.Context, lease *CampaignBatchLease, o AgentPai
 		return fmt.Errorf("campaign child budget path differs")
 	}
 	path := filepath.Join(lease.Dir, "run.jsonl")
-	if err = RunAgentPair(ctx, path, o); err != nil {
+	if err = run(ctx, path, o); err != nil {
 		return err
 	}
 	report, err := ReportPreparedPair(path)
