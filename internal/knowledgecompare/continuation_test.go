@@ -3,6 +3,7 @@ package knowledgecompare
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/frostloom/ai-gateway/internal/knowledgepilot"
 	"io"
 	"net/http"
@@ -172,5 +173,121 @@ func TestCompletionRequiresVerifiedCleanupWhenOriginalCloseFailed(t *testing.T) 
 	c.CleanupProofSHA = knowledgepilot.SHA(proof)
 	if _, e := AcquireCompletion(claim, c, auth(c), p, r, j, pp); e != nil {
 		t.Fatal("separate cleanup proof rejected", e)
+	}
+}
+
+func costBaselineFixture(t *testing.T, fullAccounting bool) (Contract, string, string, string) {
+	c, p, r, j := completionFixture(t)
+	raw, _ := os.ReadFile(r)
+	var old Result
+	json.Unmarshal(raw, &old)
+	s, _ := LoadSuite("../..")
+	old.Tasks = nil
+	for _, q := range s.Cases {
+		for _, arm := range []string{"a", "b"} {
+			task := Task{CaseID: q.ID, Arm: arm, BusinessUnchanged: true, OwnedCleanup: true}
+			for i, question := range q.Turns {
+				task.Turns = append(task.Turns, Turn{Index: i + 1, Question: question, HTTPStatus: 200})
+			}
+			old.Tasks = append(old.Tasks, task)
+		}
+	}
+	old.Status = "checkpoint_pending"
+	old.Complete = true
+	old.AllTasksDisposed = true
+	old.ActualUserTurns = 224
+	if fullAccounting {
+		old.Events = nil
+		old.Budget = GuardState{}
+		for i := 0; i < 308; i++ {
+			input := int64(100)
+			hit, miss := int64(40), int64(60)
+			if i == 307 {
+				input = 600764
+				hit = 0
+				miss = input
+			}
+			response := strings.Replace(goodNative, `"prompt_tokens":100`, fmt.Sprintf(`"prompt_tokens":%d`, input), 1)
+			response = strings.Replace(response, `"prompt_cache_hit_tokens":40`, fmt.Sprintf(`"prompt_cache_hit_tokens":%d`, hit), 1)
+			response = strings.Replace(response, `"prompt_cache_miss_tokens":60`, fmt.Sprintf(`"prompt_cache_miss_tokens":%d`, miss), 1)
+			task := old.Tasks[i%200]
+			intent := Event{Kind: "intent", Task: task.CaseID + "-" + task.Arm, Turn: 1, Sequence: i + 1, RequestSHA: knowledgepilot.SHA([]byte(wire)), Request: json.RawMessage(wire)}
+			usage := Event{Kind: "usage", Task: intent.Task, Turn: 1, Sequence: i + 1, Input: input, Output: 20, CacheHit: hit, CacheMiss: miss, UpperCost: price(input, 20, c), Response: json.RawMessage(response)}
+			old.Events = append(old.Events, intent, usage)
+			old.Budget.Calls++
+			old.Budget.KnownUpper += usage.UpperCost
+		}
+		var journal []byte
+		for _, e := range old.Events {
+			b, _ := json.Marshal(e)
+			journal = append(journal, append(b, '\n')...)
+		}
+		os.WriteFile(j, journal, 0600)
+		c.PriorJournalSHA = knowledgepilot.SHA(journal)
+	}
+	raw, _ = json.Marshal(old)
+	os.WriteFile(r, raw, 0600)
+	c.PriorRecordingSHA = knowledgepilot.SHA(raw)
+	return c, p, r, j
+}
+func TestCostStudyRequiresCompleteBaselineAndKeepsParentSpend(t *testing.T) {
+	c, p, r, j := costBaselineFixture(t, true)
+	path := filepath.Join(t.TempDir(), "study")
+	if _, e := AcquireCompletion(path, c, auth(c), p, r, j); e == nil {
+		t.Fatal("completed scope resumed without distinct study")
+	}
+	c.CostStudy = "knowledge-resident-cost.v1"
+	cap, e := AcquireCompletion(path, c, auth(c), p, r, j)
+	if e != nil {
+		t.Fatal(e)
+	}
+	if cap.inherited.Calls != 308 || cap.inherited.KnownUpper != 1312208 || len(cap.skip) != 0 || cap.priorTurns != 0 {
+		t.Fatal("study reset budget or reused old completion counts")
+	}
+	if _, e := AcquireCompletion(path, c, auth(c), p, r, j); e == nil {
+		t.Fatal("study reissued")
+	}
+}
+func TestCostStudyRejectsUnderaccountedCompleteBaseline(t *testing.T) {
+	c, p, r, j := costBaselineFixture(t, false)
+	c.CostStudy = "knowledge-resident-cost.v1"
+	path := filepath.Join(t.TempDir(), "study")
+	if _, e := AcquireCompletion(path, c, auth(c), p, r, j); e == nil {
+		t.Fatal("1-call fake complete baseline accepted")
+	}
+	if _, e := os.Stat(path); !os.IsNotExist(e) {
+		t.Fatal("invalid baseline wrote claim")
+	}
+}
+func TestCostStudyRejectsMissingCallAndFalseCompletion(t *testing.T) {
+	for _, kind := range []string{"missing_call", "false_complete"} {
+		t.Run(kind, func(t *testing.T) {
+			c, p, r, j := costBaselineFixture(t, true)
+			b, _ := os.ReadFile(r)
+			var old Result
+			json.Unmarshal(b, &old)
+			if kind == "false_complete" {
+				old.Complete = false
+			} else {
+				last := old.Events[len(old.Events)-1]
+				old.Budget.Calls--
+				old.Budget.KnownUpper -= last.UpperCost
+				old.Events = old.Events[:len(old.Events)-2]
+				var journal []byte
+				for _, e := range old.Events {
+					x, _ := json.Marshal(e)
+					journal = append(journal, append(x, '\n')...)
+				}
+				os.WriteFile(j, journal, 0600)
+				c.PriorJournalSHA = knowledgepilot.SHA(journal)
+			}
+			b, _ = json.Marshal(old)
+			os.WriteFile(r, b, 0600)
+			c.PriorRecordingSHA = knowledgepilot.SHA(b)
+			c.CostStudy = "knowledge-resident-cost.v1"
+			if _, e := AcquireCompletion(filepath.Join(t.TempDir(), "claim"), c, auth(c), p, r, j); e == nil {
+				t.Fatal("invalid baseline accepted")
+			}
+		})
 	}
 }

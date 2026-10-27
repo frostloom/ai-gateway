@@ -309,3 +309,51 @@ func TestCompletionCollectsSafeInvalidAmountAsQualityFailure(t *testing.T) {
 		t.Fatal("safe quality negative aborted collection", e, n)
 	}
 }
+func TestCostStudyHandlerComparesToolAndResident(t *testing.T) {
+	c, p, r, j := costBaselineFixture(t, true)
+	c.CostStudy = "knowledge-resident-cost.v1"
+	cap, e := AcquireCompletion(filepath.Join(t.TempDir(), "study"), c, auth(c), p, r, j)
+	if e != nil {
+		t.Fatal(e)
+	}
+	n := 0
+	g, e := NewGuard(filepath.Join(t.TempDir(), "events"), cap, roundFunc(func(req *http.Request) (*http.Response, error) {
+		n++
+		var body struct {
+			Messages []agent.Message `json:"messages"`
+			Tools    []agent.Tool    `json:"tools"`
+		}
+		json.NewDecoder(req.Body).Decode(&body)
+		hasSearch := false
+		for _, x := range body.Tools {
+			hasSearch = hasSearch || x.Function.Name == "search_platform_knowledge"
+		}
+		msg := agent.Message{Role: "assistant", Content: "SYNTHETIC"}
+		if hasSearch && body.Messages[len(body.Messages)-1].Role != "tool" {
+			var tc agent.ToolCall
+			tc.ID = "k"
+			tc.Type = "function"
+			tc.Function.Name = "search_platform_knowledge"
+			tc.Function.Arguments = `{"query":"平台功能"}`
+			msg = agent.Message{Role: "assistant", ToolCalls: []agent.ToolCall{tc}}
+		}
+		if !hasSearch && !strings.Contains(body.Messages[0].Content, "[KB-012]") {
+			t.Error("resident text not on wire")
+		}
+		return &http.Response{StatusCode: 200, Header: make(http.Header), Body: io.NopCloser(strings.NewReader(encode(msg)))}, nil
+	}))
+	if e != nil {
+		t.Fatal(e)
+	}
+	defer g.Close()
+	o, _ := fixture(t, func(req *http.Request) string { return encode(agent.Message{Role: "assistant", Content: "UNUSED"}) })
+	o.Guard = g
+	o.CaseIDs = []string{"K001"}
+	result, e := Run(context.Background(), o)
+	if e != nil || len(result.Tasks) != 2 || n != 3 || result.PriorTasks != 0 || result.PriorUserTurns != 0 || result.Budget.Calls != 311 || !result.Cleanup {
+		t.Fatal("new study reused old coverage or wrong modes", e, n)
+	}
+	if !result.Tasks[0].Runtime.KnowledgeEnabled || result.Tasks[0].Runtime.KnowledgeStrategy != "" || result.Tasks[1].Runtime.KnowledgeStrategy != "resident" {
+		t.Fatal("study arms mislabeled")
+	}
+}

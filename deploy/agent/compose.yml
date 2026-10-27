@@ -17,6 +17,7 @@ services:
     environment:
       AGENT_KNOWLEDGE_ENABLED: ${AGENT_KNOWLEDGE_ENABLED:-false}
       AGENT_KNOWLEDGE_DIR: /app/knowledge/platform
+      AGENT_KNOWLEDGE_STRATEGY: ${AGENT_KNOWLEDGE_STRATEGY:-tool}
       LISTEN_HOST: 0.0.0.0
       AGENT_PORT: "9105"
     extra_hosts: ["host.docker.internal:host-gateway"]

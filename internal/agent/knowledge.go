@@ -16,6 +16,9 @@ func (tb *Toolbox) SetKnowledge(c *knowledge.Corpus) error {
 		return fmt.Errorf("invalid knowledge corpus")
 	}
 	tb.knowledge = c
+	tb.knowledgeStrategy = ""
+	tb.residentText = ""
+	tb.residentHits = nil
 	tb.tools["search_platform_knowledge"] = tb.knowledgeTool()
 	return nil
 }
@@ -38,12 +41,18 @@ func (tb *Toolbox) knowledgeTool() *execTool {
 	}}
 }
 func (h *Handler) basePrompt() string {
+	if h.tb != nil && h.tb.knowledgeStrategy == "resident" {
+		return systemPrompt + residentPrompt + "\n<platform_knowledge>\n" + h.tb.residentText + "</platform_knowledge>"
+	}
 	if h.tb.KnowledgeVersion() != "" {
 		return systemPrompt + knowledgePrompt
 	}
 	return systemPrompt
 }
 func (h *Handler) effectiveContract() string {
+	if h.tb != nil && h.tb.knowledgeStrategy == "resident" {
+		return runtimeContract + ";knowledge-resident-v1;untrusted-public-documents;live-facts-only-tools;corpus-versioned;complete-corpus<=4096bytes"
+	}
 	if h.tb.KnowledgeVersion() != "" {
 		return runtimeContract + ";knowledge-read-v1;untrusted-public-documents;live-facts-only-tools;corpus-versioned"
 	}

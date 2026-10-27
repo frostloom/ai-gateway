@@ -382,6 +382,7 @@ func isGearToolLine(t string) bool {
 // 每轮最多 5 次工具迭代，防 LLM 死循环。v 为 JEV 前置判定（含提示行与警告标记）。
 func (h *Handler) llmLoop(ctx context.Context, sessionID string, tenantID uint64, v jevVerdict, ses *session) (string, []traceItem, error) {
 	ctx = context.WithValue(ctx, knowledgeCorpusKey{}, h.tb.knowledge)
+	ctx = h.withResidentContext(ctx)
 	var trace []traceItem
 	pending := ses.PendingAction
 	// Request-local only: current-balance queries in a later turn must hit billing again.

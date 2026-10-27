@@ -11,20 +11,21 @@ import (
 // RuntimeMetadata identifies the actual shared model/execution contract. It
 // contains no credentials. Dataset/fixture hashes belong to the evaluator.
 type RuntimeMetadata struct {
-	KnowledgeEnabled bool               `json:"knowledge_enabled,omitempty"`
-	CorpusVersion    string             `json:"corpus_version,omitempty"`
-	Model            string             `json:"model"`
-	Protocol         string             `json:"protocol"`
-	EndpointSHA256   string             `json:"endpoint_sha256"`
-	PromptSHA256     string             `json:"prompt_sha256"`
-	ToolsSHA256      string             `json:"tools_sha256"`
-	ContractSHA256   string             `json:"contract_sha256"`
-	RoutingMode      string             `json:"routing_mode"`
-	RoutingRevision  string             `json:"routing_revision"`
-	Thresholds       map[string]float64 `json:"thresholds"`
-	MaxOutputTokens  int                `json:"max_output_tokens"`
-	ThinkingMode     string             `json:"thinking_mode,omitempty"`
-	ReplyRepairLimit int                `json:"reply_repair_limit"`
+	KnowledgeStrategy string             `json:"knowledge_strategy,omitempty"`
+	KnowledgeEnabled  bool               `json:"knowledge_enabled,omitempty"`
+	CorpusVersion     string             `json:"corpus_version,omitempty"`
+	Model             string             `json:"model"`
+	Protocol          string             `json:"protocol"`
+	EndpointSHA256    string             `json:"endpoint_sha256"`
+	PromptSHA256      string             `json:"prompt_sha256"`
+	ToolsSHA256       string             `json:"tools_sha256"`
+	ContractSHA256    string             `json:"contract_sha256"`
+	RoutingMode       string             `json:"routing_mode"`
+	RoutingRevision   string             `json:"routing_revision"`
+	Thresholds        map[string]float64 `json:"thresholds"`
+	MaxOutputTokens   int                `json:"max_output_tokens"`
+	ThinkingMode      string             `json:"thinking_mode,omitempty"`
+	ReplyRepairLimit  int                `json:"reply_repair_limit"`
 }
 
 const runtimeContract = "customer-contract-v5;tenant-auth;read-only-four-first-independent-no-params;intent-shape>=0.90;legit>=0.85;risk<0.5;risk_conf>=0.8;shared-preview-confirm;no-pending-overwrite;empty-pending-confirm-noop;finite-recharge-completion-needs-execution;finite-explicit-own-recharge-preview-application;finite-refund-completion-needs-execution;reply-repair-max-one;explicit-own-cash-read-recovery-once-after-repair;no-numeric-inference;one-tool-per-iteration;loop-max-five"
@@ -48,6 +49,9 @@ func (h *Handler) runtimeMetadata() *RuntimeMetadata {
 	if h.jevFastPathMin > 0 {
 		metadata.Thresholds["intent_min"] = h.jevFastPathMin
 		metadata.Thresholds["shape_min"] = h.jevFastPathMin
+	}
+	if h.tb != nil {
+		metadata.KnowledgeStrategy = h.tb.knowledgeStrategy
 	}
 	metadata.CorpusVersion = h.tb.KnowledgeVersion()
 	metadata.KnowledgeEnabled = metadata.CorpusVersion != ""

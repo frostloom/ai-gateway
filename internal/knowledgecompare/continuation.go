@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/frostloom/ai-gateway/internal/knowledgepilot"
 	"os"
+	"strings"
 )
 
 // AcquireCompletion is a separately authorized continuation of the SAME parent
@@ -51,7 +52,7 @@ func AcquireCompletion(path string, c Contract, a Approval, parent, prior, journ
 		return nil, fmt.Errorf("parent claim invalid")
 	}
 	var r Result
-	if json.Unmarshal(rb, &r) != nil || r.Schema != "knowledge-answer100-recording.v1" || r.EvidenceKind != "real_provider" || r.Status != "stopped" || r.Complete || r.Contract.SHA() != pc.Contract.SHA() {
+	if json.Unmarshal(rb, &r) != nil || r.Schema != "knowledge-answer100-recording.v1" || r.EvidenceKind != "real_provider" || r.Contract.SHA() != pc.Contract.SHA() {
 		return nil, fmt.Errorf("closed original segment required")
 	}
 	if !r.Cleanup {
@@ -73,6 +74,14 @@ func AcquireCompletion(path string, c Contract, a Approval, parent, prior, journ
 		}
 	}
 	old := r.Contract
+	startingStudy := c.CostStudy != "" && old.CostStudy == ""
+	if startingStudy {
+		if !r.Complete || r.Status != "checkpoint_pending" {
+			return nil, fmt.Errorf("cost study requires complete baseline")
+		}
+	} else if c.CostStudy != old.CostStudy || r.Complete || r.Status != "stopped" {
+		return nil, fmt.Errorf("closed matching segment required")
+	}
 	if old.SuiteSHA != c.SuiteSHA || old.CorpusSHA != c.CorpusSHA || old.MainSHA != c.MainSHA || old.PriceSHA != c.PriceSHA || old.MaxMicroCNY != c.MaxMicroCNY || old.MaxCalls != c.MaxCalls || old.MaxBytes != c.MaxBytes || old.MaxOutput != c.MaxOutput || old.InputCeiling != c.InputCeiling || old.InputRate != c.InputRate || old.OutputRate != c.OutputRate || old.FundingPool != c.FundingPool {
 		return nil, fmt.Errorf("parent protocol/allocation differs")
 	}
@@ -144,7 +153,15 @@ func AcquireCompletion(path string, c Contract, a Approval, parent, prior, journ
 		if !done || len(id) < 3 {
 			return nil, fmt.Errorf("invalid prior slot")
 		}
-		def, ok := cases[id[:len(id)-2]]
+		caseKey := id[:len(id)-2]
+		if old.CostStudy != "" {
+			prefix := old.CostStudy + ":"
+			if !strings.HasPrefix(caseKey, prefix) {
+				return nil, fmt.Errorf("wrong prior namespace")
+			}
+			caseKey = strings.TrimPrefix(caseKey, prefix)
+		}
+		def, ok := cases[caseKey]
 		arm := id[len(id)-1:]
 		if !ok || (arm != "a" && arm != "b") {
 			return nil, fmt.Errorf("unknown prior slot")
@@ -156,7 +173,7 @@ func AcquireCompletion(path string, c Contract, a Approval, parent, prior, journ
 		return nil, fmt.Errorf("ancestral coverage differs")
 	}
 	for _, t := range r.Tasks {
-		id := t.CaseID + "-" + t.Arm
+		id := taskKey(old, t.CaseID, t.Arm)
 		def, ok := cases[t.CaseID]
 		if !ok || (t.Arm != "a" && t.Arm != "b") || skip[id] || !t.BusinessUnchanged || !t.OwnedCleanup || len(t.Turns) != len(def.Turns) || t.TerminatedReason != "" {
 			return nil, fmt.Errorf("prior task disposition incomplete")
@@ -174,8 +191,18 @@ func AcquireCompletion(path string, c Contract, a Approval, parent, prior, journ
 			return nil, fmt.Errorf("unowned prior attempt")
 		}
 	}
-	if len(skip) == 0 || len(skip) >= 200 || turns != r.ActualUserTurns+r.PriorUserTurns {
+	if len(skip) == 0 || len(skip) > 200 || turns != r.ActualUserTurns+r.PriorUserTurns {
 		return nil, fmt.Errorf("prior coverage differs")
+	}
+	if !startingStudy && len(skip) >= 200 {
+		return nil, fmt.Errorf("no remaining slots")
+	}
+	if startingStudy {
+		if len(skip) != 200 || turns != 224 || calls != 308 || cost != 1312208 {
+			return nil, fmt.Errorf("baseline coverage incomplete")
+		}
+		skip = map[string]bool{}
+		turns = 0
 	}
 	claim := struct {
 		Schema         string          `json:"schema"`
@@ -194,4 +221,12 @@ func AcquireCompletion(path string, c Contract, a Approval, parent, prior, journ
 		return nil, e
 	}
 	return &Capability{c: c, skip: skip, inherited: GuardState{Calls: calls, KnownUpper: cost}, priorTurns: turns}, nil
+}
+
+func taskKey(c Contract, caseID, arm string) string {
+	key := caseID + "-" + arm
+	if c.CostStudy != "" {
+		return c.CostStudy + ":" + key
+	}
+	return key
 }

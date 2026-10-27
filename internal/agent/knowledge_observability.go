@@ -61,6 +61,7 @@ func requestedKnowledge(messages []Message) []knowledge.Result {
 	return out
 }
 func observeKnowledgeRequest(ctx context.Context, messages []Message, ordinal int) {
+	observeResidentRequest(ctx, messages, ordinal)
 	current, _ := ctx.Value(knowledgeCorpusKey{}).(*knowledge.Corpus)
 	for _, r := range requestedKnowledge(messages) {
 		stage := "included_in_request"

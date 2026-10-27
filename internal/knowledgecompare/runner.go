@@ -149,7 +149,7 @@ func Run(ctx context.Context, o Options) (r Result, runErr error) {
 			arms = []string{"b", "a"}
 		}
 		for _, arm := range arms {
-			if o.Guard.cap.skip[c.ID+"-"+arm] {
+			if o.Guard.cap.skip[taskKey(o.Guard.c, c.ID, arm)] {
 				continue
 			}
 			task, e := runOne(ctx, o, env, corpus, c, arm, clock)
@@ -169,7 +169,7 @@ func Run(ctx context.Context, o Options) (r Result, runErr error) {
 	expectedLocal := 2 * len(selected)
 	for id := range selected {
 		for _, arm := range []string{"a", "b"} {
-			if o.Guard.cap.skip[id+"-"+arm] {
+			if o.Guard.cap.skip[taskKey(o.Guard.c, id, arm)] {
 				expectedLocal--
 			}
 		}
@@ -229,8 +229,13 @@ func runOne(ctx context.Context, o Options, env *taskbench.PairedFixtureEnvironm
 	proxy := adminProxy(f.AdminURL, o.Guard)
 	defer proxy.Close()
 	tb := agent.NewToolbox(agent.NewAdminClientWithToken(proxy.URL, f.Token))
-	if arm == "b" {
+	if arm == "b" || o.Guard.c.CostStudy != "" {
 		if e = tb.SetKnowledge(corpus); e != nil {
+			return task, e
+		}
+	}
+	if o.Guard.c.CostStudy != "" && arm == "b" {
+		if e = tb.SetKnowledgeStrategy("resident"); e != nil {
 			return task, e
 		}
 	}
@@ -243,7 +248,7 @@ func runOne(ctx context.Context, o Options, env *taskbench.PairedFixtureEnvironm
 	task.Runtime = *h.EvaluationRuntimeMetadata()
 	var current atomic.Int32
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		r = r.WithContext(WithTurn(r.Context(), c.ID+"-"+arm, int(current.Load())))
+		r = r.WithContext(WithTurn(r.Context(), taskKey(o.Guard.c, c.ID, arm), int(current.Load())))
 		r.Header.Set("X-Agent-Internal", f.Token)
 		r.Header.Set("X-Agent-Tenant", fmt.Sprint(f.Tenant))
 		h.ServeHTTP(w, r)

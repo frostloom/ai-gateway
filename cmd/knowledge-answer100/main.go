@@ -111,7 +111,7 @@ func run(args []string, out io.Writer) int {
 			return fail("prior recording rejected")
 		}
 		if prev.Contract.PriorRecordingSHA != "" {
-			parentClaimPath = filepath.Join(claimDir, kc.CampaignID+".continue-"+prev.Contract.PriorRecordingSHA+".json")
+			parentClaimPath = filepath.Join(claimDir, kc.CampaignID+claimInfix(prev.Contract)+prev.Contract.PriorRecordingSHA+".json")
 		}
 	}
 	claimPath := parentClaimPath
@@ -119,7 +119,7 @@ func run(args []string, out io.Writer) int {
 		if *prior == "" || *priorJournal == "" {
 			return fail("completion evidence required")
 		}
-		claimPath = filepath.Join(claimDir, kc.CampaignID+".continue-"+c.PriorRecordingSHA+".json")
+		claimPath = filepath.Join(claimDir, kc.CampaignID+claimInfix(c)+c.PriorRecordingSHA+".json")
 	} else if *prior != "" || *priorJournal != "" {
 		return fail("completion must be bound in contract")
 	}
@@ -255,4 +255,11 @@ func readEnv(path string) (map[string]string, error) {
 		v[strings.TrimSpace(k)] = strings.Trim(strings.TrimSpace(x), "\"'")
 	}
 	return v, nil
+}
+
+func claimInfix(c kc.Contract) string {
+	if c.CostStudy != "" {
+		return ".cost-study-"
+	}
+	return ".continue-"
 }

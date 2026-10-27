@@ -23,5 +23,8 @@ func configureKnowledge(tb *agent.Toolbox, get func(string) string) error {
 	if e != nil {
 		return fmt.Errorf("invalid knowledge corpus: %w", e)
 	}
-	return tb.SetKnowledge(c)
+	if e := tb.SetKnowledge(c); e != nil {
+		return e
+	}
+	return tb.SetKnowledgeStrategy(get("AGENT_KNOWLEDGE_STRATEGY"))
 }

@@ -14,6 +14,7 @@ const CampaignID = "knowledge-answer100-independent-20261027"
 const ProviderURL = "https://api.deepseek.com/v1/chat/completions"
 
 type Contract struct {
+	CostStudy             string `json:"cost_study,omitempty"`
 	CollectSafeFailures   bool   `json:"collect_safe_failures,omitempty"`
 	ObservationBestEffort bool   `json:"observation_best_effort,omitempty"`
 	CleanupProofSHA       string `json:"cleanup_proof_sha256,omitempty"`
@@ -42,6 +43,9 @@ type Contract struct {
 func (c Contract) SHA() string      { b, _ := json.Marshal(c); return knowledgepilot.SHA(b) }
 func validSHA(s string, n int) bool { b, e := hex.DecodeString(s); return e == nil && len(b) == n }
 func (c Contract) Validate() error {
+	if c.CostStudy != "" && (c.CostStudy != "knowledge-resident-cost.v1" || c.PriorRecordingSHA == "" || c.MaxMicroCNY != 20000000) {
+		return fmt.Errorf("invalid cost study")
+	}
 	if (c.CollectSafeFailures || c.ObservationBestEffort || c.CleanupProofSHA != "") && c.PriorRecordingSHA == "" {
 		return fmt.Errorf("completion policy requires parent")
 	}

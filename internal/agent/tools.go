@@ -107,9 +107,12 @@ type execTool struct {
 
 // Toolbox 工具集：LLM 只能从这里挑工具，参数一律在此层重新校验（执行层不信任 LLM）。
 type Toolbox struct {
-	knowledge *knowledge.Corpus
-	admin     *AdminClient
-	tools     map[string]*execTool
+	knowledgeStrategy string
+	residentText      string
+	residentHits      []knowledge.Hit
+	knowledge         *knowledge.Corpus
+	admin             *AdminClient
+	tools             map[string]*execTool
 }
 
 func NewToolbox(admin *AdminClient) *Toolbox {
