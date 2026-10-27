@@ -1,0 +1,62 @@
+{
+  "schema": "knowledge-main-baseline-preflight.v1",
+  "date": "2026-10-27",
+  "main_revision": "72d3e683710f0a96eea904440a9f78a7ce264ed2",
+  "rag_revision": "f4e035219a256fac2db89ed6df2e1d6eb4b19da1",
+  "main_runtime_equals_rag_off": true,
+  "rag_on_changed_fields": [
+    "contract_sha256",
+    "corpus_version",
+    "knowledge_enabled",
+    "prompt_sha256",
+    "tools_sha256"
+  ],
+  "main_non_test_agent_go_sha256": {
+    "internal/agent/cash_read_recovery.go": "c1759126b37852efa8351ec31b9ec144966ed10912e2e648b0aecdc844fa38b5",
+    "internal/agent/chat.go": "8ed51e6db31f24bcb33763b9411dccacf2c8229b2146ccfb1360f4e9da7dbb5b",
+    "internal/agent/evalcore.go": "ec3846fd8ebe144f783ed1ebee15a64d15047b267f607cc581f87231034f9a34",
+    "internal/agent/fast_path.go": "f962e2d7e3760f68f976a68354ebf14562212f91427b267fe6333d0aaf975ddb",
+    "internal/agent/guard.go": "a1c770b0434a3021a9ec574ced4880b76695cd4252ee28d9287dd1321abfc20f",
+    "internal/agent/intentsuite.go": "7f33af8037acec75560e74d14bace4033cb32e90d7496968f31547283ef44ae2",
+    "internal/agent/llm.go": "ab6af51fe69b2a0c41b21ce3d82b8b97e80e362ec42efe745b84156e0e88a96f",
+    "internal/agent/llm_protocol.go": "78beb6894cecaac9ba1923a3b7c9cf8f2798633445f5b2e641c3e96a85dbf37b",
+    "internal/agent/observability.go": "bdfe917d3bcfc4b35c1822355764c3fdf09f07b0b6a1218d3c292217ac41abf3",
+    "internal/agent/policy.go": "bdc3e4cccefeaad9f662739c576587f6631acea7d13f798145b538d171c3362e",
+    "internal/agent/prompt.go": "0fb4c7aa7cd4eab195971d5f1e63995789a94fea37ec671e773dc728ad56d6c5",
+    "internal/agent/reply_boundary.go": "cac12aae0f8daf91b6144b8e67ced5791f8ae7795cd47f3d738b83b38d52d0ec",
+    "internal/agent/runtime_metadata.go": "c2715df9b7b9d80486e9a24f5a914b503c31d910643905a0de6cdcb36eaf253c",
+    "internal/agent/telemetry.go": "e84e8099f67e320e1ab870c0a542977e102ac62887ef35c954446ac8833ba03e",
+    "internal/agent/tools.go": "3a12c8ae187f265e6d63bf6868d906c5e847ca1ecbe3c1428efc0579d550d082"
+  },
+  "frozen_suite_sha256": "f84cd60dec07cdb98e7514339c4fc56622c52cb3b456ba734e664c7c5eb11994",
+  "planned_cases": 72,
+  "planned_tasks": 144,
+  "planned_routing": "model in both arms; not the main1220 model/JEV experiment",
+  "candidate_max_calls": 720,
+  "candidate_output_tokens": 512,
+  "reserved_cny_micro": null,
+  "ready_for_paid_run": false,
+  "accuracy": {
+    "main": null,
+    "rag": null
+  },
+  "customer_model_calls": 0,
+  "jev_calls": 0,
+  "claims_created": 0,
+  "limitations": [
+    "Runtime identity equality does not independently prove every business implementation path equivalent.",
+    "512-token fixed evaluation output is not a claim that deployed customer settings or the main1220 128-token contract changed.",
+    "No real answers collected or scored; no higher-accuracy conclusion.",
+    "Current local-only claim/transport/collector cannot be relabeled as a real provider run."
+  ],
+  "blockers": [
+    "knowledge_paid_capability_not_implemented",
+    "shared_permanent_budget_integration_pending",
+    "exact_provider_payload_usage_tariff_binding_pending"
+  ],
+  "sha256": {
+    "main-off.json": "409f7f0f4a67b68ac8b11e45653173b3b7e1a1653a608bc09da75bd2617fae8a",
+    "rag-off.json": "409f7f0f4a67b68ac8b11e45653173b3b7e1a1653a608bc09da75bd2617fae8a",
+    "rag-on.json": "4cd3a9971286f582fb5cfcad8033185a497368c02e6dc17598914666b579a360"
+  }
+}
