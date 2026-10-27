@@ -12,7 +12,7 @@ import (
 // AcquireCompletion is a separately authorized continuation of the SAME parent
 // allocation. It retains the original permanent claim and all settled charges.
 // Caller supplies the fixed common-dir child path derived from prior SHA.
-func AcquireCompletion(path string, c Contract, a Approval, parent, prior, journal string) (*Capability, error) {
+func AcquireCompletion(path string, c Contract, a Approval, parent, prior, journal string, cleanupProof ...string) (*Capability, error) {
 	if e := CheckApproval(c, a); e != nil {
 		return nil, e
 	}
@@ -51,8 +51,26 @@ func AcquireCompletion(path string, c Contract, a Approval, parent, prior, journ
 		return nil, fmt.Errorf("parent claim invalid")
 	}
 	var r Result
-	if json.Unmarshal(rb, &r) != nil || r.Schema != "knowledge-answer100-recording.v1" || r.EvidenceKind != "real_provider" || r.Status != "stopped" || !r.Cleanup || r.Complete || r.Contract.SHA() != pc.Contract.SHA() {
+	if json.Unmarshal(rb, &r) != nil || r.Schema != "knowledge-answer100-recording.v1" || r.EvidenceKind != "real_provider" || r.Status != "stopped" || r.Complete || r.Contract.SHA() != pc.Contract.SHA() {
 		return nil, fmt.Errorf("closed original segment required")
+	}
+	if !r.Cleanup {
+		if len(cleanupProof) != 1 || c.CleanupProofSHA == "" {
+			return nil, fmt.Errorf("additional cleanup proof required")
+		}
+		b, e := read(cleanupProof[0], c.CleanupProofSHA)
+		if e != nil {
+			return nil, e
+		}
+		var proof struct {
+			Schema    string `json:"schema"`
+			Prior     string `json:"prior_recording_sha256"`
+			Remaining *int   `json:"remaining_pair_schemas"`
+			Checked   string `json:"checked_at"`
+		}
+		if knowledgepilot.StrictDecode(b, &proof) != nil || proof.Schema != "knowledge-cleanup-readback.v1" || proof.Prior != c.PriorRecordingSHA || proof.Remaining == nil || *proof.Remaining != 0 || proof.Checked == "" {
+			return nil, fmt.Errorf("cleanup proof invalid")
+		}
 	}
 	old := r.Contract
 	if old.SuiteSHA != c.SuiteSHA || old.CorpusSHA != c.CorpusSHA || old.MainSHA != c.MainSHA || old.PriceSHA != c.PriceSHA || old.MaxMicroCNY != c.MaxMicroCNY || old.MaxCalls != c.MaxCalls || old.MaxBytes != c.MaxBytes || old.MaxOutput != c.MaxOutput || old.InputCeiling != c.InputCeiling || old.InputRate != c.InputRate || old.OutputRate != c.OutputRate || old.FundingPool != c.FundingPool {

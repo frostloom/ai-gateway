@@ -240,3 +240,72 @@ func TestCompletionRunnerSkipsRecordedArm(t *testing.T) {
 		t.Fatalf("old arm rerun or coverage lost: %v tasks%d calls%d", e, len(result.Tasks), n)
 	}
 }
+
+func TestObservationOnlyFailureDoesNotCancelCompletionCollection(t *testing.T) {
+	c, p, r, j := completionFixture(t)
+	c.ObservationBestEffort = true
+	cap, e := AcquireCompletion(filepath.Join(t.TempDir(), "claim"), c, auth(c), p, r, j)
+	if e != nil {
+		t.Fatal(e)
+	}
+	g, e := NewGuard(filepath.Join(t.TempDir(), "events"), cap, roundFunc(func(req *http.Request) (*http.Response, error) {
+		return &http.Response{StatusCode: 200, Header: make(http.Header), Body: io.NopCloser(strings.NewReader(encode(agent.Message{Role: "assistant", Content: "SYNTHETIC"})))}, nil
+	}))
+	if e != nil {
+		t.Fatal(e)
+	}
+	defer g.Close()
+	endpoint := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { http.Error(w, "synthetic", 503) }))
+	defer endpoint.Close()
+	obs, e := observability.New(context.Background(), observability.Config{Enabled: true, Endpoint: endpoint.URL + "/api/public/otel/v1/traces", PublicKey: "synthetic", SecretKey: "synthetic", HashKey: strings.Repeat("x", 32), Release: "synthetic-nonblocking", Environment: "evaluation", SampleRate: 1, ExportTimeout: 200 * time.Millisecond})
+	if e != nil {
+		t.Fatal(e)
+	}
+	defer obs.Shutdown(context.Background())
+	o, _ := fixture(t, func(req *http.Request) string { return encode(agent.Message{Role: "assistant", Content: "UNUSED"}) })
+	o.Guard = g
+	o.Observer = obs
+	o.CaseIDs = []string{"K002"}
+	result, e := Run(context.Background(), o)
+	if e != nil || len(result.Tasks) != 2 || result.ObserverStats.Failed == 0 || result.Budget.Stopped || result.Tasks[0].Turns[0].ObservationFailure == "" || !result.Cleanup {
+		t.Fatal("observation failure stopped collection or vanished", e)
+	}
+}
+
+func TestCompletionCollectsSafeInvalidAmountAsQualityFailure(t *testing.T) {
+	c, p, r, j := completionFixture(t)
+	c.CollectSafeFailures = true
+	cap, e := AcquireCompletion(filepath.Join(t.TempDir(), "claim"), c, auth(c), p, r, j)
+	if e != nil {
+		t.Fatal(e)
+	}
+	n := 0
+	g, e := NewGuard(filepath.Join(t.TempDir(), "events"), cap, roundFunc(func(req *http.Request) (*http.Response, error) {
+		n++
+		var wire struct {
+			Messages []agent.Message `json:"messages"`
+		}
+		json.NewDecoder(req.Body).Decode(&wire)
+		msg := agent.Message{Role: "assistant", Content: "请输入正数金额"}
+		if wire.Messages[len(wire.Messages)-1].Role != "tool" {
+			var tc agent.ToolCall
+			tc.ID = "bad"
+			tc.Type = "function"
+			tc.Function.Name = "recharge"
+			tc.Function.Arguments = `{"amount_money":0}`
+			msg = agent.Message{Role: "assistant", ToolCalls: []agent.ToolCall{tc}}
+		}
+		return &http.Response{StatusCode: 200, Header: make(http.Header), Body: io.NopCloser(strings.NewReader(encode(msg)))}, nil
+	}))
+	if e != nil {
+		t.Fatal(e)
+	}
+	defer g.Close()
+	o, _ := fixture(t, func(req *http.Request) string { return encode(agent.Message{Role: "assistant", Content: "UNUSED"}) })
+	o.Guard = g
+	o.CaseIDs = []string{"S010"}
+	result, e := Run(context.Background(), o)
+	if e != nil || len(result.Tasks) != 2 || result.Tasks[0].StatePass || !result.Tasks[0].BusinessUnchanged || !result.Tasks[0].OwnedCleanup || n != 4 {
+		t.Fatal("safe quality negative aborted collection", e, n)
+	}
+}

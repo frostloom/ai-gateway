@@ -151,3 +151,26 @@ func TestCompletionChainRetainsAllClosedSegments(t *testing.T) {
 		t.Fatal("ancestor accounting or coverage reset")
 	}
 }
+
+func TestCompletionRequiresVerifiedCleanupWhenOriginalCloseFailed(t *testing.T) {
+	c, p, r, j := completionFixture(t)
+	b, _ := os.ReadFile(r)
+	var old Result
+	json.Unmarshal(b, &old)
+	old.Cleanup = false
+	b, _ = json.Marshal(old)
+	os.WriteFile(r, b, 0600)
+	c.PriorRecordingSHA = knowledgepilot.SHA(b)
+	dir := t.TempDir()
+	claim := filepath.Join(dir, "claim")
+	if _, e := AcquireCompletion(claim, c, auth(c), p, r, j); e == nil {
+		t.Fatal("unverified cleanup accepted")
+	}
+	proof := []byte(`{"schema":"knowledge-cleanup-readback.v1","prior_recording_sha256":"` + c.PriorRecordingSHA + `","remaining_pair_schemas":0,"checked_at":"2026-10-27T18:30:00+08:00"}`)
+	pp := filepath.Join(dir, "proof")
+	os.WriteFile(pp, proof, 0600)
+	c.CleanupProofSHA = knowledgepilot.SHA(proof)
+	if _, e := AcquireCompletion(claim, c, auth(c), p, r, j, pp); e != nil {
+		t.Fatal("separate cleanup proof rejected", e)
+	}
+}

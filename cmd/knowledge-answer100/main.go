@@ -4,6 +4,7 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -29,6 +30,7 @@ func run(args []string, out io.Writer) int {
 	root := f.String("root", ".", "RAG source checkout")
 	execute := f.Bool("execute", false, "one separately approved independent-budget execution")
 	contract := f.String("contract", "", "frozen contract JSON")
+	proof := f.String("cleanup-proof", "", "additional immutable zero-schema cleanup readback")
 	prior := f.String("continue-from", "", "immutable stopped recording for explicitly authorized completion")
 	priorJournal := f.String("prior-journal", "", "immutable matching original provider journal")
 	approval := f.String("approval", "", "explicit independent extra-budget approval JSON")
@@ -174,7 +176,26 @@ func run(args []string, out io.Writer) int {
 	}
 	var cap *kc.Capability
 	if c.PriorRecordingSHA != "" {
-		cap, e = kc.AcquireCompletion(claimPath, c, a, parentClaimPath, *prior, *priorJournal)
+		if c.CleanupProofSHA != "" {
+			if *proof == "" || checkSHA(*proof, c.CleanupProofSHA) != nil || *dsn != "root:root@tcp(127.0.0.1:3307)/" {
+				return fail("local cleanup proof required")
+			}
+			db, err := sql.Open("mysql", *dsn)
+			if err != nil {
+				return fail("cleanup recheck unavailable")
+			}
+			checkCtx, cc := context.WithTimeout(ctx, 5*time.Second)
+			var remaining int
+			err = db.QueryRowContext(checkCtx, "SELECT COUNT(*) FROM information_schema.schemata WHERE schema_name LIKE 'ai_gateway_pair_%'").Scan(&remaining)
+			cc()
+			db.Close()
+			if err != nil || remaining != 0 {
+				return fail("owned schema absence not verified")
+			}
+			cap, e = kc.AcquireCompletion(claimPath, c, a, parentClaimPath, *prior, *priorJournal, *proof)
+		} else {
+			cap, e = kc.AcquireCompletion(claimPath, c, a, parentClaimPath, *prior, *priorJournal)
+		}
 	} else {
 		cap, e = kc.Acquire(claimPath, c, a)
 	}

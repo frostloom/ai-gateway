@@ -35,15 +35,16 @@ type Options struct {
 	CaseIDs               []string
 }
 type Turn struct {
-	Index      int                 `json:"index"`
-	Question   string              `json:"question"`
-	Reply      string              `json:"reply"`
-	HTTPStatus int                 `json:"http_status"`
-	Trace      json.RawMessage     `json:"trace"`
-	Telemetry  agent.TurnTelemetry `json:"telemetry"`
-	Pending    bool                `json:"pending"`
-	Snapshot   json.RawMessage     `json:"snapshot"`
-	DurationMS float64             `json:"request_ms"`
+	ObservationFailure string              `json:"observation_failure,omitempty"`
+	Index              int                 `json:"index"`
+	Question           string              `json:"question"`
+	Reply              string              `json:"reply"`
+	HTTPStatus         int                 `json:"http_status"`
+	Trace              json.RawMessage     `json:"trace"`
+	Telemetry          agent.TurnTelemetry `json:"telemetry"`
+	Pending            bool                `json:"pending"`
+	Snapshot           json.RawMessage     `json:"snapshot"`
+	DurationMS         float64             `json:"request_ms"`
 }
 type Task struct {
 	CaseID, Arm                                string
@@ -304,6 +305,9 @@ func runOne(ctx context.Context, o Options, env *taskbench.PairedFixtureEnvironm
 		for _, tr := range tools {
 			if tr.Outcome == "failure" {
 				task.StatePass = false
+				if o.Guard.c.CollectSafeFailures && !o.Guard.State().Stopped {
+					continue
+				}
 				// Unknown tool failures have no trusted technical/quality type in the
 				// production schema. Refuse continuation rather than guess from prose.
 				return task, fmt.Errorf("untyped tool failure; scope halted")
@@ -321,11 +325,19 @@ func runOne(ctx context.Context, o Options, env *taskbench.PairedFixtureEnvironm
 				return task, fmt.Errorf("observation identity missing")
 			}
 			if e = o.Observer.ForceFlush(ctx); e != nil {
+				if o.Guard.c.ObservationBestEffort {
+					task.Turns[len(task.Turns)-1].ObservationFailure = "flush_failed"
+					continue
+				}
 				o.Guard.externalStop("observation_flush")
 				return task, &observationFailure{stage: "observation_flush", cause: e}
 			}
 			stats := o.Observer.Stats()
 			if stats.Dropped != 0 || stats.Failed != 0 {
+				if o.Guard.c.ObservationBestEffort {
+					task.Turns[len(task.Turns)-1].ObservationFailure = "counter_failure_retained"
+					continue
+				}
 				o.Guard.externalStop("observation_counters")
 				return task, &observationFailure{stage: "observation_counters", cause: fmt.Errorf("observation export failed")}
 			}

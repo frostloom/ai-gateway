@@ -14,31 +14,40 @@ const CampaignID = "knowledge-answer100-independent-20261027"
 const ProviderURL = "https://api.deepseek.com/v1/chat/completions"
 
 type Contract struct {
-	ObserverTimeoutMS int    `json:"observer_timeout_ms,omitempty"`
-	PriorRecordingSHA string `json:"prior_recording_sha256,omitempty"`
-	PriorJournalSHA   string `json:"prior_journal_sha256,omitempty"`
-	ParentClaimSHA    string `json:"parent_claim_sha256,omitempty"`
-	Schema            string `json:"schema"`
-	ID                string `json:"id"`
-	FundingPool       string `json:"funding_pool"`
-	SuiteSHA          string `json:"suite_sha256"`
-	Revision          string `json:"revision"`
-	CorpusSHA         string `json:"corpus_sha256"`
-	MainSHA           string `json:"main_reference_sha256"`
-	BinarySHA         string `json:"binary_sha256"`
-	PriceSHA          string `json:"price_sha256"`
-	MaxMicroCNY       int64  `json:"max_micro_cny"`
-	MaxCalls          int    `json:"max_calls"`
-	MaxOutput         int    `json:"max_output_tokens"`
-	MaxBytes          int    `json:"max_request_bytes"`
-	InputCeiling      int64  `json:"input_ceiling"`
-	InputRate         int64  `json:"input_micro_per_million"`
-	OutputRate        int64  `json:"output_micro_per_million"`
+	CollectSafeFailures   bool   `json:"collect_safe_failures,omitempty"`
+	ObservationBestEffort bool   `json:"observation_best_effort,omitempty"`
+	CleanupProofSHA       string `json:"cleanup_proof_sha256,omitempty"`
+	ObserverTimeoutMS     int    `json:"observer_timeout_ms,omitempty"`
+	PriorRecordingSHA     string `json:"prior_recording_sha256,omitempty"`
+	PriorJournalSHA       string `json:"prior_journal_sha256,omitempty"`
+	ParentClaimSHA        string `json:"parent_claim_sha256,omitempty"`
+	Schema                string `json:"schema"`
+	ID                    string `json:"id"`
+	FundingPool           string `json:"funding_pool"`
+	SuiteSHA              string `json:"suite_sha256"`
+	Revision              string `json:"revision"`
+	CorpusSHA             string `json:"corpus_sha256"`
+	MainSHA               string `json:"main_reference_sha256"`
+	BinarySHA             string `json:"binary_sha256"`
+	PriceSHA              string `json:"price_sha256"`
+	MaxMicroCNY           int64  `json:"max_micro_cny"`
+	MaxCalls              int    `json:"max_calls"`
+	MaxOutput             int    `json:"max_output_tokens"`
+	MaxBytes              int    `json:"max_request_bytes"`
+	InputCeiling          int64  `json:"input_ceiling"`
+	InputRate             int64  `json:"input_micro_per_million"`
+	OutputRate            int64  `json:"output_micro_per_million"`
 }
 
 func (c Contract) SHA() string      { b, _ := json.Marshal(c); return knowledgepilot.SHA(b) }
 func validSHA(s string, n int) bool { b, e := hex.DecodeString(s); return e == nil && len(b) == n }
 func (c Contract) Validate() error {
+	if (c.CollectSafeFailures || c.ObservationBestEffort || c.CleanupProofSHA != "") && c.PriorRecordingSHA == "" {
+		return fmt.Errorf("completion policy requires parent")
+	}
+	if c.CleanupProofSHA != "" && !validSHA(c.CleanupProofSHA, 32) {
+		return fmt.Errorf("cleanup proof digest invalid")
+	}
 	if c.ObserverTimeoutMS != 0 && c.ObserverTimeoutMS != 10000 {
 		return fmt.Errorf("observer deadline rejected")
 	}
