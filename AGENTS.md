@@ -1,5 +1,10 @@
 # ai-gateway 项目记忆
 
+## 本知识库任务的独立分支边界（2026-10-27 用户纠正）
+
+本任务在 `codex/customer-knowledge-rag` 独立分支及现有知识库工作树进行。知识库实现、测评结果、报告和后续修复都只在该分支提交推送。通用的“main直接开发”约定不覆盖用户对本任务的明确独立分支要求。未获用户明确合并指令，不向main纳入本任务内容；此次main操作仅用于普通revert撤销误推的313da0e报告提交，不改写历史、不干扰其他开发。
+
+
 2026-10-24 当前v5原六案例统一离线验收已完成，仅新测试/档案未改客服：非测试agent Go源码逐字节匹配已部署50e3c8d，合同a95cacd；原六冻结定义/问法/画像未变，每条路径同suite/journal12独立账户26轮。local loopback模型/FakeJEV下正常22模型6Fake、纠正30/6均无结构失败；缺少本轮现金读取20/6及退款错误amount200对原100申请22/6各仅目标两臂failed，后者虽cap25实际退款25但参数不符不能算任务成功。现金纠正恢复归因execution审计，取消trace0以cancel_confirmation/cancelled审计为准，自动needs_review/Successfalse保留，不称真实质量/收益。94替身模型24Fake调用只是四路径本地观测，最大请求7280字节/128输出，literal loopback未验证官方thinking，usage合成不是token/计费证明。初始测试设置nilOperation、Fake版本标识、取消trace/错误文字假设失败均保留，未改生产规则。首次完整Go17包通过，仅KafkaE2E NotLeader失败；taskbench401.533秒包括新测试通过，原配置有界Kafka独立复验12.26秒通过非skip，当前只读60分区leader均有/healthy，不确认根因或永久修复、不称首次全量全绿。独立审查无P1/P2，审查者MySQL受沙箱限制，主代理集成证据为据。3263旧私密文件/claim SHA不变、隔离库0；零新真实模型/JEV/claim/评分/部署，累计仍37/9。本小目标同版离线探针通过不等于新真实队列已就绪，下一步独立同版受控入口/永久claim预算链及精确版本计费绑定，实际付费前仍须完整回归和新范围明确批准，不重复问100+1预算。见docs/v5-six-case-offline-2026-10-24.md及对应档案。
 
 2026-10-24 已完成六案例历史真实证据离线汇总：跨6执行器/5合同，每例仅选修复后最终通过一次，顺序均model先selective后，不能称同版本整套或总体收益。仅balance-001单轮余额fastpath模型2→0；其他五例无调用节省，selective各增加1JEV且本次runner更长。成功运行22模型6JEV，三历史失败15模型3JEV，合为37/9；币种分开、配置计价非账单、不抹去失败或释放永久预留。发现取消旧摘要标签错误：原server1183.130834/2089.230250ms其实HTTP往返和，原fullrunner1255.316792/2226.538375ms其实conversation；正确servertelemetry964.069000/1723.039875ms、runner1414.805167/2435.907250ms。旧摘要/journal/manifest不改，旧docs新增勘误；新统一表以原journal/report为准。runner包括factory/oracle/drivercleanup但不含人工/全局DB准备删除/末尾export及评分读回，不是用户E2E。现金followup fresh read归因execution cash_read_recovery审计。50绑定来源SHA、六历史clock源码和12臂算术经独立审查无P1/P2；3257旧私密文件SHA不变。零新增模型/JEV/claim/评分/部署，累计仍37/9，客服仍50e3c8d/v5。下一小目标先当前v5原六案例统一离线验收，再冻结新同版本队列受控入口；未创建新scope/付费授权，不沿用消耗claim、不先扩付费样本。见docs/six-case-evidence-synthesis-2026-10-24.md及同日six-case-synthesis档案。
