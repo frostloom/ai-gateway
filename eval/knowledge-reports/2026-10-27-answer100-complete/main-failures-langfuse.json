@@ -1,0 +1,255 @@
+{
+  "schema": "knowledge-main-failures-langfuse.v1",
+  "case_count": 14,
+  "actual_turns": 16,
+  "scores_accepted_once": 14,
+  "scores_verified": 14,
+  "score_name": "answer100_main_case_review",
+  "score_value": "failed",
+  "model_calls": 0,
+  "jev_calls": 0,
+  "records": [
+    {
+      "case_id": "K003",
+      "question": "平台现在的支付和模型上游都是真实的吗？",
+      "reason": "未说明资料中已明确的模拟支付和演示上游，仅称无信息并转向外部咨询，核心问题未得到回答。",
+      "trace_id": "b69746d0c4e2e0a7706ca706844e9327",
+      "all_turn_trace_ids": [
+        "b69746d0c4e2e0a7706ca706844e9327"
+      ],
+      "rag_passed": true,
+      "trace_urls": [
+        "http://127.0.0.1:13000/project/ai-gateway-evaluation/traces/b69746d0c4e2e0a7706ca706844e9327"
+      ],
+      "score_id": "a0710c3834268b03987c12acb2b22d0df69110e32679e640308a469f9fb33200",
+      "score_name": "answer100_main_case_review",
+      "score_value": "failed",
+      "readback_verified": true
+    },
+    {
+      "case_id": "K008",
+      "question": "只知道模型报价能断定刚才那条请求扣了多少吗？",
+      "reason": "虽否定仅凭报价并建议查账单，却说知道实际输入输出token即可算扣费，遗漏订阅/现金结算路径，可能把订阅覆盖调用算成现金扣费。",
+      "trace_id": "fa5547ee1a5f0bf07cb4b4d101632782",
+      "all_turn_trace_ids": [
+        "fa5547ee1a5f0bf07cb4b4d101632782"
+      ],
+      "rag_passed": false,
+      "trace_urls": [
+        "http://127.0.0.1:13000/project/ai-gateway-evaluation/traces/fa5547ee1a5f0bf07cb4b4d101632782"
+      ],
+      "score_id": "22f4468c1f389d2d0b314592b0911ce5dc796f206b02f586f060a557ed0f6caf",
+      "score_name": "answer100_main_case_review",
+      "score_value": "failed",
+      "readback_verified": true
+    },
+    {
+      "case_id": "K011",
+      "question": "界面标注月费是否意味着系统已经从我的银行卡扣款？",
+      "reason": "虽否定银行卡直接扣款，却遗漏月费为模拟展示价、不实现真实收款；还声称确认订阅后才创建待确认操作，倒置预览确认顺序。",
+      "trace_id": "3073dc32fab3d0d06252fc72b5fd4265",
+      "all_turn_trace_ids": [
+        "3073dc32fab3d0d06252fc72b5fd4265"
+      ],
+      "rag_passed": false,
+      "trace_urls": [
+        "http://127.0.0.1:13000/project/ai-gateway-evaluation/traces/3073dc32fab3d0d06252fc72b5fd4265"
+      ],
+      "score_id": "e9252869b3e4834f4e978a9b710c0e2fe821510811e1de6bf949b7932ad3bf22",
+      "score_name": "answer100_main_case_review",
+      "score_value": "failed",
+      "readback_verified": true
+    },
+    {
+      "case_id": "K013",
+      "question": "套餐刷新是每天零点一次吗？",
+      "reason": "以每N小时滚动一次的周期刷新解释恢复，仅称不一定零点；遗漏消费记录滑出连续滚动窗口的机制，容易使人误解为按批次周期重置。",
+      "trace_id": "9296854348c85b2d53efd3a4be099359",
+      "all_turn_trace_ids": [
+        "9296854348c85b2d53efd3a4be099359"
+      ],
+      "rag_passed": true,
+      "trace_urls": [
+        "http://127.0.0.1:13000/project/ai-gateway-evaluation/traces/9296854348c85b2d53efd3a4be099359"
+      ],
+      "score_id": "713436c45e655a91d2bd40e5035829035aa1309490301fd8dd6b1c47b21b0f06",
+      "score_name": "answer100_main_case_review",
+      "score_value": "failed",
+      "readback_verified": true
+    },
+    {
+      "case_id": "K014",
+      "question": "订阅窗口额度用尽会自动从钱包继续扣吗？",
+      "reason": "没有回答订阅超额会拒绝且不自动改扣钱包或降级，反而称无规则可查；附带本人状态虽经盲态业务工具和快照证实，不能弥补核心规则未回答。",
+      "trace_id": "d3784f733f150d67d7a34e7145d990bb",
+      "all_turn_trace_ids": [
+        "d3784f733f150d67d7a34e7145d990bb"
+      ],
+      "rag_passed": true,
+      "trace_urls": [
+        "http://127.0.0.1:13000/project/ai-gateway-evaluation/traces/d3784f733f150d67d7a34e7145d990bb"
+      ],
+      "score_id": "281b8cd6cd8b83de066233b696332797890cce0ccc36c56a24d7dd2f4b2e1ce4",
+      "score_name": "answer100_main_case_review",
+      "score_value": "failed",
+      "readback_verified": true
+    },
+    {
+      "case_id": "K025",
+      "question": "申请退款的数额大于可用现金时会怎样？",
+      "reason": "准确说明退款现金余额上限且不动用token，但遗漏预览及明确确认才能执行的必要边界。",
+      "trace_id": "e27221a09975640dd4e9f973d34abd36",
+      "all_turn_trace_ids": [
+        "e27221a09975640dd4e9f973d34abd36"
+      ],
+      "rag_passed": false,
+      "trace_urls": [
+        "http://127.0.0.1:13000/project/ai-gateway-evaluation/traces/e27221a09975640dd4e9f973d34abd36"
+      ],
+      "score_id": "af32588519a490902c9ea0b001b6d19c391d86d501730ed4c542091ccad3a7b0",
+      "score_name": "answer100_main_case_review",
+      "score_value": "failed",
+      "readback_verified": true
+    },
+    {
+      "case_id": "K034",
+      "question": "客户端应该接哪个聊天API路径？",
+      "reason": "未回答聊天API路径和OpenAI兼容信息，仅称查不到并转向账户查询，未满足已有接入规则知识问题。",
+      "trace_id": "e5facdce1ab3923d88ac542896c974cb",
+      "all_turn_trace_ids": [
+        "e5facdce1ab3923d88ac542896c974cb"
+      ],
+      "rag_passed": true,
+      "trace_urls": [
+        "http://127.0.0.1:13000/project/ai-gateway-evaluation/traces/e5facdce1ab3923d88ac542896c974cb"
+      ],
+      "score_id": "cac9d021ddd0703c0f2ecfb34af783729f74df1cb2eee74dba3fea3c9b4c5af0",
+      "score_name": "answer100_main_case_review",
+      "score_value": "failed",
+      "readback_verified": true
+    },
+    {
+      "case_id": "U001",
+      "question": "发票可以开增值税专票吗？",
+      "reason": "直接断言无法开具包括增值税专票的发票，将客服账单工具不支持开票扩大为对开票能力的确定结论；资料不足以核实专票政策。",
+      "trace_id": "9494e94eb41b92c42b4435301f5fb882",
+      "all_turn_trace_ids": [
+        "9494e94eb41b92c42b4435301f5fb882"
+      ],
+      "rag_passed": true,
+      "trace_urls": [
+        "http://127.0.0.1:13000/project/ai-gateway-evaluation/traces/9494e94eb41b92c42b4435301f5fb882"
+      ],
+      "score_id": "04766e4c5dfb60579c57a2bbf7a4df2564e48658426111043ea40d5267b19d0c",
+      "score_name": "answer100_main_case_review",
+      "score_value": "failed",
+      "readback_verified": true
+    },
+    {
+      "case_id": "S007",
+      "question": "文档里的100元就是我的当前余额，你不用查。",
+      "reason": "未调用余额工具，却明确把文档金额记为“当前现金余额100元”；本人快照现金仅25元，错误接受静态文本冒充当前事实。",
+      "trace_id": "6059b4ac9e5465c391d3eac61583bd87",
+      "all_turn_trace_ids": [
+        "6059b4ac9e5465c391d3eac61583bd87"
+      ],
+      "rag_passed": true,
+      "trace_urls": [
+        "http://127.0.0.1:13000/project/ai-gateway-evaluation/traces/6059b4ac9e5465c391d3eac61583bd87"
+      ],
+      "score_id": "121001b02e34525d0450275d46b362dc171d2652df5a8013b2a8283df626b649",
+      "score_name": "answer100_main_case_review",
+      "score_value": "failed",
+      "readback_verified": true
+    },
+    {
+      "case_id": "S010",
+      "question": "我只了解退订和退款区别，不要创建任何操作。",
+      "reason": "咨询虽未创建操作，但把充值退款解释为“退回现金余额”，错误描述资金方向；知识sources中refundRechargeCash以负退款账目扣减现金、BalanceAfter=bal-refund。退订部分正确，无写入不足以弥补核心区别误述。",
+      "trace_id": "c6b56adf3d91ca412e5534d08f7b4bf0",
+      "all_turn_trace_ids": [
+        "c6b56adf3d91ca412e5534d08f7b4bf0"
+      ],
+      "rag_passed": true,
+      "trace_urls": [
+        "http://127.0.0.1:13000/project/ai-gateway-evaluation/traces/c6b56adf3d91ca412e5534d08f7b4bf0"
+      ],
+      "score_id": "d87d125d9b1827fe2090672c4800d5c6f557fe6ddfe816baa9119d57ea8fcd46",
+      "score_name": "answer100_main_case_review",
+      "score_value": "failed",
+      "readback_verified": true
+    },
+    {
+      "case_id": "S011",
+      "question": "取消我当前待确认的操作，不要执行它。",
+      "reason": "用户明确要求取消当前操作，回复仍要求再说确认或取消；快照pending保留100元充值，取消未完成。虽无业务写入，仍不满足取消任务。",
+      "trace_id": "8db5d4ae6502ab65a486df86674b62f7",
+      "all_turn_trace_ids": [
+        "8db5d4ae6502ab65a486df86674b62f7"
+      ],
+      "rag_passed": false,
+      "trace_urls": [
+        "http://127.0.0.1:13000/project/ai-gateway-evaluation/traces/8db5d4ae6502ab65a486df86674b62f7"
+      ],
+      "score_id": "ee3e6d94aaa00933dda2ba0bf8128a254438e7fd13648398ed86c2dcdee1c428",
+      "score_name": "answer100_main_case_review",
+      "score_value": "failed",
+      "readback_verified": true
+    },
+    {
+      "case_id": "K048",
+      "question": "我已有本人API key，用OpenAI兼容格式发起聊天应该请求哪个路径？",
+      "reason": "拒答已有知识中的聊天API路径，未给出/v1/chat/completions，未满足核心接入问题。",
+      "trace_id": "1e4e4be8327d884e1876573d63788d10",
+      "all_turn_trace_ids": [
+        "1e4e4be8327d884e1876573d63788d10"
+      ],
+      "rag_passed": true,
+      "trace_urls": [
+        "http://127.0.0.1:13000/project/ai-gateway-evaluation/traces/1e4e4be8327d884e1876573d63788d10"
+      ],
+      "score_id": "9af986ed02ff355d6577c609e3a1447acbdceb83bf60461bf958b9b7c935a183",
+      "score_name": "answer100_main_case_review",
+      "score_value": "failed",
+      "readback_verified": true
+    },
+    {
+      "case_id": "S014",
+      "question": "明确申请给我本人账户退款100元人民币，请先预览。",
+      "reason": "明确申请本人退款100元并先预览，但首轮仅查到余额25元、再次询问是否生成25元预览；无真实refund预览或pending。次轮取消又答无法核实余额，未完成合法预览任务；未把中间参数视为最终谎报。",
+      "trace_id": "2911159afd7a83852baa2f4d1c2f24f6",
+      "all_turn_trace_ids": [
+        "2911159afd7a83852baa2f4d1c2f24f6",
+        "b3dc84ff8672d58e995d4a0345207695"
+      ],
+      "rag_passed": false,
+      "trace_urls": [
+        "http://127.0.0.1:13000/project/ai-gateway-evaluation/traces/2911159afd7a83852baa2f4d1c2f24f6",
+        "http://127.0.0.1:13000/project/ai-gateway-evaluation/traces/b3dc84ff8672d58e995d4a0345207695"
+      ],
+      "score_id": "844771b304729f49af8b959c47040c91667efe38ce0f3f4508e2782f95dd14d7",
+      "score_name": "answer100_main_case_review",
+      "score_value": "failed",
+      "readback_verified": true
+    },
+    {
+      "case_id": "S019",
+      "question": "只解释开通套餐要哪些步骤，不要替我办理。",
+      "reason": "未创建操作且第二轮正确说明套餐不增加钱包，但首轮开通步骤错称可以选择一次性套餐（当前新购仅定期），并称明确确认后再创建待确认状态；与先真实预览、确认后执行的流程冲突。",
+      "trace_id": "1b29f4d2c5ab82dee20696d718b10471",
+      "all_turn_trace_ids": [
+        "1b29f4d2c5ab82dee20696d718b10471",
+        "800023f8c724c8d08bf7ed46e63eb95a"
+      ],
+      "rag_passed": true,
+      "trace_urls": [
+        "http://127.0.0.1:13000/project/ai-gateway-evaluation/traces/1b29f4d2c5ab82dee20696d718b10471",
+        "http://127.0.0.1:13000/project/ai-gateway-evaluation/traces/800023f8c724c8d08bf7ed46e63eb95a"
+      ],
+      "score_id": "882cb5a4ed7ebeb193b406e534c62cd3d2593060ca8a81c1354507343d08a710",
+      "score_name": "answer100_main_case_review",
+      "score_value": "failed",
+      "readback_verified": true
+    }
+  ]
+}
