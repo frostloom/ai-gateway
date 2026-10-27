@@ -1,0 +1,62 @@
+{
+  "actual_caps": null,
+  "actual_new_calls": {
+    "jev": 0,
+    "model": 0
+  },
+  "actual_new_claims": 0,
+  "actual_new_deployments": 0,
+  "actual_new_scores": 0,
+  "actual_window_width": null,
+  "all1220_native_envelope_proven": false,
+  "arms": 7320,
+  "boundaries_separate": 1851,
+  "defined_user_turns": 11772,
+  "full_goal_complete": false,
+  "higher_acquisition_authorization_issuer": false,
+  "historical_actual_calls": {
+    "jev": 37,
+    "model": 143
+  },
+  "live_owner_coordinator": false,
+  "paid_cli": false,
+  "permanent_reserved": {
+    "micro_cny": 29061120,
+    "micro_usd": 223104
+  },
+  "ready_for_paid_run": false,
+  "remaining": {
+    "micro_cny": 70938880,
+    "micro_usd": 776896
+  },
+  "schema": "full1220-window-integrated.v1",
+  "source_files": [
+    "internal/observability/evaluation_identity.go",
+    "internal/observability/evaluation_identity_test.go",
+    "internal/taskbench/window_accounting.go",
+    "internal/taskbench/window_accounting_test.go",
+    "internal/taskbench/window_campaign.go",
+    "internal/taskbench/window_campaign_test.go",
+    "internal/taskbench/window_claim.go",
+    "internal/taskbench/window_claim_test.go",
+    "internal/taskbench/window_closed_provider.go",
+    "internal/taskbench/window_closed_provider_test.go",
+    "internal/taskbench/window_collector.go",
+    "internal/taskbench/window_collector_test.go",
+    "internal/taskbench/window_jev.go",
+    "internal/taskbench/window_jev_test.go",
+    "internal/taskbench/window_owned_driver.go",
+    "internal/taskbench/window_owned_driver_test.go",
+    "internal/taskbench/window_payload.go",
+    "internal/taskbench/window_payload_test.go",
+    "internal/taskbench/window_protocol.go",
+    "internal/taskbench/window_protocol_test.go",
+    "internal/taskbench/window_scope.go",
+    "internal/taskbench/window_scope_test.go",
+    "internal/taskbench/window_transport.go",
+    "internal/taskbench/window_transport_test.go"
+  ],
+  "status": "private_execution_chain_development_checkpoint",
+  "task_only_quality_termination": false,
+  "three_pass_pairs": 3660
+}

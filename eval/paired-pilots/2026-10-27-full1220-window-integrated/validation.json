@@ -1,0 +1,61 @@
+{
+  "combined_module_command": {
+    "command": [
+      "go",
+      "test",
+      "-race",
+      "./internal/taskbench",
+      "./internal/observability",
+      "-run",
+      "^(TestWindow|TestFullWindow|TestEvaluationIdentity)",
+      "-count=1",
+      "-timeout=20m",
+      "-json"
+    ],
+    "elapsed_seconds": 984.2103968330193,
+    "exit_code": 0,
+    "external_timeout": false,
+    "sdkroot": "/Library/Developer/CommandLineTools/SDKs/MacOSX26.5.sdk",
+    "source_files": 355
+  },
+  "combined_skips": 0,
+  "full_regression_required_before_paid_freeze": true,
+  "initial_sandbox_attempt": {
+    "cause": "Go cache and loopback socket access denied; no assertion-level failure",
+    "exit_code": 1,
+    "seconds": 4.0010511669679545
+  },
+  "linker_warning_retained": "LC_DYSYMTAB",
+  "packages": [
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/observability",
+      "seconds": 2.4699999999999998
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+      "seconds": 978.235
+    }
+  ],
+  "pass_records_including_subtests": 476,
+  "python": {
+    "original_skips": 15,
+    "seconds": 21.654,
+    "tests": 200
+  },
+  "retained_whole_go_attempts": [
+    {
+      "exit_code": 1,
+      "failure": "existing TestAgentPairOwnedEnvironmentLocalReadAndWrite cleanup MySQL read timeout",
+      "other_packages_passed": 20,
+      "seconds": 1002.0060665839701
+    },
+    {
+      "exit_code": 124,
+      "failure": "external whole-command timeout during existing explicit arm order integration",
+      "other_packages_passed": 20,
+      "seconds": 1200.331721
+    }
+  ],
+  "top_level_tests": 110,
+  "whole_go_passed": false
+}

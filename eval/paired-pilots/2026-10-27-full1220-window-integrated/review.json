@@ -1,0 +1,39 @@
+{
+  "additional_editing_error": "multiline Bytes JSON tag from import insertion restored before final combined race",
+  "fixed": [
+    {
+      "counterexamples": [
+        "root_replace",
+        "lock_replace",
+        "claim_edit",
+        "ledger_dir_replace",
+        "journal_unlink",
+        "journal_replace",
+        "journal_append"
+      ],
+      "fix": "check campaign inventory and anchored live ledger inode/byte digest before admission; append validates before and after sync",
+      "follow_up": "independent targeted source review confirmed fix",
+      "green": "all seven zero upstream calls and owner stopped",
+      "issue": "durable campaign or active ledger replacement could permit subsequent upstream request",
+      "priority": "P2",
+      "red": "all seven reached one closed upstream call"
+    },
+    {
+      "fix": "audit completion proof explicitly unavailable; require successful live Close",
+      "issue": "foundation close bytes mistaken for durable completion proof",
+      "priority": "P2"
+    },
+    {
+      "fix": "bound fixed remaining counts before arithmetic",
+      "issue": "foundation attempt count integer overflow before sum validation",
+      "priority": "P2"
+    }
+  ],
+  "limitations": [
+    "review did not run tests or external services",
+    "no production authorization issuer/coordinator or paid readiness verified",
+    "whole Go regression incomplete"
+  ],
+  "remaining_p1_p2": 0,
+  "scope": "24 new window execution and observer identity files, independent read-only integrated source review"
+}
