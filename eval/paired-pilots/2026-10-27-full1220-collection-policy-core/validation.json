@@ -1,0 +1,43 @@
+{
+  "go": {
+    "exit_code": 0,
+    "whole_command_timeout": false,
+    "elapsed_seconds": 461.2278044169652,
+    "timeout_seconds": 1200,
+    "command": [
+      "go",
+      "test",
+      "./...",
+      "-count=1",
+      "-timeout=20m",
+      "-json"
+    ],
+    "passed_packages": 21,
+    "taskbench_seconds": 442.562,
+    "raw_sha256": "8d15a4ea9a46d6d1cb13252253371af88c4087bedbae4a7e52c5f16b72502795"
+  },
+  "python": {
+    "tests": 200,
+    "original_skips": 15,
+    "elapsed_seconds": 22.206,
+    "raw_sha256": "230cd2d68d5bfa12e7ae99d52ba435548ded6b5cbd98640a7ffef836b1e938e1"
+  },
+  "race": {
+    "cli_seconds": 1.728,
+    "taskbench_seconds": 26.594,
+    "platform_linker_warnings_retained": true,
+    "raw_sha256": "fbc09341174c495cf942a414e6e00b86b78294d8bd75f9eec458b03810173ed6"
+  },
+  "independent_review": {
+    "mode": "read-only static review",
+    "p2_found": 2,
+    "p2_fixed": 2,
+    "remaining_p1_p2": 0,
+    "counterexample_sha256": "d3f3c055e89ad8b559bbeabf8595cf17974c85d65e1d78a8a4a26c66558d9306",
+    "green_sha256": "32f4b60908c627bad695a78382d1a9792dfb04673e480bf806ff2f099e8b8a5f"
+  },
+  "frozen_replay_output_sha256": "1f68c963e72787d6cf43504616a79eae2db556ed74c3ed60bf077e46bfd52818",
+  "frozen_replay_stdout_sha256": "9f51bd882d966e6368a51eaa4fb774fe869c124792dea61f6d9c66bcd01991d2",
+  "final_isolated_schema_count": 0,
+  "actual_full1220_complete": false
+}

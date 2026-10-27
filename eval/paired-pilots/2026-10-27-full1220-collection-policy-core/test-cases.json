@@ -1,0 +1,324 @@
+{
+  "cases": [
+    {
+      "package": "github.com/frostloom/ai-gateway/cmd/full-customer-policy-audit",
+      "name": "TestPolicyAuditCLIRejectsInvalidInputsWithoutOutput",
+      "status": "pass",
+      "elapsed_seconds": 0
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+      "name": "TestCollectionAuditFrozenSourceAndSafeNegative",
+      "status": "pass",
+      "elapsed_seconds": 0.37
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+      "name": "TestCollectionAuditRejectsMissingChangedOrDuplicateJournal",
+      "status": "pass",
+      "elapsed_seconds": 0.51
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+      "name": "TestCollectionAuditRejectsContradictoryRuntime/model",
+      "status": "pass",
+      "elapsed_seconds": 0.15
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+      "name": "TestCollectionAuditRejectsContradictoryRuntime/protocol",
+      "status": "pass",
+      "elapsed_seconds": 0.16
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+      "name": "TestCollectionAuditRejectsContradictoryRuntime/routing_mode",
+      "status": "pass",
+      "elapsed_seconds": 0.14
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+      "name": "TestCollectionAuditRejectsContradictoryRuntime/jev_calls",
+      "status": "pass",
+      "elapsed_seconds": 0.14
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+      "name": "TestCollectionAuditRejectsContradictoryRuntime/shared",
+      "status": "pass",
+      "elapsed_seconds": 0.14
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+      "name": "TestCollectionAuditRejectsContradictoryRuntime",
+      "status": "pass",
+      "elapsed_seconds": 0.94
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+      "name": "TestCollectionPolicyRetainsSafeUnmetGoal",
+      "status": "pass",
+      "elapsed_seconds": 0
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+      "name": "TestCollectionPolicyHaltsBeforeWrongPendingConfirmation",
+      "status": "pass",
+      "elapsed_seconds": 0
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+      "name": "TestCollectionPolicyDetectsUntracedMutation",
+      "status": "pass",
+      "elapsed_seconds": 0
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+      "name": "TestCollectionPolicyPositiveAndLegacyJSON",
+      "status": "pass",
+      "elapsed_seconds": 0
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+      "name": "TestCollectionPolicyUnknownEvidenceStopsImmediately/action",
+      "status": "pass",
+      "elapsed_seconds": 0
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+      "name": "TestCollectionPolicyUnknownEvidenceStopsImmediately/phase",
+      "status": "pass",
+      "elapsed_seconds": 0
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+      "name": "TestCollectionPolicyUnknownEvidenceStopsImmediately/outcome",
+      "status": "pass",
+      "elapsed_seconds": 0
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+      "name": "TestCollectionPolicyUnknownEvidenceStopsImmediately",
+      "status": "pass",
+      "elapsed_seconds": 0
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+      "name": "TestCollectionPolicyWrongActualAmountStopsBeforeLaterTurn",
+      "status": "pass",
+      "elapsed_seconds": 0
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+      "name": "TestCollectionPolicyReviewNegativeIsDistinctFromInvalidEvidence/fail",
+      "status": "pass",
+      "elapsed_seconds": 0
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+      "name": "TestCollectionPolicyReviewNegativeIsDistinctFromInvalidEvidence/stale",
+      "status": "pass",
+      "elapsed_seconds": 0
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+      "name": "TestCollectionPolicyReviewNegativeIsDistinctFromInvalidEvidence/duplicate",
+      "status": "pass",
+      "elapsed_seconds": 0
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+      "name": "TestCollectionPolicyReviewNegativeIsDistinctFromInvalidEvidence/unknown",
+      "status": "pass",
+      "elapsed_seconds": 0
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+      "name": "TestCollectionPolicyReviewNegativeIsDistinctFromInvalidEvidence/verdict",
+      "status": "pass",
+      "elapsed_seconds": 0
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+      "name": "TestCollectionPolicyReviewNegativeIsDistinctFromInvalidEvidence",
+      "status": "pass",
+      "elapsed_seconds": 0
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+      "name": "TestCollectionPolicyReplayRejectsAlteredAssessment/policy",
+      "status": "pass",
+      "elapsed_seconds": 0
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+      "name": "TestCollectionPolicyReplayRejectsAlteredAssessment/disposition",
+      "status": "pass",
+      "elapsed_seconds": 0
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+      "name": "TestCollectionPolicyReplayRejectsAlteredAssessment/result",
+      "status": "pass",
+      "elapsed_seconds": 0
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+      "name": "TestCollectionPolicyReplayRejectsAlteredAssessment/review",
+      "status": "pass",
+      "elapsed_seconds": 0
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+      "name": "TestCollectionPolicyReplayRejectsAlteredAssessment/issue",
+      "status": "pass",
+      "elapsed_seconds": 0
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+      "name": "TestCollectionPolicyReplayRejectsAlteredAssessment/policy#01",
+      "status": "pass",
+      "elapsed_seconds": 0
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+      "name": "TestCollectionPolicyReplayRejectsAlteredAssessment/disposition#01",
+      "status": "pass",
+      "elapsed_seconds": 0
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+      "name": "TestCollectionPolicyReplayRejectsAlteredAssessment/result#01",
+      "status": "pass",
+      "elapsed_seconds": 0
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+      "name": "TestCollectionPolicyReplayRejectsAlteredAssessment/review#01",
+      "status": "pass",
+      "elapsed_seconds": 0
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+      "name": "TestCollectionPolicyReplayRejectsAlteredAssessment/issue#01",
+      "status": "pass",
+      "elapsed_seconds": 0
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+      "name": "TestCollectionPolicyReplayRejectsAlteredAssessment",
+      "status": "pass",
+      "elapsed_seconds": 0
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+      "name": "TestCollectionPolicySafetyFaultsStopAtObservedTurn/early-write",
+      "status": "pass",
+      "elapsed_seconds": 0
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+      "name": "TestCollectionPolicySafetyFaultsStopAtObservedTurn/foreign-control",
+      "status": "pass",
+      "elapsed_seconds": 0
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+      "name": "TestCollectionPolicySafetyFaultsStopAtObservedTurn/wrong-pending",
+      "status": "pass",
+      "elapsed_seconds": 0
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+      "name": "TestCollectionPolicySafetyFaultsStopAtObservedTurn/duplicate-write",
+      "status": "pass",
+      "elapsed_seconds": 0
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+      "name": "TestCollectionPolicySafetyFaultsStopAtObservedTurn/http",
+      "status": "pass",
+      "elapsed_seconds": 0
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+      "name": "TestCollectionPolicySafetyFaultsStopAtObservedTurn/missing-control",
+      "status": "pass",
+      "elapsed_seconds": 0
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+      "name": "TestCollectionPolicySafetyFaultsStopAtObservedTurn/ledger",
+      "status": "pass",
+      "elapsed_seconds": 0
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+      "name": "TestCollectionPolicySafetyFaultsStopAtObservedTurn/unknown-terminal",
+      "status": "pass",
+      "elapsed_seconds": 0
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+      "name": "TestCollectionPolicySafetyFaultsStopAtObservedTurn/wrong-tool",
+      "status": "pass",
+      "elapsed_seconds": 0
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+      "name": "TestCollectionPolicySafetyFaultsStopAtObservedTurn/session",
+      "status": "pass",
+      "elapsed_seconds": 0
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+      "name": "TestCollectionPolicySafetyFaultsStopAtObservedTurn/preview-failure",
+      "status": "pass",
+      "elapsed_seconds": 0
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+      "name": "TestCollectionPolicySafetyFaultsStopAtObservedTurn/foreign-args",
+      "status": "pass",
+      "elapsed_seconds": 0
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+      "name": "TestCollectionPolicySafetyFaultsStopAtObservedTurn/hidden-pending",
+      "status": "pass",
+      "elapsed_seconds": 0
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+      "name": "TestCollectionPolicySafetyFaultsStopAtObservedTurn/missing-authoritative-pending",
+      "status": "pass",
+      "elapsed_seconds": 0
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+      "name": "TestCollectionPolicySafetyFaultsStopAtObservedTurn/allowance",
+      "status": "pass",
+      "elapsed_seconds": 0
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+      "name": "TestCollectionPolicySafetyFaultsStopAtObservedTurn",
+      "status": "pass",
+      "elapsed_seconds": 0
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+      "name": "TestCollectionPolicyFactMismatchRemainsNegative",
+      "status": "pass",
+      "elapsed_seconds": 0
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+      "name": "TestCollectionPolicyCancellationStopsBeforeAnotherTurn",
+      "status": "pass",
+      "elapsed_seconds": 0
+    }
+  ],
+  "new_test_skips": 0,
+  "tests_are_local_only": true
+}

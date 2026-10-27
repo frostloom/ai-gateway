@@ -41,3 +41,11 @@ The complete reviewed candidate replay confirms1220pairs/2440arms/3924turns, zer
 Final preservation checks bind331Go sources,15customer implementation files against50e3c8d/v5,9277historical private files,1220original local journals, the prior full1220 public manifest and9canonical claims. Owned pair/fixture schemas read back0. New real model/JEV requests, claims, scores and deployments remain0; historical actual143/37 and permanent¥29.061120+$0.223104 are unchanged.
 
 The remaining paid pair/campaign/ledger integration is deliberately unfinished until its new financial lease and scope gates exist. Current private disposition is assessment evidence, never permission to bypass the existing strict full/pilot APIs.
+
+## Frozen replay and delivery
+
+Audit source9b280bda99130ad82b770ae4b8ac2183f5543f76 was pushed to main. Its archived -buildvcs=false audit binary SHA isbed6f2cf291107edffd2a92ae4efe98385aadb9872fc08bb9251ce44b5a80b74. Replaying the explicit1220original journal SHA references produced exactly the same JSON as the reviewed candidate output:2440arms/3924turns, runtime_complete=true/missing0,2440continue/0halt, all original strict assessments unchanged and all task outcomes still needs_review/Success=false.
+
+Public [summary](../eval/paired-pilots/2026-10-27-full1220-collection-policy-core/summary.json), [coverage](../eval/paired-pilots/2026-10-27-full1220-collection-policy-core/coverage.jsonl), [53 passed local test/group records](../eval/paired-pilots/2026-10-27-full1220-collection-policy-core/test-cases.json) and [SHA manifest](../eval/paired-pilots/2026-10-27-full1220-collection-policy-core/manifest.json) bind the evidence. Private original logs and bodies remain separate. Hindsight original text and15facts were read back; three extraction errors about permanent reserve versus spend, missing versus synthesized runtime data, and final-source freeze versus no source edits were corrected individually and read back again.
+
+Proceed under the [new window-accounting plan](superpowers/plans/2026-10-27-full1220-window-accounting.md), then finish the pending pair/campaign recording integration and full actual-scope prerequisites. No numeric cap, new actual claim or provider request was introduced here. Overall1220actual evaluation remains active and incomplete.
