@@ -56,6 +56,8 @@ type Task struct {
 	TerminatedReason                           string `json:"terminated_reason,omitempty"`
 }
 type Result struct {
+	PriorTasks                                      int                  `json:"prior_tasks,omitempty"`
+	PriorUserTurns                                  int                  `json:"prior_user_turns,omitempty"`
 	FailureStage                                    string               `json:"failure_stage,omitempty"`
 	ObserverStats                                   *observability.Stats `json:"observer_stats,omitempty"`
 	AllTasksDisposed                                bool                 `json:"all_tasks_disposed"`
@@ -81,6 +83,8 @@ func Run(ctx context.Context, o Options) (r Result, runErr error) {
 		return r, fmt.Errorf("guard/observer/explicit credentials required")
 	}
 	r.Contract = o.Guard.c
+	r.PriorTasks = len(o.Guard.cap.skip)
+	r.PriorUserTurns = o.Guard.cap.priorTurns
 	suite, e := LoadSuite(o.Root)
 	if e != nil || suite.SHA != o.Guard.c.SuiteSHA || !reflect.DeepEqual(suite, o.Suite) {
 		return r, fmt.Errorf("frozen suite differs")
@@ -144,6 +148,9 @@ func Run(ctx context.Context, o Options) (r Result, runErr error) {
 			arms = []string{"b", "a"}
 		}
 		for _, arm := range arms {
+			if o.Guard.cap.skip[c.ID+"-"+arm] {
+				continue
+			}
 			task, e := runOne(ctx, o, env, corpus, c, arm, clock)
 			r.Tasks = append(r.Tasks, task)
 			r.ActualUserTurns += len(task.Turns)
@@ -158,7 +165,15 @@ func Run(ctx context.Context, o Options) (r Result, runErr error) {
 			}
 		}
 	}
-	if len(selected) > 0 && len(r.Tasks) != 2*len(selected) {
+	expectedLocal := 2 * len(selected)
+	for id := range selected {
+		for _, arm := range []string{"a", "b"} {
+			if o.Guard.cap.skip[id+"-"+arm] {
+				expectedLocal--
+			}
+		}
+	}
+	if len(selected) > 0 && len(r.Tasks) != expectedLocal {
 		return r, fmt.Errorf("unknown local case")
 	}
 	r.setCoverage()
@@ -384,8 +399,8 @@ func writeReview(dir string, r Result) error {
 }
 
 func (r *Result) setCoverage() {
-	r.AllTasksDisposed = len(r.Tasks) == 200
-	r.Complete = r.AllTasksDisposed && r.ActualUserTurns == 224
+	r.AllTasksDisposed = len(r.Tasks)+r.PriorTasks == 200
+	r.Complete = r.AllTasksDisposed && r.ActualUserTurns+r.PriorUserTurns == 224
 }
 
 // Audits are available in recording.json, never in the semantic scoring view.

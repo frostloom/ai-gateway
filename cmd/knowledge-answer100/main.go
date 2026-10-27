@@ -29,6 +29,8 @@ func run(args []string, out io.Writer) int {
 	root := f.String("root", ".", "RAG source checkout")
 	execute := f.Bool("execute", false, "one separately approved independent-budget execution")
 	contract := f.String("contract", "", "frozen contract JSON")
+	prior := f.String("continue-from", "", "immutable stopped recording for explicitly authorized completion")
+	priorJournal := f.String("prior-journal", "", "immutable matching original provider journal")
 	approval := f.String("approval", "", "explicit independent extra-budget approval JSON")
 	consent := f.String("consent", "", "saved actual user consent text; SHA bound in approval")
 	prices := f.String("price-evidence", "", "frozen official price evidence JSON")
@@ -100,7 +102,17 @@ func run(args []string, out io.Writer) int {
 	// Fixed path independent of caller output path/revision prevents reissuing the
 	// same campaign under a new working directory or executable.
 	claimDir := filepath.Join(common, "knowledge-independent-claims")
-	claimPath := filepath.Join(claimDir, kc.CampaignID+".json")
+	parentClaimPath := filepath.Join(claimDir, kc.CampaignID+".json")
+	claimPath := parentClaimPath
+	if c.PriorRecordingSHA != "" {
+		if *prior == "" || *priorJournal == "" {
+			return fail("completion evidence required")
+		}
+		claimPath = filepath.Join(claimDir, kc.CampaignID+".continue-"+c.PriorRecordingSHA+".json")
+	} else if *prior != "" || *priorJournal != "" {
+		return fail("completion must be bound in contract")
+	}
+
 	vals, e := readEnv(*envfile)
 	if e != nil || vals["AGENT_LLM_API_KEY"] == "" {
 		return fail("explicit provider credentials unavailable")
@@ -148,7 +160,12 @@ func run(args []string, out io.Writer) int {
 	if e = os.MkdirAll(claimDir, 0700); e != nil {
 		return fail("claim directory unavailable")
 	}
-	cap, e := kc.Acquire(claimPath, c, a)
+	var cap *kc.Capability
+	if c.PriorRecordingSHA != "" {
+		cap, e = kc.AcquireCompletion(claimPath, c, a, parentClaimPath, *prior, *priorJournal)
+	} else {
+		cap, e = kc.Acquire(claimPath, c, a)
+	}
 	if e != nil {
 		return fail("permanent campaign claim refused; no retry or reissue")
 	}

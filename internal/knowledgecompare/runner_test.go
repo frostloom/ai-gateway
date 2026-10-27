@@ -216,3 +216,27 @@ func TestObserverFaultStopsAndPersistsBoundedDiagnostics(t *testing.T) {
 		t.Fatal("failure stage absent from recording")
 	}
 }
+
+func TestCompletionRunnerSkipsRecordedArm(t *testing.T) {
+	c, p, r, j := completionFixture(t)
+	cap, e := AcquireCompletion(filepath.Join(t.TempDir(), "claim"), c, auth(c), p, r, j)
+	if e != nil {
+		t.Fatal(e)
+	}
+	n := 0
+	g, e := NewGuard(filepath.Join(t.TempDir(), "events"), cap, roundFunc(func(req *http.Request) (*http.Response, error) {
+		n++
+		return &http.Response{StatusCode: 200, Header: make(http.Header), Body: io.NopCloser(strings.NewReader(encode(agent.Message{Role: "assistant", Content: "SYNTHETIC"})))}, nil
+	}))
+	if e != nil {
+		t.Fatal(e)
+	}
+	defer g.Close()
+	o, _ := fixture(t, func(req *http.Request) string { return encode(agent.Message{Role: "assistant", Content: "UNUSED"}) })
+	o.Guard = g
+	o.CaseIDs = []string{"K001"}
+	result, e := Run(context.Background(), o)
+	if e != nil || len(result.Tasks) != 1 || result.Tasks[0].Arm != "b" || n != 1 || result.PriorTasks != 1 || result.PriorUserTurns != 1 || !result.Cleanup {
+		t.Fatalf("old arm rerun or coverage lost: %v tasks%d calls%d", e, len(result.Tasks), n)
+	}
+}

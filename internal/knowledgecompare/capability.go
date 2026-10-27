@@ -14,22 +14,25 @@ const CampaignID = "knowledge-answer100-independent-20261027"
 const ProviderURL = "https://api.deepseek.com/v1/chat/completions"
 
 type Contract struct {
-	Schema       string `json:"schema"`
-	ID           string `json:"id"`
-	FundingPool  string `json:"funding_pool"`
-	SuiteSHA     string `json:"suite_sha256"`
-	Revision     string `json:"revision"`
-	CorpusSHA    string `json:"corpus_sha256"`
-	MainSHA      string `json:"main_reference_sha256"`
-	BinarySHA    string `json:"binary_sha256"`
-	PriceSHA     string `json:"price_sha256"`
-	MaxMicroCNY  int64  `json:"max_micro_cny"`
-	MaxCalls     int    `json:"max_calls"`
-	MaxOutput    int    `json:"max_output_tokens"`
-	MaxBytes     int    `json:"max_request_bytes"`
-	InputCeiling int64  `json:"input_ceiling"`
-	InputRate    int64  `json:"input_micro_per_million"`
-	OutputRate   int64  `json:"output_micro_per_million"`
+	PriorRecordingSHA string `json:"prior_recording_sha256,omitempty"`
+	PriorJournalSHA   string `json:"prior_journal_sha256,omitempty"`
+	ParentClaimSHA    string `json:"parent_claim_sha256,omitempty"`
+	Schema            string `json:"schema"`
+	ID                string `json:"id"`
+	FundingPool       string `json:"funding_pool"`
+	SuiteSHA          string `json:"suite_sha256"`
+	Revision          string `json:"revision"`
+	CorpusSHA         string `json:"corpus_sha256"`
+	MainSHA           string `json:"main_reference_sha256"`
+	BinarySHA         string `json:"binary_sha256"`
+	PriceSHA          string `json:"price_sha256"`
+	MaxMicroCNY       int64  `json:"max_micro_cny"`
+	MaxCalls          int    `json:"max_calls"`
+	MaxOutput         int    `json:"max_output_tokens"`
+	MaxBytes          int    `json:"max_request_bytes"`
+	InputCeiling      int64  `json:"input_ceiling"`
+	InputRate         int64  `json:"input_micro_per_million"`
+	OutputRate        int64  `json:"output_micro_per_million"`
 }
 
 func (c Contract) SHA() string      { b, _ := json.Marshal(c); return knowledgepilot.SHA(b) }
@@ -37,6 +40,13 @@ func validSHA(s string, n int) bool { b, e := hex.DecodeString(s); return e == n
 func (c Contract) Validate() error {
 	if c.Schema != "knowledge-answer100.v1" || c.ID != CampaignID || c.FundingPool != "knowledge-independent" || (c.MaxMicroCNY != 5000000 && c.MaxMicroCNY != 20000000) || c.MaxCalls != 1120 || c.MaxOutput != 512 || c.MaxBytes != 32768 || c.InputCeiling != 1048576 || c.InputRate != 2000000 || c.OutputRate != 8000000 {
 		return fmt.Errorf("contract bounds differ")
+	}
+	if c.PriorRecordingSHA != "" || c.PriorJournalSHA != "" || c.ParentClaimSHA != "" {
+		for _, h := range []string{c.PriorRecordingSHA, c.PriorJournalSHA, c.ParentClaimSHA} {
+			if !validSHA(h, 32) {
+				return fmt.Errorf("incomplete continuation digest")
+			}
+		}
 	}
 	for _, h := range []string{c.SuiteSHA, c.CorpusSHA, c.MainSHA, c.BinarySHA, c.PriceSHA} {
 		if !validSHA(h, 32) {
@@ -58,9 +68,12 @@ type Approval struct {
 	ConsentSHA  string `json:"consent_sha256"`
 }
 type Capability struct {
-	mu   sync.Mutex
-	c    Contract
-	used bool
+	mu         sync.Mutex
+	c          Contract
+	used       bool
+	skip       map[string]bool
+	inherited  GuardState
+	priorTurns int
 }
 
 func (c *Capability) consume() error {
@@ -108,6 +121,9 @@ func writeNew(path string, b []byte) error {
 // Caller chooses only the canonical common-Git-root path. This capability can
 // never consume the main100+1 pool; its separate approval must be explicit.
 func Acquire(path string, c Contract, a Approval) (*Capability, error) {
+	if c.PriorRecordingSHA != "" {
+		return nil, fmt.Errorf("completion must verify parent evidence")
+	}
 	if e := CheckApproval(c, a); e != nil {
 		return nil, e
 	}

@@ -1,3 +1,5 @@
+2026-10-27 用户最新明确纠正“为啥就跑了29题我让你跑完啊”：要求继续直至100题完成，在原额外独立¥20总上限内复用已完成59任务，旧78请求/¥0.336768上界必须继承；覆盖旧“本轮停止后不继续”的流程，不删除或提升原stopped、不释放/重领旧claim、不追加20元、不重跑已完成slot。新completion capability绑定原claim/recording/journal三个SHA与新原话，剩余141task165turn，完成200唯一slot224轮才交付完整比较。所有代码仅RAG分支，不写main。
+
 2026-10-27 RAG answer100独立真实范围按用户“批准20元，开始做吧”执行一次并stopped，100题未完成。源码9b0c6e1，binary beca1bbeb4157f76ce5e959fcf28e39c79785fcb3a9ef7ceba1dd77717432a9b；实际59任务59轮78模型/JEV0，K001–K029完成29对、K030仅b，余141任务165轮未运行。独立盲评59条48pass/11fail，配对A23/29、B24/29，仅知识子集不能推总体。配对缓存费率估算A¥0.028722/B¥0.04821328；总152644入3935出，总配置估算¥0.07760896、全miss上界¥0.336768，非账单。59任务业务不变/owned清理/隔离库清理通过。独立20元claim d877f8b2f69ff29f1de2082420a870481adf0735b550341b0287d40c9ee160a1永久保留，不续旧scope、不重领；main资金池未使用。原stop只能定位观测检查阶段，原runErr/Observer Stats未保留，禁止回填或确定物理根因。Langfuse六原容器后续退出，web退出晚于最后回合；按原镜像配置恢复用于只读核对，59trace/224span/13检索(11ok2no_match)/22正文SHA+实际request_context+环境release全匹配，无补发/评分上传。新源码仅补未来有界failure_stage/observer_stats及503停止测试，不提升旧结果。全部仅codex/customer-knowledge-rag，报告docs/knowledge-answer100-partial-result-2026-10-27.md，私密.tmp/knowledge-validation/2026-10-27-answer100/live20/。
 
 # ai-gateway 项目记忆

@@ -68,7 +68,7 @@ func NewGuard(path string, cap *Capability, upstream http.RoundTripper) (*Guard,
 	if e != nil {
 		return nil, e
 	}
-	return &Guard{c: cap.c, cap: cap, file: f, upstream: upstream, turnCalls: map[turnID]int{}}, nil
+	return &Guard{c: cap.c, cap: cap, file: f, upstream: upstream, state: cap.inherited, turnCalls: map[turnID]int{}}, nil
 }
 func (g *Guard) append(e Event) error {
 	if g.closed {
@@ -116,6 +116,10 @@ func (g *Guard) RoundTrip(req *http.Request) (*http.Response, error) {
 	g.mu.Lock()
 	defer g.mu.Unlock()
 	id, _ := req.Context().Value(turnKey{}).(turnID)
+	if g.cap.skip[id.Task] {
+		g.state.Stopped = true
+		return nil, fmt.Errorf("already completed slot rejected")
+	}
 	if g.closed || g.state.Stopped || id.Task == "" || id.Turn < 1 || id.Turn > 3 || req.Method != "POST" || req.URL.String() != ProviderURL {
 		return nil, fmt.Errorf("request capability or turn rejected")
 	}
