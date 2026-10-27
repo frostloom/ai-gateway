@@ -22,7 +22,7 @@ SHA links and source provenance are trusted evidence, not cryptographic executio
 
 ## Validation and delivery status
 
-Implementation has passed final original-configuration Go regression (20packages, taskbench916.872seconds, wholecommand948.268seconds within20minutes). All1220 local windows and the actual full comparison remain pending; no execution completion is claimed by this implementation checkpoint. Private phase evidence is `.tmp/paired-live-private/full1220-local-matrix-20261027/`. Execution results and a public SHA manifest will be appended only after observing the frozen build's actual windows.
+Implementation has passed final original-configuration Go regression (20packages, taskbench916.872seconds, wholecommand948.268seconds within20minutes). The actual full comparison remains pending; the completed local matrix is recorded below. Private phase evidence is `.tmp/paired-live-private/full1220-local-matrix-20261027/`. Execution results and a public SHA manifest will be appended only after observing the frozen build's actual windows.
 
 Fresh whole-change review identified two aggregation P2 findings: contradictory raw finish results could be hidden by a successful report, and substantive source/configuration changes were not independently checked. Both received counterexamples and fixes. New synthetic status flags remain false throughout.
 
@@ -31,3 +31,17 @@ The actual historical evaluation count remains143model/37JEV; permanent reservat
 The first broad regression failed in existing recharge fixture setup and was stopped (taskbench976.115seconds). Those original failures remain archived; subsequent success does not erase them. An interrupted owned schema was inspected and removed exactly, then schema count readback was0. One original failing confirmation path passed17.507seconds before the final full regression. Host/MySQL waiting observations are diagnostic clues, not a confirmed historical cause or product fix. No assertion, DB/HTTP timeout, test parallelism, service configuration or customer source was changed.
 
 At this checkpoint325Go source hashes,15customer implementation files against50e3c8d,9277historical private artifacts and9permanent claims all match; isolated pair/fixture schemas read back0. User-authorized budget and historical actual counts are unchanged.
+
+## Completed local matrix
+
+The archived24b10258f8aea6ba198b649810dbb65df7c38b0d executable (SHA8d669c000c31c3c9bfff5d5b981f2034597f635307a28ecf71ea432085298b24) ran all13 predeclared windows once, with no failed/unrun tasks. Independent read-only reaggregation confirms1220 distinct pairs,2440 arms,3924 actual user turns and2440 distinct local traces. The4238 model attempts and1219 FakeJEV attempts are synthetic execution counters; the latter also matches raw JEV reservation journals. All14945 local spans retain their case/arm/full-contract association. All answers remain needs_review; no semantic pass, real Langfuse upload, score publication, actual supplier call, invoice or paid token-envelope proof is implied.
+
+Window execution totals910.528seconds; the longest was87.236seconds. Those are local substitute timings, not remote model or customer E2E latency. Every window stayed within its300second execution context and returned0. Closed output directories were never resumed or overwritten.
+
+Final Python release regression passed200tests in18.553seconds with15original conditional skips. Final post-matrix audit again verified325Go/327frozen source files,15customer implementation files,9277historical private artifacts and9canonical claims; all11JSON files in the historical claim directory remain present. Owned pair/fixture schemas read back0. Initial broad-test failures and two private archive-helper schema-reading failures remain recorded; fixing the read-only helper did not rerun any window or create any real call.
+
+Public evidence: [summary](../eval/paired-pilots/2026-10-27-full1220-local-matrix/summary.json), [per-case coverage](../eval/paired-pilots/2026-10-27-full1220-local-matrix/coverage.jsonl), [validation](../eval/paired-pilots/2026-10-27-full1220-local-matrix/validation.json) and [SHA manifest](../eval/paired-pilots/2026-10-27-full1220-local-matrix/manifest.json). Private raw journals, observations and execution provenance are separate.
+
+## Next actual-evaluation work
+
+Proceed to the distinct full recording policy, complete real-protocol request envelope and new permanent-window accounting described in [the proposed full collection design](full1220-collection-design-2026-10-27.md). Current conservative three-pass reservation cannot fit the remaining budget; no cap, new paid entry or claim was created by this local stage. The full1220 actual comparison remains active and incomplete. Do not repeat six-case pilots as a substitute.

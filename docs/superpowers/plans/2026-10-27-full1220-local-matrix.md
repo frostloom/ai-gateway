@@ -52,11 +52,11 @@
 
 ### Task 3: Execute actual full local matrix and deliver
 
-- [ ] Run targeted RED→GREEN and representative local windows, then fresh whole-change review, final original-config Go20min and Python suite; fix real defects without weakening source/scorer assertions.
-- [ ] Commit code first, archive-build new local CLI from that commit with exact Go/source/binary hashes; freeze all13 window definitions before first run.
-- [ ] Execute each window once, at most300s, closed substitutes only; on any failure preserve all partial evidence and investigate without treating a tool timeout as terminal until process state checked.
-- [ ] Independently rederive1220 coverage, observed turns, local spans, source contracts and no semantic/actual-model claims; query isolated-schema cleanup and original evidence/claim SHA.
-- [ ] Archive public per-case structural matrix and private raw journals/requests separately, update AGENTS/Hindsight, push main. Overall goal stays active for real full-scope scheduling, quality/failure policy, budget, actual execution and independent scoring.
+- [x] Run targeted RED→GREEN and representative local windows, then fresh whole-change review, final original-config Go20min and Python suite; fix real defects without weakening source/scorer assertions.
+- [x] Commit code first, archive-build new local CLI from that commit with exact Go/source/binary hashes; freeze all13 window definitions before first run.
+- [x] Execute each window once, at most300s, closed substitutes only; on any failure preserve all partial evidence and investigate without treating a tool timeout as terminal until process state checked.
+- [x] Independently rederive1220 coverage, observed turns, local spans, source contracts and no semantic/actual-model claims; query isolated-schema cleanup and original evidence/claim SHA.
+- [x] Archive public per-case structural matrix and private raw journals/requests separately, update AGENTS/Hindsight, push main. Overall goal stays active for real full-scope scheduling, quality/failure policy, budget, actual execution and independent scoring.
 
 ## Execution rulings
 

@@ -1,0 +1,57 @@
+{
+  "go": {
+    "exit_code": 0,
+    "whole_command_timeout": false,
+    "elapsed_seconds": 948.2682309169904,
+    "timeout_seconds": 1200,
+    "command": [
+      "go",
+      "test",
+      "./...",
+      "-count=1",
+      "-timeout=20m",
+      "-json"
+    ],
+    "passed_packages": 20,
+    "taskbench_seconds": 916.872,
+    "raw_sha256": "58ced8fd345584145d452bf990a0c75a1dc002b4e6b3c0df8df2c579b10e1f88",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "python": {
+    "tests": 200,
+    "original_skips": 15,
+    "exit_code": 0,
+    "elapsed_seconds": 18.553,
+    "raw_sha256": "073cbc82f78c546a72754131749734d44127cdbca761cab8072be8138dc9c7dc"
+  },
+  "initial_go_failed_retained": {
+    "status": "failed_then_operator_stopped",
+    "exit_code": 1,
+    "taskbench_elapsed_seconds": 976.115,
+    "passed_packages": 19,
+    "observed_test_failures": [
+      "TestRechargeConfirmOfflineAcceptance/confirm",
+      "TestRechargeConfirmOfflineAcceptance/repair-old-cap",
+      "TestRechargeConfirmOfflineAcceptance/repair"
+    ],
+    "interrupted_test": "TestRechargeConfirmOfflineAcceptance/duplicate",
+    "not_final_source_regression": true,
+    "no_assertion_timeout_or_parallel_config_changes": true
+  },
+  "initial_failure_raw_sha256": "ceef78d7c9afc4e4b516d8313569240876d891fe6ad62107e2aa1d56c0a54b67",
+  "targeted_full_local_log_sha256": "e5a1abe8cd567e5092aff8167d351ffba64fdeb16633696a98065df75d7d6c4c",
+  "source_projection_audit": {
+    "go_typed_cases": 1220,
+    "python_typed_cases": 1220,
+    "mismatched_cases": [],
+    "actual_full1220_complete": false
+  },
+  "final_isolated_schema_count": 0,
+  "whole_change_review": {
+    "findings_p2": 2,
+    "fixed_with_counterexamples": 2,
+    "no_unresolved_p1_p2": true,
+    "reviewer_test_cache_denied_before_compilation": true
+  },
+  "actual_full1220_complete": false
+}
