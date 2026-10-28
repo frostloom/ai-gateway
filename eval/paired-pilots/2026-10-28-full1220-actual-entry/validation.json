@@ -1,0 +1,25 @@
+{
+  "schema": "full1220-actual-entry-validation.v1",
+  "integrated_race": {
+    "top_level_pass": 39,
+    "pass_records": 49,
+    "skip": 0,
+    "fail": 0,
+    "packages": [
+      {
+        "package": "github.com/frostloom/ai-gateway/cmd/full-window-actual",
+        "seconds": 1.726
+      },
+      {
+        "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+        "seconds": 2.502
+      }
+    ]
+  },
+  "red_provenance": "Ready/CLI and final settings/Ping raw process logs preserved. Earlier session receipt/quality-end RED and early GREEN are explicitly labelled accurate retained tool-result transcriptions, not original process logs. Compile failures are not assertion RED.",
+  "review": "Independent ready/source/build P2 fixed and scoped re-review passed; independent session, final settings/Ping delta and CLI reviews found no remaining P1/P2. Reviews do not certify production readiness.",
+  "production_ready_positive_proof": false,
+  "actual_session_handler_mysql_positive": false,
+  "local_database_ping_positive_only": true,
+  "original_full_go_pass": false
+}
