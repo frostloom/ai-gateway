@@ -1,0 +1,99 @@
+{
+  "schema": "full1220-v4-stopped-public-evidence.v1",
+  "created_at": "2026-10-28T22:34:38.275706+00:00",
+  "original_goal_complete": false,
+  "owner_terminal": {
+    "exit_code": 1,
+    "ended_epoch": 1793224692.805664,
+    "relaunch_allowed": false
+  },
+  "terminal": {
+    "evidence_kind": "recorded_run",
+    "acquisition_done": false,
+    "closed": true,
+    "next_window_index": 3,
+    "last_receipt_sha256": "c38a54516b22488807150666db678860928569388964b8d245c9e9fb647b7b95",
+    "planned_pairs": 3660,
+    "planned_arms": 7320,
+    "defined_turns": 11772,
+    "boundaries_excluded": 1851,
+    "attempted_arms": 112,
+    "finished_arms": 112,
+    "failed_attempted_arms": 0,
+    "unattempted_arms": 7208,
+    "observed_turns": 134,
+    "quality_end_unrun_turns": 0,
+    "global_unrun_turns": 11638,
+    "model_attempts": 194,
+    "jev_attempts": 56
+  },
+  "bindings": {
+    "actual-manifest.json": "fb48dd1465a452ffc2dfdb2029a107adfeb351f4c176892a071d07e18b95c0ea",
+    "actual-owner-exit.json": "0015af89d829c625c3fef4b21219dd3a40682c54308f9426c7e1bc279f268c66",
+    "records/terminal.json": "13520b9e02f814b7c7e3c9cb2ca8f40793714d2649c14dd9f2acfdc9886bbe29",
+    "records/window-000001-summary.json": "062361b5d10b3add9fd5599382fadc73aef032663b4ba9248e94e35cbaf6aa2e",
+    "records/window-000002-summary.json": "c38a54516b22488807150666db678860928569388964b8d245c9e9fb647b7b95",
+    "semantic-review-window-000001.json": "9c56ef1499c4cb74428efe22f8c3d27e57dcc70d0fa8b1d3a4c48959c539cc9f",
+    "semantic-review-window-000002.json": "45e53f45d6f32e250eae9bb2b6b8bce88d2a882260825a4e867bf0b73c7382fa"
+  },
+  "independent_stop_audit_sha256": "2818476f6f36d0cc86cef7e15ef3d16fe0cefce86eb4c17a0f7387a299fa3aac",
+  "delivery_state": "semantic_reviews_complete; formal_content_and_score_delivery_pending",
+  "new_actual": {
+    "model": 194,
+    "jev": 56
+  },
+  "historical_actual_total": {
+    "model": 1985,
+    "jev": 501
+  },
+  "permanent_claims": {
+    "count": 28,
+    "micro_cny": 40625891,
+    "micro_usd": 323825
+  },
+  "budget_parent": {
+    "micro_cny": 105000000,
+    "micro_usd": 1000000
+  },
+  "unallocated": {
+    "micro_cny": 64374109,
+    "micro_usd": 676175
+  },
+  "reserved_risk": {
+    "micro_cny": 2023424,
+    "micro_usd": 65
+  },
+  "configuration_estimate_non_invoice": {
+    "micro_cny": 150347,
+    "micro_usd": 2861
+  },
+  "observer_cumulative": {
+    "accepted": 595,
+    "exported": 595,
+    "failed": 0,
+    "dropped": 0,
+    "queue": 0
+  },
+  "review": {
+    "arms": 112,
+    "turns": 134,
+    "requirements": 398,
+    "requirement_pass": 372,
+    "requirement_fail": 26,
+    "task_pass": 97,
+    "task_fail": 15,
+    "blind": false,
+    "human": false,
+    "external_model_or_jev": false
+  },
+  "source_inventory": {
+    "tracked_files": 2108,
+    "tracked_changed": 0,
+    "extra_path": "scripts/__pycache__/full1220-window-scores.cpython-312.pyc",
+    "extra_sha256": "c16f5c7917e7ec91f154c828d596569af2ff24d7f2de24ad5ee23380abda49c4",
+    "extra_preserved": true,
+    "original_error_text_available": false,
+    "sole_stop_cause_proved": false
+  },
+  "claims_notes": "Third new claim retained without third ledger, report or native request; no fourth new claim. Old holds unchanged. Never resume or relaunch."
+}
