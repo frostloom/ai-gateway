@@ -1,6 +1,6 @@
 # V3停止范围的25份claim只读证明实施计划
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans inline, with test-driven-development. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans inline, with test-driven-development. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** 把已停止V3的9份新claim与原16份具体证明连接成可重新读取的25份历史基线，供后续新独立完整范围使用。
 
@@ -43,10 +43,12 @@
 - `expectedStoppedV3WindowBaseline() fullWindowBaseline`：旧16map复制后追加命名为`full1220-v3-20261028/window-%06d`的9个完整SHA；精确值按Global Constraints。
 - descriptor schema `full-window-stopped-baseline.v3`，字段`previous_baseline`绑定原具体V2 descriptor SHA857bc856db8ee7837f9043a97fd98080d7e881c78fae22a6f6a789d0bbbd4ab3、`original_root`、`budget_approval`绑定现有105批准SHA。不得接受caller注入历史验证器。
 
-- [ ] 写RED：合法bundle；首16与新增9 claim任一缺失/篡改；顶层一致但子record/body篡改；claim10/checkpoint9/window10/extra sidecar；根交叉/别名；停止状态或模型计数篡改；读后变更；budget改100或币种错配。
-- [ ] 运行上述新测试，保留断言RED，不把编译/SDK/权限失败当RED。
-- [ ] 实现固定pins加载、原16具体证明前后重读、既有campaign.lock只读锁及完整inventory；逐窗重算claim永久额、summary prior链与分项，逐请求比对intent/response/usage及actual次数。
-- [ ] 新record解析复用旧stopped专用合法null处理，不能放宽readiness decoder。原前8窗collection成功与第9窗原false/audit-only状态逐值保留；所有9窗schema仍为原件，不修改数据来匹配新类型。
-- [ ] 跑定向正常及race：`SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX26.5.sdk go test ./internal/taskbench -run 'TestWindowStoppedV3' -count=1`，以及同选择器`-race`。检查无实际网络/推理/fixture创建或原件写入。
-- [ ] 在独立私密test overlay调用真实25份只读加载器，输出实际derived值及旧文件前后SHA清单；不调用actual Open/check或读取provider settings。
-- [ ] 独立审查后提交/直推该只读单元。全Go20m、native包络、fee及新签名冻结属于后续新执行器门禁，本单元不宣称付费ready。
+- [x] 写RED：合法bundle；首16与新增9 claim任一缺失/篡改；顶层一致但子record/body篡改；claim10/checkpoint9/window10/extra sidecar；根交叉/别名；停止状态或模型计数篡改；读后变更；budget改100或币种错配。
+- [x] 运行上述新测试，保留断言RED，不把编译/SDK/权限失败当RED。
+- [x] 实现固定pins加载、原16具体证明前后重读、既有campaign.lock只读锁及完整inventory；逐窗重算claim永久额、summary prior链与分项，逐请求比对intent/response/usage及actual次数。
+- [x] 新record解析复用旧stopped专用合法null处理，不能放宽readiness decoder。原前8窗collection成功与第9窗原false/audit-only状态逐值保留；所有9窗schema仍为原件，不修改数据来匹配新类型。
+- [x] 跑定向正常及race：`SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX26.5.sdk go test ./internal/taskbench -run 'TestWindowStoppedV3' -count=1`，以及同选择器`-race`。检查无实际网络/推理/fixture创建或原件写入。
+- [x] 在独立私密test overlay调用真实25份只读加载器，输出实际derived值及旧文件前后SHA清单；不调用actual Open/check或读取provider settings。
+- [x] 独立审查后提交/直推该只读单元。全Go20m、native包络、fee及新签名冻结属于后续新执行器门禁，本单元不宣称付费ready。
+
+2026-10-29：只读单元交付；83 normal/159实际overlay/243含overlay race/最终83 unit race通过，root再83通过，独立定向2.286秒通过，无确认P1/P2。57top、25claim、482record/1223native全部读取，9174旧原件前后SHA一致。原factory/paid入口/pricing未改，后续新执行器仍须精确归档全Go20m及其全部门禁，不能据本单元称paidready。早期wrapper误用zsh只读变量导致整命令非0保留，不计成功；空expectedSHA原实现已拒绝的测试直接GREEN，不冒称修复RED。

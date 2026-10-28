@@ -1,0 +1,107 @@
+{
+  "schema": "full1220-stopped-v3-25claim-proof-result.v1",
+  "new_source_hashes": {
+    "internal/taskbench/window_stopped_v3.go": "42de6b677bacf54b663b3d8bfda8919ee7b6fd64e64180aeb631acb27c322bac",
+    "internal/taskbench/window_stopped_v3_pins.go": "34a0632d2b7cf6ee02eca8ebfb42a5c39b484e799e80ec54e670154d58d2d296",
+    "internal/taskbench/window_stopped_v3_bundle.go": "87c305c458d576d8fe8ec771d8a4a15a74ee3e5dd57a6f1b64e50085c23bea95",
+    "internal/taskbench/window_stopped_v3_evidence.go": "d5d28f431c192a3ed8159838d7a0613ba4b8094857f19fdac28b5748ca625309",
+    "internal/taskbench/window_stopped_v3_test.go": "b6686ffbba66d7534fbf61780e0e2016eef396f2c7ae8d241eb9942f03bd7afc"
+  },
+  "descriptor_sha256": "12a9d584ea9508a9fc7701532ad9214b0c743a8e13d17829432fac0d6b48a20c",
+  "real_go_derived": {
+    "claims": 25,
+    "permanent_model_micro_cny": 38888170,
+    "permanent_jev_micro_usd": 308003,
+    "remaining_model_micro_cny": 66111830,
+    "remaining_jev_micro_usd": 691997,
+    "actual_model_calls": 1791,
+    "actual_jev_calls": 445,
+    "original_files_unchanged": 9174,
+    "source": "actual production Go loader and fresh revalidation; native/full counts are checked by concrete bundle",
+    "new_model_calls": 0,
+    "new_jev_calls": 0,
+    "new_claims": 0,
+    "new_scores": 0,
+    "new_deployments": 0,
+    "paid_ready": false
+  },
+  "runs": {
+    "normal": {
+      "test_passes": 83,
+      "failures": 0,
+      "skips": 0,
+      "package_elapsed_seconds": [
+        1.897
+      ],
+      "stdout_sha256": "9d1d13a68f40dc09d89cedd7c37609f23e9c0d483eaabdbc4a06834807b14de2",
+      "stderr_bytes": 0
+    },
+    "actual-normal": {
+      "test_passes": 159,
+      "failures": 0,
+      "skips": 0,
+      "package_elapsed_seconds": [
+        19.705
+      ],
+      "stdout_sha256": "bf3879f93e330d71c54682040e40192308a7991e541eb9352c1c32ffb561d12d",
+      "stderr_bytes": 0
+    },
+    "race": {
+      "test_passes": 243,
+      "failures": 0,
+      "skips": 0,
+      "package_elapsed_seconds": [
+        174.575
+      ],
+      "stdout_sha256": "489c12b3927e09d3703f1b1e5e4470e6a4552ae142e7bb1e6a5c16614b2da09c",
+      "stderr_bytes": 0
+    },
+    "unit-final-race": {
+      "test_passes": 83,
+      "failures": 0,
+      "skips": 0,
+      "package_elapsed_seconds": [
+        3.9859999999999998
+      ],
+      "stdout_sha256": "053b1ce21be81294464c2737c66cc8ecfd69b36c315b14cbd1d01be6f9b4f827",
+      "stderr_bytes": 0
+    }
+  },
+  "root_fresh_run": {
+    "schema": "stopped-v3-proof-root-verification.v1",
+    "exit_code": 0,
+    "elapsed_seconds": 7.44632999994792,
+    "pass_tests": 83,
+    "failed_tests": 0,
+    "skipped_tests": 0,
+    "source_hashes_before_after_identical": {
+      "window_stopped_v3.go": "42de6b677bacf54b663b3d8bfda8919ee7b6fd64e64180aeb631acb27c322bac",
+      "window_stopped_v3_pins.go": "34a0632d2b7cf6ee02eca8ebfb42a5c39b484e799e80ec54e670154d58d2d296",
+      "window_stopped_v3_bundle.go": "87c305c458d576d8fe8ec771d8a4a15a74ee3e5dd57a6f1b64e50085c23bea95",
+      "window_stopped_v3_evidence.go": "d5d28f431c192a3ed8159838d7a0613ba4b8094857f19fdac28b5748ca625309",
+      "window_stopped_v3_test.go": "b6686ffbba66d7534fbf61780e0e2016eef396f2c7ae8d241eb9942f03bd7afc"
+    },
+    "stderr_bytes": 0
+  },
+  "old_evidence_file_count": 9174,
+  "old_evidence_before_after_identical": true,
+  "old_evidence_before_sha256": "3c124d827da293903d86302298dca0e713aec12dce64a17e97fb1a431bacf6b7",
+  "old_evidence_after_sha256": "3c124d827da293903d86302298dca0e713aec12dce64a17e97fb1a431bacf6b7",
+  "independent_review_remaining_confirmed_p1_p2": 0,
+  "independent_targeted_go_seconds": 2.286,
+  "fixed_top_pins": 57,
+  "collected_record_count": 482,
+  "native_packet_count": 1223,
+  "native_model_packets": 982,
+  "native_jev_packets": 241,
+  "all_new_native_responses_complete_http200": true,
+  "new_execution_interface": false,
+  "new_pricing_enabled": false,
+  "new_model_calls": 0,
+  "new_jev_calls": 0,
+  "new_claims": 0,
+  "new_scores": 0,
+  "new_deployments": 0,
+  "whole_go_run_for_this_unit": false,
+  "new_actual_paid_ready": false
+}
