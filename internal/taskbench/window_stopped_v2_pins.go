@@ -1,0 +1,46 @@
+package taskbench
+
+// Exact stopped v2 originals; descendant raw bytes are checked through these
+// pinned manifests, never by trusting a caller-provided inventory.
+func windowStoppedV2ArtifactPins() map[string]string {
+	return map[string]string{
+		"actual-manifest.json":                        "5cd8f9d038e93c3be4c62c3e14a3100850d0e9b03415bd5c65d9f133a2a74071",
+		"campaign/checkpoint-000001.json":             "a18cd540319ef3965f593fa490de750cf8bcbc0980011b5a2faa35d93fd81afc",
+		"campaign/checkpoint-000002.json":             "38f3f159754737ef0763f7dee1052c1de67a205b1cd88b76c06864c481c79d0c",
+		"campaign/checkpoint-000003.json":             "e01523524738c632aca7bdb95c6b278933f61241be645df4efb38bdf897a62cb",
+		"campaign/checkpoint-000004.json":             "96304d6b45c1c4c1b555451f58ee2cc84d2023ac276ec79525efae5771fa3fa8",
+		"campaign/checkpoint-000005.json":             "288cdd47907423776e0c2b8ba7016828532c7e6953392e20b366c63ec22ae2cf",
+		"campaign/claim-000001.json":                  "c02cf79e01ad6727cf6bfe9c6157aa74c43ab68cedcb622457a2acb94aacb682",
+		"campaign/claim-000002.json":                  "518af94e74565c7f21e3d89da226e25563ad29756a04100a11d55755e6e91820",
+		"campaign/claim-000003.json":                  "fd4ccb5cc9b2fed837383d532271d34a4a2dc3c15062b044dc411a5a12124ae6",
+		"campaign/claim-000004.json":                  "76bc6395aaf66ce6cc5569fd440802b6517110975618cc9773fd3e9b0e1a72b9",
+		"campaign/claim-000005.json":                  "f2eb059f5bf55dbab4d0328633de7e98b029cca441cd26b584f7b96cead46988",
+		"campaign/claim-000006.json":                  "0f074c6761a898c46ba831b4a96f9818d27093955a5fb42ae8e662f745b173aa",
+		"campaign/ledger-000001/accounting.jsonl":     "67e82c74ce0c9cc516bcb82024c8870b961a6b1589f59aab828c501c45cd5634",
+		"campaign/ledger-000002/accounting.jsonl":     "4b88deb24bee6e1026717be44051bf67b2b61fbdc21fd433c7fe5f0ab1f26d56",
+		"campaign/ledger-000003/accounting.jsonl":     "77ae83488639665209811f9433bd618ce789b634a2552e57d6d343aaacd2b4b2",
+		"campaign/ledger-000004/accounting.jsonl":     "eca97bd8bc60880bace7c5fdf10728b5530bc03bb5389c087049f176d09fce8f",
+		"campaign/ledger-000005/accounting.jsonl":     "d522d5f86222f8eae7e5f861ff70f543090304c3db26004de941461c05c5efed",
+		"campaign/ledger-000006/accounting.jsonl":     "72c004234e122b0f2755573230dcfb8b858923af0efc73d7ec1614ebe217d823",
+		"records/startup.json":                        "94d263e8f7abd368f3ab1e5f6be25de0e12adaafb1a3b4689534433811ef73a1",
+		"records/terminal.json":                       "89e6dbbd8b4810588a13646a30f42b99ca22756a9a86f15db599be81a9c8a398",
+		"records/window-000001-summary.json":          "8f9f67dc417ca7363516c3ff8d313d3b4c2b563066099b1e9d8b426c7520fb0d",
+		"records/window-000001/payload-manifest.json": "cf3da0e282518e14d18f2260678395029d3f00d8047e6fe2ec26f4953a57425e",
+		"records/window-000001/receipt.json":          "ad669b78543cac3b96c53d6df9e2b02a48e90619196093a60e583b00e3885580",
+		"records/window-000002-summary.json":          "5de55f0e48f15fa9348c58932a571b2bfa319d6e35a2b6c95da5b42b6f3bd1f6",
+		"records/window-000002/payload-manifest.json": "008c8108dbd831ef189c8e83c55fc2a3a230a7d3def85ef3e2b0bc9de8853e66",
+		"records/window-000002/receipt.json":          "2b5ae720cd499919b206389b2e69d5beab708a3aca6b0fee0db3264972253311",
+		"records/window-000003-summary.json":          "8d32eeaf6c18c72b05fd22fe6ec17ff303a8c2f6bd0de3138d8ed0cd7633d721",
+		"records/window-000003/payload-manifest.json": "1d9bed7525e10c6cc0149cd92de1e2172473e3bfd75feb72cba40e258f667ed4",
+		"records/window-000003/receipt.json":          "ecdb3f41bff8cdd3798f1f8f68c4e16df78ad788fcb04004177b075eb7ccd97e",
+		"records/window-000004-summary.json":          "204bd7e9be40aed0cfea82f728c4e5c1de24464d5f3fde102e1eeee0bc1cee6c",
+		"records/window-000004/payload-manifest.json": "5f7d7e1a00ae5073fb9c3fe341f832520647cbc36d6027173742681067aec3ff",
+		"records/window-000004/receipt.json":          "74bd979eb833356a72038a77e7a6212d27a5f1f129ffa945072908100660fd24",
+		"records/window-000005-summary.json":          "c65ca77e98c9c1497916e1f31d0dd4770ad5f7ea7ca35f6029994a6a28c92d8f",
+		"records/window-000005/payload-manifest.json": "cac1cf53a7a8c25ba4c81370c4eac3348c52af1c7bcd16d418027590cc7f4c16",
+		"records/window-000005/receipt.json":          "466bd36e7624a4766b270033ecd39c97b6a104818c860baf7fa66d9069ee470f",
+		"records/window-000006-summary.json":          "0669a7f502cb250a62b74351457561aa6953d406b7eaf6d88520b01d88abb2a7",
+		"records/window-000006/payload-manifest.json": "63ae12915173532bc1a1a2ed046b76f6d7d919dcfd757415f75e4e51f1efd300",
+		"records/window-000006/receipt.json":          "e574b104639929e93a69bfe4dea937a1ed4fe506fa5c1b407f3e2a285dd0ae70",
+	}
+}

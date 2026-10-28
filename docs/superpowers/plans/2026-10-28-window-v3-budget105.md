@@ -45,3 +45,7 @@ Ruling: 删除原计划的通用budget推导器，直接复用v1固定上限后�
 独立v3_scope_review静态复核无确认P1/P2；其默认SDK27链接不兼容，测试未执行成功，不计为通过。主代理固定SDK26.5的实际测试证据另列，保留独立环境失败限制。
 
 Task1验证补充：旧campaign/停止证明/actual拒绝和scope组合race 270项通过473.957秒，失败/跳过0，stderr0。Task2/3与全Go门槛仍pending。
+
+2026-10-28 Task2具体读取器：38固定顶层SHA、旧具体first proof前后读回、只读原锁、嵌套334记录/832请求/831完整响应/1不可用响应、原目录精确inventory与16claim预算推导已通过原件正例及副本负例；35项race通过67.966秒、stderr0，3705原文件重新SHA一致。原件合法null误用readiness非空规则已定位并以独立record decoder RED→GREEN修正，readiness规则不变。独立审查无确认P1/P2，公开StoppedV2测试独立退出0/2.394秒，首次cache权限setup失败保留；Task3接线和完整全Go仍未完成。
+
+Ruling: 不声称跨两个旧目录获得事务原子快照；每个原owner使用自身现有只读锁、固定原始SHA及身份检查，第一具体proof在第二bundle前后重读。原始owner均有固定终止证据，历史字节不变，下一claim仍重新验证。
