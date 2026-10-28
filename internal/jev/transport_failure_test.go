@@ -13,6 +13,7 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"strings"
+	"sync/atomic"
 	"syscall"
 	"testing"
 	"time"
@@ -66,9 +67,9 @@ func TestTransportFailureTypedCauseIsRedactedAndNeverRetried(t *testing.T) {
 func TestTransportFailureLocalTLSAndEOF(t *testing.T) {
 	for _, mode := range []string{"tls_certificate", "eof"} {
 		t.Run(mode, func(t *testing.T) {
-			calls := 0
+			var calls atomic.Int64
 			server := httptest.NewUnstartedServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				calls++
+				calls.Add(1)
 				conn, _, err := w.(http.Hijacker).Hijack()
 				if err != nil {
 					t.Error(err)
@@ -96,8 +97,8 @@ func TestTransportFailureLocalTLSAndEOF(t *testing.T) {
 			if got["transport_cause"] != mode || FailureDetails(err).UpstreamAttempted != nil {
 				t.Fatalf("local fault misclassified: %s", raw)
 			}
-			if mode == "eof" && calls != 1 {
-				t.Fatalf("unexpected retry: %d", calls)
+			if mode == "eof" && calls.Load() != 1 {
+				t.Fatalf("unexpected retry: %d", calls.Load())
 			}
 		})
 	}

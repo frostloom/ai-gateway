@@ -280,11 +280,11 @@ func OpenFullWindowActual(ctx context.Context, ready *FullWindowActualReady, pri
 	if ctx == nil || ctx.Err() != nil {
 		return nil, fmt.Errorf("actual session context rejected")
 	}
-	// The first actual v1 window is permanently consumed. New execution must
-	// include it in the separately verified v2 budget epoch, even if a caller
+	// Both actual v1 and v2 owners are permanently consumed. New execution must
+	// include them in the separately verified v3 budget epoch, even if a caller
 	// can still read an old readiness snapshot. No settings or claim first.
-	if ready == nil || ready.manifest.Schema != "full-window-actual-ready.v2" || ready.manifest.Scope.Schema != "full-window-scope.v2" {
-		return nil, fmt.Errorf("actual v2 scope required for current budget epoch")
+	if ready == nil || ready.manifest.Schema != "full-window-actual-ready.v3" || ready.manifest.Scope.Schema != "full-window-scope.v3" {
+		return nil, fmt.Errorf("actual v3 scope required for current budget epoch")
 	}
 	if e := ready.revalidateStopped(); e != nil {
 		return nil, e

@@ -20,12 +20,13 @@ type windowPayloadBody struct {
 	PrefixSHA256 string `json:"prefix_sha256,omitempty"`
 }
 type windowPayloadResponse struct {
-	Status         int                `json:"status"`
-	Code           string             `json:"code"`
-	Complete       bool               `json:"complete"`
-	Available      bool               `json:"available"`
-	Body           *windowPayloadBody `json:"body,omitempty"`
-	DescriptorFile string             `json:"descriptor_file"`
+	Status           int                     `json:"status"`
+	Code             string                  `json:"code"`
+	Complete         bool                    `json:"complete"`
+	Available        bool                    `json:"available"`
+	Body             *windowPayloadBody      `json:"body,omitempty"`
+	DescriptorFile   string                  `json:"descriptor_file"`
+	TransportFailure *windowTransportFailure `json:"transport_failure,omitempty"`
 }
 type windowPayloadPacket struct {
 	Sequence              int                    `json:"sequence"`
@@ -239,6 +240,9 @@ func (s *windowPayloadStore) writeWindowRequest(sequence int, identity windowReq
 	return nil
 }
 func (s *windowPayloadStore) writeWindowResponse(sequence int, identity windowRequestIdentity, status int, body []byte, complete bool, code string) error {
+	return s.writeWindowResponseWithFailure(sequence, identity, status, body, complete, code, nil)
+}
+func (s *windowPayloadStore) writeWindowResponseWithFailure(sequence int, identity windowRequestIdentity, status int, body []byte, complete bool, code string, failure *windowTransportFailure) error {
 	if s == nil {
 		return fmt.Errorf("missing payload store")
 	}
@@ -253,7 +257,14 @@ func (s *windowPayloadStore) writeWindowResponse(sequence int, identity windowRe
 	if !hasString([]string{"complete", "round_trip", "response_read", "response_bound", "response_close", "http_status", "protocol"}, code) || (status != 0 && (status < 100 || status > 599)) || len(body) > windowMaxResponseBytes+1 || complete && len(body) > windowMaxResponseBytes || code == "complete" && !complete || complete && (code == "response_read" || code == "response_bound") || status == 0 && (complete || len(body) > 0) {
 		return s.poisonLocked()
 	}
+	if failure != nil && (!failure.valid() || !hasString([]string{"round_trip", "response_read", "response_close"}, code) || complete && code != "response_close") {
+		return s.poisonLocked()
+	}
 	response := windowPayloadResponse{Status: status, Code: code, Complete: complete, Available: body != nil || complete, DescriptorFile: fmt.Sprintf("response-%06d.json", sequence)}
+	if failure != nil {
+		copy := *failure
+		response.TransportFailure = &copy
+	}
 	if response.Available {
 		descriptor := &windowPayloadBody{File: fmt.Sprintf("response-%06d.body", sequence), Bytes: len(body), Complete: complete}
 		if complete {

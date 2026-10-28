@@ -1,0 +1,108 @@
+{
+  "schema": "full1220-bounded-transport-diagnostics-evidence.v1",
+  "evidence_kind": "offline_and_readonly_GET_no_inference",
+  "source_sha256": {
+    "internal/jev/transport_failure.go": "881019d57b9949ce637fb01cf68dff25927d530b8c4396f289279dda234617d4",
+    "internal/jev/transport_failure_test.go": "00472c229f129fc0381f45c1b85f3f36006a67ebf726faf7eb98ed70716c1892",
+    "internal/taskbench/window_transport.go": "bfb0fd6ef2694e9c456d93c94493fee2009dcc699f2ed856e8e4ad62256e666a",
+    "internal/taskbench/window_payload.go": "6d95df047fab4aa51dadbc4910226df85b73aec8419b9b927c777d7eb0c5b7fe",
+    "internal/taskbench/window_transport_diagnostics.go": "5addb93ae69ce07b9709aef7b1ffb13339a93b7af70f9a3c76aa6fe98eaeac09",
+    "internal/taskbench/window_transport_diagnostics_test.go": "bb44c2cf707cd972ffd21213a94f2764904cd99e1eaa61469fcb085fd9ec6bb6",
+    "internal/taskbench/window_actual_session.go": "22131c1ee0b9925bc072e2e7d34dcc0ea780479aded2929f6d30bac44304da2b",
+    "internal/taskbench/window_actual_v2_test.go": "bb322fe6600c260ee774da00d720352f34853b16656f116a83ceac35bf090215",
+    "internal/taskbench/window_legacy_entry_test.go": "e67be18c21d8166c20d473121c4616c2c4d9d11b3aeed42fddd19e0bc516eb59"
+  },
+  "runs": [
+    {
+      "name": "review-final-race",
+      "test_records": {
+        "pass": 245
+      },
+      "packages": [
+        {
+          "package": "github.com/frostloom/ai-gateway/internal/jev",
+          "result": "pass",
+          "seconds": 2.656
+        },
+        {
+          "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+          "result": "pass",
+          "seconds": 5.95
+        }
+      ],
+      "sha256": "5c48c6e0cbdbf1b7cd5911347f200756e7965ff5e7c49a91da93faaa53155cfc",
+      "stderr_bytes": 0
+    },
+    {
+      "name": "consumed-epoch-green-race",
+      "test_records": {
+        "pass": 61
+      },
+      "packages": [
+        {
+          "package": "github.com/frostloom/ai-gateway/cmd/full-window-actual",
+          "result": "pass",
+          "seconds": 2.694
+        },
+        {
+          "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+          "result": "pass",
+          "seconds": 86.9
+        }
+      ],
+      "sha256": "90d8ec707fa1faebf6b5f745d8791d43cd1e667e75454c72d5a7560c944c74f7",
+      "stderr_bytes": 0
+    }
+  ],
+  "assertion_red_logs": [
+    "red.log",
+    "edge-red-unsandboxed.log",
+    "review-p2-red.log",
+    "consumed-v2-epoch-red.log"
+  ],
+  "preserved_non_assertion_failure": "edge-red.log existing go-cache sandbox read denied",
+  "original_jev_test_race": "targeted-race.jsonl: old EOF test unsynchronized counter; atomic Add/Load preserves count==1 assertion",
+  "independent_review": "transport_diag_review: one confirmedP2 bound+close native-prefix regression, reproducedRED and fixedGREEN; no other confirmedP1/P2",
+  "readonly_get_probe": {
+    "actual_claims": 0,
+    "actual_jev_inference_calls": 0,
+    "actual_model_calls": 0,
+    "body_sha256": "7fbe8d7d66e3d1c9560506fd514b47dee5308246139de38f61a685b715362d60",
+    "historical_physical_cause_inferred": false,
+    "logical_get_calls": 1,
+    "method": "GET",
+    "no_explicit_retry": true,
+    "request_succeeded": true,
+    "schema": "full1220-jev-readonly-transport-probe.v1",
+    "snapshot": {
+      "cause": "unknown",
+      "phase": "read_response",
+      "elapsed_ms": 615,
+      "trace_observed": true,
+      "connection_reused": false,
+      "request_written": true,
+      "first_byte": true
+    },
+    "status": 200,
+    "uses_original_10_second_client_limit": true
+  },
+  "historical_physical_cause_established": false,
+  "current_old_epochs_blocked": true,
+  "actual_v3_16_claim_entry": "not_yet_implemented_or_frozen",
+  "full_exact_archive_Go20m": "pending",
+  "new_actual_model_calls": 0,
+  "new_actual_jev_inference_calls": 0,
+  "new_actual_claims": 0,
+  "parent_budget_micro_cny": 105000000,
+  "parent_budget_micro_usd": 1000000,
+  "permanent_micro_cny": 33395934,
+  "permanent_micro_usd": 259511,
+  "precommit_verification": {
+    "exit_code": 0,
+    "log_sha256": "7040912f59eae11c061d181975942f9d6f9530e3475001fe6d1a2e1bdfd165cc",
+    "jev_seconds": 2.094,
+    "taskbench_seconds": 122.547,
+    "cmd_compiled_no_matching_tests": true,
+    "platform_linker_warning_preserved": true
+  }
+}

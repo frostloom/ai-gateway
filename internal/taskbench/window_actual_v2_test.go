@@ -24,8 +24,8 @@ func TestActualV2ManifestPreservesStoppedEvidenceBinding(t *testing.T) {
 	}
 }
 
-func TestActualV2RechecksStoppedProofBeforeOpenAndWindowInputs(t *testing.T) {
-	r := &FullWindowActualReady{manifestRaw: []byte(`{}`), manifest: windowActualManifest{Schema: "full-window-actual-ready.v2", Scope: fullWindowScope{Schema: "full-window-scope.v2"}}}
+func TestActualCurrentEpochRequiresStoppedProofBeforeOpenAndWindowInputs(t *testing.T) {
+	r := &FullWindowActualReady{manifestRaw: []byte(`{}`), manifest: windowActualManifest{Schema: "full-window-actual-ready.v3", Scope: fullWindowScope{Schema: "full-window-scope.v3"}}}
 	if s, err := OpenFullWindowActual(context.Background(), r, "/never-read-settings"); err == nil || s != nil || !strings.Contains(err.Error(), "stopped") {
 		t.Fatal("Open did not check stopped evidence first", err)
 	}

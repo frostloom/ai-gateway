@@ -10,6 +10,8 @@ import (
 	"net/http"
 	"reflect"
 	"strings"
+
+	"github.com/frostloom/ai-gateway/internal/jev"
 )
 
 // No production type currently implements this private capability. The owned
@@ -152,7 +154,7 @@ func (t *windowProviderTransport) RoundTrip(req *http.Request) (*http.Response, 
 	}
 	if req.Context().Err() != nil {
 		if t.payload != nil {
-			_ = t.payload.writeWindowResponse(ticket.sequence, identity, 0, nil, false, "round_trip")
+			_ = t.payload.writeWindowResponseWithFailure(ticket.sequence, identity, 0, nil, false, "round_trip", &windowTransportFailure{Cause: jev.ClassifyTransportFailureCause(req.Context().Err()), Phase: "before_send"})
 		}
 		return fail("upstream_failure")
 	}
@@ -160,6 +162,12 @@ func (t *windowProviderTransport) RoundTrip(req *http.Request) (*http.Response, 
 	frozen.Body = io.NopCloser(bytes.NewReader(raw))
 	frozen.GetBody = nil
 	frozen.ContentLength = int64(len(raw))
+	var probe *windowTransportProbe
+	if t.payload != nil {
+		var ctx context.Context
+		ctx, probe = newWindowTransportProbe(frozen.Context())
+		frozen = frozen.WithContext(ctx)
+	}
 	response, upErr := t.upstream.RoundTrip(frozen)
 	if upErr != nil || response == nil || response.Body == nil {
 		status := 0
@@ -170,7 +178,7 @@ func (t *windowProviderTransport) RoundTrip(req *http.Request) (*http.Response, 
 			_ = response.Body.Close()
 		}
 		if t.payload != nil {
-			_ = t.payload.writeWindowResponse(ticket.sequence, identity, status, nil, false, "round_trip")
+			_ = t.payload.writeWindowResponseWithFailure(ticket.sequence, identity, status, nil, false, "round_trip", probe.snapshot(upErr, ""))
 		}
 		return fail("upstream_failure")
 	}
@@ -187,7 +195,13 @@ func (t *windowProviderTransport) RoundTrip(req *http.Request) (*http.Response, 
 	} else if response.StatusCode != http.StatusOK {
 		code = "http_status"
 	}
-	if t.payload != nil && t.payload.writeWindowResponse(ticket.sequence, identity, response.StatusCode, body, complete, code) != nil {
+	var failure *windowTransportFailure
+	if bodyErr != nil {
+		failure = probe.snapshot(bodyErr, "response_read")
+	} else if bodyCloseErr != nil && code == "response_close" {
+		failure = probe.snapshot(bodyCloseErr, "response_close")
+	}
+	if t.payload != nil && t.payload.writeWindowResponseWithFailure(ticket.sequence, identity, response.StatusCode, body, complete, code, failure) != nil {
 		return fail("protocol_failure")
 	}
 	if !complete || bodyCloseErr != nil || response.StatusCode != http.StatusOK {

@@ -9,6 +9,10 @@ import (
 	"syscall"
 )
 
+// ClassifyTransportFailureCause exposes the same finite typed classification
+// to guarded evaluation transports. It never returns raw error text.
+func ClassifyTransportFailureCause(err error) string { return transportFailureCause(err) }
+
 // Classify typed errors only. Never inspect or retain raw text, addresses,
 // proxy credentials or certificate subjects. A cause does not establish whether
 // an inference reached the provider, was processed, or incurred a charge.
