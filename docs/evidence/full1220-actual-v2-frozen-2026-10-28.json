@@ -1,0 +1,121 @@
+{
+  "schema": "full1220-actual-v2-frozen-readiness.v1",
+  "evidence_kind": "exact_archive_and_signed_readonly_ready",
+  "archive_commit": "3eb22933050d61ff57068964e42a3312bb5d4eec",
+  "archive_tree": "c36a36a7c92322a86ddc6fd5cad239bfdc528c12",
+  "manifest_sha256": "5cd8f9d038e93c3be4c62c3e14a3100850d0e9b03415bd5c65d9f133a2a74071",
+  "scope_sha256": "22f2228963813d09e542a160b850c7a34b8f1b09a8280ed7d377c9ad7aa4562e",
+  "execution_sha256": "d5fae629058831f74b9111ddf8e67434b4a4dd0fa0c1c7dd282934c137cd1126",
+  "binary_sha256": "255f5d07706aa066ed2bb646f819e94a81c5ac4574c3e8bfa7e5b607e02b3e42",
+  "source_files": 2024,
+  "source_go_files": 389,
+  "source_canonical_sha256": "1bb0a9e19e804141e9122f4c671a21b4d3a024def4d348478e1129c663f2eff3",
+  "full_go": {
+    "exit_code": 0,
+    "command": [
+      "go",
+      "test",
+      "./...",
+      "-count=1",
+      "-timeout=20m",
+      "-json"
+    ],
+    "seconds": 699.1591962079983,
+    "sha256": "75871015dde76d9e42ee81735aa6652d169ee37d3eb8e0c033b11194beeea35a",
+    "test_packages_pass": 23,
+    "no_test_packages_skip": 26,
+    "original_optin_skips": [
+      {
+        "package": "github.com/frostloom/ai-gateway/internal/billing/store",
+        "test": "TestCashLoad"
+      },
+      {
+        "package": "github.com/frostloom/ai-gateway/internal/billing/store",
+        "test": "TestCashProfileRowTiming"
+      },
+      {
+        "package": "github.com/frostloom/ai-gateway/internal/agent",
+        "test": "TestLiveJevSemanticsDiagnostic"
+      }
+    ],
+    "failed_tests": [],
+    "source_unchanged": true,
+    "services_restored": true
+  },
+  "signed_readonly_check": {
+    "schema": "full1220-v2-actual-readonly-check.v1",
+    "exit_code": 0,
+    "seconds": 1.9310972090461291,
+    "stdout_sha256": "7bf334704acd2bf5aeab2f91a57d76dcd936c350616cc4244193779a1e749289",
+    "stderr_bytes": 0,
+    "new_actual_calls": 0,
+    "new_actual_claims": 0,
+    "roots_absent": true,
+    "response": {
+      "read_only": true,
+      "readiness": {
+        "manifest_sha256": "5cd8f9d038e93c3be4c62c3e14a3100850d0e9b03415bd5c65d9f133a2a74071",
+        "scope_sha256": "22f2228963813d09e542a160b850c7a34b8f1b09a8280ed7d377c9ad7aa4562e",
+        "execution_sha256": "d5fae629058831f74b9111ddf8e67434b4a4dd0fa0c1c7dd282934c137cd1126",
+        "pairs": 3660,
+        "arms": 7320,
+        "defined_turns": 11772,
+        "boundaries_excluded": 1851
+      },
+      "type": "checked"
+    }
+  },
+  "new_zero_inference_trace_readback": {
+    "schema": "full1220-v2-zero-inference-readback.v1",
+    "status": 200,
+    "seconds": 0.47014849999686703,
+    "trace_id": "1a4f0627e9a2d2a297bf38dcc7419b81",
+    "response_sha256": "43baadaa3487c3782ecaad60342db6b1d0cfbed7694e386ef91e91ae48b706c1",
+    "checks": {
+      "count": true,
+      "unique_ids": true,
+      "names": true,
+      "trace": true,
+      "release": true,
+      "environment": true,
+      "turn_input": true,
+      "turn_output": true,
+      "span_input": true,
+      "span_output": true
+    },
+    "all_pass": true,
+    "actual_model_calls": 0,
+    "actual_jev_calls": 0,
+    "actual_claims": 0,
+    "resends": 0,
+    "semantic_pass": false
+  },
+  "current_public_official_sources_GET200": true,
+  "authenticated_model_catalog_GET200": true,
+  "jev_version_not_listed_is_not_unsupported": true,
+  "independent_review": "actual_v2_review: no confirmed P1/P2; actual Open/collection/scores not yet performed",
+  "historical_claims": {
+    "full1220-first-actual-20261028": "52bbf6e7edf8b66099141db5ac7c6782e45b8afc3bcd9145ea1fd51f936eca48",
+    "recharge-cancel-20261024": "a9ce7a22d79e4e42e8ded0b932c34648df3db0d0574ad0710c098d2b02cbc8f4",
+    "recharge-confirm-20261023": "2c9d64b98bd985a24da5aed31c049d63311ebdd7f8dc4c862600ccd77e80dcbc",
+    "recharge-confirm-diagnostic-retest-20261023": "23047a143039f719531cfe403f1769abda7a6091b2ee51cecf6184eb4768e654",
+    "recharge-supplement-20261024": "824e1e44882b1043bba833ec6af5b88980d6d89b4ce8e4023fd12c68c98fb11c",
+    "refund-cap-20261024": "9a026381dea69bc1feb9712d58a41e305877701e1355ba2464543aaaa0857b30",
+    "v5-repeated-cohort-20261024": "c7f14ee3b310cec23cf71b7dc004fe73b29ec5e8efa4b6c4167eb91159c8dd58",
+    "v5-repeated-export-diagnostic-20261025": "8c63988dbd31b09cb523c7e0b067f5978ad0ee91f5736f0fc581752544161e6a",
+    "v5-repeated-receiver-20261027": "f09de5bb9ab4147f140f54db7a25c5f419b7a4e48137d63c1782ea7c38d768b3",
+    "v5-six-case-cohort-20261024": "b49808feb6a124c60c7f3fd88a7965589368a0ce8d8f4336e94ebaee9a025d34"
+  },
+  "planned_pairs": 3660,
+  "planned_arms": 7320,
+  "defined_turns": 11772,
+  "boundaries_separate": 1851,
+  "knowledge_both_arms": "off",
+  "new_actual_calls": 0,
+  "new_actual_claims": 0,
+  "permanent_micro_cny": 29475706,
+  "permanent_micro_usd": 227183,
+  "cumulative_if_all_new_windows_claimed_micro_cny": 97897368,
+  "cumulative_if_all_new_windows_claimed_micro_usd": 932211,
+  "goal_complete": false
+}

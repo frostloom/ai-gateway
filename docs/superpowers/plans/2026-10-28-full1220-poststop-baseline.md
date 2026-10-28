@@ -58,8 +58,8 @@ Files: `window_actual_ready.go`、`window_actual_session.go`、`cmd/full-window-
 
 - [x] v2 manifest及Open缺停止证据断言RED→GREEN；原材料只读/临时descriptor篡改在启动与逐窗门禁零upstream拒绝。Task1覆盖全部14材料/九claim，旧构建固定SHA与schema不能接受新v2manifest；最终完整有效ready仍须下面精确归档验收。
 - [x] 将v2基线验证接入Check/Open/verifyInputs及campaign推进，保持私密settings SHA、固定HTTPS、JEV显式本机route、2秒observer等全部门禁。
-- [ ] 有界真实Handler替身正常/纠正/标准service_tier/未知tier/usage缺失/观测失败/清理失败验证；失败不发生第二次请求，不恢复原scope。
-- [ ] 原配置完整Go20分钟、新提交精确归档、source/blob/输入/价格/原生请求包络及签名只读检查；独立复核后冻结全新roots。
+- [x] 有界真实Handler替身正常/标准service_tier/未知tier/usage缺失/观测失败与直接清理方法故障通过；原纠正/repair测试在完整Go中实际通过。技术失败无自动重试或下一claim，不恢复原scope；不能笼统说所有故障都只有一次请求，observer/JEV故障前可有正常模型两次。
+- [x] 原配置完整Go20分钟、新提交精确归档、source/blob/输入/价格/原生请求包络及签名只读检查；独立复核后冻结全新roots。归档3eb2293，全Go699.159秒/23包pass，签名Check1.931秒通过，细节见[冻结报告](../../full1220-actual-v2-frozen-2026-10-28.md)。
 
 ## Task 4：完整实际采集及评分交付
 
