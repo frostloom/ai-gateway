@@ -1,0 +1,30 @@
+{
+  "schema": "full1220-actual-jev-route-targeted-validation.v1",
+  "evidence_kind": "local_stub",
+  "baseline_revision": "9514d49a518fdbaf9f5d28596610ece7ae21a0eb",
+  "race": true,
+  "top_level_tests": 41,
+  "passing_test_records": 51,
+  "packages": [
+    {
+      "name": "github.com/frostloom/ai-gateway/internal/taskbench",
+      "seconds": 5.571
+    },
+    {
+      "name": "github.com/frostloom/ai-gateway/cmd/full-window-actual",
+      "seconds": 5.628
+    }
+  ],
+  "skips": 0,
+  "failures": 0,
+  "logs": {
+    "integrated-green.jsonl": "a17d4c5d3b933eddaeffbd6e889ad122b7f57f40fb3c457dcdfb96d3f8b96e51",
+    "settings-red.log": "7fd3c537fd333a54bc0a48595ce2d95589dc6d28f5d61cd3bb9a0b3f0f500c74",
+    "integrated-green.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "transport-red.log": "9e83e93b56a8e4a3753fa02af4090d363965b31efa6999456a9dc16cbde171ca"
+  },
+  "actual_provider_calls": 0,
+  "new_claims": 0,
+  "full_go_changed_archive": "pending",
+  "ready_for_paid_run": false
+}

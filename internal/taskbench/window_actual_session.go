@@ -1,6 +1,7 @@
 package taskbench
 
 import (
+	"bytes"
 	"context"
 	"database/sql"
 	"encoding/json"
@@ -24,11 +25,13 @@ import (
 )
 
 // The only public constructor consumes an opaque, freshly checked ready token.
-// Settings cannot replace endpoints, caps, sources, transports or authorizations.
+// Settings cannot replace endpoints, caps, sources or authorizations. The
+// separately pinned JEV CONNECT route is explicit and limited to local HTTP.
 type windowActualSettings struct {
 	rawSHA256            string
 	ModelKey             string                       `json:"model_key"`
 	JEVKey               string                       `json:"jev_key"`
+	JEVHTTPSProxy        string                       `json:"jev_https_proxy"`
 	LoopbackAdminDSN     string                       `json:"loopback_admin_dsn"`
 	AllowFixtureCreation bool                         `json:"allow_fixture_creation"`
 	Observer             windowActualObserverSettings `json:"observer"`
@@ -70,7 +73,7 @@ func readWindowActualSettings(path string) (out windowActualSettings, err error)
 	_ = json.Unmarshal(raw, &obj)
 	var obs map[string]json.RawMessage
 	_ = json.Unmarshal(obj["observer"], &obs)
-	if len(obj) != 5 || len(obs) != 11 || strings.TrimSpace(out.ModelKey) == "" || strings.TrimSpace(out.JEVKey) == "" || strings.ContainsAny(out.ModelKey+out.JEVKey, "\r\n") || !out.AllowFixtureCreation {
+	if len(obj) != 6 || bytes.Equal(bytes.TrimSpace(obj["jev_https_proxy"]), []byte("null")) || len(obs) != 11 || strings.TrimSpace(out.ModelKey) == "" || strings.TrimSpace(out.JEVKey) == "" || strings.ContainsAny(out.ModelKey+out.JEVKey, "\r\n") || !out.AllowFixtureCreation {
 		return reject()
 	}
 	if _, e = windowActualLoopbackEndpoint(out.Observer.Endpoint); e != nil {
@@ -81,6 +84,9 @@ func readWindowActualSettings(path string) (out windowActualSettings, err error)
 	}
 	o := out.Observer
 	if !o.Enabled || !o.CaptureContent || o.SampleRate != 1 || o.Environment != "evaluation" || !windowActualRevision(o.Release) || o.ExportTimeoutMS != 2000 || o.QueueSize < 1 || o.QueueSize > 4096 || len(o.HashKey) < 32 || strings.TrimSpace(o.PublicKey) == "" || strings.TrimSpace(o.SecretKey) == "" || strings.ContainsAny(o.PublicKey+o.SecretKey, "\r\n:") {
+		return reject()
+	}
+	if _, e = windowActualJEVProxy(out.JEVHTTPSProxy); e != nil {
 		return reject()
 	}
 	out.rawSHA256 = conversationHash(raw)
@@ -142,6 +148,44 @@ func checkWindowActualDatabase(ctx context.Context, dsn string) error {
 	}
 	return nil
 }
+
+// Only an explicitly frozen local HTTP CONNECT route is permitted for JEV.
+// The target remains the fixed HTTPS provider and retains default TLS checks.
+func windowActualJEVProxy(raw string) (*url.URL, error) {
+	if raw == "" {
+		return nil, nil
+	}
+	u, e := url.Parse(raw)
+	if e != nil || u.Scheme != "http" || u.User != nil || u.Path != "" || u.RawPath != "" || u.RawQuery != "" || u.ForceQuery || u.Fragment != "" || u.Opaque != "" || net.ParseIP(u.Hostname()) == nil || !net.ParseIP(u.Hostname()).IsLoopback() {
+		return nil, fmt.Errorf("actual JEV route rejected")
+	}
+	port := u.Port()
+	if port == "" {
+		return nil, fmt.Errorf("actual JEV route rejected")
+	}
+	for _, c := range port {
+		if c < '0' || c > '9' {
+			return nil, fmt.Errorf("actual JEV route rejected")
+		}
+	}
+	n, e := strconv.Atoi(port)
+	if e != nil || n < 1 || n > 65535 {
+		return nil, fmt.Errorf("actual JEV route rejected")
+	}
+	return u, nil
+}
+func newWindowActualJEVTransport(proxy string) (*http.Transport, error) {
+	u, e := windowActualJEVProxy(proxy)
+	if e != nil {
+		return nil, e
+	}
+	tr := newWindowActualTransport()
+	if u != nil {
+		tr.Proxy = http.ProxyURL(u)
+	}
+	return tr, nil
+}
+
 func newWindowActualTransport() *http.Transport {
 	return &http.Transport{Proxy: nil, DialContext: (&net.Dialer{Timeout: 10 * time.Second, KeepAlive: 30 * time.Second}).DialContext, ForceAttemptHTTP2: true, MaxIdleConns: 4, MaxIdleConnsPerHost: 2, IdleConnTimeout: 30 * time.Second, TLSHandshakeTimeout: 10 * time.Second, ResponseHeaderTimeout: 120 * time.Second, ExpectContinueTimeout: time.Second}
 }
@@ -213,22 +257,23 @@ type FullWindowActualReceipt struct {
 	ReportStatus           string `json:"report_status"`
 }
 type FullWindowActualSession struct {
-	op          sync.Mutex
-	mu          sync.Mutex
-	status      FullWindowActualStatus
-	ready       *FullWindowActualReady
-	auth        windowAcquisitionAuthorization
-	campaign    *windowCampaign
-	lifetime    context.Context
-	cancel      context.CancelFunc
-	stopParent  func() bool
-	rootInfo    os.FileInfo
-	files       map[string]string
-	reportRoots map[string]bool
-	reportDirs  map[string]os.FileInfo
-	transport   *http.Transport
-	shutdown    bool
-	closeErr    error
+	op           sync.Mutex
+	mu           sync.Mutex
+	status       FullWindowActualStatus
+	ready        *FullWindowActualReady
+	auth         windowAcquisitionAuthorization
+	campaign     *windowCampaign
+	lifetime     context.Context
+	cancel       context.CancelFunc
+	stopParent   func() bool
+	rootInfo     os.FileInfo
+	files        map[string]string
+	reportRoots  map[string]bool
+	reportDirs   map[string]os.FileInfo
+	transport    *http.Transport
+	jevTransport *http.Transport
+	shutdown     bool
+	closeErr     error
 }
 
 func OpenFullWindowActual(ctx context.Context, ready *FullWindowActualReady, privateSettingsPath string) (_ *FullWindowActualSession, err error) {
@@ -245,8 +290,12 @@ func OpenFullWindowActual(ctx context.Context, ready *FullWindowActualReady, pri
 	if e = checkWindowActualSettingsDigest(settings, ready.manifest.PrivateSettingsSHA256); e != nil {
 		return nil, e
 	}
+	jevTransport, e := newWindowActualJEVTransport(settings.JEVHTTPSProxy)
+	if e != nil {
+		return nil, e
+	}
 	lifetime, cancel := context.WithCancel(ctx)
-	s := &FullWindowActualSession{ready: ready, lifetime: lifetime, cancel: cancel, files: map[string]string{}, reportRoots: map[string]bool{}, reportDirs: map[string]os.FileInfo{}, transport: newWindowActualTransport(), status: FullWindowActualStatus{EvidenceKind: "recorded_run", NextWindowIndex: 1, PlannedPairs: 3660, PlannedArms: 7320, UnattemptedArms: 7320, DefinedTurns: 11772, GlobalUnrunTurns: 11772, BoundariesExcluded: 1851}}
+	s := &FullWindowActualSession{ready: ready, lifetime: lifetime, cancel: cancel, files: map[string]string{}, reportRoots: map[string]bool{}, reportDirs: map[string]os.FileInfo{}, transport: newWindowActualTransport(), jevTransport: jevTransport, status: FullWindowActualStatus{EvidenceKind: "recorded_run", NextWindowIndex: 1, PlannedPairs: 3660, PlannedArms: 7320, UnattemptedArms: 7320, DefinedTurns: 11772, GlobalUnrunTurns: 11772, BoundariesExcluded: 1851}}
 	defer func() {
 		if err != nil {
 			_ = s.Close()
@@ -288,7 +337,7 @@ func OpenFullWindowActual(ctx context.Context, ready *FullWindowActualReady, pri
 	if e != nil {
 		return nil, e
 	}
-	s.auth = windowAcquisitionAuthorization{campaign: s.campaign, source: ready.source, frozenScopeSHA: m.ScopeSHA256, frozenExecutionSHA: m.ExecutionSHA256, actualExecutionSHA: m.ExecutionSHA256, observer: observer, observerIdentity: m.Observer, modelKey: settings.ModelKey, jevKey: settings.JEVKey, modelUpstream: &windowActualNoRedirectTransport{s.transport}, jevUpstream: &windowActualNoRedirectTransport{s.transport}, fixtureOptions: PairedFixtureOptions{AllowFixtureCreation: true, AdminDSN: settings.LoopbackAdminDSN, ProfilesDir: m.ProfilesDir}, evidenceKind: "recorded_run"}
+	s.auth = windowAcquisitionAuthorization{campaign: s.campaign, source: ready.source, frozenScopeSHA: m.ScopeSHA256, frozenExecutionSHA: m.ExecutionSHA256, actualExecutionSHA: m.ExecutionSHA256, observer: observer, observerIdentity: m.Observer, modelKey: settings.ModelKey, jevKey: settings.JEVKey, modelUpstream: &windowActualNoRedirectTransport{s.transport}, jevUpstream: &windowActualNoRedirectTransport{s.jevTransport}, fixtureOptions: PairedFixtureOptions{AllowFixtureCreation: true, AdminDSN: settings.LoopbackAdminDSN, ProfilesDir: m.ProfilesDir}, evidenceKind: "recorded_run"}
 	if _, e = s.persist("startup.json", s.Status()); e != nil {
 		return nil, e
 	}
@@ -401,6 +450,9 @@ func (s *FullWindowActualSession) stop() error {
 	}
 	if s.transport != nil {
 		s.transport.CloseIdleConnections()
+	}
+	if s.jevTransport != nil {
+		s.jevTransport.CloseIdleConnections()
 	}
 	if s.rootInfo != nil {
 		_, e := s.persist("terminal.json", s.Status())

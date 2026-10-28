@@ -1,0 +1,75 @@
+{
+  "schema": "full1220-actual-jev-route-readonly-evidence.v1",
+  "actual_provider_calls": 0,
+  "new_claims": 0,
+  "public_sources": [
+    {
+      "name": "deepseek-pricing",
+      "url": "https://api-docs.deepseek.com/zh-cn/quick_start/pricing/",
+      "method": "GET",
+      "retries": 0,
+      "proxy": false,
+      "status": 200,
+      "bytes": 26182,
+      "sha256": "556097caba8adfeeed6455714bffd731c7f60db520fcee06a922eba5840663a3",
+      "elapsed_ms": 898.167
+    },
+    {
+      "name": "typesafe-models",
+      "url": "https://docs.typesafe.ai/models.md",
+      "method": "GET",
+      "retries": 0,
+      "proxy": false,
+      "status": 200,
+      "bytes": 8353,
+      "sha256": "1c56aeadeec0225beccef214dd2f0b4b47d6a0e0d53c356aac46290f9053146c",
+      "elapsed_ms": 3368.718
+    },
+    {
+      "name": "deepseek-token-usage",
+      "url": "https://api-docs.deepseek.com/quick_start/token_usage/",
+      "method": "GET",
+      "retries": 0,
+      "proxy": false,
+      "status": 200,
+      "bytes": 23322,
+      "sha256": "f714e2bc8d423cc25ba123a914c2d837c893571086ff75f48c775928aab97897",
+      "elapsed_ms": 871.364
+    }
+  ],
+  "direct_typesafe": [
+    {
+      "route": "direct",
+      "method": "GET",
+      "inference": false,
+      "proxy_configured": false,
+      "status": 451,
+      "body_bytes": 66,
+      "body_sha256": "9aad89d541d3f6208b641cf6811714e94b4e9557cf2c3b74dcdb2d17fbe4b122",
+      "elapsed_ms": 2879.545,
+      "json_top_keys": [
+        "status",
+        "title"
+      ],
+      "fixed_version_listed": false
+    }
+  ],
+  "owned_local_proxy_typesafe": [
+    {
+      "route": "verified_user_local_proxy",
+      "method": "GET",
+      "inference": false,
+      "proxy_configured": true,
+      "status": 200,
+      "body_bytes": 311,
+      "body_sha256": "7fbe8d7d66e3d1c9560506fd514b47dee5308246139de38f61a685b715362d60",
+      "elapsed_ms": 557.614,
+      "json_top_keys": [
+        "models"
+      ],
+      "fixed_version_listed": false
+    }
+  ],
+  "automatic_review": "First combined credential/proxy diagnostic rejected and not executed. Local a1 process ownership and unauthenticated CONNECT evidence were then established. A new authenticated read-only GET was accepted. No proxy or trust configuration changed.",
+  "models_get_does_not_prove_inference_compatibility": true
+}

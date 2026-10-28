@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestFullWindowActualOpenRejectsBeforeSettings(t *testing.T) {
@@ -63,7 +64,7 @@ func TestFullWindowActualPrivateSettings(t *testing.T) {
 	}
 }
 func actualTestSettings(endpoint string) string {
-	return `{"model_key":"synthetic-model","jev_key":"synthetic-jev","loopback_admin_dsn":"fixture@tcp(127.0.0.1:3306)/","allow_fixture_creation":true,"observer":{"enabled":true,"capture_content":true,"endpoint":"` + endpoint + `","public_key":"pk-test","secret_key":"sk-test","hash_key":"hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh","release":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","environment":"evaluation","sample_rate":1,"queue_size":256,"export_timeout_ms":2000}}`
+	return `{"model_key":"synthetic-model","jev_key":"synthetic-jev","jev_https_proxy":"","loopback_admin_dsn":"fixture@tcp(127.0.0.1:3306)/","allow_fixture_creation":true,"observer":{"enabled":true,"capture_content":true,"endpoint":"` + endpoint + `","public_key":"pk-test","secret_key":"sk-test","hash_key":"hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh","release":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","environment":"evaluation","sample_rate":1,"queue_size":256,"export_timeout_ms":2000}}`
 }
 func TestFullWindowActualHealthIsBoundedAuthenticatedGet(t *testing.T) {
 	var paths []string
@@ -376,4 +377,82 @@ func TestFullWindowActualSettingsRejectsDatabaseInitializationQueries(t *testing
 	if _, err := readWindowActualSettings(p); err != nil {
 		t.Fatalf("client-only DSN settings rejected: %v", err)
 	}
+}
+
+func TestFullWindowActualJEVProxySettings(t *testing.T) {
+	root, _ := filepath.EvalSymlinks(t.TempDir())
+	path := filepath.Join(root, "settings")
+	baseline := actualTestSettings("http://127.0.0.1:3000/api/public/otel/v1/traces")
+	for _, proxy := range []string{"", "http://127.0.0.1:7892", "http://[::1]:7892"} {
+		var obj map[string]any
+		_ = json.Unmarshal([]byte(baseline), &obj)
+		obj["jev_https_proxy"] = proxy
+		raw, _ := json.Marshal(obj)
+		if err := os.WriteFile(path, raw, 0600); err != nil {
+			t.Fatal(err)
+		}
+		if _, err := readWindowActualSettings(path); err != nil {
+			t.Errorf("explicit local JEV route rejected: %q: %v", proxy, err)
+		}
+	}
+	for _, proxy := range []any{nil, 3, "http://localhost:7892", "http://192.0.2.1:7892", "https://127.0.0.1:7892", "socks5://127.0.0.1:7892", "http://user:pass@127.0.0.1:7892", "http://127.0.0.1:0", "http://127.0.0.1:65536", "http://127.0.0.1:http", "http://127.0.0.1:7892/", "http://127.0.0.1:7892?", "http://127.0.0.1:7892#x"} {
+		var obj map[string]any
+		_ = json.Unmarshal([]byte(baseline), &obj)
+		obj["jev_https_proxy"] = proxy
+		raw, _ := json.Marshal(obj)
+		if err := os.WriteFile(path, raw, 0600); err != nil {
+			t.Fatal(err)
+		}
+		if _, err := readWindowActualSettings(path); err == nil {
+			t.Errorf("invalid JEV route accepted: %#v", proxy)
+		}
+	}
+}
+
+func TestFullWindowActualJEVTransportOnlyExplicitConnect(t *testing.T) {
+	calls := 0
+	proxy := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		calls++
+		if r.Method != "CONNECT" || r.Host != "api.typesafe.ai:443" || r.Header.Get("Authorization") != "" || r.Header.Get("Proxy-Authorization") != "" {
+			t.Error("credential or target leaked to CONNECT proxy")
+		}
+		w.WriteHeader(http.StatusBadGateway)
+	}))
+	defer proxy.Close()
+	t.Setenv("HTTPS_PROXY", proxy.URL)
+	t.Setenv("HTTP_PROXY", proxy.URL)
+	direct := newWindowActualTransport()
+	defer direct.CloseIdleConnections()
+	if direct.Proxy != nil {
+		t.Fatal("model/health inherited environment proxy")
+	}
+	tr, e := newWindowActualJEVTransport(proxy.URL)
+	if e != nil {
+		t.Fatal(e)
+	}
+	defer tr.CloseIdleConnections()
+	if tr.Proxy == nil {
+		t.Fatal("explicit JEV route ignored")
+	}
+	if tr.TLSClientConfig != nil && tr.TLSClientConfig.InsecureSkipVerify {
+		t.Fatal("TLS verification disabled")
+	}
+	req, _ := http.NewRequest("GET", "https://api.typesafe.ai/v1/models", nil)
+	req.Header.Set("Authorization", "Bearer synthetic-test-key")
+	if u, e := tr.Proxy(req); e != nil || u.String() != proxy.URL {
+		t.Fatal("JEV proxy differs from exact frozen route")
+	}
+	cli := &http.Client{Transport: tr, Timeout: time.Second}
+	resp, e := cli.Do(req)
+	if resp != nil {
+		resp.Body.Close()
+	}
+	if e == nil || calls != 1 {
+		t.Fatalf("CONNECT count=%d error=%v", calls, e)
+	}
+	noProxy, e := newWindowActualJEVTransport("")
+	if e != nil || noProxy.Proxy != nil {
+		t.Fatal("empty explicit route inherited environment")
+	}
+	noProxy.CloseIdleConnections()
 }
