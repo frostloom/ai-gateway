@@ -1,0 +1,110 @@
+{
+  "schema": "full1220-cache-split-accounting-kernel-result.v1",
+  "sources": {
+    "internal/taskbench/window_accounting.go": "a2a9121c38d324a6501b808a6fb5f874cd69843e00197ecb70ce863e396894f1",
+    "internal/taskbench/window_accounting_cache.go": "2c5fc88de45e696588ebdbc34497b43e58a0604cbf1823b0c3b65ee4d5576a81",
+    "internal/taskbench/window_accounting_cache_test.go": "54ee2c10383e69a48efdf66d00d78cc1b9a7a7eff09a6c6e3dc36f9aebbf96d1"
+  },
+  "runs": {
+    "normal": {
+      "pass": 176,
+      "fail": 0,
+      "skip": 0,
+      "package": {
+        "Time": "2026-10-29T03:21:21.38791+08:00",
+        "Action": "pass",
+        "Package": "github.com/frostloom/ai-gateway/internal/taskbench",
+        "Elapsed": 2.479
+      },
+      "stderr_bytes": 0
+    },
+    "race": {
+      "pass": 176,
+      "fail": 0,
+      "skip": 0,
+      "package": {
+        "Time": "2026-10-29T03:22:02.065055+08:00",
+        "Action": "pass",
+        "Package": "github.com/frostloom/ai-gateway/internal/taskbench",
+        "Elapsed": 3.987
+      },
+      "stderr_bytes": 0
+    },
+    "final-normal": {
+      "pass": 177,
+      "fail": 0,
+      "skip": 0,
+      "package": {
+        "Time": "2026-10-29T03:22:53.85117+08:00",
+        "Action": "pass",
+        "Package": "github.com/frostloom/ai-gateway/internal/taskbench",
+        "Elapsed": 2.759
+      },
+      "stderr_bytes": 0
+    },
+    "actual-race": {
+      "pass": 179,
+      "fail": 0,
+      "skip": 0,
+      "package": {
+        "Time": "2026-10-29T03:23:33.349789+08:00",
+        "Action": "pass",
+        "Package": "github.com/frostloom/ai-gateway/internal/taskbench",
+        "Elapsed": 59.936
+      },
+      "stderr_bytes": 0
+    }
+  },
+  "root_fresh_run": {
+    "exit_code": 0,
+    "elapsed_seconds": 10.685857165954076,
+    "test_passes": 177,
+    "failures": 0,
+    "skips": 0,
+    "source_hashes_before_after_identical": {
+      "window_accounting.go": "a2a9121c38d324a6501b808a6fb5f874cd69843e00197ecb70ce863e396894f1",
+      "window_accounting_cache.go": "2c5fc88de45e696588ebdbc34497b43e58a0604cbf1823b0c3b65ee4d5576a81",
+      "window_accounting_cache_test.go": "54ee2c10383e69a48efdf66d00d78cc1b9a7a7eff09a6c6e3dc36f9aebbf96d1"
+    },
+    "stderr_bytes": 0
+  },
+  "independent_targeted_go_seconds": 2.705,
+  "independent_confirmed_remaining_p1_p2": 0,
+  "real_original_proof": {
+    "claims": 25,
+    "historical_model_calls": 1791,
+    "historical_jev_calls": 445,
+    "permanent_model_micro_cny": 38888170,
+    "permanent_jev_micro_usd": 308003,
+    "remaining_model_micro_cny": 66111830,
+    "remaining_jev_micro_usd": 691997,
+    "old_files_before_after_sha_identical": 9174
+  },
+  "copied_prefix_only_shadow": {
+    "actual_model_requests_in_saved_prefix": 982,
+    "actual_jev_requests_in_saved_prefix": 241,
+    "original_known_model_micro_cny_unchanged": 4027750,
+    "shadow_model_micro_cny": 879664,
+    "jev_micro_usd_unchanged": 12316,
+    "ninth_window_shadow_prefix_only_micro_cny": 60386,
+    "all_original_halt_and_close_events_removed_in_shadow": true,
+    "shadow_is_unsealed": true,
+    "unobserved_suffix_simulated": false,
+    "original_scope_resumed": false
+  },
+  "worst_hold_unchanged": {
+    "model_micro_cny": 74752,
+    "jev_micro_usd": 2688
+  },
+  "legacy_schema_pricing_unchanged": true,
+  "old_zero_field_json_unchanged": true,
+  "actual_entry_wired": false,
+  "new_caps_wired": false,
+  "new_model_calls": 0,
+  "new_jev_calls": 0,
+  "new_claims": 0,
+  "new_scores": 0,
+  "new_deployments": 0,
+  "new_actual_paid_ready": false,
+  "preserved_non_product_failure": "max-bound reference arithmetic typo corrected in test only; not counted as product RED"
+}

@@ -1,6 +1,6 @@
 # 新版本缓存分拆结算内核实施计划
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans inline, with test-driven-development. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans inline, with test-driven-development. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** 仅在显式新版账本启用报告hit/miss分拆的峰值计价，同时逐字节、逐金额保留所有旧账语义及原准入保护。
 
@@ -39,10 +39,12 @@
 - `func (p windowProviderLimits) settlementCost(u *windowUsage) (int64, error)`：先沿用`windowUsageValid`，若费率0或双cache字段缺失则原`cost`；否则`ceil((miss*InputRate+hit*CacheHitInputRate)/1000000)+ceil(output*OutputRate/1000000)`。
 - 账本replay与live Settle使用同函数；任何cost验证失败返回error，不追加假settle。旧`cost`和`Begin`路径保持原算法。
 
-- [ ] 写断言RED：新版真实样例input1757/output33/hit1536/miss221，费率40000/2000000/8000000应768µCNY；旧schema同usage仍3778，新最大hold仍74752；新字段0在旧header中省略。
-- [ ] 运行新选择器，观察断言失败后再实现（编译/SDK失败不计RED）。
-- [ ] 实现新字段/价格验证与纯函数；旧schema拒非零字段、新schema拒缺0/负值/高于miss或JEV非零字段。现有构造器默认schema1不激活新价格。
-- [ ] 补mixed/all-hit/all-miss/无cache对/半对/负值/总和不符/最大边界、整数ceil及`settlement<=cost`性质；核对live close与journal replay完全一致，重复/过时ticket和pending失败规则保持。
-- [ ] 运行`SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX26.5.sdk go test ./internal/taskbench -run 'TestWindow(Accounting|StoppedV3)' -count=1`及同选择器`-race`；不运行与本单元无关的DB或真实网络。
-- [ ] 私密overlay对真实25claim原证据只读再验证：旧known/预算/次数/SHA逐值不变；另对拷贝的已捕获前缀做新版影子replay，标明排除原halt及未捕获后缀，不称原第9窗恢复/完成。
-- [ ] 独立审查无剩余重要问题后提交并直推main。本单元不宣称新完整范围已技术冻结或已执行。
+- [x] 写断言RED：新版真实样例input1757/output33/hit1536/miss221，费率40000/2000000/8000000应768µCNY；旧schema同usage仍3778，新最大hold仍74752；新字段0在旧header中省略。
+- [x] 运行新选择器，观察断言失败后再实现（编译/SDK失败不计RED）。
+- [x] 实现新字段/价格验证与纯函数；旧schema拒非零字段、新schema拒缺0/负值/高于miss或JEV非零字段。现有构造器默认schema1不激活新价格。
+- [x] 补mixed/all-hit/all-miss/无cache对/半对/负值/总和不符/最大边界、整数ceil及`settlement<=cost`性质；核对live close与journal replay完全一致，重复/过时ticket和pending失败规则保持。
+- [x] 运行`SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX26.5.sdk go test ./internal/taskbench -run 'TestWindow(Accounting|StoppedV3)' -count=1`及同选择器`-race`；不运行与本单元无关的DB或真实网络。
+- [x] 私密overlay对真实25claim原证据只读再验证：旧known/预算/次数/SHA逐值不变；另对拷贝的已捕获前缀做新版影子replay，标明排除原halt及未捕获后缀，不称原第9窗恢复/完成。
+- [x] 独立审查无剩余重要问题后提交并直推main。本单元不宣称新完整范围已技术冻结或已执行。
+
+2026-10-29：内核3文件完成。真实样例3778≠768与原schema2拒绝已断言RED→GREEN；cost/Begin不变。最终177normal/179含actual overlay race通过，25原proof及9174SHA不变；复制prefix只移除halt/close且unsealed，shadow879664/12316不更新实账。边界测试算术预期11000000000→10999999990的错误保留并仅改测试，不称产品缺陷修复。root再177通过，独立2.705秒通过无确认P1/P2。Actual/Open/caps未接，本单元不构成paidready。

@@ -18,13 +18,14 @@ import (
 // These private primitives are not a claim validator or an execution capability.
 // No network client, provider key or legacy budget mutation exists here.
 type windowProviderLimits struct {
-	Model           string `json:"model"`
-	MaxAttempts     int    `json:"max_attempts"`
-	MaxRequestBytes int    `json:"max_request_bytes"`
-	MaxInput        int64  `json:"max_input_tokens"`
-	MaxOutput       int64  `json:"max_output_tokens"`
-	InputRate       int64  `json:"input_micro_per_million"`
-	OutputRate      int64  `json:"output_micro_per_million"`
+	Model             string `json:"model"`
+	MaxAttempts       int    `json:"max_attempts"`
+	MaxRequestBytes   int    `json:"max_request_bytes"`
+	MaxInput          int64  `json:"max_input_tokens"`
+	MaxOutput         int64  `json:"max_output_tokens"`
+	InputRate         int64  `json:"input_micro_per_million"`
+	OutputRate        int64  `json:"output_micro_per_million"`
+	CacheHitInputRate int64  `json:"cache_hit_input_micro_per_million,omitempty"`
 }
 type windowAccountingContract struct {
 	Schema         string               `json:"schema"`
@@ -138,8 +139,11 @@ func (p windowProviderLimits) validate(model bool) error {
 	return nil
 }
 func (c windowAccountingContract) validate() error {
-	if c.Schema != "full-window-accounting.v1" || !windowIDPattern.MatchString(c.WindowID) || c.ModelCap < 1 || c.ModelCap > 1000000000 || c.JEVCap < 1 || c.JEVCap > 1000000000 {
+	if (c.Schema != "full-window-accounting.v1" && c.Schema != "full-window-accounting.v2") || !windowIDPattern.MatchString(c.WindowID) || c.ModelCap < 1 || c.ModelCap > 1000000000 || c.JEVCap < 1 || c.JEVCap > 1000000000 {
 		return fmt.Errorf("invalid window declaration")
+	}
+	if c.JEV.CacheHitInputRate != 0 || (c.Schema == "full-window-accounting.v1" && c.Model.CacheHitInputRate != 0) || (c.Schema == "full-window-accounting.v2" && (c.Model.CacheHitInputRate <= 0 || c.Model.CacheHitInputRate > c.Model.InputRate)) {
+		return fmt.Errorf("invalid versioned cache input rate")
 	}
 	for _, h := range []string{c.ScopeSHA256, c.ScheduleSHA256, c.PolicySHA256, c.ClaimSHA256} {
 		if !comparisonDigest(h) {
@@ -369,10 +373,10 @@ func (l *windowAccounting) apply(e windowAccountingEvent) error {
 		}
 		provider := l.state.Pending.Request.Provider
 		p, _ := l.contract.provider(provider)
-		if !windowUsageValid(p, e.Usage) {
-			return fmt.Errorf("invalid bounded usage")
+		cost, err := p.settlementCost(e.Usage)
+		if err != nil {
+			return err
 		}
-		cost := p.cost(*e.Usage.Input, *e.Usage.Output)
 		if provider == "model" {
 			if l.state.ModelKnown > l.contract.ModelCap-cost {
 				return fmt.Errorf("settlement exceeds cap")
@@ -468,6 +472,9 @@ func (l *windowAccounting) Settle(t windowRequestTicket, responseSHA string, usa
 			code = "usage_out_of_bounds"
 		}
 		return l.halt(code)
+	}
+	if _, err := p.settlementCost(usage); err != nil {
+		return l.halt("usage_invalid")
 	}
 	return l.append(windowAccountingEvent{Kind: "settle", Sequence: t.sequence, ResponseSHA256: responseSHA, Usage: usage})
 }
