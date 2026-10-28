@@ -1,0 +1,85 @@
+{
+  "schema": "full1220-v3-budget105-offline-scope-evidence.v1",
+  "evidence_kind": "offline_no_claim_capability",
+  "source_sha256": {
+    "internal/taskbench/window_scope.go": "dd606e5c548007bbe270fae7675efc5ceb30a7803b6250250b43dd8a0c55c0ed",
+    "internal/taskbench/window_scope_v3.go": "5044d9c85ee27c8966809623055d0f2aaf38f61f8061010a5847c5ffcbafe167",
+    "internal/taskbench/window_scope_v3_test.go": "5c8bb449e7594f10d496b60e0183c88a0a3f116b1ec380e225320fe6d4ef291d"
+  },
+  "runs": [
+    {
+      "name": "scope-final-race",
+      "test_pass": 41,
+      "test_fail": 0,
+      "test_skip": 0,
+      "package_seconds": [
+        58.731
+      ],
+      "sha256": "77c783bea57cf9384bc004482c20e2f58ccbcca90d6b06ba2f77f47db3b8adac",
+      "stderr_bytes": 0
+    },
+    {
+      "name": "scope-integration-race",
+      "test_pass": 270,
+      "test_fail": 0,
+      "test_skip": 0,
+      "package_seconds": [
+        473.957
+      ],
+      "sha256": "b4ca10db626ae3a8d160db4f812ce87ca826d0dcdaf964999691625e9f0a3caa",
+      "stderr_bytes": 0
+    }
+  ],
+  "original_131_caps_overlay": {
+    "exit_code": 0,
+    "log_sha256": "900fb28333c25c3a833c26f738ef21ed9876ad76d933a7b8ac440cbd62ecfd32",
+    "windows": 131,
+    "schedule_and_caps_identical": true,
+    "model_caps_micro_cny": 68421662,
+    "jev_caps_micro_usd": 705028,
+    "full_pairs": 3660,
+    "full_arms": 7320,
+    "defined_turns": 11772,
+    "boundaries_separate": 1851
+  },
+  "budget_approval_sha256": "d5062e6f39f9ae7c9a8461121f9ba907c798100d7a5428af72da459595d2d554",
+  "parent_budget_micro_cny": 105000000,
+  "parent_budget_micro_usd": 1000000,
+  "permanent_micro_cny": 33395934,
+  "permanent_micro_usd": 259511,
+  "remaining_micro_cny": 71604066,
+  "remaining_micro_usd": 740489,
+  "risk_margin_micro_cny": 2023424,
+  "risk_margin_micro_usd": 65,
+  "parent_required_with_caps_and_margin_micro_cny": 103841020,
+  "parent_required_with_caps_and_margin_micro_usd": 964604,
+  "tail_micro_cny": 1158980,
+  "tail_micro_usd": 35396,
+  "tail_not_authorized_for_extra_experiments": true,
+  "concrete_16_claim_proof": "pending",
+  "actual_v3_entry": "pending",
+  "exact_archive_full_Go20m": "pending",
+  "new_actual_claims": 0,
+  "new_actual_model_calls": 0,
+  "new_actual_jev_calls": 0,
+  "independent_review": {
+    "reviewer": "v3_scope_review",
+    "confirmed_P1_P2": 0,
+    "static_review_completed": true,
+    "independent_test": "not_executed_successfully: defaultSDK27 clang/tapi link incompatibility; mainSDK26.5 test evidence separate"
+  },
+  "predecessor_hierarchy_preparation": {
+    "top_level_pinned_artifacts": 38,
+    "recorded_arms": 334,
+    "native_requests": 832,
+    "complete_HTTP200_responses": 831,
+    "unavailable_response": 1,
+    "derived_claim_count": 16,
+    "derived_permanent_micro_cny": 33395934,
+    "derived_permanent_micro_usd": 259511,
+    "derived_native_model_attempts": 809,
+    "derived_native_jev_attempts": 204,
+    "runtime_inventory_including_no_seventh_claim_checked": true,
+    "concrete_Go_proof": false
+  }
+}
