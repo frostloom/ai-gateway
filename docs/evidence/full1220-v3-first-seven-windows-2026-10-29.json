@@ -1,0 +1,201 @@
+{
+  "schema": "full1220-v3-seven-window-progress.v1",
+  "snapshot_only": true,
+  "source_commit": "f48bb0ac8ecc690605c4f2662b7ad3250b6888a7",
+  "manifest_sha256": "0243bbc33f2985ed0e942235b15311525dab1d082e4713570a6c5521688640d9",
+  "planned_pairs": 3660,
+  "planned_arms": 7320,
+  "defined_turns": 11772,
+  "boundaries_separate": 1851,
+  "completed_pairs": 196,
+  "completed_arms": 392,
+  "observed_turns": 462,
+  "technical_failed_arms": 0,
+  "cumulative_new_model_attempts": 799,
+  "cumulative_new_jev_attempts": 196,
+  "historical_plus_new_model_attempts": 1608,
+  "historical_plus_new_jev_attempts": 400,
+  "window_count": 7,
+  "windows": [
+    {
+      "index": 1,
+      "summary_sha256": "947205c27cf6301851da7abb17f1aa6519bb0871d1fe65826e07456780fd6a3b",
+      "native_packets": 96,
+      "finished_arms": 56,
+      "observed_turns": 60,
+      "quality_negative_arms": 3,
+      "accounting": {
+        "permanent_model_micro_cny": 414586,
+        "permanent_jev_micro_usd": 5388,
+        "known_model_micro_cny": 262418,
+        "known_jev_micro_usd": 1433,
+        "held_model_micro_cny": 0,
+        "held_jev_micro_usd": 0,
+        "model_intents": 68,
+        "jev_intents": 28,
+        "closed": true,
+        "envelope_violation": false
+      },
+      "review_sha256": "931eea5e5ec837735270581225c0eb5132d8cd6bb207b5a8d0e5c2c022a61c84"
+    },
+    {
+      "index": 2,
+      "summary_sha256": "571ee2ed134fe1652995ca45501b6c1370fe50ad67edce13d9f7f85426959598",
+      "native_packets": 160,
+      "finished_arms": 56,
+      "observed_turns": 74,
+      "quality_negative_arms": 3,
+      "accounting": {
+        "permanent_model_micro_cny": 758282,
+        "permanent_jev_micro_usd": 5388,
+        "known_model_micro_cny": 529956,
+        "known_jev_micro_usd": 1428,
+        "held_model_micro_cny": 0,
+        "held_jev_micro_usd": 0,
+        "model_intents": 132,
+        "jev_intents": 28,
+        "closed": true,
+        "envelope_violation": false
+      },
+      "review_sha256": "0c827d54004605788222385b7707a00ab17391474676ee1fa426586619c43c2e"
+    },
+    {
+      "index": 3,
+      "summary_sha256": "77494abcd64315cc33c3d842f0ef8d486af7af7ba054f1ce82fe3b3457c14c0a",
+      "native_packets": 141,
+      "finished_arms": 56,
+      "observed_turns": 66,
+      "quality_negative_arms": 1,
+      "accounting": {
+        "permanent_model_micro_cny": 684909,
+        "permanent_jev_micro_usd": 5388,
+        "known_model_micro_cny": 448984,
+        "known_jev_micro_usd": 1438,
+        "held_model_micro_cny": 0,
+        "held_jev_micro_usd": 0,
+        "model_intents": 113,
+        "jev_intents": 28,
+        "closed": true,
+        "envelope_violation": false
+      },
+      "review_sha256": "d3d5ffa0a066f87a362170b81f48e32b02a4f95c871969b2b54279f73d0d4247"
+    },
+    {
+      "index": 4,
+      "summary_sha256": "4286319546f52ef1be0f57d1920544c3ef7e9d542734ccdb99dc0f0df85fad14",
+      "native_packets": 153,
+      "finished_arms": 56,
+      "observed_turns": 70,
+      "quality_negative_arms": 2,
+      "accounting": {
+        "permanent_model_micro_cny": 719665,
+        "permanent_jev_micro_usd": 5388,
+        "known_model_micro_cny": 498262,
+        "known_jev_micro_usd": 1428,
+        "held_model_micro_cny": 0,
+        "held_jev_micro_usd": 0,
+        "model_intents": 125,
+        "jev_intents": 28,
+        "closed": true,
+        "envelope_violation": false
+      },
+      "review_sha256": "c0907de1e22c90cc3819dbb22f568cc8801b035119339977eef05d18954ae31d"
+    },
+    {
+      "index": 5,
+      "summary_sha256": "f9551d7c041cc36038b872440315740cb56f55c5258284dc79e1046faa2ebd0a",
+      "native_packets": 147,
+      "finished_arms": 56,
+      "observed_turns": 64,
+      "quality_negative_arms": 6,
+      "accounting": {
+        "permanent_model_micro_cny": 657877,
+        "permanent_jev_micro_usd": 5388,
+        "known_model_micro_cny": 496080,
+        "known_jev_micro_usd": 1428,
+        "held_model_micro_cny": 0,
+        "held_jev_micro_usd": 0,
+        "model_intents": 119,
+        "jev_intents": 28,
+        "closed": true,
+        "envelope_violation": false
+      },
+      "review_sha256": "57b825d96eb219d3549eb54d147ae94014eee10d457bbd29a8ad80cef951f119"
+    },
+    {
+      "index": 6,
+      "summary_sha256": "f1d911127e5763d550c89f3c63f67733fe952535c81dda60de8e5c2d869c33e9",
+      "native_packets": 149,
+      "finished_arms": 56,
+      "observed_turns": 66,
+      "quality_negative_arms": 12,
+      "accounting": {
+        "permanent_model_micro_cny": 684909,
+        "permanent_jev_micro_usd": 5388,
+        "known_model_micro_cny": 517710,
+        "known_jev_micro_usd": 1428,
+        "held_model_micro_cny": 0,
+        "held_jev_micro_usd": 0,
+        "model_intents": 121,
+        "jev_intents": 28,
+        "closed": true,
+        "envelope_violation": false
+      },
+      "review_sha256": "6d1f4c64c712dc20b22e2649dacfcace6f86b12b443f307a61d493997bc08c0f"
+    },
+    {
+      "index": 7,
+      "summary_sha256": "4f1cbe5478e29b4d866b378e4b2a81b91a446950b2e150ce2a7be992852c4d54",
+      "native_packets": 149,
+      "finished_arms": 56,
+      "observed_turns": 62,
+      "quality_negative_arms": 4,
+      "accounting": {
+        "permanent_model_micro_cny": 646291,
+        "permanent_jev_micro_usd": 5388,
+        "known_model_micro_cny": 523422,
+        "known_jev_micro_usd": 1438,
+        "held_model_micro_cny": 0,
+        "held_jev_micro_usd": 0,
+        "model_intents": 121,
+        "jev_intents": 28,
+        "closed": true,
+        "envelope_violation": false
+      },
+      "review_sha256": "1f22bf8eaeb72930cdd841258924348819f293a531d1aaad60509c48c4cbc4f0"
+    }
+  ],
+  "known_configuration_model_micro_cny": 3276832,
+  "known_configuration_jev_micro_usd": 10021,
+  "cost_is_invoice": false,
+  "all_claims_permanent": 24,
+  "permanent_micro_cny": 38527648,
+  "permanent_micro_usd": 302615,
+  "parent_micro_cny": 105000000,
+  "parent_micro_usd": 1000000,
+  "reviewed_windows": 7,
+  "reviewed_arms": 392,
+  "requirements": {
+    "passed": 1352,
+    "failed": 174
+  },
+  "semantic": {
+    "passed": 284,
+    "failed": 108
+  },
+  "strict": {
+    "passed": 281,
+    "failed": 111
+  },
+  "original_quality_negative_arms_first7": 31,
+  "review_blind": false,
+  "review_human": false,
+  "scores_published": 0,
+  "goal_complete": false,
+  "customer_version": "50e/v5",
+  "knowledge_both_arms": "off",
+  "task2_actual_validation": "attempt1 rejected legitimate root .git pointer; fixed with50 pure tests; attempt2 frozen Go helper and selfchecks passed; first LF GET delivered metadata booleans, compatibility pending; no scores",
+  "hindsight_completed_operation": "a7650ba1-2e79-4536-b0ff-9570993012b7",
+  "hindsight_readback_verified": true,
+  "window8_dispatched_once_result_not_observed": true
+}
