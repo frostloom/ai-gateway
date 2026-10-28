@@ -140,7 +140,12 @@ func parseWindowResponseUsage(provider string, body []byte, p windowProviderLimi
 	}
 	keys := []string{"input_tokens", "output_tokens"}
 	if provider == "model" {
-		keys = append(keys, "cache_read_input_tokens", "cache_creation_input_tokens")
+		keys = append(keys, "cache_read_input_tokens", "cache_creation_input_tokens", "service_tier")
+		// The fixed DeepSeek Anthropic endpoint returns standard-tier metadata.
+		// It is not token usage; other tiers have no frozen pricing contract.
+		if tier, present := usage["service_tier"]; present && tier != "standard" {
+			return nil, fmt.Errorf("unsupported model service tier")
+		}
 	}
 	if err = windowOnlyKeys(usage, keys...); err != nil {
 		return nil, err

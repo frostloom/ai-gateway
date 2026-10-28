@@ -1,0 +1,70 @@
+# 1220技术停止后的独立历史基线实施计划
+
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+
+**Goal:** 在保留首次实际技术停止证据和永久预留的前提下，为原1220三轮完整真实评测准备新的独立版本与预算链。
+
+**Architecture:** 采用显式v2停止前置证据、scope和实际ready合同。先读取原九claim，再核验已停止实际窗口的完整证据；只有从证据推导出的新基线能进入新campaign。逐窗复验同一证据，旧v1/closed合同保持，新scope从头完整运行。
+
+**Tech Stack:** Go、严格JSON、SHA256、现有窗口账本与Ed25519构建签名，不新增服务或付费分类器。
+
+**Spec:** [首次实际停止报告](../../full1220-first-actual-stop-2026-10-28.md)及原1220正式完整任务契约。
+
+## Global Constraints
+
+- 直接main开发/验证/提交/推送；既有自主预授权覆盖常规推进，不逐项询问。
+- 原3660对、7320臂、11772定义轮、三轮交错、1851边界另列、两臂知识off保持。
+- 总额100000000µCNY、1000000µUSD；新历史基线29475706/227183，剩70524294/772817。
+- 实际144模型/37JEV；原claim52bbf6e7edf8b66099141db5ac7c6782e45b8afc3bcd9145ea1fd51f936eca48消耗不可释放；原known0/pending74752/false字段不改写。
+- 新范围不是恢复旧scope；单owner、显式逐窗、300秒、技术失败即停、无自动重试/重领/磁盘恢复。
+- 保留完整Go20分钟原配置及正式fixture；使用MacOSX26.5 SDK。实际build不能用会省略ldflags证明的trimpath，归档需自身detached Git证明元数据。
+
+## Review Focus
+
+- 首次ready验证后，旧claim/原生payload/terminal被删改：首窗和后续claim前均应拒绝。
+- 旧negative状态被改success或known0被当成免费：原摘要和永久cap仍是唯一基线来源。
+- 原owner未真正结束：必须结合原锁可独占获取及当前进程句柄终态，不只相信可写terminal。
+- 新v2误入旧primitive、缺基线字段或旧scope交叉：在新root/claim/upstream之前拒绝。
+- 两币种可领取余额与模型未知风险余量：完整整数重算，不把尾差分配给知识补充。
+
+## Task 1：停止证据及新基线的纯验证
+
+Files: 新增`internal/taskbench/window_stopped_baseline.go`及对应测试；读取现有`window_scope.go`原九claim验证器，不修改旧文件证据。
+
+Interface: `loadWindowStoppedBaseline(path, expectedSHA string) (windowStoppedBaseline, error)`；私有结构保存验证后base、原raw证据SHA及停止bundle绑定，不可由caller JSON构造执行授权。
+
+- [ ] RED：缺任一原九claim、固定第十claim、原manifest/terminal/receipt/summary/ledger/payload manifest/原生request-response均拒绝；交叉scope、重复cap、去pending、改false也拒绝。
+- [ ] 最小实现严格有界普通文件读取与SHA/关联验证。原ledger须closed，原owner须已结束；可获取原锁后只读核验并释放，不能启动旧owner或补写旧证据。
+- [ ] 推导29475706/227183与144/37，不接收caller累计金额。验证旧完整响应的标准tier和usage，冻结峰价责任3832≤旧hold74752≤旧cap414586；任一无法证明即拒绝新scope，不假设风险尾差覆盖两个未界定请求。保留旧known0/pending，不补settle或释放hold。原stop为失败不影响作为永久预算前置证据。
+- [ ] 定向测试及race通过后独立审查、提交该纯验证单元。
+
+## Task 2：v2完整scope和campaign链
+
+Files: `window_scope.go`、`window_campaign.go`，新增v2定向测试；旧`window_claim.go`只明确拒绝v2，不扩展未接线primitive。
+
+Interfaces: v2 scope包含不可省略的`baseline_evidence_sha256`；`newWindowCampaignV2`只接受Task1已验证快照。v1序列化和closed路径保持原样。
+
+- [ ] RED：v2缺绑定、交叉入口、旧scope误接收、新基线被覆盖回九claim，以及领取前篡改停止bundle均拒绝且不创建新root。
+- [ ] 让campaign start、persist和后续复验沿冻结版本读取同一基线；每份v2claim记录十claim SHA及baseline evidence SHA，不仅修改最初ready。
+- [ ] 验证原3660槽位、三轮轮换、臂顺序及两币种全部cap；全领累计97897368/760967，尾差2102632/239033，额外未知风险后79208µCNY保留。
+- [ ] 验证O_EXCL/fsync、原锁、领取/结算/停止/文件篡改与旧v1/closed回归；独立审查并提交。
+
+## Task 3：v2实际ready/session与原Handler替身验收
+
+Files: `window_actual_ready.go`、`window_actual_session.go`、`cmd/full-window-actual`及测试。
+
+- [ ] RED：ready之后、首窗之前和后续窗之前篡改Task1任一证据均零upstream拒绝；旧构建pins不能接受v2manifest。
+- [ ] 将v2基线验证接入Check/Open/verifyInputs及campaign推进，保持私密settings SHA、固定HTTPS、JEV显式本机route、2秒observer等全部门禁。
+- [ ] 有界真实Handler替身正常/纠正/标准service_tier/未知tier/usage缺失/观测失败/清理失败验证；失败不发生第二次请求，不恢复原scope。
+- [ ] 原配置完整Go20分钟、新提交精确归档、source/blob/输入/价格/原生请求包络及签名只读检查；独立复核后冻结全新roots。
+
+## Task 4：完整实际采集及评分交付
+
+- [ ] 按既有自主授权启动新单owner，逐窗读取并核验原receipt SHA后再显式推进；不自动付费循环。发生技术停止保留新claim和完整失败分母，再独立诊断。
+- [ ] 三轮全部3660对采集后完成全部题级独立语义复核，原始规则/附加源规则/质量提前结束/未运行分母均保留。
+- [ ] 为窗口结果实现显式版本的Langfuse评分及内容适配，不伪装成旧六案例pair journal；一次发布并只读核验。
+- [ ] 交付全量可追溯报告、实际调用/两币种费用与未知费、每正确任务成本、缓存、P50/P95及明确时钟边界，直推main。独立复核全部目标证据后才能complete goal。
+
+## Self-review
+
+原完整范围、十claim前置、每窗TOCTOU、未知成本、旧结果不可改写和独立评分/正文读回均有对应任务。任务1–3不增加真实调用；Task4受原预算和技术停止规则约束。知识整合设计继续单列，不能使用本计划风险尾差。用户已明确授权自主执行，按上述顺序衔接，不新增例行确认。

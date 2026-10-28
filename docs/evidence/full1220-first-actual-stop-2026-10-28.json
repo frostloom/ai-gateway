@@ -1,0 +1,132 @@
+{
+  "schema": "full1220-first-actual-stop-public.v1",
+  "evidence_kind": "recorded_run_stopped_not_quality_comparison",
+  "executor_revision": "c1c446e991eedcb5c5e1a544e5e762981d8d2571",
+  "planned_pairs": 3660,
+  "planned_arms": 7320,
+  "defined_turns": 11772,
+  "boundaries_separate": 1851,
+  "attempted_arms": 1,
+  "finished_arms": 0,
+  "unattempted_arms": 7319,
+  "observed_turns": 1,
+  "unrun_defined_turns": 11771,
+  "actual_new_model_attempts": 1,
+  "actual_new_jev_attempts": 0,
+  "historical_model_attempts": 144,
+  "historical_jev_attempts": 37,
+  "permanent_model_micro_cny": 29475706,
+  "permanent_jev_micro_usd": 227183,
+  "remaining_model_micro_cny": 70524294,
+  "remaining_jev_micro_usd": 772817,
+  "new_claim_model_micro_cny": 414586,
+  "new_claim_jev_micro_usd": 4079,
+  "original_accounting_known_model_micro_cny": 0,
+  "original_accounting_pending_model_micro_cny": 74752,
+  "retrospective_peak_configuration_estimate_micro_cny": 3832,
+  "supplier_bill": null,
+  "original_halt": "protocol_failure",
+  "root_cause": "model usage service_tier standard rejected by strict whitelist",
+  "original_receipt_cleanup": false,
+  "environment_cleanup": true,
+  "original_receipt_observer": false,
+  "readback_unique_observations": 3,
+  "score_writes": 0,
+  "source_fix_targeted_tests": {
+    "pass_records": 176,
+    "fail_records": 0,
+    "skip_records": 0
+  },
+  "whole_go_regression": {
+    "command": [
+      "go",
+      "test",
+      "./...",
+      "-count=1",
+      "-timeout=20m",
+      "-json"
+    ],
+    "exit_code": 0,
+    "seconds": 875.3405532079632,
+    "test_packages_passed": 23,
+    "no_test_packages_skipped": 27,
+    "original_optin_tests_skipped": [
+      "TestCashLoad",
+      "TestCashProfileRowTiming",
+      "TestLiveJevSemanticsDiagnostic"
+    ],
+    "failures": [],
+    "source_unchanged": true,
+    "validation_scope": "workspace Go sources, not yet final committed archive freeze",
+    "extra_workspace_no_test_report_package": "github.com/frostloom/ai-gateway/eval/reports/compact-eval-20261009-1791553102771416100"
+  },
+  "independent_review": "no P1/P2 in minimal standard-tier fix; original stop verified separately",
+  "private_artifact_sha256": {
+    "actual-manifest.json": "2d6ccad655fb19fb0a945b326a5a80eedf54d0b6a9bb15d220b097127568193e",
+    "actual-manifest.json.binary-attestation.json": "c3906fb4bec066e6ffbb31a26a313ec99d77665b2c9c88f7a1ca7825df4f1721",
+    "actual-build-v2-provenance.json": "b8de50800188c351eb8d25a154dda0acac8f0e6808b46fbd89660e1fd94f4558",
+    "actual-readonly-check-v3.json": "adacffb3650b0c84b3a6bcbc2d4d0a68ebd53e2b1eda56aa1b2c59aca78c927c",
+    "archive-git-metadata-provision.json": "d6e62464fa9c22925210a80e958451f25f8e432059038d513487e667f6f369ad",
+    "campaign/claim-000001.json": "52bbf6e7edf8b66099141db5ac7c6782e45b8afc3bcd9145ea1fd51f936eca48",
+    "campaign/ledger-000001/accounting.jsonl": "787ca17269827a924fce17baa8e475063436402fb6bed50e12ff97b6277d526f",
+    "records/terminal.json": "de9a3f0fdd79cb2aa3bf7559381792f4cdaae7958d559469a1974b7267e37b82",
+    "records/window-000001-summary.json": "a075e2c631d46e2df68dd513dcc1dad43e0cd51e3653364eca4a5f053133417c",
+    "records/window-000001/receipt.json": "2f7f73ad528bde066786a451cc32b52064b227b1afe9f08c1a57db9186e2858f",
+    "records/window-000001/arm-000001-model.json": "df6c07efa4730641965eb8bbaf268aed4270be2f973e31c7a9c9c610d64a9b04",
+    "records/window-000001/payload-manifest.json": "ed93e54cd55ef6267cca8558167dbfcc33afb5f9942c379559a48926cf28a61f",
+    "records/window-000001/native-payloads/response-000001.body": "255d829e95fad2ee0594f94c07227830e953b3c2eb8af8ae0114cb9cb669b140",
+    "poststop/service-tier-red.jsonl": "b4729a532fdde7989ebb0a3cfe171864063f7177d64067a03debe99aa755203f",
+    "poststop/service-tier-green.jsonl": "4b3c184a1ae7d989cf90946a4948f4b861526b076bfba83439883c8b812e98ee",
+    "poststop/namespace-audit.json": "d2d9e56dce789f74b83199a911ae240c7f076a5b02dbd280eeb8e028fdf50ff6",
+    "poststop/readback-second.json": "3acf3aa4095aeb6aab132ecc810e7a612fcea9cceb58fd888f284136fc67e146",
+    "poststop/trace-content-verification.json": "5f78f71a1a983f6cd7bd56d5a8c0d884914bb3ca32e9f31b487aec8da1d10672",
+    "poststop/independent-review.json": "ca6d4ea4cfebcb2032b854c5f6b8542ba3f6330652f8f2984894ae557da96a7c",
+    "poststop/independent-semantic-review.json": "55a2e06d8a2bdf39f0069f60eaec2d611d5251368c78fb6dbdd2fd8997b4e06e",
+    "poststop/full-go/full.jsonl": "41f1c5c952862d71eb2fb7698b506611fe416edfd2847fdffcc7a158f8ef29bc",
+    "poststop/full-go/result.json": "3a5d459e4a335aa6a651b5c1c78c1f0651468b31cce8b811610f02d5b09b4488",
+    "poststop/full-go/source-map.json": "2f6faba4c5b6c5442b9a7ef7c4b13d71370b1f525fe7a754b21d95d5f916e389",
+    "poststop/full-go/restored.json": "3fc92ca6b3648dd0dfb23280e20aef568f3405a282f0226eac03dc0091db23d4",
+    "poststop/hindsight-document-readback.json": "e9a0103668dacb0693b0320ed40486b499a22799afd4cc2abac9204a515afe3f",
+    "poststop/hindsight-recall-readback.json": "d18ef1c588473dc826b160a8f857cdc840d6249d8bb29599043aa47569bf7b5e"
+  },
+  "goal_complete": false,
+  "no_old_scope_resume_or_claim_release": true,
+  "owned_services_restored": {
+    "schema": "service-tier-regression-owned-services-restored.v1",
+    "all_nine_running_healthy": true,
+    "same_ids_images_configuration_mounts": true,
+    "polls": 1,
+    "checks": [
+      {
+        "path": "/api/public/health",
+        "status": 200,
+        "milliseconds": 154.5367919607088
+      },
+      {
+        "path": "/api/public/projects",
+        "status": 200,
+        "milliseconds": 1443.1014159927145
+      }
+    ],
+    "other_projects_changed": false,
+    "model_jev_calls": 0,
+    "new_claims": 0
+  },
+  "independent_semantic_review": {
+    "requirements": 3,
+    "passed": 0,
+    "not_assessable": 3,
+    "reason": "technical_failure",
+    "task_retained_in_denominator": true
+  },
+  "old_native_response_liability_bound": {
+    "configuration_estimate_micro_cny": 3832,
+    "old_pending_hold_micro_cny": 74752,
+    "old_permanent_cap_micro_cny": 414586,
+    "not_ledger_settlement_or_bill": true
+  },
+  "source_fix_sha256": {
+    "internal/taskbench/window_protocol.go": "ee672280e7b57155d879184c7dcf30b001a10759a566e0831c5c7c12c1f10395",
+    "internal/taskbench/window_service_tier_test.go": "ce351bab58aff4ee06ccdf19c702851ed8f4fbcef3d17a172c8e44db52b5cd71"
+  }
+}
