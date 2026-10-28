@@ -48,10 +48,10 @@ Files: 新增`scripts/helpers/full1220_content_projection_test.go.txt`；扩展�
 
 Interface: `project_window_content(...)`在验证后的精确归档用固定helper和内存exporter调用原`Observer.content()`，返回expected JSON及原input/reply SHA；`validate_window_traces(plan, projection, client)`读取原trace并校验全部身份、turn索引和正文。
 
-- [ ] RED：密钥/邮箱等脱敏、UTF8裁剪、4096-byte包装、空回复及被改投影；source/record不同或helper不可信拒绝。
-- [ ] helper不创建网络exporter/trace，不读取凭据，仅在独立结果目录O_EXCL写出投影；Go投影使用MacOSX26.5 SDK。
-- [ ] 验证root/pair/pass/order/release/evaluation、所有turn和正文；缺失/延迟读回保留未验证，不重发trace或推理。
-- [ ] 当前私密首窗prototype已验证56trace/231obs/60turn；正式适配器仍须上述测试和独立审查，不能直接把prototype当产品实现。
+- [x] RED：密钥/邮箱等脱敏、UTF8裁剪、4096-byte包装、空回复及被改投影；source/record不同或helper不可信拒绝。
+- [x] helper不创建网络exporter/trace，不读取凭据，仅在独立结果目录O_EXCL写出投影；Go投影使用MacOSX26.5 SDK。
+- [x] 验证root/pair/pass/order/release/evaluation、所有turn和正文；缺失/延迟读回保留未验证，不重发trace或推理。
+- [x] 当前私密首窗prototype已验证56trace/231obs/60turn；正式适配器仍须上述测试和独立审查，不能直接把prototype当产品实现。
 
 ## Task 3：单次发布与只读核验
 
@@ -72,3 +72,5 @@ Interfaces: CLI显式`plan / publish --execute / verify`；只读默认。publis
 2026-10-28：窗口实际采集与独立复核已开始。首窗私密投影直接复用冻结Go content()在内存exporter生成，真实Langfuse56trace/60turn正文及231obs元数据只读通过；0评分。新窗口格式尚无正式评分适配器，旧脚本仅可复用通信客户端。源码抓到cashClaim不含千分位的风险，正在用五份原记录作只读复现；保持当前冻结执行器与原所有negative。
 
 2026-10-29 Task1：纯计划与30项测试交付，230项Python回归/15原skip/0fail-error；原六窗334record/1268要求全部重算匹配，269/63/2语义与259/75严格口径不改。独立P2首窗observed/quality互换已root复现并RED→GREEN：首窗分项精确，后窗当前quality下界，prior分项显式pending链验证；不假设prior quality=0。无第二轮审查，修复后完整suite与root30测试通过。Task2/3仍pending、publish_ready=false、0POST。
+
+2026-10-29 Task2：固定helper在精确归档副本调用原content()，原source/staged/records/helper/可信Go SHA前后校验，opaque proof拒绝普通JSON；纯测试53项通过，完整Python253项/15原skip/0fail。真实预检root.git误拒和首GET布尔metadata表示误拒分别保留并最小RED→GREEN，独立定向复核无确认P1/P2。最终新v3首窗56trace235obs60轮逐源正文/元数据/父链只读通过，评分仍0/publish_ready=false；其余窗尚待实际内容读回，Task3未完成。

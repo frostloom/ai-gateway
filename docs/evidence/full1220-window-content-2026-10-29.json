@@ -1,0 +1,52 @@
+{
+  "schema": "full1220-window-content-task2-result.v1",
+  "sources": {
+    "scripts/full1220-window-scores.py": "0c3c92ae84315fbb637ae83962e3c567c3a4c2cdd21d8a61c422173c3cb437bb",
+    "scripts/tests/test_full1220_window_scores.py": "f66c3742c25fc0f32ef1fc78ee6a3a97177649aafd38c41c4a487e18d3c8ef46",
+    "scripts/helpers/full1220_content_projection_test.go.txt": "57847bf1ba02864c918261813ea45f68dc57f4dbd5d06349cc0dd661e225cdfc"
+  },
+  "full_python_tests": 253,
+  "original_skips": 15,
+  "failures": 0,
+  "python_seconds": 30.702,
+  "full_python_log_sha256": "5fbbaa60ce7a900f5a9563d1aba46ce11a0bf4a6a02aa96d7cfe9ec362d0a415",
+  "fixed_archive_commit": "f48bb0ac8ecc690605c4f2662b7ad3250b6888a7",
+  "fixed_go_executable_sha256": "8612de418d551a418517845c05cebdcfed49095cd08ef0a4d682bb2a5cf4896c",
+  "manifest_sha256": "0243bbc33f2985ed0e942235b15311525dab1d082e4713570a6c5521688640d9",
+  "actual_validation": {
+    "all_pass": true,
+    "claims_created": 0,
+    "content_source_sha256": "1c2884a41724bcc116764eac61f807d7c7845bae92285009406580575ace5a73",
+    "expected_traces": 56,
+    "helper_sha256": "57847bf1ba02864c918261813ea45f68dc57f4dbd5d06349cc0dd661e225cdfc",
+    "included_does_not_prove_used": true,
+    "native_llm_payload_io_claimed": false,
+    "new_external_requests_from_projection": 0,
+    "new_jev_calls": 0,
+    "new_model_calls": 0,
+    "pending_gates": [
+      "single_publication_protocol"
+    ],
+    "plan_sha256": "780f45d2b6bf9f5dbf9ac01129303877df31c89f67ce6ae58389fe6ec31d0889",
+    "projection_sha256": "2fd1d1555f9a32a9b1d5252013b9ea7417283dc124fdfc41b6b40c6d00a36c56",
+    "publish_ready": false,
+    "schema": "full1220-window-content-validation.v1",
+    "scores_published": 0,
+    "unverified": [],
+    "verified_observations": 235,
+    "verified_traces": 56,
+    "verified_turns": 60
+  },
+  "validation_file_sha256": "d153ecabbc31781fb40fa3015e4dac7ee2153795431bc33e96664b49df6d53cc",
+  "helper_stdout_sha256": "d2bfafc3beef99a79cab31bc995caf9ade2bf2b23e0ca6a5aab85774ed04f757",
+  "independent_review_confirmed_p1_p2": 0,
+  "initial_failures_preserved": [
+    "legitimate root git pointer rejected before helper/GET",
+    "first real GET metadata bool representation rejected after successful helper"
+  ],
+  "new_actual_model_calls": 0,
+  "new_actual_jev_calls": 0,
+  "claims_created": 0,
+  "scores_published": 0,
+  "final_goal_complete": false
+}

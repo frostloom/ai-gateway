@@ -1,0 +1,176 @@
+package observability
+
+// Fixed offline helper. Copy only into a verified isolated archive; select only
+// TestFull1220FrozenContentProjection. It never constructs Observer.New, reads
+// settings, installs a global provider, or exports an external span.
+import (
+    "context"
+    "crypto/sha256"
+    "encoding/hex"
+    "encoding/json"
+    "io"
+    "os"
+    "path/filepath"
+    "strings"
+    "testing"
+    "unicode/utf8"
+
+    sdktrace "go.opentelemetry.io/otel/sdk/trace"
+    "go.opentelemetry.io/otel/sdk/trace/tracetest"
+)
+
+type full1220ProjectionRow struct {
+    TraceID string `json:"trace_id"`
+    RecordingFile string `json:"recording_file"`
+    RecordingSHA256 string `json:"recording_sha256"`
+    ObservedTurns int `json:"observed_turns"`
+    Metadata map[string]string `json:"metadata"`
+}
+type full1220ProjectionInput struct {
+    Schema string `json:"schema"`
+    ManifestSHA256 string `json:"manifest_sha256"`
+    ReceiptSHA256 string `json:"receipt_sha256"`
+    ScopeSHA256 string `json:"scope_sha256"`
+    ExecutionSHA256 string `json:"execution_sha256"`
+    ArchiveCommit string `json:"archive_commit"`
+    ArchiveTree string `json:"archive_tree"`
+    ContentSourceSHA256 string `json:"content_source_sha256"`
+    HelperSHA256 string `json:"helper_sha256"`
+    WindowID string `json:"window_id"`
+    Rows []full1220ProjectionRow `json:"rows"`
+}
+type full1220ProjectedTurn struct {
+    TurnIndex int `json:"turn_index"`
+    Input json.RawMessage `json:"input"`
+    Output json.RawMessage `json:"output"`
+    OriginalInputSHA256 string `json:"original_input_sha256"`
+    OriginalReplySHA256 string `json:"original_reply_sha256"`
+}
+type full1220ProjectedRow struct {
+    TraceID string `json:"trace_id"`
+    RecordingSHA256 string `json:"recording_sha256"`
+    Turns []full1220ProjectedTurn `json:"turns"`
+}
+
+func full1220ProjectionHash(body []byte) string {
+    sum := sha256.Sum256(body)
+    return hex.EncodeToString(sum[:])
+}
+func full1220ProjectionRead(t *testing.T, path string) []byte {
+    t.Helper()
+    info, err := os.Lstat(path)
+    if err != nil || !info.Mode().IsRegular() || info.Size() > 16<<20 {
+        t.Fatal("bounded regular projection input required")
+    }
+    f, err := os.Open(path)
+    if err != nil { t.Fatal("projection input open failed") }
+    defer f.Close()
+    opened, err := f.Stat()
+    if err != nil || !os.SameFile(info, opened) { t.Fatal("projection input replaced") }
+    body, err := io.ReadAll(io.LimitReader(f, (16<<20)+1))
+    after, statErr := f.Stat()
+    if err != nil || statErr != nil || len(body) > 16<<20 || int64(len(body)) != info.Size() || !os.SameFile(opened, after) || opened.Size() != after.Size() {
+        t.Fatal("projection input changed")
+    }
+    return body
+}
+func full1220ProjectString(t *testing.T, value string) json.RawMessage {
+    t.Helper()
+    exporter := tracetest.NewInMemoryExporter()
+    provider := sdktrace.NewTracerProvider(sdktrace.WithSyncer(exporter))
+    _, span := provider.Tracer("full1220.offline.content.projection").Start(context.Background(), "local.content.projection")
+    observer := &Observer{cfg: Config{CaptureContent: true}}
+    observer.content(span, "input", value)
+    span.End()
+    spans := exporter.GetSpans()
+    if len(spans) != 1 { t.Fatal("in-memory capture missing") }
+    var raw json.RawMessage
+    for _, field := range spans[0].Attributes {
+        if string(field.Key) == "langfuse.observation.input" {
+            if raw != nil { t.Fatal("duplicate capture attribute") }
+            raw = json.RawMessage(field.Value.AsString())
+        }
+    }
+    if err := provider.Shutdown(context.Background()); err != nil { t.Fatal("in-memory shutdown failed") }
+    if !json.Valid(raw) || len(raw) > 4096 { t.Fatal("invalid or unbounded content capture") }
+    return raw
+}
+func full1220ProjectionSelfChecks(t *testing.T) {
+    t.Helper()
+    checks := []struct{ input, expected string }{
+        {"sk-abcd1234 person@example.com", "[REDACTED] [REDACTED]"},
+        {strings.Repeat("界", 1000), strings.Repeat("界", 682)+"[TRUNCATED]"},
+        {"", ""},
+    }
+    for _, check := range checks {
+        var got string
+        if json.Unmarshal(full1220ProjectString(t, check.input), &got) != nil || got != check.expected {
+            t.Fatal("frozen content self-check failed")
+        }
+    }
+    var wrapped struct { Truncated bool `json:"truncated"`; Preview string `json:"preview"` }
+    if json.Unmarshal(full1220ProjectString(t, strings.Repeat("\\", 2048)), &wrapped) != nil || !wrapped.Truncated || len(wrapped.Preview) != 1500 || !utf8.ValidString(wrapped.Preview) {
+        t.Fatal("frozen 4096-byte wrapper self-check failed")
+    }
+}
+func TestFull1220FrozenContentProjection(t *testing.T) {
+    full1220ProjectionSelfChecks(t)
+    inputPath, outputPath := os.Getenv("FULL1220_PROJECTION_INPUT"), os.Getenv("FULL1220_PROJECTION_OUTPUT")
+    if !filepath.IsAbs(inputPath) || !filepath.IsAbs(outputPath) || filepath.Base(inputPath) != "input.json" || filepath.Base(outputPath) != "projection.json" || filepath.Dir(inputPath) != filepath.Dir(outputPath) || filepath.Base(os.Getenv("SDKROOT")) != "MacOSX26.5.sdk" {
+        t.Fatal("explicit isolated projection paths and SDK26.5 required")
+    }
+    raw := full1220ProjectionRead(t, inputPath)
+    if full1220ProjectionHash(raw) != os.Getenv("FULL1220_PROJECTION_INPUT_SHA256") { t.Fatal("projection input SHA mismatch") }
+    var job full1220ProjectionInput
+    decoder := json.NewDecoder(strings.NewReader(string(raw)))
+    decoder.DisallowUnknownFields()
+    if decoder.Decode(&job) != nil || job.Schema != "full1220-content-projection-input.v1" {
+        t.Fatal("fixed projection input schema required")
+    }
+    if full1220ProjectionHash(full1220ProjectionRead(t, "content.go")) != job.ContentSourceSHA256 || job.ContentSourceSHA256 != "1c2884a41724bcc116764eac61f807d7c7845bae92285009406580575ace5a73" {
+        t.Fatal("frozen content source SHA mismatch")
+    }
+    if full1220ProjectionHash(full1220ProjectionRead(t, "full1220_content_projection_test.go")) != job.HelperSHA256 {
+        t.Fatal("fixed helper SHA mismatch")
+    }
+    rows := make([]full1220ProjectedRow, 0, len(job.Rows))
+    seen := map[string]bool{}
+    for _, row := range job.Rows {
+        if row.RecordingFile == "" || filepath.Base(row.RecordingFile) != row.RecordingFile || row.TraceID == "" || seen[row.TraceID] {
+            t.Fatal("explicit unique recording identity required")
+        }
+        seen[row.TraceID] = true
+        body := full1220ProjectionRead(t, filepath.Join(filepath.Dir(inputPath), "records", row.RecordingFile))
+        if full1220ProjectionHash(body) != row.RecordingSHA256 { t.Fatal("record SHA mismatch") }
+        var record struct { Result struct { Observations []struct { Turn struct {
+            Message string `json:"message"`
+            Response struct { Reply string `json:"reply"` } `json:"response"`
+        } `json:"turn"` } `json:"observations"` } `json:"result"` }
+        if json.Unmarshal(body, &record) != nil || len(record.Result.Observations) != row.ObservedTurns {
+            t.Fatal("recorded turn count mismatch")
+        }
+        turns := make([]full1220ProjectedTurn, 0, row.ObservedTurns)
+        for index, observation := range record.Result.Observations {
+            message, reply := observation.Turn.Message, observation.Turn.Response.Reply
+            turns = append(turns, full1220ProjectedTurn{index+1, full1220ProjectString(t, message), full1220ProjectString(t, reply), full1220ProjectionHash([]byte(message)), full1220ProjectionHash([]byte(reply))})
+        }
+        rows = append(rows, full1220ProjectedRow{row.TraceID, row.RecordingSHA256, turns})
+    }
+    result := map[string]any{
+        "schema":"full1220-content-projection.v1", "manifest_sha256":job.ManifestSHA256,
+        "receipt_sha256":job.ReceiptSHA256, "scope_sha256":job.ScopeSHA256,
+        "execution_sha256":job.ExecutionSHA256, "archive_commit":job.ArchiveCommit,
+        "archive_tree":job.ArchiveTree, "content_source_sha256":job.ContentSourceSHA256,
+        "helper_sha256":job.HelperSHA256, "window_id":job.WindowID,
+        "input_sha256":full1220ProjectionHash(raw), "rows":rows, "new_external_requests":0,
+    }
+    encoded, err := json.Marshal(result)
+    if err != nil { t.Fatal("projection JSON encoding failed") }
+    encoded = append(encoded, '\n')
+    file, err := os.OpenFile(outputPath, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0600)
+    if err != nil { t.Fatal("exclusive projection output required") }
+    if _, err = file.Write(encoded); err != nil { file.Close(); t.Fatal("projection output write failed") }
+    if file.Sync() != nil || file.Close() != nil { t.Fatal("projection output persistence failed") }
+    t.Logf("FULL1220_PROJECTION_OUTPUT_SHA256=%s", full1220ProjectionHash(encoded))
+    t.Log("fixed frozen content() projected locally; zero network exporters or external requests")
+}

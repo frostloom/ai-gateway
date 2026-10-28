@@ -1,8 +1,9 @@
 """Pure, explicitly SHA-anchored full1220 window score plans.
 
-No filesystem discovery, credentials, network client, score publication or
-execution entry point lives here. A plan is not publication authorization:
-Task2 still has to verify frozen capture projections and persisted traces.
+Task1 is pure. Task2 accepts explicit frozen paths, runs only a pinned offline
+helper in an isolated source copy, and validates traces through a supplied
+read-only client. There is no credential loader, network client or publication
+entry point. Neither a plan nor current content validation authorizes scores.
 
 Records are original Go encoding/json snapshots. Context reconstruction takes
 nested JSON fragments from those externally anchored bytes, preserving Go's
@@ -14,6 +15,10 @@ import hashlib
 import json
 import math
 import re
+import os
+import stat
+import subprocess
+from pathlib import Path
 
 
 NAMESPACE = 'full1220.v1.'
@@ -568,3 +573,329 @@ def build_window_score_plan(manifest_raw, summary_raw, receipt_raw, records, rev
         return _build(manifest_raw, summary_raw, receipt_raw, records, review_raw, expected_hashes)
     except (KeyError, IndexError, TypeError, UnicodeError, OverflowError, RecursionError) as error:
         raise ValueError('Incomplete or invalid full-window evidence: ' + type(error).__name__) from error
+
+
+_PROJECTION_SDKROOT = '/Library/Developer/CommandLineTools/SDKs/MacOSX26.5.sdk'
+_PROJECTION_HELPER_SHA256 = '57847bf1ba02864c918261813ea45f68dc57f4dbd5d06349cc0dd661e225cdfc'
+_CONTENT_SOURCE_SHA256 = '1c2884a41724bcc116764eac61f807d7c7845bae92285009406580575ace5a73'
+_PROJECTION_HELPER_RELATIVE = 'internal/observability/full1220_content_projection_test.go'
+_PROJECTION_SEAL = object()
+
+
+def _json_bytes(value):
+    return json.dumps(value, sort_keys=True, separators=(',', ':'), ensure_ascii=False, allow_nan=False).encode('utf-8')
+
+
+def _regular_bytes(path, limit=64 << 20):
+    """Bounded O_RDONLY/no-follow read with opened-file identity checks."""
+    path = Path(path)
+    before = path.lstat()
+    _require(stat.S_ISREG(before.st_mode) and before.st_size <= limit, 'Bounded regular file required')
+    descriptor = os.open(path, os.O_RDONLY | os.O_NOFOLLOW)
+    with os.fdopen(descriptor, 'rb') as stream:
+        opened = os.fstat(stream.fileno())
+        _require(os.path.samestat(before, opened), 'File identity changed before read')
+        raw = stream.read(limit+1)
+        after = os.fstat(stream.fileno())
+    final = path.lstat()
+    _require(len(raw) <= limit and len(raw) == before.st_size and os.path.samestat(opened, after)
+             and os.path.samestat(after, final) and before.st_size == after.st_size == final.st_size
+             and before.st_mtime_ns == after.st_mtime_ns == final.st_mtime_ns, 'File changed during read')
+    return raw
+
+
+def _exclusive_write(path, raw):
+    descriptor = os.open(path, os.O_CREAT | os.O_EXCL | os.O_WRONLY | os.O_NOFOLLOW, 0o600)
+    with os.fdopen(descriptor, 'wb') as stream:
+        stream.write(raw); stream.flush(); os.fsync(stream.fileno())
+
+
+def _verify_frozen_sources(root, sources, extras=None, *, allow_root_git_pointer=False):
+    _require(root.is_dir() and not root.is_symlink(), 'Explicit regular frozen source directory required')
+    expected = {**sources, **(extras or {})}; actual = set(); git_pointer_sha = None
+    for directory, subdirs, files in os.walk(root, followlinks=False):
+        for name in subdirs:
+            _require(name != '.git', 'Git metadata directories are not frozen source')
+            _require(not (Path(directory)/name).is_symlink(), 'Source symlink directory forbidden')
+        for name in files:
+            path = Path(directory)/name
+            relative = path.relative_to(root).as_posix()
+            if relative == '.git':
+                _require(allow_root_git_pointer and relative not in expected, 'Only original-root Git pointer metadata is allowed')
+                pointer = _regular_bytes(path, 4096)
+                match = re.fullmatch(rb'gitdir: ([^\r\n\x00]+)\n', pointer)
+                _require(match is not None, 'Canonical bounded gitdir pointer required')
+                target = match[1].decode('utf-8', errors='strict')
+                _require(Path(target).is_absolute() and str(Path(target)) == target and target == target.strip()
+                         and '..' not in Path(target).parts and all(ord(char) >= 32 and ord(char) != 127 for char in target),
+                         'Absolute clean gitdir path required')
+                git_pointer_sha = _sha(pointer)
+                continue
+            _require(relative in expected, 'Unexpected source inventory file')
+            _equal(_sha(_regular_bytes(path)), expected[relative], 'Frozen source SHA mismatch: '+relative)
+            actual.add(relative)
+    _require(actual == set(expected), 'Incomplete frozen source inventory')
+    return git_pointer_sha
+
+
+class _ContentProjection:
+    """Opaque local provenance, deliberately not reconstructible from JSON."""
+    __slots__ = ('_raw', '_raw_sha', '_plan_sha', '_job', '_seal')
+
+    def __init__(self, seal, raw, plan, job):
+        _require(seal is _PROJECTION_SEAL, 'Fixed helper execution proof required')
+        for name, value in (('_raw', raw), ('_raw_sha', _sha(raw)), ('_plan_sha', _sha(_json_bytes(plan))),
+                            ('_job', _json_bytes(job)), ('_seal', seal)):
+            object.__setattr__(self, name, value)
+
+    def __setattr__(self, name, value):
+        raise AttributeError('Frozen helper proof is immutable')
+
+    def as_dict(self):
+        return _Document(self._raw).value
+
+
+def _projection_job(plan, manifest):
+    rows = []
+    for row in plan['rows']:
+        if not row['attempted']:
+            continue
+        _require(row['trace_id'], 'Attempted arm without actual trace cannot establish trace content')
+        slot = manifest['scope']['slots'][row['ordinal']-1]
+        metadata = {'run_id': plan['provenance']['scope_sha256'], 'case_key': row['case_key'], 'arm': row['arm'],
+                    'evidence_kind': 'recorded_run', 'pair_id': plan['provenance']['scope_sha256']+'/'+plan['window_id']
+                        + f"/ordinal-{row['ordinal']:06d}/pass-{row['pass']}",
+                    'block_id': plan['window_id'], 'arm_order': ','.join(slot['arm_order']),
+                    'attributes.langfuse.release': plan['provenance']['archive_commit']}
+        rows.append({'trace_id': row['trace_id'], 'recording_file': row['recording_file'],
+                     'recording_sha256': row['recording_sha256'], 'observed_turns': row['observed_turns'], 'metadata': metadata})
+    return {'schema': 'full1220-content-projection-input.v1',
+            **{key: plan['provenance'][key] for key in ('manifest_sha256', 'receipt_sha256', 'scope_sha256',
+                                                       'execution_sha256', 'archive_commit', 'archive_tree')},
+            'content_source_sha256': _CONTENT_SOURCE_SHA256, 'helper_sha256': _PROJECTION_HELPER_SHA256,
+            'window_id': plan['window_id'], 'rows': rows}
+
+
+def _check_projected_output(payload, job, input_raw, records):
+    _equal(payload['schema'], 'full1220-content-projection.v1', 'Fixed helper output schema required')
+    for key in ('manifest_sha256', 'receipt_sha256', 'scope_sha256', 'execution_sha256', 'archive_commit',
+                'archive_tree', 'content_source_sha256', 'helper_sha256', 'window_id'):
+        _equal(payload[key], job[key], 'Projection provenance mismatch: '+key)
+    _equal(payload['input_sha256'], _sha(input_raw), 'Projection input digest mismatch')
+    _equal(payload['new_external_requests'], 0, 'Offline projection required')
+    _equal([row['trace_id'] for row in payload['rows']], [row['trace_id'] for row in job['rows']], 'Exact ordered projection trace set required')
+    for projected, source in zip(payload['rows'], job['rows']):
+        _equal(projected['recording_sha256'], source['recording_sha256'], 'Projected recording digest mismatch')
+        observations = _Document(records[source['recording_file']]).value['result']['observations'] or []
+        _equal([turn['turn_index'] for turn in projected['turns']], list(range(1, len(observations)+1)), 'Exact projection turn coverage required')
+        for turn, observation in zip(projected['turns'], observations):
+            _equal(turn['original_input_sha256'], _sha(observation['turn']['message'].encode()), 'Helper original input digest mismatch')
+            _equal(turn['original_reply_sha256'], _sha(observation['turn']['response']['reply'].encode()), 'Helper original reply digest mismatch')
+            for field in ('input', 'output'):
+                value = turn[field]
+                _require(type(value) in (str, dict), 'Frozen string capture or bounded wrapper required')
+                if type(value) is dict:
+                    _require(set(value) == {'truncated', 'preview'} and value['truncated'] is True
+                             and type(value['preview']) is str and len(value['preview'].encode()) <= 1500,
+                             'Original content wrapper shape required')
+                _require(len(_json_bytes(value)) <= 4096, 'Projected content exceeds frozen capture bound')
+
+
+def project_window_content(manifest_raw, summary_raw, receipt_raw, records, review_raw, expected_hashes,
+                           *, source_root, output_dir, runtime, execute=False):
+    """Run the fixed no-network Go helper against an isolated frozen archive.
+
+    Requires explicit execute=True (schedule this outside measurement windows),
+    an absent output_dir whose parent exists, and runtime={go_executable,
+    go_sha256,module_cache}. The executable is an externally trusted SHA pin,
+    never PATH lookup; arguments, helper, SDK26.5 and environment are fixed.
+    All manifest source files are rehashed before/after an isolated full copy;
+    originals and staged records are revalidated after the command. No settings
+    or credentials are read. Return an opaque proof; JSON alone cannot reload it.
+    """
+    try:
+        _require(execute is True, 'Explicit fixed offline helper execution required')
+        plan = build_window_score_plan(manifest_raw, summary_raw, receipt_raw, records, review_raw, expected_hashes)
+        manifest = _Document(manifest_raw).value
+        _equal(expected_hashes['projection_helper_sha256'], _PROJECTION_HELPER_SHA256, 'Externally pinned fixed helper required')
+        helper_path = Path(__file__).resolve().parent/'helpers/full1220_content_projection_test.go.txt'
+        helper = _regular_bytes(helper_path, 1 << 20)
+        _equal(_sha(helper), _PROJECTION_HELPER_SHA256, 'Fixed helper source changed')
+        _equal(manifest['sources']['internal/observability/content.go'], _CONTENT_SOURCE_SHA256, 'Unsupported frozen content source version')
+        observer = manifest['observer']
+        for key, expected in [('enabled', True), ('capture_content', True), ('sample_rate', 1),
+                              ('environment', 'evaluation'), ('release', manifest['archive_commit'])]:
+            _equal(observer[key], expected, 'Frozen capture configuration mismatch: '+key)
+        root = Path(source_root).absolute()
+        _equal(str(root.resolve()), str(Path(manifest['source_root']).resolve()), 'Explicit source root must match pinned manifest')
+        root_git_pointer = _verify_frozen_sources(root, manifest['sources'], allow_root_git_pointer=True)
+        sdk = Path(_PROJECTION_SDKROOT)
+        _require(sdk.is_dir() and sdk.name == 'MacOSX26.5.sdk', 'Fixed MacOSX26.5 SDK required')
+        executable = Path(runtime['go_executable']).resolve()
+        _equal(_sha(_regular_bytes(executable)), _hex(runtime['go_sha256'], _HEX64, 'Pinned Go executable SHA required'), 'Go executable SHA mismatch')
+        _require(os.access(executable, os.X_OK), 'Pinned executable must be executable')
+        module_cache = Path(runtime['module_cache']).resolve()
+        _require(module_cache.is_dir(), 'Explicit existing offline module cache required')
+        output = Path(output_dir).absolute()
+        _require(output.parent.is_dir() and not output.exists() and not output.is_symlink(), 'Absent isolated projection output directory required')
+        canonical_root, canonical_output = root.resolve(), output.resolve()
+        _require(canonical_root != canonical_output and canonical_root not in canonical_output.parents
+                 and canonical_output not in canonical_root.parents, 'Projection directory must be separate from frozen source')
+        output.mkdir(mode=0o700)
+        staged = output/'source'; staged.mkdir(mode=0o700)
+        for name in manifest['sources']:
+            target = staged/name; target.parent.mkdir(parents=True, exist_ok=True)
+            raw = _regular_bytes(root/name)
+            _equal(_sha(raw), manifest['sources'][name], 'Source changed while staging')
+            _exclusive_write(target, raw)
+        _require(_PROJECTION_HELPER_RELATIVE not in manifest['sources'], 'Frozen archive already contains helper destination')
+        _exclusive_write(staged/_PROJECTION_HELPER_RELATIVE, helper)
+        extra = {_PROJECTION_HELPER_RELATIVE: _PROJECTION_HELPER_SHA256}
+        _verify_frozen_sources(staged, manifest['sources'], extra)
+        staged_records = output/'records'; staged_records.mkdir(mode=0o700)
+        for name, raw in records.items():
+            _exclusive_write(staged_records/name, raw)
+        job = _projection_job(plan, manifest); input_raw = _json_bytes(job)
+        _exclusive_write(output/'input.json', input_raw)
+        for name in ('cache', 'tmp'):
+            (output/name).mkdir(mode=0o700)
+        env = {'PATH': '/usr/bin:/bin:/usr/sbin:/sbin', 'GOENV': 'off', 'GOWORK': 'off', 'GOFLAGS': '',
+               'GOTOOLCHAIN': 'local', 'GOPROXY': 'off', 'GOSUMDB': 'off', 'GO111MODULE': 'on',
+               'GOCACHE': str(output/'cache'), 'GOTMPDIR': str(output/'tmp'), 'GOMODCACHE': str(module_cache),
+               'SDKROOT': str(sdk), 'CGO_ENABLED': '1', 'CC': '/usr/bin/clang', 'CXX': '/usr/bin/clang++',
+               'CGO_CFLAGS': '-isysroot '+str(sdk), 'CGO_LDFLAGS': '-isysroot '+str(sdk),
+               'FULL1220_PROJECTION_INPUT': str(output/'input.json'),
+               'FULL1220_PROJECTION_OUTPUT': str(output/'projection.json'),
+               'FULL1220_PROJECTION_INPUT_SHA256': _sha(input_raw)}
+        command = [str(executable), 'test', '-mod=readonly', '-buildvcs=false', '-v', './internal/observability',
+                   '-run', '^TestFull1220FrozenContentProjection$', '-count=1', '-timeout=2m']
+        result = subprocess.run(command, cwd=str(staged), env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                timeout=150, check=False)
+        _require(len(result.stdout) <= 8 << 20 and len(result.stderr) <= 8 << 20, 'Helper output bound exceeded')
+        _exclusive_write(output/'helper.stdout', result.stdout); _exclusive_write(output/'helper.stderr', result.stderr)
+        _require(result.returncode == 0, 'Fixed helper failed; projection not verified')
+        _equal(_verify_frozen_sources(root, manifest['sources'], allow_root_git_pointer=True), root_git_pointer, 'Original Git pointer changed during helper execution')
+        _verify_frozen_sources(staged, manifest['sources'], extra)
+        _equal(_sha(_regular_bytes(helper_path, 1 << 20)), _PROJECTION_HELPER_SHA256, 'Helper changed during execution')
+        _equal(_sha(_regular_bytes(executable)), runtime['go_sha256'], 'Go executable changed during execution')
+        _require(_regular_bytes(output/'input.json') == input_raw, 'Helper input changed during execution')
+        for name, raw in records.items():
+            _require(_regular_bytes(staged_records/name, 16 << 20) == raw, 'Staged record changed during helper execution')
+        projected_raw = _regular_bytes(output/'projection.json', 16 << 20)
+        output_receipts = re.findall(rb'(?m)^\s+full1220_content_projection_test\.go:[0-9]+: FULL1220_PROJECTION_OUTPUT_SHA256=([0-9a-f]{64})\r?$', result.stdout)
+        _require(len(output_receipts) == 1 and output_receipts[0].decode() == _sha(projected_raw),
+                 'Projection bytes do not match the fixed helper process receipt')
+        payload = _Document(projected_raw).value
+        _check_projected_output(payload, job, input_raw, records)
+        return _ContentProjection(_PROJECTION_SEAL, projected_raw, plan, job)
+    except (KeyError, IndexError, TypeError, OSError, UnicodeError, subprocess.SubprocessError) as error:
+        raise ValueError('Frozen offline projection unavailable: '+type(error).__name__) from error
+
+
+def _content_matches(actual, expected):
+    if _json_bytes(actual) == _json_bytes(expected):
+        return True
+    if type(actual) is str:
+        try:
+            return _json_bytes(json.loads(actual)) == _json_bytes(expected)
+        except ValueError:
+            return False
+    return False
+
+
+def validate_window_traces(plan, projection, client):
+    """Read each original trace once using client.observations(trace), never POST.
+
+    Missing/delayed observations or IO remain unverified; a provenance, identity,
+    parent, turn or delivered-content contradiction rejects the whole result.
+    Only the opaque fixed-helper proof is accepted. Native LLM payload capture
+    and actual use of included content are never inferred from agent.turn IO.
+    This does not consume or clear the prior receipt partition chain gate.
+    """
+    try:
+        _require(type(projection) is _ContentProjection and projection._seal is _PROJECTION_SEAL,
+                 'Live fixed helper projection proof required; plain JSON/SHA is insufficient')
+        _equal(_sha(projection._raw), projection._raw_sha, 'Projection proof mutated')
+        _equal(_sha(_json_bytes(plan)), projection._plan_sha, 'Projection belongs to another or modified plan')
+        payload = projection.as_dict(); job = _Document(projection._job).value
+        _require(callable(getattr(client, 'observations', None)), 'Read-only observations client required')
+        projected = {row['trace_id']: row for row in payload['rows']}
+        bound = {row['trace_id']: row for row in job['rows']}
+        _require(set(projected) == set(plan['trace_bindings']) == set(bound), 'Exact projection/plan trace set required')
+        summaries, pending = [], []
+        for trace, binding in plan['trace_bindings'].items():
+            try:
+                observations = client.observations(trace)
+            except (ValueError, OSError, TimeoutError):
+                pending.append({'trace_id': trace, 'reason': 'read_unavailable'}); continue
+            _require(type(observations) is list and len(observations) <= 1000, 'Bounded original observation list required')
+            by_id = _index(observations, lambda row: row['id'], 'observation ID')
+            _require(all(type(key) is str and key for key in by_id), 'Observation ID required')
+            for observation in observations:
+                _equal(observation['traceId'], trace, 'Foreign observation trace')
+                _equal(observation['environment'], 'evaluation', 'Observation environment mismatch')
+                for key, value in bound[trace]['metadata'].items():
+                    _equal(observation['metadata'][key], value, 'Observation frozen identity mismatch: '+key)
+            roots = [row for row in observations if row['name'] == 'evaluation.task']
+            turns = [row for row in observations if row['name'] == 'agent.turn']
+            _require(len(roots) <= 1 and len(turns) <= binding['expected_observed_turns'], 'Extra root or turn observation')
+            if not roots or len(turns) < binding['expected_observed_turns']:
+                pending.append({'trace_id': trace, 'reason': 'missing_root_or_turn'}); continue
+            root = roots[0]
+            _require(root.get('parentObservationId') in (None, ''), 'Evaluation root has foreign parent')
+            expected_success = ('true' if binding['original_status'] == 'passed' else 'false'
+                                if binding['original_status'] in ('failed', 'setup_failed') else 'unknown')
+            for key, value in [('status', binding['original_status']),
+                               ('structural_pass', str(binding['original_structural_pass']).lower()),
+                               ('task_success', expected_success)]:
+                actual = root['metadata'][key]
+                if key in ('structural_pass', 'task_success') and value in ('true', 'false'):
+                    _require((type(actual) is bool and actual is (value == 'true'))
+                             or (type(actual) is str and actual == value),
+                             'Original evaluation boolean metadata mismatch: '+key)
+                else:
+                    _equal(actual, value, 'Original evaluation status mismatch: '+key)
+            indexed_turns = {}
+            for turn in turns:
+                index = turn['metadata']['turn_index']
+                if type(index) is str and re.fullmatch(r'[1-9][0-9]*', index):
+                    index = int(index)
+                _integer(index, 1, 'Canonical observed turn index required')
+                _require(index not in indexed_turns, 'Duplicate observed turn index')
+                indexed_turns[index] = turn
+                _equal(turn['parentObservationId'], root['id'], 'Agent turn belongs to another task root')
+            _equal(sorted(indexed_turns), list(range(1, binding['expected_observed_turns']+1)), 'Exact observed turn index set required')
+            for observation in observations:
+                chain = set(); current = observation
+                while current['id'] != root['id']:
+                    parent = current.get('parentObservationId')
+                    _require(parent in by_id and parent not in chain, 'Foreign or cyclic observation parent chain')
+                    chain.add(parent); current = by_id[parent]
+            missing_io = False
+            for expected in projected[trace]['turns']:
+                actual = indexed_turns[expected['turn_index']]
+                for field in ('input', 'output'):
+                    if field not in actual or actual[field] is None:
+                        missing_io = True
+                    else:
+                        _require(_content_matches(actual[field], expected[field]), 'Captured agent turn content mismatch: '+field)
+            if missing_io:
+                pending.append({'trace_id': trace, 'reason': 'missing_captured_content'}); continue
+            summaries.append({'trace_id': trace, 'observations': len(observations), 'turns': len(turns),
+                              'observation_body_sha256': _sha(_json_bytes(observations)),
+                              'llm_attempts_without_payload_io': sum(row['name'] == 'llm.attempt' and row.get('input') is None
+                                  and row.get('output') is None for row in observations)})
+        all_pass = not pending and len(summaries) == len(plan['trace_bindings'])
+        gates = [gate for gate in plan['pending_gates'] if gate != 'frozen_capture_projection'
+                 and not (all_pass and gate == 'persisted_trace_content_validation')]
+        return {'schema': 'full1220-window-content-validation.v1', 'all_pass': all_pass, 'publish_ready': False,
+                'verified_traces': len(summaries), 'expected_traces': len(plan['trace_bindings']),
+                'verified_observations': sum(row['observations'] for row in summaries),
+                'verified_turns': sum(row['turns'] for row in summaries), 'summaries': summaries, 'unverified': pending,
+                'pending_gates': gates, 'projection_sha256': projection._raw_sha,
+                'helper_sha256': _PROJECTION_HELPER_SHA256, 'content_source_sha256': _CONTENT_SOURCE_SHA256,
+                'plan_sha256': projection._plan_sha, 'new_external_requests_from_projection': 0,
+                'new_model_calls': 0, 'new_jev_calls': 0, 'claims_created': 0, 'scores_published': 0,
+                'native_llm_payload_io_claimed': False, 'included_does_not_prove_used': True}
+    except (KeyError, IndexError, TypeError, UnicodeError) as error:
+        raise ValueError('Invalid captured trace evidence: '+type(error).__name__) from error

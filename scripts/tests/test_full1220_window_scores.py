@@ -4,6 +4,9 @@ import hashlib
 import importlib.util
 import json
 import unittest
+import tempfile
+import subprocess
+from unittest.mock import patch
 from pathlib import Path
 
 SCRIPT = Path(__file__).resolve().parents[1] / 'full1220-window-scores.py'
@@ -482,6 +485,325 @@ class WindowScorePlanTests(unittest.TestCase):
         for target,field in [('summary','planned_pairs'),('summary','boundaries_excluded'),('receipt','observed_turns'),('receipt','planned_current_arms')]:
             f=fixture();f[target][field]+=1;refresh_links(f)
             with self.subTest(target=target,field=field):self.reject(f)
+
+
+class ContentProjectionTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        spec=importlib.util.spec_from_file_location('window_content_projection_tests',SCRIPT)
+        cls.adapter=importlib.util.module_from_spec(spec);spec.loader.exec_module(cls.adapter)
+
+    def setUp(self):
+        self.temporary=tempfile.TemporaryDirectory();self.addCleanup(self.temporary.cleanup)
+        self.root=Path(self.temporary.name);self.source=self.root/'source';self.source.mkdir()
+        self.f=fixture();self.f['manifest']['source_root']=str(self.source)
+        content=(SCRIPT.parents[1]/'internal/observability/content.go').read_bytes()
+        sources={'internal/observability/content.go':content,
+            'internal/taskbench/conversation_runner.go':b'package taskbench\n',
+            'go.mod':b'module github.com/frostloom/ai-gateway\n'}
+        for name,body in sources.items():
+            target=self.source/name;target.parent.mkdir(parents=True,exist_ok=True);target.write_bytes(body)
+        self.f['manifest']['sources']={name:digest(body) for name,body in sources.items()}
+        self.f['manifest']['observer']={'enabled':True,'capture_content':True,'sample_rate':1,
+            'environment':'evaluation','release':self.f['manifest']['archive_commit']}
+        refresh_links(self.f)
+        self.go=self.root/'go';self.go.write_bytes(b'pinned fake compiler for mocked boundary only');self.go.chmod(0o700)
+        self.cache=self.root/'modules';self.cache.mkdir()
+        self.sdk=self.root/'MacOSX26.5.sdk';self.sdk.mkdir()
+        self.sdk_patch=patch.object(self.adapter,'_PROJECTION_SDKROOT',str(self.sdk),create=True)
+        self.sdk_patch.start();self.addCleanup(self.sdk_patch.stop)
+        self.overrides={};self.commands=[];self.run_mutation=None;self.after_output=None;self.stdout_override=None
+
+    def api(self):
+        for name in ('project_window_content','validate_window_traces'):
+            self.assertTrue(callable(getattr(self.adapter,name,None)),name+' is missing')
+
+    def fake_go(self,command,**kwargs):
+        self.commands.append((command,kwargs))
+        job=json.loads(Path(kwargs['env']['FULL1220_PROJECTION_INPUT']).read_bytes())
+        result={key:job[key] for key in ('manifest_sha256','receipt_sha256','scope_sha256',
+            'execution_sha256','archive_commit','archive_tree','content_source_sha256','helper_sha256','window_id')}
+        result.update(schema='full1220-content-projection.v1',input_sha256=digest(
+            Path(kwargs['env']['FULL1220_PROJECTION_INPUT']).read_bytes()),new_external_requests=0,rows=[])
+        for item in job['rows']:
+            record=json.loads((Path(kwargs['env']['FULL1220_PROJECTION_INPUT']).parent/'records'/item['recording_file']).read_bytes())
+            turns=[]
+            for i,ob in enumerate(record['result']['observations'] or [],1):
+                message=ob['turn']['message'];reply=ob['turn']['response']['reply']
+                turns.append({'turn_index':i,'input':message,
+                    'output':self.overrides.get((item['trace_id'],i),reply),
+                    'original_input_sha256':digest(message.encode()),'original_reply_sha256':digest(reply.encode())})
+            result['rows'].append({'trace_id':item['trace_id'],'recording_sha256':item['recording_sha256'],'turns':turns})
+        if self.run_mutation:self.run_mutation(result,job,kwargs)
+        target=Path(kwargs['env']['FULL1220_PROJECTION_OUTPUT'])
+        encoded=wire(result)
+        with target.open('xb') as stream:stream.write(encoded)
+        receipt=b'    full1220_content_projection_test.go:174: FULL1220_PROJECTION_OUTPUT_SHA256='+digest(encoded).encode()+b'\n'
+        if self.after_output:self.after_output(target)
+        return subprocess.CompletedProcess(command,0,receipt if self.stdout_override is None else self.stdout_override,b'')
+
+    def project(self,f=None,output=None,execute=True):
+        self.api();f=f or self.f;args=list(arguments(f))
+        args[-1]['projection_helper_sha256']=getattr(self.adapter,'_PROJECTION_HELPER_SHA256','0'*64)
+        runtime={'go_executable':str(self.go),'go_sha256':digest(self.go.read_bytes()),'module_cache':str(self.cache)}
+        with patch.object(self.adapter.subprocess,'run',side_effect=self.fake_go):
+            return self.adapter.project_window_content(*args,source_root=str(self.source),
+                output_dir=str(output or self.root/'projection'),runtime=runtime,execute=execute)
+
+    def plan(self,f=None):return self.adapter.build_window_score_plan(*arguments(f or self.f))
+
+    def client(self,plan,proof):
+        projection=proof.as_dict();by_trace={row['trace_id']:row for row in projection['rows']}
+        payloads={}
+        slots=self.f['manifest']['scope']['slots']
+        for trace,binding in plan['trace_bindings'].items():
+            root='root-'+trace
+            common={'run_id':plan['provenance']['scope_sha256'],'case_key':binding['case_key'],
+                'arm':binding['arm'],'evidence_kind':'recorded_run',
+                'pair_id':plan['provenance']['scope_sha256']+'/'+plan['window_id']+f"/ordinal-{binding['ordinal']:06d}/pass-{binding['pass']}",
+                'block_id':plan['window_id'],'arm_order':','.join(slots[binding['ordinal']-1]['arm_order']),
+                'attributes.langfuse.release':plan['provenance']['archive_commit']}
+            payloads[trace]=[{'id':root,'traceId':trace,'name':'evaluation.task','parentObservationId':None,
+                'environment':'evaluation','metadata':{**common,'status':binding['original_status'],
+                    'structural_pass':str(binding['original_structural_pass']).lower(),
+                    'task_success':'true' if binding['original_status']=='passed' else 'false' if binding['original_status'] in ('failed','setup_failed') else 'unknown'}}]
+            for turn in by_trace[trace]['turns']:
+                payloads[trace].append({'id':root+'-turn-'+str(turn['turn_index']),'traceId':trace,
+                    'parentObservationId':root,'name':'agent.turn','environment':'evaluation',
+                    'metadata':{**common,'turn_index':str(turn['turn_index'])},
+                    'input':turn['input'],'output':turn['output']})
+            payloads[trace].append({'id':root+'-llm','traceId':trace,'parentObservationId':root+'-turn-1',
+                'name':'llm.attempt','environment':'evaluation','metadata':common,'input':None,'output':None})
+        class ReadOnlyFake:
+            def __init__(self):self.calls=[];self.payloads=payloads;self.failure=None
+            def observations(self,trace):
+                self.calls.append(trace)
+                if self.failure:raise self.failure
+                return copy.deepcopy(self.payloads[trace])
+            def request(self,*args,**kwargs):raise AssertionError('No general request or POST allowed')
+        return ReadOnlyFake()
+
+    def test_fixed_helper_projection_binds_source_record_runtime_and_no_environment_credentials(self):
+        proof=self.project();projection=proof.as_dict();plan=self.plan()
+        self.assertEqual(projection['schema'],'full1220-content-projection.v1')
+        self.assertEqual(len(projection['rows']),4)
+        command,kwargs=self.commands[0]
+        self.assertEqual(command[1:],['test','-mod=readonly','-buildvcs=false','-v','./internal/observability',
+            '-run','^TestFull1220FrozenContentProjection$','-count=1','-timeout=2m'])
+        self.assertEqual(kwargs['env']['SDKROOT'],str(self.sdk))
+        self.assertEqual(kwargs['env']['GOPROXY'],'off');self.assertEqual(kwargs['env']['GOWORK'],'off')
+        self.assertFalse(any('KEY' in key or 'TOKEN' in key or 'SECRET' in key for key in kwargs['env']))
+        result=self.adapter.validate_window_traces(plan,proof,self.client(plan,proof))
+        self.assertTrue(result['all_pass']);self.assertEqual(result['verified_turns'],8)
+        self.assertFalse(result['publish_ready']);self.assertFalse(result['native_llm_payload_io_claimed'])
+
+    def test_plain_handwritten_projection_even_with_its_sha_is_not_evidence(self):
+        proof=self.project();raw=proof.as_dict();raw['projection_sha256']=digest(wire(raw))
+        with self.assertRaises(ValueError):self.adapter.validate_window_traces(self.plan(),raw,self.client(self.plan(),proof))
+
+    def test_projection_tamper_and_different_plan_rejected_before_any_client_read(self):
+        proof=self.project();plan=self.plan();client=self.client(plan,proof)
+        raw=proof.as_dict();raw['rows'][0]['turns'][0]['output']='forged'
+        with self.assertRaises(ValueError):self.adapter.validate_window_traces(plan,raw,client)
+        altered=copy.deepcopy(plan);altered['rows'][0]['ordinal']=999
+        with self.assertRaises(ValueError):self.adapter.validate_window_traces(altered,proof,client)
+        self.assertEqual(client.calls,[])
+
+    def test_source_extra_file_changed_record_helper_pin_or_content_version_fails_before_go(self):
+        self.api()
+        for mode in ('extra','source_changed','helper_pin','content_version','record'):
+            with self.subTest(mode=mode),tempfile.TemporaryDirectory() as out:
+                f=copy.deepcopy(self.f);extra=self.source/'extra.go'
+                if mode=='extra':extra.write_bytes(b'package malicious')
+                if mode=='source_changed':(self.source/'go.mod').write_bytes(b'changed')
+                args=list(arguments(f));args[-1]['projection_helper_sha256']=getattr(self.adapter,'_PROJECTION_HELPER_SHA256','0'*64)
+                if mode=='helper_pin':args[-1]['projection_helper_sha256']='0'*64
+                if mode=='content_version':
+                    f['manifest']['sources']['internal/observability/content.go']='1'*64;refresh_links(f);args=list(arguments(f));args[-1]['projection_helper_sha256']=getattr(self.adapter,'_PROJECTION_HELPER_SHA256','0'*64)
+                if mode=='record':args[3][next(iter(args[3]))]+=b' '
+                with patch.object(self.adapter.subprocess,'run',side_effect=AssertionError('must reject before Go')):
+                    with self.assertRaises(ValueError):self.adapter.project_window_content(*args,source_root=str(self.source),
+                        output_dir=str(Path(out)/'new'),runtime={'go_executable':str(self.go),'go_sha256':digest(self.go.read_bytes()),'module_cache':str(self.cache)},execute=True)
+                if extra.exists():extra.unlink()
+                (self.source/'go.mod').write_bytes(b'module github.com/frostloom/ai-gateway\n')
+
+    def test_original_root_git_pointer_is_validated_but_never_staged(self):
+        pointer=self.source/'.git';raw=('gitdir: '+str(self.root/'archive-git-metadata')+'\n').encode()
+        pointer.write_bytes(raw)
+        proof=self.project()
+        self.assertEqual(pointer.read_bytes(),raw)
+        self.assertFalse((self.root/'projection/source/.git').exists())
+        self.assertTrue(self.adapter.validate_window_traces(self.plan(),proof,self.client(self.plan(),proof))['all_pass'])
+
+    def test_git_pointer_compatibility_rejects_directories_links_nested_and_invalid_bytes(self):
+        cases=('directory','symlink','nested_file','nested_directory','relative','extra_line','oversized','missing_prefix','pycache')
+        for mode in cases:
+            target=self.source/'.git';parent=None
+            if mode.startswith('nested_'):
+                parent=self.source/'nested';parent.mkdir();target=parent/'.git'
+            if mode=='directory' or mode=='nested_directory':target.mkdir()
+            elif mode=='symlink':target.symlink_to(self.source/'go.mod')
+            elif mode=='relative':target.write_bytes(b'gitdir: ../archive-git-metadata\n')
+            elif mode=='extra_line':target.write_bytes(b'gitdir: /safe/archive\nextra\n')
+            elif mode=='oversized':target.write_bytes(b'gitdir: /'+b'a'*4096+b'\n')
+            elif mode=='missing_prefix':target.write_bytes(b'/safe/archive\n')
+            elif mode=='pycache':
+                parent=self.source/'__pycache__';parent.mkdir();target=parent/'cached.pyc';target.write_bytes(b'extra')
+            else:target.write_bytes(b'gitdir: /safe/archive\n')
+            try:
+                with self.subTest(mode=mode),self.assertRaises(ValueError):self.project(output=self.root/('output-'+mode))
+            finally:
+                if target.is_symlink() or target.is_file():target.unlink()
+                elif target.is_dir():target.rmdir()
+                if parent:parent.rmdir()
+        self.assertEqual(self.commands,[])
+
+    def test_original_git_pointer_changes_during_helper_are_rejected(self):
+        pointer=self.source/'.git';pointer.write_bytes(b'gitdir: /first/archive\n')
+        self.run_mutation=lambda result,job,kwargs:pointer.write_bytes(b'gitdir: /second/archive\n')
+        with self.assertRaises(ValueError):self.project()
+        self.assertEqual(len(self.commands),1)
+
+    def test_helper_original_reply_digest_and_output_provenance_are_revalidated(self):
+        def corrupt(result,job,kwargs):result['rows'][0]['turns'][0]['original_reply_sha256']='0'*64
+        self.run_mutation=corrupt
+        with self.assertRaises(ValueError):self.project()
+
+    def test_helper_cannot_mutate_frozen_copy_or_reuse_output_directory(self):
+        self.run_mutation=lambda result,job,kwargs:(Path(kwargs['cwd'])/'go.mod').write_bytes(b'mutated')
+        with self.assertRaises(ValueError):self.project()
+        self.run_mutation=None
+        with self.assertRaises(ValueError):self.project()
+
+    def test_go_execution_requires_explicit_request_and_nonzero_exit_never_seals(self):
+        with self.assertRaises(ValueError):self.project(execute=False)
+        self.api();args=list(arguments(self.f));args[-1]['projection_helper_sha256']=self.adapter._PROJECTION_HELPER_SHA256
+        with patch.object(self.adapter.subprocess,'run',return_value=subprocess.CompletedProcess([],1,b'',b'compile failed')):
+            with self.assertRaises(ValueError):self.adapter.project_window_content(*args,source_root=str(self.source),
+                output_dir=str(self.root/'failed'),runtime={'go_executable':str(self.go),'go_sha256':digest(self.go.read_bytes()),'module_cache':str(self.cache)},execute=True)
+
+    def test_root_pair_pass_arm_order_release_environment_and_parent_binding(self):
+        proof=self.project();plan=self.plan()
+        for field,value in [('pair_id','wrong'),('arm','model-wrong'),('arm_order','wrong'),
+            ('attributes.langfuse.release','0'*40),('case_key','wrong')]:
+            client=self.client(plan,proof);trace=next(iter(client.payloads));client.payloads[trace][0]['metadata'][field]=value
+            with self.subTest(field=field),self.assertRaises(ValueError):self.adapter.validate_window_traces(plan,proof,client)
+        for key,value in [('traceId','9'*32),('environment','production'),('parentObservationId','wrong')]:
+            client=self.client(plan,proof);trace=next(iter(client.payloads));client.payloads[trace][1][key]=value
+            with self.subTest(key=key),self.assertRaises(ValueError):self.adapter.validate_window_traces(plan,proof,client)
+
+    def test_langfuse_bool_or_same_canonical_string_preserves_original_boolean_status(self):
+        base=copy.deepcopy(self.f)
+        for status in ('failed','passed','needs_review'):
+            f=partial_fixture() if status=='failed' else copy.deepcopy(base)
+            if status=='failed':
+                for key in ('source_root','sources','observer'):f['manifest'][key]=copy.deepcopy(base['manifest'][key])
+                refresh_links(f)
+            if status=='passed':
+                refresh_record(f,0,lambda d:d['result'].update(status='passed',success=True))
+                f['receipt']['rows'][0].update(status='passed',success=True)
+                f['review']['rows'][0].update(original_status='passed',original_success=True)
+                refresh_links(f)
+            with self.subTest(status=status):
+                proof=self.project(f,self.root/('bool-'+status));plan=self.plan(f);client=self.client(plan,proof)
+                trace=next(iter(client.payloads));metadata=client.payloads[trace][0]['metadata']
+                for key in ('structural_pass','task_success'):
+                    if metadata[key] in ('true','false'):metadata[key]=metadata[key]=='true'
+                self.assertTrue(self.adapter.validate_window_traces(plan,proof,client)['all_pass'])
+                self.assertEqual(plan['rows'][0]['original_status'],status)
+                self.assertEqual(plan['rows'][0]['original_success'],status=='passed')
+
+    def test_boolean_metadata_rejects_integer_float_and_noncanonical_or_wrong_values(self):
+        f=partial_fixture()
+        for key in ('source_root','sources','observer'):f['manifest'][key]=copy.deepcopy(self.f['manifest'][key])
+        refresh_links(f);proof=self.project(f);plan=self.plan(f)
+        for key in ('structural_pass','task_success'):
+            for value in (0,1,0.0,1.0,'False','FALSE','true',True,None):
+                client=self.client(plan,proof);trace=next(iter(client.payloads));client.payloads[trace][0]['metadata'][key]=value
+                with self.subTest(key=key,value=value),self.assertRaises(ValueError):self.adapter.validate_window_traces(plan,proof,client)
+
+    def test_unknown_task_success_requires_exact_string_and_other_metadata_stays_strict(self):
+        proof=self.project();plan=self.plan()
+        for value in (False,True,0,1,'false','true','unknown ',None):
+            client=self.client(plan,proof);trace=next(iter(client.payloads));client.payloads[trace][0]['metadata']['task_success']=value
+            with self.subTest(value=value),self.assertRaises(ValueError):self.adapter.validate_window_traces(plan,proof,client)
+        client=self.client(plan,proof);trace=next(iter(client.payloads));client.payloads[trace][0]['metadata']['status']=False
+        with self.assertRaises(ValueError):self.adapter.validate_window_traces(plan,proof,client)
+
+    def test_missing_or_delayed_reads_remain_unverified_without_retry(self):
+        proof=self.project();plan=self.plan();client=self.client(plan,proof)
+        client.failure=TimeoutError('temporary')
+        result=self.adapter.validate_window_traces(plan,proof,client)
+        self.assertFalse(result['all_pass']);self.assertFalse(result['publish_ready'])
+        self.assertEqual(len(client.calls),len(plan['trace_bindings']))
+        client=self.client(plan,proof);trace=next(iter(client.payloads));client.payloads[trace].pop(1)
+        result=self.adapter.validate_window_traces(plan,proof,client);self.assertFalse(result['all_pass'])
+
+    def test_duplicate_turn_missing_io_and_empty_string_not_null(self):
+        proof=self.project();plan=self.plan();client=self.client(plan,proof);trace=next(iter(client.payloads))
+        client.payloads[trace].append(copy.deepcopy(client.payloads[trace][1]))
+        with self.assertRaises(ValueError):self.adapter.validate_window_traces(plan,proof,client)
+        client=self.client(plan,proof);client.payloads[trace][1]['output']=None
+        self.assertFalse(self.adapter.validate_window_traces(plan,proof,client)['all_pass'])
+
+    def test_redacted_utf8_and_4096_wrapper_outputs_compare_go_projection_not_raw_reply(self):
+        self.api()
+        cases=[('sk-abcd1234 person@example.com','[REDACTED] [REDACTED]'),
+            ('界'*1000,'界'*682+'[TRUNCATED]'),
+            ('\\'*2048,{'truncated':True,'preview':'"'+'\\'*1499}),('','')]
+        for original,projected in cases:
+            with self.subTest(kind=type(projected).__name__),tempfile.TemporaryDirectory() as out:
+                f=copy.deepcopy(self.f)
+                def mutate(record):
+                    record['result']['observations'][0]['turn']['response']['reply']=original
+                    for req in record['result']['review_requirements']:
+                        if req['turn_index']==0:req['reply_sha256']=digest(original.encode())
+                refresh_record(f,0,mutate)
+                for req in f['review']['rows'][0]['requirements']:
+                    if req['turn_index']==0:req['reply_sha256']=digest(original.encode())
+                trace=f['receipt']['rows'][0]['trace_id'];self.overrides[(trace,1)]=projected
+                proof=self.project(f,Path(out)/'projection');plan=self.plan(f);client=self.client(plan,proof)
+                self.assertTrue(self.adapter.validate_window_traces(plan,proof,client)['all_pass'])
+                client.payloads[trace][1]['output']=None
+                self.assertFalse(self.adapter.validate_window_traces(plan,proof,client)['all_pass'])
+
+    def test_projection_file_tamper_after_helper_output_is_rejected_by_process_receipt(self):
+        def tamper(path):
+            body=json.loads(path.read_bytes());body['rows'][0]['turns'][0]['output']='handwritten forged projection'
+            path.write_bytes(wire(body))
+        self.after_output=tamper
+        with self.assertRaises(ValueError):self.project()
+
+    def test_missing_fixed_helper_process_output_receipt_does_not_seal_projection(self):
+        self.stdout_override=b'go command returned success but no trusted helper receipt'
+        with self.assertRaises(ValueError):self.project()
+
+    def test_projection_proof_is_immutable_and_serialized_copy_cannot_replace_it(self):
+        proof=self.project()
+        with self.assertRaises(AttributeError):proof._raw=b'{}'
+
+    def test_output_parent_symlink_cannot_write_inside_original_source(self):
+        self.api();alias=self.root/'source-alias';alias.symlink_to(self.source,target_is_directory=True)
+        with self.assertRaises(ValueError):self.project(output=alias/'new-result')
+        self.assertFalse((self.source/'new-result').exists())
+        self.assertEqual(self.commands,[])
+
+    def test_real_later_window_partition_gate_survives_successful_current_trace_validation(self):
+        later=later_quality_fixture(prior_quality=4)
+        for key in ('sources','source_root','observer'):later['manifest'][key]=copy.deepcopy(self.f['manifest'][key])
+        refresh_links(later);self.f=later
+        proof=self.project();plan=self.plan();result=self.adapter.validate_window_traces(plan,proof,self.client(plan,proof))
+        self.assertTrue(result['all_pass'])
+        self.assertIn('prior_receipt_turn_partition_chain',result['pending_gates'])
+        self.assertIn('single_publication_protocol',result['pending_gates'])
+        self.assertFalse(result['publish_ready'])
+        self.assertEqual(plan['denominators']['acquisition_cumulative']['quality_end_unrun_turns'],5)
+
+    def test_prior_receipt_partition_gate_remains_pending_after_current_content_validation(self):
+        proof=self.project();plan=self.plan();plan['pending_gates'].append('prior_receipt_turn_partition_chain')
+        # A changed plan must be reprojected; a token from another plan cannot be
+        # borrowed to clear gates, even if its trace/body projection is identical.
+        with self.assertRaises(ValueError):self.adapter.validate_window_traces(plan,proof,self.client(self.plan(),proof))
 
 
 if __name__ == '__main__': unittest.main()
