@@ -42,9 +42,9 @@
 ### Task 2: Scope5 and campaign5
 
 **Files:** new scope_v5/campaign_v5 and tests; explicit dispatcher additions only.
-- [ ] Pin the newly generated concrete28 descriptor SHA and explicit62m/676k vector; fixed schedule remains byte-identical.
-- [ ] Add claim5 parent105/baseline28/four-root namespace checks, O_EXCL/fsync fresh proof; preserve old canonical JSON/hashes and accounting1 for1–3/accounting2 for4–5.
-- [ ] RED→GREEN caps/budget/wrongepoch/history/namespace tests, focused race and independent review; commit/push.
+- [x] Pin the newly generated concrete28 descriptor SHA and explicit62m/676k vector; fixed schedule remains byte-identical.
+- [x] Add claim5 parent105/baseline28/four-root namespace checks, O_EXCL/fsync fresh proof; preserve old canonical JSON/hashes and accounting1 for1–3/accounting2 for4–5.
+- [x] RED→GREEN caps/budget/wrongepoch/history/namespace tests, focused race and independent review; commit/push.
 
 ### Task 3: Actual5 and score compatibility
 

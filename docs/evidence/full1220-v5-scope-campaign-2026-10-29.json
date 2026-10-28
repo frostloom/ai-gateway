@@ -1,0 +1,141 @@
+{
+  "schema": "full1220-v5-scope-campaign-offline-evidence.v1",
+  "kind": "offline_declaration_and_closed_owned_test_only_not_actual_readiness",
+  "source_sha256": {
+    "internal/taskbench/window_scope.go": "3f7877867fcaa0ff62142af3b628d558d4493f25d597ff1def1a0af9916298b7",
+    "internal/taskbench/window_campaign.go": "f03913fbf3e486b85dd16b4f212fb0238721ea0f25af6f801d9575d7e224033a",
+    "internal/taskbench/window_scope_v5.go": "222b1d648bb81557dbca05a3f5bc3a45a681a2519c860859b0b033ce89b72685",
+    "internal/taskbench/window_scope_v5_test.go": "df04bd6f8c6d360ea2eb109957134d1bee871caae8ce2dae0706831162491bec",
+    "internal/taskbench/window_campaign_v5.go": "afda2a27c491f3048d38bdb68651786c8c50b06f11961fcbd8b184d0ebd6072f",
+    "internal/taskbench/window_campaign_v5_test.go": "d0590b10ddf5726575ae29c490efd31dd44a13196f1ed95c63bed4f657b57c2f"
+  },
+  "baseline_descriptor_sha256": "2f8c83546a2918b85801160f521465c2f53e040073b3590e1ecde53f278ef340",
+  "baseline_claims": 28,
+  "permanent_model_micro_cny": 40625891,
+  "permanent_jev_micro_usd": 323825,
+  "parent_model_micro_cny": 105000000,
+  "parent_jev_micro_usd": 1000000,
+  "candidate_model_micro_cny": 62000000,
+  "candidate_jev_micro_usd": 676000,
+  "original_risk_model_micro_cny": 2023424,
+  "original_risk_jev_micro_usd": 65,
+  "all_allocated_plus_risk_model_micro_cny": 104649315,
+  "all_allocated_plus_risk_jev_micro_usd": 999890,
+  "tail_model_micro_cny": 350685,
+  "tail_jev_micro_usd": 110,
+  "tail_authorizes_extra_requests": false,
+  "caps_sha256": "7fe19887167feaa4ce85520f2717cf82d0143cd5e2eef6577b3b07afcfe04862",
+  "fixed_scope": {
+    "pairs": 3660,
+    "arms": 7320,
+    "defined_turns": 11772,
+    "boundaries_separate": 1851,
+    "width": 28,
+    "windows": 131,
+    "schedule_sha256": "ef427c0a70fc6186818d6ccc8306f18099d6523801005e61f4fa469b431ad5b3",
+    "original_rotation_arm_order_maxcalls_rederived_unchanged": true,
+    "source_suite_and_profiles_unchanged": true,
+    "customer_business_sources_modified": false,
+    "knowledge_configuration_modified": false
+  },
+  "accounting": {
+    "explicit_scope5_schema": "full-window-accounting.v2",
+    "limits_reuse": "windowV4ExpectedLimits",
+    "model_cache_hit_input_rate": 40000,
+    "model_miss_input_rate": 2000000,
+    "model_output_rate": 8000000,
+    "jev_input_rate": 42000,
+    "jev_output_rate": 0,
+    "max_holds": [
+      74752,
+      2688
+    ],
+    "pricing_kernel_modified": false,
+    "epochs1_to3_still_schema1_and_reject_nonzero_cache": true,
+    "epoch4_remains_schema2": true
+  },
+  "capability": {
+    "production_constructor_final_argument": "concrete windowStoppedV4Baseline only",
+    "caller_verifier_hook": false,
+    "history_roots": 4,
+    "fresh28_before_each_claim": true,
+    "root_oexcl_fsync_unchanged": true,
+    "uncertain_claim_keeps_full_cap": true,
+    "created_campaign_positive_tests": "local_stub mirror history + owned temporary roots only",
+    "actual28_positive_overlay": "loadWindowStoppedV4Baseline + validateStoppedV5CampaignHistory only; no ctor/start",
+    "actual_newroot_absent_after_readonly_overlay": true,
+    "actual_ready_minted": false,
+    "actual_layer_modified_by_this_unit": false,
+    "new_actual_provider_requests": 0,
+    "new_financial_claims": 0,
+    "db_operations": 0,
+    "owner_operations": 0
+  },
+  "compatibility": {
+    "before_snapshot_sha256": "c1c2a3aa5855d0b94ef75a676b0ae498ef27b15b2cd5740dba8a9d5827ec2018",
+    "after_snapshot_sha256": "c1c2a3aa5855d0b94ef75a676b0ae498ef27b15b2cd5740dba8a9d5827ec2018",
+    "snapshot_bytes_identical": true,
+    "entries": 27,
+    "original_scope_versions": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "original_execution_versions": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "original_campaign_claims_canonical_roundtripped": 19,
+    "actual_original_file_sha_unchanged": 10309,
+    "old_source_pyc_imported_or_modified": false
+  },
+  "verification": {
+    "focused-normal": {
+      "pass": 76,
+      "fail": 0,
+      "skip": 0,
+      "package_action": "pass",
+      "elapsed": 9.692,
+      "stderr_bytes": 0,
+      "build_warnings": 0
+    },
+    "focused-race": {
+      "pass": 76,
+      "fail": 0,
+      "skip": 0,
+      "package_action": "pass",
+      "elapsed": 124.193,
+      "stderr_bytes": 0,
+      "build_warnings": 1
+    },
+    "actual-normal": {
+      "pass": 2,
+      "fail": 0,
+      "skip": 0,
+      "package_action": "pass",
+      "elapsed": 19.471,
+      "stderr_bytes": 0,
+      "build_warnings": 0
+    }
+  },
+  "red_log": "red.log two genuine compiled assertion failures: scope5 stub rejected and accounting1 selected",
+  "test_expectation_ruling": "Historical scope3 may carry arbitrary digest/budget-bounded caps as offline data. Preserve that declaration behavior; reject scope3 + schema5 tariff/history at campaign boundary. focused-first.jsonl retained incorrect test expectation failure; test-only correction, not product behavior change.",
+  "limits": {
+    "whole_go_run": false,
+    "full_cold_cache_completion_guaranteed": false,
+    "scores_or_semantic_quality_changed": false,
+    "commit_or_push_by_agent": false,
+    "independent_review": "passed_no_confirmed_P1_P2; independent focused pureGo9.234s; initial cache-permission setup failure retained"
+  },
+  "private_scope_example": {
+    "path": "offline-scope5-local_stub.json",
+    "sha256": "d27f28c4c772273408c7300d41da20d7244320412a7752507a42a64160130ed8",
+    "allow_paid": false,
+    "ready_for_paid_run": false,
+    "helper_executor_customer_revisions": "b40/c40 are local_stub placeholders, not actual freeze bindings"
+  },
+  "private_report_sha256": "1853878d116adcdb56cd9a7d56301d01780c362f4b354bdb230419cf0ed28dbd"
+}
