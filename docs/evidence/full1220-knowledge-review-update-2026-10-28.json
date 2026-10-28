@@ -1,0 +1,31 @@
+{
+  "schema": "knowledge-integration-current-review.v1",
+  "evidence_kind": "read_only_design_review",
+  "main_commit": "406e059d1de28ef51183bddfc830936e9a49df98",
+  "rag_commit": "5beca059dd4ad26eebe42b275309d4da38abd4d7",
+  "original_source_bindings_verified": 24,
+  "main_original_files_unchanged": [
+    "internal/agent/fast_path.go",
+    "internal/agent/guard.go",
+    "internal/agent/policy.go",
+    "internal/taskbench/collection_policy.go",
+    "internal/taskbench/conversation_comparison.go",
+    "internal/taskbench/conversation_http.go",
+    "internal/taskbench/window_jev.go",
+    "internal/taskbench/window_owned_driver.go"
+  ],
+  "main_original_files_changed_since_design": [
+    "internal/taskbench/window_accounting.go"
+  ],
+  "new_actual_model_calls": 0,
+  "new_actual_jev_calls": 0,
+  "new_actual_claims": 0,
+  "primary_pairs": 3660,
+  "primary_arms": 7320,
+  "primary_defined_turns": 11772,
+  "knowledge_both_arms": "off",
+  "new_knowledge_paid_scope_frozen": false,
+  "draft_cases": 20,
+  "budget_integer_checks": true,
+  "design_sha256": "65e607b939b7b19a0475efb6c7f59ab99a47325460c91a6947f882610fff00c0"
+}
