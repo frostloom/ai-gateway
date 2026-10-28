@@ -286,6 +286,9 @@ func OpenFullWindowActual(ctx context.Context, ready *FullWindowActualReady, pri
 	if ready == nil || ready.manifest.Schema != "full-window-actual-ready.v2" || ready.manifest.Scope.Schema != "full-window-scope.v2" {
 		return nil, fmt.Errorf("actual v2 scope required for current budget epoch")
 	}
+	if e := ready.revalidateStopped(); e != nil {
+		return nil, e
+	}
 	if e := ready.revalidate(); e != nil {
 		return nil, e
 	}
@@ -339,7 +342,7 @@ func OpenFullWindowActual(ctx context.Context, ready *FullWindowActualReady, pri
 		return nil, e
 	}
 	m := ready.manifest
-	s.campaign, e = newWindowCampaign(m.CampaignRoot, m.CampaignRoot, m.ClaimsDir, m.Scope, ready.source, ready.profiles, m.Scope.Bindings, m.ScopeSHA256, m.ExecutionSHA256, m.Limits)
+	s.campaign, e = newWindowCampaignV2(m.CampaignRoot, m.CampaignRoot, m.Scope, ready.source, ready.profiles, m.Scope.Bindings, m.ScopeSHA256, m.ExecutionSHA256, m.Limits, ready.stopped)
 	if e != nil {
 		return nil, e
 	}
@@ -594,6 +597,9 @@ func (s *FullWindowActualSession) verifyInputs() error {
 	if r == nil || len(r.manifestRaw) == 0 {
 		return fmt.Errorf("actual frozen inputs absent")
 	}
+	if e := r.revalidateStopped(); e != nil {
+		return e
+	}
 	m := r.manifest
 	raw, e := readWindowActualFile(r.manifestPath, fullWindowActualManifestSHA, 8<<20)
 	if e != nil || !reflect.DeepEqual(raw, r.manifestRaw) {
@@ -628,11 +634,6 @@ func (s *FullWindowActualSession) verifyInputs() error {
 					return e
 				}
 			}
-		}
-	}
-	for name, sha := range fullWindowCanonicalClaims() {
-		if _, e := readWindowActualFile(filepath.Join(m.ClaimsDir, name+".json"), sha, 65536); e != nil {
-			return e
 		}
 	}
 	if s.auth.observer == nil || s.auth.observer.EvaluationIdentity() != m.Observer || s.auth.observerIdentity != m.Observer {

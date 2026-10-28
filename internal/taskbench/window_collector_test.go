@@ -22,6 +22,9 @@ func testWindowCollectorAuthorization(t *testing.T, widths ...int) (*windowAcqui
 	return testWindowCollectorAuthorizationPolicy(t, collectionPolicySHA(), widths...)
 }
 func testWindowCollectorAuthorizationPolicy(t *testing.T, policy string, widths ...int) (*windowAcquisitionAuthorization, *int, *int) {
+	return testWindowCollectorAuthorizationVersion(t, policy, false, widths...)
+}
+func testWindowCollectorAuthorizationVersion(t *testing.T, policy string, v2 bool, widths ...int) (*windowAcquisitionAuthorization, *int, *int) {
 	t.Helper()
 	source, profiles, bindings := windowScopeInputs(t)
 	bindings.PolicySHA256 = policy
@@ -33,7 +36,13 @@ func testWindowCollectorAuthorizationPolicy(t *testing.T, policy string, widths 
 	for i := range caps {
 		caps[i] = fullWindowCaps{int64(10 * width), int64(width)}
 	}
-	scope, e := prepareFullWindowScope(source, profiles, width, caps, bindings)
+	var scope fullWindowScope
+	var e error
+	if v2 {
+		scope, e = prepareFullWindowScopeV2(source, profiles, width, caps, bindings, strings.Repeat("8", 64))
+	} else {
+		scope, e = prepareFullWindowScope(source, profiles, width, caps, bindings)
+	}
 	if e != nil {
 		t.Fatal(e)
 	}
@@ -56,6 +65,10 @@ func testWindowCollectorAuthorizationPolicy(t *testing.T, policy string, widths 
 		t.Fatal(e)
 	}
 	_, baseline := fixtureWindowCampaign(t)
+	if v2 {
+		baseline = expectedStoppedWindowBaseline()
+		prepared.stoppedHistory = &fixtureStoppedHistory{base: baseline, sha: scope.BaselineEvidenceSHA256, root: filepath.Join(parent, "old-stopped")}
+	}
 	campaign, e := startWindowCampaign(prepared, baseline)
 	if e != nil {
 		t.Fatal(e)

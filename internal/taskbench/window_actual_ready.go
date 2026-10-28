@@ -51,6 +51,7 @@ type FullWindowActualReady struct {
 	manifest       windowActualManifest
 	prepared       windowCampaignPrepared
 	baseline       fullWindowBaseline
+	stopped        windowStoppedBaseline
 	source         ConversationSuite
 	profiles       PairedProfiles
 }
@@ -77,6 +78,7 @@ type windowActualManifest struct {
 	ProfilesDir               string                           `json:"profiles_dir"`
 	ClaimsDir                 string                           `json:"claims_dir"`
 	HistoricalClaims          map[string]string                `json:"historical_claims"`
+	BaselineEvidence          *windowActualFile                `json:"baseline_evidence,omitempty"`
 	SessionRoot               string                           `json:"session_root"`
 	CampaignRoot              string                           `json:"campaign_root"`
 	KnowledgeModel            string                           `json:"knowledge_model"`
@@ -117,7 +119,7 @@ func CheckFullWindowActualReady(o FullWindowActualReadyOptions) (FullWindowActua
 		return reject()
 	}
 	var m windowActualManifest
-	if decodeWindowActualJSON(raw, &m) != nil || validateWindowActualPrivateSettingsBinding(&m) != nil || m.Schema != "full-window-actual-ready.v1" || m.EvidenceKind != "actual" || m.ArchiveCommit != fullWindowActualArchiveCommit || m.ArchiveTree != fullWindowActualArchiveTree {
+	if decodeWindowActualJSON(raw, &m) != nil || validateWindowActualPrivateSettingsBinding(&m) != nil || m.Schema != "full-window-actual-ready.v2" || m.Scope.Schema != "full-window-scope.v2" || m.EvidenceKind != "actual" || m.ArchiveCommit != fullWindowActualArchiveCommit || m.ArchiveTree != fullWindowActualArchiveTree {
 		return reject()
 	}
 	attestationRaw, err := readWindowActualBytes(o.ManifestPath+".binary-attestation.json", "", 65536)
@@ -193,21 +195,17 @@ func CheckFullWindowActualReady(o FullWindowActualReadyOptions) (FullWindowActua
 	if err != nil || totals.Pairs != 3660 || totals.Arms != 7320 || totals.DefinedUserTurns != 11772 || totals.Boundaries != 1851 {
 		return reject()
 	}
-	if !reflect.DeepEqual(m.HistoricalClaims, fullWindowCanonicalClaims()) {
+	stopped, err := loadWindowActualStoppedBaseline(m)
+	if err != nil {
 		return reject()
 	}
-	// Verify regular/no-symlink raw files before the fixed production baseline loader.
-	for name, sha := range fullWindowCanonicalClaims() {
-		if _, err = readWindowActualFile(filepath.Join(m.ClaimsDir, name+".json"), sha, 65536); err != nil {
-			return reject()
-		}
-	}
-	baseline, err := loadFullWindowBaseline(m.ClaimsDir)
-	if err != nil || validatePreparedWindowCampaign(prepared, baseline) != nil {
+	baseline := stopped.base
+	prepared.stoppedHistory = stopped
+	if validatePreparedWindowCampaign(prepared, baseline) != nil {
 		return reject()
 	}
 	summary = FullWindowActualReadySummary{fullWindowActualManifestSHA, m.ScopeSHA256, m.ExecutionSHA256, 3660, 7320, 11772, 1851}
-	return summary, &FullWindowActualReady{manifestPath: o.ManifestPath, manifestRaw: append([]byte(nil), raw...), attestationRaw: append([]byte(nil), attestationRaw...), manifest: m, prepared: prepared, baseline: baseline, source: source, profiles: profiles}, nil
+	return summary, &FullWindowActualReady{manifestPath: o.ManifestPath, manifestRaw: append([]byte(nil), raw...), attestationRaw: append([]byte(nil), attestationRaw...), manifest: m, prepared: prepared, baseline: baseline, stopped: stopped, source: source, profiles: profiles}, nil
 }
 
 // Future session startup must recheck before any credential load or claim write.
@@ -219,7 +217,7 @@ func (r *FullWindowActualReady) revalidate() error {
 	if err != nil {
 		return err
 	}
-	if !bytes.Equal(r.manifestRaw, fresh.manifestRaw) || !bytes.Equal(r.attestationRaw, fresh.attestationRaw) || !reflect.DeepEqual(r.manifest, fresh.manifest) || !reflect.DeepEqual(r.prepared, fresh.prepared) || !reflect.DeepEqual(r.baseline, fresh.baseline) {
+	if !bytes.Equal(r.manifestRaw, fresh.manifestRaw) || !bytes.Equal(r.attestationRaw, fresh.attestationRaw) || !reflect.DeepEqual(r.manifest, fresh.manifest) || !reflect.DeepEqual(r.prepared, fresh.prepared) || !reflect.DeepEqual(r.baseline, fresh.baseline) || !reflect.DeepEqual(r.stopped, fresh.stopped) {
 		return fmt.Errorf("actual ready snapshot changed")
 	}
 	return nil

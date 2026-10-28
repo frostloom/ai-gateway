@@ -1,0 +1,98 @@
+{
+  "schema": "full1220-actual-v2-wiring-evidence.v1",
+  "evidence_kind": "offline_wiring_and_local_handler_stubs",
+  "runs": [
+    {
+      "name": "actual-v2-targeted-race",
+      "test_records": {
+        "pass": 339
+      },
+      "packages": [
+        {
+          "package": "github.com/frostloom/ai-gateway/cmd/full-window-actual",
+          "result": "pass",
+          "seconds": 2.124
+        },
+        {
+          "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+          "result": "pass",
+          "seconds": 85.747
+        }
+      ],
+      "sha256": "008410192e5fd46e1f5b37e44b6e0777095d7152fea90237f6ab9dd809171f5b",
+      "stderr_bytes": 0
+    },
+    {
+      "name": "actual-v2-handler",
+      "test_records": {
+        "pass": 6
+      },
+      "packages": [
+        {
+          "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+          "result": "pass",
+          "seconds": 10.245
+        }
+      ],
+      "sha256": "4547c7e0da7d53770c39dc3d7cfc6c8a92d7f32df73dae5cd4a23af5fffaa2f2",
+      "stderr_bytes": 0
+    },
+    {
+      "name": "actual-v2-handler-final-race",
+      "test_records": {
+        "pass": 4
+      },
+      "packages": [
+        {
+          "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+          "result": "pass",
+          "seconds": 57.341
+        }
+      ],
+      "sha256": "2413457e6d7f765a1e449f581937f10cf4fdb7bac72304deece20aaac122a1a4",
+      "stderr_bytes": 0
+    },
+    {
+      "name": "actual-v2-handler-v2-only-race",
+      "test_records": {
+        "pass": 9
+      },
+      "packages": [
+        {
+          "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+          "result": "pass",
+          "seconds": 88.612
+        }
+      ],
+      "sha256": "596e9eaed2b88ab0f4cb2c180678f5630ad7d424d51aa096408811d92e8bc8a8",
+      "stderr_bytes": 0
+    }
+  ],
+  "source_sha256": {
+    "window_actual_ready.go": "8c7cf4879e19cb648c92af0a14553a475e4c03e511b8ef1fe828e09085a304dd",
+    "window_actual_session.go": "4af6ac5d071037d4937f2a50098a7d1d47e43045daf2f7aae5c1c87f5ca22d8a",
+    "window_actual_v2.go": "4a51a92d22258508c3683e573a071fa5d22ac5ac91ac19a612cdda5dbd39549b",
+    "window_actual_v2_test.go": "904b7a5a94557ca34633159fb18aaa8981915d47da3b990091c9dc010a419da2",
+    "window_collector_test.go": "02ae31558bd11ea7182d7256fa286f00df067a924ced535d58d20eed1639fa1d",
+    "window_actual_v2_collector_test.go": "a8a57354ecb15dfc2341cb4ecf4008ee9d29ef39ca9184099b66c93c7e2f8336"
+  },
+  "functional_red": [
+    "actual-v2-manifest-red.log",
+    "actual-v2-hook-red.log"
+  ],
+  "compile_red_not_assertion_red": "actual-v2-binding-red.log",
+  "original_stopped_material_readonly_overlay": {
+    "result": "pass",
+    "package_seconds": 1.851,
+    "cloned_descriptor_only_mutated": true,
+    "new_roots_created": false
+  },
+  "independent_review": "actual_v2_review: no confirmed P1/P2 in production and supplemental test diffs",
+  "full_exact_archive_go_20m": "pending",
+  "actual_ready": "not_yet_frozen_or_verified",
+  "new_actual_claims": 0,
+  "new_actual_model_calls": 0,
+  "new_actual_jev_calls": 0,
+  "permanent_micro_cny": 29475706,
+  "permanent_micro_usd": 227183
+}

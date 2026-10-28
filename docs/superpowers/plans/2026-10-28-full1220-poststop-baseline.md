@@ -56,8 +56,8 @@ Interfaces: v2 scope包含不可省略的`baseline_evidence_sha256`；`newWindow
 
 Files: `window_actual_ready.go`、`window_actual_session.go`、`cmd/full-window-actual`及测试。
 
-- [ ] RED：ready之后、首窗之前和后续窗之前篡改Task1任一证据均零upstream拒绝；旧构建pins不能接受v2manifest。
-- [ ] 将v2基线验证接入Check/Open/verifyInputs及campaign推进，保持私密settings SHA、固定HTTPS、JEV显式本机route、2秒observer等全部门禁。
+- [x] v2 manifest及Open缺停止证据断言RED→GREEN；原材料只读/临时descriptor篡改在启动与逐窗门禁零upstream拒绝。Task1覆盖全部14材料/九claim，旧构建固定SHA与schema不能接受新v2manifest；最终完整有效ready仍须下面精确归档验收。
+- [x] 将v2基线验证接入Check/Open/verifyInputs及campaign推进，保持私密settings SHA、固定HTTPS、JEV显式本机route、2秒observer等全部门禁。
 - [ ] 有界真实Handler替身正常/纠正/标准service_tier/未知tier/usage缺失/观测失败/清理失败验证；失败不发生第二次请求，不恢复原scope。
 - [ ] 原配置完整Go20分钟、新提交精确归档、source/blob/输入/价格/原生请求包络及签名只读检查；独立复核后冻结全新roots。
 
