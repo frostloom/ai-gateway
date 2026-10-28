@@ -29,14 +29,15 @@
 
 ## Task 1：停止证据及新基线的纯验证
 
-Files: 新增`internal/taskbench/window_stopped_baseline.go`及对应测试；读取现有`window_scope.go`原九claim验证器，不修改旧文件证据。
+Files: 新增`internal/taskbench/window_stopped_baseline.go`、`window_stopped_bundle.go`、`window_stopped_evidence.go`及对应测试；读取现有`window_scope.go`原九claim验证器，不修改旧文件证据。
 
 Interface: `loadWindowStoppedBaseline(path, expectedSHA string) (windowStoppedBaseline, error)`；私有结构保存验证后base、原raw证据SHA及停止bundle绑定，不可由caller JSON构造执行授权。
 
-- [ ] RED：缺任一原九claim、固定第十claim、原manifest/terminal/receipt/summary/ledger/payload manifest/原生request-response均拒绝；交叉scope、重复cap、去pending、改false也拒绝。
-- [ ] 最小实现严格有界普通文件读取与SHA/关联验证。原ledger须closed，原owner须已结束；可获取原锁后只读核验并释放，不能启动旧owner或补写旧证据。
-- [ ] 推导29475706/227183与144/37，不接收caller累计金额。验证旧完整响应的标准tier和usage，冻结峰价责任3832≤旧hold74752≤旧cap414586；任一无法证明即拒绝新scope，不假设风险尾差覆盖两个未界定请求。保留旧known0/pending，不补settle或释放hold。原stop为失败不影响作为永久预算前置证据。
-- [ ] 定向测试及race通过后独立审查、提交该纯验证单元。
+- [x] RED：缺任一原九claim、固定第十claim、原manifest/terminal/receipt/summary/ledger/payload manifest/原生request-response均拒绝；交叉scope、重复cap、去pending、改false也拒绝。
+- [x] 最小实现严格有界普通文件读取与SHA/关联验证。原ledger须closed，原owner须已结束；可获取原锁后只读核验并释放，不能启动旧owner或补写旧证据。
+- [x] 推导29475706/227183与144/37，不接收caller累计金额。验证旧完整响应的标准tier和usage，冻结峰价责任3832≤旧hold74752≤旧cap414586；任一无法证明即拒绝新scope，不假设风险尾差覆盖两个未界定请求。保留旧known0/pending，不补settle或释放hold。原stop为失败不影响作为永久预算前置证据。
+- [x] 定向223记录及最终新单元53记录通过；联合原账本/协议/传输与原材料最终277记录race通过，独立只读审查无确认P1/P2。
+- [x] 提交该只读验证单元；整个v2实际入口仍须Task3精确归档全Go20分钟，当前不宣称新scope冻结就绪。
 
 ## Task 2：v2完整scope和campaign链
 
@@ -68,3 +69,11 @@ Files: `window_actual_ready.go`、`window_actual_session.go`、`cmd/full-window-
 ## Self-review
 
 原完整范围、十claim前置、每窗TOCTOU、未知成本、旧结果不可改写和独立评分/正文读回均有对应任务。任务1–3不增加真实调用；Task4受原预算和技术停止规则约束。知识整合设计继续单列，不能使用本计划风险尾差。用户已明确授权自主执行，按上述顺序衔接，不新增例行确认。
+
+## Execution ledger
+
+2026-10-28 Task1：原正例及两组filesystem/语义正例先RED；原scope反例曾误用与原值相同的a64，保留失败日志后改成真正不同的9号摘要。账本既有canonical重放抽为有界字节纯函数，原文件路径继续复用同一规则。原14文件及九claim只读验证通过，原known0/pending/false状态和完整预留保留。
+
+Ruling: 将纯责任、跨文件语义和文件/锁边界分为三个聚焦文件；只读单元按定向/race证据提交，不代表整个v2实现或精确归档全Go已完成。最终完整冻结仍在Task3，避免把局部结果当真实完整测评。
+
+Task1最终证据见`docs/evidence/full1220-stopped-baseline-2026-10-28.json`。新增独立要求文件集测试覆盖14停止文件与九历史claim逐项缺失/篡改；故障overlay移除SHA/库存时28项测试失败，正式源最终race无失败/跳过。原材料实际只读loader通过，不属于新推理。

@@ -1,0 +1,57 @@
+{
+  "schema": "full1220-stopped-baseline-readonly-unit.v1",
+  "planned_full_pairs": 3660,
+  "planned_full_arms": 7320,
+  "planned_full_turns": 11772,
+  "boundaries_separate": 1851,
+  "actual_scope_ready": false,
+  "new_actual_model_calls": 0,
+  "new_actual_jev_calls": 0,
+  "new_actual_claims": 0,
+  "known_ledger_rewritten": false,
+  "historical_calls": [
+    144,
+    37
+  ],
+  "permanent_model_micro_cny": 29475706,
+  "permanent_jev_micro_usd": 227183,
+  "remaining_model_micro_cny": 70524294,
+  "remaining_jev_micro_usd": 772817,
+  "additional_stopped_claim_sha256": "52bbf6e7edf8b66099141db5ac7c6782e45b8afc3bcd9145ea1fd51f936eca48",
+  "original_artifacts_pinned": 14,
+  "historical_claims_pinned": 9,
+  "configuration_liability_micro_cny": 3832,
+  "old_pending_hold_micro_cny": 74752,
+  "new_baseline_claim_count": 10,
+  "final_race": {
+    "pass_records": 277,
+    "fail": 0,
+    "skip": 0,
+    "seconds": 5.171
+  },
+  "independent_static_review": {
+    "p1": 0,
+    "p2": 0
+  },
+  "whole_v2_frozen_go_regression": "pending Task3, not claimed",
+  "source_sha256": {
+    "internal/taskbench/window_accounting.go": "9de4ccd3721bffe0545c858b8bbe01794f8e9bdc2654f10ef9b94e97520cd2e4",
+    "internal/taskbench/window_stopped_baseline.go": "2699d60239ea1ee66c21fc1a5aeaf9e415bdb5081a9c5312375f73fe582621ce",
+    "internal/taskbench/window_stopped_baseline_test.go": "224f4d75ac4324b8b57ba718b28e3192a4fd7287bcf45cec0c900e9834bf00b4",
+    "internal/taskbench/window_stopped_bundle.go": "84636e549fa1071c2c6f07527df1d6c12be634db5af7257c27f7987ae64077a5",
+    "internal/taskbench/window_stopped_bundle_test.go": "4b397b410354f0cfa1baa85cf4ce281e16cb156d41008ded950013ee80a12c83",
+    "internal/taskbench/window_stopped_evidence.go": "4e79661392c882af99418543ef32206b0ad6335dd2c3893986a80e390d42d92e",
+    "internal/taskbench/window_stopped_evidence_test.go": "0c26d366070d79138b489fbdcb416b62f59ea42b00e6763eda2426ab0e277881"
+  },
+  "private_artifact_sha256": {
+    "stopped-bundle-red-v2.jsonl": "e2d0de33f6bae7977539f26fa9f2eaa362b800c29372cef9dcb4185dffd5d9bf",
+    "stopped-files-red.jsonl": "087413dade13a8057bc9eda88adbffede24e3c2941f9d8dd100d6fec157e263e",
+    "stopped-baseline-original-red.jsonl": "200855e3d57dec9421c5e96dcb7616ab9b867dc4c30f6e49f5d91572a16d6138",
+    "stopped-baseline-original-green.jsonl": "dc45d1a53f73dfc8d367087b81c2936bc8e8786daf54c8c0ee50989f6ff4bb39",
+    "stopped-evidence-fault-red.jsonl": "5cdf536aada8e07ff341f1480e2e13c819ba227488bca374c24bcfc313ec7509",
+    "stopped-baseline-final-race.jsonl": "64868544cf218e6b87315c3c44eede10640ea1f98ea21da0d9880b524e45414b",
+    "stopped-baseline-evidence.json": "4c55d694405c61948857dfd72279118243e5ea4dbd2de72b6254687ab08d1dbf",
+    "stopped-baseline-independent-review.json": "537b71afe72d785800da96eb5eb297af02e7f20b8bc95171018b085103f1b747",
+    "jev-response-offline-audit.json": "a51b22604d62933eeac9a8cfc2e59d0004197c7c2ff42bce5c42c36d5ee22f00"
+  }
+}

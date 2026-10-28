@@ -538,7 +538,14 @@ func readWindowAccounting(dir string) (windowAccountingAudit, error) {
 	if err != nil {
 		return audit, err
 	}
-	if len(raw) == 0 || raw[len(raw)-1] != '\n' {
+	return readWindowAccountingBytes(raw)
+}
+
+// Reuse the canonical replay rules after a caller has safely read and bound
+// immutable bytes, without reopening an evidence path during verification.
+func readWindowAccountingBytes(raw []byte) (windowAccountingAudit, error) {
+	var audit windowAccountingAudit
+	if len(raw) == 0 || len(raw) > 64<<20 || raw[len(raw)-1] != '\n' {
 		return audit, fmt.Errorf("truncated ledger")
 	}
 	scan := bufio.NewScanner(bytes.NewReader(raw))
