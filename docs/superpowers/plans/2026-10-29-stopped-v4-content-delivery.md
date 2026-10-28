@@ -45,16 +45,16 @@ Use an optional explicit `closed_archive_extra_witness` only for formal content 
 **Interfaces:** optional `project_window_content(..., closed_archive_extra_witness=None)` and explicit CLI job witness path/SHA; existing opaque projection proof remains required.
 - [x] Write failing tests for valid pinned P4 shape, absent/changed witness, exit/terminal mismatch, extra file/directory/symlink, helper-time mutation and clean staged tree.
 - [x] Implement the exact pinned witness checks; do not relax `_verify_frozen_sources` or actual readiness.
-- [ ] Complete290 Python tests passed/15 original skips; old nine-plan reconstruction result pending final report.
+- [x] Complete290 Python tests passed/15 original skips; nine old plans/1442 IDs and saved readbacks reconstructed identical.
 - [x] Independent review: no confirmed P1/P2,36 targeted tests; source63cf3181/test1f5fcb4c. Commit this unit before formal use.
 
 ### Task 3: Deliver stopped windows
 
 **Files:** private merged reviews/jobs/readbacks; docs/full1220-v4-stopped-2026-10-29.md; AGENTS.md.
 - [x] Merge independent chunk reviews without changing judgments or original statuses; totals112 arms/134 turns/398 requirements,372pass26fail,97taskpass15fail.
-- [ ] Execute fixed offline Go projection with explicit witness for each window, then readonly Langfuse content validation.
-- [ ] Publish each new score intent once; preserve immediate pending reads and use readonly verification to completion.
-- [ ] Audit250 native packets,28 permanent claims40625891/323825, third claim retained with no third ledger/request, observer595/595.
+- [x] Execute fixed offline Go projection with explicit witness for each window, then readonly Langfuse content validation.
+- [x] Publish each new score intent once; preserve immediate pending reads and use readonly verification to completion.
+- [x] Audit250 native packets,28 permanent claims40625891/323825, third claim retained with no third ledger/request, observer595/595.
 - [ ] Write truthful partial delivery report and latest Hindsight stopped memory, read back, commit/push and confirm remote SHA.
 
 ## Progress
@@ -62,3 +62,5 @@ Use an optional explicit `closed_archive_extra_witness` only for formal content 
 2026-10-29: Plan uses the already authorized autonomous workflow; no new approval requested. Witness proposal reviewed by root before implementation. New full-scope budget design is a separate offline task; it cannot authorize resuming V4.
 
 2026-10-29 Task2:290 complete Python tests passed in49.239s,15 original skips. Pinned witness93b4bf1621dbac2e43f87d8e11b472563c095f6505111f4ed284d678ac905059; no actual readiness restored, no source extra removed.
+
+2026-10-29 Task3:112traces595observations134turns allmatch;336scores once-only ACK and subsequent readonly verification0,8normalizedGET pages saved. Independent local file audit0024c1cbdd2 passed; original audit001 mapping error retained. Newactual model/JEV/claim0. Report and memory publication in progress.

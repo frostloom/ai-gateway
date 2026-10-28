@@ -37,7 +37,7 @@
     "semantic-review-window-000002.json": "45e53f45d6f32e250eae9bb2b6b8bce88d2a882260825a4e867bf0b73c7382fa"
   },
   "independent_stop_audit_sha256": "2818476f6f36d0cc86cef7e15ef3d16fe0cefce86eb4c17a0f7387a299fa3aac",
-  "delivery_state": "semantic_reviews_complete; formal_content_and_score_delivery_pending",
+  "delivery_state": "two_recorded_windows_formal_content_and_336_once_only_scores_readback_complete; independent_file_audit_passed",
   "new_actual": {
     "model": 194,
     "jev": 56
@@ -95,5 +95,102 @@
     "original_error_text_available": false,
     "sole_stop_cause_proved": false
   },
-  "claims_notes": "Third new claim retained without third ledger, report or native request; no fourth new claim. Old holds unchanged. Never resume or relaunch."
+  "claims_notes": "Third new claim retained without third ledger, report or native request; no fourth new claim. Old holds unchanged. Never resume or relaunch.",
+  "descriptive_metrics": {
+    "schema": "full1220-v4-two-window-descriptive-metrics.v1",
+    "arms": {
+      "model": {
+        "arms": 56,
+        "correct_tasks": 49,
+        "model_calls": 116,
+        "jev_calls": 0,
+        "model_micro_cny": 85382,
+        "jev_micro_usd": 0,
+        "cache_hit_tokens": 186368,
+        "cache_miss_tokens": 23423,
+        "model_input_tokens": 209791,
+        "cache_pair_available_calls": 116,
+        "driver_arm_p50_ms": 1554.726,
+        "driver_arm_p95_ms": 4285.495,
+        "cost_per_correct_task": {
+          "cny": 0.0017424897959183673,
+          "usd": 0.0,
+          "denominator": "all strict-passed arms; numerator includes failed-arm costs; no currency conversion"
+        }
+      },
+      "jev_selective": {
+        "arms": 56,
+        "correct_tasks": 48,
+        "model_calls": 78,
+        "jev_calls": 56,
+        "model_micro_cny": 64965,
+        "jev_micro_usd": 2861,
+        "cache_hit_tokens": 127358,
+        "cache_miss_tokens": 16701,
+        "model_input_tokens": 144059,
+        "cache_pair_available_calls": 78,
+        "driver_arm_p50_ms": 1543.535,
+        "driver_arm_p95_ms": 5682.819,
+        "cost_per_correct_task": {
+          "cny": 0.0013534374999999998,
+          "usd": 5.960416666666666e-05,
+          "denominator": "all strict-passed arms; numerator includes failed-arm costs; no currency conversion"
+        }
+      }
+    },
+    "source_bindings": {
+      "records/window-000001/receipt.json": "8f19c51266fa81d6dfa468534c8355dd4ac525af6e0217e7c289e6e2bc9f5ceb",
+      "semantic-review-window-000001.json": "9c56ef1499c4cb74428efe22f8c3d27e57dcc70d0fa8b1d3a4c48959c539cc9f",
+      "records/window-000001/payload-manifest.json": "c508a88982262c341ede87b9d1ee62230d96401c2442c88e551d949a51940243",
+      "campaign/ledger-000001/accounting.jsonl": "4a11873361cac6e60384e85b0a68b24a5aa5d8cd162af989a0459f240856c3ba",
+      "records/window-000002/receipt.json": "ced5a0d7ff5c94d4065e0f9702387b199fef02e71e9ed26eabea2423e8aaacc7",
+      "semantic-review-window-000002.json": "45e53f45d6f32e250eae9bb2b6b8bce88d2a882260825a4e867bf0b73c7382fa",
+      "records/window-000002/payload-manifest.json": "e7d383685dc544a7dbb6bf02f5b0db9c504de8eb3c2bca9e2375cd7fd2a7e8d6",
+      "campaign/ledger-000002/accounting.jsonl": "0df018d2d7a8cda10f76dd653f933d5379d535946f48aa4f78ae999ac9e2501a"
+    },
+    "limitations": [
+      "Fixed first56pairs only; no full1220 or population benefit inference.",
+      "Both arms knowledge off: retrieval miss/invalid retrieval rates not measured; no knowledge strategy comparison.",
+      "Cache reflects explicit reported billing usage only; not evidence of knowledge usage.",
+      "Driver arm timer includes evaluation start/end and recordCollectionConversation including oracle/state work; excludes driver construction and post-record persistence; not pure HTTP or user E2E.",
+      "Configuration cost estimates, not supplier invoice; currencies separate.",
+      "Nearest-rank quantiles, arm durations not individual request latency."
+    ]
+  },
+  "descriptive_metrics_sha256": "70be557fe85ceaca411ecc36dcb2435ad32e8401420cc62ca003779878f64b01",
+  "descriptive_independent_audit_sha256": "f007398c2c0b3ebd033ad68ebe91ec71304d63395dd8f9d4733be2328076dfb1",
+  "formal_delivery": {
+    "trace_count": 112,
+    "observations": 595,
+    "turns": 134,
+    "scores_posted_once": 336,
+    "score_unique_ids": 336,
+    "scores_all_verified": true,
+    "normalized_score_GET_pages": 8,
+    "new_model_or_jev_requests": 0,
+    "new_financial_claims": 0,
+    "actual_ready_restored": false,
+    "pyc_preserved": true,
+    "source_witness_sha256": "93b4bf1621dbac2e43f87d8e11b472563c095f6505111f4ed284d678ac905059",
+    "active_tool_sha256": "63cf3181be7a6356f939abca155864bd8b465a7abb9c4bfd0919d74bc9ac064e",
+    "archived_tool_sha256": "4301927fe1c3d662e470ddf1bb720377a53d2b7c8901932641a4146df7ef4690",
+    "artifacts": {
+      "score-delivery-v4/window-000001/job.private.json": "600de7598dd40ed2b908ec6f45d4af90ad4bee632127c765c3f5e889f9958487",
+      "score-delivery-v4/window-000001/plan.private.json": "60aa4a7e0fc69187f76c99fde622c1f0d06396dd101a7dfc04c7700ccd10a328",
+      "score-delivery-v4/window-000001/publish-result.json": "318d01e9ce2d4fb4a47f8d6ff22eee8da31000769f780b868323b89f5c87848d",
+      "score-delivery-v4/window-000001/formal-content-readback-001.json": "8b02d7f776865d079d0a591036bb31c756b01f251bc2021b5eb20a88026b7338",
+      "score-delivery-v4/window-000001/verify-readonly-001.json": "9c7e113de46dcdd5a12bf7620f5d5e9a23bebac5b77ef0f75359d902ca3b8f82",
+      "score-delivery-v4/window-000002/job.private.json": "a75b91e983930dee9f6e15cf19c7adbb594fa6e141fd946c9d73f2d45279e95e",
+      "score-delivery-v4/window-000002/plan.private.json": "d102399cc4fd9b556048591b4167f4b26b5290bd901539ead2271964cde616bf",
+      "score-delivery-v4/window-000002/publish-result.json": "318d01e9ce2d4fb4a47f8d6ff22eee8da31000769f780b868323b89f5c87848d",
+      "score-delivery-v4/window-000002/formal-content-readback-001.json": "a8ddf35a1805d1b3ab87c93feb552ec95096950f14969cac5c627ff5457397cf",
+      "score-delivery-v4/window-000002/verify-readonly-001.json": "9c7e113de46dcdd5a12bf7620f5d5e9a23bebac5b77ef0f75359d902ca3b8f82",
+      "score-final-readback-001/report.json": "afa56b70acd06b73fb7a69e7d135e32371cbe26af2cff0712f8fc368d5f39421",
+      "closed-archive-extra-witness.private.json": "93b4bf1621dbac2e43f87d8e11b472563c095f6505111f4ed284d678ac905059",
+      "review-bytecode-provenance-addendum.json": "be3d585c60320ee23c9c511dcb0caf6cdc4c90a96b7069655f727adeebfa5ef4",
+      "deliver-stopped-scores.py": "3472172238e1fe1e643912660e667a96d78b9d0b80194048363267f42cc12f24"
+    },
+    "independent_local_file_audit_sha256": "4c1cbdd2412af2c17c35c2c8fe6cb6ee9b703a8b1db538a2207caf13c77a6b10",
+    "independent_audit_is_not_network_or_invoice_proof": true
+  }
 }
