@@ -143,6 +143,8 @@ func validateFullWindowScope(scope fullWindowScope, s ConversationSuite, p Paire
 		expected, e = prepareFullWindowScopeV2(s, p, scope.Width, caps, b, scope.BaselineEvidenceSHA256)
 	case "full-window-scope.v3":
 		expected, e = prepareFullWindowScopeV3(s, p, scope.Width, caps, b, scope.BaselineEvidenceSHA256, scope.BudgetApprovalSHA256)
+	case "full-window-scope.v4":
+		expected, e = prepareFullWindowScopeV4(s, p, scope.Width, caps, b, scope.BaselineEvidenceSHA256, scope.BudgetApprovalSHA256)
 	default:
 		return "", totals, fmt.Errorf("unsupported complete-window scope version")
 	}

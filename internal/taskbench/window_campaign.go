@@ -20,12 +20,13 @@ import (
 // first-claim primitive cannot be run first and resumed here: the campaign owner
 // must acquire the first claim and all later claims under one reviewed contract.
 type windowCampaignProviderBounds struct {
-	Model           string `json:"model"`
-	MaxRequestBytes int    `json:"max_request_bytes"`
-	MaxInput        int64  `json:"max_input_tokens"`
-	MaxOutput       int64  `json:"max_output_tokens"`
-	InputRate       int64  `json:"input_micro_per_million"`
-	OutputRate      int64  `json:"output_micro_per_million"`
+	Model             string `json:"model"`
+	MaxRequestBytes   int    `json:"max_request_bytes"`
+	MaxInput          int64  `json:"max_input_tokens"`
+	MaxOutput         int64  `json:"max_output_tokens"`
+	InputRate         int64  `json:"input_micro_per_million"`
+	OutputRate        int64  `json:"output_micro_per_million"`
+	CacheHitInputRate int64  `json:"cache_hit_input_micro_per_million,omitempty"`
 }
 type windowCampaignLimits struct {
 	Model windowCampaignProviderBounds `json:"model"`
@@ -49,7 +50,10 @@ func executionSHAWindowCampaign(scopeSHA, absoluteRoot string, limits windowCamp
 		return "", fmt.Errorf("fixed campaign models/output bound required")
 	}
 	for i, p := range []windowCampaignProviderBounds{limits.Model, limits.JEV} {
-		provider := windowProviderLimits{Model: p.Model, MaxAttempts: 1, MaxRequestBytes: p.MaxRequestBytes, MaxInput: p.MaxInput, MaxOutput: p.MaxOutput, InputRate: p.InputRate, OutputRate: p.OutputRate}
+		provider := windowProviderLimits{Model: p.Model, MaxAttempts: 1, MaxRequestBytes: p.MaxRequestBytes, MaxInput: p.MaxInput, MaxOutput: p.MaxOutput, InputRate: p.InputRate, OutputRate: p.OutputRate, CacheHitInputRate: p.CacheHitInputRate}
+		if p.CacheHitInputRate < 0 || p.CacheHitInputRate > p.InputRate || (i == 1 && p.CacheHitInputRate != 0) {
+			return "", fmt.Errorf("invalid execution cache rate")
+		}
 		if e := provider.validate(i == 0); e != nil {
 			return "", e
 		}
@@ -90,6 +94,9 @@ type windowCampaignOwnedCheckpoint struct {
 type windowCampaignClaim struct {
 	Schema                   string                `json:"schema"`
 	BaselineEvidenceSHA256   string                `json:"baseline_evidence_sha256,omitempty"`
+	BudgetApprovalSHA256     string                `json:"budget_approval_sha256,omitempty"`
+	ParentModel              int64                 `json:"parent_model_micro_cny,omitempty"`
+	ParentJEV                int64                 `json:"parent_jev_micro_usd,omitempty"`
 	Root                     string                `json:"root"`
 	Index                    int                   `json:"index"`
 	ScopeSHA256              string                `json:"scope_sha256"`
@@ -151,9 +158,13 @@ func canonicalRootWindowCampaign(root string) error {
 }
 func contractWindowCampaign(scope fullWindowScope, sha string, w fullWindowDeclaration, limits windowCampaignLimits) windowAccountingContract {
 	convert := func(p windowCampaignProviderBounds, attempts int) windowProviderLimits {
-		return windowProviderLimits{Model: p.Model, MaxAttempts: attempts, MaxRequestBytes: p.MaxRequestBytes, MaxInput: p.MaxInput, MaxOutput: p.MaxOutput, InputRate: p.InputRate, OutputRate: p.OutputRate}
+		return windowProviderLimits{Model: p.Model, MaxAttempts: attempts, MaxRequestBytes: p.MaxRequestBytes, MaxInput: p.MaxInput, MaxOutput: p.MaxOutput, InputRate: p.InputRate, OutputRate: p.OutputRate, CacheHitInputRate: p.CacheHitInputRate}
 	}
-	return windowAccountingContract{Schema: "full-window-accounting.v1", ScopeSHA256: sha, ScheduleSHA256: scope.ScheduleSHA256, PolicySHA256: scope.Bindings.PolicySHA256, ClaimSHA256: sha, WindowID: w.ID, ModelCap: w.ModelCap, JEVCap: w.JEVCap, Model: convert(limits.Model, w.MaxModelCalls), JEV: convert(limits.JEV, w.MaxJEVCalls)}
+	schema := "full-window-accounting.v1"
+	if scope.Schema == "full-window-scope.v4" {
+		schema = "full-window-accounting.v2"
+	}
+	return windowAccountingContract{Schema: schema, ScopeSHA256: sha, ScheduleSHA256: scope.ScheduleSHA256, PolicySHA256: scope.Bindings.PolicySHA256, ClaimSHA256: sha, WindowID: w.ID, ModelCap: w.ModelCap, JEVCap: w.JEVCap, Model: convert(limits.Model, w.MaxModelCalls), JEV: convert(limits.JEV, w.MaxJEVCalls)}
 }
 func prepareWindowCampaign(root, frozenRoot string, scope fullWindowScope, source ConversationSuite, profiles PairedProfiles, bindings fullWindowBindings, frozenSHA, frozenExecutionSHA string, limits windowCampaignLimits) (windowCampaignPrepared, error) {
 	var out windowCampaignPrepared
@@ -162,6 +173,9 @@ func prepareWindowCampaign(root, frozenRoot string, scope fullWindowScope, sourc
 	}
 	if root != frozenRoot {
 		return out, fmt.Errorf("campaign root is not independently frozen root")
+	}
+	if e := validateWindowCampaignEpochLimits(scope, limits); e != nil {
+		return out, e
 	}
 	sha, _, e := validateFullWindowScope(scope, source, profiles, bindings)
 	if e != nil {
@@ -283,8 +297,15 @@ func validatePreparedWindowCampaign(p windowCampaignPrepared, b fullWindowBaseli
 		if err := validateStoppedV3CampaignHistory(p, b); err != nil {
 			return err
 		}
+	case "full-window-scope.v4":
+		if err := validateStoppedV4CampaignHistory(p, b); err != nil {
+			return err
+		}
 	default:
 		return fmt.Errorf("prepared campaign scope version rejected")
+	}
+	if err := validateWindowCampaignEpochLimits(p.scope, p.limits); err != nil {
+		return err
 	}
 	raw, e := json.Marshal(p.scope)
 	if e != nil || conversationHash(raw) != p.scopeSHA {
@@ -357,6 +378,10 @@ func (c *windowCampaign) persistClaimWindowCampaign(i int, previous, checkpoint 
 		if err := validateStoppedV3CampaignHistory(c.prepared, c.baseline); err != nil {
 			return err
 		}
+	} else if c.prepared.scope.Schema == "full-window-scope.v4" {
+		if err := validateStoppedV4CampaignHistory(c.prepared, c.baseline); err != nil {
+			return err
+		}
 	} else if c.historicalDir != "" {
 		baseline, e := loadFullWindowBaseline(c.historicalDir)
 		if e != nil || !reflect.DeepEqual(baseline, c.baseline) {
@@ -365,7 +390,7 @@ func (c *windowCampaign) persistClaimWindowCampaign(i int, previous, checkpoint 
 	}
 	w := c.prepared.scope.Windows[i]
 	parentModel, parentJEV := int64(100000000), int64(1000000)
-	if c.prepared.scope.Schema == "full-window-scope.v3" {
+	if c.prepared.scope.Schema == "full-window-scope.v3" || c.prepared.scope.Schema == "full-window-scope.v4" {
 		parentModel, parentJEV = c.baseline.TotalModel, c.baseline.TotalJEV
 	}
 	if w.ModelCap > parentModel-c.model || w.JEVCap > parentJEV-c.jev {
@@ -377,6 +402,13 @@ func (c *windowCampaign) persistClaimWindowCampaign(i int, previous, checkpoint 
 		r.Schema, r.BaselineEvidenceSHA256 = "full-window-campaign-claim.v2", d.BaselineEvidenceSHA256
 	} else if d.Schema == "full-window-scope.v3" {
 		r.Schema, r.BaselineEvidenceSHA256 = "full-window-campaign-claim.v3", d.BaselineEvidenceSHA256
+	}
+	if d.Schema == "full-window-scope.v4" {
+		r.Schema = "full-window-campaign-claim.v4"
+		r.BaselineEvidenceSHA256 = d.BaselineEvidenceSHA256
+		r.BudgetApprovalSHA256 = d.BudgetApprovalSHA256
+		r.ParentModel = parentModel
+		r.ParentJEV = parentJEV
 	}
 	// A claim attempt consumes its whole cap conservatively even if the new
 	// claim file is partial or its directory sync fails. This owner then halts;

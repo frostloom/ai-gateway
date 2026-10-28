@@ -1,0 +1,92 @@
+{
+  "schema": "full1220-v4-scope-campaign-offline.v1",
+  "scope": "Task1_only_not_actual_readiness",
+  "source_sha256": {
+    "internal/taskbench/window_scope.go": "57cf8821e107110d3e4d74abf7b3f641b93d42fab2b783a2f551233a40b5b216",
+    "internal/taskbench/window_campaign.go": "723c04cc5de9bd6c1c3a3ef0c4c12a751e5465fc85f5595134c706ef2834691d",
+    "internal/taskbench/window_scope_v4.go": "454cc23a466e0965ff3252f5b75723f30a00d6611f2f182861c32aea210e5b10",
+    "internal/taskbench/window_scope_v4_test.go": "c34fba02f29d1a76a01096b7be9adc29099cf9c68b37344970b4c726283cf13d",
+    "internal/taskbench/window_campaign_v4.go": "d846b468b1a0fdbc0bef25cfd0c3a2397fdf68079eb5e83a3092bf9d320de904",
+    "internal/taskbench/window_campaign_v4_test.go": "2ea187b0e3c0a20c42c934b88cdc19b9f846b24150ca69c99d907a4684d3aff6",
+    "eval/paired-pilots/2026-10-29-cache-price/declaration.json": "7775e0ad93ee85fcb195b8febbe9918183c14e97be1a8e831b5354cb9c638bd2"
+  },
+  "test_results": {
+    "focused-final": {
+      "pass": 53,
+      "fail": 0,
+      "skip": 0,
+      "package_action": "pass",
+      "elapsed": 7.118,
+      "stderr_bytes": 0,
+      "build_warnings": 0
+    },
+    "normal": {
+      "pass": 391,
+      "fail": 0,
+      "skip": 0,
+      "package_action": "pass",
+      "elapsed": 51.857,
+      "stderr_bytes": 0,
+      "build_warnings": 0
+    },
+    "actual-race": {
+      "pass": 229,
+      "fail": 0,
+      "skip": 0,
+      "package_action": "fail",
+      "elapsed": 480.891,
+      "stderr_bytes": 0,
+      "build_warnings": 1
+    },
+    "focused-race": {
+      "pass": 91,
+      "fail": 0,
+      "skip": 0,
+      "package_action": "pass",
+      "elapsed": 158.937,
+      "stderr_bytes": 0,
+      "build_warnings": 1
+    }
+  },
+  "independent_review": {
+    "confirmed_p1_p2": 0,
+    "test_seconds": 7.713,
+    "source_sha_unchanged": true
+  },
+  "baseline": {
+    "claims": 25,
+    "permanent_micro_cny": 38888170,
+    "permanent_micro_usd": 308003,
+    "native_model": 1791,
+    "native_jev": 445,
+    "old_original_files_unchanged": 9174,
+    "legacy_scope_versions": [
+      1,
+      2,
+      3
+    ],
+    "legacy_scope_execution_hashes_unchanged": true,
+    "legacy_campaign_claim_canonical_byte_roundtrips": 16
+  },
+  "new_declaration": {
+    "pairs": 3660,
+    "arms": 7320,
+    "defined_turns": 11772,
+    "boundaries_excluded": 1851,
+    "windows": 131,
+    "width": 28,
+    "model_cap_micro_cny": 64000000,
+    "jev_cap_micro_usd": 690000,
+    "cumulative_plus_risk_micro_cny": 104911594,
+    "cumulative_plus_risk_micro_usd": 998068,
+    "parent_micro_cny": 105000000,
+    "parent_micro_usd": 1000000
+  },
+  "new_actual_model": 0,
+  "new_actual_jev": 0,
+  "new_financial_claims": 0,
+  "new_scores": 0,
+  "deployed": false,
+  "full_go_completed_for_this_source": false,
+  "actual_paid_ready": false
+}
