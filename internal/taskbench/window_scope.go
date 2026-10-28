@@ -39,6 +39,7 @@ type fullWindowDeclaration struct {
 }
 type fullWindowScope struct {
 	Schema                   string                  `json:"schema"`
+	BaselineEvidenceSHA256   string                  `json:"baseline_evidence_sha256,omitempty"`
 	Bindings                 fullWindowBindings      `json:"bindings"`
 	DefinitionSHA256         string                  `json:"definition_sha256"`
 	ManifestSHA256           string                  `json:"manifest_sha256"`
@@ -132,7 +133,16 @@ func validateFullWindowScope(scope fullWindowScope, s ConversationSuite, p Paire
 	for i, w := range scope.Windows {
 		caps[i] = w.fullWindowCaps
 	}
-	expected, e := prepareFullWindowScope(s, p, scope.Width, caps, b)
+	var expected fullWindowScope
+	var e error
+	switch scope.Schema {
+	case "full-window-scope.v1":
+		expected, e = prepareFullWindowScope(s, p, scope.Width, caps, b)
+	case "full-window-scope.v2":
+		expected, e = prepareFullWindowScopeV2(s, p, scope.Width, caps, b, scope.BaselineEvidenceSHA256)
+	default:
+		return "", totals, fmt.Errorf("unsupported complete-window scope version")
+	}
 	if e != nil {
 		return "", totals, e
 	}

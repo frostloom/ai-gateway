@@ -39,6 +39,9 @@ type fullWindowClaimReceipt struct {
 // historical claims and rederives the complete source schedule before touching
 // the new registry. Neither arbitrary hashes nor a receipt authorize HTTP.
 func claimFirstFullWindow(root, historicalDir string, scope fullWindowScope, source ConversationSuite, profiles PairedProfiles, bindings fullWindowBindings, frozenSHA string) (fullWindowClaimReceipt, error) {
+	if scope.Schema != "full-window-scope.v1" || scope.BaselineEvidenceSHA256 != "" {
+		return fullWindowClaimReceipt{}, fmt.Errorf("legacy first-claim scope version rejected")
+	}
 	if _, e := loadFullWindowBaseline(historicalDir); e != nil {
 		return fullWindowClaimReceipt{}, e
 	}

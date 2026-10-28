@@ -1,0 +1,102 @@
+{
+  "schema": "full1220-v2-scope-campaign-unit.v1",
+  "full_original_pairs": 3660,
+  "full_original_arms": 7320,
+  "defined_turns": 11772,
+  "boundaries_separate": 1851,
+  "new_budget_epoch": {
+    "historical_calls": [
+      144,
+      37
+    ],
+    "permanent_micro_cny": 29475706,
+    "permanent_micro_usd": 227183,
+    "remaining_micro_cny": 70524294,
+    "remaining_micro_usd": 772817,
+    "claim_count": 10
+  },
+  "claims_v2_bind_baseline_sha": true,
+  "history_revalidated_before_each_claim": true,
+  "actual_constructor_accepts_concrete_file_proof_only": true,
+  "old_actual_epoch_now_rejected_before_settings_or_roots": true,
+  "legacy_scope_sha256_unchanged": "635bdd4016392c23865c4f9a2e4a7b88fa3cf6291bc0ec473266ce75d63e1855",
+  "legacy_claim_sha256_unchanged": "52bbf6e7edf8b66099141db5ac7c6782e45b8afc3bcd9145ea1fd51f936eca48",
+  "test_runs": {
+    "scope-v2-green": {
+      "test_pass": 332,
+      "failures": [],
+      "test_skip": 0,
+      "package_pass": 3,
+      "source_sha256": "b6e82354235f904205e713d136ba8e267b7b344f05e38c8764a4979aaaedfc92"
+    },
+    "scope-v2-targeted-race": {
+      "test_pass": 9,
+      "failures": [],
+      "test_skip": 0,
+      "package_pass": 1,
+      "source_sha256": "2b1b756f3d7f20db032254b363ced0bcceda45a07b730727bead4655316f92de"
+    },
+    "campaign-v2-race": {
+      "test_pass": 14,
+      "failures": [],
+      "test_skip": 0,
+      "package_pass": 1,
+      "source_sha256": "8401a30fec5cb2767e0dccdd50daf72708fb580caed8c18149c2ae5f656de823"
+    },
+    "campaign-v2-legacy-compat": {
+      "test_pass": 246,
+      "failures": [],
+      "test_skip": 0,
+      "package_pass": 3,
+      "source_sha256": "2284e931b1b57df22a14d9f8f72bfee559dceeffb4ff5628416cc266fc679295"
+    },
+    "scope-v2-compat-race": {
+      "test_pass": 135,
+      "failures": [
+        {
+          "test": null,
+          "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+          "elapsed": 302.405
+        }
+      ],
+      "test_skip": 0,
+      "package_pass": 2,
+      "source_sha256": "931f17da620f3ca210acfcb38429f0ac36ada3d2c9769b4d6bd6f93a4d3652aa"
+    }
+  },
+  "independent_review": {
+    "reviewer": "campaign_v2_review",
+    "p1": 0,
+    "p2": 0,
+    "scope": "static/source and existing evidence review; no new test execution"
+  },
+  "actual_ready_v2_connected": false,
+  "whole_v2_frozen_go_regression": "pending Task3",
+  "new_actual_model_calls": 0,
+  "new_actual_jev_calls": 0,
+  "new_actual_claims": 0,
+  "services_modified": false,
+  "scope_caps_candidate_sha256": "b0fb03ad102643f653a6a99870a75706f883c929764025e4a9384b6bdaeb0986",
+  "candidate_caps": {
+    "model_micro_cny": 68421662,
+    "jev_micro_usd": 705028,
+    "if_all_claimed_cumulative_micro_cny": 97897368,
+    "if_all_claimed_cumulative_micro_usd": 932211,
+    "remaining_after_extra_unknown_micro_cny": 79208,
+    "remaining_after_extra_unknown_micro_usd": 67724,
+    "not_claimed_or_bill": true,
+    "not_all_max_attempts_funded": true,
+    "normal_session_history_assumption_not_unconditional": true
+  },
+  "source_sha256": {
+    "internal/taskbench/window_scope.go": "8712364c05627b49c62775578b5b3f689a1b8df36571b55d9572e83029b97cbf",
+    "internal/taskbench/window_scope_v2.go": "b498681cb5ca77dae9b5cf6c723c969141c2c0b6a6b2c15aa1c546291f3348db",
+    "internal/taskbench/window_scope_v2_test.go": "c98fb844b50c313188be1acef72de4989f5e05605687703e4cd807313af76ed6",
+    "internal/taskbench/window_claim.go": "e71dcfbaf1ff2155cb284eb50eae812437e12859907e06c4d49f9c54bed9d9cf",
+    "internal/taskbench/window_campaign.go": "7e8843dc64307b175eda8defbd04a83506faeeb6192bc2a176053b60c9447ddb",
+    "internal/taskbench/window_campaign_v2.go": "6f6157140b71947b53eaeb8eb50130c1db7dd2232027e7640d897498b314cf63",
+    "internal/taskbench/window_campaign_v2_test.go": "2a3cc13ce4d5e32d775bb54da376df1ca07605e957cd0be1523fc39611d1a6bc",
+    "internal/taskbench/window_actual_session.go": "3e64734f4c09c19a33cc8f0fc7df6d2cbcf562dd1592fd37c48639b5a74ca0dd",
+    "internal/taskbench/window_legacy_entry_test.go": "12cbcb3226abc73eded7191475ec68045ba88c74d9abab2c2bd4069ddb4e7a0e"
+  }
+}

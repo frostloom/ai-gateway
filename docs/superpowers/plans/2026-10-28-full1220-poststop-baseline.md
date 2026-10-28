@@ -43,12 +43,13 @@ Interface: `loadWindowStoppedBaseline(path, expectedSHA string) (windowStoppedBa
 
 Files: `window_scope.go`、`window_campaign.go`，新增v2定向测试；旧`window_claim.go`只明确拒绝v2，不扩展未接线primitive。
 
-Interfaces: v2 scope包含不可省略的`baseline_evidence_sha256`；`newWindowCampaignV2`只接受Task1已验证快照。v1序列化和closed路径保持原样。
+Interfaces: v2 scope包含不可省略的`baseline_evidence_sha256`；`newWindowCampaignV2`只接受Task1已验证快照。v1序列化和closed路径保持原样。 私有campaign使用密封的`windowStoppedHistory`接口做每次重新验证；实际构造器只传入Task1具体文件快照，测试可在测试文件中实现内存证明，不引入生产test开关。验证同时返回基线、证据SHA及原root；scope、基线及新root与旧root隔离须全部一致。旧实际Open现需v2epoch，旧v1只读及closed记录仍可核验。
 
-- [ ] RED：v2缺绑定、交叉入口、旧scope误接收、新基线被覆盖回九claim，以及领取前篡改停止bundle均拒绝且不创建新root。
-- [ ] 让campaign start、persist和后续复验沿冻结版本读取同一基线；每份v2claim记录十claim SHA及baseline evidence SHA，不仅修改最初ready。
-- [ ] 验证原3660槽位、三轮轮换、臂顺序及两币种全部cap；全领累计97897368/760967，尾差2102632/239033，额外未知风险后79208µCNY保留。
-- [ ] 验证O_EXCL/fsync、原锁、领取/结算/停止/文件篡改与旧v1/closed回归；独立审查并提交。
+- [x] RED：v2缺绑定、交叉入口、旧scope误接收、新基线被覆盖回九claim，以及领取前篡改停止bundle均拒绝且不创建新root。
+- [x] 让campaign start、persist和后续复验沿冻结版本读取同一基线；每份v2claim记录十claim SHA及baseline evidence SHA，不仅修改最初ready。
+- [x] 验证原3660槽位、三轮轮换、臂顺序及两币种全部cap；模型cap不变，JEV候选增加正常路径余量后，全领累计97897368/932211，尾差2102632/67789，额外未知风险后79208µCNY/67724µUSD保留。
+- [x] 验证共享O_EXCL/fsync及v2首份/后续领取、状态变化和旧v1/closed回归；独立审查无确认P1/P2。
+- [x] 提交Task2单元；Task3精确归档全Go与实际入口接线仍待。
 
 ## Task 3：v2实际ready/session与原Handler替身验收
 
@@ -77,3 +78,9 @@ Files: `window_actual_ready.go`、`window_actual_session.go`、`cmd/full-window-
 Ruling: 将纯责任、跨文件语义和文件/锁边界分为三个聚焦文件；只读单元按定向/race证据提交，不代表整个v2实现或精确归档全Go已完成。最终完整冻结仍在Task3，避免把局部结果当真实完整测评。
 
 Task1最终证据见`docs/evidence/full1220-stopped-baseline-2026-10-28.json`。新增独立要求文件集测试覆盖14停止文件与九历史claim逐项缺失/篡改；故障overlay移除SHA/库存时28项测试失败，正式源最终race无失败/跳过。原材料实际只读loader通过，不属于新推理。
+
+Task2进度：v2数据声明已重算同一3660槽位/原臂序并绑定新基线SHA，新总余额单独校验；旧first-claim/campaign跨v2及旧actual epoch明确拒绝已RED→GREEN。原v1 canonical SHA635bdd4016392c23865c4f9a2e4a7b88fa3cf6291bc0ec473266ce75d63e1855只读重算一致。宽race组5分钟总超时保留，不算通过；新增分组定向race进行中，最终20分钟全Go门槛不变。
+
+Ruling: v2候选在原美元余额内将JEV每窗cap改为2688+(N−1)×100µUSD，N按窗内全部slot（正常同一会话历史路径每任务至多一次；Redis丢失/损坏等例外可能增加调用并提前停止）。模型cap不变；新JEV总705028、全领累计USD932211、余67789，额外未知65后67724。独立整数复核通过，不是新claim/实际费，也不保证全部5886最大JEV尝试；旧scope cap与claim不改。
+
+Task2验证：scope非race332过、定向race9过（35.987秒）、v2 campaign定向race14过（83.283秒）、旧兼容246过/三包pass（taskbench68.532秒）；宽race组302.405秒总超时保留，不计通过。两条原v1 canonical SHA实际只读复算一致。细节见`docs/evidence/full1220-v2-scope-campaign-2026-10-28.json`。

@@ -62,12 +62,13 @@ func executionSHAWindowCampaign(scopeSHA, absoluteRoot string, limits windowCamp
 }
 
 type windowCampaignPrepared struct {
-	root         string
-	scopeSHA     string
-	executionSHA string
-	limits       windowCampaignLimits
-	scope        fullWindowScope
-	contracts    []windowAccountingContract
+	root           string
+	scopeSHA       string
+	executionSHA   string
+	limits         windowCampaignLimits
+	scope          fullWindowScope
+	contracts      []windowAccountingContract
+	stoppedHistory windowStoppedHistory
 }
 type windowCampaignArmEvidence struct {
 	QualityEnd                   *windowQualityEndEvidence `json:",omitempty"`
@@ -88,6 +89,7 @@ type windowCampaignOwnedCheckpoint struct {
 }
 type windowCampaignClaim struct {
 	Schema                   string                `json:"schema"`
+	BaselineEvidenceSHA256   string                `json:"baseline_evidence_sha256,omitempty"`
 	Root                     string                `json:"root"`
 	Index                    int                   `json:"index"`
 	ScopeSHA256              string                `json:"scope_sha256"`
@@ -204,6 +206,9 @@ func prepareWindowCampaign(root, frozenRoot string, scope fullWindowScope, sourc
 // certify their evidence-file contents or official tariff interpretation. This
 // function does not select a real root, cap, paid entry or certify price content.
 func newWindowCampaign(root, frozenRoot, historicalDir string, scope fullWindowScope, source ConversationSuite, profiles PairedProfiles, bindings fullWindowBindings, frozenSHA, frozenExecutionSHA string, limits windowCampaignLimits) (*windowCampaign, error) {
+	if scope.Schema != "full-window-scope.v1" || scope.BaselineEvidenceSHA256 != "" {
+		return nil, fmt.Errorf("legacy campaign scope version rejected")
+	}
 	p, e := prepareWindowCampaign(root, frozenRoot, scope, source, profiles, bindings, frozenSHA, frozenExecutionSHA, limits)
 	if e != nil {
 		return nil, e
@@ -253,7 +258,7 @@ func startWindowCampaign(p windowCampaignPrepared, baseline fullWindowBaseline) 
 		return nil, e
 	}
 	c := &windowCampaign{root: p.root, rootInfo: info, lock: lock, prepared: p, baseline: baseline, model: baseline.PermanentModel, jev: baseline.PermanentJEV, files: map[string]string{}, ledgerAudits: map[string]string{}}
-	c.baseline.ClaimSHA256 = fullWindowCanonicalClaims()
+	c.baseline.ClaimSHA256 = cloneWindowHistoricalClaims(baseline.ClaimSHA256)
 	if e = c.persistClaimWindowCampaign(0, "", ""); e != nil {
 		c.closeWindowCampaign()
 		return nil, e
@@ -264,9 +269,18 @@ func validatePreparedWindowCampaign(p windowCampaignPrepared, b fullWindowBaseli
 	if e := canonicalRootWindowCampaign(p.root); e != nil {
 		return e
 	}
-	expected := fullWindowBaseline{TotalModel: 100000000, TotalJEV: 1000000, PermanentModel: 29061120, PermanentJEV: 223104, RemainingModel: 70938880, RemainingJEV: 776896, ActualModelCalls: 143, ActualJEVCalls: 37, ClaimSHA256: fullWindowCanonicalClaims()}
-	if !reflect.DeepEqual(expected, b) {
-		return fmt.Errorf("historical baseline differs from fixed permanent chain")
+	switch p.scope.Schema {
+	case "full-window-scope.v1":
+		expected := fullWindowBaseline{TotalModel: 100000000, TotalJEV: 1000000, PermanentModel: 29061120, PermanentJEV: 223104, RemainingModel: 70938880, RemainingJEV: 776896, ActualModelCalls: 143, ActualJEVCalls: 37, ClaimSHA256: fullWindowCanonicalClaims()}
+		if p.stoppedHistory != nil || !reflect.DeepEqual(expected, b) {
+			return fmt.Errorf("historical baseline differs from fixed permanent chain")
+		}
+	case "full-window-scope.v2":
+		if err := validateStoppedCampaignHistory(p, b); err != nil {
+			return err
+		}
+	default:
+		return fmt.Errorf("prepared campaign scope version rejected")
 	}
 	raw, e := json.Marshal(p.scope)
 	if e != nil || conversationHash(raw) != p.scopeSHA {
@@ -278,7 +292,7 @@ func validatePreparedWindowCampaign(p windowCampaignPrepared, b fullWindowBaseli
 	}
 	d := fullWindowClaimDeclaration{ScopeSHA256: p.scopeSHA, ScheduleSHA256: p.scope.ScheduleSHA256, PolicySHA256: p.scope.Bindings.PolicySHA256, Windows: p.scope.Windows}
 	for _, w := range d.Windows {
-		if w.ModelCap > 70938880-d.ModelTotal || w.JEVCap > 776896-d.JEVTotal || w.ModelCap < 1 || w.JEVCap < 1 {
+		if w.ModelCap > b.RemainingModel-d.ModelTotal || w.JEVCap > b.RemainingJEV-d.JEVTotal || w.ModelCap < 1 || w.JEVCap < 1 {
 			return fmt.Errorf("campaign caps exceed baseline")
 		}
 		d.ModelTotal += w.ModelCap
@@ -331,7 +345,11 @@ func (c *windowCampaign) persistClaimWindowCampaign(i int, previous, checkpoint 
 	if i < 0 || i >= len(c.prepared.scope.Windows) {
 		return fmt.Errorf("no next window")
 	}
-	if c.historicalDir != "" {
+	if c.prepared.scope.Schema == "full-window-scope.v2" {
+		if err := validateStoppedCampaignHistory(c.prepared, c.baseline); err != nil {
+			return err
+		}
+	} else if c.historicalDir != "" {
 		baseline, e := loadFullWindowBaseline(c.historicalDir)
 		if e != nil || !reflect.DeepEqual(baseline, c.baseline) {
 			return fmt.Errorf("historical claim chain changed")
@@ -342,7 +360,10 @@ func (c *windowCampaign) persistClaimWindowCampaign(i int, previous, checkpoint 
 		return fmt.Errorf("permanent currency cap exhausted")
 	}
 	d := c.prepared.scope
-	r := windowCampaignClaim{Schema: "full-window-campaign-claim.v1", Root: c.root, Index: i + 1, ScopeSHA256: c.prepared.scopeSHA, ExecutionSHA256: c.prepared.executionSHA, DefinitionSHA256: d.DefinitionSHA256, ManifestSHA256: d.ManifestSHA256, SelectionSHA256: d.SelectionSHA256, ProfileSHA256: d.ProfileSHA256, ScheduleSHA256: d.ScheduleSHA256, PolicySHA256: d.Bindings.PolicySHA256, PreviousClaimSHA256: previous, PreviousCheckpointSHA256: checkpoint, Window: w, HistoricalClaims: fullWindowCanonicalClaims(), ModelPermanent: c.model + w.ModelCap, JEVPermanent: c.jev + w.JEVCap}
+	r := windowCampaignClaim{Schema: "full-window-campaign-claim.v1", Root: c.root, Index: i + 1, ScopeSHA256: c.prepared.scopeSHA, ExecutionSHA256: c.prepared.executionSHA, DefinitionSHA256: d.DefinitionSHA256, ManifestSHA256: d.ManifestSHA256, SelectionSHA256: d.SelectionSHA256, ProfileSHA256: d.ProfileSHA256, ScheduleSHA256: d.ScheduleSHA256, PolicySHA256: d.Bindings.PolicySHA256, PreviousClaimSHA256: previous, PreviousCheckpointSHA256: checkpoint, Window: w, HistoricalClaims: cloneWindowHistoricalClaims(c.baseline.ClaimSHA256), ModelPermanent: c.model + w.ModelCap, JEVPermanent: c.jev + w.JEVCap}
+	if d.Schema == "full-window-scope.v2" {
+		r.Schema, r.BaselineEvidenceSHA256 = "full-window-campaign-claim.v2", d.BaselineEvidenceSHA256
+	}
 	// A claim attempt consumes its whole cap conservatively even if the new
 	// claim file is partial or its directory sync fails. This owner then halts;
 	// reopening is prohibited and cannot interpret a partial claim as free.
