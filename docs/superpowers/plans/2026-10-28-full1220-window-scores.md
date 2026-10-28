@@ -74,3 +74,5 @@ Interfaces: CLI显式`plan / publish --execute / verify`；只读默认。publis
 2026-10-29 Task1：纯计划与30项测试交付，230项Python回归/15原skip/0fail-error；原六窗334record/1268要求全部重算匹配，269/63/2语义与259/75严格口径不改。独立P2首窗observed/quality互换已root复现并RED→GREEN：首窗分项精确，后窗当前quality下界，prior分项显式pending链验证；不假设prior quality=0。无第二轮审查，修复后完整suite与root30测试通过。Task2/3仍pending、publish_ready=false、0POST。
 
 2026-10-29 Task2：固定helper在精确归档副本调用原content()，原source/staged/records/helper/可信Go SHA前后校验，opaque proof拒绝普通JSON；纯测试53项通过，完整Python253项/15原skip/0fail。真实预检root.git误拒和首GET布尔metadata表示误拒分别保留并最小RED→GREEN，独立定向复核无确认P1/P2。最终新v3首窗56trace235obs60轮逐源正文/元数据/父链只读通过，评分仍0/publish_ready=false；其余窗尚待实际内容读回，Task3未完成。
+
+2026-10-29 Task3实现已固定待实际发布：逐窗原summary SHA链重算至停止窗9通过；固定stdlib Ed25519 helper对原manifest/attestation/binary真实正例通过、改1位signature反例拒绝，不执行消耗的actual binary。72专项、完整Python272项/15原skip/0fail/41.409秒。独立P2发现verify只glob现存intent子集误报完整，RED复现12缺1仍true；改为先持久化原完整batch清单，exactset核对，原复现变unverified且新review仍验证旧完整payload，3项独立复核通过。score wire剔除内部logical_identity，固定scope registry/once-only intent与受限client均实现；尚未实际POST，最终全量报告未完成。

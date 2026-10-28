@@ -6,6 +6,10 @@ import json
 import unittest
 import tempfile
 import subprocess
+import base64
+import io
+import threading
+from concurrent.futures import ThreadPoolExecutor
 from unittest.mock import patch
 from pathlib import Path
 
@@ -804,6 +808,306 @@ class ContentProjectionTests(unittest.TestCase):
         # A changed plan must be reprojected; a token from another plan cannot be
         # borrowed to clear gates, even if its trace/body projection is identical.
         with self.assertRaises(ValueError):self.adapter.validate_window_traces(plan,proof,self.client(self.plan(),proof))
+
+
+class PublicationTests(unittest.TestCase):
+    setUpClass = classmethod(ContentProjectionTests.setUpClass.__func__)
+    api = ContentProjectionTests.api
+    fake_go = ContentProjectionTests.fake_go
+    project = ContentProjectionTests.project
+    plan = ContentProjectionTests.plan
+    client = ContentProjectionTests.client
+
+    def setUp(self):
+        ContentProjectionTests.setUp(self)
+        self.registry=(self.root/'fixed-publication-registry').resolve()
+        self.registry_patch=patch.object(self.adapter,'_PUBLICATION_REGISTRY_ROOT',self.registry,create=True)
+        self.registry_patch.start();self.addCleanup(self.registry_patch.stop)
+        old=(SCRIPT.parent/'langfuse-eval.py').read_bytes();path=self.source/'scripts/langfuse-eval.py'
+        path.parent.mkdir();path.write_bytes(old)
+        self.f['manifest']['sources']['scripts/langfuse-eval.py']=digest(old)
+        self.f['manifest']['build_attestation_public_key']='a'*64
+        self.f['manifest']['observer'].update(endpoint_sha256=digest(b'http://127.0.0.1:3000/api/public/otel/v1/traces'),project_sha256=digest(b'fake-public'))
+        self.f['summary']['last_receipt_sha256']=''
+        refresh_links(self.f)
+        self.posted=[];self.visible={};self.verify_calls=0;self.post_error=None;self.bad_ack=False;self.on_read=None
+
+    def pub_api(self):
+        for name in ('verify_window_receipt_chain','verify_window_attestation','load_window_score_client','publish_window_scores','verify_window_scores'):
+            self.assertTrue(callable(getattr(self.adapter,name,None)),name+' is missing')
+
+    def chain(self,f=None):
+        self.pub_api();f=f or self.f;plan=self.plan(f)
+        entries=[{'summary_raw':wire(f['summary']),'receipt_raw':wire(f['receipt'])}]
+        pins=[{'summary_sha256':digest(entries[0]['summary_raw']),'receipt_sha256':digest(entries[0]['receipt_raw'])}]
+        return self.adapter.verify_window_receipt_chain(plan,wire(f['manifest']),entries,pins)
+
+    def attest(self,f=None):
+        self.pub_api();f=f or self.f;manifest=f['manifest'];binary=self.root/'actual-binary'
+        if not binary.exists():binary.write_bytes(b'explicit actual binary bytes, never executed');binary.chmod(0o700)
+        att={'schema':'full-window-actual-binary-attestation.v1','archive_commit':manifest['archive_commit'],
+             'archive_tree':manifest['archive_tree'],'ready_manifest_sha256':digest(wire(manifest)),
+             'binary_sha256':digest(binary.read_bytes()),'signature':'b'*128}
+        def fake_attestation(command,**kwargs):
+            job=json.loads(kwargs['input']);binding={k:att[k] for k in ('schema','archive_commit','archive_tree','ready_manifest_sha256','binary_sha256')}
+            body={'schema':'full1220-attestation-verification.v1','manifest_sha256':digest(wire(manifest)),
+                  'attestation_sha256':digest(wire(att)),'binary_sha256':att['binary_sha256'],
+                  'canonical_binding_sha256':digest(wire(binding)),'signature_verified':True}
+            return subprocess.CompletedProcess(command,0,wire(body),b'')
+        with patch.object(self.adapter.subprocess,'run',side_effect=fake_attestation):
+            return self.adapter.verify_window_attestation(wire(manifest),wire(att),digest(wire(att)),str(binary.resolve()),
+                runtime={'go_executable':str(self.go),'go_sha256':digest(self.go.read_bytes())},
+                output_dir=str(self.root/('attestation-'+str(len(list(self.root.glob('attestation-*')))))),execute=True)
+
+    def bound_client(self,plan,proof):
+        self.pub_api();fake=self.client(plan,proof);test=self
+        class Delegate:
+            def __init__(self,c):self.c=c
+            def observations(self,trace):
+                if test.on_read:test.on_read(trace)
+                return fake.observations(trace)
+            def request(self,path,body=None):
+                if body is not None:
+                    test.posted.append(copy.deepcopy(body))
+                    if test.post_error:raise test.post_error
+                    test.visible[body['id']]=copy.deepcopy(body)
+                    return {} if test.bad_ack else {'id':body['id']}
+                raise AssertionError('verify_scores should be the only score GET boundary')
+            def verify_scores(self,scores):
+                test.verify_calls+=1
+                for score in scores:
+                    if test.visible.get(score['id'])!=score:raise ValueError('delayed or mismatching score')
+        settings=self.root/'evaluation-client.json'
+        if not settings.exists():
+            settings.write_bytes(wire({'OTEL_EXPORTER_OTLP_TRACES_ENDPOINT':'http://127.0.0.1:3000/api/public/otel/v1/traces',
+                'AGENT_LANGFUSE_ENVIRONMENT':'evaluation','LANGFUSE_PUBLIC_KEY':'fake-public','LANGFUSE_SECRET_KEY':'fake-secret'}));settings.chmod(0o600)
+        with patch.object(self.adapter,'_old_langfuse_client_class',return_value=Delegate):
+            return self.adapter.load_window_score_client(wire(self.f['manifest']),str(settings))
+
+    def gates(self):
+        self.pub_api();proof=self.project(output=self.root/('publication-projection-'+str(len(list(self.root.glob('publication-projection-*'))))));plan=self.plan();return plan,proof,self.chain(),self.attest(),self.bound_client(plan,proof)
+
+    def publish(self,values,execute=True):
+        plan,projection,chain,attestation,client=values
+        return self.adapter.publish_window_scores(plan,projection,chain,attestation,client,execute=execute)
+
+    def test_publish_requires_all_proofs_and_explicit_execute_before_post(self):
+        values=self.gates()
+        with self.assertRaises(ValueError):self.publish(values,False)
+        for index in (1,2,3):
+            bad=list(values);bad[index]={}
+            with self.subTest(index=index),self.assertRaises(ValueError):self.publish(bad)
+        self.assertEqual(self.posted,[])
+        result=self.publish(values);self.assertTrue(result['all_verified'])
+        self.assertEqual(len(self.posted),len(values[0]['scores']))
+
+    def test_http_payload_excludes_internal_logical_identity_but_intent_keeps_it(self):
+        values=self.gates();self.publish(values)
+        for score in self.posted:self.assertNotIn('logical_identity',score.keys())
+        scope=self.registry/values[0]['provenance']['scope_sha256']
+        intents=[json.loads(path.read_bytes()) for path in scope.glob('logical-*.intent.json')]
+        self.assertEqual(len(intents),len(self.posted))
+        self.assertTrue(all(type(event['logical_identity']) is str for event in intents))
+
+    def test_duplicate_publish_and_review_or_id_change_never_resend(self):
+        values=self.gates();self.publish(values);count=len(self.posted)
+        with self.assertRaises(ValueError):self.publish(values)
+        self.f['review']['review_revision']=999
+        updated=self.gates()
+        with self.assertRaises(ValueError):self.publish(updated)
+        altered=list(updated);altered[0]=copy.deepcopy(updated[0]);altered[0]['scores'][0]['id']='9'*64
+        with self.assertRaises(ValueError):self.publish(altered)
+        self.assertEqual(len(self.posted),count)
+
+    def test_timeout_or_bad_ack_is_unknown_and_only_verify_is_allowed(self):
+        values=self.gates();self.post_error=TimeoutError('sent then timeout')
+        with self.assertRaises(ValueError):self.publish(values)
+        count=len(self.posted)
+        with self.assertRaises(ValueError):self.publish(values)
+        self.assertEqual(len(self.posted),count)
+        result=self.adapter.verify_window_scores(values[0],values[4]);self.assertFalse(result['all_verified'])
+
+    def test_bad_ack_does_not_repost_even_when_score_eventually_appears(self):
+        values=self.gates();self.bad_ack=True
+        with self.assertRaises(ValueError):self.publish(values)
+        count=len(self.posted);self.bad_ack=False
+        self.adapter.verify_window_scores(values[0],values[4])
+        self.assertEqual(len(self.posted),count)
+
+    def test_delayed_verify_performs_only_reads_and_uses_original_intent_metadata(self):
+        values=self.gates();self.publish(values);saved=copy.deepcopy(self.visible);self.visible.clear()
+        result=self.adapter.verify_window_scores(values[0],values[4]);self.assertFalse(result['all_verified'])
+        count=len(self.posted);self.visible.update(saved)
+        self.assertTrue(self.adapter.verify_window_scores(values[0],values[4])['all_verified'])
+        self.assertEqual(len(self.posted),count)
+
+    def test_intent_disk_failure_causes_zero_post_and_accepted_failure_cannot_retry(self):
+        values=self.gates();original=self.adapter._publication_event
+        def fail(handle,name,event):
+            if name.startswith('score-'):raise OSError('intent fsync failure')
+            return original(handle,name,event)
+        with patch.object(self.adapter,'_publication_event',side_effect=fail),self.assertRaises(ValueError):self.publish(values)
+        self.assertEqual(self.posted,[])
+        with self.assertRaises(ValueError):self.publish(values)
+
+    def test_accepted_event_failure_after_post_is_never_resent(self):
+        values=self.gates();original=self.adapter._publication_event
+        def fail(handle,name,event):
+            if name.endswith('.accepted.json'):raise OSError('accepted fsync failure')
+            return original(handle,name,event)
+        with patch.object(self.adapter,'_publication_event',side_effect=fail),self.assertRaises(ValueError):self.publish(values)
+        self.assertEqual(len(self.posted),1)
+        with self.assertRaises(ValueError):self.publish(values)
+        self.assertEqual(len(self.posted),1)
+
+    def test_registry_directory_relocation_before_post_fails_closed(self):
+        values=self.gates();scope=values[0]['provenance']['scope_sha256'];called=[]
+        def relocate(trace):
+            if called:return
+            called.append(trace);path=self.registry/scope;path.rename(self.registry/(scope+'-moved'));path.mkdir(mode=0o700)
+        self.on_read=relocate
+        with self.assertRaises(ValueError):self.publish(values)
+        self.assertEqual(self.posted,[])
+        self.on_read=None
+        with self.assertRaises(ValueError):self.publish(values)
+
+    def test_concurrent_publish_loser_has_zero_post(self):
+        values=self.gates();entered=threading.Event();release=threading.Event()
+        def wait(trace):entered.set();release.wait(5)
+        self.on_read=wait
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            first=pool.submit(self.publish,values);self.assertTrue(entered.wait(5))
+            with self.assertRaises(ValueError):self.publish(values)
+            release.set();self.assertTrue(first.result(timeout=5)['all_verified'])
+        self.assertEqual(len(self.posted),len(values[0]['scores']))
+
+    def test_binary_tamper_and_client_project_change_reject_before_post(self):
+        values=self.gates();(self.root/'actual-binary').write_bytes(b'tampered')
+        with self.assertRaises(ValueError):self.publish(values)
+        self.assertEqual(self.posted,[])
+        settings=self.root/'bad-client.json';settings.write_bytes(wire({'OTEL_EXPORTER_OTLP_TRACES_ENDPOINT':'http://127.0.0.1:3000/api/public/otel/v1/traces',
+            'AGENT_LANGFUSE_ENVIRONMENT':'evaluation','LANGFUSE_PUBLIC_KEY':'other','LANGFUSE_SECRET_KEY':'fake'}));settings.chmod(0o600)
+        with self.assertRaises(ValueError):self.adapter.load_window_score_client(wire(self.f['manifest']),str(settings))
+
+    def test_current_receipt_chain_tamper_and_missing_previous_entries_reject(self):
+        self.pub_api();f=self.f;plan=self.plan();entries=[{'summary_raw':wire(f['summary']),'receipt_raw':wire(f['receipt'])}]
+        pins=[{'summary_sha256':digest(entries[0]['summary_raw']),'receipt_sha256':digest(entries[0]['receipt_raw'])}]
+        wrong=copy.deepcopy(entries);wrong[0]['receipt_raw']+=b' '
+        with self.assertRaises(ValueError):self.adapter.verify_window_receipt_chain(plan,wire(f['manifest']),wrong,pins)
+        with self.assertRaises(ValueError):self.adapter.verify_window_receipt_chain(plan,wire(f['manifest']),[],[])
+
+    def test_remaining_accepted_marker_blocks_repost_after_partial_evidence_loss(self):
+        values=self.gates();self.publish(values);count=len(self.posted)
+        scope=self.registry/values[0]['provenance']['scope_sha256']
+        for pattern in ('logical-*.intent.json','score-*.intent.json','*.sent.json'):
+            for path in scope.glob(pattern):path.unlink()
+        with self.assertRaises(ValueError):self.publish(values)
+        self.assertEqual(len(self.posted),count)
+        self.assertFalse(self.adapter.verify_window_scores(values[0],values[4])['all_verified'])
+
+    def test_missing_one_original_intent_and_link_cannot_verify_remaining_subset_as_complete(self):
+        values=self.gates();self.publish(values)
+        scope=self.registry/values[0]['provenance']['scope_sha256']
+        path=next(scope.glob('logical-*.intent.json'));event=json.loads(path.read_bytes());path.unlink()
+        (scope/('score-'+event['score']['id']+'.intent.json')).unlink()
+        result=self.adapter.verify_window_scores(values[0],values[4])
+        self.assertFalse(result['all_verified'])
+
+    def test_original_batch_manifest_is_durable_before_first_logical_intent(self):
+        values=self.gates();original=self.adapter._publication_event;seen=[]
+        def check(handle,name,event):
+            if name.startswith('logical-'):
+                target=handle.scope/('window-%06d.batch.json'%values[0]['window_index'])
+                self.assertTrue(target.exists(),'complete batch inventory must precede first logical intent')
+                batch=json.loads(target.read_bytes());self.assertEqual(len(batch['scores']),len(values[0]['scores']));seen.append(name)
+            return original(handle,name,event)
+        with patch.object(self.adapter,'_publication_event',side_effect=check):self.assertTrue(self.publish(values)['all_verified'])
+        self.assertEqual(len(seen),len(values[0]['scores']))
+
+    def test_new_review_with_fewer_metrics_verifies_all_original_batch_payloads(self):
+        values=self.gates();self.publish(values);count=len(values[0]['scores'])
+        self.f['review']['review_revision']=999;self.f['review']['rows'][0]['pass_score_publish_eligible']=False
+        changed=self.plan();self.assertLess(len(changed['scores']),count)
+        result=self.adapter.verify_window_scores(changed,values[4])
+        self.assertTrue(result['all_verified']);self.assertEqual(result['scores_checked'],count)
+
+    def test_complete_nonzero_prior_quality_chain_with_current_partial_and_unstarted(self):
+        self.pub_api();prior=partial_fixture(quality=True);current=later_quality_fixture(prior_quality=1)
+        for key in ('source_root','sources','observer','build_attestation_public_key'):
+            current['manifest'][key]=copy.deepcopy(self.f['manifest'][key])
+        prior['manifest']=copy.deepcopy(current['manifest'])
+        prior['receipt'].update(scope_sha256=current['manifest']['scope_sha256'],cleanup=True,
+            environment_cleanup=True,observer=True,advanced=True,payload_verified=True)
+        prior['summary'].update(last_receipt_sha256='',closed=False,acquisition_done=False,next_window_index=2)
+        recalculate_counts(prior)
+        for row,review in zip(current['receipt']['rows'],current['review']['rows']):
+            row['trace_id']='e'+row['trace_id'][1:];review['trace_id']=row['trace_id']
+            index=current['receipt']['rows'].index(row)
+            refresh_record(current,index,lambda d,trace=row['trace_id']:[ob['turn']['response']['telemetry'].__setitem__('langfuse_trace_id',trace) for ob in d['result']['observations']])
+        def partial(record):
+            result=record['result'];result['observations']=result['observations'][:1]
+            result['review_requirements']=[req for req in result['review_requirements'] if req['turn_index']==0]
+            result.update(status='failed',structural_pass=False,errors=['budget_exhausted']);record['disposition']='halt'
+        refresh_record(current,2,partial)
+        current['receipt']['rows'][2].update(status='failed',structural_pass=False,observed_turns=1,finished=False,cleanup=False,observer=False,disposition='halt')
+        review=current['review']['rows'][2];review.update(original_status='failed',original_structural_pass=False,
+            original_errors=['budget_exhausted'],observed_turns=1,finished=False,semantic_task_verdict='not_assessable',task_verdict='failed',pass_score_publish_eligible=False)
+        review['requirements']=[req for req in review['requirements'] if req['turn_index']==0]
+        for req in review['requirements']:req['verdict']='not_assessable'
+        last=current['receipt']['rows'][3];del current['records'][last['recording_file']]
+        last.update(attempted=False,finished=False,observed_turns=0,trace_id='',recording_file='',recording_sha256='',
+            status='not_started',disposition='',cleanup=False,observer=False,structural_pass=False)
+        current['review']['rows'][3]={**{key:last[key] for key in ('ordinal','pass','case_key','arm')},
+            'original_status':'not_started','original_success':False,'task_verdict':'not_started',
+            'semantic_task_verdict':'not_started','trace_id':None,'recording_file':None,'recording_sha256':None,
+            'requirements':[],'pass_score_publish_eligible':False}
+        current['receipt']['status']='stopped';recalculate_counts(current)
+        for key in ('attempted_arms','finished_arms','observed_turns','quality_end_unrun_turns'):
+            current['summary'][key]+=prior['summary'][key]
+        current['summary'].update(unattempted_arms=7320-current['summary']['attempted_arms'],
+            global_unrun_turns=11772-current['summary']['observed_turns']-current['summary']['quality_end_unrun_turns'])
+        current['summary']['last_receipt_sha256']=digest(wire(prior['summary']));refresh_links(current)
+        self.f=current;plan=self.plan();entries=[{'summary_raw':wire(f['summary']),'receipt_raw':wire(f['receipt'])} for f in (prior,current)]
+        pins=[{kind+'_sha256':digest(entry[kind+'_raw']) for kind in ('summary','receipt')} for entry in entries]
+        chain=self.adapter.verify_window_receipt_chain(plan,wire(current['manifest']),entries,pins)
+        self.assertEqual(chain.as_dict()['cumulative']['observed_turns'],11)
+        self.assertEqual(chain.as_dict()['cumulative']['quality_end_unrun_turns'],2)
+        self.assertEqual(plan['denominators']['window']['unattempted_arms'],1)
+        proof=self.project();client=self.bound_client(plan,proof)
+        self.assertTrue(self.publish((plan,proof,chain,self.attest(),client))['all_verified'])
+        for row in self.posted:
+            if row['metadata']['original_status']=='failed':self.assertNotEqual(row['value'],'passed')
+        for mutation in ('link','component','missing'):
+            bad=copy.deepcopy(entries);badpins=copy.deepcopy(pins)
+            if mutation=='missing':bad=bad[1:];badpins=badpins[1:]
+            else:
+                summary=json.loads(bad[1]['summary_raw'])
+                if mutation=='link':summary['last_receipt_sha256']=pins[0]['receipt_sha256']
+                else:summary['observed_turns']+=1;summary['quality_end_unrun_turns']-=1
+                bad[1]['summary_raw']=wire(summary);badpins[1]['summary_sha256']=digest(bad[1]['summary_raw'])
+            with self.subTest(mutation=mutation),self.assertRaises(ValueError):self.adapter.verify_window_receipt_chain(plan,wire(current['manifest']),bad,badpins)
+
+    def test_verify_without_publication_does_not_create_registry_or_post(self):
+        values=self.gates();self.assertFalse(self.registry.exists())
+        result=self.adapter.verify_window_scores(values[0],values[4])
+        self.assertFalse(result['all_verified']);self.assertFalse(self.registry.exists());self.assertEqual(self.posted,[])
+        paths={}
+        for name in ('manifest','summary','receipt','review'):
+            path=self.root/('cli-'+name+'.json');path.write_bytes(wire(self.f[name]));paths[name+'_path']=str(path)
+        directory=self.root/'cli-records';directory.mkdir()
+        for name,raw in self.f['records'].items():(directory/name).write_bytes(raw)
+        job={'schema':'full1220-window-score-job.v1',**paths,'records_dir':str(directory),
+             'expected_hashes':arguments(self.f)[-1],'client_settings_path':str(self.root/'evaluation-client.json')}
+        jobfile=self.root/'cli-job.json';jobfile.write_bytes(wire(job))
+        with patch.object(self.adapter,'load_window_score_client',return_value=values[4]),patch('sys.stdout',new_callable=io.StringIO):
+            self.assertEqual(self.adapter.main(['verify','--job',str(jobfile)]),2)
+        self.assertFalse(self.registry.exists());self.assertEqual(self.posted,[])
+
+    def test_cli_default_plan_does_not_load_credentials_or_write_registry(self):
+        self.pub_api();self.assertTrue(callable(getattr(self.adapter,'main',None)))
+        with patch.object(self.adapter,'load_window_score_client',side_effect=AssertionError('read-only default')):
+            self.assertEqual(self.adapter.main([]),0)
+        self.assertFalse(self.registry.exists())
 
 
 if __name__ == '__main__': unittest.main()

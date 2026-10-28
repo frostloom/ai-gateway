@@ -1,0 +1,34 @@
+{
+  "schema": "full1220-window-score-publication-readiness.v1",
+  "source_hashes": {
+    "scripts/full1220-window-scores.py": "145db0939e364b36cc3c373342757c1ea24c9edfad52757b611d3f25d7f867c4",
+    "scripts/tests/test_full1220_window_scores.py": "1b52c0a285599a6f4c72b9e129b10ddc76f7d1e9e38f9e642ef0a553588d16f4",
+    "scripts/helpers/full1220_attestation.go.txt": "207155724a5a5c860817ec88c89311a9b2c96a02d7a2be6e9d82be12e0f9a945"
+  },
+  "python_tests": 272,
+  "original_skips": 15,
+  "failures": 0,
+  "elapsed_seconds": 41.409,
+  "python_log_sha256": "f2513f1684ef4da701ef89d5fcbba871eaadc90c2316acd2eea555520c06bce1",
+  "real_signature_tests": {
+    "schema": "full1220-window-real-signature-positive-and-negative.v1",
+    "actual_signature_passed": true,
+    "one_hex_signature_change_rejected_by_real_go_helper": true,
+    "source_script_sha256": "145db0939e364b36cc3c373342757c1ea24c9edfad52757b611d3f25d7f867c4",
+    "attestation_sha256": "5a0e256a4ad0f6e31bc3611095a2e853864e538e4b2244209967c9049b16e08d",
+    "new_requests": 0,
+    "actual_binary_executions": 0,
+    "private_keys_read": false
+  },
+  "real_signature_tests_sha256": "ea78375045bab9b4fc649d715557da3b34afb635e7260e429c74a29d1a34a655",
+  "independent_review_p2_found_then_fixed": "whole-window verify must reject missing original logical/score intents; persisted original complete batch precedes all intents; original subset reproduction now unverified",
+  "independent_fixed_targeted_tests": 3,
+  "independent_remaining_confirmed_p1_p2": 0,
+  "original_complete_scope_stopped": true,
+  "collected_traces": 482,
+  "collected_content_all_readback_verified": true,
+  "scores_published_at_snapshot": 0,
+  "new_model_calls": 0,
+  "new_jev_calls": 0,
+  "new_budget_claims": 0
+}

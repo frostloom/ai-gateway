@@ -1,9 +1,11 @@
 """Pure, explicitly SHA-anchored full1220 window score plans.
 
-Task1 is pure. Task2 accepts explicit frozen paths, runs only a pinned offline
-helper in an isolated source copy, and validates traces through a supplied
-read-only client. There is no credential loader, network client or publication
-entry point. Neither a plan nor current content validation authorizes scores.
+Task1 is pure. Task2 runs a pinned offline capture helper in an isolated
+source copy. Task3 requires the original receipt chain, an offline Ed25519
+attestation proof, complete trace/content validation, and explicit --execute
+before once-only local score publication. Default plan and verify are read-only;
+no inference, actual-budget claims, private signing keys or consumed binary
+execution are supported. The publication registry is fixed to this local project.
 
 Records are original Go encoding/json snapshots. Context reconstruction takes
 nested JSON fragments from those externally anchored bytes, preserving Go's
@@ -16,6 +18,11 @@ import json
 import math
 import re
 import os
+import fcntl
+import base64
+import argparse
+import importlib.util
+import sys
 import stat
 import subprocess
 from pathlib import Path
@@ -899,3 +906,469 @@ def validate_window_traces(plan, projection, client):
                 'native_llm_payload_io_claimed': False, 'included_does_not_prove_used': True}
     except (KeyError, IndexError, TypeError, UnicodeError) as error:
         raise ValueError('Invalid captured trace evidence: '+type(error).__name__) from error
+
+
+# This registry is intentionally specific to this local project. No command,
+# review, output directory, copied script, or manifest may override its root.
+# The design cannot resist an owner maliciously deleting all disk evidence.
+_PUBLICATION_REGISTRY_ROOT = Path('/Users/a1/项目/ai-gateway/.tmp/full1220-score-publications')
+_PROJECT_ROOT = Path('/Users/a1/项目/ai-gateway')
+_ATTESTATION_HELPER_SHA256 = '207155724a5a5c860817ec88c89311a9b2c96a02d7a2be6e9d82be12e0f9a945'
+_PUBLICATION_SEAL = object()
+
+
+class _PublicationProof:
+    __slots__ = ('_kind', '_plan_sha', '_raw', '_seal')
+
+    def __init__(self, seal, kind, data, plan=None):
+        _require(seal is _PUBLICATION_SEAL, 'Verified gate proof required')
+        for key, value in (('_kind', kind), ('_plan_sha', _sha(_json_bytes(plan)) if plan is not None else None),
+                           ('_raw', _json_bytes(data)), ('_seal', seal)):
+            object.__setattr__(self, key, value)
+
+    def __setattr__(self, name, value):
+        raise AttributeError('Immutable verified gate proof')
+
+    def as_dict(self):
+        return _Document(self._raw).value
+
+
+def verify_window_receipt_chain(plan, manifest_raw, entries, expected_hashes):
+    """Recompute the complete raw prior-summary → summary → receipt chain.
+
+    entries and SHA pins explicitly contain windows1..current, including the
+    current partial/stopped window. Only prior windows must have completed.
+    No records, directories, historical claims or original files are modified.
+    """
+    try:
+        manifest = _Document(manifest_raw).value
+        _equal(_sha(manifest_raw), plan['provenance']['manifest_sha256'], 'Chain manifest mismatch')
+        _require(type(entries) is list and type(expected_hashes) is list
+                 and len(entries) == len(expected_hashes) == plan['window_index'], 'Complete original prefix chain required')
+        totals = {'attempted_arms': 0, 'finished_arms': 0, 'observed_turns': 0, 'quality_end_unrun_turns': 0}
+        previous = ''; inventory = []
+        for index, (entry, pins) in enumerate(zip(entries, expected_hashes), 1):
+            raw_summary, raw_receipt = entry['summary_raw'], entry['receipt_raw']
+            _require(type(raw_summary) is bytes and type(raw_receipt) is bytes, 'Original chain bytes required')
+            for name, raw in [('summary', raw_summary), ('receipt', raw_receipt)]:
+                _equal(_sha(raw), _hex(pins[name+'_sha256'], _HEX64, 'External chain SHA pin required'), 'Original chain SHA mismatch')
+            summary, receipt = _Document(raw_summary).value, _Document(raw_receipt).value
+            _equal(receipt['schema'], 'full-window-acquisition-receipt.v1', 'Original receipt schema required')
+            _equal(receipt['evidence_kind'], 'recorded_run', 'Original recorded receipt required')
+            _equal(receipt['window_index'], index, 'Contiguous prefix windows required')
+            for key in ('scope_sha256', 'execution_sha256'):
+                _equal(receipt[key], manifest[key], 'Prefix scope/execution mismatch')
+            _planned_rows(manifest, receipt)
+            _validate_summary(summary, receipt, pins['receipt_sha256'], manifest)
+            _equal(summary['last_receipt_sha256'], previous, 'Original prior-summary SHA chain mismatch')
+            if index < len(entries):
+                _require(receipt['status'] == 'collected_window' and receipt['finished_arms'] == receipt['planned_current_arms']
+                         and receipt['attempted_arms'] == receipt['planned_current_arms']
+                         and all(receipt[key] is True for key in ('cleanup', 'environment_cleanup', 'observer', 'advanced', 'payload_verified'))
+                         and summary['closed'] is False, 'Only completed prior windows may form a prefix')
+            for key in ('attempted_arms', 'finished_arms', 'observed_turns'):
+                totals[key] += receipt[key]
+            totals['quality_end_unrun_turns'] += sum((row.get('quality_end') or {}).get('unrun_turns', 0) for row in receipt['rows'])
+            exact = {**totals, 'failed_attempted_arms': totals['attempted_arms']-totals['finished_arms'],
+                     'unattempted_arms': 7320-totals['attempted_arms'],
+                     'global_unrun_turns': 11772-totals['observed_turns']-totals['quality_end_unrun_turns']}
+            for key, value in exact.items():
+                _equal(summary[key], value, 'Original cumulative component mismatch: '+key)
+            previous = pins['summary_sha256']; inventory.append(dict(pins))
+        _equal(previous, plan['provenance']['summary_sha256'], 'Chain must end at exact planned summary')
+        _equal(expected_hashes[-1]['receipt_sha256'], plan['provenance']['receipt_sha256'], 'Chain current receipt mismatch')
+        return _PublicationProof(_PUBLICATION_SEAL, 'receipt_chain', {'manifest_sha256': _sha(manifest_raw),
+            'inventory': inventory, 'chain_sha256': _sha(_json_bytes(inventory)), 'cumulative': exact}, plan)
+    except (KeyError, IndexError, TypeError, UnicodeError) as error:
+        raise ValueError('Invalid original receipt chain: '+type(error).__name__) from error
+
+
+def verify_window_attestation(manifest_raw, attestation_raw, attestation_sha256, binary_path, *, runtime, output_dir, execute=False):
+    """Fixed stdlib Ed25519 verifier; never invoke the consumed actual binary."""
+    try:
+        _require(execute is True, 'Explicit fixed offline signature helper execution required')
+        manifest, attestation = _Document(manifest_raw).value, _Document(attestation_raw, 65536).value
+        _equal(_sha(attestation_raw), _hex(attestation_sha256, _HEX64, 'Pinned attestation SHA required'), 'Attestation SHA mismatch')
+        binding = {key: attestation[key] for key in ('schema', 'archive_commit', 'archive_tree', 'ready_manifest_sha256', 'binary_sha256')}
+        _equal(binding['schema'], 'full-window-actual-binary-attestation.v1', 'Original binary attestation schema required')
+        for key in ('archive_commit', 'archive_tree'):
+            _equal(binding[key], manifest[key], 'Attested archive mismatch')
+        _equal(binding['ready_manifest_sha256'], _sha(manifest_raw), 'Attested manifest mismatch')
+        _hex(manifest['build_attestation_public_key'], _HEX64, 'Frozen public key required')
+        _require(type(attestation['signature']) is str and re.fullmatch(r'[0-9a-f]{128}', attestation['signature']), 'Original Ed25519 signature required')
+        binary = Path(binary_path).absolute()
+        _require(str(binary.resolve()) == str(binary), 'Unaliased actual binary path required')
+        _equal(_sha(_regular_bytes(binary, 1 << 30)), _hex(binding['binary_sha256'], _HEX64, 'Actual binary SHA required'), 'Actual binary SHA mismatch')
+        helper = _regular_bytes(Path(__file__).resolve().parent/'helpers/full1220_attestation.go.txt', 1 << 20)
+        _equal(_sha(helper), _ATTESTATION_HELPER_SHA256, 'Fixed Ed25519 helper changed')
+        executable = Path(runtime['go_executable']).resolve()
+        _equal(_sha(_regular_bytes(executable)), _hex(runtime['go_sha256'], _HEX64, 'Pinned Go executable required'), 'Go executable SHA mismatch')
+        sdk = Path(_PROJECTION_SDKROOT)
+        _require(sdk.is_dir() and sdk.name == 'MacOSX26.5.sdk', 'Fixed SDK26.5 required')
+        output = Path(output_dir).absolute()
+        _require(output.parent.is_dir() and not output.exists() and not output.is_symlink(), 'New isolated signature output required')
+        output.mkdir(mode=0o700)
+        _exclusive_write(output/'full1220_attestation.go', helper); (output/'cache').mkdir(mode=0o700); (output/'tmp').mkdir(mode=0o700)
+        job = {'manifest_raw': base64.b64encode(manifest_raw).decode(), 'attestation_raw': base64.b64encode(attestation_raw).decode(),
+               'manifest_sha256': _sha(manifest_raw), 'attestation_sha256': attestation_sha256, 'binary_path': str(binary)}
+        env = {'PATH': '/usr/bin:/bin:/usr/sbin:/sbin', 'GOENV': 'off', 'GOWORK': 'off', 'GOFLAGS': '',
+               'GOTOOLCHAIN': 'local', 'GOPROXY': 'off', 'GOSUMDB': 'off', 'GO111MODULE': 'off',
+               'GOCACHE': str(output/'cache'), 'GOTMPDIR': str(output/'tmp'), 'SDKROOT': str(sdk), 'CGO_ENABLED': '0'}
+        result = subprocess.run([str(executable), 'run', str(output/'full1220_attestation.go')], input=_json_bytes(job),
+                                cwd=str(output), env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=150, check=False)
+        _exclusive_write(output/'helper.stdout', result.stdout); _exclusive_write(output/'helper.stderr', result.stderr)
+        _require(result.returncode == 0, 'Original Ed25519 verification rejected')
+        data = _Document(result.stdout, 65536).value
+        expected = {'schema': 'full1220-attestation-verification.v1', 'manifest_sha256': _sha(manifest_raw),
+                    'attestation_sha256': attestation_sha256, 'binary_sha256': binding['binary_sha256'],
+                    'canonical_binding_sha256': _sha(('{'+','.join(_string(key)+':'+_string(value) for key, value in binding.items())+'}').encode()),
+                    'signature_verified': True}
+        _equal(data, expected, 'Signature helper binding mismatch')
+        _equal(_regular_bytes(output/'full1220_attestation.go', 1 << 20).decode(), helper.decode(), 'Signature helper changed')
+        _equal(_sha(_regular_bytes(executable)), runtime['go_sha256'], 'Go executable changed')
+        _equal(_sha(_regular_bytes(binary, 1 << 30)), binding['binary_sha256'], 'Actual binary changed during verification')
+        return _PublicationProof(_PUBLICATION_SEAL, 'attestation', {**expected, 'binary_path': str(binary),
+                                'helper_sha256': _ATTESTATION_HELPER_SHA256})
+    except (KeyError, IndexError, TypeError, OSError, UnicodeError, subprocess.SubprocessError) as error:
+        raise ValueError('Offline attestation unavailable: '+type(error).__name__) from error
+
+
+def _old_langfuse_client_class(manifest):
+    path = _PROJECT_ROOT/'scripts/langfuse-eval.py'
+    _equal(_sha(_regular_bytes(path, 1 << 20)), manifest['sources']['scripts/langfuse-eval.py'], 'Frozen restricted client changed')
+    spec = importlib.util.spec_from_file_location('full1220_frozen_local_client', path)
+    module = importlib.util.module_from_spec(spec); spec.loader.exec_module(module)
+    return module.Client
+
+
+class _WindowScoreClient:
+    __slots__ = ('_inner', '_manifest_sha', '_seal')
+    def __init__(self, seal, inner, manifest_sha):
+        _require(seal is _PUBLICATION_SEAL, 'Pinned local evaluation client required')
+        self._inner = inner; self._manifest_sha = manifest_sha; self._seal = seal
+    def observations(self, trace):
+        return self._inner.observations(trace)
+    def post_score(self, score):
+        return self._inner.request('/api/public/scores', score)
+    def verify_scores(self, scores):
+        return self._inner.verify_scores(scores)
+
+
+def load_window_score_client(manifest_raw, settings_path):
+    """Only explicit owner0600 evaluation-only JSON; never load model settings."""
+    try:
+        info = Path(settings_path).lstat()
+        _require(info.st_uid == os.geteuid() and stat.S_IMODE(info.st_mode) == 0o600, 'Private owner0600 evaluation settings required')
+        settings = _Document(_regular_bytes(settings_path, 16384)).value
+        _require(set(settings) == {'OTEL_EXPORTER_OTLP_TRACES_ENDPOINT', 'AGENT_LANGFUSE_ENVIRONMENT', 'LANGFUSE_PUBLIC_KEY', 'LANGFUSE_SECRET_KEY'},
+                 'Evaluation-only client configuration required')
+        manifest = _Document(manifest_raw).value
+        _equal(_sha(settings['OTEL_EXPORTER_OTLP_TRACES_ENDPOINT'].encode()), manifest['observer']['endpoint_sha256'], 'Frozen observer endpoint mismatch')
+        _equal(_sha(settings['LANGFUSE_PUBLIC_KEY'].encode()), manifest['observer']['project_sha256'], 'Frozen observer project mismatch')
+        _equal(settings['AGENT_LANGFUSE_ENVIRONMENT'], 'evaluation', 'Evaluation client required')
+        return _WindowScoreClient(_PUBLICATION_SEAL, _old_langfuse_client_class(manifest)(settings), _sha(manifest_raw))
+    except (KeyError, TypeError, OSError, UnicodeError) as error:
+        raise ValueError('Invalid evaluation client settings: '+type(error).__name__) from error
+
+
+def _private_directory(path):
+    info = path.lstat()
+    _require(stat.S_ISDIR(info.st_mode) and info.st_uid == os.geteuid() and stat.S_IMODE(info.st_mode) == 0o700,
+             'Private owner0700 registry directory required')
+    _require(path.resolve() == path.absolute(), 'Registry path must have no symlink aliases')
+    return info
+
+
+def _sync_directory(path):
+    descriptor = os.open(path, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+    try:
+        os.fsync(descriptor)
+    finally:
+        os.close(descriptor)
+
+
+class _RegistryHandle:
+    def __init__(self, root, scope, root_fd, scope_fd, lock_fd, anchor):
+        self.root = root; self.scope = scope; self.root_fd = root_fd; self.scope_fd = scope_fd
+        self.lock_fd = lock_fd; self.anchor = anchor
+    def check(self):
+        root_info, scope_info = _private_directory(self.root), _private_directory(self.scope)
+        _require(os.path.samestat(root_info, os.fstat(self.root_fd)) and os.path.samestat(scope_info, os.fstat(self.scope_fd)), 'Publication registry directory moved or replaced')
+        _equal([scope_info.st_dev, scope_info.st_ino], self.anchor['directory_identity'], 'Fixed scope directory identity changed')
+        _equal(_Document(_regular_bytes(self.root/(self.scope.name+'.anchor.json'), 16384)).value, self.anchor, 'Fixed scope anchor changed')
+        _equal(_Document(_regular_bytes(self.scope/'scope.json', 16384)).value['nonce'], self.anchor['nonce'], 'Fixed scope nonce changed')
+    def close(self):
+        for descriptor in (self.scope_fd, self.lock_fd, self.root_fd):
+            os.close(descriptor)
+
+
+def _open_publication_registry(scope, *, create=False):
+    _hex(scope, _HEX64, 'Scope registry identity required')
+    root = Path(_PUBLICATION_REGISTRY_ROOT).absolute()
+    if not root.exists():
+        _require(not root.is_symlink(), 'Registry alias forbidden')
+        if not create:
+            return None
+        root.mkdir(mode=0o700); _sync_directory(root.parent)
+    _private_directory(root)
+    root_fd = os.open(root, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+    lock_fd = scope_fd = None
+    try:
+        flags = os.O_RDWR | os.O_NOFOLLOW | (os.O_CREAT if create else 0)
+        lock_fd = os.open('.lock', flags, 0o600, dir_fd=root_fd)
+        lock_info = os.fstat(lock_fd)
+        _require(stat.S_ISREG(lock_info.st_mode) and lock_info.st_uid == os.geteuid() and stat.S_IMODE(lock_info.st_mode) == 0o600, 'Private stable registry lock required')
+        fcntl.flock(lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        directory = root/scope; anchor_path = root/(scope+'.anchor.json')
+        if not anchor_path.exists():
+            if not create:
+                _require(not directory.exists(), 'Orphan publication directory')
+                os.close(lock_fd); os.close(root_fd); return None
+            _require(not directory.exists() and not directory.is_symlink(), 'Unanchored publication directory cannot be adopted')
+            directory.mkdir(mode=0o700)
+            info = _private_directory(directory)
+            anchor = {'schema': 'full1220-fixed-scope-registry.v1', 'scope_sha256': scope,
+                      'directory_identity': [info.st_dev, info.st_ino], 'nonce': os.urandom(16).hex()}
+            _exclusive_write(directory/'scope.json', _json_bytes({'nonce': anchor['nonce']})); _sync_directory(directory)
+            _exclusive_write(anchor_path, _json_bytes(anchor)); _sync_directory(root)
+        anchor = _Document(_regular_bytes(anchor_path, 16384)).value
+        _equal(anchor['schema'], 'full1220-fixed-scope-registry.v1', 'Scope anchor schema mismatch')
+        _equal(anchor['scope_sha256'], scope, 'Scope anchor mismatch')
+        scope_fd = os.open(directory, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+        handle = _RegistryHandle(root, directory, root_fd, scope_fd, lock_fd, anchor); handle.check()
+        return handle
+    except BaseException:
+        for descriptor in (scope_fd, lock_fd, root_fd):
+            if descriptor is not None:
+                os.close(descriptor)
+        raise
+
+
+def _publication_event(handle, name, event):
+    handle.check()
+    _require(re.fullmatch(r'[a-z0-9.-]+', name) is not None, 'Fixed event filename required')
+    descriptor = os.open(name, os.O_CREAT | os.O_EXCL | os.O_WRONLY | os.O_NOFOLLOW, 0o600, dir_fd=handle.scope_fd)
+    with os.fdopen(descriptor, 'wb') as stream:
+        stream.write(_json_bytes(event)); stream.flush(); os.fsync(stream.fileno())
+    os.fsync(handle.scope_fd); handle.check()
+
+
+def _publication_scores(plan):
+    _equal(plan['schema'], 'full1220-window-score-plan.v1', 'Original full-window plan required')
+    result = []; logicals = set(); ids = set()
+    for score in plan['scores']:
+        metadata = score['metadata']; trace = score['traceId']
+        _require(trace in plan['trace_bindings'] and score['name'] in [NAMESPACE+name for name in ('original_status', 'semantic_task', 'strict_task')], 'Unknown score namespace or trace')
+        logical = {'scope_sha256': plan['provenance']['scope_sha256'], 'window_id': plan['window_id'], 'pass': metadata['pass'],
+                   'ordinal': metadata['ordinal'], 'arm': metadata['arm'], 'trace_id': trace, 'metric': score['name']}
+        raw = _json_bytes(logical).decode()
+        _equal(score['logical_identity'], raw, 'Stable logical identity mismatch')
+        _equal(score['id'], _sha(raw.encode()), 'Stable score ID cannot be replaced')
+        _require(raw not in logicals and score['id'] not in ids, 'Duplicate logical score or score ID')
+        _require(not (score['value'] == 'passed' and (metadata['original_status'] in ('failed', 'setup_failed')
+                     or metadata['original_structural_pass'] is not True)), 'Original negative cannot publish a passing score')
+        logicals.add(raw); ids.add(score['id']); result.append(score)
+    return result
+
+
+def _gate_data(proof, kind, plan):
+    _require(type(proof) is _PublicationProof and proof._seal is _PUBLICATION_SEAL and proof._kind == kind, 'Complete verified '+kind+' gate required')
+    if proof._plan_sha is not None:
+        _equal(proof._plan_sha, _sha(_json_bytes(plan)), 'Gate proof belongs to a different plan')
+    data = proof.as_dict()
+    _equal(data['manifest_sha256'], plan['provenance']['manifest_sha256'], 'Gate manifest mismatch')
+    return data
+
+
+def _batch_source_identity(plan):
+    return {trace: {key: binding[key] for key in ('ordinal', 'pass', 'case_key', 'arm', 'recording_sha256',
+                                                  'expected_defined_turns', 'expected_observed_turns')}
+            for trace, binding in plan['trace_bindings'].items()}
+
+
+def publish_window_scores(plan, projection, receipt_chain, attestation, client, *, execute=False):
+    """One POST per durable intent, fail closed; uncertainty permits verify only.
+
+    Stable logical intent is fsynced before score-ID intent. All scores are
+    reserved before any POST; all traces/gates pass first. No inference, claim,
+    automatic retry, mutable receipt overwrite, or caller publication-root option.
+    """
+    handle = None
+    try:
+        _require(execute is True, 'Explicit --execute required for score publication')
+        chain = _gate_data(receipt_chain, 'receipt_chain', plan); signed = _gate_data(attestation, 'attestation', plan)
+        _require(type(client) is _WindowScoreClient and client._seal is _PUBLICATION_SEAL, 'Pinned local evaluation client required')
+        _equal(client._manifest_sha, plan['provenance']['manifest_sha256'], 'Client manifest mismatch')
+        _equal(_sha(_regular_bytes(signed['binary_path'], 1 << 30)), signed['binary_sha256'], 'Attested actual binary changed')
+        scores = _publication_scores(plan)
+        handle = _open_publication_registry(plan['provenance']['scope_sha256'], create=True)
+        # The batch fixes the complete original inventory independently of later
+        # reviews, caller outputs, or missing individual intent/link files.
+        batch_name = 'window-%06d.batch.json' % plan['window_index']
+        _require(not (handle.scope/batch_name).exists(), 'Window publication batch exists; verify original batch only')
+        # Refuse the entire operation before reads if any identity was claimed.
+        for score in scores:
+            _require(not any((handle.scope/name).exists() for name in (
+                'logical-'+score['id']+'.intent.json', 'score-'+score['id']+'.intent.json',
+                score['id']+'.sent.json', score['id']+'.accepted.json')),
+                'Publication evidence exists; verify only, never resend')
+        validation = validate_window_traces(plan, projection, client)
+        _require(validation['all_pass'] is True, 'All captured trace content must verify before any score intent')
+        handle.check(); intents = []
+        batch = {'schema': 'full1220-score-batch.v1', 'scope_sha256': plan['provenance']['scope_sha256'],
+                 'manifest_sha256': plan['provenance']['manifest_sha256'], 'window_id': plan['window_id'],
+                 'window_index': plan['window_index'], 'plan_sha256': _sha(_json_bytes(plan)),
+                 'trace_source_identity': _batch_source_identity(plan),
+                 'scores': [{key: score[key] for key in ('id', 'logical_identity', 'traceId', 'name')} for score in scores]}
+        batch['batch_sha256'] = _sha(_json_bytes(batch))
+        _publication_event(handle, batch_name, batch)
+        for score in scores:
+            payload = json.loads(_json_bytes(score))
+            payload.pop('logical_identity')  # Local lock authority, never an API score field.
+            payload['metadata'].update(plan_sha256=_sha(_json_bytes(plan)), receipt_chain_sha256=chain['chain_sha256'],
+                                       binary_attestation_sha256=signed['attestation_sha256'], actual_binary_sha256=signed['binary_sha256'])
+            event = {'schema': 'full1220-score-intent.v1', 'logical_identity': score['logical_identity'], 'score': payload,
+                     'scope_sha256': plan['provenance']['scope_sha256'], 'window_id': plan['window_id'], 'batch_sha256': batch['batch_sha256']}
+            event['intent_sha256'] = _sha(_json_bytes(event))
+            _publication_event(handle, 'logical-'+score['id']+'.intent.json', event)
+            _publication_event(handle, 'score-'+score['id']+'.intent.json', {'logical_sha256': score['id'], 'intent_sha256': event['intent_sha256']})
+            intents.append(event)
+        for event in intents:
+            score = event['score']; identifier = score['id']
+            handle.check()
+            _publication_event(handle, identifier+'.sent.json', {'intent_sha256': event['intent_sha256'], 'may_have_been_sent': True})
+            handle.check()
+            try:
+                ack = client.post_score(score)
+            except Exception:
+                raise ValueError('Score POST outcome uncertain; intent retained, verify only') from None
+            _require(type(ack) is dict and ack.get('id') == identifier, 'Score ACK unknown; intent retained, verify only')
+            _publication_event(handle, identifier+'.accepted.json', {'intent_sha256': event['intent_sha256'], 'ack_id': identifier})
+        handle.check()
+        try:
+            client.verify_scores([event['score'] for event in intents]); verified = True
+        except (ValueError, OSError, TimeoutError):
+            verified = False
+        return {'schema': 'full1220-score-publication.v1', 'all_verified': verified, 'intents': len(intents),
+                'acknowledged': len(intents), 'scores_published_once': len(intents), 'model_calls': 0, 'jev_calls': 0,
+                'actual_claims_created': 0, 'needs_readback': not verified}
+    except (KeyError, IndexError, TypeError, OSError) as error:
+        raise ValueError('Score publication stopped; retained intents permit verify only: '+type(error).__name__) from error
+    finally:
+        if handle is not None:
+            handle.close()
+
+
+def verify_window_scores(plan, client):
+    """Read original intent payloads and existing score IDs; never create files or POST."""
+    handle = None
+    try:
+        _require(type(client) is _WindowScoreClient and client._seal is _PUBLICATION_SEAL, 'Pinned local evaluation client required')
+        _equal(client._manifest_sha, plan['provenance']['manifest_sha256'], 'Client manifest mismatch')
+        handle = _open_publication_registry(plan['provenance']['scope_sha256'], create=False)
+        if handle is None:
+            return {'all_verified': False, 'reason': 'not_published', 'scores_checked': 0, 'scores_published': 0}
+        batch_path = handle.scope/('window-%06d.batch.json' % plan['window_index'])
+        if not batch_path.exists():
+            return {'all_verified': False, 'reason': 'complete_batch_manifest_missing', 'scores_checked': 0, 'scores_published': 0}
+        batch = _Document(_regular_bytes(batch_path, 1 << 20)).value
+        integrity = dict(batch); batch_sha = integrity.pop('batch_sha256')
+        _equal(_sha(_json_bytes(integrity)), batch_sha, 'Original complete batch manifest tampered')
+        for key, expected in [('schema', 'full1220-score-batch.v1'), ('scope_sha256', plan['provenance']['scope_sha256']),
+                              ('manifest_sha256', plan['provenance']['manifest_sha256']), ('window_id', plan['window_id']),
+                              ('window_index', plan['window_index']), ('trace_source_identity', _batch_source_identity(plan))]:
+            _equal(batch[key], expected, 'Original batch source identity mismatch: '+key)
+        catalog = _index(batch['scores'], lambda item: item['id'], 'original batch score ID')
+        events = {}
+        for path in sorted(handle.scope.glob('logical-*.intent.json')):
+            event = _Document(_regular_bytes(path, 1 << 20)).value
+            integrity = dict(event); claimed = integrity.pop('intent_sha256')
+            _equal(_sha(_json_bytes(integrity)), claimed, 'Original publication intent tampered')
+            if event['window_id'] != plan['window_id']:
+                continue
+            score = event['score']; logical = json.loads(event['logical_identity'])
+            _equal(score['id'], _sha(_json_bytes(logical)), 'Original score identity tampered')
+            _equal(path.name, 'logical-'+score['id']+'.intent.json', 'Original logical filename tampered')
+            _equal(event['scope_sha256'], plan['provenance']['scope_sha256'], 'Publication scope mismatch')
+            _equal(event['batch_sha256'], batch_sha, 'Original intent belongs to a different batch')
+            _equal(score['metadata']['plan_sha256'], batch['plan_sha256'], 'Original intent plan provenance mismatch')
+            _require(score['id'] not in events, 'Duplicate original score intent')
+            events[score['id']] = event
+        if set(events) != set(catalog):
+            return {'all_verified': False, 'reason': 'incomplete_original_intent_inventory', 'scores_checked': 0,
+                    'expected_scores': len(catalog), 'present_intents': len(events), 'scores_published': 0}
+        intents = []
+        for identifier, expected in catalog.items():
+            event = events[identifier]; score = event['score']
+            _equal({key: score[key] for key in ('id', 'traceId', 'name')},
+                   {key: expected[key] for key in ('id', 'traceId', 'name')}, 'Original batch score binding mismatch')
+            _equal(event['logical_identity'], expected['logical_identity'], 'Original batch logical identity mismatch')
+            _require(score['traceId'] in plan['trace_bindings'], 'Original publication trace not in current window')
+            link = _Document(_regular_bytes(handle.scope/('score-'+identifier+'.intent.json'), 16384)).value
+            _equal(link, {'logical_sha256': identifier, 'intent_sha256': event['intent_sha256']}, 'Original score-ID link tampered')
+            intents.append(score)
+        handle.check()
+        if not intents:
+            return {'all_verified': False, 'reason': 'not_published', 'scores_checked': 0, 'scores_published': 0}
+        try:
+            client.verify_scores(intents); verified = True
+        except (ValueError, OSError, TimeoutError):
+            verified = False
+        return {'schema': 'full1220-score-verification.v1', 'all_verified': verified, 'scores_checked': len(intents),
+                'scores_published': 0, 'uses_original_intent_metadata': True}
+    except (KeyError, IndexError, TypeError, OSError) as error:
+        raise ValueError('Original score verification unavailable: '+type(error).__name__) from error
+    finally:
+        if handle is not None:
+            handle.close()
+
+
+def _read_score_job(path):
+    job = _Document(_regular_bytes(path, 1 << 20)).value
+    _equal(job['schema'], 'full1220-window-score-job.v1', 'Explicit full-window score job required')
+    raw = [_regular_bytes(job[key+'_path'], 16 << 20) for key in ('manifest', 'summary', 'receipt')]
+    review = _regular_bytes(job['review_path'], 16 << 20)
+    records = {name: _regular_bytes(Path(job['records_dir'])/name, 16 << 20) for name in job['expected_hashes']['records']}
+    args = (*raw, records, review, job['expected_hashes'])
+    return job, args, build_window_score_plan(*args)
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description='Full1220 offline plans, explicit once-only local score publication, or read-only verification.')
+    parser.add_argument('mode', nargs='?', choices=('plan', 'verify', 'publish'), default='plan')
+    parser.add_argument('--job', help='Explicit paths and external hashes; no directory scanning')
+    parser.add_argument('--out', help='Optional new result JSON; never a publication lock authority')
+    parser.add_argument('--execute', action='store_true')
+    args = parser.parse_args(argv)
+    if not args.job:
+        parser.print_help(); return 0
+    if args.mode == 'publish' and not args.execute:
+        print('Explicit --execute required for score publication', file=sys.stderr); return 2
+    try:
+        job, inputs, plan = _read_score_job(args.job)
+        if args.mode == 'plan':
+            result = plan
+        elif args.mode == 'verify':
+            result = verify_window_scores(plan, load_window_score_client(inputs[0], job['client_settings_path']))
+        else:
+            entries = [{'summary_raw': _regular_bytes(entry['summary_path'], 16 << 20),
+                        'receipt_raw': _regular_bytes(entry['receipt_path'], 16 << 20)} for entry in job['chain']]
+            pins = [{key: entry[key] for key in ('summary_sha256', 'receipt_sha256')} for entry in job['chain']]
+            chain = verify_window_receipt_chain(plan, inputs[0], entries, pins)
+            attestation = verify_window_attestation(inputs[0], _regular_bytes(job['attestation_path'], 65536),
+                job['attestation_sha256'], job['binary_path'], runtime=job['runtime'], output_dir=job['attestation_output'], execute=True)
+            projection = project_window_content(*inputs, source_root=_Document(inputs[0]).value['source_root'],
+                output_dir=job['projection_output'], runtime=job['runtime'], execute=True)
+            result = publish_window_scores(plan, projection, chain, attestation,
+                load_window_score_client(inputs[0], job['client_settings_path']), execute=True)
+        if args.out:
+            _exclusive_write(Path(args.out), _json_bytes(result)+b'\n')
+        else:
+            print(_json_bytes(result).decode())
+        return 0 if args.mode == 'plan' or result.get('all_verified') else 2
+    except (ValueError, OSError) as error:
+        print(str(error), file=sys.stderr); return 2
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())
