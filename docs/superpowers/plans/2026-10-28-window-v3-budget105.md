@@ -49,3 +49,5 @@ Task1验证补充：旧campaign/停止证明/actual拒绝和scope组合race 270�
 2026-10-28 Task2具体读取器：38固定顶层SHA、旧具体first proof前后读回、只读原锁、嵌套334记录/832请求/831完整响应/1不可用响应、原目录精确inventory与16claim预算推导已通过原件正例及副本负例；35项race通过67.966秒、stderr0，3705原文件重新SHA一致。原件合法null误用readiness非空规则已定位并以独立record decoder RED→GREEN修正，readiness规则不变。独立审查无确认P1/P2，公开StoppedV2测试独立退出0/2.394秒，首次cache权限setup失败保留；Task3接线和完整全Go仍未完成。
 
 Ruling: 不声称跨两个旧目录获得事务原子快照；每个原owner使用自身现有只读锁、固定原始SHA及身份检查，第一具体proof在第二bundle前后重读。原始owner均有固定终止证据，历史字节不变，下一claim仍重新验证。
+
+2026-10-28 Task3接线单元：candidate readiness按匹配schema2/3加载各自原具体proof；Open仍仅v3且settings前fresh proof；v3工厂只接受具体16claim文件证明，两旧根均隔离。新claim前重新验证，v3永久父额105、旧1/2仍100，claim3绑定scope/baseline；原source/完整Go/签名/价格/包络/observer门禁保留。campaign/binding/version三个断言RED→GREEN，48项定向race通过128.964秒、stderr0（cmd仅编译无匹配测试）。独立复核无确认P1/P2，非race定向过9.482秒。此处只交付接线；精确归档全Go20m、原生包络/Handler与最终freeze仍pending。

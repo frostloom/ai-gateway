@@ -35,6 +35,9 @@ func loadWindowActualStoppedBaseline(m windowActualManifest) (windowStoppedBasel
 }
 
 func (r *FullWindowActualReady) revalidateStopped() error {
+	if r != nil && r.manifest.Schema == "full-window-actual-ready.v3" {
+		return r.revalidateStoppedV3()
+	}
 	if r == nil || validateWindowActualStoppedBinding(r.manifest, r.stopped) != nil {
 		return fmt.Errorf("actual stopped snapshot absent or changed")
 	}

@@ -1,0 +1,59 @@
+{
+  "schema": "full1220-v3-actual-entry-wiring-evidence.v1",
+  "source_sha256": {
+    "internal/taskbench/window_campaign_v3.go": "f112235e7513fa283c70ee26111ed12d9dbb199caa09d8d9e0a0f5268e20d9f2",
+    "internal/taskbench/window_campaign_v3_test.go": "3728001ab2eee40b33d301831d24eb2de22ff49f495d7f581eaa9b591d96c6f0",
+    "internal/taskbench/window_campaign.go": "48ef77d1f682cfdbd0f1da26e1cefd84dc8ddfbde070951526435e7c520d6608",
+    "internal/taskbench/window_actual_v3.go": "53597a547dff2d5bc055be4f2461b830951311d4122da54e3a51d912341dfdbb",
+    "internal/taskbench/window_actual_v3_test.go": "69e10d4e95a3d918c8755e7e262e259866fa2055e5e22535cdd4b864076f42dd",
+    "internal/taskbench/window_actual_v2.go": "b1fdee7072ac180d486612563efbb0ec4d4284249bfd162f61775e764941f883",
+    "internal/taskbench/window_actual_ready.go": "8c5af6264589b15e15d977b3564c79d4f36bc8d111e3f8801b8bbff977b7c439",
+    "internal/taskbench/window_actual_session.go": "6ffe9d3c07b61dd635e7998e73f86b0fa066a75aa28840c0a2bb945d611749b4"
+  },
+  "assertion_RED": [
+    "campaign-red.log",
+    "binding-red.log",
+    "version-red.log"
+  ],
+  "targeted_race": {
+    "test_pass": 48,
+    "fail": 0,
+    "skip": 0,
+    "taskbench_seconds": 128.964,
+    "cmd_compilation_only": true,
+    "stderr_bytes": 0,
+    "sha256": "e1ea86fe128aea94b7d761e87fb2bf8e65ba1d7c8128919ccd62e95c000adfd6"
+  },
+  "independent_review": {
+    "reviewer": "actual_v3_wiring_review",
+    "confirmed_P1_P2": 0,
+    "SDKROOT": "/Library/Developer/CommandLineTools/SDKs/MacOSX26.5.sdk",
+    "test_regex": "^Test(WindowCampaignV3|ActualV3|ActualEpoch)",
+    "exit_code": 0,
+    "seconds": 9.482,
+    "race": false
+  },
+  "concrete_factory_only": true,
+  "fresh_sixteen_claim_proof_before_each_claim": true,
+  "both_old_roots_disjoint_from_new_roots": true,
+  "v2_readonly_retained_Open_v3_only": true,
+  "parent_micro_cny": 105000000,
+  "parent_micro_usd": 1000000,
+  "old_v1_v2_parent_micro_cny": 100000000,
+  "historical_claims": 16,
+  "permanent_micro_cny": 33395934,
+  "permanent_micro_usd": 259511,
+  "ordinary_build_missing_signed_pins_cannot_be_actual_ready": true,
+  "customer50e_v5_unchanged": true,
+  "original_full_pairs": 3660,
+  "original_full_arms": 7320,
+  "original_defined_turns": 11772,
+  "boundaries_separate": 1851,
+  "knowledge_both": "off",
+  "exact_archive_full_Go20m": "pending",
+  "full_handler_native_envelope_and_final_freeze": "pending",
+  "new_actual_model_calls": 0,
+  "new_actual_jev_calls": 0,
+  "new_actual_claims": 0,
+  "deployments": 0
+}

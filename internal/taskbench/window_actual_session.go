@@ -342,7 +342,7 @@ func OpenFullWindowActual(ctx context.Context, ready *FullWindowActualReady, pri
 		return nil, e
 	}
 	m := ready.manifest
-	s.campaign, e = newWindowCampaignV2(m.CampaignRoot, m.CampaignRoot, m.Scope, ready.source, ready.profiles, m.Scope.Bindings, m.ScopeSHA256, m.ExecutionSHA256, m.Limits, ready.stopped)
+	s.campaign, e = newWindowCampaignV3(m.CampaignRoot, m.CampaignRoot, m.Scope, ready.source, ready.profiles, m.Scope.Bindings, m.ScopeSHA256, m.ExecutionSHA256, m.Limits, ready.stoppedV2)
 	if e != nil {
 		return nil, e
 	}

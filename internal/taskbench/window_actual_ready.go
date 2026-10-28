@@ -52,6 +52,7 @@ type FullWindowActualReady struct {
 	prepared       windowCampaignPrepared
 	baseline       fullWindowBaseline
 	stopped        windowStoppedBaseline
+	stoppedV2      windowStoppedV2Baseline
 	source         ConversationSuite
 	profiles       PairedProfiles
 }
@@ -119,7 +120,7 @@ func CheckFullWindowActualReady(o FullWindowActualReadyOptions) (FullWindowActua
 		return reject()
 	}
 	var m windowActualManifest
-	if decodeWindowActualJSON(raw, &m) != nil || validateWindowActualPrivateSettingsBinding(&m) != nil || m.Schema != "full-window-actual-ready.v2" || m.Scope.Schema != "full-window-scope.v2" || m.EvidenceKind != "actual" || m.ArchiveCommit != fullWindowActualArchiveCommit || m.ArchiveTree != fullWindowActualArchiveTree {
+	if decodeWindowActualJSON(raw, &m) != nil || validateWindowActualPrivateSettingsBinding(&m) != nil || !windowActualSupportedEpoch(m) || m.EvidenceKind != "actual" || m.ArchiveCommit != fullWindowActualArchiveCommit || m.ArchiveTree != fullWindowActualArchiveTree {
 		return reject()
 	}
 	attestationRaw, err := readWindowActualBytes(o.ManifestPath+".binary-attestation.json", "", 65536)
@@ -195,17 +196,25 @@ func CheckFullWindowActualReady(o FullWindowActualReadyOptions) (FullWindowActua
 	if err != nil || totals.Pairs != 3660 || totals.Arms != 7320 || totals.DefinedUserTurns != 11772 || totals.Boundaries != 1851 {
 		return reject()
 	}
-	stopped, err := loadWindowActualStoppedBaseline(m)
-	if err != nil {
-		return reject()
+	candidate := &FullWindowActualReady{manifestPath: o.ManifestPath, manifestRaw: append([]byte(nil), raw...), attestationRaw: append([]byte(nil), attestationRaw...), manifest: m, prepared: prepared, source: source, profiles: profiles}
+	if m.Schema == "full-window-actual-ready.v3" {
+		proof, err := loadWindowActualStoppedBaselineV3(m)
+		if err != nil {
+			return reject()
+		}
+		candidate.baseline, candidate.stoppedV2, candidate.prepared.stoppedHistory = proof.base, proof, proof
+	} else {
+		proof, err := loadWindowActualStoppedBaseline(m)
+		if err != nil {
+			return reject()
+		}
+		candidate.baseline, candidate.stopped, candidate.prepared.stoppedHistory = proof.base, proof, proof
 	}
-	baseline := stopped.base
-	prepared.stoppedHistory = stopped
-	if validatePreparedWindowCampaign(prepared, baseline) != nil {
+	if validatePreparedWindowCampaign(candidate.prepared, candidate.baseline) != nil {
 		return reject()
 	}
 	summary = FullWindowActualReadySummary{fullWindowActualManifestSHA, m.ScopeSHA256, m.ExecutionSHA256, 3660, 7320, 11772, 1851}
-	return summary, &FullWindowActualReady{manifestPath: o.ManifestPath, manifestRaw: append([]byte(nil), raw...), attestationRaw: append([]byte(nil), attestationRaw...), manifest: m, prepared: prepared, baseline: baseline, stopped: stopped, source: source, profiles: profiles}, nil
+	return summary, candidate, nil
 }
 
 // Future session startup must recheck before any credential load or claim write.
@@ -217,7 +226,7 @@ func (r *FullWindowActualReady) revalidate() error {
 	if err != nil {
 		return err
 	}
-	if !bytes.Equal(r.manifestRaw, fresh.manifestRaw) || !bytes.Equal(r.attestationRaw, fresh.attestationRaw) || !reflect.DeepEqual(r.manifest, fresh.manifest) || !reflect.DeepEqual(r.prepared, fresh.prepared) || !reflect.DeepEqual(r.baseline, fresh.baseline) || !reflect.DeepEqual(r.stopped, fresh.stopped) {
+	if !bytes.Equal(r.manifestRaw, fresh.manifestRaw) || !bytes.Equal(r.attestationRaw, fresh.attestationRaw) || !reflect.DeepEqual(r.manifest, fresh.manifest) || !reflect.DeepEqual(r.prepared, fresh.prepared) || !reflect.DeepEqual(r.baseline, fresh.baseline) || !reflect.DeepEqual(r.stopped, fresh.stopped) || !reflect.DeepEqual(r.stoppedV2, fresh.stoppedV2) {
 		return fmt.Errorf("actual ready snapshot changed")
 	}
 	return nil

@@ -279,6 +279,10 @@ func validatePreparedWindowCampaign(p windowCampaignPrepared, b fullWindowBaseli
 		if err := validateStoppedCampaignHistory(p, b); err != nil {
 			return err
 		}
+	case "full-window-scope.v3":
+		if err := validateStoppedV3CampaignHistory(p, b); err != nil {
+			return err
+		}
 	default:
 		return fmt.Errorf("prepared campaign scope version rejected")
 	}
@@ -349,6 +353,10 @@ func (c *windowCampaign) persistClaimWindowCampaign(i int, previous, checkpoint 
 		if err := validateStoppedCampaignHistory(c.prepared, c.baseline); err != nil {
 			return err
 		}
+	} else if c.prepared.scope.Schema == "full-window-scope.v3" {
+		if err := validateStoppedV3CampaignHistory(c.prepared, c.baseline); err != nil {
+			return err
+		}
 	} else if c.historicalDir != "" {
 		baseline, e := loadFullWindowBaseline(c.historicalDir)
 		if e != nil || !reflect.DeepEqual(baseline, c.baseline) {
@@ -356,13 +364,19 @@ func (c *windowCampaign) persistClaimWindowCampaign(i int, previous, checkpoint 
 		}
 	}
 	w := c.prepared.scope.Windows[i]
-	if w.ModelCap > 100000000-c.model || w.JEVCap > 1000000-c.jev {
+	parentModel, parentJEV := int64(100000000), int64(1000000)
+	if c.prepared.scope.Schema == "full-window-scope.v3" {
+		parentModel, parentJEV = c.baseline.TotalModel, c.baseline.TotalJEV
+	}
+	if w.ModelCap > parentModel-c.model || w.JEVCap > parentJEV-c.jev {
 		return fmt.Errorf("permanent currency cap exhausted")
 	}
 	d := c.prepared.scope
 	r := windowCampaignClaim{Schema: "full-window-campaign-claim.v1", Root: c.root, Index: i + 1, ScopeSHA256: c.prepared.scopeSHA, ExecutionSHA256: c.prepared.executionSHA, DefinitionSHA256: d.DefinitionSHA256, ManifestSHA256: d.ManifestSHA256, SelectionSHA256: d.SelectionSHA256, ProfileSHA256: d.ProfileSHA256, ScheduleSHA256: d.ScheduleSHA256, PolicySHA256: d.Bindings.PolicySHA256, PreviousClaimSHA256: previous, PreviousCheckpointSHA256: checkpoint, Window: w, HistoricalClaims: cloneWindowHistoricalClaims(c.baseline.ClaimSHA256), ModelPermanent: c.model + w.ModelCap, JEVPermanent: c.jev + w.JEVCap}
 	if d.Schema == "full-window-scope.v2" {
 		r.Schema, r.BaselineEvidenceSHA256 = "full-window-campaign-claim.v2", d.BaselineEvidenceSHA256
+	} else if d.Schema == "full-window-scope.v3" {
+		r.Schema, r.BaselineEvidenceSHA256 = "full-window-campaign-claim.v3", d.BaselineEvidenceSHA256
 	}
 	// A claim attempt consumes its whole cap conservatively even if the new
 	// claim file is partial or its directory sync fails. This owner then halts;
