@@ -1,0 +1,59 @@
+{
+  "schema": "full1220-window-score-plan-task1-evidence.v1",
+  "source_sha256": {
+    "scripts/full1220-window-scores.py": "4643bb3ea20af43c034504154b4a31635e0ad3f38cc474cce909f925b3a7ac6a",
+    "scripts/tests/test_full1220_window_scores.py": "fd2fd10f83fa84e0b64a311c3006a6c76fa9ab7c6d1eb2d3b8c724cd1c6ea4b1"
+  },
+  "task": "pure_plan_only",
+  "independent_review": {
+    "reviewer": "score_plan_review",
+    "confirmed_P2": 1,
+    "finding": "cumulative observed/quality partition accepted contradictory first-window source counts",
+    "fixed": true,
+    "root_independently_reproduced": true,
+    "RED_assertion_failures": 5,
+    "fix": "first window separate exact fields; later quality>=current and prefix receipt chain gate pending"
+  },
+  "root_fixed_test_run": {
+    "tests": 30,
+    "seconds": 6.758,
+    "failures": 0,
+    "errors": 0
+  },
+  "full_python_regression": {
+    "total": 230,
+    "original_skips": 15,
+    "failures": 0,
+    "errors": 0,
+    "seconds": 25.403
+  },
+  "actual_stopped_v2_original_validation": {
+    "recorded_arms": 334,
+    "requirements": 1268,
+    "semantic": {
+      "passed": 269,
+      "failed": 63,
+      "not_assessable": 2
+    },
+    "strict": {
+      "passed": 259,
+      "failed": 75
+    },
+    "unstarted_no_trace_or_score": 2
+  },
+  "logs_sha256": {
+    "review-p2-turn-partition-red.log": "01737c623d62b0e852a1e05991f00abdfacb0028f77e6b4d008782c08d6894a6",
+    "review-p2-turn-partition-green.log": "3db3abee55b0f4cfadb71723d453904f44cde55ab8f8bbeb4351469c69a0bba7",
+    "review-p2-python-regression.log": "47f9ed909d6528405b3486f0e0814a6f210cc909d860205d7b7b7a8f752c2ac1",
+    "review-p2-original-validation.log": "289b86ff3d0927f7e67bb2b6fba8d444f20e6923bfa9febb3139f60392a1df39",
+    "root-review-fixed-tests.log": "af255a2c5a2826912a59ef6ca6666fa725ecae4e6c55ba0de914c8ca55825104"
+  },
+  "original_negative_positive_scores_suppressed": true,
+  "original_semantic_truth_preserved": true,
+  "requirements_context_recomputed_from_Go_JSON_fragments": true,
+  "capture_trace_signature_and_publish_gates": "pending",
+  "publish_ready": false,
+  "new_actual_inference": 0,
+  "new_actual_claims": 0,
+  "score_posts": 0
+}

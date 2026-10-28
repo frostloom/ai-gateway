@@ -12,8 +12,8 @@
 
 ## Global Constraints
 
-- 实际owner继续运行归档3eb2293；只操作其显式窗口接口，不改变归档、owned records/campaign或供应商请求。
-- 原3660对、7320臂、11772定义轮、三轮交错、1851边界另列、知识两臂off和¥100+$1不变；本适配器不能发模型/JEV请求或创建实际预算claim。
+- 原归档3eb2293的owner49109已终止exit1；原scope不续/重领，当前对已停止数据操作，不改变原归档、owned records/campaign或供应商请求。
+- 原3660对、7320臂、11772定义轮、三轮交错、1851边界另列、知识两臂off不变；用户父预算已调整为¥105+$1，16历史claim永久预留33395934µCNY/259511µUSD；本适配器不能发模型/JEV请求或创建实际预算claim。
 - 不把needs_review/structural_pass视为语义通过；不重写原Successfalse、failed或negative要求。
 - 原确定性负例若独立语义已证实正确，不能写成语义错误：保留真实semantic结论及分歧元数据，抑制正分或明确unknown/omit；strict仍保持负例。
 - 区分原确定性结果、独立语义任务、严格组合结果与评测端分歧；五份千分位部分匹配疑例需独立证据确认，不静默升分。原negative不发布通过分。
@@ -37,10 +37,10 @@ Files: 新增`scripts/full1220-window-scores.py`和`scripts/tests/test_full1220_
 
 Interface: `build_window_score_plan(manifest_raw, summary_raw, receipt_raw, records, review_raw, expected_hashes) -> dict`，返回独立schema的计划、全部计划分母、trace绑定、原状态和独立审查来源。
 
-- [ ] RED：完整双臂正例；重复case跨pass不覆盖；错SHA/错scope/错trace/错ordinal/缺review/缺requirement/改reply/同义改写requirements均拒绝。
-- [ ] 实现完整字段绑定和新评分namespace，确定性状态与独立评分分开，不接受旧pi-first-live review或journal替代。
-- [ ] 覆盖原failed、not_started、partial/技术失败、quality_end未运行后缀、semantic not_assessable和确定性/语义分歧；禁止给原negative发通过分。
-- [ ] 运行纯计划测试及原Langfuse脚本回归，提交可独立审查单元。
+- [x] RED：完整双臂正例；重复case跨pass不覆盖；错SHA/错scope/错trace/错ordinal/缺review/缺requirement/改reply/同义改写requirements均拒绝。
+- [x] 实现完整字段绑定和新评分namespace，确定性状态与独立评分分开，不接受旧pi-first-live review或journal替代。
+- [x] 覆盖原failed、not_started、partial/技术失败、quality_end未运行后缀、semantic not_assessable和确定性/语义分歧；禁止给原negative发通过分。
+- [x] 运行纯计划测试及原Langfuse脚本回归，提交可独立审查单元。
 
 ## Task 2：冻结capture规则投影与实际trace校验
 
@@ -70,3 +70,5 @@ Interfaces: CLI显式`plan / publish --execute / verify`；只读默认。publis
 ## Execution ledger
 
 2026-10-28：窗口实际采集与独立复核已开始。首窗私密投影直接复用冻结Go content()在内存exporter生成，真实Langfuse56trace/60turn正文及231obs元数据只读通过；0评分。新窗口格式尚无正式评分适配器，旧脚本仅可复用通信客户端。源码抓到cashClaim不含千分位的风险，正在用五份原记录作只读复现；保持当前冻结执行器与原所有negative。
+
+2026-10-29 Task1：纯计划与30项测试交付，230项Python回归/15原skip/0fail-error；原六窗334record/1268要求全部重算匹配，269/63/2语义与259/75严格口径不改。独立P2首窗observed/quality互换已root复现并RED→GREEN：首窗分项精确，后窗当前quality下界，prior分项显式pending链验证；不假设prior quality=0。无第二轮审查，修复后完整suite与root30测试通过。Task2/3仍pending、publish_ready=false、0POST。
