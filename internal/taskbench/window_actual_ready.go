@@ -54,6 +54,7 @@ type FullWindowActualReady struct {
 	stopped        windowStoppedBaseline
 	stoppedV2      windowStoppedV2Baseline
 	stoppedV3      windowStoppedV3Baseline
+	stoppedV4      windowStoppedV4Baseline
 	source         ConversationSuite
 	profiles       PairedProfiles
 }
@@ -198,7 +199,13 @@ func CheckFullWindowActualReady(o FullWindowActualReadyOptions) (FullWindowActua
 		return reject()
 	}
 	candidate := &FullWindowActualReady{manifestPath: o.ManifestPath, manifestRaw: append([]byte(nil), raw...), attestationRaw: append([]byte(nil), attestationRaw...), manifest: m, prepared: prepared, source: source, profiles: profiles}
-	if m.Schema == "full-window-actual-ready.v4" {
+	if m.Schema == "full-window-actual-ready.v5" {
+		proof, err := loadWindowActualStoppedBaselineV5(m)
+		if err != nil {
+			return reject()
+		}
+		candidate.baseline, candidate.stoppedV4, candidate.prepared.stoppedHistory = proof.base, proof, proof
+	} else if m.Schema == "full-window-actual-ready.v4" {
 		proof, err := loadWindowActualStoppedBaselineV4(m)
 		if err != nil {
 			return reject()

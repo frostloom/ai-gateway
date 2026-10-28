@@ -1,0 +1,196 @@
+{
+  "schema": "full1220-v5-actual-wiring-unit-verification.v1",
+  "created_utc": "2026-10-28T23:23:05.708444+00:00",
+  "source_sha256": {
+    "internal/taskbench/window_actual_v5.go": "3f89c05077b1aeea74504690b1dfbee066c26e8db7a6c4bc1e8870017ccf1295",
+    "internal/taskbench/window_actual_v5_test.go": "997a3d979dd4bae9a02bcf103030c627f168ffa49411a62ddb6a8ab8e307222c",
+    "internal/taskbench/window_actual_v5_collector_test.go": "946dee0513e3df1f9c59f159c9e024a8a5cb54e16495e7c65014aecd0553d16a",
+    "internal/taskbench/window_actual_ready.go": "c4d456df7a5ff75702d92f51b8c7f07ef73ca1e9601fd5db84a3aa07a39d4d56",
+    "internal/taskbench/window_actual_v2.go": "2ada579a348e0032d31e4c3a692e754f95aea4f46878e554f79aadb2c75622c4",
+    "internal/taskbench/window_actual_v3.go": "2fb24f4008df6099957da42f64b11e4dc13d6e98c19bb529ff53f8043305bb7d",
+    "internal/taskbench/window_actual_session.go": "72cba1d7ea0b5566862abfd34ab826da1493172eb356f437cf73babcc74ae2a7",
+    "internal/taskbench/window_actual_v2_test.go": "fe6158272a1339492bea05c419a106f45798655a4b565a5a68fc5503ae5baa55",
+    "internal/taskbench/window_actual_v3_test.go": "5ac436c2b254156bc023bed7ed3a777ba3dcdd643bf35452d1f8e5e4a3180146",
+    "internal/taskbench/window_actual_v4_test.go": "35aa223f338cc3a552e15c5e1ab29fef4440ad339e37f510556b9332f1f3be2b"
+  },
+  "interface_boundary": {
+    "consumes": "Task2 scope5/campaign5; concrete windowStoppedV4Baseline only",
+    "baseline_sha256": "2f8c83546a2918b85801160f521465c2f53e040073b3590e1ecde53f278ef340",
+    "candidate_total_micro_cny": 62000000,
+    "candidate_total_micro_usd": 676000,
+    "parent_micro_cny": 105000000,
+    "parent_micro_usd": 1000000,
+    "old28_permanent_micro_cny": 40625891,
+    "old28_permanent_micro_usd": 323825,
+    "old_actual_model_jev": [
+      1985,
+      501
+    ],
+    "knowledge": "off/off",
+    "old_pending_hold_retained": [
+      74752,
+      2688
+    ]
+  },
+  "implemented": [
+    "matching readonly manifest/scope epochs2–5; Open only5 before proof/settings/newroots",
+    "concrete28 in Ready/load/fresh, exact V5 caps/width/budget and original accounting2 rates/envelopes",
+    "four predecessor roots isolated from session/campaign; old nested25/16/first3832 consistency retained",
+    "newWindowCampaignV5 concrete final argument; existing every-window source/attestation/fees/basis/observer and campaign fresh gates retained",
+    "legacy V4 closed collector and repair files unchanged; only necessary old entry expectation/currentepoch fixtures adapted"
+  ],
+  "tdd": {
+    "epoch_red": "epoch5 pairing unsupported and consumed1–4 rejected at old boundary; assertion failures preserved epoch-red.log",
+    "binding_red": "consistent28 positive fails with unimplemented binding stub; assertion failure preserved binding-red.log",
+    "compile_only_red_claimed": false
+  },
+  "verification": {
+    "binding-green": {
+      "pass": 46,
+      "fail": 0,
+      "skip": 0,
+      "package_action": "pass",
+      "seconds": 7.451,
+      "stderr_bytes": 0,
+      "LC_DYSYMTAB_warnings": 0
+    },
+    "compat-normal": {
+      "pass": 127,
+      "fail": 0,
+      "skip": 0,
+      "package_action": "pass",
+      "seconds": 7.3,
+      "stderr_bytes": 0,
+      "LC_DYSYMTAB_warnings": 0
+    },
+    "binding-race": {
+      "pass": 47,
+      "fail": 0,
+      "skip": 0,
+      "package_action": "pass",
+      "seconds": 108.213,
+      "stderr_bytes": 0,
+      "LC_DYSYMTAB_warnings": 1
+    },
+    "collector-normal-authorized": {
+      "pass": 14,
+      "fail": 0,
+      "skip": 0,
+      "package_action": "pass",
+      "seconds": 140.221,
+      "stderr_bytes": 0,
+      "LC_DYSYMTAB_warnings": 0
+    },
+    "collector-race": {
+      "pass": 7,
+      "fail": 0,
+      "skip": 0,
+      "package_action": "pass",
+      "seconds": 148.001,
+      "stderr_bytes": 0,
+      "LC_DYSYMTAB_warnings": 1
+    },
+    "readonly-overlay": {
+      "pass": 1,
+      "fail": 0,
+      "skip": 0,
+      "package_action": "pass",
+      "seconds": 17.809,
+      "stderr_bytes": 0,
+      "LC_DYSYMTAB_warnings": 0
+    }
+  },
+  "new5_closed_native_test_capture": {
+    "cache": {
+      "native": 144,
+      "model": 116,
+      "FakeJEV": 28,
+      "known_micro_cny": 12528,
+      "known_micro_usd": 140,
+      "qualitynegative": 40
+    },
+    "absent": {
+      "native": 144,
+      "model": 116,
+      "FakeJEV": 28,
+      "known_micro_cny": 30624,
+      "known_micro_usd": 140,
+      "qualitynegative": 40
+    },
+    "repair": {
+      "native": 145,
+      "model": 117,
+      "FakeJEV": 28,
+      "repairs": 1,
+      "known_micro_cny": 12636,
+      "known_micro_usd": 140,
+      "qualitynegative": 40
+    },
+    "three_modes_total": {
+      "native": 433,
+      "model": 349,
+      "FakeJEV": 84
+    },
+    "negative": {
+      "native": 84,
+      "model": 56,
+      "FakeJEV": 28,
+      "qualitynegative": 56,
+      "all_quality_end_and_defined_suffix_retained": true
+    },
+    "scope": "new scope5 local_stub synthetic history; temporary test raw files, not a final frozen capture, actual quality or invoice"
+  },
+  "failure_coverage": [
+    "model/JEV EOF stop without next claim/retry and preserve pending",
+    "Handler settlement fsync known0/hold74752/pending/durability_failure",
+    "observer failure stops first arm; cleanup failure zero egress",
+    "occupied report/wrong execution/cancelled reject before ledger/egress",
+    "cache absent costs allmiss; original negative/Successfalse unchanged"
+  ],
+  "real_predecessor_readonly_overlay": {
+    "typed28_load_binding_and_fresh_only": true,
+    "original_sha_checked_before_and_after": 10309,
+    "campaign_constructor_or_actual_ready_called": false
+  },
+  "retained_setup_failure": "collector-normal.jsonl initial sandbox httptest loopback bind denial before Handler/DB, not product RED or successful test; authorized isolated-loopback rerun passed",
+  "execution_boundary": {
+    "real_model_or_jev_requests": 0,
+    "actual_financial_claims": 0,
+    "synthetic_fixture_claims": "created only in local_stub temporary tests",
+    "real_score_posts": 0,
+    "old_owner_operations": 0,
+    "frozen_archive_python_imports": 0,
+    "original_archives_modified": 0,
+    "scope_campaign_accounting_or_customer_files_modified_by_this_task": false,
+    "commits_pushes": 0
+  },
+  "limitations": [
+    "Final exact committed archive fullGo20m/service restore/source sealing/new closed capture and prices/envelope/observer/binary/signature/actualcheck/authorization still belong to freeze.",
+    "No complete Actual suite/fullGo run in this unit; focused normal/race and explicit historical binding regression only.",
+    "Race collector is a focused subset; cache-absent/ownednegative/cleanup/pre-egress paths passed normal, not repeated in collector race.",
+    "No claim of actual readiness or new paid scope execution."
+  ],
+  "artifact_sha256": {
+    "compat-normal.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "compat-normal.jsonl": "bdbd691bc8619fef8f7423dbb70073e0d1a992f476d7a53a5ef603ff3a2ff13c",
+    "readonly-overlay.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "binding-race.jsonl": "3e922223d291daf58866c60259e2ccba8fd5ce9f930e5a281253fca3020d16e7",
+    "collector-normal.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "source-sha256.json": "ffd720287168f704a69c8606e6d4cb2316b645696453cc4c2cb17d0ecd96d6de",
+    "binding-green.jsonl": "053a314f0a9164b9e18f6636af4397d14d005d8736143a128a233cc719bee9c3",
+    "readonly-overlay.json": "1575358d0cc6f2dca0fadf82bd6702dcea5dacabc4b816733026584ee87e8761",
+    "collector-race.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "binding-race.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "collector-normal-authorized.jsonl": "1fa9a478e79d49eaf5a36c55d3a2167edd66ad12559f3a298a8136b5aba4f6b7",
+    "epoch-red.log": "da8c232aa284fcda12ffc38b7c1d5ab251124935b7013bc0a0edcc44336aae39",
+    "binding-red.log": "8379cdfa8357a6308b989c54259bd7b087130ed8f563150dab0b8b10ca308874",
+    "collector-normal-authorized.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "binding-green.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "readonly-overlay_test.go": "f81c7a4048d1e4a6ca6cadedac4e51e17c53821737aa8a7f0c4eecba9f4f11b2",
+    "collector-race.jsonl": "d6023c66d6bbbfd27390bd1336d14ebd39af1c956b54f18a334c5677c0dc15bb",
+    "collector-normal.jsonl": "753d72de03888440b860f129e9d71abc75093421f7af4e33941c2cdfad236bb6",
+    "readonly-overlay.jsonl": "d66fdb981ce50c3a3d1cb8c1ccd8e75a2dcee0640c051a4e81ddc3a7e4b289f8"
+  },
+  "private_report_sha256": "a01dadb32c957c4a69e6702543092348fab9ec561c42177767d8e7ff51b35138",
+  "independent_review": "passed_no_confirmed_P1_P2;10source/allartifactSHA matched; pureGo7.610s; defaultcachepermission setupfailure retained, writablecache rerunpassed"
+}

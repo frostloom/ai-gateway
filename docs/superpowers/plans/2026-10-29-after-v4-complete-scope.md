@@ -49,9 +49,9 @@
 ### Task 3: Actual5 and score compatibility
 
 **Files:** explicit actual_v5 loader/binding; minimalready/source dispatcher and score/test changes.
-- [ ] Support matching5/5 only; ActualOpen onlynew5 and reject consumed1–4 before settings/side effects. Preserve historical parsers for read-only audit.
-- [ ] Real Handler closed provider/FakeJEV native accounting happy/repair/cachemissing/negative/failure-stop fixtures; no inference or billing claims.
-- [ ] Score5 explicit compatibility and fixed attestation helper; old2–4 plans/IDs/intents read back unchanged; independent review/commit/push.
+- [x] Support matching5/5 only; ActualOpen onlynew5 and reject consumed1–4 before settings/side effects. Preserve historical parsers for read-only audit.
+- [x] Real Handler closed provider/FakeJEV native accounting happy/repair/cachemissing/negative/failure-stop fixtures; no inference or billing claims.
+- [x] Score5 explicit compatibility and fixed attestation helper; old2–4 plans/IDs/intents read back unchanged; independent review/commit/push.
 
 ### Task 4: Freeze and execution
 
@@ -66,3 +66,5 @@
 2026-10-29: Offline budget/vector double algorithm complete. No new28 Go proof, epoch5, newfinancialclaim or actual execution yet. P4 partialscore delivery is a separate active plan. Existing autonomous authorization applies after all concrete gates; no repeated permission question.
 
 2026-10-29 Task1 complete: descriptor2f8c8354,10309oldSHA unchanged;unit151/race151/actualoverlay230/race237 pass, independent noP1P2. Epoch5 not yet implemented.
+
+2026-10-29 Task2/3 independent review complete,noP1P2;scope76normal/race plusreadonly,score294Python/15originalskips+11oldplans1778 unchanged,actualfocusednormal/race+newtemporary433native passed. Task4 exact committed archive fullGo20m/read-only sealing/finalcapture and precise freeze still pending; actualclaims0.
