@@ -698,14 +698,112 @@ def _verify_frozen_sources(root, sources, extras=None, *, allow_root_git_pointer
     return git_pointer_sha
 
 
+_CLOSED_P4_ROOT = Path('/Users/a1/项目/ai-gateway/.tmp/paired-live-private/full1220-actual-v4-freeze-20261029')
+_CLOSED_ARCHIVE_EXTRA_POLICY = {
+    'schema': 'full1220-closed-archive-extra-witness.v1', 'phase': 'post_stop_content_projection',
+    'not_actual_ready': True,
+    'manifest_sha256': 'fb48dd1465a452ffc2dfdb2029a107adfeb351f4c176892a071d07e18b95c0ea',
+    'source_map_sha256': '5e7de1c0ed75706390e3625287270376d16d976cb6e3f310a9c0b033f1b472cf',
+    'source_root': str(_CLOSED_P4_ROOT/'regression/source'), 'tracked_file_count': 2108,
+    'extra_files': [{'path': 'scripts/__pycache__/full1220-window-scores.cpython-312.pyc',
+                     'sha256': 'c16f5c7917e7ec91f154c828d596569af2ff24d7f2de24ad5ee23380abda49c4', 'size': 129686}],
+    'extra_directories': ['scripts/__pycache__'],
+    'owner_exit': {'path': str(_CLOSED_P4_ROOT/'actual-owner-exit.json'),
+                   'sha256': '0015af89d829c625c3fef4b21219dd3a40682c54308f9426c7e1bc279f268c66'},
+    'terminal': {'path': str(_CLOSED_P4_ROOT/'records/terminal.json'),
+                 'sha256': '13520b9e02f814b7c7e3c9cb2ca8f40793714d2649c14dd9f2acfdc9886bbe29'},
+    'independent_stop_audit': {'path': str(_CLOSED_P4_ROOT/'stopped-preflight-independent-audit.json'),
+                              'sha256': '2818476f6f36d0cc86cef7e15ef3d16fe0cefce86eb4c17a0f7387a299fa3aac'}}
+
+
+def _source_directories(names):
+    return {parent.as_posix() for name in names for parent in Path(name).parents if parent != Path('.')}
+
+
+def _verify_closed_archive_inventory(root, sources, extras):
+    """Exact file AND directory inventory; never imports or decodes an extra."""
+    _require(root.resolve() == root.absolute(), 'Closed archive root alias forbidden')
+    extra_map = {}; identities = {}
+    for item in extras:
+        name = item['path']; relative = Path(name)
+        _require(not relative.is_absolute() and relative.as_posix() == name and '..' not in relative.parts
+                 and name != '.git' and name not in sources and name not in extra_map, 'Exact separate extra path required')
+        _hex(item['sha256'], _HEX64, 'Pinned extra SHA required')
+        _integer(item['size'], 1, 'Pinned positive extra size required')
+        info = (root/name).lstat()
+        _require(stat.S_ISREG(info.st_mode) and info.st_size == item['size'], 'Pinned regular extra size mismatch')
+        identities[name] = [info.st_dev, info.st_ino, info.st_size, info.st_mtime_ns, info.st_ctime_ns, info.st_mode]
+        extra_map[name] = item['sha256']
+    git_pointer = _verify_frozen_sources(root, sources, extra_map, allow_root_git_pointer=True)
+    directories = {str((Path(directory)/name).relative_to(root).as_posix())
+                   for directory, names, _ in os.walk(root, followlinks=False) for name in names}
+    _equal(sorted(directories), sorted(_source_directories([*sources, *extra_map])), 'Unexpected closed archive directory inventory')
+    for name, expected in identities.items():
+        info = (root/name).lstat()
+        _equal([info.st_dev, info.st_ino, info.st_size, info.st_mtime_ns, info.st_ctime_ns, info.st_mode], expected,
+               'Extra changed during inventory read')
+    info = root.lstat()
+    return {'git_pointer_sha256': git_pointer, 'source_directory_identity': [info.st_dev, info.st_ino],
+            'extra_file_identities': identities}
+
+
+def _validate_closed_archive_extra_witness(spec, manifest_raw, root):
+    """One pinned P4 post-stop exception, solely for content staging; no actual capability."""
+    _require(type(spec) is dict and set(spec) == {'path', 'sha256'}, 'Explicit witness path and SHA required')
+    path = Path(spec['path']).absolute()
+    _require(path.resolve() == path, 'Witness path alias forbidden')
+    witness_raw = _regular_bytes(path, 16384)
+    _equal(_sha(witness_raw), _hex(spec['sha256'], _HEX64, 'External witness SHA required'), 'Closed archive witness SHA mismatch')
+    witness = _Document(witness_raw, 16384).value
+    _equal(witness, _CLOSED_ARCHIVE_EXTRA_POLICY, 'Only the pinned stopped P4 archive witness is supported')
+    manifest = _Document(manifest_raw).value
+    _equal(_sha(manifest_raw), witness['manifest_sha256'], 'Closed witness manifest mismatch')
+    _equal(_sha(_json_bytes(manifest['sources'])), witness['source_map_sha256'], 'Closed witness source map mismatch')
+    _equal(len(manifest['sources']), witness['tracked_file_count'], 'Closed witness tracked count mismatch')
+    _equal(str(root), witness['source_root'], 'Closed witness requires original declared root')
+    _equal(manifest['source_root'], witness['source_root'], 'Manifest original source root mismatch')
+    _equal(sorted(_source_directories([*manifest['sources'], *[x['path'] for x in witness['extra_files']]])
+                  - _source_directories(manifest['sources'])), witness['extra_directories'], 'Closed extra directory policy mismatch')
+    documents = {}
+    for name in ('owner_exit', 'terminal', 'independent_stop_audit'):
+        entry = witness[name]; evidence_path = Path(entry['path'])
+        _require(evidence_path.resolve() == evidence_path, 'Stopped evidence path alias forbidden')
+        raw = _regular_bytes(evidence_path, 16 << 20)
+        _equal(_sha(raw), entry['sha256'], 'Pinned stopped evidence changed: '+name)
+        documents[name] = _Document(raw).value
+    _equal(documents['owner_exit']['exit_code'], 1, 'Closed witness requires exit1')
+    _equal(documents['owner_exit']['relaunch_allowed'], False, 'Closed witness forbids relaunch')
+    _equal(documents['terminal']['closed'], True, 'Closed terminal required')
+    _equal(documents['terminal']['acquisition_done'], False, 'Stopped incomplete scope required')
+    audit = documents['independent_stop_audit']
+    _equal(audit['schema'], 'full1220-v4-stopped-preflight-independent-audit.v1', 'Independent stopped audit required')
+    for key, expected in [('owner_exit_code', 1), ('closed', True), ('resume_relaunch_allowed', False)]:
+        _equal(audit['stop'][key], expected, 'Independent stopped state mismatch')
+    _equal(audit['source_inventory']['tracked_files'], 2108, 'Independent original inventory count mismatch')
+    _equal(audit['source_inventory']['changed_files'], [], 'Independent original sources changed')
+    _equal(audit['source_inventory']['extra_files'], [x['path'] for x in witness['extra_files']], 'Independent extra inventory mismatch')
+    _equal(audit['pyc']['sha256'], witness['extra_files'][0]['sha256'], 'Independent extra SHA mismatch')
+    _equal(audit['pyc']['size'], witness['extra_files'][0]['size'], 'Independent extra size mismatch')
+    inventory = _verify_closed_archive_inventory(root, manifest['sources'], witness['extra_files'])
+    return {'schema': 'full1220-closed-archive-projection-source.v1', 'phase': witness['phase'], 'not_actual_ready': True,
+            'witness_path': str(path), 'witness_sha256': spec['sha256'], 'manifest_sha256': witness['manifest_sha256'],
+            'source_map_sha256': witness['source_map_sha256'], 'source_root': str(root), 'tracked_file_count': 2108,
+            'extra_files': witness['extra_files'], 'extra_directories': witness['extra_directories'],
+            'owner_exit_sha256': witness['owner_exit']['sha256'], 'terminal_sha256': witness['terminal']['sha256'],
+            'independent_stop_audit_sha256': witness['independent_stop_audit']['sha256'], 'inventory': inventory,
+            'extras_copied_or_executed': False}
+
+
 class _ContentProjection:
     """Opaque local provenance, deliberately not reconstructible from JSON."""
-    __slots__ = ('_raw', '_raw_sha', '_plan_sha', '_job', '_seal')
+    __slots__ = ('_raw', '_raw_sha', '_plan_sha', '_job', '_seal', '_archive_provenance', '_archive_provenance_sha')
 
-    def __init__(self, seal, raw, plan, job):
+    def __init__(self, seal, raw, plan, job, archive_provenance=None):
         _require(seal is _PROJECTION_SEAL, 'Fixed helper execution proof required')
+        provenance = _json_bytes(archive_provenance) if archive_provenance is not None else None
         for name, value in (('_raw', raw), ('_raw_sha', _sha(raw)), ('_plan_sha', _sha(_json_bytes(plan))),
-                            ('_job', _json_bytes(job)), ('_seal', seal)):
+                            ('_job', _json_bytes(job)), ('_seal', seal), ('_archive_provenance', provenance),
+                            ('_archive_provenance_sha', _sha(provenance) if provenance is not None else None)):
             object.__setattr__(self, name, value)
 
     def __setattr__(self, name, value):
@@ -713,6 +811,12 @@ class _ContentProjection:
 
     def as_dict(self):
         return _Document(self._raw).value
+
+    def archive_source_provenance(self):
+        if self._archive_provenance is None:
+            return None
+        _equal(_sha(self._archive_provenance), self._archive_provenance_sha, 'Closed archive proof provenance mutated')
+        return _Document(self._archive_provenance).value
 
 
 def _projection_job(plan, manifest):
@@ -762,7 +866,7 @@ def _check_projected_output(payload, job, input_raw, records):
 
 
 def project_window_content(manifest_raw, summary_raw, receipt_raw, records, review_raw, expected_hashes,
-                           *, source_root, output_dir, runtime, execute=False):
+                           *, source_root, output_dir, runtime, execute=False, closed_archive_extra_witness=None):
     """Run the fixed no-network Go helper against an isolated frozen archive.
 
     Requires explicit execute=True (schedule this outside measurement windows),
@@ -772,6 +876,9 @@ def project_window_content(manifest_raw, summary_raw, receipt_raw, records, revi
     All manifest source files are rehashed before/after an isolated full copy;
     originals and staged records are revalidated after the command. No settings
     or credentials are read. Return an opaque proof; JSON alone cannot reload it.
+    The optional explicit path/SHA witness supports only pinned stopped P4;
+    its extra bytecode is retained outside staging and never executed. This
+    source evidence does not establish actual readiness. Default inventory is strict.
     """
     try:
         _require(execute is True, 'Explicit fixed offline helper execution required')
@@ -788,7 +895,11 @@ def project_window_content(manifest_raw, summary_raw, receipt_raw, records, revi
             _equal(observer[key], expected, 'Frozen capture configuration mismatch: '+key)
         root = Path(source_root).absolute()
         _equal(str(root.resolve()), str(Path(manifest['source_root']).resolve()), 'Explicit source root must match pinned manifest')
-        root_git_pointer = _verify_frozen_sources(root, manifest['sources'], allow_root_git_pointer=True)
+        archive_provenance = None
+        if closed_archive_extra_witness is not None:
+            archive_provenance = _validate_closed_archive_extra_witness(closed_archive_extra_witness, manifest_raw, root)
+        else:
+            root_git_pointer = _verify_frozen_sources(root, manifest['sources'], allow_root_git_pointer=True)
         sdk = Path(_PROJECTION_SDKROOT)
         _require(sdk.is_dir() and sdk.name == 'MacOSX26.5.sdk', 'Fixed MacOSX26.5 SDK required')
         executable = Path(runtime['go_executable']).resolve()
@@ -834,7 +945,11 @@ def project_window_content(manifest_raw, summary_raw, receipt_raw, records, revi
         _require(len(result.stdout) <= 8 << 20 and len(result.stderr) <= 8 << 20, 'Helper output bound exceeded')
         _exclusive_write(output/'helper.stdout', result.stdout); _exclusive_write(output/'helper.stderr', result.stderr)
         _require(result.returncode == 0, 'Fixed helper failed; projection not verified')
-        _equal(_verify_frozen_sources(root, manifest['sources'], allow_root_git_pointer=True), root_git_pointer, 'Original Git pointer changed during helper execution')
+        if closed_archive_extra_witness is not None:
+            _equal(_validate_closed_archive_extra_witness(closed_archive_extra_witness, manifest_raw, root), archive_provenance,
+                   'Closed archive witness/source/extra changed during helper execution')
+        else:
+            _equal(_verify_frozen_sources(root, manifest['sources'], allow_root_git_pointer=True), root_git_pointer, 'Original Git pointer changed during helper execution')
         _verify_frozen_sources(staged, manifest['sources'], extra)
         _equal(_sha(_regular_bytes(helper_path, 1 << 20)), _PROJECTION_HELPER_SHA256, 'Helper changed during execution')
         _equal(_sha(_regular_bytes(executable)), runtime['go_sha256'], 'Go executable changed during execution')
@@ -847,7 +962,10 @@ def project_window_content(manifest_raw, summary_raw, receipt_raw, records, revi
                  'Projection bytes do not match the fixed helper process receipt')
         payload = _Document(projected_raw).value
         _check_projected_output(payload, job, input_raw, records)
-        return _ContentProjection(_PROJECTION_SEAL, projected_raw, plan, job)
+        if archive_provenance is not None:
+            archive_provenance['checked_before_and_after'] = True
+            _exclusive_write(output/'archive-source-provenance.json', _json_bytes(archive_provenance))
+        return _ContentProjection(_PROJECTION_SEAL, projected_raw, plan, job, archive_provenance)
     except (KeyError, IndexError, TypeError, OSError, UnicodeError, subprocess.SubprocessError) as error:
         raise ValueError('Frozen offline projection unavailable: '+type(error).__name__) from error
 
@@ -948,7 +1066,7 @@ def validate_window_traces(plan, projection, client):
         all_pass = not pending and len(summaries) == len(plan['trace_bindings'])
         gates = [gate for gate in plan['pending_gates'] if gate != 'frozen_capture_projection'
                  and not (all_pass and gate == 'persisted_trace_content_validation')]
-        return {'schema': 'full1220-window-content-validation.v1', 'all_pass': all_pass, 'publish_ready': False,
+        result = {'schema': 'full1220-window-content-validation.v1', 'all_pass': all_pass, 'publish_ready': False,
                 'verified_traces': len(summaries), 'expected_traces': len(plan['trace_bindings']),
                 'verified_observations': sum(row['observations'] for row in summaries),
                 'verified_turns': sum(row['turns'] for row in summaries), 'summaries': summaries, 'unverified': pending,
@@ -957,6 +1075,13 @@ def validate_window_traces(plan, projection, client):
                 'plan_sha256': projection._plan_sha, 'new_external_requests_from_projection': 0,
                 'new_model_calls': 0, 'new_jev_calls': 0, 'claims_created': 0, 'scores_published': 0,
                 'native_llm_payload_io_claimed': False, 'included_does_not_prove_used': True}
+        archive_provenance = projection.archive_source_provenance()
+        if archive_provenance is not None:
+            _equal(archive_provenance['manifest_sha256'], plan['provenance']['manifest_sha256'], 'Closed source proof manifest mismatch')
+            _require(archive_provenance['not_actual_ready'] is True and archive_provenance['checked_before_and_after'] is True,
+                     'Complete post-stop source proof required')
+            result['archive_source_provenance'] = archive_provenance
+        return result
     except (KeyError, IndexError, TypeError, UnicodeError) as error:
         raise ValueError('Invalid captured trace evidence: '+type(error).__name__) from error
 
@@ -1389,7 +1514,7 @@ def _read_score_job(path):
 def main(argv=None):
     parser = argparse.ArgumentParser(description='Full1220 offline plans, explicit once-only local score publication, or read-only verification.')
     parser.add_argument('mode', nargs='?', choices=('plan', 'verify', 'publish'), default='plan')
-    parser.add_argument('--job', help='Explicit paths and external hashes; no directory scanning')
+    parser.add_argument('--job', help='Explicit paths and hashes; optional closed_archive_extra_witness={path,sha256} for pinned post-stop projection only')
     parser.add_argument('--out', help='Optional new result JSON; never a publication lock authority')
     parser.add_argument('--execute', action='store_true')
     args = parser.parse_args(argv)
@@ -1411,7 +1536,8 @@ def main(argv=None):
             attestation = verify_window_attestation(inputs[0], _regular_bytes(job['attestation_path'], 65536),
                 job['attestation_sha256'], job['binary_path'], runtime=job['runtime'], output_dir=job['attestation_output'], execute=True)
             projection = project_window_content(*inputs, source_root=_Document(inputs[0]).value['source_root'],
-                output_dir=job['projection_output'], runtime=job['runtime'], execute=True)
+                output_dir=job['projection_output'], runtime=job['runtime'], execute=True,
+                closed_archive_extra_witness=job.get('closed_archive_extra_witness'))
             result = publish_window_scores(plan, projection, chain, attestation,
                 load_window_score_client(inputs[0], job['client_settings_path']), execute=True)
         if args.out:

@@ -1269,4 +1269,146 @@ class ZeroSuffixCompatibilityTests(unittest.TestCase):
                 with self.subTest(key=key,value=value):self.reject(f)
         f=self.zero_quality_fixture();del f['receipt']['rows'][0]['quality_end']['unrun_turns'];refresh_links(f);self.reject(f)
 
+
+class ClosedArchiveInventoryTests(unittest.TestCase):
+    setUpClass = classmethod(ContentProjectionTests.setUpClass.__func__)
+
+    def setUp(self):
+        ContentProjectionTests.setUp(self)
+        self.root=self.root.resolve();self.source=self.source.resolve()
+        self.f['manifest']['source_root']=str(self.source);refresh_links(self.f)
+    project = ContentProjectionTests.project
+    api = ContentProjectionTests.api
+    fake_go = ContentProjectionTests.fake_go
+
+    def extra(self):
+        path=self.source/'scripts/__pycache__/full1220-window-scores.cpython-312.pyc'
+        path.parent.mkdir(parents=True,exist_ok=True);path.write_bytes(b'fixture pyc never executed'+b'x'*129661)
+        return [{'path':path.relative_to(self.source).as_posix(),'sha256':digest(path.read_bytes()),'size':path.stat().st_size}]
+
+    def inventory(self,extras):
+        self.assertTrue(callable(getattr(self.adapter,'_verify_closed_archive_inventory',None)),
+                        'Closed archive exact inventory verifier is missing')
+        return self.adapter._verify_closed_archive_inventory(self.source,self.f['manifest']['sources'],extras)
+
+    def test_closed_inventory_exact_extra_shape_and_no_default_waiver(self):
+        extras=self.extra();self.inventory(extras)
+        with self.assertRaises(ValueError):self.project()
+        self.assertEqual(self.commands,[])
+        self.assertTrue((self.source/extras[0]['path']).exists())
+
+    def test_closed_inventory_rejects_more_files_empty_directories_and_links(self):
+        extras=self.extra();self.inventory(extras)
+        for name,directory in [('scripts/__pycache__/other.pyc',False),('extra-empty',True)]:
+            target=self.source/name
+            if directory:target.mkdir()
+            else:target.write_bytes(b'extra')
+            with self.subTest(name=name),self.assertRaises(ValueError):self.inventory(extras)
+            if directory:target.rmdir()
+            else:target.unlink()
+        link=self.source/'scripts/__pycache__/linked.pyc';link.symlink_to(self.source/extras[0]['path'])
+        with self.assertRaises(ValueError):self.inventory(extras)
+
+    def test_closed_inventory_rechecks_changed_extra_and_signed_source(self):
+        extras=self.extra();self.inventory(extras);path=self.source/extras[0]['path'];original=path.read_bytes()
+        path.write_bytes(b'z'+original[1:])
+        with self.assertRaises(ValueError):self.inventory(extras)
+        path.write_bytes(original);self.inventory(extras)
+        (self.source/'go.mod').write_bytes(b'changed signed source')
+        with self.assertRaises(ValueError):self.inventory(extras)
+
+
+class ClosedP4WitnessTests(unittest.TestCase):
+    setUpClass = classmethod(ContentProjectionTests.setUpClass.__func__)
+    fake_go = ContentProjectionTests.fake_go
+    P4 = SCRIPT.parents[1]/'.tmp/paired-live-private/full1220-actual-v4-freeze-20261029'
+
+    def setUp(self):
+        self.temporary=tempfile.TemporaryDirectory();self.addCleanup(self.temporary.cleanup)
+        self.root=Path(self.temporary.name).resolve()
+        self.witness=self.P4/'closed-archive-extra-witness.private.json'
+        review=self.P4/'semantic-review-window-000001.json'
+        if not self.witness.is_file() or not review.is_file():self.skipTest('Exact private stopped P4 witness/review unavailable')
+        self.witness_raw=self.witness.read_bytes();self.spec={'path':str(self.witness.resolve()),'sha256':digest(self.witness_raw)}
+        self.manifest_raw=(self.P4/'actual-manifest.json').read_bytes();self.manifest=json.loads(self.manifest_raw)
+        self.source=Path(self.manifest['source_root']);self.f={'manifest':self.manifest}
+        summary=(self.P4/'records/window-000001-summary.json').read_bytes();receipt_raw=(self.P4/'records/window-000001/receipt.json').read_bytes()
+        receipt=json.loads(receipt_raw);records={r['recording_file']:(self.P4/'records/window-000001'/r['recording_file']).read_bytes() for r in receipt['rows'] if r['attempted']}
+        review_raw=review.read_bytes();pins={'manifest_sha256':digest(self.manifest_raw),'summary_sha256':digest(summary),
+            'receipt_sha256':digest(receipt_raw),'review_sha256':digest(review_raw),'records':{n:digest(b) for n,b in records.items()},
+            'projection_helper_sha256':'57847bf1ba02864c918261813ea45f68dc57f4dbd5d06349cc0dd661e225cdfc'}
+        self.args=(self.manifest_raw,summary,receipt_raw,records,review_raw,pins)
+        self.go=self.root/'go';self.go.write_bytes(b'mocked compiler boundary only');self.go.chmod(0o700)
+        self.cache=self.root/'modules';self.cache.mkdir();sdk=self.root/'MacOSX26.5.sdk';sdk.mkdir()
+        self.sdk_patch=patch.object(self.adapter,'_PROJECTION_SDKROOT',str(sdk));self.sdk_patch.start();self.addCleanup(self.sdk_patch.stop)
+        self.overrides={};self.commands=[];self.run_mutation=None;self.after_output=None;self.stdout_override=None
+
+    def witness_api(self):
+        self.assertTrue(callable(getattr(self.adapter,'_validate_closed_archive_extra_witness',None)),
+                        'Pinned closed-archive witness verifier is missing')
+
+    def validate(self,spec=None):
+        self.witness_api()
+        return self.adapter._validate_closed_archive_extra_witness(self.spec if spec is None else spec,self.manifest_raw,self.source)
+
+    def project(self,spec=None,with_witness=True):
+        self.witness_api();kwargs={'closed_archive_extra_witness':self.spec if spec is None else spec} if with_witness else {}
+        with patch.object(self.adapter.subprocess,'run',side_effect=self.fake_go):
+            return self.adapter.project_window_content(*self.args,source_root=str(self.source),output_dir=self.root/'projection',
+                runtime={'go_executable':str(self.go),'go_sha256':digest(self.go.read_bytes()),'module_cache':str(self.cache)},execute=True,**kwargs)
+
+    def test_actual_p4_pinned_witness_stages_only_signed_sources_and_keeps_go_bytes(self):
+        evidence=self.validate();self.assertTrue(evidence['not_actual_ready'])
+        self.assertEqual(evidence['phase'],'post_stop_content_projection')
+        proof=self.project();provenance=proof.archive_source_provenance()
+        self.assertTrue(provenance['checked_before_and_after']);self.assertTrue(provenance['not_actual_ready'])
+        self.assertEqual(provenance['witness_sha256'],self.spec['sha256'])
+        self.assertEqual(proof.as_dict(),json.loads((self.root/'projection/projection.json').read_bytes()))
+        self.assertEqual(digest((self.root/'projection/projection.json').read_bytes()),proof._raw_sha)
+        self.assertNotIn('archive_source_provenance',proof.as_dict())
+        self.assertFalse((self.root/'projection/source/scripts/__pycache__').exists())
+        self.assertTrue((self.source/'scripts/__pycache__/full1220-window-scores.cpython-312.pyc').exists())
+        self.assertEqual(len(self.commands),1)
+        plan=self.adapter.build_window_score_plan(*self.args)
+        result=self.adapter.validate_window_traces(plan,proof,ContentProjectionTests.client(self,plan,proof))
+        self.assertTrue(result['all_pass']);self.assertEqual(result['archive_source_provenance'],provenance)
+        provenance['not_actual_ready']=False
+        self.assertTrue(proof.archive_source_provenance()['not_actual_ready'])
+
+    def test_actual_p4_without_witness_fails_before_any_helper(self):
+        with self.assertRaises(ValueError):self.project(with_witness=False)
+        self.assertFalse((self.root/'projection').exists());self.assertEqual(self.commands,[])
+
+    def test_witness_wrong_sha_unknown_fields_live_exit_or_open_terminal_rejected(self):
+        self.witness_api()
+        with self.assertRaises(ValueError):self.validate({**self.spec,'sha256':'0'*64})
+        link=self.root/'witness-link.json';link.symlink_to(self.witness)
+        with self.assertRaises(ValueError):self.validate({'path':str(link),'sha256':self.spec['sha256']})
+        for field in ('manifest_sha256','source_map_sha256','source_root','owner_exit','terminal','unknown'):
+            doc=json.loads(self.witness_raw)
+            if field in ('owner_exit','terminal'):
+                other=self.root/(field+'.json');other.write_bytes(wire({'exit_code':0,'relaunch_allowed':True} if field=='owner_exit' else {'closed':False}))
+                doc[field]={'path':str(other),'sha256':digest(other.read_bytes())}
+            else:doc[field]='wrong'
+            path=self.root/(field+'-witness.json');path.write_bytes(wire(doc))
+            with self.subTest(field=field),self.assertRaises(ValueError):self.validate({'path':str(path),'sha256':digest(path.read_bytes())})
+        self.assertEqual(self.commands,[])
+
+    def test_witness_mutation_during_helper_cannot_seal_projection(self):
+        copy=self.root/'witness-copy.json';copy.write_bytes(self.witness_raw);spec={'path':str(copy),'sha256':digest(copy.read_bytes())}
+        self.run_mutation=lambda *args:copy.write_bytes(self.witness_raw+b' ')
+        with self.assertRaises(ValueError):self.project(spec)
+        self.assertEqual(len(self.commands),1)
+        self.assertFalse((self.root/'projection/archive-source-provenance.json').exists())
+
+    def test_cli_forwards_only_explicit_job_witness_and_never_loads_client_on_rejection(self):
+        self.witness_api();plan=self.adapter.build_window_score_plan(*self.args)
+        job={'chain':[],'attestation_path':str(self.P4/'actual-manifest.json.binary-attestation.json'),
+             'attestation_sha256':'d36949ed8ccd36e8cef61e58c94b8b268feec7e34dbec672c47546c4c85a2496',
+             'binary_path':str(self.P4/'full-window-actual-v4'),'runtime':{},'attestation_output':str(self.root/'sig'),
+             'projection_output':str(self.root/'projection'),'closed_archive_extra_witness':self.spec}
+        with patch.object(self.adapter,'_read_score_job',return_value=(job,self.args,plan)),             patch.object(self.adapter,'verify_window_receipt_chain'),patch.object(self.adapter,'verify_window_attestation'),             patch.object(self.adapter,'project_window_content',side_effect=ValueError('test stop before client')) as projected,             patch.object(self.adapter,'load_window_score_client',side_effect=AssertionError('client must remain unread')),             patch('sys.stderr',new_callable=io.StringIO):
+            self.assertEqual(self.adapter.main(['publish','--execute','--job','explicit-test-job']),2)
+        self.assertEqual(projected.call_args.kwargs['closed_archive_extra_witness'],self.spec)
+
 if __name__ == '__main__': unittest.main()
