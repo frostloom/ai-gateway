@@ -40,7 +40,7 @@ func TestActualOpenRejectsLegacyBudgetBeforeSettingsOrRoots(t *testing.T) {
 	root := stoppedEvidenceRoot(t)
 	ready := &FullWindowActualReady{manifest: windowActualManifest{Schema: "full-window-actual-ready.v1", Scope: fullWindowScope{Schema: "full-window-scope.v1"}, SessionRoot: filepath.Join(root, "never-created"), CampaignRoot: filepath.Join(root, "never-claimed")}}
 	_, err := OpenFullWindowActual(context.Background(), ready, filepath.Join(root, "unread-settings"))
-	if err == nil || !strings.Contains(err.Error(), "v3 scope") {
+	if err == nil || !strings.Contains(err.Error(), "v4 scope") {
 		t.Fatal("legacy actual path did not fail for obsolete budget epoch", err)
 	}
 	entries, err := os.ReadDir(root)
@@ -53,7 +53,7 @@ func TestActualOpenRejectsConsumedV2EpochBeforeSettingsOrRoots(t *testing.T) {
 	root := stoppedEvidenceRoot(t)
 	r := &FullWindowActualReady{manifest: windowActualManifest{Schema: "full-window-actual-ready.v2", Scope: fullWindowScope{Schema: "full-window-scope.v2"}, SessionRoot: filepath.Join(root, "never-created"), CampaignRoot: filepath.Join(root, "never-claimed")}}
 	_, err := OpenFullWindowActual(context.Background(), r, filepath.Join(root, "unread-settings"))
-	if err == nil || !strings.Contains(err.Error(), "v3 scope") {
+	if err == nil || !strings.Contains(err.Error(), "v4 scope") {
 		t.Fatal("consumed v2 epoch did not reject before stopped proof/settings", err)
 	}
 	entries, e := os.ReadDir(root)

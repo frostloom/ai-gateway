@@ -1,0 +1,121 @@
+{
+  "schema": "full1220-v4-actual-wiring-offline.v1",
+  "source_sha256": {
+    "internal/taskbench/window_actual_v4.go": "2e5cc028d7bca3018e81209199a8e86969150e817672d12e123fdcbfc620ad33",
+    "internal/taskbench/window_actual_v4_test.go": "2c69a0f0ed255ebe8ee4b9b7d677aa3d87ec18eac4c399999d3d18156038083e",
+    "internal/taskbench/window_actual_v4_collector_test.go": "d324d374645bf06ca90ce56e12b1d36853a7f2635d1fb4159b7426d312e6e225",
+    "internal/taskbench/window_actual_v4_repair_test.go": "4e7be0bce54ff28468251e408c8a74d73caf23cbfb1c1f82502eafd62fc54236",
+    "internal/taskbench/window_actual_ready.go": "0c1b288f1b85e9657384ec51af5d4a753117f37b318fd6e193ff01963cb1dfb4",
+    "internal/taskbench/window_actual_session.go": "71e31fc361e17b9c8732502f33a7ffd97e8b2eb778c1d9faa376f276b646edda",
+    "internal/taskbench/window_actual_v2.go": "eb4e1d2bc4f1d85789b7c711e1bbde0748f5ed85796057d05e2951ee53b613a4",
+    "internal/taskbench/window_actual_v3.go": "a84e0ed6d1f756a75a6d5f9b565644af1d50dee56f0c9ac1471e213f4faff41c",
+    "internal/taskbench/window_actual_v2_test.go": "43a17d99438f77700767a819b89d70f4435cccaea7f3ea7b1410a938d7d97b70",
+    "internal/taskbench/window_actual_v3_test.go": "af16f67c0cff46401039ace0212099d07bfbba987056d97a05d7b626e729efc9",
+    "internal/taskbench/window_legacy_entry_test.go": "9093ad2e03d698d21520d0449bbd8b1bd816877efce8c10fc56c359d6e07e77f"
+  },
+  "tests": {
+    "actual-focused-final": {
+      "passed_test_records": 127,
+      "failed_test_records": 0,
+      "skipped_test_records": 0,
+      "package_action": "pass",
+      "elapsed_seconds": 14.65,
+      "linker_warnings": 0,
+      "stderr_bytes": 0
+    },
+    "v4-owned-final": {
+      "passed_test_records": 57,
+      "failed_test_records": 0,
+      "skipped_test_records": 0,
+      "package_action": "pass",
+      "elapsed_seconds": 117.035,
+      "linker_warnings": 0,
+      "stderr_bytes": 0
+    },
+    "v4-owned-race": {
+      "passed_test_records": 10,
+      "failed_test_records": 0,
+      "skipped_test_records": 0,
+      "package_action": "fail",
+      "elapsed_seconds": 300.831,
+      "linker_warnings": 1,
+      "stderr_bytes": 0
+    },
+    "v4-focused-race": {
+      "passed_test_records": 6,
+      "failed_test_records": 0,
+      "skipped_test_records": 0,
+      "package_action": "pass",
+      "elapsed_seconds": 144.474,
+      "linker_warnings": 1,
+      "stderr_bytes": 0
+    },
+    "handler-fsync-race": {
+      "passed_test_records": 2,
+      "failed_test_records": 0,
+      "skipped_test_records": 0,
+      "package_action": "pass",
+      "elapsed_seconds": 10.142,
+      "linker_warnings": 1,
+      "stderr_bytes": 0
+    },
+    "actual-final": {
+      "passed_test_records": 143,
+      "failed_test_records": 0,
+      "skipped_test_records": 0,
+      "package_action": "pass",
+      "elapsed_seconds": 133.233,
+      "linker_warnings": 0,
+      "stderr_bytes": 0
+    }
+  },
+  "repair": {
+    "normal": {
+      "pass": 1,
+      "fail": 0,
+      "skip": 0,
+      "package_action": "pass",
+      "elapsed": 26.188,
+      "stderr_bytes": 0,
+      "build_warnings": 0
+    },
+    "race": {
+      "pass": 1,
+      "fail": 0,
+      "skip": 0,
+      "package_action": "pass",
+      "elapsed": 123.176,
+      "stderr_bytes": 0,
+      "build_warnings": 1
+    }
+  },
+  "independent_confirmed_p1_p2": 0,
+  "open_only_epoch": 4,
+  "readonly_epochs": [
+    2,
+    3,
+    4
+  ],
+  "concrete_baseline_claims": 25,
+  "permanent_micro_cny": 38888170,
+  "permanent_micro_usd": 308003,
+  "old_unknown_holds_preserved": [
+    74752,
+    2688
+  ],
+  "new_actual_model": 0,
+  "new_actual_jev": 0,
+  "new_financial_claims": 0,
+  "new_scores": 0,
+  "deployed": false,
+  "new_archived_full_go_pending": true,
+  "new_capture_pending": true,
+  "actual_paid_ready": false,
+  "own_timeout_cleanup": {
+    "exact_one_schema_dropped": true,
+    "two_recorded_fixture_identities_match": true,
+    "active_connections_before": 0,
+    "exact_schema_absent_after": true,
+    "other_schemas_untouched": true
+  }
+}

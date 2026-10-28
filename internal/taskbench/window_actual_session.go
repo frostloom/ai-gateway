@@ -280,11 +280,11 @@ func OpenFullWindowActual(ctx context.Context, ready *FullWindowActualReady, pri
 	if ctx == nil || ctx.Err() != nil {
 		return nil, fmt.Errorf("actual session context rejected")
 	}
-	// Both actual v1 and v2 owners are permanently consumed. New execution must
-	// include them in the separately verified v3 budget epoch, even if a caller
+	// Actual v1, v2 and v3 owners are permanently consumed. New execution must
+	// include them in the separately verified v4 budget epoch, even if a caller
 	// can still read an old readiness snapshot. No settings or claim first.
-	if ready == nil || ready.manifest.Schema != "full-window-actual-ready.v3" || ready.manifest.Scope.Schema != "full-window-scope.v3" {
-		return nil, fmt.Errorf("actual v3 scope required for current budget epoch")
+	if ready == nil || ready.manifest.Schema != "full-window-actual-ready.v4" || ready.manifest.Scope.Schema != "full-window-scope.v4" {
+		return nil, fmt.Errorf("actual v4 scope required for current budget epoch")
 	}
 	if e := ready.revalidateStopped(); e != nil {
 		return nil, e
@@ -342,7 +342,7 @@ func OpenFullWindowActual(ctx context.Context, ready *FullWindowActualReady, pri
 		return nil, e
 	}
 	m := ready.manifest
-	s.campaign, e = newWindowCampaignV3(m.CampaignRoot, m.CampaignRoot, m.Scope, ready.source, ready.profiles, m.Scope.Bindings, m.ScopeSHA256, m.ExecutionSHA256, m.Limits, ready.stoppedV2)
+	s.campaign, e = newWindowCampaignV4(m.CampaignRoot, m.CampaignRoot, m.Scope, ready.source, ready.profiles, m.Scope.Bindings, m.ScopeSHA256, m.ExecutionSHA256, m.Limits, ready.stoppedV3)
 	if e != nil {
 		return nil, e
 	}

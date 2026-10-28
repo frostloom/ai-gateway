@@ -53,6 +53,7 @@ type FullWindowActualReady struct {
 	baseline       fullWindowBaseline
 	stopped        windowStoppedBaseline
 	stoppedV2      windowStoppedV2Baseline
+	stoppedV3      windowStoppedV3Baseline
 	source         ConversationSuite
 	profiles       PairedProfiles
 }
@@ -197,7 +198,13 @@ func CheckFullWindowActualReady(o FullWindowActualReadyOptions) (FullWindowActua
 		return reject()
 	}
 	candidate := &FullWindowActualReady{manifestPath: o.ManifestPath, manifestRaw: append([]byte(nil), raw...), attestationRaw: append([]byte(nil), attestationRaw...), manifest: m, prepared: prepared, source: source, profiles: profiles}
-	if m.Schema == "full-window-actual-ready.v3" {
+	if m.Schema == "full-window-actual-ready.v4" {
+		proof, err := loadWindowActualStoppedBaselineV4(m)
+		if err != nil {
+			return reject()
+		}
+		candidate.baseline, candidate.stoppedV3, candidate.prepared.stoppedHistory = proof.base, proof, proof
+	} else if m.Schema == "full-window-actual-ready.v3" {
 		proof, err := loadWindowActualStoppedBaselineV3(m)
 		if err != nil {
 			return reject()
@@ -226,7 +233,7 @@ func (r *FullWindowActualReady) revalidate() error {
 	if err != nil {
 		return err
 	}
-	if !bytes.Equal(r.manifestRaw, fresh.manifestRaw) || !bytes.Equal(r.attestationRaw, fresh.attestationRaw) || !reflect.DeepEqual(r.manifest, fresh.manifest) || !reflect.DeepEqual(r.prepared, fresh.prepared) || !reflect.DeepEqual(r.baseline, fresh.baseline) || !reflect.DeepEqual(r.stopped, fresh.stopped) || !reflect.DeepEqual(r.stoppedV2, fresh.stoppedV2) {
+	if !bytes.Equal(r.manifestRaw, fresh.manifestRaw) || !bytes.Equal(r.attestationRaw, fresh.attestationRaw) || !reflect.DeepEqual(r.manifest, fresh.manifest) || !reflect.DeepEqual(r.prepared, fresh.prepared) || !reflect.DeepEqual(r.baseline, fresh.baseline) || !reflect.DeepEqual(r.stopped, fresh.stopped) || !reflect.DeepEqual(r.stoppedV2, fresh.stoppedV2) || !reflect.DeepEqual(r.stoppedV3, fresh.stoppedV3) {
 		return fmt.Errorf("actual ready snapshot changed")
 	}
 	return nil

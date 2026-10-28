@@ -39,7 +39,7 @@ func loadWindowActualStoppedBaselineV3(m windowActualManifest) (windowStoppedV2B
 }
 
 func windowActualSupportedEpoch(m windowActualManifest) bool {
-	return m.Schema == "full-window-actual-ready.v2" && m.Scope.Schema == "full-window-scope.v2" || m.Schema == "full-window-actual-ready.v3" && m.Scope.Schema == "full-window-scope.v3"
+	return m.Schema == "full-window-actual-ready.v4" && m.Scope.Schema == "full-window-scope.v4" || m.Schema == "full-window-actual-ready.v2" && m.Scope.Schema == "full-window-scope.v2" || m.Schema == "full-window-actual-ready.v3" && m.Scope.Schema == "full-window-scope.v3"
 }
 
 func (r *FullWindowActualReady) revalidateStoppedV3() error {
