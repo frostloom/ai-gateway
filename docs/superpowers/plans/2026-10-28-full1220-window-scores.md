@@ -61,11 +61,12 @@ Interfaces: CLI显式`plan / publish --execute / verify`；只读默认。publis
 
 稳定逻辑身份锁先于score ID领取；同一逻辑身份已有intent而ACK未知时，更换review/计划/ID也拒绝发布，只能verify。该锁不等于付费推理claim，不允许借它启动推理或采集。
 
-- [ ] RED：任一绑定错误零POST；重复发布、HTTP错误、ACK截断、写意图/落盘失败、verify延迟均不自动重发。
-- [ ] 复用旧受限本机evaluation客户端，严格校验settings权限和目标，不允许端点/trace/score ID替换。
-- [ ] 原始Go状态与独立语义评分保留各自命名和provenance，review SHA/执行版本/record/receipt/范围进入元数据；原negative仅负例/未知分。
-- [ ] 纯替身测试、完整相关Python回归和独立审查通过后，以已结束窗口实际发布一次；所有ID读回后记录，不改采集状态。
+- [x] RED：任一绑定错误零POST；重复发布、HTTP错误、ACK截断、写意图/落盘失败、verify延迟均不自动重发。
+- [x] 复用旧受限本机evaluation客户端，严格校验settings权限和目标，不允许端点/trace/score ID替换。
+- [x] 原始Go状态与独立语义评分保留各自命名和provenance，review SHA/执行版本/record/receipt/范围进入元数据；原negative仅负例/未知分。
+- [x] 纯替身测试、完整相关Python回归和独立审查通过后，以已结束窗口实际发布一次；所有ID读回后记录，不改采集状态。
 - [ ] 为最终3660对报告汇总完整执行/未运行分母、两币种已知/未知成本、每正确任务成本、缓存、各时钟P50/P95；部分窗口不称总体结论。
+
 
 ## Execution ledger
 
@@ -76,3 +77,5 @@ Interfaces: CLI显式`plan / publish --execute / verify`；只读默认。publis
 2026-10-29 Task2：固定helper在精确归档副本调用原content()，原source/staged/records/helper/可信Go SHA前后校验，opaque proof拒绝普通JSON；纯测试53项通过，完整Python253项/15原skip/0fail。真实预检root.git误拒和首GET布尔metadata表示误拒分别保留并最小RED→GREEN，独立定向复核无确认P1/P2。最终新v3首窗56trace235obs60轮逐源正文/元数据/父链只读通过，评分仍0/publish_ready=false；其余窗尚待实际内容读回，Task3未完成。
 
 2026-10-29 Task3实现已固定待实际发布：逐窗原summary SHA链重算至停止窗9通过；固定stdlib Ed25519 helper对原manifest/attestation/binary真实正例通过、改1位signature反例拒绝，不执行消耗的actual binary。72专项、完整Python272项/15原skip/0fail/41.409秒。独立P2发现verify只glob现存intent子集误报完整，RED复现12缺1仍true；改为先持久化原完整batch清单，exactset核对，原复现变unverified且新review仍验证旧完整payload，3项独立复核通过。score wire剔除内部logical_identity，固定scope registry/once-only intent与受限client均实现；尚未实际POST，最终全量报告未完成。
+
+2026-10-29 Task3已采scope实际交付：原review资格全false，独立release审查及root反向diff核对仅释放318行，4原negative语义通过仍hold；派生review不改事实/判断。新plan正式projection/GET/签名/chain全部重做，9窗1442分各POST一次且ACK，初verify全exit2保留，后只读verify全exit0；另35个GET保存标准化服务JSON，全部ID/值/type/subject/metadata/environment匹配，独立交付审计无确认P1/P2。0新推理/财务claim，原scope仍terminal，最终3660报告pending。
