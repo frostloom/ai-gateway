@@ -1,0 +1,343 @@
+{
+  "schema": "full1220-score5-fixed-helper-compatibility-completion.v1",
+  "initial_source_sha256": {
+    "scripts/full1220-window-scores.py": "63cf3181be7a6356f939abca155864bd8b465a7abb9c4bfd0919d74bc9ac064e",
+    "scripts/tests/test_full1220_window_scores.py": "1f5fcb4cb9697b8aba1fbe222787a9ebbfb06c94c12ba905ae5fdd11f9a10c5d",
+    "scripts/helpers/full1220_attestation.go.txt": "43fd979da289d348fb9480aa394ff2a12a82948631a13e267fba76890d0530a9"
+  },
+  "final_source_sha256": {
+    "scripts/full1220-window-scores.py": "ca980762e373cca687e05ebc83ef18eb5aa6b53b2e7c61750707bfb5fcf3f2d3",
+    "scripts/tests/test_full1220_window_scores.py": "fdc36f350ee4e9c0323568e833a53da7e43838086d64913585299829ebdf2233",
+    "scripts/helpers/full1220_attestation.go.txt": "cadae5ad17b7233b97ba9d6d24029365e10dc280223b4991987d6ca31ea58b63"
+  },
+  "implementation": [
+    "Explicit matching manifest5/scope5 support; no optional schema inference or caller-provided accounting profile.",
+    "Epoch5 exact descriptor2f8c83546a2918b85801160f521465c2f53e040073b3590e1ecde53f278ef340, exact28map canonical9b06ad5fd58440494b49fb44437160a870d123007467f798b2f6d0e613783335 including P4 reserved unrun claim3.",
+    "Epoch5 full131cap vector canonical7fe19887167feaa4ce85520f2717cf82d0143cd5e2eef6577b3b07afcfe04862 selects configured62m/676k; same fixed105approval, original rates/envelopes, accounting2 and unknown-cache allmiss policy.",
+    "Epoch4 retains exact25 descriptor/map/vector64m/690k and identical configured pricing provenance; epoch2/3 legacy JSON unchanged.",
+    "Standalone fixed stdlib helper adds only explicit5 whitelist; matched schema required, signature/canonical binding/binary SHA rules unchanged; active helper SHA updated truthfully.",
+    "P4 closed-witness policy and original artifact JSON were not edited."
+  ],
+  "tdd": {
+    "targeted_tests": 4,
+    "targeted_seconds": 1.882,
+    "red_log": "red.log",
+    "red_assertion_failures": 1,
+    "red_additional_expected_unsupported5_error": 1,
+    "signature_red": "Original helper43 rejected valid matching5 signature; signature-red.json",
+    "green_log": "green-targeted.log"
+  },
+  "complete_python_suite": {
+    "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B -m unittest discover -s scripts/tests",
+    "runs": 1,
+    "tests": 294,
+    "seconds": 56.39,
+    "original_skips": 15,
+    "failures_or_errors": 0,
+    "existing_ephemeral_loopback_tests_included": true,
+    "log": "full-python.log"
+  },
+  "fixed_sdk_real_stdlib_crypto_tests": {
+    "all_pass": true,
+    "sdk": "MacOSX26.5.sdk",
+    "go_sha256": "8612de418d551a418517845c05cebdcfed49095cd08ef0a4d682bb2a5cf4896c",
+    "before_helper_sha256": "43fd979da289d348fb9480aa394ff2a12a82948631a13e267fba76890d0530a9",
+    "after_helper_sha256": "cadae5ad17b7233b97ba9d6d24029365e10dc280223b4991987d6ca31ea58b63",
+    "cases": [
+      {
+        "manifest_epoch": "v2",
+        "scope_epoch": "v2",
+        "exit_code": 0,
+        "old2_4_output_bytes_identical": true
+      },
+      {
+        "manifest_epoch": "v2",
+        "scope_epoch": "v3",
+        "exit_code": 1,
+        "old2_4_output_bytes_identical": null
+      },
+      {
+        "manifest_epoch": "v2",
+        "scope_epoch": "v4",
+        "exit_code": 1,
+        "old2_4_output_bytes_identical": null
+      },
+      {
+        "manifest_epoch": "v2",
+        "scope_epoch": "v5",
+        "exit_code": 1,
+        "old2_4_output_bytes_identical": null
+      },
+      {
+        "manifest_epoch": "v3",
+        "scope_epoch": "v2",
+        "exit_code": 1,
+        "old2_4_output_bytes_identical": null
+      },
+      {
+        "manifest_epoch": "v3",
+        "scope_epoch": "v3",
+        "exit_code": 0,
+        "old2_4_output_bytes_identical": true
+      },
+      {
+        "manifest_epoch": "v3",
+        "scope_epoch": "v4",
+        "exit_code": 1,
+        "old2_4_output_bytes_identical": null
+      },
+      {
+        "manifest_epoch": "v3",
+        "scope_epoch": "v5",
+        "exit_code": 1,
+        "old2_4_output_bytes_identical": null
+      },
+      {
+        "manifest_epoch": "v4",
+        "scope_epoch": "v2",
+        "exit_code": 1,
+        "old2_4_output_bytes_identical": null
+      },
+      {
+        "manifest_epoch": "v4",
+        "scope_epoch": "v3",
+        "exit_code": 1,
+        "old2_4_output_bytes_identical": null
+      },
+      {
+        "manifest_epoch": "v4",
+        "scope_epoch": "v4",
+        "exit_code": 0,
+        "old2_4_output_bytes_identical": true
+      },
+      {
+        "manifest_epoch": "v4",
+        "scope_epoch": "v5",
+        "exit_code": 1,
+        "old2_4_output_bytes_identical": null
+      },
+      {
+        "manifest_epoch": "v5",
+        "scope_epoch": "v2",
+        "exit_code": 1,
+        "old2_4_output_bytes_identical": null
+      },
+      {
+        "manifest_epoch": "v5",
+        "scope_epoch": "v3",
+        "exit_code": 1,
+        "old2_4_output_bytes_identical": null
+      },
+      {
+        "manifest_epoch": "v5",
+        "scope_epoch": "v4",
+        "exit_code": 1,
+        "old2_4_output_bytes_identical": null
+      },
+      {
+        "manifest_epoch": "v5",
+        "scope_epoch": "v5",
+        "exit_code": 0,
+        "old2_4_output_bytes_identical": null
+      },
+      {
+        "manifest_epoch": "v6",
+        "scope_epoch": "v6",
+        "exit_code": 1
+      },
+      {
+        "manifest_epoch": "v5",
+        "scope_epoch": "v6",
+        "exit_code": 1
+      }
+    ],
+    "one_hex_signature_mutation_with_reanchored_attestation_sha_rejected": true,
+    "old2_4_positive_stdout_identical": true,
+    "private_keys_read": false,
+    "ephemeral_private_key_in_memory_only": true,
+    "actual_binary_executions": 0,
+    "provider_or_database_or_network_requests": 0,
+    "whole_project_Go_tests": 0
+  },
+  "independent_exact28_source_resolution": {
+    "all_pass": true,
+    "exact_claims": 28,
+    "canonical_sha256": "9b06ad5fd58440494b49fb44437160a870d123007467f798b2f6d0e613783335",
+    "third_P4_unrun_claim_retained": true,
+    "Go_executed_for_resolution": false
+  },
+  "old2_3_snapshot_test": "Existing old epoch plan JSON/ID byte snapshots passed in the single complete suite.",
+  "old4_fixture_snapshot": {
+    "canonical_sha256": "66105d3489ca14dcf316ab79194642c3c374d2ce03c7c07f0229d49c178a412a"
+  },
+  "old_actual11_plan_1778_compatibility": {
+    "all_pass": true,
+    "windows": [
+      {
+        "epoch": "v3",
+        "index": 1,
+        "saved_plan_formatted_bytes_identical": true,
+        "canonical_plan_sha256": "1cc49a90610fc74540985d5413155dc5e14ffaee130d9f926b6c500951f14d6b",
+        "scores": 168,
+        "source_and_pricing_provenance_unchanged": true
+      },
+      {
+        "epoch": "v3",
+        "index": 2,
+        "saved_plan_formatted_bytes_identical": true,
+        "canonical_plan_sha256": "e89e7cdc296d9e895ee5fa23716632a9014f505e5c0367104e9e093296b392a4",
+        "scores": 166,
+        "source_and_pricing_provenance_unchanged": true
+      },
+      {
+        "epoch": "v3",
+        "index": 3,
+        "saved_plan_formatted_bytes_identical": true,
+        "canonical_plan_sha256": "789a29c49523426a620a70e063d7f4b65f6e03081873eba6de8b53a000a19fc3",
+        "scores": 168,
+        "source_and_pricing_provenance_unchanged": true
+      },
+      {
+        "epoch": "v3",
+        "index": 4,
+        "saved_plan_formatted_bytes_identical": true,
+        "canonical_plan_sha256": "0233967c40f75045c456283377dd5a0e03043b5f9a844182ed3096a1cc5e199c",
+        "scores": 168,
+        "source_and_pricing_provenance_unchanged": true
+      },
+      {
+        "epoch": "v3",
+        "index": 5,
+        "saved_plan_formatted_bytes_identical": true,
+        "canonical_plan_sha256": "631d0e63883632415823cef2ee35f0495f77ebc10e0b9ace03c6a62f258ed6ea",
+        "scores": 167,
+        "source_and_pricing_provenance_unchanged": true
+      },
+      {
+        "epoch": "v3",
+        "index": 6,
+        "saved_plan_formatted_bytes_identical": true,
+        "canonical_plan_sha256": "d721aad9043692dcd847fbd3f24852ba29ef1ffcb0af88024b1851a738f42388",
+        "scores": 168,
+        "source_and_pricing_provenance_unchanged": true
+      },
+      {
+        "epoch": "v3",
+        "index": 7,
+        "saved_plan_formatted_bytes_identical": true,
+        "canonical_plan_sha256": "c1d3e730637119c8d5a62772948fce63a5163c5f411f227fe5922d5fb9c7191a",
+        "scores": 168,
+        "source_and_pricing_provenance_unchanged": true
+      },
+      {
+        "epoch": "v3",
+        "index": 8,
+        "saved_plan_formatted_bytes_identical": true,
+        "canonical_plan_sha256": "b72d44e816787f4cde13c056ca561340c759568359410c4915342befe82d39a3",
+        "scores": 167,
+        "source_and_pricing_provenance_unchanged": true
+      },
+      {
+        "epoch": "v3",
+        "index": 9,
+        "saved_plan_formatted_bytes_identical": true,
+        "canonical_plan_sha256": "cad4f4328ed6c33a0e35ea885d448bf8826cff4c4c1b509c3ad194d21b9b8354",
+        "scores": 102,
+        "source_and_pricing_provenance_unchanged": true
+      },
+      {
+        "epoch": "v4",
+        "index": 1,
+        "saved_plan_formatted_bytes_identical": true,
+        "canonical_plan_sha256": "3213d1c3e516c5aad74c16a93e1757ba0d7a306e53749ba7dd5db168231e2799",
+        "scores": 168,
+        "source_and_pricing_provenance_unchanged": true
+      },
+      {
+        "epoch": "v4",
+        "index": 2,
+        "saved_plan_formatted_bytes_identical": true,
+        "canonical_plan_sha256": "2071935897475604fab5bc63c9adcb17f267da4dbd8516f07fe28ed10739e3c9",
+        "scores": 168,
+        "source_and_pricing_provenance_unchanged": true
+      }
+    ],
+    "original_p3_scores": 1442,
+    "original_p4_scores": 336,
+    "unique_existing_ids": 1778,
+    "old_plans_formatted_and_canonical_bytes_unchanged": true,
+    "source_and_pricing_provenance_unchanged": true,
+    "saved_readbacks_exact_payloads": true,
+    "old_registry_files_unchanged_before_after": true,
+    "files_rechecked": 7179,
+    "publication_lock_empty_same_inode_size_mtime_ctime_and_never_opened": true,
+    "P4_closed_witness_json_and_policy_unchanged": true,
+    "network_calls": 0,
+    "score_posts": 0,
+    "archive_module_imports": 0,
+    "bytecode_disabled": true
+  },
+  "git_diff_check_passed": true,
+  "this_agent_boundaries": {
+    "tracked_files_changed": [
+      "scripts/full1220-window-scores.py",
+      "scripts/tests/test_full1220_window_scores.py",
+      "scripts/helpers/full1220_attestation.go.txt"
+    ],
+    "Go_agent_sources_modified": false,
+    "real_provider_or_langfuse_requests": 0,
+    "real_score_posts": 0,
+    "actual_owner_or_claim_operations": 0,
+    "whole_project_Go_tests": 0,
+    "actual_campaign_binary_executions": 0,
+    "stdlib_ephemeral_signer_and_verifier_executed": true,
+    "original_private_keys_or_settings_read": false,
+    "ephemeral_private_keys_persisted": false,
+    "frozen_module_imports": 0,
+    "all_Python_B_and_dontwrite": true,
+    "old_archive_manifest_witness_sourceMap_or_registry_modified": false,
+    "publication_lock_opened": false,
+    "commits_or_pushes": 0
+  },
+  "limitations": [
+    "New5 is offline score/helper compatibility only; no new actual5 manifest, paid readiness, exact execution authorization or production signature is established.",
+    "New concrete source freeze, whole Go20m, actual5 gates and independent review remain required in later plan tasks.",
+    "Crypto cases use fresh ephemeral public keys and minimal signed schema fixtures, not production attestations; no original private key is read.",
+    "Old2-4 standalone Go output bytes are identical for identical jobs; the current Python attestation proof truthfully identifies the newly versioned helper SHA, while all original stored proof archives remain untouched.",
+    "Configuration cache pricing is not invoice, measured cache split or evidence of knowledge use."
+  ],
+  "artifacts_sha256": {
+    "signature-job-v5-v3.json": "33600b9ec02ea9991367caaf5d6a37abcf88978413915299a1bee2fe3bebd2f4",
+    "signature-red.json": "19de3dce9561658a30c884e03f198cce0d36db3a8dd33d67f63ae8731135d075",
+    "signature-fixture.go": "ca9e1d97e44822dfd15e61dcf3f45c451afd83497285386b5c474e0dc2e06428",
+    "initial-source-sha.json": "a2808b17d7f40f50a75ba4a0dd2d6ba87e497de3e1174c8163ff8677e5117e66",
+    "signature-job-v4-v2.json": "f83d33dc9b572f623b021e81260ac694269b4210d3e889721023c95321b5e0c9",
+    "signature-job-v4-v3.json": "2757f60ebf1715738f79a9611c7a1561f761f46090ba1a5a0339c6d91652a9b4",
+    "before-attestation.go": "43fd979da289d348fb9480aa394ff2a12a82948631a13e267fba76890d0530a9",
+    "signature-job-v5-v2.json": "fc2e14ead8b1671d8e4803243632fe49d0b5f24432405af38ecf23556cb77280",
+    "red.log": "7632d792facd88e1425af3d9eb9903425c5095ebf9ab7438ecab3bb260fccae8",
+    "after-attestation.go": "cadae5ad17b7233b97ba9d6d24029365e10dc280223b4991987d6ca31ea58b63",
+    "signature-green.json": "504084ca4ad69d0abbb7b9bb84d82c75eb3deedbd9e891bf11c336d5fddfd88d",
+    "signature-job-v5-v5.json": "60a97bbcd4d9f3cd329183ba1d3c1b3370cfb956c47afaaa7a5195986f77df4b",
+    "signature-job-v4-v4.json": "d88e927a94bbd0391943c09f9b318806b15e45a952f868e4d98b9dbdbe07efeb",
+    "v4-fixture-before-plan-sha.json": "7b8baaead9e33e64f48c867ee86435f6995a451792f28975a63a420dc1407082",
+    "signature-job-v4-v5.json": "2ae34727fd23f97e6614233db3d5dc66ec7edbad8e656e0ffbbe17b02ffeef16",
+    "signature-job-v5-v4.json": "886bdf4f02373f64ab1c712541a5b599eb4e41b6f43ebd1dd63933ada5933c34",
+    "signature-job-v3-v2.json": "930ad84b4f6ce1d6bd10dad1c2d55df54c206e4788ae469b3e6d24d60fd76c75",
+    "signature-job-v2-v3.json": "2d058bb4afe2f9bcbd8b99c59ce4e09469ca68c64859211e49808905c28bfdd6",
+    "independent-Go-28map-resolution.json": "e5db6c82949826776412e553b604560a5be8ccfc9869d3969c398bb4ecbd177f",
+    "green-targeted.log": "620f4daeab7bc400f600eeeb55bd548b4593df4ac3393716aded3d5da6979925",
+    "full-python.log": "b8f45118bbad52fc020da7872852e397d320ac38f1d9ccf0a6f5cb9f1480158e",
+    "signature-job-v2-v2.json": "e23e8ef16eab707823ad08d90f16c5dde89a5dc08b7d1f9da63dde17104ad971",
+    "expected-28claims.json": "a6ac4793fb743ba793228697cc44eec7ddbc3d8d231a8d905a8970a967641efb",
+    "signature-job-v3-v3.json": "bb3eaec901dd0ce42fe9155616b4396202ad3a6e0ec5b8d30b91eaf7dd26d24b",
+    "signature-job-v3-v4.json": "c87ff7b1afc5f5d27204f1e3a58b3eb161a44e013fcc59b28a3820ba5cbd125d",
+    "signature-job-v2-v5.json": "0a755b123cfe8b0610c392b008533636ec063569eea1fdbe6e389555cea75ce8",
+    "signature-job-v2-v4.json": "569fc4a1ec9ea1a69bd57d69ebe0d806165b9acf40d0396e0e4c770a7fac6704",
+    "signature-one-hex-negative-job.json": "5a57548714452f9bb67c214321da2daa5e89019a9f2491fd04b893736dc0d59b",
+    "signature-job-v3-v5.json": "2842d2de6dd5a6d87f008594a4117bd601a4f1ff2603fb9a431fd69315ff5679",
+    "old-11-plan-1778-compatibility.json": "5cd59d95f9f59ffd1e1e84596989778a37b0b84df16bee13287aa09762d5708d"
+  },
+  "private_report_sha256": "b2a3917f1da9ddc6a1dac6112e4bc9e09c61d0b2d4fddb155f84c5335c485677",
+  "independent_review": "passed_no_actionable_P1_P2;threeSHA/report30artifactSHA matched;9offlinePython4.033s"
+}

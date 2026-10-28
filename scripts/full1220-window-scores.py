@@ -354,22 +354,36 @@ def _validate_summary(summary, receipt, receipt_sha, manifest):
 
 def _score_cache_accounting(manifest, epoch):
     limits = manifest.get('provider_limits', {})
-    if epoch != 'v4':
+    if epoch not in ('v4', 'v5'):
         for provider in ('model', 'jev'):
             _equal(limits.get(provider, {}).get('cache_hit_input_micro_per_million', 0), 0,
                    'Legacy score epoch cannot enable cache accounting')
         return None
     scope = manifest['scope']
-    baseline = '12a9d584ea9508a9fc7701532ad9214b0c743a8e13d17829432fac0d6b48a20c'
-    _equal(scope['baseline_evidence_sha256'], baseline, 'Epoch4 stopped baseline mismatch')
-    _equal(manifest['baseline_evidence']['sha256'], baseline, 'Epoch4 manifest baseline mismatch')
+    if epoch == 'v4':
+        label = 'Epoch4'
+        baseline = '12a9d584ea9508a9fc7701532ad9214b0c743a8e13d17829432fac0d6b48a20c'
+        claims_sha = 'c444e717aeff328eb2b82fc0910901de22610541a39551c103e55fb5f4cef354'
+        claims_label = 'twenty-five'
+        caps_sha = '0c020b80cf65c9876025d72ef8ad68bcfdea6c77b429b0390f2aabde895ca025'
+        model_cap, jev_cap = 64000000, 690000
+        caps_label = '64m/690k'
+    else:
+        label = 'Epoch5'
+        baseline = '2f8c83546a2918b85801160f521465c2f53e040073b3590e1ecde53f278ef340'
+        claims_sha = '9b06ad5fd58440494b49fb44437160a870d123007467f798b2f6d0e613783335'
+        claims_label = 'twenty-eight'
+        caps_sha = '7fe19887167feaa4ce85520f2717cf82d0143cd5e2eef6577b3b07afcfe04862'
+        model_cap, jev_cap = 62000000, 676000
+        caps_label = '62m/676k'
+    _equal(scope['baseline_evidence_sha256'], baseline, label+' stopped baseline mismatch')
+    _equal(manifest['baseline_evidence']['sha256'], baseline, label+' manifest baseline mismatch')
     _equal(scope['budget_approval_sha256'], 'd5062e6f39f9ae7c9a8461121f9ba907c798100d7a5428af72da459595d2d554',
-           'Epoch4 fixed 105 approval mismatch')
-    # Canonical digest of the exact expectedStoppedV3WindowBaseline claim map,
-    # including the original nine claims, first stop, six v2 and nine v3 claims.
-    _equal(_sha(_json_bytes(manifest['historical_claims'])),
-           'c444e717aeff328eb2b82fc0910901de22610541a39551c103e55fb5f4cef354',
-           'Epoch4 exact twenty-five historical claims required')
+           label+' fixed 105 approval mismatch')
+    # Fixed expectedStoppedV3/V4 maps; v5 also retains all three P4 claims,
+    # including the reserved third claim with no ledger or provider request.
+    _equal(_sha(_json_bytes(manifest['historical_claims'])), claims_sha,
+           label+' exact '+claims_label+' historical claims required')
     expected = {
         'model': {'model': 'deepseek-flash', 'max_request_bytes': 32768, 'max_input_tokens': 36864,
                   'max_output_tokens': 128, 'input_micro_per_million': 2000000,
@@ -379,19 +393,18 @@ def _score_cache_accounting(manifest, epoch):
     normalized = {key: dict(value) for key, value in limits.items()}
     if 'cache_hit_input_micro_per_million' in normalized.get('jev', {}):
         _equal(normalized['jev'].pop('cache_hit_input_micro_per_million'), 0, 'JEV cache accounting forbidden')
-    _equal(normalized, expected, 'Epoch4 exact provider rates and envelopes required')
-    _equal(scope['width'], 28, 'Epoch4 original width required')
-    _equal(len(scope['windows']), 131, 'Epoch4 original window count required')
-    caps = [{key: _integer(window[key], 0, 'Integer epoch4 cap required')
+    _equal(normalized, expected, label+' exact provider rates and envelopes required')
+    _equal(scope['width'], 28, label+' original width required')
+    _equal(len(scope['windows']), 131, label+' original window count required')
+    caps = [{key: _integer(window[key], 0, 'Integer '+label.lower()+' cap required')
              for key in ('model_cap_micro_cny', 'jev_cap_micro_usd')} for window in scope['windows']]
     # Go's fullWindowCaps struct order is model then JEV, independent of map ordering.
-    _equal(_sha(json.dumps(caps, separators=(',', ':')).encode()),
-           '0c020b80cf65c9876025d72ef8ad68bcfdea6c77b429b0390f2aabde895ca025',
-           'Epoch4 fixed 64m/690k cap vector required')
+    _equal(_sha(json.dumps(caps, separators=(',', ':')).encode()), caps_sha,
+           label+' fixed '+caps_label+' cap vector required')
     return {'schema': 'full-window-accounting.v2', 'model_cache_hit_input_micro_per_million': 40000,
             'model_input_micro_per_million': 2000000, 'model_output_micro_per_million': 8000000,
             'jev_input_micro_per_million': 42000, 'jev_output_micro_per_million': 0,
-            'model_total_cap_micro_cny': 64000000, 'jev_total_cap_micro_usd': 690000,
+            'model_total_cap_micro_cny': model_cap, 'jev_total_cap_micro_usd': jev_cap,
             'basis': 'frozen_configuration_not_invoice_or_observed_cache_split',
             'cache_absent_settlement': 'all_input_at_miss_rate_without_observed_cache_split',
             'proves_cache_usage': False, 'proves_knowledge_usage': False}
@@ -406,8 +419,8 @@ def _build(manifest_raw, summary_raw, receipt_raw, records, review_raw, expected
         _require(type(raw) is bytes and _sha(raw) == expected, 'Artifact SHA mismatch: ' + name)
         documents[name] = _Document(raw)
     manifest, summary, receipt, review = (documents[name].value for name in ('manifest', 'summary', 'receipt', 'review'))
-    _require(manifest['schema'] in ('full-window-actual-ready.v2', 'full-window-actual-ready.v3', 'full-window-actual-ready.v4')
-             and manifest['evidence_kind'] == 'actual', 'Frozen actual v2/v3/v4 manifest required')
+    _require(manifest['schema'] in ('full-window-actual-ready.v2', 'full-window-actual-ready.v3', 'full-window-actual-ready.v4', 'full-window-actual-ready.v5')
+             and manifest['evidence_kind'] == 'actual', 'Frozen actual v2/v3/v4/v5 manifest required')
     epoch = manifest['schema'].rsplit('.', 1)[1]
     _equal(manifest['scope']['schema'], 'full-window-scope.'+epoch, 'Manifest/scope epoch mismatch')
     cache_accounting = _score_cache_accounting(manifest, epoch)
@@ -1091,7 +1104,7 @@ def validate_window_traces(plan, projection, client):
 # The design cannot resist an owner maliciously deleting all disk evidence.
 _PUBLICATION_REGISTRY_ROOT = Path('/Users/a1/项目/ai-gateway/.tmp/full1220-score-publications')
 _PROJECT_ROOT = Path('/Users/a1/项目/ai-gateway')
-_ATTESTATION_HELPER_SHA256 = '43fd979da289d348fb9480aa394ff2a12a82948631a13e267fba76890d0530a9'
+_ATTESTATION_HELPER_SHA256 = 'cadae5ad17b7233b97ba9d6d24029365e10dc280223b4991987d6ca31ea58b63'
 _PUBLICATION_SEAL = object()
 
 

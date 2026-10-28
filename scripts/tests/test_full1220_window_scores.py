@@ -1411,4 +1411,84 @@ class ClosedP4WitnessTests(unittest.TestCase):
             self.assertEqual(self.adapter.main(['publish','--execute','--job','explicit-test-job']),2)
         self.assertEqual(projected.call_args.kwargs['closed_archive_extra_witness'],self.spec)
 
+
+def v5_fixture(base=None):
+    f=v4_fixture(base);m=f['manifest'];scope=m['scope']
+    m['schema']='full-window-actual-ready.v5';scope['schema']='full-window-scope.v5'
+    baseline='2f8c83546a2918b85801160f521465c2f53e040073b3590e1ecde53f278ef340'
+    scope['baseline_evidence_sha256']=baseline;m['baseline_evidence']={'path':'/offline/stopped-v4.json','sha256':baseline}
+    m['historical_claims'].update({
+        'full1220-v4-20261029/window-000001':'58d63365bd94f562642a7e39138da6b347d90b02c283c3aa661274d523b2784e',
+        'full1220-v4-20261029/window-000002':'388914ae974e3c3218060997c6c289b92492d8d489b12beee79be1fad6e4dace',
+        'full1220-v4-20261029/window-000003':'412231c60c4ea4ac8df02377a2dde3f065dfdd84fb73fadaab91bc73ec169dd1'})
+    # Literal approved largest-remainder vector: no private file dependency.
+    caps=[(375675, 5167), (687114, 5167), (620628, 5167), (652122, 5167), (596132, 5167), (620628, 5167), (585634, 5167), (512149, 5167), (326686, 5167), (302191, 5167), (344182, 5167), (400171, 5167), (501651, 5167), (417667, 5167), (428165, 5167), (302191, 5167), (333684, 5167), (302191, 5167), (400171, 5167), (536644, 5167), (638124, 5166), (536644, 5166), (526147, 5166), (526147, 5166), (512149, 5166), (536644, 5166), (501651, 5166), (484154, 5166), (512149, 5166), (459658, 5166), (435163, 5166), (375675, 5166), (333684, 5166), (477156, 5166), (368677, 5166), (393172, 5166), (400171, 5166), (501651, 5166), (400171, 5166), (428165, 5166), (536644, 5166), (568138, 5166), (620628, 5166), (519147, 5166), (309188, 5166), (333684, 5166), (302191, 5166), (386174, 5166), (536644, 5166), (620628, 5166), (554140, 5166), (526146, 5166), (526146, 5166), (512149, 5166), (536644, 5166), (501651, 5166), (501651, 5166), (494652, 5166), (477156, 5166), (428165, 5166), (368677, 5166), (351181, 5166), (459658, 5166), (386174, 5166), (393172, 5166), (386174, 5166), (501651, 5166), (410669, 5166), (428165, 5166), (526146, 5166), (568138, 5166), (620628, 5166), (484154, 5166), (477156, 5166), (687114, 5166), (687114, 5166), (578635, 5166), (638124, 5166), (568138, 5166), (585634, 5166), (428165, 5166), (326686, 5166), (344182, 5166), (309188, 5166), (452660, 5166), (484154, 5166), (435163, 5166), (452660, 5166), (442163, 5166), (358180, 5166), (344182, 5166), (459658, 5166), (400171, 5166), (393172, 5166), (368677, 5166), (501651, 5166), (417667, 5166), (428165, 5166), (519147, 5166), (568138, 5166), (620628, 5166), (501651, 5166), (442163, 5166), (704611, 5166), (669617, 5166), (596132, 5166), (620628, 5166), (585634, 5166), (585634, 5166), (442163, 5166), (326686, 5166), (333684, 5166), (316187, 5166), (442163, 5166), (494652, 5166), (417667, 5166), (386174, 5166), (302191, 5166), (333684, 5166), (302191, 5166), (470158, 5166), (554140, 5166), (620628, 5166), (536644, 5166), (501651, 5166), (554140, 5166), (512149, 5166), (536644, 5166), (501651, 5166), (477156, 5166), (386174, 4400)]
+    for window,(model,jev) in zip(scope['windows'],caps):
+        window.update(model_cap_micro_cny=model,jev_cap_micro_usd=jev)
+    m['scope_sha256']=digest(wire(scope));f['receipt']['scope_sha256']=m['scope_sha256']
+    f['review']['bindings']['scope_sha256']=m['scope_sha256'];refresh_links(f);return f
+
+
+class V5CompatibilityTests(unittest.TestCase):
+    setUpClass = classmethod(WindowScorePlanTests.setUpClass.__func__)
+    plan = WindowScorePlanTests.plan
+    reject = WindowScorePlanTests.reject
+
+    def test_v5_exact28_and_new_caps_select_configuration_only_accounting2(self):
+        try:plan=self.plan(v5_fixture())
+        except ValueError as error:self.fail('Explicit epoch5 and fixed28 cache accounting must be accepted: '+str(error))
+        cost=plan['provenance']['configured_cache_accounting']
+        self.assertEqual(cost['schema'],'full-window-accounting.v2')
+        self.assertEqual(cost['model_total_cap_micro_cny'],62000000);self.assertEqual(cost['jev_total_cap_micro_usd'],676000)
+        self.assertEqual(cost['model_cache_hit_input_micro_per_million'],40000)
+        self.assertEqual(cost['model_input_micro_per_million'],2000000);self.assertEqual(cost['model_output_micro_per_million'],8000000)
+        self.assertEqual(cost['jev_input_micro_per_million'],42000);self.assertEqual(cost['jev_output_micro_per_million'],0)
+        self.assertFalse(cost['proves_cache_usage']);self.assertFalse(cost['proves_knowledge_usage'])
+        self.assertEqual(cost['cache_absent_settlement'],'all_input_at_miss_rate_without_observed_cache_split')
+        self.assertEqual(len(plan['scores']),12);self.assertFalse(plan['publish_ready'])
+
+    def test_v5_rejects_coherent_old25_wrong_claim_descriptor_caps_epoch_and_price(self):
+        def old25(m):
+            m['historical_claims']={key:value for key,value in m['historical_claims'].items() if not key.startswith('full1220-v4-')}
+        def oldbaseline(m):
+            m['scope']['baseline_evidence_sha256']=m['baseline_evidence']['sha256']='12a9d584ea9508a9fc7701532ad9214b0c743a8e13d17829432fac0d6b48a20c'
+        def oldcaps(m):
+            for window,old in zip(m['scope']['windows'],v4_fixture()['manifest']['scope']['windows']):
+                for key in ('model_cap_micro_cny','jev_cap_micro_usd'):window[key]=old[key]
+        def swapcaps(m):
+            a,b=m['scope']['windows'][:2];a['model_cap_micro_cny'],b['model_cap_micro_cny']=b['model_cap_micro_cny'],a['model_cap_micro_cny']
+        def oldepoch(m):m['schema']='full-window-actual-ready.v4';m['scope']['schema']='full-window-scope.v4'
+        mutations=[old25,oldbaseline,oldcaps,swapcaps,oldepoch,
+            lambda m:m['historical_claims'].pop('full1220-v4-20261029/window-000003'),
+            lambda m:m['historical_claims'].__setitem__('full1220-v4-20261029/window-000003','0'*64),
+            lambda m:m['baseline_evidence'].__setitem__('sha256','0'*64),
+            lambda m:m['scope'].__setitem__('budget_approval_sha256','0'*64),
+            lambda m:m['scope'].__setitem__('schema','full-window-scope.v4'),
+            lambda m:m.__setitem__('schema','full-window-actual-ready.v4'),
+            lambda m:m['provider_limits']['model'].__setitem__('cache_hit_input_micro_per_million',0),
+            lambda m:m['provider_limits']['model'].pop('cache_hit_input_micro_per_million'),
+            lambda m:m['provider_limits']['model'].__setitem__('input_micro_per_million',2000001),
+            lambda m:m['provider_limits']['model'].__setitem__('output_micro_per_million',8000001),
+            lambda m:m['provider_limits']['jev'].__setitem__('input_micro_per_million',42001),
+            lambda m:m['provider_limits']['jev'].__setitem__('output_micro_per_million',1),
+            lambda m:m['provider_limits']['jev'].__setitem__('cache_hit_input_micro_per_million',1)]
+        for mutate in mutations:
+            f=v5_fixture();m=f['manifest'];mutate(m);m['scope_sha256']=digest(wire(m['scope']))
+            f['receipt']['scope_sha256']=m['scope_sha256'];f['review']['bindings']['scope_sha256']=m['scope_sha256'];refresh_links(f)
+            with self.subTest(mutate=mutate):self.reject(f)
+
+    def test_v5_negative_unknown_and_independently_held_pass_stay_unchanged(self):
+        for quality in (False,True):
+            f=v5_fixture(partial_fixture(quality));plan=self.plan(f);trace=f['receipt']['rows'][0]['trace_id']
+            self.assertEqual(plan['rows'][0]['semantic_task_verdict'],'failed' if quality else 'not_assessable')
+            self.assertEqual(plan['rows'][0]['strict_task_verdict'],'failed')
+            self.assertFalse(any(s['value']=='passed' for s in plan['scores'] if s['traceId']==trace))
+        f=v5_fixture()
+        for row in f['review']['rows']:row['pass_score_publish_eligible']=False
+        refresh_links(f);self.assertEqual(len(self.plan(f)['scores']),4)
+
+    def test_v4_plan_json_ids_and_configuration_provenance_remain_byte_identical(self):
+        raw=json.dumps(self.plan(v4_fixture()),sort_keys=True,separators=(',',':'),ensure_ascii=False).encode()
+        self.assertEqual(digest(raw),'66105d3489ca14dcf316ab79194642c3c374d2ce03c7c07f0229d49c178a412a')
+
 if __name__ == '__main__': unittest.main()
