@@ -1,3 +1,5 @@
+2026-10-28 停止v2复核与Langfuse内容核对补齐：334已尝试臂/396观察轮/1268要求独立agent复核，语义269通过63失败2无法判断；保留原确定性失败的严格口径259通过75失败。全部334trace/1912观测身份和原冻结content()脱敏投影正文只读核对通过，两未运行行保留；非原生模型请求全部IO证明、非人工盲评，0评分发布/推理/claim/旧trace重发。旧owner49109终止及原failed/needs_review不改，目标仍完整3660对，预算105+1、永久33.395934+0.259511不变。见docs/full1220-v2-review-content-2026-10-28.md。
+
 # ai-gateway 项目记忆
 
 2026-10-28 新传输诊断源码定向/race单元通过未整版冻结：仅失败descriptor可选有限typed cause/最远httptrace phase/耗时/布尔，单请求锁与值快照，晚到拨号不倒退，无URL/头/证书/原错误字符串。正常JSON/native请求不变、SDK10秒/窗口300秒/hold/停止/不重试不改。独立P2超限+close丢原prefix先RED后修，仅主code=response_close附close诊断，保留response_bound前缀；最终两包245项race过/0skip/fail、taskbench5.950秒。旧JEV EOF测试裸counter race修atomic仍断言1次；cache拒绝非断言RED保留。一次原路由认证目录GET200/615ms观测read_response，不当历史修复，旧JEV根因unknown。当前源码Open先拒旧actual v1/v2 epoch，v3必需，61入口race过；16claim/v3 ready尚未接线，现不能实际新执行。全新精确归档完整Go20m仍待，不称ready。新增模型/JEV推理/claim0，历史809/204、永久¥33.395934+$0.259511、新父105+1不变；旧49109仍terminal禁止操作。见docs/full1220-transport-diagnostics-2026-10-28.md及计划。

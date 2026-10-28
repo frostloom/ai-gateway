@@ -1,0 +1,161 @@
+{
+  "schema": "full1220-v2-stopped-review-content-evidence.v1",
+  "scope_sha256": "22f2228963813d09e542a160b850c7a34b8f1b09a8280ed7d377c9ad7aa4562e",
+  "execution_sha256": "d5fae629058831f74b9111ddf8e67434b4a4dd0fa0c1c7dd282934c137cd1126",
+  "archive_commit": "3eb22933050d61ff57068964e42a3312bb5d4eec",
+  "windows": [
+    {
+      "window_index": 1,
+      "review_sha256": "75f186bfc5aa7d532b1d4a6395c2c1ff0682f291ef1c8a44b1ac89bfd90f8e32",
+      "receipt_sha256": "ad669b78543cac3b96c53d6df9e2b02a48e90619196093a60e583b00e3885580",
+      "readback_result_sha256": "116866ec9fa8413d380dd801923e2c293d5012c348ef8bd889940a2ea33f82df",
+      "reviewed_attempted_arms": 56,
+      "requirements": 172,
+      "semantic_task_verdicts": {
+        "passed": 52,
+        "failed": 4
+      },
+      "strict_task_verdicts": {
+        "passed": 52,
+        "failed": 4
+      },
+      "readback_traces": 56,
+      "readback_observations": 231,
+      "readback_turns": 60
+    },
+    {
+      "window_index": 2,
+      "review_sha256": "c7bbe0ddf6031295e047faa131b2e227195eae25ab3f67c19a5443b87f997cfe",
+      "receipt_sha256": "2b5ae720cd499919b206389b2e69d5beab708a3aca6b0fee0db3264972253311",
+      "readback_result_sha256": "0b0ca5acf30e59f4f8a2e4e7e39b92bd8653cde1e50bbf162b474cfefa322a1d",
+      "reviewed_attempted_arms": 56,
+      "requirements": 226,
+      "semantic_task_verdicts": {
+        "passed": 46,
+        "failed": 10
+      },
+      "strict_task_verdicts": {
+        "passed": 46,
+        "failed": 10
+      },
+      "readback_traces": 56,
+      "readback_observations": 364,
+      "readback_turns": 74
+    },
+    {
+      "window_index": 3,
+      "review_sha256": "ea5dae7c634a20123abe5f9c0228a289d3155f0105b8c00ce8769da525d5c020",
+      "receipt_sha256": "ecdb3f41bff8cdd3798f1f8f68c4e16df78ad788fcb04004177b075eb7ccd97e",
+      "readback_result_sha256": "b8190e2143b6e910ef1b3dc370554a0080ae08ecf8cd9ea0b2a50c2389a302be",
+      "reviewed_attempted_arms": 56,
+      "requirements": 202,
+      "semantic_task_verdicts": {
+        "failed": 9,
+        "passed": 46,
+        "not_assessable": 1
+      },
+      "strict_task_verdicts": {
+        "failed": 14,
+        "passed": 42
+      },
+      "readback_traces": 56,
+      "readback_observations": 328,
+      "readback_turns": 66
+    },
+    {
+      "window_index": 4,
+      "review_sha256": "f40338998a9fa0e931d44fb2d9e88f1274e559a217c727a44a376c7b16d68e1c",
+      "receipt_sha256": "74bd979eb833356a72038a77e7a6212d27a5f1f129ffa945072908100660fd24",
+      "readback_result_sha256": "fa6ba93b33168f3cd8c41f77f765cdaa22b19ad239ae4b40392f9b1ea39f127f",
+      "reviewed_attempted_arms": 56,
+      "requirements": 212,
+      "semantic_task_verdicts": {
+        "failed": 8,
+        "passed": 48
+      },
+      "strict_task_verdicts": {
+        "failed": 10,
+        "passed": 46
+      },
+      "readback_traces": 56,
+      "readback_observations": 360,
+      "readback_turns": 70
+    },
+    {
+      "window_index": 5,
+      "review_sha256": "7dceb3a0adb979bed2d1e5889d79ed275c8ad2cd5ba24eb6a7cae3d0dbb6f792",
+      "receipt_sha256": "466bd36e7624a4766b270033ecd39c97b6a104818c860baf7fa66d9069ee470f",
+      "readback_result_sha256": "6ec99647ba84a4e49aed9fbf24235089329e2f57e41a01a16342f6a3c2e520f5",
+      "reviewed_attempted_arms": 56,
+      "requirements": 224,
+      "semantic_task_verdicts": {
+        "passed": 43,
+        "failed": 13
+      },
+      "strict_task_verdicts": {
+        "passed": 42,
+        "failed": 14
+      },
+      "readback_traces": 56,
+      "readback_observations": 322,
+      "readback_turns": 64
+    },
+    {
+      "window_index": 6,
+      "review_sha256": "5f7b5b8b96ab02eec80657bd61db669ac0c3eeb2008222be580cc56163093c60",
+      "receipt_sha256": "e574b104639929e93a69bfe4dea937a1ed4fe506fa5c1b407f3e2a285dd0ae70",
+      "readback_result_sha256": "6ab3d9b9727dc9504e616574a6e69a80a7a6ddcfa9f3a83a53e8bd47d38fcb6f",
+      "reviewed_attempted_arms": 54,
+      "requirements": 232,
+      "semantic_task_verdicts": {
+        "passed": 34,
+        "failed": 19,
+        "not_assessable": 1
+      },
+      "strict_task_verdicts": {
+        "failed": 23,
+        "passed": 31
+      },
+      "readback_traces": 54,
+      "readback_observations": 307,
+      "readback_turns": 62
+    }
+  ],
+  "attempted_arms": 334,
+  "finished_arms": 333,
+  "failed_attempted_arms": 1,
+  "unattempted_global_arms": 6986,
+  "full_planned_pairs": 3660,
+  "full_planned_arms": 7320,
+  "full_planned_turns": 11772,
+  "reviewed_requirements": 1268,
+  "requirement_verdicts": {
+    "passed": 1160,
+    "failed": 98,
+    "not_assessable": 10
+  },
+  "semantic_task_verdicts": {
+    "passed": 269,
+    "failed": 63,
+    "not_assessable": 2
+  },
+  "strict_task_verdicts": {
+    "passed": 259,
+    "failed": 75
+  },
+  "verified_traces": 334,
+  "verified_observations": 1912,
+  "verified_turns": 396,
+  "review_blind": false,
+  "review_human": false,
+  "review_external_inference": false,
+  "content_comparison": "frozen source-owned redacted projection of captured turn input/output",
+  "native_request_bodies_in_langfuse_claimed": false,
+  "scores_published": 0,
+  "new_actual_model_calls": 0,
+  "new_actual_jev_calls": 0,
+  "new_claims": 0,
+  "old_trace_resends": 0,
+  "raw_originals_rewritten": false,
+  "not_full_or_representative_comparison": true
+}
