@@ -1,0 +1,1504 @@
+{
+  "schema": "after-p4-complete-cohort-budget-design.v1",
+  "kind": "offline_non_executable_design_not_scope_or_file_proof",
+  "fixed_scope": {
+    "pairs": 3660,
+    "arms": 7320,
+    "defined_turns": 11772,
+    "boundaries_separate": 1851,
+    "width": 28,
+    "windows": 131,
+    "rotation": [
+      0,
+      406,
+      812
+    ],
+    "schedule_sha256": "ef427c0a70fc6186818d6ccc8306f18099d6523801005e61f4fa469b431ad5b3",
+    "knowledge_model": "off",
+    "knowledge_jev": "off",
+    "customer_revision": "50e3c8dab14b4b6cc25322fd340a274e6970200b",
+    "source_plan_unchanged": true
+  },
+  "parent": {
+    "model_micro_cny": 105000000,
+    "jev_micro_usd": 1000000
+  },
+  "permanent28": {
+    "model_micro_cny": 40625891,
+    "jev_micro_usd": 323825,
+    "remaining_model_micro_cny": 64374109,
+    "remaining_jev_micro_usd": 676175,
+    "old25_model": 38888170,
+    "old25_jev": 308003,
+    "new3_full_caps_model": 1737721,
+    "new3_full_caps_jev": 15822,
+    "claim3_unattempted_still_permanent": true,
+    "old_claims_repriced_or_released": false
+  },
+  "risk_unchanged": {
+    "model_micro_cny": 2023424,
+    "jev_micro_usd": 65
+  },
+  "candidate": {
+    "model_micro_cny": 62000000,
+    "jev_micro_usd": 676000,
+    "caps_canonical_sha256": "7fe19887167feaa4ce85520f2717cf82d0143cd5e2eef6577b3b07afcfe04862",
+    "minimum_model_cap": 302191,
+    "minimum_jev_cap": 4400,
+    "maximum_model_cap": 704611,
+    "maximum_jev_cap": 5167,
+    "maximum_holds_unchanged": [
+      74752,
+      2688
+    ],
+    "all_windows_cover_one_maximum_hold": true,
+    "model_apportionment": {
+      "denominator": 64000000,
+      "floor_sum": 61999931,
+      "extra_units": 69,
+      "extra_original_indices": [
+        42,
+        71,
+        79,
+        100,
+        5,
+        106,
+        10,
+        16,
+        18,
+        20,
+        22,
+        26,
+        41,
+        47,
+        49,
+        55,
+        118,
+        120,
+        124,
+        128,
+        14,
+        34,
+        59,
+        74,
+        97,
+        116,
+        130,
+        4,
+        90,
+        48,
+        64,
+        66,
+        117,
+        131,
+        3,
+        6,
+        9,
+        43,
+        50,
+        72,
+        82,
+        101,
+        107,
+        111,
+        123,
+        13,
+        27,
+        38,
+        56,
+        57,
+        67,
+        96,
+        102,
+        125,
+        129,
+        89,
+        103,
+        110,
+        114,
+        68,
+        104,
+        121,
+        7,
+        62,
+        80,
+        108,
+        109,
+        23,
+        24
+      ]
+    },
+    "jev_apportionment": {
+      "denominator": 690000,
+      "floor_sum": 675979,
+      "extra_units": 21,
+      "extra_original_indices": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        131,
+        20
+      ]
+    },
+    "independent_fraction_heap_crosscheck_equal": true,
+    "method": "largest fractional remainder; earlier original index wins equal remainder; base is exact P4 vector, not pre-P4 vector",
+    "caps": [
+      {
+        "index": 1,
+        "id": "window-001",
+        "model_cap_micro_cny": 375675,
+        "jev_cap_micro_usd": 5167
+      },
+      {
+        "index": 2,
+        "id": "window-002",
+        "model_cap_micro_cny": 687114,
+        "jev_cap_micro_usd": 5167
+      },
+      {
+        "index": 3,
+        "id": "window-003",
+        "model_cap_micro_cny": 620628,
+        "jev_cap_micro_usd": 5167
+      },
+      {
+        "index": 4,
+        "id": "window-004",
+        "model_cap_micro_cny": 652122,
+        "jev_cap_micro_usd": 5167
+      },
+      {
+        "index": 5,
+        "id": "window-005",
+        "model_cap_micro_cny": 596132,
+        "jev_cap_micro_usd": 5167
+      },
+      {
+        "index": 6,
+        "id": "window-006",
+        "model_cap_micro_cny": 620628,
+        "jev_cap_micro_usd": 5167
+      },
+      {
+        "index": 7,
+        "id": "window-007",
+        "model_cap_micro_cny": 585634,
+        "jev_cap_micro_usd": 5167
+      },
+      {
+        "index": 8,
+        "id": "window-008",
+        "model_cap_micro_cny": 512149,
+        "jev_cap_micro_usd": 5167
+      },
+      {
+        "index": 9,
+        "id": "window-009",
+        "model_cap_micro_cny": 326686,
+        "jev_cap_micro_usd": 5167
+      },
+      {
+        "index": 10,
+        "id": "window-010",
+        "model_cap_micro_cny": 302191,
+        "jev_cap_micro_usd": 5167
+      },
+      {
+        "index": 11,
+        "id": "window-011",
+        "model_cap_micro_cny": 344182,
+        "jev_cap_micro_usd": 5167
+      },
+      {
+        "index": 12,
+        "id": "window-012",
+        "model_cap_micro_cny": 400171,
+        "jev_cap_micro_usd": 5167
+      },
+      {
+        "index": 13,
+        "id": "window-013",
+        "model_cap_micro_cny": 501651,
+        "jev_cap_micro_usd": 5167
+      },
+      {
+        "index": 14,
+        "id": "window-014",
+        "model_cap_micro_cny": 417667,
+        "jev_cap_micro_usd": 5167
+      },
+      {
+        "index": 15,
+        "id": "window-015",
+        "model_cap_micro_cny": 428165,
+        "jev_cap_micro_usd": 5167
+      },
+      {
+        "index": 16,
+        "id": "window-016",
+        "model_cap_micro_cny": 302191,
+        "jev_cap_micro_usd": 5167
+      },
+      {
+        "index": 17,
+        "id": "window-017",
+        "model_cap_micro_cny": 333684,
+        "jev_cap_micro_usd": 5167
+      },
+      {
+        "index": 18,
+        "id": "window-018",
+        "model_cap_micro_cny": 302191,
+        "jev_cap_micro_usd": 5167
+      },
+      {
+        "index": 19,
+        "id": "window-019",
+        "model_cap_micro_cny": 400171,
+        "jev_cap_micro_usd": 5167
+      },
+      {
+        "index": 20,
+        "id": "window-020",
+        "model_cap_micro_cny": 536644,
+        "jev_cap_micro_usd": 5167
+      },
+      {
+        "index": 21,
+        "id": "window-021",
+        "model_cap_micro_cny": 638124,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 22,
+        "id": "window-022",
+        "model_cap_micro_cny": 536644,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 23,
+        "id": "window-023",
+        "model_cap_micro_cny": 526147,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 24,
+        "id": "window-024",
+        "model_cap_micro_cny": 526147,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 25,
+        "id": "window-025",
+        "model_cap_micro_cny": 512149,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 26,
+        "id": "window-026",
+        "model_cap_micro_cny": 536644,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 27,
+        "id": "window-027",
+        "model_cap_micro_cny": 501651,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 28,
+        "id": "window-028",
+        "model_cap_micro_cny": 484154,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 29,
+        "id": "window-029",
+        "model_cap_micro_cny": 512149,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 30,
+        "id": "window-030",
+        "model_cap_micro_cny": 459658,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 31,
+        "id": "window-031",
+        "model_cap_micro_cny": 435163,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 32,
+        "id": "window-032",
+        "model_cap_micro_cny": 375675,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 33,
+        "id": "window-033",
+        "model_cap_micro_cny": 333684,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 34,
+        "id": "window-034",
+        "model_cap_micro_cny": 477156,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 35,
+        "id": "window-035",
+        "model_cap_micro_cny": 368677,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 36,
+        "id": "window-036",
+        "model_cap_micro_cny": 393172,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 37,
+        "id": "window-037",
+        "model_cap_micro_cny": 400171,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 38,
+        "id": "window-038",
+        "model_cap_micro_cny": 501651,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 39,
+        "id": "window-039",
+        "model_cap_micro_cny": 400171,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 40,
+        "id": "window-040",
+        "model_cap_micro_cny": 428165,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 41,
+        "id": "window-041",
+        "model_cap_micro_cny": 536644,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 42,
+        "id": "window-042",
+        "model_cap_micro_cny": 568138,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 43,
+        "id": "window-043",
+        "model_cap_micro_cny": 620628,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 44,
+        "id": "window-044",
+        "model_cap_micro_cny": 519147,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 45,
+        "id": "window-045",
+        "model_cap_micro_cny": 309188,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 46,
+        "id": "window-046",
+        "model_cap_micro_cny": 333684,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 47,
+        "id": "window-047",
+        "model_cap_micro_cny": 302191,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 48,
+        "id": "window-048",
+        "model_cap_micro_cny": 386174,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 49,
+        "id": "window-049",
+        "model_cap_micro_cny": 536644,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 50,
+        "id": "window-050",
+        "model_cap_micro_cny": 620628,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 51,
+        "id": "window-051",
+        "model_cap_micro_cny": 554140,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 52,
+        "id": "window-052",
+        "model_cap_micro_cny": 526146,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 53,
+        "id": "window-053",
+        "model_cap_micro_cny": 526146,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 54,
+        "id": "window-054",
+        "model_cap_micro_cny": 512149,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 55,
+        "id": "window-055",
+        "model_cap_micro_cny": 536644,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 56,
+        "id": "window-056",
+        "model_cap_micro_cny": 501651,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 57,
+        "id": "window-057",
+        "model_cap_micro_cny": 501651,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 58,
+        "id": "window-058",
+        "model_cap_micro_cny": 494652,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 59,
+        "id": "window-059",
+        "model_cap_micro_cny": 477156,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 60,
+        "id": "window-060",
+        "model_cap_micro_cny": 428165,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 61,
+        "id": "window-061",
+        "model_cap_micro_cny": 368677,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 62,
+        "id": "window-062",
+        "model_cap_micro_cny": 351181,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 63,
+        "id": "window-063",
+        "model_cap_micro_cny": 459658,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 64,
+        "id": "window-064",
+        "model_cap_micro_cny": 386174,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 65,
+        "id": "window-065",
+        "model_cap_micro_cny": 393172,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 66,
+        "id": "window-066",
+        "model_cap_micro_cny": 386174,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 67,
+        "id": "window-067",
+        "model_cap_micro_cny": 501651,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 68,
+        "id": "window-068",
+        "model_cap_micro_cny": 410669,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 69,
+        "id": "window-069",
+        "model_cap_micro_cny": 428165,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 70,
+        "id": "window-070",
+        "model_cap_micro_cny": 526146,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 71,
+        "id": "window-071",
+        "model_cap_micro_cny": 568138,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 72,
+        "id": "window-072",
+        "model_cap_micro_cny": 620628,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 73,
+        "id": "window-073",
+        "model_cap_micro_cny": 484154,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 74,
+        "id": "window-074",
+        "model_cap_micro_cny": 477156,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 75,
+        "id": "window-075",
+        "model_cap_micro_cny": 687114,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 76,
+        "id": "window-076",
+        "model_cap_micro_cny": 687114,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 77,
+        "id": "window-077",
+        "model_cap_micro_cny": 578635,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 78,
+        "id": "window-078",
+        "model_cap_micro_cny": 638124,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 79,
+        "id": "window-079",
+        "model_cap_micro_cny": 568138,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 80,
+        "id": "window-080",
+        "model_cap_micro_cny": 585634,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 81,
+        "id": "window-081",
+        "model_cap_micro_cny": 428165,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 82,
+        "id": "window-082",
+        "model_cap_micro_cny": 326686,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 83,
+        "id": "window-083",
+        "model_cap_micro_cny": 344182,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 84,
+        "id": "window-084",
+        "model_cap_micro_cny": 309188,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 85,
+        "id": "window-085",
+        "model_cap_micro_cny": 452660,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 86,
+        "id": "window-086",
+        "model_cap_micro_cny": 484154,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 87,
+        "id": "window-087",
+        "model_cap_micro_cny": 435163,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 88,
+        "id": "window-088",
+        "model_cap_micro_cny": 452660,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 89,
+        "id": "window-089",
+        "model_cap_micro_cny": 442163,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 90,
+        "id": "window-090",
+        "model_cap_micro_cny": 358180,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 91,
+        "id": "window-091",
+        "model_cap_micro_cny": 344182,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 92,
+        "id": "window-092",
+        "model_cap_micro_cny": 459658,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 93,
+        "id": "window-093",
+        "model_cap_micro_cny": 400171,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 94,
+        "id": "window-094",
+        "model_cap_micro_cny": 393172,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 95,
+        "id": "window-095",
+        "model_cap_micro_cny": 368677,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 96,
+        "id": "window-096",
+        "model_cap_micro_cny": 501651,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 97,
+        "id": "window-097",
+        "model_cap_micro_cny": 417667,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 98,
+        "id": "window-098",
+        "model_cap_micro_cny": 428165,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 99,
+        "id": "window-099",
+        "model_cap_micro_cny": 519147,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 100,
+        "id": "window-100",
+        "model_cap_micro_cny": 568138,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 101,
+        "id": "window-101",
+        "model_cap_micro_cny": 620628,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 102,
+        "id": "window-102",
+        "model_cap_micro_cny": 501651,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 103,
+        "id": "window-103",
+        "model_cap_micro_cny": 442163,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 104,
+        "id": "window-104",
+        "model_cap_micro_cny": 704611,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 105,
+        "id": "window-105",
+        "model_cap_micro_cny": 669617,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 106,
+        "id": "window-106",
+        "model_cap_micro_cny": 596132,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 107,
+        "id": "window-107",
+        "model_cap_micro_cny": 620628,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 108,
+        "id": "window-108",
+        "model_cap_micro_cny": 585634,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 109,
+        "id": "window-109",
+        "model_cap_micro_cny": 585634,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 110,
+        "id": "window-110",
+        "model_cap_micro_cny": 442163,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 111,
+        "id": "window-111",
+        "model_cap_micro_cny": 326686,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 112,
+        "id": "window-112",
+        "model_cap_micro_cny": 333684,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 113,
+        "id": "window-113",
+        "model_cap_micro_cny": 316187,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 114,
+        "id": "window-114",
+        "model_cap_micro_cny": 442163,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 115,
+        "id": "window-115",
+        "model_cap_micro_cny": 494652,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 116,
+        "id": "window-116",
+        "model_cap_micro_cny": 417667,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 117,
+        "id": "window-117",
+        "model_cap_micro_cny": 386174,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 118,
+        "id": "window-118",
+        "model_cap_micro_cny": 302191,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 119,
+        "id": "window-119",
+        "model_cap_micro_cny": 333684,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 120,
+        "id": "window-120",
+        "model_cap_micro_cny": 302191,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 121,
+        "id": "window-121",
+        "model_cap_micro_cny": 470158,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 122,
+        "id": "window-122",
+        "model_cap_micro_cny": 554140,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 123,
+        "id": "window-123",
+        "model_cap_micro_cny": 620628,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 124,
+        "id": "window-124",
+        "model_cap_micro_cny": 536644,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 125,
+        "id": "window-125",
+        "model_cap_micro_cny": 501651,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 126,
+        "id": "window-126",
+        "model_cap_micro_cny": 554140,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 127,
+        "id": "window-127",
+        "model_cap_micro_cny": 512149,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 128,
+        "id": "window-128",
+        "model_cap_micro_cny": 536644,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 129,
+        "id": "window-129",
+        "model_cap_micro_cny": 501651,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 130,
+        "id": "window-130",
+        "model_cap_micro_cny": 477156,
+        "jev_cap_micro_usd": 5166
+      },
+      {
+        "index": 131,
+        "id": "window-131",
+        "model_cap_micro_cny": 386174,
+        "jev_cap_micro_usd": 4400
+      }
+    ]
+  },
+  "totals_after_risk": {
+    "model_micro_cny": 104649315,
+    "jev_micro_usd": 999890,
+    "remaining_model_micro_cny": 350685,
+    "remaining_jev_micro_usd": 110
+  },
+  "maximum_usage_counterexample": {
+    "model_attempt_upper_bound": 58860,
+    "jev_attempt_upper_bound": 5886,
+    "model_all_max_settlement_micro_cny": 4399902720,
+    "jev_all_max_settlement_micro_usd": 15821568,
+    "candidate_can_fund_all_maximum_usage": false
+  },
+  "full_completion_guaranteed": false,
+  "cold_cache_completion_guaranteed": false,
+  "no_goal_or_denominator_reduction": true,
+  "tail_authorized_for_extra_requests": false,
+  "new_requests": 0,
+  "new_claims": 0,
+  "go_implementation": false,
+  "actual_ready": false,
+  "basis_manifest_sha256": "fb48dd1465a452ffc2dfdb2029a107adfeb351f4c176892a071d07e18b95c0ea",
+  "basis_caps_sha256": "0c020b80cf65c9876025d72ef8ad68bcfdea6c77b429b0390f2aabde895ca025",
+  "caps": [
+    {
+      "model_cap_micro_cny": 375675,
+      "jev_cap_micro_usd": 5167
+    },
+    {
+      "model_cap_micro_cny": 687114,
+      "jev_cap_micro_usd": 5167
+    },
+    {
+      "model_cap_micro_cny": 620628,
+      "jev_cap_micro_usd": 5167
+    },
+    {
+      "model_cap_micro_cny": 652122,
+      "jev_cap_micro_usd": 5167
+    },
+    {
+      "model_cap_micro_cny": 596132,
+      "jev_cap_micro_usd": 5167
+    },
+    {
+      "model_cap_micro_cny": 620628,
+      "jev_cap_micro_usd": 5167
+    },
+    {
+      "model_cap_micro_cny": 585634,
+      "jev_cap_micro_usd": 5167
+    },
+    {
+      "model_cap_micro_cny": 512149,
+      "jev_cap_micro_usd": 5167
+    },
+    {
+      "model_cap_micro_cny": 326686,
+      "jev_cap_micro_usd": 5167
+    },
+    {
+      "model_cap_micro_cny": 302191,
+      "jev_cap_micro_usd": 5167
+    },
+    {
+      "model_cap_micro_cny": 344182,
+      "jev_cap_micro_usd": 5167
+    },
+    {
+      "model_cap_micro_cny": 400171,
+      "jev_cap_micro_usd": 5167
+    },
+    {
+      "model_cap_micro_cny": 501651,
+      "jev_cap_micro_usd": 5167
+    },
+    {
+      "model_cap_micro_cny": 417667,
+      "jev_cap_micro_usd": 5167
+    },
+    {
+      "model_cap_micro_cny": 428165,
+      "jev_cap_micro_usd": 5167
+    },
+    {
+      "model_cap_micro_cny": 302191,
+      "jev_cap_micro_usd": 5167
+    },
+    {
+      "model_cap_micro_cny": 333684,
+      "jev_cap_micro_usd": 5167
+    },
+    {
+      "model_cap_micro_cny": 302191,
+      "jev_cap_micro_usd": 5167
+    },
+    {
+      "model_cap_micro_cny": 400171,
+      "jev_cap_micro_usd": 5167
+    },
+    {
+      "model_cap_micro_cny": 536644,
+      "jev_cap_micro_usd": 5167
+    },
+    {
+      "model_cap_micro_cny": 638124,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 536644,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 526147,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 526147,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 512149,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 536644,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 501651,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 484154,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 512149,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 459658,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 435163,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 375675,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 333684,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 477156,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 368677,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 393172,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 400171,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 501651,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 400171,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 428165,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 536644,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 568138,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 620628,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 519147,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 309188,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 333684,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 302191,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 386174,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 536644,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 620628,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 554140,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 526146,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 526146,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 512149,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 536644,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 501651,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 501651,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 494652,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 477156,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 428165,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 368677,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 351181,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 459658,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 386174,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 393172,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 386174,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 501651,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 410669,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 428165,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 526146,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 568138,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 620628,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 484154,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 477156,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 687114,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 687114,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 578635,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 638124,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 568138,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 585634,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 428165,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 326686,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 344182,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 309188,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 452660,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 484154,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 435163,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 452660,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 442163,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 358180,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 344182,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 459658,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 400171,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 393172,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 368677,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 501651,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 417667,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 428165,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 519147,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 568138,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 620628,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 501651,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 442163,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 704611,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 669617,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 596132,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 620628,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 585634,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 585634,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 442163,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 326686,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 333684,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 316187,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 442163,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 494652,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 417667,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 386174,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 302191,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 333684,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 302191,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 470158,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 554140,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 620628,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 536644,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 501651,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 554140,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 512149,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 536644,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 501651,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 477156,
+      "jev_cap_micro_usd": 5166
+    },
+    {
+      "model_cap_micro_cny": 386174,
+      "jev_cap_micro_usd": 4400
+    }
+  ],
+  "private_design_sha256": {
+    "budget-and-vector.json": "877050e97c0b6c4313f32599bbee47e8f5c783ced0cb8db63f47806ed2d4bd07",
+    "compatibility-design.md": "1b5fe13dd430bcf75993a7113be78b9d815277247e6918736268617136e72af7",
+    "candidate-caps.json": "dd85f5df089577b43babb50ca8f389dc31c643205108661e673de24f74e2ef65"
+  }
+}

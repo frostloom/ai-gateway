@@ -1,0 +1,187 @@
+{
+  "schema": "full1220-stopped-v4-proof-evidence.v1",
+  "kind": "concrete_go_readonly_historical_file_proof_not_actual_readiness",
+  "descriptor": {
+    "path": ".tmp/stopped-v4-proof-work/stopped-v4.private.json",
+    "sha256": "2f8c83546a2918b85801160f521465c2f53e040073b3590e1ecde53f278ef340",
+    "schema": "full-window-stopped-baseline.v4",
+    "previous_concrete25_sha256": "12a9d584ea9508a9fc7701532ad9214b0c743a8e13d17829432fac0d6b48a20c",
+    "budget_approval_sha256": "d5062e6f39f9ae7c9a8461121f9ba907c798100d7a5428af72da459595d2d554"
+  },
+  "source_sha256": {
+    "internal/taskbench/window_stopped_v4.go": "a11ebb445d983046c59e6b14643552d710b1f6c2d729ef9bf77b30a5a2ac1de3",
+    "internal/taskbench/window_stopped_v4_pins.go": "6f119073fd043837b0fbca7b62f83f03bac8b693b5a3ba7a7243e4d74ac24e83",
+    "internal/taskbench/window_stopped_v4_bundle.go": "893fcf312803cd37505ef5a04a6668d7b04cd48d868633a05a09e5c01cc9d948",
+    "internal/taskbench/window_stopped_v4_evidence.go": "cf64829abedbae5171a75b1c475a1029bc4bc67c73c2497b5e85f24c40d903c9",
+    "internal/taskbench/window_stopped_v4_test.go": "e55433ce669a186a1780da42d981ed38724792995a7b8f8fb41e161218012513"
+  },
+  "pins": {
+    "top_original_artifacts": 17,
+    "full_original_evidence_files_before_after": 10309,
+    "before_after_identical": true,
+    "before_inventory_sha256": "23c183de646ebc6f18510e2221673219aeca98d17ad58b3984d7643a70534c44",
+    "after_inventory_sha256": "23c183de646ebc6f18510e2221673219aeca98d17ad58b3984d7643a70534c44",
+    "includes_prior25_before_after_revalidation": true,
+    "historical_source_cleanliness_not_claimed": true,
+    "frozen_python_imported": false,
+    "frozen_pyc_modified_by_this_unit": false
+  },
+  "derived_baseline": {
+    "claims": 28,
+    "total_model_micro_cny": 105000000,
+    "total_jev_micro_usd": 1000000,
+    "permanent_model_micro_cny": 40625891,
+    "permanent_jev_micro_usd": 323825,
+    "remaining_model_micro_cny": 64374109,
+    "remaining_jev_micro_usd": 676175,
+    "historical_model_attempts": 1985,
+    "historical_jev_attempts": 501,
+    "p4_model_attempts": 194,
+    "p4_jev_attempts": 56,
+    "p4_records": 112,
+    "p4_native_packets": 250
+  },
+  "exact_stop_shape": {
+    "completed_windows": 2,
+    "reserved_claims": 3,
+    "third_claim_unattempted_and_permanent": true,
+    "third_model_cap_micro_cny": 640648,
+    "third_jev_cap_micro_usd": 5274,
+    "third_ledger_report_checkpoint_absent": true,
+    "claim4_absent": true,
+    "terminal_closed": true,
+    "original_summary2_closed": false,
+    "terminal_acquisition_done": false,
+    "terminal_next_window_index": 3,
+    "owner_exit_code": 1,
+    "owner_relaunch_allowed": false,
+    "physical_stop_cause_not_inferred": true
+  },
+  "p4_windows_original_fields_reconciled_by_go": [
+    {
+      "index": 1,
+      "quality_negative_arms": 3,
+      "quality_end_arms": 1,
+      "quality_end_unrun_turns": 0,
+      "observed_turns": 60,
+      "model_attempts": 67,
+      "jev_attempts": 28,
+      "known_model_micro_cny": 51503,
+      "known_jev_micro_usd": 1433,
+      "original_summary_closed": false
+    },
+    {
+      "index": 2,
+      "quality_negative_arms": 1,
+      "quality_end_arms": 0,
+      "quality_end_unrun_turns": 0,
+      "observed_turns": 74,
+      "model_attempts": 127,
+      "jev_attempts": 28,
+      "known_model_micro_cny": 98844,
+      "known_jev_micro_usd": 1428,
+      "original_summary_closed": false
+    }
+  ],
+  "accounting": {
+    "p4_schema": "full-window-accounting.v2",
+    "model_cache_hit_input_micro_per_million": 40000,
+    "model_miss_input_micro_per_million": 2000000,
+    "model_output_micro_per_million": 8000000,
+    "jev_input_micro_per_million": 42000,
+    "jev_output_micro_per_million": 0,
+    "raw_response_usage_reparsed_and_matches_settle": true,
+    "weighted_input_then_output_ceil_independently_reconciled": true,
+    "ancestor_schema1_remains_all_input_original_cost": true,
+    "original_unknown_model_hold_micro_cny": 74752,
+    "original_unknown_jev_hold_micro_usd": 2688,
+    "old_holds_settled_or_released": false,
+    "provider_invoice_proved": false
+  },
+  "quality": {
+    "original_failed_needs_review_success_false_retained": true,
+    "negative_arms_by_window": [
+      3,
+      1
+    ],
+    "quality_end_arms_by_window": [
+      1,
+      0
+    ],
+    "quality_end_unrun_turns_by_window": [
+      0,
+      0
+    ],
+    "quality_candidate_cleanup_full_sha_and_envelope_recomputed": true,
+    "original_null_record_fields_use_record_specific_decoder": true,
+    "independent_semantic_review_not_implemented_by_this_proof": true
+  },
+  "namespace": {
+    "canonical_disjoint_predecessor_roots": 4,
+    "old_history_interfaces_not_promoted": true,
+    "concrete_factory_no_caller_verifier": true,
+    "existing_lock_readonly_exclusive_only": true,
+    "strict_owned_campaign_records_inventories": true,
+    "entire_freeze_root_not_scanned": true
+  },
+  "verification": {
+    "unit-normal": {
+      "pass": 151,
+      "fail": 0,
+      "skip": 0,
+      "package_action": "pass",
+      "elapsed": 1.316,
+      "stderr_bytes": 0,
+      "build_warnings": 0
+    },
+    "unit-race": {
+      "pass": 151,
+      "fail": 0,
+      "skip": 0,
+      "package_action": "pass",
+      "elapsed": 3.148,
+      "stderr_bytes": 0,
+      "build_warnings": 1
+    },
+    "actual-normal": {
+      "pass": 230,
+      "fail": 0,
+      "skip": 0,
+      "package_action": "pass",
+      "elapsed": 21.129,
+      "stderr_bytes": 0,
+      "build_warnings": 0
+    },
+    "actual-race": {
+      "pass": 237,
+      "fail": 0,
+      "skip": 0,
+      "package_action": "pass",
+      "elapsed": 153.297,
+      "stderr_bytes": 0,
+      "build_warnings": 1
+    }
+  },
+  "red_evidence": {
+    "red.log": "compiled pins0!=17 and valid namespace refused;weighted fixture initial test-model mismatch is setup failure, not assertion RED",
+    "weighted-red.log": "correct fixed-model fixture768 cost rejected by stub;assertion RED",
+    "quality-red.log": "legal observed1/unrun0 quality rejected by stub;assertion RED"
+  },
+  "review": {
+    "independent_review_confirmed_p1_p2": 0,
+    "root_owns_integration": true
+  },
+  "limits": {
+    "whole_go_regression_for_this_change": false,
+    "epoch5_implemented": false,
+    "paid_ready": false,
+    "new_actual_provider_calls": 0,
+    "new_financial_claims": 0,
+    "db_operations": 0,
+    "owner_operations": 0,
+    "deployments": 0,
+    "scores_published": 0,
+    "business_goal_complete": false
+  },
+  "private_evidence_root": ".tmp/stopped-v4-proof-work/"
+}

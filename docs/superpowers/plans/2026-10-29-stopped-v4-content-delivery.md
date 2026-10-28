@@ -55,7 +55,7 @@ Use an optional explicit `closed_archive_extra_witness` only for formal content 
 - [x] Execute fixed offline Go projection with explicit witness for each window, then readonly Langfuse content validation.
 - [x] Publish each new score intent once; preserve immediate pending reads and use readonly verification to completion.
 - [x] Audit250 native packets,28 permanent claims40625891/323825, third claim retained with no third ledger/request, observer595/595.
-- [ ] Write truthful partial delivery report and latest Hindsight stopped memory, read back, commit/push and confirm remote SHA.
+- [x] Partial delivery report pushed5c8f7f82; latestHindsight d329eb8f completed and originaltext readback; remote SHA confirmed.
 
 ## Progress
 
