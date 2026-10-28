@@ -1,0 +1,37 @@
+{
+  "schema": "full1220-v4-score-compat-offline.v1",
+  "source_sha256": {
+    "scripts/full1220-window-scores.py": "4301927fe1c3d662e470ddf1bb720377a53d2b7c8901932641a4146df7ef4690",
+    "scripts/tests/test_full1220_window_scores.py": "e52724e3793694fee8bbcfac51a560fc38f91bb1c9dabd30cb7d3913cc4461ca",
+    "scripts/helpers/full1220_attestation.go.txt": "43fd979da289d348fb9480aa394ff2a12a82948631a13e267fba76890d0530a9"
+  },
+  "root_full_python": {
+    "command": "python3 -m unittest discover -s scripts/tests",
+    "tests": 277,
+    "original_skipped": 15,
+    "failures": 0,
+    "errors": 0,
+    "elapsed_seconds": 42.608,
+    "exit_code": 0
+  },
+  "targeted_tests": 77,
+  "targeted_seconds": 26.106,
+  "independent_tests": 5,
+  "independent_seconds": 1.983,
+  "confirmed_p1_p2": 0,
+  "go_helper_real_signature_positive_epochs": [
+    2,
+    3,
+    4
+  ],
+  "go_helper_crossed_and_changed_signature_rejected": true,
+  "old_9_plans_canonical_json_hash_source_bindings_equal": true,
+  "old_score_intents_readback_unchanged": 1442,
+  "old_score_posts": 0,
+  "new_actual_model": 0,
+  "new_actual_jev": 0,
+  "new_financial_claims": 0,
+  "original_loopback_sandbox_error_retained": true,
+  "actual_paid_ready": false,
+  "final_full_go_and_freeze_pending": true
+}

@@ -39,10 +39,12 @@ func main() {
         ArchiveCommit string `json:"archive_commit"`
         ArchiveTree string `json:"archive_tree"`
         PublicKey string `json:"build_attestation_public_key"`
+        Scope struct { Schema string `json:"schema"` } `json:"scope"`
     }
     var signed attestation
     require(json.Unmarshal(job.ManifestRaw, &manifest) == nil && json.Unmarshal(job.AttestationRaw, &signed) == nil)
-    require((manifest.Schema == "full-window-actual-ready.v2" || manifest.Schema == "full-window-actual-ready.v3") && signed.Schema == "full-window-actual-binary-attestation.v1")
+    require((manifest.Schema == "full-window-actual-ready.v2" || manifest.Schema == "full-window-actual-ready.v3" || manifest.Schema == "full-window-actual-ready.v4") && signed.Schema == "full-window-actual-binary-attestation.v1")
+    require(manifest.Scope.Schema == "full-window-scope."+manifest.Schema[len(manifest.Schema)-2:])
     require(signed.ArchiveCommit == manifest.ArchiveCommit && signed.ArchiveTree == manifest.ArchiveTree && signed.ReadyManifestSHA256 == job.ManifestSHA256)
     public, err := hex.DecodeString(manifest.PublicKey); require(err == nil && len(public) == ed25519.PublicKeySize && len(manifest.PublicKey) == 64)
     signature, err := hex.DecodeString(signed.Signature); require(err == nil && len(signature) == ed25519.SignatureSize)

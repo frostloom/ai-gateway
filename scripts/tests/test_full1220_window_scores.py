@@ -1110,4 +1110,90 @@ class PublicationTests(unittest.TestCase):
         self.assertFalse(self.registry.exists())
 
 
+
+def v4_fixture(base=None):
+    f = fixture() if base is None else base; m = f['manifest']; scope = m['scope']
+    m['schema'] = 'full-window-actual-ready.v4'; scope['schema'] = 'full-window-scope.v4'
+    scope['baseline_evidence_sha256'] = '12a9d584ea9508a9fc7701532ad9214b0c743a8e13d17829432fac0d6b48a20c'
+    scope['budget_approval_sha256'] = 'd5062e6f39f9ae7c9a8461121f9ba907c798100d7a5428af72da459595d2d554'
+    declaration = json.loads((SCRIPT.parents[1]/'eval/paired-pilots/2026-10-29-cache-price/declaration.json').read_bytes())
+    scope['width'] = 28
+    # The compact score fixture retains its four recorded arms and full schedule.
+    for window, cap in zip(scope['windows'], declaration['caps']): window.update(cap)
+    scope['windows'] += [dict(id='cap-only-%03d'%i, first_ordinal=3661, last_ordinal=3660, **cap)
+                         for i, cap in enumerate(declaration['caps'][2:], 3)]
+    m['baseline_evidence'] = {'path': '/offline/stopped-v3.json', 'sha256': scope['baseline_evidence_sha256']}
+    m['historical_claims'] = {'full1220-first-actual-20261028': '52bbf6e7edf8b66099141db5ac7c6782e45b8afc3bcd9145ea1fd51f936eca48', 'full1220-v2-20261028/window-000001': 'c02cf79e01ad6727cf6bfe9c6157aa74c43ab68cedcb622457a2acb94aacb682', 'full1220-v2-20261028/window-000002': '518af94e74565c7f21e3d89da226e25563ad29756a04100a11d55755e6e91820', 'full1220-v2-20261028/window-000003': 'fd4ccb5cc9b2fed837383d532271d34a4a2dc3c15062b044dc411a5a12124ae6', 'full1220-v2-20261028/window-000004': '76bc6395aaf66ce6cc5569fd440802b6517110975618cc9773fd3e9b0e1a72b9', 'full1220-v2-20261028/window-000005': 'f2eb059f5bf55dbab4d0328633de7e98b029cca441cd26b584f7b96cead46988', 'full1220-v2-20261028/window-000006': '0f074c6761a898c46ba831b4a96f9818d27093955a5fb42ae8e662f745b173aa', 'recharge-cancel-20261024': 'a9ce7a22d79e4e42e8ded0b932c34648df3db0d0574ad0710c098d2b02cbc8f4', 'recharge-confirm-20261023': '2c9d64b98bd985a24da5aed31c049d63311ebdd7f8dc4c862600ccd77e80dcbc', 'recharge-confirm-diagnostic-retest-20261023': '23047a143039f719531cfe403f1769abda7a6091b2ee51cecf6184eb4768e654', 'recharge-supplement-20261024': '824e1e44882b1043bba833ec6af5b88980d6d89b4ce8e4023fd12c68c98fb11c', 'refund-cap-20261024': '9a026381dea69bc1feb9712d58a41e305877701e1355ba2464543aaaa0857b30', 'v5-repeated-cohort-20261024': 'c7f14ee3b310cec23cf71b7dc004fe73b29ec5e8efa4b6c4167eb91159c8dd58', 'v5-repeated-export-diagnostic-20261025': '8c63988dbd31b09cb523c7e0b067f5978ad0ee91f5736f0fc581752544161e6a', 'v5-repeated-receiver-20261027': 'f09de5bb9ab4147f140f54db7a25c5f419b7a4e48137d63c1782ea7c38d768b3', 'v5-six-case-cohort-20261024': 'b49808feb6a124c60c7f3fd88a7965589368a0ce8d8f4336e94ebaee9a025d34', 'full1220-v3-20261028/window-000001': '5cb4f10bd990e073b71ac039d7d09670d732de72cb2831422444dc0e525373e1', 'full1220-v3-20261028/window-000002': 'b46344d00c277ce8c3d7a4ad317fd23d97f77a2f0e5d50960422affd51535dd4', 'full1220-v3-20261028/window-000003': '37d8e559963bf116dbafe8c18f059e77125f8be8cc604fe5d6d4b2b822f26088', 'full1220-v3-20261028/window-000004': 'd9cb74a2376dc827744cc929eda9e39547b03ed0a20fa0ea5e8bb8aca0ba262d', 'full1220-v3-20261028/window-000005': '735f6ad0fb8a3173f6d1db6fc012260fd9040c4357b00b16824ab28df4c95998', 'full1220-v3-20261028/window-000006': '9ab2594ef283fa01446e55d7c5598397076c9ef0ee9e88cbd5e5efb2a1ca5493', 'full1220-v3-20261028/window-000007': '503ca8aaa9a4ae807dc4bd98b196414222083092751e5177ca92ce12361df926', 'full1220-v3-20261028/window-000008': '54c227dccb982dcf80b19d9603b6d8eba6765a365463cbaf23ff5259547a1cc7', 'full1220-v3-20261028/window-000009': '0f698f0bf29550cee7052d9ca04f94ef76592942f858b4d84e44a7651f5df6b1'}
+    m['provider_limits'] = {
+        'model': {'model':'deepseek-flash','max_request_bytes':32768,'max_input_tokens':36864,'max_output_tokens':128,
+                  'input_micro_per_million':2000000,'output_micro_per_million':8000000,'cache_hit_input_micro_per_million':40000},
+        'jev': {'model':'jev-1.13.0','max_request_bytes':4096,'max_input_tokens':64000,'max_output_tokens':1000000,
+                'input_micro_per_million':42000,'output_micro_per_million':0}}
+    m['scope_sha256'] = digest(wire(scope)); f['receipt']['scope_sha256'] = m['scope_sha256']
+    f['review']['bindings']['scope_sha256'] = m['scope_sha256']; refresh_links(f)
+    return f
+
+
+class V4CompatibilityTests(unittest.TestCase):
+    setUpClass = classmethod(WindowScorePlanTests.setUpClass.__func__)
+    plan = WindowScorePlanTests.plan
+    reject = WindowScorePlanTests.reject
+    def test_v4_plan_records_configuration_only_cache_accounting_provenance(self):
+        try: plan = self.plan(v4_fixture())
+        except ValueError as error: self.fail('Valid epoch4 cache accounting must be accepted: '+str(error))
+        pricing = plan['provenance']['configured_cache_accounting']
+        self.assertEqual(pricing['schema'], 'full-window-accounting.v2')
+        self.assertEqual(pricing['model_cache_hit_input_micro_per_million'],40000)
+        self.assertEqual(pricing['cache_absent_settlement'],'all_input_at_miss_rate_without_observed_cache_split')
+        self.assertFalse(pricing['proves_cache_usage']); self.assertFalse(pricing['proves_knowledge_usage'])
+        self.assertEqual(len(plan['scores']),12)
+        self.assertTrue(all(s['metadata']['configured_cache_accounting']==pricing for s in plan['scores']))
+
+    def test_v4_configuration_does_not_launder_negative_unknown_or_held_pass(self):
+        for quality in (False,True):
+            f=v4_fixture(partial_fixture(quality));plan=self.plan(f);trace=f['receipt']['rows'][0]['trace_id']
+            first=[score for score in plan['scores'] if score['traceId']==trace]
+            self.assertTrue(first);self.assertFalse(any(score['value']=='passed' for score in first))
+            self.assertEqual(plan['rows'][0]['semantic_task_verdict'],'failed' if quality else 'not_assessable')
+            self.assertFalse(plan['publish_ready'])
+        f=v4_fixture()
+        for row in f['review']['rows']:row['pass_score_publish_eligible']=False
+        refresh_links(f);plan=self.plan(f)
+        self.assertEqual(len(plan['scores']),4)
+        self.assertTrue(all(score['name'].endswith('original_status') for score in plan['scores']))
+
+    def test_v4_rejects_coherent_wrong_baseline_claim_price_caps_and_epoch(self):
+        mutations = [lambda m: m['scope'].__setitem__('schema','full-window-scope.v3'),
+            lambda m: m['scope'].__setitem__('baseline_evidence_sha256','0'*64),
+            lambda m: m['scope'].__setitem__('budget_approval_sha256','0'*64),
+            lambda m: m['baseline_evidence'].__setitem__('sha256','0'*64),
+            lambda m: m['historical_claims'].pop(next(iter(m['historical_claims']))),
+            lambda m: m['historical_claims'].__setitem__(next(iter(m['historical_claims'])),'0'*64),
+            lambda m: m['scope']['windows'][0].__setitem__('model_cap_micro_cny',387795),
+            lambda m: m['scope']['windows'][0].__setitem__('jev_cap_micro_usd',5275),
+            lambda m: m['provider_limits']['model'].pop('cache_hit_input_micro_per_million')]
+        for provider,field,value in [('model','cache_hit_input_micro_per_million',0),('model','input_micro_per_million',1),
+            ('model','output_micro_per_million',1),('jev','cache_hit_input_micro_per_million',1),('jev','output_micro_per_million',1),
+            ('jev','input_micro_per_million',1),('model','max_output_tokens',512)]:
+            mutations.append(lambda m,p=provider,k=field,v=value:m['provider_limits'][p].__setitem__(k,v))
+        for mutate in mutations:
+            f=v4_fixture(); mutate(f['manifest']); m=f['manifest'];m['scope_sha256']=digest(wire(m['scope']))
+            f['receipt']['scope_sha256']=m['scope_sha256'];f['review']['bindings']['scope_sha256']=m['scope_sha256'];refresh_links(f)
+            with self.subTest(mutate=mutate):self.reject(f)
+
+    def test_old_epoch_plan_json_and_ids_remain_byte_identical(self):
+        expected = {2: 'da0f9b2bb04ae9cfa0d5bb2110de385d4f59521a8a15990885269f080767d4cb', 3: '3edbaa382494a6b6483f4a7c165299c7e4ac9a20495a5f2776b2a0a88bb2229e'}
+        for epoch in (2,3):
+            f=fixture(); m=f['manifest'];m['schema']='full-window-actual-ready.v%d'%epoch;m['scope']['schema']='full-window-scope.v%d'%epoch
+            m['scope_sha256']=digest(wire(m['scope']));f['receipt']['scope_sha256']=m['scope_sha256'];f['review']['bindings']['scope_sha256']=m['scope_sha256'];refresh_links(f)
+            raw=json.dumps(self.plan(f),sort_keys=True,separators=(',',':'),ensure_ascii=False).encode()
+            self.assertEqual(digest(raw),expected[epoch])
+
+    def test_old_epoch_cannot_enable_nonzero_cache_price(self):
+        for epoch in (2,3):
+            f=fixture();f['manifest']['schema']='full-window-actual-ready.v%d'%epoch;f['manifest']['scope']['schema']='full-window-scope.v%d'%epoch
+            f['manifest']['provider_limits']={'model':{'cache_hit_input_micro_per_million':40000},'jev':{}}
+            m=f['manifest'];m['scope_sha256']=digest(wire(m['scope']));f['receipt']['scope_sha256']=m['scope_sha256'];f['review']['bindings']['scope_sha256']=m['scope_sha256'];refresh_links(f)
+            self.reject(f)
+
 if __name__ == '__main__': unittest.main()
