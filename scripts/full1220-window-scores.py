@@ -295,7 +295,12 @@ def _planned_rows(manifest, receipt):
         if key in receipt:
             _equal(receipt[key], expected, 'Explicit window suffix denominator mismatch: ' + key)
         elif quality_rows:
-            _require(False, 'Quality-end requires explicit window suffix denominator: ' + key)
+            # This pinned Go producer omits zero-valued receipt suffix ints.
+            # Only an exactly rederived zero may be absent; unknown producers
+            # and every nonzero component still require explicit evidence.
+            _require(expected == 0 and manifest['sources'].get('internal/taskbench/window_collector.go')
+                     == '9131a3bc61c7cef89c1bda02dabffffe5d85bbebd48e9834afb542553cd200d7',
+                     'Quality-end requires explicit window suffix denominator: ' + key)
     for key, expected in [('planned_current_pairs', len(selected)), ('planned_current_arms', len(identities)),
                           ('planned_current_turns', sum(slot['user_turns']*2 for slot in selected)),
                           ('attempted_arms', sum(row['attempted'] for row in receipt['rows'])),

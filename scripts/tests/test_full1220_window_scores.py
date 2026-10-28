@@ -1196,4 +1196,77 @@ class V4CompatibilityTests(unittest.TestCase):
             m=f['manifest'];m['scope_sha256']=digest(wire(m['scope']));f['receipt']['scope_sha256']=m['scope_sha256'];f['review']['bindings']['scope_sha256']=m['scope_sha256'];refresh_links(f)
             self.reject(f)
 
+
+class ZeroSuffixCompatibilityTests(unittest.TestCase):
+    setUpClass = classmethod(WindowScorePlanTests.setUpClass.__func__)
+    plan = WindowScorePlanTests.plan
+    reject = WindowScorePlanTests.reject
+
+    @staticmethod
+    def zero_quality_fixture():
+        f=fixture();row=f['receipt']['rows'][0];review=f['review']['rows'][0]
+        def negative(record):
+            record['result'].update(status='failed',structural_pass=False,errors=['quality negative'])
+            record['disposition']='halt'
+        refresh_record(f,0,negative)
+        row.update(status='failed',structural_pass=False,disposition='halt',exclude_complete_task_comparison=True)
+        row['quality_end']=copy.deepcopy(partial_fixture(quality=True)['receipt']['rows'][0]['quality_end'])
+        row['quality_end'].update(observed_turns=2,unrun_turns=0)
+        review.update(original_status='failed',original_structural_pass=False,original_errors=['quality negative'],
+                      semantic_task_verdict='failed',task_verdict='failed',pass_score_publish_eligible=False)
+        for req in review['requirements']:req['verdict']='failed'
+        f['receipt']['quality_end_arms']=1
+        f['manifest']['sources']['internal/taskbench/window_collector.go']='9131a3bc61c7cef89c1bda02dabffffe5d85bbebd48e9834afb542553cd200d7'
+        recalculate_counts(f)
+        # Production windowAcquisitionReceipt uses omitempty for these int zeros.
+        f['receipt'].pop('quality_end_unrun_turns',None);f['receipt'].pop('global_unrun_turns',None)
+        refresh_links(f);return f
+
+    def test_known_go_producer_zero_quality_suffix_omission_preserves_negative(self):
+        f=self.zero_quality_fixture()
+        try:plan=self.plan(f)
+        except ValueError as error:self.fail('Known Go omitempty zero suffix must be accepted: '+str(error))
+        self.assertEqual(plan['denominators']['window']['quality_end_unrun_turns'],0)
+        self.assertEqual(plan['denominators']['window']['global_unrun_turns'],0)
+        self.assertEqual(plan['rows'][0]['original_status'],'failed')
+        self.assertTrue(plan['rows'][0]['exclude_complete_task_comparison'])
+        self.assertFalse(any(score['value']=='passed' for score in plan['scores']
+                             if score['traceId']==f['receipt']['rows'][0]['trace_id']))
+        self.assertNotIn('quality_end_unrun_turns',f['receipt']);self.assertNotIn('global_unrun_turns',f['receipt'])
+
+    def test_actual_one_observed_one_defined_quality_row_allows_only_omitted_top_zeros(self):
+        f=self.zero_quality_fixture();scope=f['manifest']['scope'];receipt=f['receipt']
+        scope['slots'][0]['user_turns']=1;scope['slots'][-1]['user_turns']=2
+        for row in receipt['rows'][:2]:row.update(defined_turns=1,observed_turns=1)
+        receipt['rows'][0]['quality_end']['observed_turns']=1
+        receipt.update(planned_current_turns=6,observed_turns=6)
+        try:self.adapter._planned_rows(f['manifest'],receipt)
+        except ValueError as error:self.fail('Actual one-turn Go zero-suffix receipt shape rejected: '+str(error))
+
+    def test_unknown_or_absent_producer_cannot_default_missing_suffix_to_zero(self):
+        for producer in (None,'0'*64):
+            f=self.zero_quality_fixture()
+            if producer is None:f['manifest']['sources'].pop('internal/taskbench/window_collector.go')
+            else:f['manifest']['sources']['internal/taskbench/window_collector.go']=producer
+            refresh_links(f);self.reject(f)
+            # Explicit, consistent integer zeros preserve prior unknown-source behavior.
+            f['receipt'].update(quality_end_unrun_turns=0,global_unrun_turns=0);refresh_links(f);self.plan(f)
+
+    def test_nonzero_count_quality_or_global_suffix_must_be_explicit(self):
+        for missing in ('quality_end_arms','quality_end_unrun_turns'):
+            f=partial_fixture(quality=True)
+            f['manifest']['sources']['internal/taskbench/window_collector.go']='9131a3bc61c7cef89c1bda02dabffffe5d85bbebd48e9834afb542553cd200d7'
+            del f['receipt'][missing];refresh_links(f);self.reject(f)
+        f=partial_fixture(quality=True);r=f['receipt'];r['rows'][1].update(observed_turns=1,finished=False)
+        r.update(finished_arms=3,observed_turns=6);r.pop('global_unrun_turns')
+        f['manifest']['sources']['internal/taskbench/window_collector.go']='9131a3bc61c7cef89c1bda02dabffffe5d85bbebd48e9834afb542553cd200d7'
+        with self.assertRaises(ValueError):self.adapter._planned_rows(f['manifest'],r)
+
+    def test_explicit_zero_suffix_stays_type_sensitive_and_row_suffix_is_required(self):
+        for key in ('quality_end_unrun_turns','global_unrun_turns'):
+            for value in (False,0.0,'0',None,1):
+                f=self.zero_quality_fixture();f['receipt'][key]=value;refresh_links(f)
+                with self.subTest(key=key,value=value):self.reject(f)
+        f=self.zero_quality_fixture();del f['receipt']['rows'][0]['quality_end']['unrun_turns'];refresh_links(f);self.reject(f)
+
 if __name__ == '__main__': unittest.main()
