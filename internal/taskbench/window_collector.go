@@ -25,6 +25,7 @@ import (
 // future verified entry must independently freeze all identities and retain the
 // same live campaign owner across bounded operations; JSON cannot mint it.
 type windowAcquisitionAuthorization struct {
+	captureFailureEvidence                                 bool
 	campaign                                               *windowCampaign
 	source                                                 ConversationSuite
 	frozenScopeSHA, frozenExecutionSHA, actualExecutionSHA string
@@ -36,6 +37,7 @@ type windowAcquisitionAuthorization struct {
 	privateReportRoot, evidenceKind                        string
 }
 type windowAcquisitionRow struct {
+	FailureEvidence               *windowFailureEvidence    `json:"failure_evidence,omitempty"`
 	QualityEnd                    *windowQualityEndEvidence `json:"quality_end,omitempty"`
 	ExcludeCompleteTaskComparison bool                      `json:"exclude_complete_task_comparison,omitempty"`
 	Ordinal                       int                       `json:"ordinal"`
@@ -278,7 +280,7 @@ func openWindowAcquisition(ctx context.Context, auth *windowAcquisitionAuthoriza
 		return run, fmt.Errorf("window acquisition stopped: environment_open")
 	}
 	run.environment = env
-	run.permit = &windowAcquisitionPermit{acquisition: run, campaign: c, ledger: run.ledger, executionSHA: executionSHA, windowIndex: index, environment: env, observer: auth.observer, observerIdentity: identity, payload: run.payload, evidenceKind: auth.evidenceKind}
+	run.permit = &windowAcquisitionPermit{captureFailureEvidence: auth.captureFailureEvidence, acquisition: run, campaign: c, ledger: run.ledger, executionSHA: executionSHA, windowIndex: index, environment: env, observer: auth.observer, observerIdentity: identity, payload: run.payload, evidenceKind: auth.evidenceKind}
 	return run, nil
 }
 
@@ -365,6 +367,11 @@ func (r *windowAcquisitionRun) runWindowAcquisitionArms(ctx context.Context) err
 				r.receipt.QualityNegativeArms++
 			}
 			proof, finishErr := driver.finishWindowOwnedArm(ctx, record)
+			if finishErr != nil && r.auth.captureFailureEvidence {
+				driver.mu.Lock()
+				row.FailureEvidence = driver.captureFailureEvidenceLocked()
+				driver.mu.Unlock()
+			}
 			exact := record
 			if finishErr == nil && proof != nil {
 				exact = proof.recording

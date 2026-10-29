@@ -148,6 +148,9 @@ func (d *windowOwnedDriver) latchWindowQualityCandidate(ctx context.Context, bef
 }
 func (d *windowOwnedDriver) finishWindowQualityOwned(ctx context.Context, record collectionRecording) (*windowOwnedArmProof, error) {
 	fail := func() (*windowOwnedArmProof, error) {
+		if d.windowFailureDiagnostics() != nil {
+			return nil, d.cleanupFailureLocked(ctx)
+		}
 		_ = d.cleanupWindowOwnedSession(ctx)
 		return nil, d.stopWindowOwned()
 	}
@@ -183,12 +186,15 @@ func (d *windowOwnedDriver) finishWindowQualityOwned(ctx context.Context, record
 	}
 	n, err := d.environment.rdb.Del(ctx, "agent:session:"+d.session).Result()
 	if err != nil || n != 1 {
+		d.recordFailureCleanup("failed", true)
 		return fail()
 	}
 	exists, err := d.environment.rdb.Exists(ctx, "agent:session:"+d.session).Result()
 	if err != nil || exists != 0 {
+		d.recordFailureCleanup("failed", true)
 		return fail()
 	}
+	d.recordFailureCleanup("verified", true)
 	post, err := captureWindowQualityEffects(ctx, d)
 	if err != nil || !reflect.DeepEqual(post.Tables, finalCapture.Tables) || !reflect.DeepEqual(post.Audits, finalCapture.Audits) || !reflect.DeepEqual(post.Sessions, finalCapture.Sessions) || !sameWindowQualityCapturedState(post.State, finalCapture.State) {
 		return fail()

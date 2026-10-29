@@ -24,11 +24,12 @@ type windowProviderPayloadCapability interface {
 	windowPayloadEvidence() (*windowPayloadStore, bool)
 }
 type windowProviderTransport struct {
-	capability windowProviderCapability
-	ledger     *windowAccounting
-	provider   string
-	upstream   http.RoundTripper
-	payload    *windowPayloadStore
+	capability  windowProviderCapability
+	ledger      *windowAccounting
+	provider    string
+	upstream    http.RoundTripper
+	payload     *windowPayloadStore
+	diagnostics *windowFailureRecorder
 }
 
 func windowTransportNil(value any) bool {
@@ -71,7 +72,11 @@ func newWindowProviderTransport(capability windowProviderCapability, provider st
 			return nil, fmt.Errorf("window payload evidence binding rejected")
 		}
 	}
-	return &windowProviderTransport{capability: capability, ledger: l, provider: provider, upstream: upstream, payload: payload}, nil
+	var diagnostics *windowFailureRecorder
+	if sink, ok := capability.(windowFailureDiagnosticCapability); ok {
+		diagnostics = sink.windowFailureDiagnostics()
+	}
+	return &windowProviderTransport{capability: capability, ledger: l, provider: provider, upstream: upstream, payload: payload, diagnostics: diagnostics}, nil
 }
 
 func windowTransportStop(l *windowAccounting, code string) error {
@@ -145,17 +150,67 @@ func (t *windowProviderTransport) RoundTrip(req *http.Request) (*http.Response, 
 	if e != nil {
 		return nil, fmt.Errorf("window request admission stopped")
 	}
+	evidence := windowFailureTransportEvidence{Sequence: ticket.sequence, Provider: t.provider, RequestPersistence: "not_attempted", DescriptorPersistence: "not_attempted", LedgerPersistence: "unknown"}
 	fail := func(code string) (*http.Response, error) {
-		_ = t.ledger.Fail(ticket, code)
+		t.ledger.mu.Lock()
+		eventsBefore := t.ledger.events
+		t.ledger.mu.Unlock()
+		ledgerErr := t.ledger.Fail(ticket, code)
+		if t.diagnostics != nil {
+			evidence.Code = code
+			// Fail returns a halt error even when the journal append succeeds.
+			// A failed/changed append must not be mistaken for that expected error.
+			t.ledger.mu.Lock()
+			verified := ledgerErr != nil && !t.ledger.poisoned && !t.ledger.closed && t.ledger.events == eventsBefore+1 && t.ledger.state.Halt == code && t.ledger.validTicket(ticket)
+			t.ledger.mu.Unlock()
+			evidence.LedgerPersistence = "failed"
+			if verified {
+				evidence.LedgerPersistence = "verified"
+			}
+			t.diagnostics.mu.Lock()
+			t.diagnostics.evidence.Transport = append(t.diagnostics.evidence.Transport, evidence)
+			t.diagnostics.mu.Unlock()
+		}
 		return nil, fmt.Errorf("window provider stopped")
 	}
-	if t.payload != nil && t.payload.writeWindowRequest(ticket.sequence, identity, raw) != nil {
-		return fail("protocol_failure")
+	if t.payload != nil {
+		evidence.RequestPersistence = "failed"
+		if t.payload.writeWindowRequest(ticket.sequence, identity, raw) != nil {
+			return fail("protocol_failure")
+		}
+		evidence.RequestPersistence = "verified"
+	}
+	writeResponse := func(status int, body []byte, complete bool, code string, failure *windowTransportFailure) error {
+		// Keep the original response classification even if its descriptor cannot
+		// be persisted. The ledger's protocol_failure is a separate outcome.
+		evidence.ResponseStage = code
+		if status >= 100 && status <= 599 {
+			evidence.ResponseStatus = status
+		}
+		if failure != nil {
+			evidence.Cause, evidence.Phase = failure.Cause, failure.Phase
+		}
+		if t.payload == nil {
+			return nil
+		}
+		err := t.payload.writeWindowResponseWithFailure(ticket.sequence, identity, status, body, complete, code, failure)
+		evidence.DescriptorPersistence = "failed"
+		if err == nil {
+			evidence.DescriptorPersistence = "verified"
+			if t.diagnostics != nil {
+				// Bind the failure descriptor to the retained request bytes too.
+				// This diagnostic verification never upgrades a completion proof.
+				if _, _, checkErr := verifyWindowPayloadStore(t.payload); checkErr != nil {
+					evidence.RequestPersistence = "unknown"
+					evidence.DescriptorPersistence = "failed"
+					return checkErr
+				}
+			}
+		}
+		return err
 	}
 	if req.Context().Err() != nil {
-		if t.payload != nil {
-			_ = t.payload.writeWindowResponseWithFailure(ticket.sequence, identity, 0, nil, false, "round_trip", &windowTransportFailure{Cause: jev.ClassifyTransportFailureCause(req.Context().Err()), Phase: "before_send"})
-		}
+		writeResponse(0, nil, false, "round_trip", &windowTransportFailure{Cause: jev.ClassifyTransportFailureCause(req.Context().Err()), Phase: "before_send"})
 		return fail("upstream_failure")
 	}
 	frozen := req.Clone(req.Context())
@@ -163,7 +218,7 @@ func (t *windowProviderTransport) RoundTrip(req *http.Request) (*http.Response, 
 	frozen.GetBody = nil
 	frozen.ContentLength = int64(len(raw))
 	var probe *windowTransportProbe
-	if t.payload != nil {
+	if t.payload != nil || t.diagnostics != nil {
 		var ctx context.Context
 		ctx, probe = newWindowTransportProbe(frozen.Context())
 		frozen = frozen.WithContext(ctx)
@@ -177,9 +232,7 @@ func (t *windowProviderTransport) RoundTrip(req *http.Request) (*http.Response, 
 			}
 			_ = response.Body.Close()
 		}
-		if t.payload != nil {
-			_ = t.payload.writeWindowResponseWithFailure(ticket.sequence, identity, status, nil, false, "round_trip", probe.snapshot(upErr, ""))
-		}
+		writeResponse(status, nil, false, "round_trip", probe.snapshot(upErr, ""))
 		return fail("upstream_failure")
 	}
 	body, bodyErr := io.ReadAll(io.LimitReader(response.Body, windowMaxResponseBytes+1))
@@ -201,7 +254,7 @@ func (t *windowProviderTransport) RoundTrip(req *http.Request) (*http.Response, 
 	} else if bodyCloseErr != nil && code == "response_close" {
 		failure = probe.snapshot(bodyCloseErr, "response_close")
 	}
-	if t.payload != nil && t.payload.writeWindowResponseWithFailure(ticket.sequence, identity, response.StatusCode, body, complete, code, failure) != nil {
+	if writeResponse(response.StatusCode, body, complete, code, failure) != nil {
 		return fail("protocol_failure")
 	}
 	if !complete || bodyCloseErr != nil || response.StatusCode != http.StatusOK {

@@ -21,6 +21,8 @@ import (
 // A trusted collector issues these only from a private higher authorization.
 // No public entry currently issues that acquisition authorization.
 type windowAcquisitionPermit struct {
+	captureFailureEvidence bool
+
 	acquisition      *windowAcquisitionRun
 	mu               sync.Mutex
 	campaign         *windowCampaign
@@ -53,6 +55,10 @@ type windowOwnedPhase struct {
 	model, jev int
 }
 type windowOwnedDriver struct {
+	failure                 windowFailureRecorder
+	failureStepInputSession string
+	failureSessionConflict  bool
+
 	mu                  sync.Mutex
 	permit              *windowAcquisitionPermit
 	ledger              *windowAccounting
@@ -305,6 +311,7 @@ func (d *windowOwnedDriver) Step(ctx context.Context, f Fixture, session, messag
 	phase := &windowOwnedPhase{nonce: randomID(), driver: d}
 	d.phase = phase
 	p.mu.Unlock()
+	d.failureStepInputSession = d.session
 	obs, stepErr := d.base.Step(context.WithValue(ctx, windowOwnedPhaseKey{}, phase), d.fixture, d.session, message)
 	p.mu.Lock()
 	d.phase = nil
@@ -317,6 +324,7 @@ func (d *windowOwnedDriver) Step(ctx context.Context, f Fixture, session, messag
 	d.nextTurn++
 	if obs.Turn.Response.SessionID != "" {
 		if d.session != "" && d.session != obs.Turn.Response.SessionID {
+			d.failureSessionConflict = true
 			return obs, d.stopWindowOwned()
 		}
 		d.session = obs.Turn.Response.SessionID
@@ -358,6 +366,14 @@ func (d *windowOwnedDriver) Final(ctx context.Context, f Fixture, session string
 	}
 	d.mu.Lock()
 	defer d.mu.Unlock()
+	if d.windowFailureDiagnostics() != nil {
+		d.permit.mu.Lock()
+		stopped := d.permit.stopped
+		d.permit.mu.Unlock()
+		if stopped {
+			return ConversationState{}, d.failureFinalLocked(ctx, f, session)
+		}
+	}
 	if ctx == nil || ctx.Err() != nil || !d.setupDone || d.finished || d.finalDone || !reflect.DeepEqual(f, d.fixture) || session != d.session || d.environment.closed {
 		return ConversationState{}, d.stopWindowOwned()
 	}
@@ -498,6 +514,9 @@ func (d *windowOwnedDriver) finishWindowOwnedArm(ctx context.Context, record col
 		defer d.server.Close()
 	}
 	fail := func() (*windowOwnedArmProof, error) {
+		if d.windowFailureDiagnostics() != nil {
+			return nil, d.cleanupFailureLocked(ctx)
+		}
 		_ = d.cleanupWindowOwnedSession(ctx)
 		return nil, d.stopWindowOwned()
 	}
@@ -526,10 +545,29 @@ func (d *windowOwnedDriver) finishWindowOwnedArm(ctx context.Context, record col
 		return fail()
 	}
 	seal := conversationHash(raw)
+	if d.windowFailureDiagnostics() != nil {
+		d.failure.mu.Lock()
+		d.failure.evidence.CleanupAttempted = true
+		d.failure.mu.Unlock()
+	}
 	if e = d.cleanupWindowOwnedSession(ctx); e != nil {
+		if d.windowFailureDiagnostics() != nil {
+			d.failure.mu.Lock()
+			d.failure.evidence.Cleanup = "failed"
+			d.failure.mu.Unlock()
+			d.captureFailureEvidenceLocked()
+		}
 		return nil, d.stopWindowOwned()
 	}
+	if d.windowFailureDiagnostics() != nil {
+		d.failure.mu.Lock()
+		d.failure.evidence.Cleanup = "verified"
+		d.failure.mu.Unlock()
+	}
 	if e = d.observer.ForceFlush(ctx); e != nil {
+		if d.windowFailureDiagnostics() != nil {
+			d.captureFailureEvidenceLocked()
+		}
 		return nil, d.stopWindowOwned()
 	}
 	stats := d.observer.Stats()
