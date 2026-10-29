@@ -62,6 +62,7 @@ func TestWindowStoppedV6DescriptorFailClosed(t *testing.T) {
 	}
 }
 func TestWindowStoppedV6ActualReadOnly(t *testing.T) {
+	parallelWindowV7HeavyTest(t, true)
 	path := os.Getenv("TASKBENCH_STOPPED_V6_EVIDENCE")
 	if path == "" {
 		t.Skip("explicit original readonly evidence not supplied")
@@ -249,6 +250,7 @@ func TestWindowStoppedV6NamespaceRejections(t *testing.T) {
 
 // Exercise the stopped namespace with owned copies, never mutate old evidence.
 func TestWindowStoppedV6ActualCopiedInventory(t *testing.T) {
+	parallelWindowV7HeavyTest(t, true)
 	path := os.Getenv("TASKBENCH_STOPPED_V6_EVIDENCE")
 	if path == "" {
 		t.Skip("explicit original readonly evidence not supplied")

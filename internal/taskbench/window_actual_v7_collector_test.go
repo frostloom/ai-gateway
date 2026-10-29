@@ -65,6 +65,7 @@ func testActualV7CollectorLocalStub(t *testing.T) (*windowAcquisitionAuthorizati
 }
 
 func TestActualV7CollectorClosedNative(t *testing.T) {
+	parallelWindowV7HeavyTest(t, false)
 	for _, mode := range []string{"cache", "absent", "repair", "modelEOF", "jevEOF", "negative", "fact"} {
 		t.Run(mode, func(t *testing.T) {
 			auth, model, jev := testActualV7CollectorLocalStub(t)

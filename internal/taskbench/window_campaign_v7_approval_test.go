@@ -9,6 +9,7 @@ import (
 )
 
 func TestWindowCampaignV7CurrentApprovalFreshBeforeNextClaim(t *testing.T) {
+	parallelWindowV7HeavyTest(t, true)
 	descriptor := "/Users/a1/项目/ai-gateway/.tmp/stopped-v6-proof-work/stopped-v6.private.json"
 	raw, err := os.ReadFile(descriptor)
 	if os.IsNotExist(err) {
