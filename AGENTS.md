@@ -50,6 +50,9 @@
 
 # ai-gateway 项目记忆
 
+2026-10-29 v6选定4ccec396完整原配置Go20m回归通过：1082.673s退出0，23包pass/26无测试，2995测试pass/3原条件skip/0fail，stderr0，source-mapb3c414/2166文件444Go前后不变，客户15Go匹配50e。新v6私密proof/approvalbasis/epoch逐项JSONpass非skip。同9服务ID/image/config/mount恢复healthy、caffeinate释放，旧定向race警告/历史RED来源限制不抹除。4c已直接非强推main并SSH读回；新合成trace2观测/10读回项全过，无重发/推理/评分。总130+1与32责任42961430/344493、实际2292/585不变，新实际scope6未冻结/owner及新真实claim调用0。私密verifiera74候选全R2三窗四claim1755证据391native168臂回放通过且42683旧文件前后SHA不变，但独立审查发现源码seal普通成员hardlink检查缺口，仍需修复复核、最终材料接线/封存/审核后才实际执行。完整3660目标仍未达成。见docs/full1220-v6-full-regression-2026-10-29.md。
+
+
 2026-10-29 v6离线代码阶段已完成整组复核及单次最终修复：8d91评分、6626质量证明、4b07发布前不可变投影绑定、8bfeb2a8普通测试非敏感32claim/131caps固定数据。两项P2均已定向复核解决，未发现剩余Critical/Important；原始期望与失败不改。4b07完整Python321项/15条件跳过/源码不变；8bf测试数据改动在无私密文件干净副本39项/0跳过通过，生产脚本/helper未变，不混称同一提交整套。新Scope6仍未冻结/无owner/真实模型JEV及claim新增0，当前2292/585和32责任¥42.961430+$0.344493、总预算¥130+$1不变。官方公开峰值2/8及cachehit0.04元/M、JEV1.13输入$0.042/M输出免费复核，官方tokenizer89085不变；未据此扩大范围。下一步选定源码原配置20分钟Go全回归、恢复同9服务身份，再完整私密verifier/owner回放与独立冻结，不复用旧740 Go证据、不续scope5。来源日志限制/链接器警告/三P3保留。见docs/full1220-v6-offline-integration-2026-10-29.md及实施判断记录。
 
 
