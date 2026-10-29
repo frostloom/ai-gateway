@@ -1563,13 +1563,11 @@ class CompletedStateV6Tests(unittest.TestCase):
         self.assertIn(b'full-window-actual-ready.v6', helper.read_bytes())
 
     def test_v6_fixed_configuration_and_mutations(self):
-        root=Path('/Users/a1/项目/ai-gateway/.tmp')
-        caps=root/'full1220-v6-design-20261029/caps.json'; claims=root/'stopped-v5-proof-work/claim32-map.json'
-        if not caps.is_file() or not claims.is_file(): self.skipTest('Private v6 declaration fixture unavailable')
+        declarations=json.loads((SCRIPT.parent/'tests/fixtures/full1220-v6-declarations.json').read_bytes())
         m=v5_fixture()['manifest']; scope=m['scope']
         scope.update(schema='full-window-scope.v6', baseline_evidence_sha256='b363ba194e641374a8a63bfacc7a1312a5b080718f637036ab4040fc075a3fc1', budget_approval_sha256='ef6322fe60807a7a608a2707edf016501717f85e9d649e28d0311de2b6ed4bce')
-        m['baseline_evidence']['sha256']=scope['baseline_evidence_sha256'];m['historical_claims']=json.loads(claims.read_bytes())
-        for window,cap in zip(scope['windows'],json.loads(caps.read_bytes())): window.update(cap)
+        m['baseline_evidence']['sha256']=scope['baseline_evidence_sha256'];m['historical_claims']=declarations['claims']
+        for window,cap in zip(scope['windows'],declarations['caps']): window.update(cap)
         output=self.adapter._score_cache_accounting(m,'v6')
         self.assertEqual((output['model_total_cap_micro_cny'],output['jev_total_cap_micro_usd']),(85000000,600000))
         for field in ('baseline_evidence_sha256','budget_approval_sha256'):
@@ -1580,14 +1578,12 @@ class CompletedStateV6Tests(unittest.TestCase):
             with self.assertRaises(ValueError):self.adapter._score_cache_accounting(altered,'v6')
 
     def test_v6_planner_binds_envelope_and_records(self):
-        root=Path('/Users/a1/项目/ai-gateway/.tmp')
-        caps=root/'full1220-v6-design-20261029/caps.json'; claims=root/'stopped-v5-proof-work/claim32-map.json'
-        if not caps.is_file() or not claims.is_file(): self.skipTest('Private v6 declaration fixture unavailable')
+        declarations=json.loads((SCRIPT.parent/'tests/fixtures/full1220-v6-declarations.json').read_bytes())
         f=v5_fixture();m=f['manifest'];scope=m['scope'];m['schema']='full-window-actual-ready.v6'
         scope.update(schema='full-window-scope.v6', baseline_evidence_sha256='b363ba194e641374a8a63bfacc7a1312a5b080718f637036ab4040fc075a3fc1', budget_approval_sha256='ef6322fe60807a7a608a2707edf016501717f85e9d649e28d0311de2b6ed4bce')
-        m['baseline_evidence']['sha256']=scope['baseline_evidence_sha256'];m['historical_claims']=json.loads(claims.read_bytes())
+        m['baseline_evidence']['sha256']=scope['baseline_evidence_sha256'];m['historical_claims']=declarations['claims']
         scope['bindings'].update(customer_revision='50e3c8dab14b4b6cc25322fd340a274e6970200b',policy_sha256='333c69bbb7506bd0c9237891cce8ddca720174974bf3f85753dd62339f368f15')
-        for window,cap in zip(scope['windows'],json.loads(caps.read_bytes())): window.update(cap)
+        for window,cap in zip(scope['windows'],declarations['caps']): window.update(cap)
         envelope=wire({'basis':[{'path':'/offline/approval','sha256':scope['budget_approval_sha256']}]});m['envelope']={'path':'/offline/envelope','sha256':digest(envelope)};scope['bindings']['request_envelope_sha256']=digest(envelope)
         for name,raw in f['records'].items():
             record=json.loads(raw);record['policy_sha256']=self.adapter._COLLECTION_POLICY_SHA256;f['records'][name]=wire(record)
@@ -1704,12 +1700,12 @@ class OwnedQualityV6Tests(unittest.TestCase):
 
 def quality_v6_fixture(adapter, quality=True, zero=False):
     f=v5_fixture(partial_fixture(True) if quality else None); m=f['manifest']; scope=m['scope']
-    base=SCRIPT.parents[1]/'.tmp'
+    declarations=json.loads((SCRIPT.parent/'tests/fixtures/full1220-v6-declarations.json').read_bytes())
     m['schema']='full-window-actual-ready.v6'
     scope.update(schema='full-window-scope.v6',baseline_evidence_sha256='b363ba194e641374a8a63bfacc7a1312a5b080718f637036ab4040fc075a3fc1',budget_approval_sha256='ef6322fe60807a7a608a2707edf016501717f85e9d649e28d0311de2b6ed4bce')
     m['baseline_evidence']['sha256']=scope['baseline_evidence_sha256']
-    m['historical_claims']=json.loads((base/'stopped-v5-proof-work/claim32-map.json').read_bytes())
-    for window,cap in zip(scope['windows'],json.loads((base/'full1220-v6-design-20261029/caps.json').read_bytes())):window.update(cap)
+    m['historical_claims']=declarations['claims']
+    for window,cap in zip(scope['windows'],declarations['caps']):window.update(cap)
     scope['bindings'].update(customer_revision='50e3c8dab14b4b6cc25322fd340a274e6970200b',policy_sha256='333c69bbb7506bd0c9237891cce8ddca720174974bf3f85753dd62339f368f15')
     envelope=wire({'basis':[{'path':'/offline/approval','sha256':scope['budget_approval_sha256']}]})
     m['envelope']={'path':'/offline/envelope','sha256':digest(envelope)}
