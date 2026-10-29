@@ -72,7 +72,7 @@ func TestActualV3BindingRejectsCrossedProofBudgetAndEitherOldRoot(t *testing.T) 
 func TestActualV3ConsistentMemoryFixtureCannotReplaceConcreteFileProof(t *testing.T) {
 	m, p := actualV3BindingFixture(t)
 	r := &FullWindowActualReady{manifestRaw: []byte(`{}`), manifest: m, baseline: p.base, stoppedV2: p}
-	if s, err := OpenFullWindowActual(context.Background(), r, "/never-read-settings"); err == nil || s != nil || !strings.Contains(err.Error(), "v5 scope required") {
+	if s, err := OpenFullWindowActual(context.Background(), r, "/never-read-settings"); err == nil || s != nil || !strings.Contains(err.Error(), "v6 scope required") {
 		t.Fatal("consumed v3 reached settings or claim", err)
 	}
 	if err := (&FullWindowActualSession{ready: r}).verifyInputs(); err == nil || !strings.Contains(err.Error(), "stopped") {

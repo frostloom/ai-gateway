@@ -55,6 +55,8 @@ type FullWindowActualReady struct {
 	stoppedV2      windowStoppedV2Baseline
 	stoppedV3      windowStoppedV3Baseline
 	stoppedV4      windowStoppedV4Baseline
+	stoppedV5      windowStoppedV5Baseline
+	approval130    windowActualFile
 	source         ConversationSuite
 	profiles       PairedProfiles
 }
@@ -199,7 +201,18 @@ func CheckFullWindowActualReady(o FullWindowActualReadyOptions) (FullWindowActua
 		return reject()
 	}
 	candidate := &FullWindowActualReady{manifestPath: o.ManifestPath, manifestRaw: append([]byte(nil), raw...), attestationRaw: append([]byte(nil), attestationRaw...), manifest: m, prepared: prepared, source: source, profiles: profiles}
-	if m.Schema == "full-window-actual-ready.v5" {
+	if m.Schema == "full-window-actual-ready.v6" {
+		proof, approval, err := loadWindowActualStoppedBaselineV6(m)
+		if err != nil {
+			return reject()
+		}
+		history := windowCurrent130History{stopped: proof, approval: approval}
+		base, _, _, err := history.revalidateWindowStoppedHistory()
+		if err != nil {
+			return reject()
+		}
+		candidate.baseline, candidate.stoppedV5, candidate.approval130, candidate.prepared.stoppedHistory = base, proof, approval, history
+	} else if m.Schema == "full-window-actual-ready.v5" {
 		proof, err := loadWindowActualStoppedBaselineV5(m)
 		if err != nil {
 			return reject()
@@ -240,7 +253,7 @@ func (r *FullWindowActualReady) revalidate() error {
 	if err != nil {
 		return err
 	}
-	if !bytes.Equal(r.manifestRaw, fresh.manifestRaw) || !bytes.Equal(r.attestationRaw, fresh.attestationRaw) || !reflect.DeepEqual(r.manifest, fresh.manifest) || !reflect.DeepEqual(r.prepared, fresh.prepared) || !reflect.DeepEqual(r.baseline, fresh.baseline) || !reflect.DeepEqual(r.stopped, fresh.stopped) || !reflect.DeepEqual(r.stoppedV2, fresh.stoppedV2) || !reflect.DeepEqual(r.stoppedV3, fresh.stoppedV3) {
+	if !bytes.Equal(r.manifestRaw, fresh.manifestRaw) || !bytes.Equal(r.attestationRaw, fresh.attestationRaw) || !reflect.DeepEqual(r.manifest, fresh.manifest) || !reflect.DeepEqual(r.prepared, fresh.prepared) || !reflect.DeepEqual(r.baseline, fresh.baseline) || !reflect.DeepEqual(r.stopped, fresh.stopped) || !reflect.DeepEqual(r.stoppedV2, fresh.stoppedV2) || !reflect.DeepEqual(r.stoppedV3, fresh.stoppedV3) || !reflect.DeepEqual(r.stoppedV4, fresh.stoppedV4) || !reflect.DeepEqual(r.stoppedV5, fresh.stoppedV5) || r.approval130 != fresh.approval130 {
 		return fmt.Errorf("actual ready snapshot changed")
 	}
 	return nil

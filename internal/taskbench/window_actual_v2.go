@@ -35,6 +35,9 @@ func loadWindowActualStoppedBaseline(m windowActualManifest) (windowStoppedBasel
 }
 
 func (r *FullWindowActualReady) revalidateStopped() error {
+	if r != nil && r.manifest.Schema == "full-window-actual-ready.v6" {
+		return r.revalidateStoppedV6()
+	}
 	if r != nil && r.manifest.Schema == "full-window-actual-ready.v5" {
 		return r.revalidateStoppedV5()
 	}
