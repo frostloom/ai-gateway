@@ -29,3 +29,7 @@
 独立 V8 codec 已用实际 Go 生成的合成向量核对 canonical 字节、字段顺序、UTF-8/转义和 hex 签名消息边界；旧 verifier/owner/score helper 未改写或执行。root 复测9项通过（0.006秒），独审无P1/P2，报告 SHA `ae2dd8c2fd0659d1cc83d38e85f5c0f7897b92f5a0edefe6ef3de7d76bc784eb`。codec 代码 SHA `a86420455b242650b5bfe35f315d4a0342e51fb8eb350fab42854888cf5918fc`。
 
 root 另以 Node 标准 crypto 对同一合成公钥/签名做独立检查：原签名为真，改签和改消息为假。该结果不是实际授权；codec 模块本身只返回未认证数据与签名消息，不检查真实文件、可信公钥或权限，也尚非完整 V8 原始回执验证器。
+
+另新增独立 native 数据重放模块，用四份 Go 生成的 model/JEV 直连与 CONNECT 合成原包核对 v3 账本、永久未知责任、精确 extra、第二次尝试、原文件哈希及 usage/cache/取整。原 `closed=false` 和 `unavailable_from_journal` 保留，不升级为实际 claim、全局配额或 owned completion 证明。
+
+审查确认裸 CR 分隔可被 Python `splitlines()` 错误接受；按固定 Go `ScanLines` 实现修为仅 LF 分割、每行仅去除一个末 CR，保留正常 CRLF 兼容。最初关于“Go拒绝CRLF”的审查表述已核实并更正，原报告保留。精确负例 RED 后，root 合并复测20项通过（0.042秒）；日志 SHA `89bed1860f4b6d94bb535885f05d66b3f71622bf98bd5d867869f5ad6596355c`。窄复审无新增 P1/P2，报告 SHA `4c6cdea954790338fc586e99aa94fb9a22415b92dcc94217169e531cdf2eaa12`。
