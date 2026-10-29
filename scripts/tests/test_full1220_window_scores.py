@@ -1,4 +1,7 @@
 """Offline full-window evidence binding tests; no services or credentials."""
+import sys
+sys.dont_write_bytecode = True
+import inspect
 import copy
 import hashlib
 import importlib.util
@@ -859,6 +862,13 @@ class PublicationTests(unittest.TestCase):
                 runtime={'go_executable':str(self.go),'go_sha256':digest(self.go.read_bytes())},
                 output_dir=str(self.root/('attestation-'+str(len(list(self.root.glob('attestation-*')))))),execute=True)
 
+    def test_attestation_selects_only_matching_v6_helper(self):
+        old=self.attest();self.assertEqual(old.as_dict()['helper_sha256'],self.adapter._ATTESTATION_HELPER_SHA256)
+        f=copy.deepcopy(self.f);f['manifest']['schema']='full-window-actual-ready.v6';f['manifest']['scope']['schema']='full-window-scope.v6'
+        new=self.attest(f);self.assertEqual(new.as_dict()['helper_sha256'],self.adapter._ATTESTATION_V6_HELPER_SHA256)
+        f['manifest']['scope']['schema']='full-window-scope.v5'
+        with self.assertRaises(ValueError):self.attest(f)
+
     def bound_client(self,plan,proof):
         self.pub_api();fake=self.client(plan,proof);test=self
         class Delegate:
@@ -1490,5 +1500,118 @@ class V5CompatibilityTests(unittest.TestCase):
     def test_v4_plan_json_ids_and_configuration_provenance_remain_byte_identical(self):
         raw=json.dumps(self.plan(v4_fixture()),sort_keys=True,separators=(',',':'),ensure_ascii=False).encode()
         self.assertEqual(digest(raw),'66105d3489ca14dcf316ab79194642c3c374d2ce03c7c07f0229d49c178a412a')
+
+
+
+class CompletedStateV6Tests(unittest.TestCase):
+    setUpClass = classmethod(WindowScorePlanTests.setUpClass.__func__)
+
+    def test_v6_has_separate_fixed_signature_helper(self):
+        helper = SCRIPT.parent / 'helpers/full1220_attestation_v6.go.txt'
+        self.assertTrue(helper.is_file(), 'v6 signature helper required')
+        self.assertEqual(digest(helper.read_bytes()), self.adapter._ATTESTATION_V6_HELPER_SHA256)
+        self.assertEqual(digest((SCRIPT.parent/'helpers/full1220_attestation.go.txt').read_bytes()), self.adapter._ATTESTATION_HELPER_SHA256)
+        self.assertIn(b'full-window-actual-ready.v6', helper.read_bytes())
+
+    def test_v6_fixed_configuration_and_mutations(self):
+        root=Path('/Users/a1/项目/ai-gateway/.tmp')
+        caps=root/'full1220-v6-design-20261029/caps.json'; claims=root/'stopped-v5-proof-work/claim32-map.json'
+        if not caps.is_file() or not claims.is_file(): self.skipTest('Private v6 declaration fixture unavailable')
+        m=v5_fixture()['manifest']; scope=m['scope']
+        scope.update(schema='full-window-scope.v6', baseline_evidence_sha256='b363ba194e641374a8a63bfacc7a1312a5b080718f637036ab4040fc075a3fc1', budget_approval_sha256='ef6322fe60807a7a608a2707edf016501717f85e9d649e28d0311de2b6ed4bce')
+        m['baseline_evidence']['sha256']=scope['baseline_evidence_sha256'];m['historical_claims']=json.loads(claims.read_bytes())
+        for window,cap in zip(scope['windows'],json.loads(caps.read_bytes())): window.update(cap)
+        output=self.adapter._score_cache_accounting(m,'v6')
+        self.assertEqual((output['model_total_cap_micro_cny'],output['jev_total_cap_micro_usd']),(85000000,600000))
+        for field in ('baseline_evidence_sha256','budget_approval_sha256'):
+            altered=copy.deepcopy(m);altered['scope'][field]='0'*64
+            with self.assertRaises(ValueError):self.adapter._score_cache_accounting(altered,'v6')
+        for mutate in (lambda x:x['historical_claims'].pop(next(iter(x['historical_claims']))), lambda x:x['scope']['windows'][0].__setitem__('model_cap_micro_cny',1), lambda x:x['provider_limits']['model'].__setitem__('input_micro_per_million',1)):
+            altered=copy.deepcopy(m);mutate(altered)
+            with self.assertRaises(ValueError):self.adapter._score_cache_accounting(altered,'v6')
+
+    def test_v6_planner_binds_envelope_and_records(self):
+        root=Path('/Users/a1/项目/ai-gateway/.tmp')
+        caps=root/'full1220-v6-design-20261029/caps.json'; claims=root/'stopped-v5-proof-work/claim32-map.json'
+        if not caps.is_file() or not claims.is_file(): self.skipTest('Private v6 declaration fixture unavailable')
+        f=v5_fixture();m=f['manifest'];scope=m['scope'];m['schema']='full-window-actual-ready.v6'
+        scope.update(schema='full-window-scope.v6', baseline_evidence_sha256='b363ba194e641374a8a63bfacc7a1312a5b080718f637036ab4040fc075a3fc1', budget_approval_sha256='ef6322fe60807a7a608a2707edf016501717f85e9d649e28d0311de2b6ed4bce')
+        m['baseline_evidence']['sha256']=scope['baseline_evidence_sha256'];m['historical_claims']=json.loads(claims.read_bytes())
+        scope['bindings'].update(customer_revision='50e3c8dab14b4b6cc25322fd340a274e6970200b',policy_sha256='333c69bbb7506bd0c9237891cce8ddca720174974bf3f85753dd62339f368f15')
+        for window,cap in zip(scope['windows'],json.loads(caps.read_bytes())): window.update(cap)
+        envelope=wire({'basis':[{'path':'/offline/approval','sha256':scope['budget_approval_sha256']}]});m['envelope']={'path':'/offline/envelope','sha256':digest(envelope)};scope['bindings']['request_envelope_sha256']=digest(envelope)
+        for name,raw in f['records'].items():
+            record=json.loads(raw);record['policy_sha256']=self.adapter._COLLECTION_POLICY_SHA256;f['records'][name]=wire(record)
+            for row in f['receipt']['rows']:
+                if row['recording_file']==name: row['recording_sha256']=digest(f['records'][name])
+            for row in f['review']['rows']:
+                if row['recording_file']==name: row['recording_sha256']=digest(f['records'][name])
+        m['scope_sha256']=digest(wire(scope));f['receipt']['scope_sha256']=m['scope_sha256'];f['review']['bindings']['scope_sha256']=m['scope_sha256'];refresh_links(f)
+        self.assertIn('epoch6_evidence', inspect.signature(self.adapter.build_window_score_plan).parameters)
+        plan=self.adapter.build_window_score_plan(*arguments(f),epoch6_evidence={'envelope_raw':envelope,'sidecars':{}})
+        self.assertEqual(plan['provenance']['budget_approval_sha256'],scope['budget_approval_sha256'])
+        self.assertFalse(plan['publish_ready'])
+        with self.assertRaises(ValueError): self.adapter.build_window_score_plan(*arguments(f),epoch6_evidence={'envelope_raw':b'{}','sidecars':{}})
+        f['manifest']['scope']['bindings']['customer_revision']='0'*40
+        f['manifest']['scope_sha256']=digest(wire(f['manifest']['scope']));f['receipt']['scope_sha256']=f['manifest']['scope_sha256'];f['review']['bindings']['scope_sha256']=f['manifest']['scope_sha256'];refresh_links(f)
+        with self.assertRaises(ValueError): self.adapter.build_window_score_plan(*arguments(f),epoch6_evidence={'envelope_raw':envelope,'sidecars':{}})
+
+    def test_content_projection_forwards_v6_evidence(self):
+        self.assertIn('epoch6_evidence', inspect.signature(self.adapter.project_window_content).parameters)
+
+    def test_late_fact_mismatch_is_a_recorded_failure(self):
+        self.assertTrue(hasattr(self.adapter, 'validate_completed_record_state'), 'completed state validator missing')
+        record = json.loads(next(iter(fixture()['records'].values())))
+        record['policy_sha256'] = self.adapter._COLLECTION_POLICY_SHA256
+        record['result'].update(status='failed', structural_pass=True, success=False, errors=['false fact'])
+        record['issues'] = [{'code':'fact_mismatch','turn':1,'error_index':0,'disposition':'continue_recorded'}]
+        record['result_sha256'] = digest(wire(record['result']))
+        self.assertEqual(self.adapter.validate_completed_record_state(wire(record)), 'recorded_negative')
+
+    def test_all_source_quality_origins_and_bindings(self):
+        for code in self.adapter._COLLECTION_QUALITY_CODES:
+            record = json.loads(next(iter(fixture()['records'].values())))
+            record['policy_sha256'] = self.adapter._COLLECTION_POLICY_SHA256
+            record['result'].update(status='failed', structural_pass=code in ('semantic_negative','fact_mismatch'), success=False, errors=['negative'])
+            record['issues'] = [{'code':code,'turn':1,'error_index':0,'disposition':'continue_recorded'}]
+            record['result_sha256'] = digest(wire(record['result']))
+            with self.subTest(code=code):
+                self.assertEqual(self.adapter.validate_completed_record_state(wire(record)), 'recorded_negative')
+                for field in ('issues','result_sha256'):
+                    bad=copy.deepcopy(record);bad.pop(field)
+                    with self.assertRaises(ValueError): self.adapter.validate_completed_record_state(wire(bad))
+                for field,value in (('status','passed'),('success',True),('errors',[])):
+                    bad=copy.deepcopy(record);bad['result'][field]=value;bad['result_sha256']=digest(wire(bad['result']))
+                    with self.assertRaises(ValueError): self.adapter.validate_completed_record_state(wire(bad))
+
+    def test_original_r2_records_replay_without_regrading(self):
+        root = Path('/Users/a1/项目/ai-gateway/.tmp/paired-live-private/full1220-actual-v5-r2-freeze-20261029/records')
+        if not root.is_dir(): self.skipTest('Original private R2 records unavailable')
+        files = [p for w in ('window-000001','window-000002','window-000003') for p in sorted((root/w).glob('arm-*.json'))]
+        self.assertEqual(len(files),168)
+        states = [self.adapter.validate_completed_record_state(p.read_bytes()) for p in files]
+        self.assertEqual(states.count('recorded_negative'),5)
+
+    def test_malformed_empty_issue_and_error_types_reject(self):
+        record=json.loads(next(iter(fixture()['records'].values())));record['policy_sha256']=self.adapter._COLLECTION_POLICY_SHA256
+        for field,value in (('issues',None),('errors','')):
+            bad=copy.deepcopy(record)
+            if field == 'issues': bad[field]=value
+            else: bad['result'][field]=value;bad['result_sha256']=digest(wire(bad['result']))
+            with self.subTest(field=field), self.assertRaises(ValueError): self.adapter.validate_completed_record_state(wire(bad))
+
+    def test_v6_quality_publication_fails_closed_before_other_gates(self):
+        plan={'provenance':{'epoch':'v6'}, 'rows':[{'quality_end':{'unrun_turns':0}}]}
+        with self.assertRaisesRegex(ValueError, 'quality.*proof'):
+            self.adapter.publish_window_scores(plan, None, None, None, None, execute=True)
+
+    def test_unbound_error_or_unknown_origin_rejects(self):
+        self.assertTrue(hasattr(self.adapter, 'validate_completed_record_state'), 'completed state validator missing')
+        record = json.loads(next(iter(fixture()['records'].values())))
+        record['policy_sha256'] = self.adapter._COLLECTION_POLICY_SHA256
+        record['result'].update(status='failed', structural_pass=False, success=False, errors=['unexpected'])
+        record['issues'] = [{'code':'unclassified','turn':1,'error_index':0,'disposition':'halt'}]
+        record['result_sha256'] = digest(wire(record['result']))
+        with self.assertRaises(ValueError): self.adapter.validate_completed_record_state(wire(record))
 
 if __name__ == '__main__': unittest.main()

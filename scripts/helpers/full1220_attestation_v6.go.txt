@@ -1,0 +1,68 @@
+package main
+
+// Standalone stdlib-only verifier. Never executes the actual campaign binary,
+// reads a private key or settings, opens a network connection, or creates claims.
+import (
+    "crypto/ed25519"
+    "crypto/sha256"
+    "encoding/hex"
+    "encoding/json"
+    "io"
+    "os"
+    "path/filepath"
+    "syscall"
+)
+
+type binding struct {
+    Schema string `json:"schema"`
+    ArchiveCommit string `json:"archive_commit"`
+    ArchiveTree string `json:"archive_tree"`
+    ReadyManifestSHA256 string `json:"ready_manifest_sha256"`
+    BinarySHA256 string `json:"binary_sha256"`
+}
+type attestation struct { binding; Signature string `json:"signature"` }
+func digest(raw []byte) string { sum := sha256.Sum256(raw); return hex.EncodeToString(sum[:]) }
+func require(ok bool) { if !ok { os.Exit(1) } }
+func main() {
+    raw, err := io.ReadAll(io.LimitReader(os.Stdin, (16<<20)+1)); require(err == nil && len(raw) <= 16<<20)
+    var job struct {
+        ManifestRaw []byte `json:"manifest_raw"`
+        AttestationRaw []byte `json:"attestation_raw"`
+        ManifestSHA256 string `json:"manifest_sha256"`
+        AttestationSHA256 string `json:"attestation_sha256"`
+        BinaryPath string `json:"binary_path"`
+    }
+    require(json.Unmarshal(raw, &job) == nil)
+    require(digest(job.ManifestRaw) == job.ManifestSHA256 && digest(job.AttestationRaw) == job.AttestationSHA256)
+    var manifest struct {
+        Schema string `json:"schema"`
+        ArchiveCommit string `json:"archive_commit"`
+        ArchiveTree string `json:"archive_tree"`
+        PublicKey string `json:"build_attestation_public_key"`
+        Scope struct { Schema string `json:"schema"` } `json:"scope"`
+    }
+    var signed attestation
+    require(json.Unmarshal(job.ManifestRaw, &manifest) == nil && json.Unmarshal(job.AttestationRaw, &signed) == nil)
+    require((manifest.Schema == "full-window-actual-ready.v6") && signed.Schema == "full-window-actual-binary-attestation.v1")
+    require(manifest.Scope.Schema == "full-window-scope."+manifest.Schema[len(manifest.Schema)-2:])
+    require(signed.ArchiveCommit == manifest.ArchiveCommit && signed.ArchiveTree == manifest.ArchiveTree && signed.ReadyManifestSHA256 == job.ManifestSHA256)
+    public, err := hex.DecodeString(manifest.PublicKey); require(err == nil && len(public) == ed25519.PublicKeySize && len(manifest.PublicKey) == 64)
+    signature, err := hex.DecodeString(signed.Signature); require(err == nil && len(signature) == ed25519.SignatureSize)
+    canonical, err := json.Marshal(signed.binding); require(err == nil && ed25519.Verify(ed25519.PublicKey(public), canonical, signature))
+    require(filepath.IsAbs(job.BinaryPath) && filepath.Clean(job.BinaryPath) == job.BinaryPath)
+    resolved, err := filepath.EvalSymlinks(job.BinaryPath); require(err == nil && resolved == job.BinaryPath)
+    before, err := os.Lstat(job.BinaryPath); require(err == nil && before.Mode().IsRegular() && before.Size() > 0 && before.Size() <= 1<<30)
+    descriptor, err := syscall.Open(job.BinaryPath, syscall.O_RDONLY|syscall.O_NOFOLLOW|syscall.O_NONBLOCK, 0); require(err == nil)
+    file := os.NewFile(uintptr(descriptor), job.BinaryPath)
+    opened, err := file.Stat(); require(err == nil && os.SameFile(before, opened))
+    hash := sha256.New(); size, err := io.Copy(hash, io.LimitReader(file, (1<<30)+1)); require(err == nil && size == before.Size())
+    after, err := file.Stat(); require(err == nil && os.SameFile(opened, after) && after.Size() == before.Size())
+    final, err := os.Lstat(job.BinaryPath); require(err == nil && os.SameFile(after, final) && final.Size() == before.Size())
+    require(file.Close() == nil && hex.EncodeToString(hash.Sum(nil)) == signed.BinarySHA256)
+    result := map[string]any{
+        "schema":"full1220-attestation-verification.v1", "manifest_sha256":job.ManifestSHA256,
+        "attestation_sha256":job.AttestationSHA256, "binary_sha256":signed.BinarySHA256,
+        "canonical_binding_sha256":digest(canonical), "signature_verified":true,
+    }
+    require(json.NewEncoder(os.Stdout).Encode(result) == nil)
+}

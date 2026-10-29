@@ -13,6 +13,8 @@ struct order, sorted maps, float lexemes, nulls and omission rules. It assembles
 the *actual* capitalized Go context struct and compares every recomputed digest;
 it never treats review verification flags or recorded context digests as proof.
 """
+import sys
+sys.dont_write_bytecode = True
 import hashlib
 import json
 import math
@@ -22,7 +24,6 @@ import fcntl
 import base64
 import argparse
 import importlib.util
-import sys
 import stat
 import subprocess
 from pathlib import Path
@@ -352,9 +353,52 @@ def _validate_summary(summary, receipt, receipt_sha, manifest):
             'claimed_prior_quality_end_unrun_turns': quality-current_quality}
 
 
+_COLLECTION_QUALITY_CODES = frozenset(('unexpected_action', 'wrong_read_tool', 'missing_read',
+    'missing_preview', 'missing_execution', 'terminal_goal', 'semantic_negative', 'fact_mismatch'))
+_COLLECTION_POLICY_SHA256 = '604c68b1c192c17594ba422b85367579cabd60c31623af6a9632278e401ae970'
+
+
+def validate_completed_record_state(record_raw):
+    """Check bound source-policy state only; does not verify native or semantic evidence."""
+    try:
+        document = _Document(record_raw); record = document.value; result = record['result']
+        _equal(record['policy_id'], 'full-customer-recording-policy.v1', 'Recording policy required')
+        _equal(record['policy_sha256'], _COLLECTION_POLICY_SHA256, 'Source policy digest mismatch')
+        _equal(record['result_sha256'], _sha(document.fragment('result').encode()), 'Result digest mismatch')
+        _equal(record['disposition'], 'continue_recorded', 'Unverified halt cannot be completed')
+        _require(result['errors'] is None or type(result['errors']) is list, 'Error list required')
+        _require(type(record['issues']) is list, 'Issue list required')
+        errors = result['errors'] or []
+        issues = record['issues']
+        _require(type(errors) is list and all(type(e) is str and e for e in errors), 'Errors required')
+        _require(type(issues) is list and len(issues) == len(errors), 'Issue/error coverage required')
+        for index, issue in enumerate(issues):
+            _require(type(issue) is dict and set(issue) == {'code','turn','error_index','disposition'}, 'Typed issue required')
+            _require(issue['code'] in _COLLECTION_QUALITY_CODES and issue['disposition'] == 'continue_recorded', 'Unknown issue origin')
+            _equal(issue['error_index'], index, 'Issue/error index mismatch')
+            _require(type(issue['turn']) is int and 1 <= issue['turn'] <= len(result['observations'] or []), 'Issue turn mismatch')
+        _require(type(result['structural_pass']) is bool and type(result['success']) is bool and result['setup_error'] is False, 'Invalid result flags')
+        if errors:
+            _equal(result['status'], 'failed', 'Negative status required')
+            _equal(result['success'], False, 'Negative success forbidden')
+            pre_review = any(i['code'] not in ('semantic_negative', 'fact_mismatch') for i in issues)
+            _equal(result['structural_pass'], not pre_review, 'Structural state mismatch')
+            return 'recorded_negative'
+        _equal(result['structural_pass'], True, 'Structural pass required')
+        if result['review_requirements']:
+            _equal(result['status'], 'needs_review', 'Review status required')
+            _equal(result['success'], False, 'Unreviewed success forbidden')
+        else:
+            _equal(result['status'], 'passed', 'Pass status required')
+            _equal(result['success'], True, 'Pass success required')
+        return 'recorded_nonnegative'
+    except (KeyError, TypeError, IndexError) as error:
+        raise ValueError('Invalid completed recording: '+type(error).__name__) from error
+
+
 def _score_cache_accounting(manifest, epoch):
     limits = manifest.get('provider_limits', {})
-    if epoch not in ('v4', 'v5'):
+    if epoch not in ('v4', 'v5', 'v6'):
         for provider in ('model', 'jev'):
             _equal(limits.get(provider, {}).get('cache_hit_input_micro_per_million', 0), 0,
                    'Legacy score epoch cannot enable cache accounting')
@@ -368,7 +412,7 @@ def _score_cache_accounting(manifest, epoch):
         caps_sha = '0c020b80cf65c9876025d72ef8ad68bcfdea6c77b429b0390f2aabde895ca025'
         model_cap, jev_cap = 64000000, 690000
         caps_label = '64m/690k'
-    else:
+    elif epoch == 'v5':
         label = 'Epoch5'
         baseline = '2f8c83546a2918b85801160f521465c2f53e040073b3590e1ecde53f278ef340'
         claims_sha = '9b06ad5fd58440494b49fb44437160a870d123007467f798b2f6d0e613783335'
@@ -376,10 +420,19 @@ def _score_cache_accounting(manifest, epoch):
         caps_sha = '7fe19887167feaa4ce85520f2717cf82d0143cd5e2eef6577b3b07afcfe04862'
         model_cap, jev_cap = 62000000, 676000
         caps_label = '62m/676k'
+    else:
+        label = 'Epoch6'
+        baseline = 'b363ba194e641374a8a63bfacc7a1312a5b080718f637036ab4040fc075a3fc1'
+        claims_sha = '7f6a967d739a1e338b69153413a5e9f06dcc3fb7d7bae05b64e2988686b5dc1b'
+        claims_label = 'thirty-two'
+        caps_sha = '30c8151031f40cb05562b255b789b9fb021a93467288e677c4eb39d87806113d'
+        model_cap, jev_cap = 85000000, 600000
+        caps_label = '85m/600k'
     _equal(scope['baseline_evidence_sha256'], baseline, label+' stopped baseline mismatch')
     _equal(manifest['baseline_evidence']['sha256'], baseline, label+' manifest baseline mismatch')
-    _equal(scope['budget_approval_sha256'], 'd5062e6f39f9ae7c9a8461121f9ba907c798100d7a5428af72da459595d2d554',
-           label+' fixed 105 approval mismatch')
+    approval = ('ef6322fe60807a7a608a2707edf016501717f85e9d649e28d0311de2b6ed4bce' if epoch == 'v6'
+                else 'd5062e6f39f9ae7c9a8461121f9ba907c798100d7a5428af72da459595d2d554')
+    _equal(scope['budget_approval_sha256'], approval, label+' fixed approval mismatch')
     # Fixed expectedStoppedV3/V4 maps; v5 also retains all three P4 claims,
     # including the reserved third claim with no ledger or provider request.
     _equal(_sha(_json_bytes(manifest['historical_claims'])), claims_sha,
@@ -410,7 +463,7 @@ def _score_cache_accounting(manifest, epoch):
             'proves_cache_usage': False, 'proves_knowledge_usage': False}
 
 
-def _build(manifest_raw, summary_raw, receipt_raw, records, review_raw, expected_hashes):
+def _build(manifest_raw, summary_raw, receipt_raw, records, review_raw, expected_hashes, epoch6_evidence=None):
     _require(type(expected_hashes) is dict and type(records) is dict, 'Explicit artifact and record SHA anchors required')
     raw_inputs = {'manifest': manifest_raw, 'summary': summary_raw, 'receipt': receipt_raw, 'review': review_raw}
     documents = {}
@@ -419,11 +472,41 @@ def _build(manifest_raw, summary_raw, receipt_raw, records, review_raw, expected
         _require(type(raw) is bytes and _sha(raw) == expected, 'Artifact SHA mismatch: ' + name)
         documents[name] = _Document(raw)
     manifest, summary, receipt, review = (documents[name].value for name in ('manifest', 'summary', 'receipt', 'review'))
-    _require(manifest['schema'] in ('full-window-actual-ready.v2', 'full-window-actual-ready.v3', 'full-window-actual-ready.v4', 'full-window-actual-ready.v5')
-             and manifest['evidence_kind'] == 'actual', 'Frozen actual v2/v3/v4/v5 manifest required')
+    _require(manifest['schema'] in ('full-window-actual-ready.v2', 'full-window-actual-ready.v3', 'full-window-actual-ready.v4', 'full-window-actual-ready.v5', 'full-window-actual-ready.v6')
+             and manifest['evidence_kind'] == 'actual', 'Frozen actual v2/v3/v4/v5/v6 manifest required')
     epoch = manifest['schema'].rsplit('.', 1)[1]
     _equal(manifest['scope']['schema'], 'full-window-scope.'+epoch, 'Manifest/scope epoch mismatch')
     cache_accounting = _score_cache_accounting(manifest, epoch)
+    if epoch == 'v6':
+        _require(type(epoch6_evidence) is dict and set(epoch6_evidence) == {'envelope_raw', 'sidecars'}, 'Explicit epoch6 evidence required')
+        _equal(manifest['scope']['bindings']['customer_revision'], '50e3c8dab14b4b6cc25322fd340a274e6970200b', 'Original customer revision required')
+        _equal(manifest['scope']['bindings']['policy_sha256'], '333c69bbb7506bd0c9237891cce8ddca720174974bf3f85753dd62339f368f15', 'Original owned quality policy required')
+        _equal(manifest['scope']['bindings']['request_envelope_sha256'], manifest['envelope']['sha256'], 'Scope envelope binding mismatch')
+        envelope_raw = epoch6_evidence['envelope_raw']
+        _equal(_sha(envelope_raw), manifest['envelope']['sha256'], 'Envelope digest mismatch')
+        envelope = _Document(envelope_raw, 8 << 20).value
+        basis = envelope['basis']
+        _require(type(basis) is list and basis, 'Envelope basis required')
+        paths, digests = set(), set()
+        for entry in basis:
+            _require(type(entry) is dict and set(entry) == {'path', 'sha256'}, 'Typed envelope basis required')
+            _require(type(entry['path']) is str and entry['path'] and entry['path'] not in paths, 'Duplicate envelope basis path')
+            _hex(entry['sha256'], _HEX64, 'Envelope basis SHA required')
+            _require(entry['sha256'] not in digests, 'Duplicate envelope basis digest')
+            paths.add(entry['path']); digests.add(entry['sha256'])
+        _require(manifest['scope']['budget_approval_sha256'] in digests, 'Current budget approval missing from envelope')
+        _require(type(epoch6_evidence['sidecars']) is dict, 'Sidecar bytes inventory required')
+        names = [q[k] for row in receipt['rows'] if (q := row.get('quality_end')) is not None
+                 for k in ('candidate_file','cleanup_file')]
+        _require(len(names) == len(set(names)) and set(names) == set(epoch6_evidence['sidecars']), 'Exact sidecar inventory required')
+        for row in receipt['rows']:
+            q = row.get('quality_end')
+            if q is not None:
+                for key in ('candidate','cleanup'):
+                    raw = epoch6_evidence['sidecars'][q[key+'_file']]
+                    _require(type(raw) is bytes and _sha(raw) == q[key+'_sha256'], 'Sidecar digest mismatch')
+    else:
+        _require(epoch6_evidence is None, 'Epoch6 evidence forbidden for legacy plans')
     _hex(manifest['archive_commit'], _HEX40, 'Archive commit required'); _hex(manifest['archive_tree'], _HEX40, 'Archive tree required')
     _equal(manifest['scope']['bindings']['executor_revision'], manifest['archive_commit'], 'Source executor revision mismatch')
     _require(type(manifest['sources']) is dict and manifest['sources'], 'Frozen source inventory required')
@@ -469,6 +552,12 @@ def _build(manifest_raw, summary_raw, receipt_raw, records, review_raw, expected
                        'review_evidence_kind_source': 'review' if 'evidence_kind' in review else 'bound_recorded_run_receipt'})
     if cache_accounting is not None:
         provenance['configured_cache_accounting'] = cache_accounting
+    if epoch == 'v6':
+        provenance.update({'epoch': 'v6', 'budget_approval_sha256': manifest['scope']['budget_approval_sha256'],
+                           'baseline_evidence_sha256': manifest['scope']['baseline_evidence_sha256'],
+                           'historical_claims_sha256': _sha(_json_bytes(manifest['historical_claims'])),
+                           'envelope_sha256': manifest['envelope']['sha256'],
+                           'parent_budget_micro_cny': 130000000, 'parent_budget_micro_usd': 1000000})
     for row in receipt['rows']:
         independent = review_rows[_identity(row)]
         for key in ('defined_turns', 'observed_turns', 'attempted', 'finished'):
@@ -504,6 +593,10 @@ def _build(manifest_raw, summary_raw, receipt_raw, records, review_raw, expected
         _equal(independent['recording_file'], name, 'Review recording filename mismatch')
         _equal(independent['recording_sha256'], record_sha, 'Review recording SHA mismatch')
         document = _Document(records[name]); record = document.value; result = record['result']
+        if epoch == 'v6' and record['disposition'] == 'continue_recorded':
+            validate_completed_record_state(records[name])
+        elif epoch == 'v6':
+            raise ValueError('Owned quality evidence verification unavailable')
         _equal(record['policy_id'], 'full-customer-recording-policy.v1', 'Frozen recording policy required')
         _hex(record['policy_sha256'], _HEX64, 'Recording policy SHA required')
         _equal(record['result_sha256'], _sha(document.fragment('result').encode()), 'Original result digest mismatch')
@@ -630,7 +723,7 @@ def _build(manifest_raw, summary_raw, receipt_raw, records, review_raw, expected
                             'No captured-content or persisted Langfuse trace validation has been performed by this function.']}
 
 
-def build_window_score_plan(manifest_raw, summary_raw, receipt_raw, records, review_raw, expected_hashes):
+def build_window_score_plan(manifest_raw, summary_raw, receipt_raw, records, review_raw, expected_hashes, *, epoch6_evidence=None):
     """Validate a complete explicit window and return a non-publishing plan.
 
     All raw artifacts must be bytes. ``records`` maps canonical receipt filenames
@@ -643,7 +736,7 @@ def build_window_score_plan(manifest_raw, summary_raw, receipt_raw, records, rev
     are intentionally ignored. Any mismatch rejects the entire window.
     """
     try:
-        return _build(manifest_raw, summary_raw, receipt_raw, records, review_raw, expected_hashes)
+        return _build(manifest_raw, summary_raw, receipt_raw, records, review_raw, expected_hashes, epoch6_evidence)
     except (KeyError, IndexError, TypeError, UnicodeError, OverflowError, RecursionError) as error:
         raise ValueError('Incomplete or invalid full-window evidence: ' + type(error).__name__) from error
 
@@ -879,7 +972,7 @@ def _check_projected_output(payload, job, input_raw, records):
 
 
 def project_window_content(manifest_raw, summary_raw, receipt_raw, records, review_raw, expected_hashes,
-                           *, source_root, output_dir, runtime, execute=False, closed_archive_extra_witness=None):
+                           *, source_root, output_dir, runtime, execute=False, closed_archive_extra_witness=None, epoch6_evidence=None):
     """Run the fixed no-network Go helper against an isolated frozen archive.
 
     Requires explicit execute=True (schedule this outside measurement windows),
@@ -895,7 +988,7 @@ def project_window_content(manifest_raw, summary_raw, receipt_raw, records, revi
     """
     try:
         _require(execute is True, 'Explicit fixed offline helper execution required')
-        plan = build_window_score_plan(manifest_raw, summary_raw, receipt_raw, records, review_raw, expected_hashes)
+        plan = build_window_score_plan(manifest_raw, summary_raw, receipt_raw, records, review_raw, expected_hashes, epoch6_evidence=epoch6_evidence)
         manifest = _Document(manifest_raw).value
         _equal(expected_hashes['projection_helper_sha256'], _PROJECTION_HELPER_SHA256, 'Externally pinned fixed helper required')
         helper_path = Path(__file__).resolve().parent/'helpers/full1220_content_projection_test.go.txt'
@@ -1105,6 +1198,7 @@ def validate_window_traces(plan, projection, client):
 _PUBLICATION_REGISTRY_ROOT = Path('/Users/a1/项目/ai-gateway/.tmp/full1220-score-publications')
 _PROJECT_ROOT = Path('/Users/a1/项目/ai-gateway')
 _ATTESTATION_HELPER_SHA256 = 'cadae5ad17b7233b97ba9d6d24029365e10dc280223b4991987d6ca31ea58b63'
+_ATTESTATION_V6_HELPER_SHA256 = 'c4c9b998d7b549b2cebe598e6ef87de0aa6534ea510a9d7c4a766db40ba36b92'
 _PUBLICATION_SEAL = object()
 
 
@@ -1190,8 +1284,13 @@ def verify_window_attestation(manifest_raw, attestation_raw, attestation_sha256,
         binary = Path(binary_path).absolute()
         _require(str(binary.resolve()) == str(binary), 'Unaliased actual binary path required')
         _equal(_sha(_regular_bytes(binary, 1 << 30)), _hex(binding['binary_sha256'], _HEX64, 'Actual binary SHA required'), 'Actual binary SHA mismatch')
-        helper = _regular_bytes(Path(__file__).resolve().parent/'helpers/full1220_attestation.go.txt', 1 << 20)
-        _equal(_sha(helper), _ATTESTATION_HELPER_SHA256, 'Fixed Ed25519 helper changed')
+        if manifest['schema'] == 'full-window-actual-ready.v6':
+            _equal(manifest['scope']['schema'], 'full-window-scope.v6', 'Manifest/scope epoch mismatch')
+            helper_name, helper_sha = 'full1220_attestation_v6.go.txt', _ATTESTATION_V6_HELPER_SHA256
+        else:
+            helper_name, helper_sha = 'full1220_attestation.go.txt', _ATTESTATION_HELPER_SHA256
+        helper = _regular_bytes(Path(__file__).resolve().parent/'helpers'/helper_name, 1 << 20)
+        _equal(_sha(helper), helper_sha, 'Fixed Ed25519 helper changed')
         executable = Path(runtime['go_executable']).resolve()
         _equal(_sha(_regular_bytes(executable)), _hex(runtime['go_sha256'], _HEX64, 'Pinned Go executable required'), 'Go executable SHA mismatch')
         sdk = Path(_PROJECTION_SDKROOT)
@@ -1219,7 +1318,7 @@ def verify_window_attestation(manifest_raw, attestation_raw, attestation_sha256,
         _equal(_sha(_regular_bytes(executable)), runtime['go_sha256'], 'Go executable changed')
         _equal(_sha(_regular_bytes(binary, 1 << 30)), binding['binary_sha256'], 'Actual binary changed during verification')
         return _PublicationProof(_PUBLICATION_SEAL, 'attestation', {**expected, 'binary_path': str(binary),
-                                'helper_sha256': _ATTESTATION_HELPER_SHA256})
+                                'helper_sha256': helper_sha})
     except (KeyError, IndexError, TypeError, OSError, UnicodeError, subprocess.SubprocessError) as error:
         raise ValueError('Offline attestation unavailable: '+type(error).__name__) from error
 
@@ -1387,6 +1486,9 @@ def publish_window_scores(plan, projection, receipt_chain, attestation, client, 
     handle = None
     try:
         _require(execute is True, 'Explicit --execute required for score publication')
+        if plan['provenance'].get('epoch') == 'v6':
+            _require(not any(row.get('quality_end') is not None for row in plan['rows']),
+                     'V6 quality proof unavailable; publication blocked')
         chain = _gate_data(receipt_chain, 'receipt_chain', plan); signed = _gate_data(attestation, 'attestation', plan)
         _require(type(client) is _WindowScoreClient and client._seal is _PUBLICATION_SEAL, 'Pinned local evaluation client required')
         _equal(client._manifest_sha, plan['provenance']['manifest_sha256'], 'Client manifest mismatch')
@@ -1521,7 +1623,18 @@ def _read_score_job(path):
     review = _regular_bytes(job['review_path'], 16 << 20)
     records = {name: _regular_bytes(Path(job['records_dir'])/name, 16 << 20) for name in job['expected_hashes']['records']}
     args = (*raw, records, review, job['expected_hashes'])
-    return job, args, build_window_score_plan(*args)
+    manifest = _Document(raw[0]).value
+    evidence = None
+    if manifest['schema'] == 'full-window-actual-ready.v6':
+        receipt = _Document(raw[2]).value
+        names = [q[key] for row in receipt['rows'] if (q := row.get('quality_end')) is not None
+                 for key in ('candidate_file', 'cleanup_file')]
+        _require(all(type(name) is str and re.fullmatch(r'[A-Za-z0-9_.-]+', name) is not None
+                     and name not in ('.', '..') for name in names), 'Safe sidecar filenames required')
+        evidence = {'envelope_raw': _regular_bytes(manifest['envelope']['path'], 8 << 20),
+                    'sidecars': {name: _regular_bytes(Path(job['records_dir'])/name, 16 << 20) for name in names}}
+        job['_epoch6_evidence'] = evidence
+    return job, args, build_window_score_plan(*args, epoch6_evidence=evidence)
 
 
 def main(argv=None):
@@ -1548,9 +1661,12 @@ def main(argv=None):
             chain = verify_window_receipt_chain(plan, inputs[0], entries, pins)
             attestation = verify_window_attestation(inputs[0], _regular_bytes(job['attestation_path'], 65536),
                 job['attestation_sha256'], job['binary_path'], runtime=job['runtime'], output_dir=job['attestation_output'], execute=True)
-            projection = project_window_content(*inputs, source_root=_Document(inputs[0]).value['source_root'],
-                output_dir=job['projection_output'], runtime=job['runtime'], execute=True,
-                closed_archive_extra_witness=job.get('closed_archive_extra_witness'))
+            projection_args = {'source_root': _Document(inputs[0]).value['source_root'],
+                'output_dir': job['projection_output'], 'runtime': job['runtime'], 'execute': True,
+                'closed_archive_extra_witness': job.get('closed_archive_extra_witness')}
+            if _Document(inputs[0]).value['schema'] == 'full-window-actual-ready.v6':
+                projection_args['epoch6_evidence'] = job['_epoch6_evidence']
+            projection = project_window_content(*inputs, **projection_args)
             result = publish_window_scores(plan, projection, chain, attestation,
                 load_window_score_client(inputs[0], job['client_settings_path']), execute=True)
         if args.out:
