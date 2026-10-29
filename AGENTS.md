@@ -50,6 +50,9 @@
 
 # ai-gateway 项目记忆
 
+2026-10-29 当前总预算已明确批准¥130+$1（授权ef6322fe），覆盖旧105/100总额；32份永久责任¥42.961430+$0.344493、风险¥2.023424+$0.000065及实际2292模型/585JEV不变。独立v6离线scope/claim fa64382a与actual入口45d3dad4已通过定向/替身/race及两轮独立复核；原3660/7320/11772/1851、客服50e/v5和双knowledge off不改。具体32停止证明仍保留原105父额/描述符b363，新130由独立授权包装读取，不改旧claim/停止记录。v6固定131窗/85mµCNY+600kµUSD向量30c815；新实际scope尚未冻结/真实claim0/推理0。仅actual6可Open，旧1–5在凭据/新根/网络前拒绝，但匹配历史readiness可只读。全manifest/provider bases在startup/每RunWindow前重查，立即claim前重查具体历史/当前授权；当前窗结束可能预留下一claim，其余材料若在窗中变动需下一RunWindow守卫停止、不得推理，不能宣称每claim前全部材料新查。Task3原输出仅tool记录，后补转录非原始日志；Task4保留全套raw日志、沙箱bind失败及已有LC_DYSYMTAB警告，两项私密绝对路径测试缺材料可skip，最终全Go需逐项JSON报告。score6/共享原始状态校验进行中；当前源码全Go20分钟、完整独立冻结及全3660实际任务仍未完成，不沿用旧740源码通过结果或复活scope5。见docs/full1220-v6-offline-integration-2026-10-29.md。
+
+
 2026-10-28 新传输诊断源码定向/race单元通过未整版冻结：仅失败descriptor可选有限typed cause/最远httptrace phase/耗时/布尔，单请求锁与值快照，晚到拨号不倒退，无URL/头/证书/原错误字符串。正常JSON/native请求不变、SDK10秒/窗口300秒/hold/停止/不重试不改。独立P2超限+close丢原prefix先RED后修，仅主code=response_close附close诊断，保留response_bound前缀；最终两包245项race过/0skip/fail、taskbench5.950秒。旧JEV EOF测试裸counter race修atomic仍断言1次；cache拒绝非断言RED保留。一次原路由认证目录GET200/615ms观测read_response，不当历史修复，旧JEV根因unknown。当前源码Open先拒旧actual v1/v2 epoch，v3必需，61入口race过；16claim/v3 ready尚未接线，现不能实际新执行。全新精确归档完整Go20m仍待，不称ready。新增模型/JEV推理/claim0，历史809/204、永久¥33.395934+$0.259511、新父105+1不变；旧49109仍terminal禁止操作。见docs/full1220-transport-diagnostics-2026-10-28.md及计划。
 
 2026-10-28 最新预算明确批准：用户对停止后预算问题回答“调整为¥105＋$1（推荐）”，父总额现105000000µCNY/1000000µUSD，覆盖旧100+1总额；旧v1/v2冻结/原claim数据不改，当前旧执行器仍不可重开。永久¥33.395934+$0.259511不释放，余¥71.604066+$0.740489；同完整新范围原caps加额外未知风险需¥103.841020+$0.964604，在新总额内余¥1.158980+$0.035396，不自动用于补充/重试。此次只调整总额，不代表新scope已技术验证/冻结，不新增模型请求或claim；按已有自主预授权完成新独立完整范围验证后才可执行，无需逐模型再问。原owner49109 terminal exit1保持，原3660对/三轮/1851边界和原失败分母不变。原话私密文件budget105-human-approval.private.json在v2冻结根，Hindsight已提交新预算及停止事实（完成/读回以工具证据为准）。下一步零付费诊断JEV10秒传输失败、评分/正文适配与独立复核，准备包含16前置claim的新基线，不续旧范围。
