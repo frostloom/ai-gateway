@@ -18,11 +18,9 @@ func TestActualV6EpochAndConsumedOpenBoundary(t *testing.T) {
 			if windowActualSupportedEpoch(m) != (a == b && a != "v1") {
 				t.Errorf("readonly epoch %s/%s", a, b)
 			}
-			if a != "v6" || b != "v6" {
-				s, e := OpenFullWindowActual(context.Background(), &FullWindowActualReady{manifest: m}, "/never-read-settings")
-				if s != nil || e == nil || !strings.Contains(e.Error(), "v6 scope required") {
-					t.Errorf("open %s/%s: %v", a, b, e)
-				}
+			s, e := OpenFullWindowActual(context.Background(), &FullWindowActualReady{manifest: m}, "/never-read-settings")
+			if s != nil || e == nil || !strings.Contains(e.Error(), "v7 scope required") {
+				t.Errorf("open %s/%s: %v", a, b, e)
 			}
 		}
 	}

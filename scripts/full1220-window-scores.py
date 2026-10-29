@@ -398,7 +398,7 @@ def validate_completed_record_state(record_raw):
 
 def _score_cache_accounting(manifest, epoch):
     limits = manifest.get('provider_limits', {})
-    if epoch not in ('v4', 'v5', 'v6'):
+    if epoch not in ('v4', 'v5', 'v6', 'v7'):
         for provider in ('model', 'jev'):
             _equal(limits.get(provider, {}).get('cache_hit_input_micro_per_million', 0), 0,
                    'Legacy score epoch cannot enable cache accounting')
@@ -420,7 +420,7 @@ def _score_cache_accounting(manifest, epoch):
         caps_sha = '7fe19887167feaa4ce85520f2717cf82d0143cd5e2eef6577b3b07afcfe04862'
         model_cap, jev_cap = 62000000, 676000
         caps_label = '62m/676k'
-    else:
+    elif epoch == 'v6':
         label = 'Epoch6'
         baseline = 'b363ba194e641374a8a63bfacc7a1312a5b080718f637036ab4040fc075a3fc1'
         claims_sha = '7f6a967d739a1e338b69153413a5e9f06dcc3fb7d7bae05b64e2988686b5dc1b'
@@ -428,9 +428,18 @@ def _score_cache_accounting(manifest, epoch):
         caps_sha = '30c8151031f40cb05562b255b789b9fb021a93467288e677c4eb39d87806113d'
         model_cap, jev_cap = 85000000, 600000
         caps_label = '85m/600k'
+    else:
+        label = 'Epoch7'
+        baseline = 'ccf528106789daf05a61c8d8f4e5f72d3a29eea65d78a6f81afb85f4e1ea45ad'
+        claims_sha = '2b67c23b0b3b6c48e676fff5dfbc3587ab5f2432e96acb3824f931130fd75ede'
+        claims_label = 'thirty-three'
+        caps_sha = '7b4078f89969bb46797217ea677a01cfec9adf51257437f603455a684368029d'
+        model_cap, jev_cap = 84500000, 600000
+        caps_label = '84.5m/600k'
+        _equal(manifest['observer']['export_timeout_ms'], 10000, 'Epoch7 fixed observer ACK wait required')
     _equal(scope['baseline_evidence_sha256'], baseline, label+' stopped baseline mismatch')
     _equal(manifest['baseline_evidence']['sha256'], baseline, label+' manifest baseline mismatch')
-    approval = ('ef6322fe60807a7a608a2707edf016501717f85e9d649e28d0311de2b6ed4bce' if epoch == 'v6'
+    approval = ('ef6322fe60807a7a608a2707edf016501717f85e9d649e28d0311de2b6ed4bce' if epoch in ('v6', 'v7')
                 else 'd5062e6f39f9ae7c9a8461121f9ba907c798100d7a5428af72da459595d2d554')
     _equal(scope['budget_approval_sha256'], approval, label+' fixed approval mismatch')
     # Fixed expectedStoppedV3/V4 maps; v5 also retains all three P4 claims,
@@ -465,6 +474,8 @@ def _score_cache_accounting(manifest, epoch):
 
 _QUALITY_V6_HELPER_SHA256 = 'c8aae02c9bf7f27d6aa7091bb94286453c4e5c2f604e78bd896c1c0f2ebba458'
 _QUALITY_V6_HELPER_RELATIVE = 'internal/taskbench/full1220_quality_v6_test.go'
+_QUALITY_V7_HELPER_SHA256 = '281d78af5cdce131cf587c4648f0632da6184585ceb2de23f27306c12c48a67b'
+_QUALITY_V7_HELPER_RELATIVE = 'internal/taskbench/full1220_quality_v7_test.go'
 _QUALITY_HALT_CODES = frozenset(('preview_arguments', 'pending_identity', 'unexpected_pending',
                                'unauthorized_tool', 'pending_not_cleared'))
 
@@ -526,17 +537,17 @@ def _quality_v6_record(row, raw, sidecars, policy):
     _equal(cleanup['post_cleanup'], candidate['evidence']['after'], 'Cleanup capture changed')
 
 
-def _quality_v6_inputs(manifest_raw, receipt_raw, records, expected_hashes, evidence):
+def _quality_inputs(manifest_raw, receipt_raw, records, expected_hashes, evidence, epoch):
     """Authenticate raw checkpoint inputs without semantic review or summary."""
     for label, raw in (('manifest',manifest_raw), ('receipt',receipt_raw)):
         _require(type(raw) is bytes, 'Original raw quality input required')
         _equal(_sha(raw), _hex(expected_hashes[label+'_sha256'], _HEX64, 'Quality input pin required'), 'Quality input digest mismatch')
     document = _Document(manifest_raw); manifest = document.value; receipt = _Document(receipt_raw).value
-    _equal(manifest['schema'], 'full-window-actual-ready.v6', 'Quality v6 manifest required')
+    _equal(manifest['schema'], 'full-window-actual-ready.'+epoch, 'Matching quality manifest required')
     _equal(manifest['evidence_kind'], 'actual', 'Actual quality manifest required')
     scope = manifest['scope']
-    _equal(scope['schema'], 'full-window-scope.v6', 'Quality v6 scope required')
-    _score_cache_accounting(manifest, 'v6')
+    _equal(scope['schema'], 'full-window-scope.'+epoch, 'Matching quality scope required')
+    _score_cache_accounting(manifest, epoch)
     _equal(scope['bindings']['customer_revision'], '50e3c8dab14b4b6cc25322fd340a274e6970200b', 'Original customer revision required')
     _equal(scope['bindings']['policy_sha256'], '333c69bbb7506bd0c9237891cce8ddca720174974bf3f85753dd62339f368f15', 'Original owned quality policy required')
     _hex(manifest['archive_commit'], _HEX40, 'Archive commit required'); _hex(manifest['archive_tree'], _HEX40, 'Archive tree required')
@@ -554,7 +565,7 @@ def _quality_v6_inputs(manifest_raw, receipt_raw, records, expected_hashes, evid
     for key in ('scope_sha256','execution_sha256'):
         _equal(receipt[key], manifest[key], 'Quality receipt binding mismatch')
     _planned_rows(manifest, receipt)
-    _require(type(evidence) is dict and set(evidence) == {'envelope_raw','sidecars'}, 'Explicit epoch6 evidence required')
+    _require(type(evidence) is dict and set(evidence) == {'envelope_raw','sidecars'}, 'Explicit '+epoch+' evidence required')
     _equal(scope['bindings']['request_envelope_sha256'], manifest['envelope']['sha256'], 'Scope envelope binding mismatch')
     envelope = _Document(evidence['envelope_raw'], 8 << 20).value
     _equal(_sha(evidence['envelope_raw']), manifest['envelope']['sha256'], 'Envelope digest mismatch')
@@ -600,13 +611,21 @@ def _quality_v6_inputs(manifest_raw, receipt_raw, records, expected_hashes, evid
     binding = {'manifest_sha256': _sha(manifest_raw), 'receipt_sha256': _sha(receipt_raw),
                'source_inventory_sha256': _sha(_json_bytes(manifest['sources'])),
                'archive_commit': manifest['archive_commit'], 'archive_tree': manifest['archive_tree'],
-               'helper_sha256': _QUALITY_V6_HELPER_SHA256, 'envelope_sha256': _sha(evidence['envelope_raw']),
+               'helper_sha256': _QUALITY_V6_HELPER_SHA256 if epoch == 'v6' else _QUALITY_V7_HELPER_SHA256, 'envelope_sha256': _sha(evidence['envelope_raw']),
                'records': {name:_sha(raw) for name,raw in records.items()},
                'rows': [{key: row[key] for key in ('ordinal','pass','case_key','arm','recording_file','recording_sha256','quality_end')} for row in quality_rows]}
     return manifest, receipt, quality_rows, binding
 
 
-def _build(manifest_raw, summary_raw, receipt_raw, records, review_raw, expected_hashes, epoch6_evidence=None):
+def _quality_v6_inputs(manifest_raw, receipt_raw, records, expected_hashes, evidence):
+    return _quality_inputs(manifest_raw, receipt_raw, records, expected_hashes, evidence, 'v6')
+
+
+def _quality_v7_inputs(manifest_raw, receipt_raw, records, expected_hashes, evidence):
+    return _quality_inputs(manifest_raw, receipt_raw, records, expected_hashes, evidence, 'v7')
+
+
+def _build(manifest_raw, summary_raw, receipt_raw, records, review_raw, expected_hashes, epoch6_evidence=None, epoch7_evidence=None):
     _require(type(expected_hashes) is dict and type(records) is dict, 'Explicit artifact and record SHA anchors required')
     raw_inputs = {'manifest': manifest_raw, 'summary': summary_raw, 'receipt': receipt_raw, 'review': review_raw}
     documents = {}
@@ -615,13 +634,17 @@ def _build(manifest_raw, summary_raw, receipt_raw, records, review_raw, expected
         _require(type(raw) is bytes and _sha(raw) == expected, 'Artifact SHA mismatch: ' + name)
         documents[name] = _Document(raw)
     manifest, summary, receipt, review = (documents[name].value for name in ('manifest', 'summary', 'receipt', 'review'))
-    _require(manifest['schema'] in ('full-window-actual-ready.v2', 'full-window-actual-ready.v3', 'full-window-actual-ready.v4', 'full-window-actual-ready.v5', 'full-window-actual-ready.v6')
-             and manifest['evidence_kind'] == 'actual', 'Frozen actual v2/v3/v4/v5/v6 manifest required')
+    _require(manifest['schema'] in ('full-window-actual-ready.v2', 'full-window-actual-ready.v3', 'full-window-actual-ready.v4', 'full-window-actual-ready.v5', 'full-window-actual-ready.v6', 'full-window-actual-ready.v7')
+             and manifest['evidence_kind'] == 'actual', 'Frozen actual v2/v3/v4/v5/v6/v7 manifest required')
     epoch = manifest['schema'].rsplit('.', 1)[1]
     _equal(manifest['scope']['schema'], 'full-window-scope.'+epoch, 'Manifest/scope epoch mismatch')
     cache_accounting = _score_cache_accounting(manifest, epoch)
     quality_binding = None
-    if epoch == 'v6':
+    _require(epoch7_evidence is None or epoch == 'v7', 'Epoch7 evidence forbidden for other epochs')
+    if epoch == 'v7':
+        _require(epoch6_evidence is None, 'Epoch6 evidence forbidden for epoch7')
+        _, _, quality_rows, quality_binding = _quality_v7_inputs(manifest_raw, receipt_raw, records, expected_hashes, epoch7_evidence)
+    elif epoch == 'v6':
         _, _, quality_rows, quality_binding = _quality_v6_inputs(manifest_raw, receipt_raw, records, expected_hashes, epoch6_evidence)
     else:
         _require(epoch6_evidence is None, 'Epoch6 evidence forbidden for legacy plans')
@@ -670,14 +693,14 @@ def _build(manifest_raw, summary_raw, receipt_raw, records, review_raw, expected
                        'review_evidence_kind_source': 'review' if 'evidence_kind' in review else 'bound_recorded_run_receipt'})
     if cache_accounting is not None:
         provenance['configured_cache_accounting'] = cache_accounting
-    if epoch == 'v6':
-        provenance.update({'epoch': 'v6', 'budget_approval_sha256': manifest['scope']['budget_approval_sha256'],
+    if epoch in ('v6', 'v7'):
+        provenance.update({'epoch': epoch, 'budget_approval_sha256': manifest['scope']['budget_approval_sha256'],
                            'baseline_evidence_sha256': manifest['scope']['baseline_evidence_sha256'],
                            'historical_claims_sha256': _sha(_json_bytes(manifest['historical_claims'])),
                            'envelope_sha256': manifest['envelope']['sha256'],
                            'parent_budget_micro_cny': 130000000, 'parent_budget_micro_usd': 1000000})
         if quality_rows:
-            provenance.update(quality_v6_source_replay='pending', quality_v6_inputs_sha256=_sha(_json_bytes(quality_binding)))
+            provenance.update({'quality_'+epoch+'_source_replay': 'pending', 'quality_'+epoch+'_inputs_sha256': _sha(_json_bytes(quality_binding))})
     for row in receipt['rows']:
         independent = review_rows[_identity(row)]
         for key in ('defined_turns', 'observed_turns', 'attempted', 'finished'):
@@ -713,9 +736,9 @@ def _build(manifest_raw, summary_raw, receipt_raw, records, review_raw, expected
         _equal(independent['recording_file'], name, 'Review recording filename mismatch')
         _equal(independent['recording_sha256'], record_sha, 'Review recording SHA mismatch')
         document = _Document(records[name]); record = document.value; result = record['result']
-        if epoch == 'v6' and record['disposition'] == 'continue_recorded':
+        if epoch in ('v6', 'v7') and record['disposition'] == 'continue_recorded':
             validate_completed_record_state(records[name])
-        elif epoch == 'v6':
+        elif epoch in ('v6', 'v7'):
             _require(row.get('quality_end') is not None, 'Owned quality evidence required')
         _equal(record['policy_id'], 'full-customer-recording-policy.v1', 'Frozen recording policy required')
         _hex(record['policy_sha256'], _HEX64, 'Recording policy SHA required')
@@ -843,7 +866,7 @@ def _build(manifest_raw, summary_raw, receipt_raw, records, review_raw, expected
                             'No captured-content or persisted Langfuse trace validation has been performed by this function.']}
 
 
-def build_window_score_plan(manifest_raw, summary_raw, receipt_raw, records, review_raw, expected_hashes, *, epoch6_evidence=None):
+def build_window_score_plan(manifest_raw, summary_raw, receipt_raw, records, review_raw, expected_hashes, *, epoch6_evidence=None, epoch7_evidence=None):
     """Validate a complete explicit window and return a non-publishing plan.
 
     All raw artifacts must be bytes. ``records`` maps canonical receipt filenames
@@ -856,7 +879,7 @@ def build_window_score_plan(manifest_raw, summary_raw, receipt_raw, records, rev
     are intentionally ignored. Any mismatch rejects the entire window.
     """
     try:
-        return _build(manifest_raw, summary_raw, receipt_raw, records, review_raw, expected_hashes, epoch6_evidence)
+        return _build(manifest_raw, summary_raw, receipt_raw, records, review_raw, expected_hashes, epoch6_evidence, epoch7_evidence)
     except (KeyError, IndexError, TypeError, UnicodeError, OverflowError, RecursionError) as error:
         raise ValueError('Incomplete or invalid full-window evidence: ' + type(error).__name__) from error
 
@@ -1092,7 +1115,7 @@ def _check_projected_output(payload, job, input_raw, records):
 
 
 def project_window_content(manifest_raw, summary_raw, receipt_raw, records, review_raw, expected_hashes,
-                           *, source_root, output_dir, runtime, execute=False, closed_archive_extra_witness=None, epoch6_evidence=None):
+                           *, source_root, output_dir, runtime, execute=False, closed_archive_extra_witness=None, epoch6_evidence=None, epoch7_evidence=None):
     """Run the fixed no-network Go helper against an isolated frozen archive.
 
     Requires explicit execute=True (schedule this outside measurement windows),
@@ -1108,7 +1131,7 @@ def project_window_content(manifest_raw, summary_raw, receipt_raw, records, revi
     """
     try:
         _require(execute is True, 'Explicit fixed offline helper execution required')
-        plan = build_window_score_plan(manifest_raw, summary_raw, receipt_raw, records, review_raw, expected_hashes, epoch6_evidence=epoch6_evidence)
+        plan = build_window_score_plan(manifest_raw, summary_raw, receipt_raw, records, review_raw, expected_hashes, epoch6_evidence=epoch6_evidence, epoch7_evidence=epoch7_evidence)
         manifest = _Document(manifest_raw).value
         _equal(expected_hashes['projection_helper_sha256'], _PROJECTION_HELPER_SHA256, 'Externally pinned fixed helper required')
         helper_path = Path(__file__).resolve().parent/'helpers/full1220_content_projection_test.go.txt'
@@ -1324,6 +1347,7 @@ _PUBLICATION_REGISTRY_ROOT = Path('/Users/a1/项目/ai-gateway/.tmp/full1220-sco
 _PROJECT_ROOT = Path('/Users/a1/项目/ai-gateway')
 _ATTESTATION_HELPER_SHA256 = 'cadae5ad17b7233b97ba9d6d24029365e10dc280223b4991987d6ca31ea58b63'
 _ATTESTATION_V6_HELPER_SHA256 = 'c4c9b998d7b549b2cebe598e6ef87de0aa6534ea510a9d7c4a766db40ba36b92'
+_ATTESTATION_V7_HELPER_SHA256 = '2bb44f9fed73daf666348b05750c239142664756bb3de5a950930371ebaa49c4'
 _PUBLICATION_SEAL = object()
 
 
@@ -1370,8 +1394,8 @@ def _quality_v6_source_identity(root, manifest):
     return {'git_pointer_sha256':pointer_sha, 'tree_listing_sha256':_sha(entries)}
 
 
-def verify_window_quality_v6(manifest_raw, receipt_raw, records, expected_hashes, *, epoch6_evidence,
-                             source_root, output_dir, runtime, execute=False):
+def _verify_window_quality(manifest_raw, receipt_raw, records, expected_hashes, *, evidence, epoch,
+                           source_root, output_dir, runtime, execute=False):
     """Replay source-owned quality offline, before semantic review/checkpoint.
 
     Raw pins cover manifest, receipt, records and quality_helper_sha256. Runtime
@@ -1382,13 +1406,17 @@ def verify_window_quality_v6(manifest_raw, receipt_raw, records, expected_hashes
     """
     try:
         _require(execute is True, 'Explicit fixed offline quality helper execution required')
-        manifest, receipt, rows, binding = _quality_v6_inputs(manifest_raw, receipt_raw, records, expected_hashes, epoch6_evidence)
+        inputs = _quality_v6_inputs if epoch == 'v6' else _quality_v7_inputs
+        manifest, receipt, rows, binding = inputs(manifest_raw, receipt_raw, records, expected_hashes, evidence)
         if not rows:
             return None
-        _equal(expected_hashes['quality_helper_sha256'], _QUALITY_V6_HELPER_SHA256, 'Externally pinned quality helper required')
-        helper_path = Path(__file__).resolve().parent/'helpers/full1220_quality_v6_test.go.txt'
+        helper_sha = _QUALITY_V6_HELPER_SHA256 if epoch == 'v6' else _QUALITY_V7_HELPER_SHA256
+        helper_relative = _QUALITY_V6_HELPER_RELATIVE if epoch == 'v6' else _QUALITY_V7_HELPER_RELATIVE
+        proof_kind = 'quality_'+epoch
+        _equal(expected_hashes['quality_helper_sha256'], helper_sha, 'Externally pinned quality helper required')
+        helper_path = Path(__file__).resolve().parent/('helpers/full1220_quality_'+epoch+'_test.go.txt')
         helper = _regular_bytes(helper_path, 1 << 20)
-        _equal(_sha(helper), _QUALITY_V6_HELPER_SHA256, 'Fixed quality helper source changed')
+        _equal(_sha(helper), helper_sha, 'Fixed quality helper source changed')
         root = Path(source_root).absolute()
         _equal(str(root.resolve()), str(Path(manifest['source_root']).resolve()), 'Quality source root mismatch')
         source_identity = _quality_v6_source_identity(root, manifest)
@@ -1409,13 +1437,13 @@ def verify_window_quality_v6(manifest_raw, receipt_raw, records, expected_hashes
         for name, digest in manifest['sources'].items():
             raw = _regular_bytes(root/name); _equal(_sha(raw), digest, 'Quality source changed while staging')
             target = staged/name; target.parent.mkdir(parents=True,exist_ok=True); _exclusive_write(target,raw)
-        _require(_QUALITY_V6_HELPER_RELATIVE not in manifest['sources'], 'Quality helper destination already present')
-        _exclusive_write(staged/_QUALITY_V6_HELPER_RELATIVE,helper)
-        extra = {_QUALITY_V6_HELPER_RELATIVE:_QUALITY_V6_HELPER_SHA256}
+        _require(helper_relative not in manifest['sources'], 'Quality helper destination already present')
+        _exclusive_write(staged/helper_relative,helper)
+        extra = {helper_relative:helper_sha}
         _verify_frozen_sources(staged,manifest['sources'],extra)
         staged_records = output/'records'; staged_records.mkdir(mode=0o700)
-        all_raw = {**records,**epoch6_evidence['sidecars']}
-        _require(len(all_raw) == len(records)+len(epoch6_evidence['sidecars']), 'Quality sidecar/record alias')
+        all_raw = {**records,**evidence['sidecars']}
+        _require(len(all_raw) == len(records)+len(evidence['sidecars']), 'Quality sidecar/record alias')
         for name, raw in all_raw.items(): _exclusive_write(staged_records/name,raw)
         input_raw = _json_bytes({'scope':manifest['scope'],'rows':rows,'binding':binding})
         _require(len(input_raw) <= 16 << 20, 'Quality helper input bound exceeded')
@@ -1429,7 +1457,7 @@ def verify_window_quality_v6(manifest_raw, receipt_raw, records, expected_hashes
             'FULL1220_QUALITY_INPUT':str(output/'input.json'), 'FULL1220_QUALITY_OUTPUT':str(output/'quality.json'),
             'FULL1220_QUALITY_INPUT_SHA256':_sha(input_raw)}
         command = [str(executable),'test','-mod=readonly','-buildvcs=false','-v','./internal/taskbench',
-                   '-run','^TestFull1220QualityV6$','-count=1','-timeout=2m']
+                   '-run','^TestFull1220QualityV'+epoch[1:]+'$','-count=1','-timeout=2m']
         process = subprocess.run(command,cwd=str(staged),env=environment,stdout=subprocess.PIPE,
                                  stderr=subprocess.PIPE,timeout=150,check=False)
         _require(len(process.stdout) <= 8 << 20 and len(process.stderr) <= 8 << 20, 'Quality helper output bound exceeded')
@@ -1437,7 +1465,7 @@ def verify_window_quality_v6(manifest_raw, receipt_raw, records, expected_hashes
         _require(process.returncode == 0, 'Fixed quality helper failed; no proof')
         _equal(_quality_v6_source_identity(root,manifest),source_identity,'Quality source/Git identity changed')
         _verify_frozen_sources(staged,manifest['sources'],extra)
-        _equal(_sha(_regular_bytes(helper_path,1 << 20)),_QUALITY_V6_HELPER_SHA256,'Quality helper changed')
+        _equal(_sha(_regular_bytes(helper_path,1 << 20)),helper_sha,'Quality helper changed')
         _equal(_sha(_regular_bytes(executable)),runtime['go_sha256'],'Quality executable changed')
         _equal(_sha(_regular_bytes(sdk/'SDKSettings.json',1 << 20)),sdk_sha,'SDKSettings metadata changed')
         _require(_regular_bytes(output/'input.json') == input_raw,'Quality helper input changed')
@@ -1445,14 +1473,30 @@ def verify_window_quality_v6(manifest_raw, receipt_raw, records, expected_hashes
             _require(_regular_bytes(staged_records/name,16 << 20) == raw,'Quality evidence changed in helper')
         _require(set(path.name for path in staged_records.iterdir()) == set(all_raw),'Quality evidence inventory changed')
         output_raw = _regular_bytes(output/'quality.json',16 << 20)
-        receipts = re.findall(rb'(?m)^\s+full1220_quality_v6_test\.go:[0-9]+: FULL1220_QUALITY_OUTPUT_SHA256=([0-9a-f]{64})\r?$',process.stdout)
+        receipts = re.findall(rb'(?m)^\s+'+re.escape(Path(helper_relative).name.encode())+rb':[0-9]+: FULL1220_QUALITY_OUTPUT_SHA256=([0-9a-f]{64})\r?$',process.stdout)
         _require(len(receipts) == 1 and receipts[0].decode() == _sha(output_raw),'Quality output lacks exact process receipt')
-        _equal(_Document(output_raw).value,{'schema':'full1220-quality-v6-replay.v1','input_sha256':_sha(input_raw),'binding':binding},'Quality helper output binding mismatch')
-        return _PublicationProof(_PUBLICATION_SEAL,'quality_v6',{
-            **binding,'quality_v6_inputs_sha256':_sha(_json_bytes(binding)), 'source_identity':source_identity,
+        _equal(_Document(output_raw).value,{'schema':'full1220-quality-'+epoch+'-replay.v1','input_sha256':_sha(input_raw),'binding':binding},'Quality helper output binding mismatch')
+        return _PublicationProof(_PUBLICATION_SEAL,proof_kind,{
+            **binding,proof_kind+'_inputs_sha256':_sha(_json_bytes(binding)), 'source_identity':source_identity,
             'output_sha256':_sha(output_raw),'go_sha256':runtime['go_sha256'],'sdk_settings_sha256':sdk_sha})
     except (KeyError, IndexError, TypeError, OSError, UnicodeError, subprocess.SubprocessError) as error:
         raise ValueError('Offline quality proof unavailable: '+type(error).__name__) from error
+
+
+def verify_window_quality_v6(manifest_raw, receipt_raw, records, expected_hashes, *, epoch6_evidence,
+                             source_root, output_dir, runtime, execute=False):
+    """Original v6 API and proof encoding; no-quality windows touch no runtime/files."""
+    return _verify_window_quality(manifest_raw, receipt_raw, records, expected_hashes,
+        evidence=epoch6_evidence, epoch='v6', source_root=source_root, output_dir=output_dir,
+        runtime=runtime, execute=execute)
+
+
+def verify_window_quality_v7(manifest_raw, receipt_raw, records, expected_hashes, *, epoch7_evidence,
+                             source_root, output_dir, runtime, execute=False):
+    """Independent v7 proof from exact offline Go replay; JSON cannot restore it."""
+    return _verify_window_quality(manifest_raw, receipt_raw, records, expected_hashes,
+        evidence=epoch7_evidence, epoch='v7', source_root=source_root, output_dir=output_dir,
+        runtime=runtime, execute=execute)
 
 
 def verify_window_receipt_chain(plan, manifest_raw, entries, expected_hashes):
@@ -1521,7 +1565,10 @@ def verify_window_attestation(manifest_raw, attestation_raw, attestation_sha256,
         binary = Path(binary_path).absolute()
         _require(str(binary.resolve()) == str(binary), 'Unaliased actual binary path required')
         _equal(_sha(_regular_bytes(binary, 1 << 30)), _hex(binding['binary_sha256'], _HEX64, 'Actual binary SHA required'), 'Actual binary SHA mismatch')
-        if manifest['schema'] == 'full-window-actual-ready.v6':
+        if manifest['schema'] == 'full-window-actual-ready.v7':
+            _equal(manifest['scope']['schema'], 'full-window-scope.v7', 'Manifest/scope epoch mismatch')
+            helper_name, helper_sha = 'full1220_attestation_v7.go.txt', _ATTESTATION_V7_HELPER_SHA256
+        elif manifest['schema'] == 'full-window-actual-ready.v6':
             _equal(manifest['scope']['schema'], 'full-window-scope.v6', 'Manifest/scope epoch mismatch')
             helper_name, helper_sha = 'full1220_attestation_v6.go.txt', _ATTESTATION_V6_HELPER_SHA256
         else:
@@ -1724,11 +1771,13 @@ def publish_window_scores(plan, projection, receipt_chain, attestation, client, 
     try:
         _require(execute is True, 'Explicit --execute required for score publication')
         quality = None
-        if plan['provenance'].get('epoch') == 'v6' and any(row.get('quality_end') is not None for row in plan['rows']):
-            _require(type(quality_proof) is _PublicationProof, 'Opaque quality_v6 proof required')
-            quality = _gate_data(quality_proof, 'quality_v6', plan)
+        epoch = plan['provenance'].get('epoch')
+        if epoch in ('v6', 'v7') and any(row.get('quality_end') is not None for row in plan['rows']):
+            proof_kind = 'quality_'+epoch
+            _require(type(quality_proof) is _PublicationProof, 'Opaque '+proof_kind+' proof required')
+            quality = _gate_data(quality_proof, proof_kind, plan)
             _equal(quality['receipt_sha256'], plan['provenance']['receipt_sha256'], 'Quality proof receipt mismatch')
-            _equal(quality['quality_v6_inputs_sha256'], plan['provenance']['quality_v6_inputs_sha256'], 'Quality proof input/source mismatch')
+            _equal(quality[proof_kind+'_inputs_sha256'], plan['provenance'][proof_kind+'_inputs_sha256'], 'Quality proof input/source mismatch')
             expected_rows = [{key:row[key] for key in ('ordinal','pass','case_key','arm','recording_file','recording_sha256','quality_end')}
                              for row in plan['rows'] if row.get('quality_end') is not None]
             _equal(quality['rows'], expected_rows, 'Quality proof row/sidecar mismatch')
@@ -1763,7 +1812,7 @@ def publish_window_scores(plan, projection, receipt_chain, attestation, client, 
                  'trace_source_identity': _batch_source_identity(plan),
                  'scores': [{key: score[key] for key in ('id', 'logical_identity', 'traceId', 'name')} for score in scores]}
         if quality is not None:
-            batch['quality_v6_proof'] = quality
+            batch[proof_kind+'_proof'] = quality
         batch['batch_sha256'] = _sha(_json_bytes(batch))
         _publication_event(handle, batch_name, batch)
         for score in scores:
@@ -1876,7 +1925,9 @@ def _read_score_job(path):
     args = (*raw, records, review, job['expected_hashes'])
     manifest = _Document(raw[0]).value
     evidence = None
-    if manifest['schema'] == 'full-window-actual-ready.v6':
+    evidence_args = {}
+    if manifest['schema'] in ('full-window-actual-ready.v6', 'full-window-actual-ready.v7'):
+        evidence_key = 'epoch'+manifest['schema'][-1]+'_evidence'
         receipt = _Document(raw[2]).value
         names = [q[key] for row in receipt['rows'] if (q := row.get('quality_end')) is not None
                  for key in ('candidate_file', 'cleanup_file')]
@@ -1884,8 +1935,9 @@ def _read_score_job(path):
                      and name not in ('.', '..') for name in names), 'Safe sidecar filenames required')
         evidence = {'envelope_raw': _regular_bytes(manifest['envelope']['path'], 8 << 20),
                     'sidecars': {name: _regular_bytes(Path(job['records_dir'])/name, 16 << 20) for name in names}}
-        job['_epoch6_evidence'] = evidence
-    return job, args, build_window_score_plan(*args, epoch6_evidence=evidence)
+        job['_'+evidence_key] = evidence
+        evidence_args[evidence_key] = evidence
+    return job, args, build_window_score_plan(*args, **evidence_args)
 
 
 def main(argv=None):
@@ -1915,12 +1967,15 @@ def main(argv=None):
             projection_args = {'source_root': _Document(inputs[0]).value['source_root'],
                 'output_dir': job['projection_output'], 'runtime': job['runtime'], 'execute': True,
                 'closed_archive_extra_witness': job.get('closed_archive_extra_witness')}
-            if _Document(inputs[0]).value['schema'] == 'full-window-actual-ready.v6':
-                projection_args['epoch6_evidence'] = job['_epoch6_evidence']
+            epoch = _Document(inputs[0]).value['schema'].rsplit('.', 1)[1]
+            if epoch in ('v6', 'v7'):
+                evidence_key = 'epoch'+epoch[1:]+'_evidence'
+                projection_args[evidence_key] = job['_'+evidence_key]
             quality_proof = None
-            if plan['provenance'].get('epoch') == 'v6' and any(row.get('quality_end') is not None for row in plan['rows']):
-                quality_proof = verify_window_quality_v6(inputs[0], inputs[2], inputs[3], inputs[5],
-                    epoch6_evidence=job['_epoch6_evidence'], source_root=projection_args['source_root'],
+            if epoch in ('v6', 'v7') and any(row.get('quality_end') is not None for row in plan['rows']):
+                quality_verifier = verify_window_quality_v6 if epoch == 'v6' else verify_window_quality_v7
+                quality_proof = quality_verifier(inputs[0], inputs[2], inputs[3], inputs[5],
+                    **{evidence_key: job['_'+evidence_key]}, source_root=projection_args['source_root'],
                     output_dir=job['quality_output'], runtime=job['runtime'], execute=True)
             projection = project_window_content(*inputs, **projection_args)
             result = publish_window_scores(plan, projection, chain, attestation,

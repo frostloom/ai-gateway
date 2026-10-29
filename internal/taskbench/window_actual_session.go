@@ -60,7 +60,10 @@ func windowActualLoopbackEndpoint(endpoint string) (*url.URL, error) {
 	}
 	return u, nil
 }
-func readWindowActualSettings(path string) (out windowActualSettings, err error) {
+func readWindowActualSettings(path string) (windowActualSettings, error) {
+	return readWindowActualSettingsForTimeout(path, 2000)
+}
+func readWindowActualSettingsForTimeout(path string, timeoutMS int64) (out windowActualSettings, err error) {
 	reject := func() (windowActualSettings, error) {
 		return windowActualSettings{}, fmt.Errorf("actual private settings rejected")
 	}
@@ -83,7 +86,7 @@ func readWindowActualSettings(path string) (out windowActualSettings, err error)
 		return reject()
 	}
 	o := out.Observer
-	if !o.Enabled || !o.CaptureContent || o.SampleRate != 1 || o.Environment != "evaluation" || !windowActualRevision(o.Release) || o.ExportTimeoutMS != 2000 || o.QueueSize < 1 || o.QueueSize > 4096 || len(o.HashKey) < 32 || strings.TrimSpace(o.PublicKey) == "" || strings.TrimSpace(o.SecretKey) == "" || strings.ContainsAny(o.PublicKey+o.SecretKey, "\r\n:") {
+	if !o.Enabled || !o.CaptureContent || o.SampleRate != 1 || o.Environment != "evaluation" || !windowActualRevision(o.Release) || o.ExportTimeoutMS != timeoutMS || o.QueueSize < 1 || o.QueueSize > 4096 || len(o.HashKey) < 32 || strings.TrimSpace(o.PublicKey) == "" || strings.TrimSpace(o.SecretKey) == "" || strings.ContainsAny(o.PublicKey+o.SecretKey, "\r\n:") {
 		return reject()
 	}
 	if _, e = windowActualJEVProxy(out.JEVHTTPSProxy); e != nil {
@@ -280,11 +283,11 @@ func OpenFullWindowActual(ctx context.Context, ready *FullWindowActualReady, pri
 	if ctx == nil || ctx.Err() != nil {
 		return nil, fmt.Errorf("actual session context rejected")
 	}
-	// Actual v1 through v5 owners are permanently consumed. New execution must
-	// include them in the separately verified v6 budget epoch, even if a caller
+	// Actual v1 through v6 owners are permanently consumed. New execution must
+	// include them in the separately verified v7 budget epoch, even if a caller
 	// can still read an old readiness snapshot. No settings or claim first.
-	if ready == nil || ready.manifest.Schema != "full-window-actual-ready.v6" || ready.manifest.Scope.Schema != "full-window-scope.v6" {
-		return nil, fmt.Errorf("actual v6 scope required for current budget epoch")
+	if ready == nil || ready.manifest.Schema != "full-window-actual-ready.v7" || ready.manifest.Scope.Schema != "full-window-scope.v7" {
+		return nil, fmt.Errorf("actual v7 scope required for current budget epoch")
 	}
 	if e := ready.revalidateStopped(); e != nil {
 		return nil, e
@@ -292,7 +295,7 @@ func OpenFullWindowActual(ctx context.Context, ready *FullWindowActualReady, pri
 	if e := ready.revalidate(); e != nil {
 		return nil, e
 	}
-	settings, e := readWindowActualSettings(privateSettingsPath)
+	settings, e := readWindowActualSettingsForTimeout(privateSettingsPath, 10000)
 	if e != nil {
 		return nil, e
 	}
@@ -342,7 +345,7 @@ func OpenFullWindowActual(ctx context.Context, ready *FullWindowActualReady, pri
 		return nil, e
 	}
 	m := ready.manifest
-	s.campaign, e = newWindowCampaignV6(m.CampaignRoot, m.CampaignRoot, m.Scope, ready.source, ready.profiles, m.Scope.Bindings, m.ScopeSHA256, m.ExecutionSHA256, m.Limits, ready.stoppedV5, ready.approval130)
+	s.campaign, e = newWindowCampaignV7(m.CampaignRoot, m.CampaignRoot, m.Scope, ready.source, ready.profiles, m.Scope.Bindings, m.ScopeSHA256, m.ExecutionSHA256, m.Limits, ready.stoppedV6, ready.approval130)
 	if e != nil {
 		return nil, e
 	}

@@ -191,7 +191,7 @@ func openWindowAcquisition(ctx context.Context, auth *windowAcquisitionAuthoriza
 		return reject()
 	}
 	identity := auth.observer.EvaluationIdentity()
-	if identity != auth.observerIdentity || !identity.Enabled || !identity.CaptureContent || identity.SampleRate != 1 || identity.Environment != "evaluation" || identity.Release == "" || identity.Release == "unknown" || identity.ExportTimeoutMS != 2000 || identity.QueueSize < 1 || !comparisonDigest(identity.EndpointSHA256) || !comparisonDigest(identity.ProjectSHA256) {
+	if identity != auth.observerIdentity || !identity.Enabled || !identity.CaptureContent || identity.SampleRate != 1 || identity.Environment != "evaluation" || identity.Release == "" || identity.Release == "unknown" || identity.ExportTimeoutMS != windowObserverTimeoutForScope(auth.campaign.prepared.scope.Schema) || identity.QueueSize < 1 || !comparisonDigest(identity.EndpointSHA256) || !comparisonDigest(identity.ProjectSHA256) {
 		return reject()
 	}
 	if canonicalRootWindowCampaign(auth.privateReportRoot) != nil {

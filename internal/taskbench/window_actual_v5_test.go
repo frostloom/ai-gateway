@@ -19,7 +19,7 @@ func TestActualV5EpochAndConsumedOpenBoundary(t *testing.T) {
 	for _, a := range []string{"v1", "v2", "v3", "v4"} {
 		r := &FullWindowActualReady{manifest: windowActualManifest{Schema: "full-window-actual-ready." + a, Scope: fullWindowScope{Schema: "full-window-scope." + a}}}
 		s, e := OpenFullWindowActual(context.Background(), r, "/never-read-settings")
-		if s != nil || e == nil || !strings.Contains(e.Error(), "v6 scope required") {
+		if s != nil || e == nil || !strings.Contains(e.Error(), "v7 scope required") {
 			t.Errorf("consumed %s did not reject at epoch boundary: %v", a, e)
 		}
 	}
@@ -46,7 +46,7 @@ func TestActualV5ConcreteBindingAndFreshBoundary(t *testing.T) {
 		t.Fatal("consistent28 data mirror rejected", e)
 	}
 	r := &FullWindowActualReady{manifestRaw: []byte(`{}`), manifest: m, baseline: p.base, stoppedV4: p}
-	if s, e := OpenFullWindowActual(context.Background(), r, "/never-read-settings"); s != nil || e == nil || !strings.Contains(e.Error(), "v6 scope required") {
+	if s, e := OpenFullWindowActual(context.Background(), r, "/never-read-settings"); s != nil || e == nil || !strings.Contains(e.Error(), "v7 scope required") {
 		t.Fatal("coherent memory mirror reached settings", e)
 	}
 	if e := (&FullWindowActualSession{ready: r}).verifyInputs(); e == nil || !strings.Contains(e.Error(), "stopped") {

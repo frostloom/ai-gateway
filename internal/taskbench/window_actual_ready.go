@@ -56,6 +56,7 @@ type FullWindowActualReady struct {
 	stoppedV3      windowStoppedV3Baseline
 	stoppedV4      windowStoppedV4Baseline
 	stoppedV5      windowStoppedV5Baseline
+	stoppedV6      windowStoppedV6Baseline
 	approval130    windowActualFile
 	source         ConversationSuite
 	profiles       PairedProfiles
@@ -177,7 +178,11 @@ func CheckFullWindowActualReady(o FullWindowActualReadyOptions) (FullWindowActua
 		}
 	}
 	id := m.Observer
-	if !id.Enabled || !id.CaptureContent || id.SampleRate != 1 || id.Environment != "evaluation" || id.Release != m.ArchiveCommit || id.ExportTimeoutMS != 2000 || id.QueueSize < 1 || !comparisonDigest(id.EndpointSHA256) || !comparisonDigest(id.ProjectSHA256) {
+	exportTimeoutMS := int64(2000)
+	if m.Schema == "full-window-actual-ready.v7" {
+		exportTimeoutMS = 10000
+	}
+	if !id.Enabled || !id.CaptureContent || id.SampleRate != 1 || id.Environment != "evaluation" || id.Release != m.ArchiveCommit || id.ExportTimeoutMS != exportTimeoutMS || id.QueueSize < 1 || !comparisonDigest(id.EndpointSHA256) || !comparisonDigest(id.ProjectSHA256) {
 		return reject()
 	}
 	// Source/profile paths are part of the reviewed tree, never arbitrary aliases.
@@ -201,7 +206,13 @@ func CheckFullWindowActualReady(o FullWindowActualReadyOptions) (FullWindowActua
 		return reject()
 	}
 	candidate := &FullWindowActualReady{manifestPath: o.ManifestPath, manifestRaw: append([]byte(nil), raw...), attestationRaw: append([]byte(nil), attestationRaw...), manifest: m, prepared: prepared, source: source, profiles: profiles}
-	if m.Schema == "full-window-actual-ready.v6" {
+	if m.Schema == "full-window-actual-ready.v7" {
+		proof, approval, err := loadWindowActualStoppedBaselineV7(m)
+		if err != nil {
+			return reject()
+		}
+		candidate.baseline, candidate.stoppedV6, candidate.approval130, candidate.prepared.stoppedHistory = proof.base, proof, approval, windowV7CurrentHistory{stopped: proof, approval: approval}
+	} else if m.Schema == "full-window-actual-ready.v6" {
 		proof, approval, err := loadWindowActualStoppedBaselineV6(m)
 		if err != nil {
 			return reject()

@@ -161,7 +161,7 @@ func contractWindowCampaign(scope fullWindowScope, sha string, w fullWindowDecla
 		return windowProviderLimits{Model: p.Model, MaxAttempts: attempts, MaxRequestBytes: p.MaxRequestBytes, MaxInput: p.MaxInput, MaxOutput: p.MaxOutput, InputRate: p.InputRate, OutputRate: p.OutputRate, CacheHitInputRate: p.CacheHitInputRate}
 	}
 	schema := "full-window-accounting.v1"
-	if scope.Schema == "full-window-scope.v4" || scope.Schema == "full-window-scope.v5" || scope.Schema == "full-window-scope.v6" {
+	if scope.Schema == "full-window-scope.v4" || scope.Schema == "full-window-scope.v5" || scope.Schema == "full-window-scope.v6" || scope.Schema == "full-window-scope.v7" {
 		schema = "full-window-accounting.v2"
 	}
 	return windowAccountingContract{Schema: schema, ScopeSHA256: sha, ScheduleSHA256: scope.ScheduleSHA256, PolicySHA256: scope.Bindings.PolicySHA256, ClaimSHA256: sha, WindowID: w.ID, ModelCap: w.ModelCap, JEVCap: w.JEVCap, Model: convert(limits.Model, w.MaxModelCalls), JEV: convert(limits.JEV, w.MaxJEVCalls)}
@@ -174,7 +174,7 @@ func prepareWindowCampaign(root, frozenRoot string, scope fullWindowScope, sourc
 	if root != frozenRoot {
 		return out, fmt.Errorf("campaign root is not independently frozen root")
 	}
-	if e := validateWindowCampaignV6OrHistoricalLimits(scope, limits); e != nil {
+	if e := validateWindowCampaignV7OrHistoricalLimits(scope, limits); e != nil {
 		return out, e
 	}
 	sha, _, e := validateFullWindowScope(scope, source, profiles, bindings)
@@ -309,10 +309,14 @@ func validatePreparedWindowCampaign(p windowCampaignPrepared, b fullWindowBaseli
 		if err := validateStoppedV6CampaignHistory(p, b); err != nil {
 			return err
 		}
+	case "full-window-scope.v7":
+		if err := validateStoppedV7CampaignHistory(p, b); err != nil {
+			return err
+		}
 	default:
 		return fmt.Errorf("prepared campaign scope version rejected")
 	}
-	if err := validateWindowCampaignV6OrHistoricalLimits(p.scope, p.limits); err != nil {
+	if err := validateWindowCampaignV7OrHistoricalLimits(p.scope, p.limits); err != nil {
 		return err
 	}
 	raw, e := json.Marshal(p.scope)
@@ -334,6 +338,8 @@ func validatePreparedWindowCampaign(p windowCampaignPrepared, b fullWindowBaseli
 	claimModelBound, claimJEVBound := int64(70938880), int64(776896)
 	if p.scope.Schema == "full-window-scope.v6" {
 		claimModelBound, claimJEVBound = 85015146, 655442
+	} else if p.scope.Schema == "full-window-scope.v7" {
+		claimModelBound, claimJEVBound = 84510611, 650855
 	}
 	if e := d.validateWithBounds(claimModelBound, claimJEVBound); e != nil {
 		return e
@@ -402,6 +408,10 @@ func (c *windowCampaign) persistClaimWindowCampaign(i int, previous, checkpoint 
 		if err := validateStoppedV6CampaignHistory(c.prepared, c.baseline); err != nil {
 			return err
 		}
+	} else if c.prepared.scope.Schema == "full-window-scope.v7" {
+		if err := validateStoppedV7CampaignHistory(c.prepared, c.baseline); err != nil {
+			return err
+		}
 	} else if c.historicalDir != "" {
 		baseline, e := loadFullWindowBaseline(c.historicalDir)
 		if e != nil || !reflect.DeepEqual(baseline, c.baseline) {
@@ -410,7 +420,7 @@ func (c *windowCampaign) persistClaimWindowCampaign(i int, previous, checkpoint 
 	}
 	w := c.prepared.scope.Windows[i]
 	parentModel, parentJEV := int64(100000000), int64(1000000)
-	if c.prepared.scope.Schema == "full-window-scope.v3" || c.prepared.scope.Schema == "full-window-scope.v4" || c.prepared.scope.Schema == "full-window-scope.v5" || c.prepared.scope.Schema == "full-window-scope.v6" {
+	if c.prepared.scope.Schema == "full-window-scope.v3" || c.prepared.scope.Schema == "full-window-scope.v4" || c.prepared.scope.Schema == "full-window-scope.v5" || c.prepared.scope.Schema == "full-window-scope.v6" || c.prepared.scope.Schema == "full-window-scope.v7" {
 		parentModel, parentJEV = c.baseline.TotalModel, c.baseline.TotalJEV
 	}
 	if w.ModelCap > parentModel-c.model || w.JEVCap > parentJEV-c.jev {
@@ -439,6 +449,13 @@ func (c *windowCampaign) persistClaimWindowCampaign(i int, previous, checkpoint 
 	}
 	if d.Schema == "full-window-scope.v6" {
 		r.Schema = "full-window-campaign-claim.v6"
+		r.BaselineEvidenceSHA256 = d.BaselineEvidenceSHA256
+		r.BudgetApprovalSHA256 = d.BudgetApprovalSHA256
+		r.ParentModel = parentModel
+		r.ParentJEV = parentJEV
+	}
+	if d.Schema == "full-window-scope.v7" {
+		r.Schema = "full-window-campaign-claim.v7"
 		r.BaselineEvidenceSHA256 = d.BaselineEvidenceSHA256
 		r.BudgetApprovalSHA256 = d.BudgetApprovalSHA256
 		r.ParentModel = parentModel

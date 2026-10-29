@@ -106,10 +106,6 @@ func newWindowOwnedDriver(permit *windowAcquisitionPermit, source ConversationSu
 	if permit.active != nil || permit.stopped || env == nil || env != permit.environment || env.closed || env.admin == nil || env.db == nil || env.st == nil || env.rdb == nil || env.redis == nil || !strings.HasPrefix(env.name, "ai_gateway_pair_") || env.rdb.Options().Addr != env.redis.Addr() || observer == nil || observer != permit.observer || strings.TrimSpace(modelKey) == "" || strings.TrimSpace(jevKey) == "" || windowTransportNil(modelUpstream) || windowTransportNil(jevUpstream) {
 		return fail()
 	}
-	identity := observer.EvaluationIdentity()
-	if !identity.Enabled || !identity.CaptureContent || identity.SampleRate != 1 || identity.Environment != "evaluation" || identity.Release == "" || identity.Release == "unknown" || identity.ExportTimeoutMS != 2000 || identity.QueueSize < 1 || !comparisonDigest(identity.EndpointSHA256) || !comparisonDigest(identity.ProjectSHA256) || identity != permit.observerIdentity {
-		return fail()
-	}
 	c := permit.campaign
 	if c == nil {
 		return fail()
@@ -118,6 +114,10 @@ func newWindowOwnedDriver(permit *windowAcquisitionPermit, source ConversationSu
 	scope := c.prepared.scope
 	scopeSHA := c.prepared.scopeSHA
 	c.mu.Unlock()
+	identity := observer.EvaluationIdentity()
+	if !identity.Enabled || !identity.CaptureContent || identity.SampleRate != 1 || identity.Environment != "evaluation" || identity.Release == "" || identity.Release == "unknown" || identity.ExportTimeoutMS != windowObserverTimeoutForScope(scope.Schema) || identity.QueueSize < 1 || !comparisonDigest(identity.EndpointSHA256) || !comparisonDigest(identity.ProjectSHA256) || identity != permit.observerIdentity {
+		return fail()
+	}
 	if scope.Bindings.PolicySHA256 != collectionPolicySHA() && scope.Bindings.PolicySHA256 != windowOwnedQualityPolicySHA() {
 		return fail()
 	}
