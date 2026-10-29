@@ -35,6 +35,94 @@ func TestConversationFactsCashUnitsAndUnknown(t *testing.T) {
 		}
 	}
 }
+
+func TestClaimCentGroupedCurrency(t *testing.T) {
+	for _, tc := range []struct {
+		raw  string
+		want int64
+		ok   bool
+	}{
+		{"¥5,000.00", 500000, true},
+		{"￥5,000.00", 500000, true},
+		{"5,000.00元", 500000, true},
+		{"-¥1,234,567.89", -123456789, true},
+		{"¥5000.00", 500000, true},
+		{"5000.00元", 500000, true},
+		{"¥50,00", 0, false},
+		{"¥5,,000", 0, false},
+		{"¥1,23,456", 0, false},
+		{"¥5,000.001", 0, false},
+		{"¥90,071,992,547,410.00", 0, false},
+	} {
+		t.Run(tc.raw, func(t *testing.T) {
+			got, ok := claimCent(tc.raw)
+			if got != tc.want || ok != tc.ok {
+				t.Fatalf("claimCent(%q) = (%d, %v), want (%d, %v)", tc.raw, got, ok, tc.want, tc.ok)
+			}
+		})
+	}
+}
+
+func TestConversationFactsGroupedCashAndRechargeRefundAmounts(t *testing.T) {
+	f, s := conversationFixture()
+	for _, tc := range []struct {
+		reply string
+		bad   bool
+	}{
+		{"当前可用余额 ¥5,000.00；账本口径 ¥5,000.00。", false},
+		{"当前可用余额 ¥5,000.00, 账本口径 ¥5,000.00。", false},
+		{"当前现金余额为 ¥5,000.00。需要我帮您充值指定金额吗？说下金额即可。", false},
+		{"当前可用余额 ¥5,000.00，账本口径也是 ¥5,000.00，两者一致。", false},
+		{"当前可用余额 ¥4,999.00；账本口径 ¥5,000.00。", true},
+	} {
+		r := ConversationResult{Fixture: f, Initial: s, Observations: []ConversationObservation{{State: s, Turn: Turn{Response: Response{Reply: tc.reply}}}}}
+		if got := factMismatch(CheckConversationFacts(r)); got != tc.bad {
+			t.Fatalf("reply %q mismatch=%v, want %v", tc.reply, got, tc.bad)
+		}
+	}
+	for _, reply := range []string{"当前可用余额 ¥50,00。", "当前可用余额 ¥5,,000。", "当前可用余额 ¥1,23,456。"} {
+		low, lowState := conversationFixture()
+		lowState.Own.BalanceCent = 500
+		checks := CheckConversationFacts(ConversationResult{Fixture: low, Initial: lowState, Observations: []ConversationObservation{{State: lowState, Turn: Turn{Response: Response{Reply: reply}}}}})
+		if !factMismatch(checks) {
+			t.Fatalf("malformed grouped cash claim was truncated into a valid smaller amount: %q (%+v)", reply, checks)
+		}
+	}
+
+	d := rechargeDriver()
+	r := RunConversation(context.Background(), rechargeConversation(), d)
+	r.Observations[1].Pending.Args["amount_money"] = float64(1000)
+	r.Observations[1].Turn.Response.Reply = "将模拟充值 1,000.00元（模拟支付）。确认后到账。"
+	if factMismatch(CheckConversationFacts(r)) {
+		t.Fatal("correct grouped recharge preview rejected")
+	}
+	r.Observations[1].Turn.Response.Reply = "将模拟充值 1,001.00元（模拟支付）。确认后到账。"
+	if !factMismatch(CheckConversationFacts(r)) {
+		t.Fatal("wrong grouped recharge preview accepted")
+	}
+
+	f, s = conversationFixture()
+	s.Own.BalanceCent = 2500
+	s.Own.LedgerBalance = 2500
+	obs := ConversationObservation{State: s, Pending: &Pending{Tool: "refund_recharge", TenantID: f.TenantID, Args: map[string]any{"amount_money": float64(100)}}, Turn: Turn{Response: Response{Reply: "当前可用余额 ¥25.00，实际退款 ¥25.00。确认后执行。"}}}
+	r = ConversationResult{Fixture: f, Initial: s, Observations: []ConversationObservation{obs}}
+	if factMismatch(CheckConversationFacts(r)) {
+		t.Fatal("correct grouped refund cap was rejected")
+	}
+	obs.Turn.Response.Reply = "实际退款 ¥24.00。确认后执行。"
+	r.Observations[0] = obs
+	if !factMismatch(CheckConversationFacts(r)) {
+		t.Fatal("wrong refund cap accepted")
+	}
+
+	s.Own.BalanceCent = 10_000_000
+	s.Own.LedgerBalance = 10_000_000
+	obs = ConversationObservation{State: s, Pending: &Pending{Tool: "refund_recharge", TenantID: f.TenantID, Args: map[string]any{"amount_money": float64(100000)}}, Turn: Turn{Response: Response{Reply: "实际退款 ¥100,000.00。确认后执行。"}}}
+	r = ConversationResult{Fixture: f, Initial: s, Observations: []ConversationObservation{obs}}
+	if factMismatch(CheckConversationFacts(r)) {
+		t.Fatal("correct grouped refund amount was rejected")
+	}
+}
 func TestConversationFactsPendingAndRefundCap(t *testing.T) {
 	d := rechargeDriver()
 	r := RunConversation(context.Background(), rechargeConversation(), d)
@@ -100,7 +188,7 @@ func TestConversationFactsOrderStatusAndWrongWriteKind(t *testing.T) {
 }
 func TestConversationFactCheckedRunnerRejectsWrongAnswer(t *testing.T) {
 	d := rechargeDriver()
-	d.steps[2].Turn.Response.Reply = "充值成功：到账 ¥999。"
+	d.steps[2].Turn.Response.Reply = "充值成功：到账 ¥9,999.00。"
 	r, checks := RunFactCheckedConversation(context.Background(), rechargeConversation(), d)
 	if !r.StructuralPass || r.Status != "failed" || r.Success || !factMismatch(checks) {
 		t.Fatalf("wrong answer counted as success %+v %+v", r, checks)

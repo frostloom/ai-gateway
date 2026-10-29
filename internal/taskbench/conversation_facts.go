@@ -17,9 +17,11 @@ type ConversationFactCheck struct {
 	Status    string `json:"status"` // match, mismatch, not_evaluated
 }
 
-var cashClaim = regexp.MustCompile(`(?:^|[；;，,。\n])\s*(当前可用余额|当前余额|(?:你的)?当前(?:可用)?现金余额|现金余额|余额|账本口径|账本余额)[：:为是\s]*([¥￥]\s*-?[0-9]+(?:\.[0-9]+)?|-?[0-9]+(?:\.[0-9]+)?\s*元)`)
-var rechargeClaim = regexp.MustCompile(`(?:将模拟充值|到账)[：:\s]*([¥￥]\s*[0-9]+(?:\.[0-9]+)?|[0-9]+(?:\.[0-9]+)?\s*元)`)
-var refundClaim = regexp.MustCompile(`(?:实际退款|已退款|已退还|退回|退款成功[：:])[：:\s]*([¥￥]\s*[0-9]+(?:\.[0-9]+)?|[0-9]+(?:\.[0-9]+)?\s*元)`)
+const moneyToken = `[0-9]+(?:,[0-9,]+)*(?:\.[0-9]+)?`
+
+var cashClaim = regexp.MustCompile(`(?:^|[；;，,。\n])\s*(当前可用余额|当前余额|(?:你的)?当前(?:可用)?现金余额|现金余额|余额|账本口径|账本余额)[：:为是\s]*([¥￥]\s*-?` + moneyToken + `|-?` + moneyToken + `\s*元)`)
+var rechargeClaim = regexp.MustCompile(`(?:将模拟充值|到账)[：:\s]*([¥￥]\s*` + moneyToken + `|` + moneyToken + `\s*元)`)
+var refundClaim = regexp.MustCompile(`(?:实际退款|已退款|已退还|退回|退款成功[：:])[：:\s]*([¥￥]\s*` + moneyToken + `|` + moneyToken + `\s*元)`)
 var ownOrderClaim = regexp.MustCompile(`(?:订单号|订单)[：:\s]+([A-Za-z0-9_:-]+)(?:\s+(?:已支付|已退款|退回)|[：:]订单额度)`)
 var orderStatusClaim = regexp.MustCompile(`订单[：:\s]+([A-Za-z0-9_:-]+)\s+(已支付|已退款)`)
 var subscriptionClaim = regexp.MustCompile(`当前订阅[：:]\s*套餐#([0-9]+)`)
@@ -31,7 +33,21 @@ func claimCent(raw string) (int64, bool) {
 	if len(parts) > 2 || (len(parts) == 2 && len(parts[1]) > 2) {
 		return 0, false
 	}
-	whole, err := strconv.ParseInt(parts[0], 10, 64)
+	wholeText := parts[0]
+	unsignedWhole := strings.TrimPrefix(wholeText, "-")
+	if strings.Contains(unsignedWhole, ",") {
+		groups := strings.Split(unsignedWhole, ",")
+		if len(groups[0]) < 1 || len(groups[0]) > 3 {
+			return 0, false
+		}
+		for _, group := range groups[1:] {
+			if len(group) != 3 {
+				return 0, false
+			}
+		}
+		wholeText = strings.ReplaceAll(wholeText, ",", "")
+	}
+	whole, err := strconv.ParseInt(wholeText, 10, 64)
 	if err != nil || whole > 90071992547409 || whole < -90071992547409 {
 		return 0, false
 	}
