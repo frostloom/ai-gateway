@@ -152,7 +152,7 @@ func CheckFullWindowActualReady(o FullWindowActualReadyOptions) (FullWindowActua
 	}
 	sourceRaw, _ := json.Marshal(m.Sources)
 	sourceSHA := conversationHash(sourceRaw)
-	if !reflect.DeepEqual(m.FullGo.Command, []string{"go", "test", "./...", "-count=1", "-timeout=20m", "-json"}) || m.FullGo.SourceSHA256 != sourceSHA || !reflect.DeepEqual(m.FullGo.Packages, packages) {
+	if !reflect.DeepEqual(m.FullGo.Command, windowActualGoCommand(m.Schema)) || m.FullGo.SourceSHA256 != sourceSHA || !reflect.DeepEqual(m.FullGo.Packages, packages) {
 		return reject()
 	}
 	inventory, err := windowActualPackageInventory(m.SourceRoot, m.Sources)

@@ -62,3 +62,12 @@ func windowObserverTimeoutForScope(schema string) int64 {
 	}
 	return 2000
 }
+
+// windowActualGoCommand binds each epoch to its independently reviewed full regression.
+func windowActualGoCommand(schema string) []string {
+	timeout := "-timeout=20m"
+	if schema == "full-window-actual-ready.v7" {
+		timeout = "-timeout=30m"
+	}
+	return []string{"go", "test", "./...", "-count=1", timeout, "-json"}
+}
