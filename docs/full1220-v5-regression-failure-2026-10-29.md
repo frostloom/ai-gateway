@@ -1,0 +1,13 @@
+# Actual5初次精确归档全Go未通过
+
+源码0a3602759198e9f2928f5e1d3c1b086184611e0e的原配置全量Go回归在940.555秒退出1，未触发1200秒整套上限。22个测试包通过、26个无测试包、taskbench失败，3项原opt-in跳过保留。
+
+仅两项失败：window_legacy_entry_test.go中的TestActualOpenRejectsLegacyBudgetBeforeSettingsOrRoots与TestActualOpenRejectsConsumedV2EpochBeforeSettingsOrRoots仍匹配“actual v4”；实际入口正确在设置/目录前以“actual v5 scope required for current budget epoch”拒绝。此前按window_actual文件名筛选遗漏了独立legacy_entry文件。修复只同步当前版本预期，保留业务、拒绝阶段及无副作用断言；先补该入口范围定向回归，再从新提交建立新独立归档重跑完整20分钟策略。
+
+原0a归档的2136文件/431Go逐SHA仍同Git，库存仅含签名源及合法.git pointer，无新增字节码；现只读保留失败证据，不删除或覆盖原日志、源码或结果，也不创建正式actual-ready seal。9个本项目服务已恢复同ID/image/config/mounts并healthy，caffeinate自有进程断言已释放。
+
+未启动付费owner、创建实际claim或调用新模型/JEV，累计1985/501、28份永久预留40625891µCNY/323825µUSD及105父预算、原risk/hold不变。不得将定向验证、替身433包或本次失败的完整命令称执行就绪。后续新归档仅为未领取scope的离线修复，不恢复任何已消耗旧scope。[原失败机器证据](evidence/full1220-v5-regression-failure-2026-10-29.json)。
+
+修复后两项失败测试及新5相关入口共5项定向回归1.162秒通过，未改生产Go或任何其他断言；全taskbench测试文件广泛检索未发现其他当前入口旧版本预期。该定向通过不替代新精确归档全Go回归。
+
+独立scoped复核确认仅两处版本预期更新，其他断言与生产Go未改，材料SHA及5项日志一致，无确认P1/P2。Hindsight失败快照已completed并原文读回，覆盖此前运行中快照。

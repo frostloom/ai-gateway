@@ -1,0 +1,83 @@
+{
+  "schema": "full1220-v5-initial-regression-failure.v1",
+  "source_commit": "0a3602759198e9f2928f5e1d3c1b086184611e0e",
+  "tree": "121293afa03ae64343df4a0cca866c036e631be2",
+  "result_sha256": "c4803cb6bdf4ca3149bf1e29a3bb26bfbca3152ca65c9423bdc35bf0dcb71947",
+  "jsonl_sha256": "1ab4ae010b3c18fba28e7a1d9999fe3376dd1f816ee86a26d28ec5d2c911223f",
+  "exit_code": 1,
+  "seconds": 940.5549175830092,
+  "command": [
+    "go",
+    "test",
+    "./...",
+    "-count=1",
+    "-timeout=20m",
+    "-json"
+  ],
+  "failed_tests": [
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+      "test": "TestActualOpenRejectsLegacyBudgetBeforeSettingsOrRoots"
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/taskbench",
+      "test": "TestActualOpenRejectsConsumedV2EpochBeforeSettingsOrRoots"
+    }
+  ],
+  "passed_test_events": 2924,
+  "package_counts": {
+    "pass": 22,
+    "skip": 26,
+    "fail": 1
+  },
+  "original_skips": [
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/billing/store",
+      "test": "TestCashLoad"
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/agent",
+      "test": "TestLiveJevSemanticsDiagnostic"
+    },
+    {
+      "package": "github.com/frostloom/ai-gateway/internal/billing/store",
+      "test": "TestCashProfileRowTiming"
+    }
+  ],
+  "source_preservation": {
+    "schema": "full1220-v5-failed-regression-source-preservation.v1",
+    "created_at": "2026-10-28T23:58:27.710795+00:00",
+    "tracked": 2136,
+    "go": 431,
+    "tracked_sha_unchanged": true,
+    "exact_inventory": true,
+    "allowed_metadata_file": ".git",
+    "source_readonly_for_evidence_preservation": true,
+    "formal_actual_ready_seal_created": false,
+    "Go_exit": 1,
+    "new_paid_owner": false,
+    "new_financial_claims": 0
+  },
+  "services_restored_same_ids_images_config_mounts_healthy": true,
+  "owned_caffeinate_released": true,
+  "new_model_or_jev_requests": 0,
+  "new_actual_financial_claims": 0,
+  "actual_owner_started": false,
+  "old_28_permanent_micro_cny": 40625891,
+  "old_28_permanent_micro_usd": 323825,
+  "cause": "Two legacy-entry test expectations still match actual v4 while Open correctly rejects with actual v5 scope required for current budget epoch. Only test expected version needs maintenance; other business and early no-side-effect assertions remain.",
+  "paid_ready": false,
+  "targeted_fix": {
+    "source_file": "internal/taskbench/window_legacy_entry_test.go",
+    "source_sha256": "be60d29c5488c883baa0d38b690226e89e3952f9f861f68e2a7e800d54e1bc13",
+    "changes": "only two expected current version substrings v4 scope->v5 scope; all other assertions preserved",
+    "tests": 5,
+    "seconds": 1.162,
+    "fail": 0,
+    "skip": 0,
+    "stderr_bytes": 0,
+    "completion_report_sha256": "f51f60c97265886cf32670d3e471cb5f4f01c5e1df07f04c5bd145811d70ad10",
+    "fullGo_rerun_required": true,
+    "independent_review": "passed_no_confirmed_P1_P2;twoexpectedversionstringsonly,allotherassertionsandproductionGounchanged;allartifactSHA matched"
+  }
+}
