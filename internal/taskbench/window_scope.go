@@ -61,6 +61,10 @@ type fullWindowTotals struct {
 
 // Preparation is an offline declaration, never execution or claim permission.
 func prepareFullWindowScope(s ConversationSuite, p PairedProfiles, width int, caps []fullWindowCaps, b fullWindowBindings) (fullWindowScope, error) {
+	return prepareFullWindowScopeWithBounds(s, p, width, caps, b, 70938880, 776896)
+}
+
+func prepareFullWindowScopeWithBounds(s ConversationSuite, p PairedProfiles, width int, caps []fullWindowCaps, b fullWindowBindings, modelBound, jevBound int64) (fullWindowScope, error) {
 	var out fullWindowScope
 	if width < 1 || width > 100 {
 		return out, fmt.Errorf("window width must be 1..100")
@@ -90,7 +94,7 @@ func prepareFullWindowScope(s ConversationSuite, p PairedProfiles, width int, ca
 	out = fullWindowScope{Schema: "full-window-scope.v1", Bindings: b, DefinitionSHA256: s.DefinitionSHA256, ManifestSHA256: s.ManifestSHA256, SelectionSHA256: digest, ProfileSHA256: p.SHA256, Width: width, OddPassFirstArmImbalance: true}
 	var model, jev int64
 	for i, c := range caps {
-		if c.ModelCap < 1 || c.ModelCap > 70938880-model || c.JEVCap < 1 || c.JEVCap > 776896-jev {
+		if c.ModelCap < 1 || c.ModelCap > modelBound-model || c.JEVCap < 1 || c.JEVCap > jevBound-jev {
 			return fullWindowScope{}, fmt.Errorf("window permanent caps exceed remaining separate currencies")
 		}
 		model += c.ModelCap
@@ -147,6 +151,8 @@ func validateFullWindowScope(scope fullWindowScope, s ConversationSuite, p Paire
 		expected, e = prepareFullWindowScopeV4(s, p, scope.Width, caps, b, scope.BaselineEvidenceSHA256, scope.BudgetApprovalSHA256)
 	case "full-window-scope.v5":
 		expected, e = prepareFullWindowScopeV5(s, p, scope.Width, caps, b, scope.BaselineEvidenceSHA256, scope.BudgetApprovalSHA256)
+	case "full-window-scope.v6":
+		expected, e = prepareFullWindowScopeV6(s, p, scope.Width, caps, b, scope.BaselineEvidenceSHA256, scope.BudgetApprovalSHA256)
 	default:
 		return "", totals, fmt.Errorf("unsupported complete-window scope version")
 	}

@@ -56,12 +56,16 @@ func claimFirstFullWindow(root, historicalDir string, scope fullWindowScope, sou
 }
 
 func (d fullWindowClaimDeclaration) validate() error {
+	return d.validateWithBounds(70938880, 776896)
+}
+
+func (d fullWindowClaimDeclaration) validateWithBounds(modelBound, jevBound int64) error {
 	for _, h := range []string{d.ScopeSHA256, d.ScheduleSHA256, d.PolicySHA256} {
 		if !comparisonDigest(h) {
 			return fmt.Errorf("missing claim identity")
 		}
 	}
-	if len(d.Windows) < 37 || len(d.Windows) > 3660 || d.ModelTotal < 1 || d.ModelTotal > 70938880 || d.JEVTotal < 1 || d.JEVTotal > 776896 {
+	if len(d.Windows) < 37 || len(d.Windows) > 3660 || d.ModelTotal < 1 || d.ModelTotal > modelBound || d.JEVTotal < 1 || d.JEVTotal > jevBound {
 		return fmt.Errorf("declared scope exceeds remaining currencies")
 	}
 	var model, jev int64
