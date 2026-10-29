@@ -1,0 +1,91 @@
+{
+  "schema": "full1220-v5-r2-stopped-delivery-public.v1",
+  "archive_commit": "740db25818eccebe8363b282a109a14ca610a0be",
+  "manifest_sha256": "3e80c9fe4bc15fb096a5dbd5a61ca9ad79bb85f7dc98f8855b65a3b947dcb30b",
+  "original_goal_pairs": 3660,
+  "completed_pairs": 84,
+  "finished_arms": 168,
+  "observed_turns": 200,
+  "unrun_pairs": 3576,
+  "unattempted_arms": 7152,
+  "global_unrun_turns": 11572,
+  "actual_owner_exit": 0,
+  "operator_closed_after_external_verifier_refusal": true,
+  "resume_allowed": false,
+  "new_model_JEV": [
+    307,
+    84
+  ],
+  "historical_cumulative_model_JEV": [
+    2292,
+    585
+  ],
+  "native_packets": 391,
+  "observer_exported": 926,
+  "observer_failed": 0,
+  "scores_once_only": 502,
+  "score_readback_all_verified": true,
+  "content_readback_traces_observations_turns": [
+    168,
+    926,
+    200
+  ],
+  "semantic_tasks_pass_fail": [
+    149,
+    19
+  ],
+  "strict_tasks_pass_fail": [
+    147,
+    21
+  ],
+  "requirements_pass_fail": [
+    556,
+    44
+  ],
+  "permanent_claim_count": 32,
+  "permanent_micro_CNY_USD": [
+    42961430,
+    344493
+  ],
+  "parent_budget_micro_CNY_USD": [
+    105000000,
+    1000000
+  ],
+  "configured_known_cost_not_invoice_micro_CNY_USD": [
+    233272,
+    4299
+  ],
+  "claim4_reserved_unrun": true,
+  "complete_goal": false,
+  "artifact_sha256": {
+    "external-verifier-stop.json": "10ae8869d432bbbb0bc3aff1dbb8888309d20767e0371f82699d29085d4bbcc8",
+    "records/terminal.json": "783d8b9f72540368c3ffc1992d7fb4e117616e4a2333ded5d5aede64da107557",
+    "actual-owner-exit.json": "7d6229b7f61bcdf712dace2f7e22587c1f4a4b6e592131b2c7b358807de4b047",
+    "window-000003-poststop-full-audit.json": "b807f5e4ac3062c646f4f53d788a89cd9c47931606cfa3af79cc31e465967ad0",
+    "verification-stop-diagnosis.json": "a6cb8d0388764514ccc050e77583db41aa605e91622c810952fa45355c6a8b52",
+    "verification-stop-diagnosis-line-correction.json": "38977ee51a007aa700d07f2c752b28447405459e194624e183790111632bee47",
+    "poststop-verifier-preparation/implementation-report.json": "4ddcd068090111a5d22ef113a93e02c30a2ed151cee01c099b17f2218c461dbe",
+    "semantic-review-window-000001.json": "0d847fcadd876cef2849698d209c81ca0797760f4ebf71e029909faa4c781fc6",
+    "semantic-review-window-000002.json": "8e0e259a87ef5e7cd6fed5437e14ba775b1fc81460906ec1eec8183b1f84fdd8",
+    "semantic-review-window-000003.json": "787994d8524d6a6a2727233fbdd5fbd6a5ab8364ae64cb1ca8edb40d197dfce4",
+    "descriptive-result.json": "a503e475c842d6b984b72a8eb404c1391d80d725b2e517456727241247507342",
+    "score-delivery-independent-audit.json": "12c5527bb05610143074dc8c7ebf6f27a8b378653d8780b968651046dc07ffaa",
+    "score-delivery-independent-audit-supplement.json": "da6892b8feeedc6e512004e13b757acc60aa9e355a60a8f0fa16cd1defc3fa3b",
+    "next-full-scope-feasibility.json": "60929cb2a6ce7e21ba5d227a6f27d7a479cf676ed87ec0f8c104877cfa94aa90",
+    "score-delivery-v5/window-000001/publish-result.json": "318d01e9ce2d4fb4a47f8d6ff22eee8da31000769f780b868323b89f5c87848d",
+    "score-delivery-v5/window-000001/scores-formal-readback-001.json": "9c7e113de46dcdd5a12bf7620f5d5e9a23bebac5b77ef0f75359d902ca3b8f82",
+    "score-delivery-v5/window-000001/scores-readback-response-inventory-001.json": "610be859f2e199e05a93bc0bd5e96a595f891da0c1f540988e4e4641a89d7ab6",
+    "score-delivery-v5/window-000001/content-formal-readback-001.json": "970107e69f4365c6e2576090a0c9cb1a2600f00f388abbe70df4871f7bcac898",
+    "score-delivery-v5/window-000001/content-readback-response-inventory-001.json": "f305915cb0fcf3f514b837e85b885e30f22afd4ac1410ebcecdd177695ecc958",
+    "score-delivery-v5/window-000002/publish-result.json": "318d01e9ce2d4fb4a47f8d6ff22eee8da31000769f780b868323b89f5c87848d",
+    "score-delivery-v5/window-000002/scores-formal-readback-001.json": "9c7e113de46dcdd5a12bf7620f5d5e9a23bebac5b77ef0f75359d902ca3b8f82",
+    "score-delivery-v5/window-000002/scores-readback-response-inventory-001.json": "f8f89c9a622bde9a734a3ecb56dffec286251f4ebffa036b9ed7f738fc648ff5",
+    "score-delivery-v5/window-000002/content-formal-readback-001.json": "dcd0ec79198697f9a4e7e8e074a51771e9489079d3ac81f9ed5686288bbfff2c",
+    "score-delivery-v5/window-000002/content-readback-response-inventory-001.json": "1a2baf99d0481b575a8ef3259212ec60e955c3ea7e7bc929e019e4ac346cc282",
+    "score-delivery-v5/window-000003/publish-result.json": "6d1a92079447376d985d568b92e2ea408bfc3fc6afc7eceb6d2ef31612f87003",
+    "score-delivery-v5/window-000003/scores-formal-readback-001.json": "dc2bdfa67bc0a7e38896fcade665447961dded5b7149a5802446e82d182b3690",
+    "score-delivery-v5/window-000003/scores-readback-response-inventory-001.json": "ef58a4347bc9990fa7d73e8ea3c0b56fdb39a88537f40011d95970bf4f5eb9cb",
+    "score-delivery-v5/window-000003/content-formal-readback-001.json": "ac613715b930b5ca0f23fbd1e007e832ea49ede3d00fe69fd4696023cfe7c5f0",
+    "score-delivery-v5/window-000003/content-readback-response-inventory-001.json": "1020092c15add781f9b06ac699b1debae22012e3b397e7363118f11934643c9c"
+  }
+}
