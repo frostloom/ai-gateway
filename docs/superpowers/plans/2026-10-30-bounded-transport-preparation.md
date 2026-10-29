@@ -12,9 +12,15 @@ TDD must demonstrate behavioral RED, then GREEN: eligible complete EOF; bare EOF
 
 ## Task 2: parent accounting core specification
 
+### Additional protocol verification for Task 1
+
+Before integration, verify the callback assumption with the real standard-library `http.Transport` over `net.Pipe`. Cover direct TLS and an in-memory HTTP CONNECT tunnel. The peer reads a complete TLS ClientHello record then closes; assert one dial, nil response, actual failed TLS callback and no request-body reads. Join the peer goroutine and bound all waits. There is no TCP listener, external network or second request. This validates two local failure paths, not arbitrary HTTP/2 internals or a retry authorization. Preserve the first observed result; this is hypothesis verification, not a fabricated production-bug RED.
+
 Design an independent versioned parent ledger: cumulative known costs, every permanent unknown liability, one pending native attempt, fixed funding tranches and duplicate-resistant nonfinancial child identity. Admission must fit funded capacity and the fixed parent ceiling. Created tranches stay permanently reserved; uncreated tranches are not pre-reserved. Persistence failure poisons the owner; closure cannot be resumed. No generic recovery framework or changes to legacy ledgers. Review this design before implementation.
 
 ## Task 3: offline accounting core, after clean specification review
+
+**Parked by engineering ruling:** Preserve the incomplete, unreviewed parent-core attempt under `.tmp/parent-accounting-core-20261030/parked/`; it has no working-tree source or runtime consumer. Do not resume this task. Prefer the narrower C-extra integration: retain existing window claims and caps, add one exact maximum-liability funding claim for each eligible first failed native attempt, and retain unknown liability permanently. This avoids a replacement parent funding pool. Its new retry and candidate ¥140+$1.1 budget remain unapproved; current execution rules stay unchanged. The paragraph below records the superseded implementation brief, not current authorization.
 
 Implement the narrowed specification `continuation-design/parent-ledger-spec.md`, SHA `95e192e5246afd61360d4aa29016029b9613b320f218809db89f444d64061f90`, under the V7 private preparation root. Preserve its original v1 and review. New parent-accounting source/test files only; leave the old window ledger and all runtime callers unchanged. The primitive manages dynamic logical requests and native attempts, not the 7320-arm cursor. Accounting tickets are not egress permits; real funding claims, verified configuration, TLS permission, source/owner guards and filesystem store integration remain separate gates.
 

@@ -40,15 +40,16 @@ type windowAccountingContract struct {
 	JEV            windowProviderLimits `json:"jev"`
 }
 type windowRequestIdentity struct {
-	Provider   string `json:"provider"`
-	Model      string `json:"model"`
-	CaseKey    string `json:"case_key"`
-	Pass       int    `json:"pass"`
-	Arm        string `json:"arm"`
-	Turn       int    `json:"turn"`
-	Attempt    int    `json:"attempt"`
-	BodySHA256 string `json:"body_sha256"`
-	Bytes      int    `json:"bytes"`
+	NativeAttempt int    `json:"native_attempt,omitempty"`
+	Provider      string `json:"provider"`
+	Model         string `json:"model"`
+	CaseKey       string `json:"case_key"`
+	Pass          int    `json:"pass"`
+	Arm           string `json:"arm"`
+	Turn          int    `json:"turn"`
+	Attempt       int    `json:"attempt"`
+	BodySHA256    string `json:"body_sha256"`
+	Bytes         int    `json:"bytes"`
 }
 type windowUsage struct {
 	Input     *int64 `json:"input_tokens"`
@@ -61,18 +62,24 @@ type windowPendingIntent struct {
 	Request  windowRequestIdentity `json:"request"`
 }
 type windowAccountingState struct {
-	ModelPermanent    int64                `json:"permanent_model_micro_cny"`
-	JEVPermanent      int64                `json:"permanent_jev_micro_usd"`
-	ModelKnown        int64                `json:"known_model_micro_cny"`
-	JEVKnown          int64                `json:"known_jev_micro_usd"`
-	ModelHeld         int64                `json:"held_model_micro_cny"`
-	JEVHeld           int64                `json:"held_jev_micro_usd"`
-	ModelAttempts     int                  `json:"model_intents"`
-	JEVAttempts       int                  `json:"jev_intents"`
-	Pending           *windowPendingIntent `json:"pending,omitempty"`
-	Halt              string               `json:"halt,omitempty"`
-	Closed            bool                 `json:"closed"`
-	EnvelopeViolation bool                 `json:"envelope_violation"`
+	UnknownIntents    []windowUnknownIntent `json:"unknown_intents,omitempty"`
+	ModelUnknownHeld  int64                 `json:"unknown_held_model,omitempty"`
+	JEVUnknownHeld    int64                 `json:"unknown_held_jev,omitempty"`
+	ModelExtraFunded  int64                 `json:"extra_funded_model,omitempty"`
+	JEVExtraFunded    int64                 `json:"extra_funded_jev,omitempty"`
+	RetryRequired     *windowPendingIntent  `json:"retry_required,omitempty"`
+	ModelPermanent    int64                 `json:"permanent_model_micro_cny"`
+	JEVPermanent      int64                 `json:"permanent_jev_micro_usd"`
+	ModelKnown        int64                 `json:"known_model_micro_cny"`
+	JEVKnown          int64                 `json:"known_jev_micro_usd"`
+	ModelHeld         int64                 `json:"held_model_micro_cny"`
+	JEVHeld           int64                 `json:"held_jev_micro_usd"`
+	ModelAttempts     int                   `json:"model_intents"`
+	JEVAttempts       int                   `json:"jev_intents"`
+	Pending           *windowPendingIntent  `json:"pending,omitempty"`
+	Halt              string                `json:"halt,omitempty"`
+	Closed            bool                  `json:"closed"`
+	EnvelopeViolation bool                  `json:"envelope_violation"`
 }
 type windowAccountingAudit struct {
 	// A readable event proves only its logical content. In particular, bytes
@@ -85,15 +92,20 @@ type windowAccountingAudit struct {
 	Events          int                      `json:"events"`
 }
 type windowAccountingEvent struct {
-	Kind           string                    `json:"kind"`
-	Index          int                       `json:"index"`
-	PreviousSHA256 string                    `json:"previous_sha256,omitempty"`
-	Contract       *windowAccountingContract `json:"contract,omitempty"`
-	Sequence       int                       `json:"sequence,omitempty"`
-	Request        *windowRequestIdentity    `json:"request,omitempty"`
-	ResponseSHA256 string                    `json:"response_sha256,omitempty"`
-	Usage          *windowUsage              `json:"usage,omitempty"`
-	Code           string                    `json:"code,omitempty"`
+	DescriptorSHA256 string                    `json:"descriptor_sha256,omitempty"`
+	UnknownSequence  int                       `json:"unknown_sequence,omitempty"`
+	Provider         string                    `json:"provider,omitempty"`
+	Amount           int64                     `json:"amount,omitempty"`
+	ExtraClaimSHA256 string                    `json:"extra_claim_sha256,omitempty"`
+	Kind             string                    `json:"kind"`
+	Index            int                       `json:"index"`
+	PreviousSHA256   string                    `json:"previous_sha256,omitempty"`
+	Contract         *windowAccountingContract `json:"contract,omitempty"`
+	Sequence         int                       `json:"sequence,omitempty"`
+	Request          *windowRequestIdentity    `json:"request,omitempty"`
+	ResponseSHA256   string                    `json:"response_sha256,omitempty"`
+	Usage            *windowUsage              `json:"usage,omitempty"`
+	Code             string                    `json:"code,omitempty"`
 }
 type windowJournalFile interface {
 	io.Writer
@@ -139,10 +151,10 @@ func (p windowProviderLimits) validate(model bool) error {
 	return nil
 }
 func (c windowAccountingContract) validate() error {
-	if (c.Schema != "full-window-accounting.v1" && c.Schema != "full-window-accounting.v2") || !windowIDPattern.MatchString(c.WindowID) || c.ModelCap < 1 || c.ModelCap > 1000000000 || c.JEVCap < 1 || c.JEVCap > 1000000000 {
+	if (c.Schema != "full-window-accounting.v1" && c.Schema != "full-window-accounting.v2" && c.Schema != "full-window-accounting.v3") || !windowIDPattern.MatchString(c.WindowID) || c.ModelCap < 1 || c.ModelCap > 1000000000 || c.JEVCap < 1 || c.JEVCap > 1000000000 {
 		return fmt.Errorf("invalid window declaration")
 	}
-	if c.JEV.CacheHitInputRate != 0 || (c.Schema == "full-window-accounting.v1" && c.Model.CacheHitInputRate != 0) || (c.Schema == "full-window-accounting.v2" && (c.Model.CacheHitInputRate <= 0 || c.Model.CacheHitInputRate > c.Model.InputRate)) {
+	if c.JEV.CacheHitInputRate != 0 || (c.Schema == "full-window-accounting.v1" && c.Model.CacheHitInputRate != 0) || ((c.Schema == "full-window-accounting.v2" || c.Schema == "full-window-accounting.v3") && (c.Model.CacheHitInputRate <= 0 || c.Model.CacheHitInputRate > c.Model.InputRate)) {
 		return fmt.Errorf("invalid versioned cache input rate")
 	}
 	for _, h := range []string{c.ScopeSHA256, c.ScheduleSHA256, c.PolicySHA256, c.ClaimSHA256} {
@@ -177,6 +189,9 @@ func windowRequestSlot(r windowRequestIdentity) string {
 	return conversationHash(raw)
 }
 func (c windowAccountingContract) validateRequest(r windowRequestIdentity) error {
+	if (c.Schema == windowAccountingV3 && r.NativeAttempt != 1 && r.NativeAttempt != 2) || (c.Schema != windowAccountingV3 && r.NativeAttempt != 0) {
+		return fmt.Errorf("invalid versioned native attempt")
+	}
 	p, err := c.provider(r.Provider)
 	if err != nil {
 		return err
@@ -326,6 +341,15 @@ func (l *windowAccounting) append(e windowAccountingEvent) error {
 	return nil
 }
 func (l *windowAccounting) apply(e windowAccountingEvent) error {
+	if l.contract.Schema == windowAccountingV3 {
+		return l.applyV3(e)
+	}
+	if e.hasV3Fields() {
+		return fmt.Errorf("v3 fields in legacy ledger")
+	}
+	return l.applyLegacy(e)
+}
+func (l *windowAccounting) applyLegacy(e windowAccountingEvent) error {
 	if e.Index != l.events || e.PreviousSHA256 != l.previous {
 		return fmt.Errorf("ledger order/hash mismatch")
 	}
@@ -424,6 +448,9 @@ func (l *windowAccounting) Begin(r windowRequestIdentity) (windowRequestTicket, 
 	if l.poisoned || l.closed || l.state.Halt != "" {
 		return windowRequestTicket{}, fmt.Errorf("window halted or closed")
 	}
+	if l.contract.Schema == windowAccountingV3 {
+		return l.beginV3(r)
+	}
 	if l.state.Pending != nil {
 		return windowRequestTicket{}, l.halt("concurrent_request")
 	}
@@ -496,6 +523,11 @@ func (l *windowAccounting) Snapshot() windowAccountingState {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 	s := l.state
+	s.UnknownIntents = append([]windowUnknownIntent(nil), s.UnknownIntents...)
+	if s.RetryRequired != nil {
+		copy := *s.RetryRequired
+		s.RetryRequired = &copy
+	}
 	if s.Pending != nil {
 		copy := *s.Pending
 		s.Pending = &copy
@@ -510,7 +542,7 @@ func (l *windowAccounting) Close() error {
 	}
 	var err error
 	if !l.poisoned {
-		if l.state.Pending != nil && l.state.Halt == "" {
+		if (l.state.Pending != nil || l.state.RetryRequired != nil) && l.state.Halt == "" {
 			_ = l.halt("pending_at_close")
 		}
 		if !l.poisoned {

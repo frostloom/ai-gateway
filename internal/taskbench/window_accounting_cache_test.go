@@ -100,7 +100,7 @@ func TestWindowAccountingCacheSchemaBounds(t *testing.T) {
 		{"new-excess", "full-window-accounting.v2", 2000001, 0, false},
 		{"new-jev", "full-window-accounting.v2", 40000, 1, false},
 		{"old-jev", "full-window-accounting.v1", 0, -1, false},
-		{"unknown", "full-window-accounting.v3", 40000, 0, false},
+		{"unknown", "full-window-accounting.v4", 40000, 0, false},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			c := windowCacheContract()
