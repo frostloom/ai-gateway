@@ -17,7 +17,7 @@ type ConversationFactCheck struct {
 	Status    string `json:"status"` // match, mismatch, not_evaluated
 }
 
-const moneyToken = `[0-9]+(?:,[0-9,]+)*(?:\.[0-9]+)?`
+const moneyToken = `[0-9]+(?:,[0-9,]+)*(?:\.[0-9]+(?:,[0-9,]+)*)?`
 
 var cashClaim = regexp.MustCompile(`(?:^|[；;，,。\n])\s*(当前可用余额|当前余额|(?:你的)?当前(?:可用)?现金余额|现金余额|余额|账本口径|账本余额)[：:为是\s]*([¥￥]\s*-?` + moneyToken + `|-?` + moneyToken + `\s*元)`)
 var rechargeClaim = regexp.MustCompile(`(?:将模拟充值|到账)[：:\s]*([¥￥]\s*` + moneyToken + `|` + moneyToken + `\s*元)`)

@@ -15,6 +15,15 @@ func factMismatch(checks []ConversationFactCheck) bool {
 	}
 	return false
 }
+
+func hasFactClaimStatus(checks []ConversationFactCheck, fact, claim, status string) bool {
+	for _, c := range checks {
+		if c.Fact == fact && c.Claim == claim && c.Status == status {
+			return true
+		}
+	}
+	return false
+}
 func TestConversationFactsCashUnitsAndUnknown(t *testing.T) {
 	f, s := conversationFixture()
 	for _, tc := range []struct {
@@ -80,12 +89,19 @@ func TestConversationFactsGroupedCashAndRechargeRefundAmounts(t *testing.T) {
 			t.Fatalf("reply %q mismatch=%v, want %v", tc.reply, got, tc.bad)
 		}
 	}
-	for _, reply := range []string{"当前可用余额 ¥50,00。", "当前可用余额 ¥5,,000。", "当前可用余额 ¥1,23,456。"} {
+	for _, tc := range []struct {
+		reply, claim string
+		balance      int64
+	}{
+		{"当前可用余额 ¥50,00。", "¥50,00", 5000},
+		{"当前可用余额 ¥5,,000。", "¥5,,000", 500},
+		{"当前可用余额 ¥1,23,456。", "¥1,23,456", 100},
+	} {
 		low, lowState := conversationFixture()
-		lowState.Own.BalanceCent = 500
-		checks := CheckConversationFacts(ConversationResult{Fixture: low, Initial: lowState, Observations: []ConversationObservation{{State: lowState, Turn: Turn{Response: Response{Reply: reply}}}}})
-		if !factMismatch(checks) {
-			t.Fatalf("malformed grouped cash claim was truncated into a valid smaller amount: %q (%+v)", reply, checks)
+		lowState.Own.BalanceCent = tc.balance
+		checks := CheckConversationFacts(ConversationResult{Fixture: low, Initial: lowState, Observations: []ConversationObservation{{State: lowState, Turn: Turn{Response: Response{Reply: tc.reply}}}}})
+		if !hasFactClaimStatus(checks, "cash_balance", tc.claim, "mismatch") {
+			t.Fatalf("malformed grouped claim was not retained as a mismatch: %q (%+v)", tc.reply, checks)
 		}
 	}
 
@@ -121,6 +137,49 @@ func TestConversationFactsGroupedCashAndRechargeRefundAmounts(t *testing.T) {
 	r = ConversationResult{Fixture: f, Initial: s, Observations: []ConversationObservation{obs}}
 	if factMismatch(CheckConversationFacts(r)) {
 		t.Fatal("correct grouped refund amount was rejected")
+	}
+	if !hasFactClaimStatus(CheckConversationFacts(r), "preview_refund_cap", "¥100,000.00", "match") {
+		t.Fatal("grouped refund amount produced no concrete preview_refund_cap match")
+	}
+}
+
+func TestConversationFactsRejectDecimalCommaContinuation(t *testing.T) {
+	f, s := conversationFixture()
+	for _, tc := range []struct {
+		name, fact, claim string
+		result            ConversationResult
+	}{
+		{
+			name:   "cash",
+			fact:   "cash_balance",
+			claim:  "¥5,000.00,1",
+			result: ConversationResult{Fixture: f, Initial: s, Observations: []ConversationObservation{{State: s, Turn: Turn{Response: Response{Reply: "当前可用余额 ¥5,000.00,1。"}}}}},
+		},
+		{
+			name:  "recharge",
+			fact:  "preview_recharge",
+			claim: "¥5,000.00,1",
+			result: func() ConversationResult {
+				d := rechargeDriver()
+				r := RunConversation(context.Background(), rechargeConversation(), d)
+				r.Observations[1].Pending.Args["amount_money"] = float64(5000)
+				r.Observations[1].Turn.Response.Reply = "到账 ¥5,000.00,1"
+				return r
+			}(),
+		},
+		{
+			name:   "refund",
+			fact:   "preview_refund_cap",
+			claim:  "¥5,000.00,1",
+			result: ConversationResult{Fixture: f, Initial: s, Observations: []ConversationObservation{{State: s, Pending: &Pending{Tool: "refund_recharge", TenantID: f.TenantID, Args: map[string]any{"amount_money": float64(5000)}}, Turn: Turn{Response: Response{Reply: "实际退款 ¥5,000.00,1"}}}}},
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			checks := CheckConversationFacts(tc.result)
+			if !hasFactClaimStatus(checks, tc.fact, tc.claim, "mismatch") {
+				t.Fatalf("malformed decimal-comma continuation accepted or truncated: %+v", checks)
+			}
+		})
 	}
 }
 func TestConversationFactsPendingAndRefundCap(t *testing.T) {
