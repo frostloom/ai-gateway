@@ -1207,6 +1207,14 @@ def _content_matches(actual, expected):
     return False
 
 
+def _validate_projection_plan_binding(plan, projection):
+    """Authenticate the immutable plan seal without client or filesystem I/O."""
+    _require(type(projection) is _ContentProjection and projection._seal is _PROJECTION_SEAL,
+             'Live fixed helper projection proof required; plain JSON/SHA is insufficient')
+    _equal(_sha(projection._raw), projection._raw_sha, 'Projection proof mutated')
+    _equal(_sha(_json_bytes(plan)), projection._plan_sha, 'Projection belongs to another or modified plan')
+
+
 def validate_window_traces(plan, projection, client):
     """Read each original trace once using client.observations(trace), never POST.
 
@@ -1217,10 +1225,7 @@ def validate_window_traces(plan, projection, client):
     This does not consume or clear the prior receipt partition chain gate.
     """
     try:
-        _require(type(projection) is _ContentProjection and projection._seal is _PROJECTION_SEAL,
-                 'Live fixed helper projection proof required; plain JSON/SHA is insufficient')
-        _equal(_sha(projection._raw), projection._raw_sha, 'Projection proof mutated')
-        _equal(_sha(_json_bytes(plan)), projection._plan_sha, 'Projection belongs to another or modified plan')
+        _validate_projection_plan_binding(plan, projection)
         payload = projection.as_dict(); job = _Document(projection._job).value
         _require(callable(getattr(client, 'observations', None)), 'Read-only observations client required')
         projected = {row['trace_id']: row for row in payload['rows']}
@@ -1730,6 +1735,9 @@ def publish_window_scores(plan, projection, receipt_chain, attestation, client, 
             _equal(quality['records'], {row['recording_file']:row['recording_sha256'] for row in plan['rows'] if row['attempted']}, 'Quality proof record inventory mismatch')
             for key in ('archive_commit','archive_tree','envelope_sha256'):
                 _equal(quality[key], plan['provenance'][key], 'Quality proof source/envelope mismatch')
+        # A fresh chain can seal a caller-modified plan. Removed quality markers
+        # must still fail the original projection seal before registry or reads.
+        _validate_projection_plan_binding(plan, projection)
         chain = _gate_data(receipt_chain, 'receipt_chain', plan); signed = _gate_data(attestation, 'attestation', plan)
         _require(type(client) is _WindowScoreClient and client._seal is _PUBLICATION_SEAL, 'Pinned local evaluation client required')
         _equal(client._manifest_sha, plan['provenance']['manifest_sha256'], 'Client manifest mismatch')

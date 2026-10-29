@@ -919,19 +919,51 @@ class PublicationTests(unittest.TestCase):
         self.assertEqual(len(intents),len(self.posted))
         self.assertTrue(all(type(event['logical_identity']) is str for event in intents))
 
+    def quality_projection_gates(self):
+        f,evidence=quality_v6_fixture(self.adapter)
+        for key in ('source_root','sources','observer','build_attestation_public_key'):
+            f['manifest'][key]=copy.deepcopy(self.f['manifest'][key])
+        f['summary']['last_receipt_sha256']=''
+        refresh_links(f);self.f=f
+        args=list(arguments(f));args[-1]['projection_helper_sha256']=self.adapter._PROJECTION_HELPER_SHA256
+        plan=self.adapter.build_window_score_plan(*args,epoch6_evidence=evidence)
+        runtime={'go_executable':str(self.go),'go_sha256':digest(self.go.read_bytes()),'module_cache':str(self.cache)}
+        with patch.object(self.adapter.subprocess,'run',side_effect=self.fake_go):
+            projection=self.adapter.project_window_content(*args,source_root=str(self.source),
+                output_dir=str(self.root/'quality-projection'),runtime=runtime,execute=True,epoch6_evidence=evidence)
+        entries=[{'summary_raw':args[1],'receipt_raw':args[2]}]
+        pins=[{key:args[-1][key] for key in ('summary_sha256','receipt_sha256')}]
+        return plan,projection,self.attest(f),self.bound_client(plan,projection),args,entries,pins,evidence
+
+    def test_quality_marker_removal_with_refreshed_chain_rejects_before_registry(self):
+        plan,projection,attestation,client,args,entries,pins,_=self.quality_projection_gates()
+        self.assertEqual(projection._plan_sha,digest(self.adapter._json_bytes(plan)))
+        for remove in ('quality','epoch','both'):
+            altered=copy.deepcopy(plan)
+            if remove in ('quality','both'):
+                for row in altered['rows']:row.pop('quality_end',None)
+            if remove in ('epoch','both'):altered['provenance'].pop('epoch')
+            # Refresh the public chain proof legitimately from the original raw
+            # receipt and summary; its plan seal must not mask the regression.
+            chain=self.adapter.verify_window_receipt_chain(altered,args[0],entries,pins)
+            self.assertEqual(chain._plan_sha,digest(self.adapter._json_bytes(altered)))
+            with self.subTest(remove=remove), \
+                 patch.object(self.adapter,'_open_publication_registry',side_effect=AssertionError('registry accessed before immutable plan check')) as registry, \
+                 patch.object(self.adapter._WindowScoreClient,'observations',side_effect=AssertionError('network read before plan validation')) as reads, \
+                 patch.object(self.adapter._WindowScoreClient,'post_score',side_effect=AssertionError('POST before plan validation')) as posts:
+                with self.assertRaisesRegex(ValueError,'Projection belongs to another or modified plan'):
+                    self.adapter.publish_window_scores(altered,projection,chain,attestation,client,execute=True)
+                registry.assert_not_called();reads.assert_not_called();posts.assert_not_called()
+        self.assertEqual(self.posted,[])
+        self.assertFalse(self.registry.exists())
+
     def test_v6_quality_publication_batch_keeps_exact_offline_proof_binding(self):
-        plan,projection,chain,attestation,client=self.gates()
-        plan['provenance'].update(epoch='v6',quality_v6_inputs_sha256='1'*64,envelope_sha256='2'*64)
-        plan['rows'][0]['quality_end']={'candidate_sha256':'3'*64}
-        data={key:plan['provenance'][key] for key in ('manifest_sha256','receipt_sha256','archive_commit','archive_tree','envelope_sha256','quality_v6_inputs_sha256')}
-        data['rows']=[{key:plan['rows'][0][key] for key in ('ordinal','pass','case_key','arm','recording_file','recording_sha256','quality_end')}]
-        data['records']={row['recording_file']:row['recording_sha256'] for row in plan['rows'] if row['attempted']}
+        plan,projection,attestation,client,args,entries,pins,evidence=self.quality_projection_gates()
+        _,_,_,binding=self.adapter._quality_v6_inputs(args[0],args[2],args[3],args[5],evidence)
+        data={**binding,'quality_v6_inputs_sha256':digest(self.adapter._json_bytes(binding))}
         quality=self.adapter._PublicationProof(self.adapter._PUBLICATION_SEAL,'quality_v6',data)
-        chain=self.adapter._PublicationProof(self.adapter._PUBLICATION_SEAL,'receipt_chain',chain.as_dict(),plan)
-        # Existing content verification has its own fixed-helper integration;
-        # this test observes the publisher's durable batch boundary only.
-        with patch.object(self.adapter,'validate_window_traces',return_value={'all_pass':True}):
-            result=self.adapter.publish_window_scores(plan,projection,chain,attestation,client,execute=True,quality_proof=quality)
+        chain=self.adapter.verify_window_receipt_chain(plan,args[0],entries,pins)
+        result=self.adapter.publish_window_scores(plan,projection,chain,attestation,client,execute=True,quality_proof=quality)
         self.assertTrue(result['all_verified'])
         path=self.registry/plan['provenance']['scope_sha256']/'window-000001.batch.json'
         self.assertEqual(json.loads(path.read_bytes())['quality_v6_proof'],data)
