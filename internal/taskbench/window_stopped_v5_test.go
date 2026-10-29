@@ -1,9 +1,9 @@
 package taskbench
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
-	"reflect"
 	"testing"
 )
 
@@ -16,8 +16,13 @@ func TestWindowStoppedV5Exact32Baseline(t *testing.T) {
 	if len(pins) != 24 || pins["campaign/claim-000004.json"] != "8207bf55da28cfe920eac539fdf09e5cee1a61c5b54fe4b993647fcb4f47300a" {
 		t.Fatal("R2 top pins changed")
 	}
-	if !reflect.DeepEqual(b.ClaimSHA256, expectedStoppedV5ClaimMap()) {
-		t.Fatal("R2 32-claim map changed")
+	raw, err := json.Marshal(b.ClaimSHA256)
+	if err != nil || conversationHash(raw) != "7f6a967d739a1e338b69153413a5e9f06dcc3fb7d7bae05b64e2988686b5dc1b" {
+		t.Fatal("R2 canonical 32-claim map changed", err)
+	}
+	b.ClaimSHA256["full1220-v5-20261029/window-000001"] = "changed"
+	if fresh := expectedStoppedV5WindowBaseline(); fresh.ClaimSHA256["full1220-v5-20261029/window-000001"] != "e439a45da5d9df4d2eec2f1fd56e7df197fe3bf8c21ba7e1f4599379b1e6eaa5" {
+		t.Fatal("claim maps share mutable state")
 	}
 }
 
