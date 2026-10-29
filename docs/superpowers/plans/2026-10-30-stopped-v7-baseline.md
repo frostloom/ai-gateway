@@ -1,0 +1,11 @@
+# Concrete read-only V7 stopped baseline
+
+Work directly on main. Implement the private spec `continuation-design/stopped-v7-baseline-spec.md` SHA `96f05d77346e0c1c0e615af3edab51489fbec52f2b55d0fa2211c1cb0ce0bef9` under the V7 preparation root. This is a read-only prerequisite for a future independent full scope, not permission to execute, retry or resume. Current budget remains ¥130+$1.
+
+Add only private `window_stopped_v7.go`, `window_stopped_v7_pins.go`, tests and a small test helper if needed. Reuse the existing concrete v6 loader before and after the V7 checks; preserve old loaders. Derive the 44 claims from the 33-claim predecessor plus eleven original V7 raw claims, checking original chains and amounts. Revalidate original terminal/exit, last pending JEV sequence15/hold2688, original false flags and absence of claim12/checkpoint11. No metrics, semantic score or new JSON success flag may substitute for evidence.
+
+Pin the existing independent stopped audit and its exact inventory. Stream-check the 6395 explicitly listed original paths, sizes and hashes without importing Python, copying trees or scanning cache/source directories. Restrict namespace inventory to the owned campaign/records. Exact bytes authenticate a source-pinned reviewed audit; they do not independently prove that audit's reasoning. This trust dependency must remain explicit. Reject escapes, symlinks, hardlinks, changed roots, missing or unexpected owned files and before/after mutation.
+
+Create one new compact private descriptor and pin its actual digest after creation; no placeholder production SHA. It binds the old concrete v6 descriptor and historical130 approval only, not a candidate140 approval. No credential/settings read or paid-ready issuer, callback verifier, executable recovery, owner, claim, DB, network, model or trace resend.
+
+Use focused TDD with owned synthetic fixtures to check bindings and failure cases. The fixture bundle helper cannot become a real loader accepting caller-supplied proof. Then perform one actual fixed-path positive read-only verification, separately labeled from portable tests. Selected race once on final code; no full suite until final integration. Root independently verifies/reviews before committing only this unit. Preserve all logs and unrelated user files.

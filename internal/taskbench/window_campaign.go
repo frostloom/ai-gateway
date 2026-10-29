@@ -168,6 +168,9 @@ func contractWindowCampaign(scope fullWindowScope, sha string, w fullWindowDecla
 }
 func prepareWindowCampaign(root, frozenRoot string, scope fullWindowScope, source ConversationSuite, profiles PairedProfiles, bindings fullWindowBindings, frozenSHA, frozenExecutionSHA string, limits windowCampaignLimits) (windowCampaignPrepared, error) {
 	var out windowCampaignPrepared
+	if scope.Schema == "full-window-scope.v8" {
+		return out, fmt.Errorf("v8 is a data-only declaration; campaign integration unavailable")
+	}
 	if e := canonicalRootWindowCampaign(root); e != nil {
 		return out, e
 	}

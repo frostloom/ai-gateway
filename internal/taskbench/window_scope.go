@@ -38,21 +38,25 @@ type fullWindowDeclaration struct {
 	fullWindowCaps
 }
 type fullWindowScope struct {
-	Schema                   string                  `json:"schema"`
-	BaselineEvidenceSHA256   string                  `json:"baseline_evidence_sha256,omitempty"`
-	BudgetApprovalSHA256     string                  `json:"budget_approval_sha256,omitempty"`
-	Bindings                 fullWindowBindings      `json:"bindings"`
-	DefinitionSHA256         string                  `json:"definition_sha256"`
-	ManifestSHA256           string                  `json:"manifest_sha256"`
-	SelectionSHA256          string                  `json:"selection_sha256"`
-	ProfileSHA256            string                  `json:"profile_sha256"`
-	Width                    int                     `json:"width"`
-	Slots                    []fullWindowSlot        `json:"slots"`
-	Windows                  []fullWindowDeclaration `json:"windows"`
-	ScheduleSHA256           string                  `json:"schedule_sha256"`
-	OddPassFirstArmImbalance bool                    `json:"odd_pass_first_arm_imbalance"`
-	AllowPaid                bool                    `json:"allow_paid"`
-	ReadyForPaidRun          bool                    `json:"ready_for_paid_run"`
+	BudgetDeclaration        *windowV8BudgetDeclaration `json:"budget_declaration,omitempty"`
+	RetryDeclaration         *windowV8RetryDeclaration  `json:"retry_declaration,omitempty"`
+	BudgetDeclarationSHA256  string                     `json:"budget_declaration_sha256,omitempty"`
+	RetryPolicySHA256        string                     `json:"retry_policy_sha256,omitempty"`
+	Schema                   string                     `json:"schema"`
+	BaselineEvidenceSHA256   string                     `json:"baseline_evidence_sha256,omitempty"`
+	BudgetApprovalSHA256     string                     `json:"budget_approval_sha256,omitempty"`
+	Bindings                 fullWindowBindings         `json:"bindings"`
+	DefinitionSHA256         string                     `json:"definition_sha256"`
+	ManifestSHA256           string                     `json:"manifest_sha256"`
+	SelectionSHA256          string                     `json:"selection_sha256"`
+	ProfileSHA256            string                     `json:"profile_sha256"`
+	Width                    int                        `json:"width"`
+	Slots                    []fullWindowSlot           `json:"slots"`
+	Windows                  []fullWindowDeclaration    `json:"windows"`
+	ScheduleSHA256           string                     `json:"schedule_sha256"`
+	OddPassFirstArmImbalance bool                       `json:"odd_pass_first_arm_imbalance"`
+	AllowPaid                bool                       `json:"allow_paid"`
+	ReadyForPaidRun          bool                       `json:"ready_for_paid_run"`
 }
 type fullWindowTotals struct {
 	Pairs, Arms, DefinedUserTurns, Boundaries int
@@ -155,6 +159,11 @@ func validateFullWindowScope(scope fullWindowScope, s ConversationSuite, p Paire
 		expected, e = prepareFullWindowScopeV6(s, p, scope.Width, caps, b, scope.BaselineEvidenceSHA256, scope.BudgetApprovalSHA256)
 	case "full-window-scope.v7":
 		expected, e = prepareFullWindowScopeV7(s, p, scope.Width, caps, b, scope.BaselineEvidenceSHA256, scope.BudgetApprovalSHA256)
+	case "full-window-scope.v8":
+		if err := validateWindowV8Declarations(scope); err != nil {
+			return "", totals, err
+		}
+		expected, e = prepareFullWindowScopeV8(s, p, scope.Width, caps, b, scope.BaselineEvidenceSHA256)
 	default:
 		return "", totals, fmt.Errorf("unsupported complete-window scope version")
 	}
