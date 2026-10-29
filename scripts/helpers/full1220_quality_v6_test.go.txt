@@ -1,0 +1,122 @@
+package taskbench
+
+// Offline replay only. All files are authored in the runner's owned copy;
+// no campaign constructor, settings, database, or transport is invoked.
+import (
+	"encoding/json"
+	"fmt"
+	"os"
+	"path/filepath"
+	"reflect"
+	"testing"
+)
+
+type full1220QualityV6Job struct {
+	Scope   fullWindowScope        `json:"scope"`
+	Rows    []windowAcquisitionRow `json:"rows"`
+	Binding json.RawMessage        `json:"binding"`
+}
+
+func full1220ReplayQualityV6(job full1220QualityV6Job, dir string) error {
+	source, err := LoadConversations("../../eval/task-definitions/2026-10-12-full-dev-v1")
+	if err != nil {
+		return err
+	}
+	profiles, err := LoadPairedProfiles("../../eval/runtime-profiles/2026-10-13-six-profiles-v1")
+	if err != nil {
+		return err
+	}
+	if job.Scope.Schema != "full-window-scope.v6" || job.Scope.Bindings.PolicySHA256 != windowOwnedQualityPolicySHA() {
+		return fmt.Errorf("quality scope epoch/policy")
+	}
+	if _, _, err = validateFullWindowScope(job.Scope, source, profiles, job.Scope.Bindings); err != nil {
+		return err
+	}
+	primary, _, err := fullCustomerSelection(source)
+	if err != nil {
+		return err
+	}
+	cases := map[string]ConversationCase{}
+	for _, c := range primary.Cases {
+		cases[c.Key()] = c
+	}
+	seen := map[string]bool{}
+	if len(job.Rows) == 0 || len(job.Rows) > 56 {
+		return fmt.Errorf("bounded quality rows required")
+	}
+	for _, row := range job.Rows {
+		if row.Ordinal < 1 || row.Ordinal > len(job.Scope.Slots) {
+			return fmt.Errorf("quality ordinal")
+		}
+		slot := job.Scope.Slots[row.Ordinal-1]
+		name := fmt.Sprintf("arm-%06d-%s.json", row.Ordinal, row.Arm)
+		if seen[name] || row.RecordingFile != name || row.Pass != slot.Pass || row.CaseKey != slot.CaseKey || row.DefinedTurns != slot.UserTurns || (row.Arm != "model" && row.Arm != "jev_selective") || !row.Attempted || !row.Finished || !row.Cleanup || !row.Observer || !row.ExcludeCompleteTaskComparison || row.QualityEnd == nil {
+			return fmt.Errorf("quality slot/row mismatch")
+		}
+		seen[name] = true
+		raw, err := readWindowActualFile(filepath.Join(dir, name), row.RecordingSHA256, 16<<20)
+		if err != nil {
+			return err
+		}
+		var record collectionRecording
+		if err = decodeWindowStoppedV4QualityData(raw, &record); err != nil {
+			return err
+		}
+		original, ok := cases[row.CaseKey]
+		if !ok || !reflect.DeepEqual(record.Result.Case, original) || len(record.Result.Observations) != row.ObservedTurns || record.Result.Status != row.Status || record.Result.StructuralPass != row.StructuralPass || record.Result.Success != row.Success || record.Disposition != row.Disposition {
+			return fmt.Errorf("quality frozen case/state mismatch")
+		}
+		for _, obs := range record.Result.Observations {
+			tm := obs.Turn.Response.Telemetry
+			if tm == nil || tm.Runtime == nil || tm.LangfuseTraceID != row.TraceID || tm.Runtime.RoutingMode != row.Arm {
+				return fmt.Errorf("quality trace/arm mismatch")
+			}
+		}
+		if _, err = readWindowStoppedV4Quality(dir, job.Scope.Bindings.PolicySHA256, slot, row, record); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func TestFull1220QualityV6(t *testing.T) {
+	input := os.Getenv("FULL1220_QUALITY_INPUT")
+	if input == "" {
+		t.Skip("explicit offline quality replay only")
+	}
+	raw, err := readWindowActualFile(input, os.Getenv("FULL1220_QUALITY_INPUT_SHA256"), 16<<20)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var job full1220QualityV6Job
+	if err = decodeWindowStoppedV4QualityData(raw, &job); err != nil {
+		t.Fatal(err)
+	}
+	if err = full1220ReplayQualityV6(job, filepath.Join(filepath.Dir(input), "records")); err != nil {
+		t.Fatal(err)
+	}
+	result, err := json.Marshal(struct {
+		Schema      string          `json:"schema"`
+		InputSHA256 string          `json:"input_sha256"`
+		Binding     json.RawMessage `json:"binding"`
+	}{"full1220-quality-v6-replay.v1", conversationHash(raw), job.Binding})
+	if err != nil {
+		t.Fatal(err)
+	}
+	file, err := os.OpenFile(os.Getenv("FULL1220_QUALITY_OUTPUT"), os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0600)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = file.Write(result); err != nil {
+		file.Close()
+		t.Fatal(err)
+	}
+	if err = file.Sync(); err != nil {
+		file.Close()
+		t.Fatal(err)
+	}
+	if err = file.Close(); err != nil {
+		t.Fatal(err)
+	}
+	t.Logf("FULL1220_QUALITY_OUTPUT_SHA256=%s", conversationHash(result))
+}

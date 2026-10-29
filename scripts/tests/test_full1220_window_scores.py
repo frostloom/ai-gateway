@@ -919,6 +919,23 @@ class PublicationTests(unittest.TestCase):
         self.assertEqual(len(intents),len(self.posted))
         self.assertTrue(all(type(event['logical_identity']) is str for event in intents))
 
+    def test_v6_quality_publication_batch_keeps_exact_offline_proof_binding(self):
+        plan,projection,chain,attestation,client=self.gates()
+        plan['provenance'].update(epoch='v6',quality_v6_inputs_sha256='1'*64,envelope_sha256='2'*64)
+        plan['rows'][0]['quality_end']={'candidate_sha256':'3'*64}
+        data={key:plan['provenance'][key] for key in ('manifest_sha256','receipt_sha256','archive_commit','archive_tree','envelope_sha256','quality_v6_inputs_sha256')}
+        data['rows']=[{key:plan['rows'][0][key] for key in ('ordinal','pass','case_key','arm','recording_file','recording_sha256','quality_end')}]
+        data['records']={row['recording_file']:row['recording_sha256'] for row in plan['rows'] if row['attempted']}
+        quality=self.adapter._PublicationProof(self.adapter._PUBLICATION_SEAL,'quality_v6',data)
+        chain=self.adapter._PublicationProof(self.adapter._PUBLICATION_SEAL,'receipt_chain',chain.as_dict(),plan)
+        # Existing content verification has its own fixed-helper integration;
+        # this test observes the publisher's durable batch boundary only.
+        with patch.object(self.adapter,'validate_window_traces',return_value={'all_pass':True}):
+            result=self.adapter.publish_window_scores(plan,projection,chain,attestation,client,execute=True,quality_proof=quality)
+        self.assertTrue(result['all_verified'])
+        path=self.registry/plan['provenance']['scope_sha256']/'window-000001.batch.json'
+        self.assertEqual(json.loads(path.read_bytes())['quality_v6_proof'],data)
+
     def test_duplicate_publish_and_review_or_id_change_never_resend(self):
         values=self.gates();self.publish(values);count=len(self.posted)
         with self.assertRaises(ValueError):self.publish(values)
@@ -1613,5 +1630,262 @@ class CompletedStateV6Tests(unittest.TestCase):
         record['issues'] = [{'code':'unclassified','turn':1,'error_index':0,'disposition':'halt'}]
         record['result_sha256'] = digest(wire(record['result']))
         with self.assertRaises(ValueError): self.adapter.validate_completed_record_state(wire(record))
+
+
+
+class OwnedQualityV6Tests(unittest.TestCase):
+    setUpClass = classmethod(WindowScorePlanTests.setUpClass.__func__)
+
+    def test_raw_quality_api_precedes_independent_review(self):
+        self.assertTrue(callable(getattr(self.adapter, 'verify_window_quality_v6', None)),
+                        'Concrete raw-input quality replay API required')
+        parameters = inspect.signature(self.adapter.verify_window_quality_v6).parameters
+        self.assertNotIn('review_raw', parameters)
+        self.assertNotIn('summary_raw', parameters)
+        self.assertIn('quality_proof', inspect.signature(self.adapter.publish_window_scores).parameters)
+
+    def test_quality_helper_has_its_own_pin_without_changing_old_helpers(self):
+        helper = SCRIPT.parent/'helpers/full1220_quality_v6_test.go.txt'
+        self.assertTrue(helper.is_file(), 'Fixed owned-quality helper required')
+        self.assertEqual(digest(helper.read_bytes()), self.adapter._QUALITY_V6_HELPER_SHA256)
+        for name, sha in [('full1220_content_projection_test.go.txt','57847bf1ba02864c918261813ea45f68dc57f4dbd5d06349cc0dd661e225cdfc'),
+                          ('full1220_attestation.go.txt','cadae5ad17b7233b97ba9d6d24029365e10dc280223b4991987d6ca31ea58b63'),
+                          ('full1220_attestation_v6.go.txt','c4c9b998d7b549b2cebe598e6ef87de0aa6534ea510a9d7c4a766db40ba36b92')]:
+            self.assertEqual(digest((SCRIPT.parent/'helpers'/name).read_bytes()),sha)
+
+    def test_projection_actually_forwards_raw_evidence(self):
+        f=fixture(); evidence={'envelope_raw':b'{}','sidecars':{}}
+        with patch.object(self.adapter, 'build_window_score_plan', side_effect=ValueError('stop after forwarding')) as build:
+            with self.assertRaisesRegex(ValueError, 'stop after forwarding'):
+                self.adapter.project_window_content(*arguments(f), source_root='/unused', output_dir='/unused',
+                    runtime={}, execute=True, epoch6_evidence=evidence)
+        self.assertIs(build.call_args.kwargs['epoch6_evidence'],evidence)
+
+    def test_fake_quality_proof_rejects_before_registry_or_client(self):
+        self.assertIn('quality_proof', inspect.signature(self.adapter.publish_window_scores).parameters)
+        plan={'provenance':{'epoch':'v6'},'rows':[{'quality_end':{}}]}
+        with patch.object(self.adapter, '_open_publication_registry', side_effect=AssertionError('registry touched')):
+            for proof in (None, {'verified':True,'kind':'quality_v6'}):
+                with self.assertRaisesRegex(ValueError, 'quality'):
+                    self.adapter.publish_window_scores(plan,None,None,None,None,execute=True,quality_proof=proof)
+
+
+def quality_v6_fixture(adapter, quality=True, zero=False):
+    f=v5_fixture(partial_fixture(True) if quality else None); m=f['manifest']; scope=m['scope']
+    base=SCRIPT.parents[1]/'.tmp'
+    m['schema']='full-window-actual-ready.v6'
+    scope.update(schema='full-window-scope.v6',baseline_evidence_sha256='b363ba194e641374a8a63bfacc7a1312a5b080718f637036ab4040fc075a3fc1',budget_approval_sha256='ef6322fe60807a7a608a2707edf016501717f85e9d649e28d0311de2b6ed4bce')
+    m['baseline_evidence']['sha256']=scope['baseline_evidence_sha256']
+    m['historical_claims']=json.loads((base/'stopped-v5-proof-work/claim32-map.json').read_bytes())
+    for window,cap in zip(scope['windows'],json.loads((base/'full1220-v6-design-20261029/caps.json').read_bytes())):window.update(cap)
+    scope['bindings'].update(customer_revision='50e3c8dab14b4b6cc25322fd340a274e6970200b',policy_sha256='333c69bbb7506bd0c9237891cce8ddca720174974bf3f85753dd62339f368f15')
+    envelope=wire({'basis':[{'path':'/offline/approval','sha256':scope['budget_approval_sha256']}]})
+    m['envelope']={'path':'/offline/envelope','sha256':digest(envelope)}
+    scope['bindings']['request_envelope_sha256']=digest(envelope)
+    for i,row in enumerate(f['receipt']['rows']):
+        def update(record):
+            record['policy_sha256']=adapter._COLLECTION_POLICY_SHA256
+            if quality and i == 0:
+                record['issues']=[{'code':'preview_arguments','turn':1,'error_index':0,'disposition':'halt'}]
+        refresh_record(f,i,update)
+    sidecars={}
+    if quality:
+        row=f['receipt']['rows'][0];record=json.loads(f['records'][row['recording_file']]);q=row['quality_end']
+        # This fixture exercises hash/state linkage only; the Go replay must still
+        # reject this deliberately incomplete SQL capture.
+        if zero:
+            # Retain two defined turns: a quality end on the last observed turn.
+            original=json.loads(next(iter(fixture()['records'].values())))
+            record['result']['observations']=original['result']['observations']
+            record['result']['review_requirements']=original['result']['review_requirements']
+            record['issues'][0]['turn']=2
+            record['result_sha256']=digest(wire(record['result']))
+            f['records'][row['recording_file']]=wire(record);row['recording_sha256']=digest(wire(record));row['observed_turns']=2
+            review=f['review']['rows'][0];review['recording_sha256']=row['recording_sha256'];review['observed_turns']=2
+            review['requirements']=fixture()['review']['rows'][0]['requirements']
+            for r in review['requirements']:r['verdict']='failed'
+            q.update(observed_turns=2,unrun_turns=0)
+        q.update(policy_sha256=scope['bindings']['policy_sha256'],candidate_file=f"quality-{row['ordinal']:06d}-{row['arm']}-candidate.json",cleanup_file=f"quality-{row['ordinal']:06d}-{row['arm']}-cleanup.json")
+        q['source_sha256']=digest(wire(record['result']['case']))
+        q['rule_sha256']=digest(wire(record['result']['case']['scenario']['turns'][row['observed_turns']-1]))
+        candidate={'policy_id':'full-customer-owned-preview-candidate.v2','policy_sha256':'1'*64,'source_sha256':q['source_sha256'],'rule_sha256':q['rule_sha256'],'disposition':'candidate_precleanup','completion_proof':'unavailable_from_recording','audit_only':True,'evidence':{'record':record,'turn':row['observed_turns'],'after':{}},'unrun':[{'turn':j+1,'rule':rule,'rule_sha256':digest(wire(rule)),'reason':'quality_end_candidate_unrun'} for j,rule in enumerate(record['result']['case']['scenario']['turns']) if j >= row['observed_turns']]}
+        cleanup={'post_cleanup':{},'deleted':1,'session_absent':True}
+        for name,value in [('candidate',candidate),('cleanup',cleanup)]:
+            sidecars[q[name+'_file']]=wire(value);q[name+'_sha256']=digest(wire(value))
+        f['receipt']['quality_end_arms']=1;f['receipt']['quality_end_unrun_turns']=q['unrun_turns'];f['receipt']['global_unrun_turns']=0
+    m['scope_sha256']=digest(wire(scope));f['receipt']['scope_sha256']=m['scope_sha256'];f['review']['bindings']['scope_sha256']=m['scope_sha256'];recalculate_counts(f)
+    return f,{'envelope_raw':envelope,'sidecars':sidecars}
+
+
+class QualityV6PureTests(unittest.TestCase):
+    setUpClass = classmethod(WindowScorePlanTests.setUpClass.__func__)
+
+    def test_zero_and_nonzero_suffix_are_pure_pending_and_still_failed(self):
+        for zero in (False,True):
+            f,evidence=quality_v6_fixture(self.adapter,zero=zero)
+            with patch.object(self.adapter.subprocess,'run',side_effect=AssertionError('pure plan launched helper')):
+                try:plan=self.adapter.build_window_score_plan(*arguments(f),epoch6_evidence=evidence)
+                except ValueError as error:self.fail('Linked quality plan must remain pending: '+str(error))
+            self.assertEqual(plan['provenance']['quality_v6_source_replay'],'pending')
+            self.assertEqual(plan['rows'][0]['strict_task_verdict'],'failed')
+            self.assertFalse(any(s['value']=='passed' for s in plan['scores'] if s['traceId']==plan['rows'][0]['trace_id']))
+
+    def test_unknown_halt_or_missing_linkage_rejected(self):
+        for fault in ('missing','sha','record','turn','cleanup','unknown'):
+            f,evidence=quality_v6_fixture(self.adapter);q=f['receipt']['rows'][0]['quality_end']
+            if fault=='missing':evidence['sidecars'].pop(q['cleanup_file'])
+            elif fault=='sha':evidence['sidecars'][q['candidate_file']]+=b' '
+            else:
+                key='cleanup' if fault=='cleanup' else 'candidate';value=json.loads(evidence['sidecars'][q[key+'_file']])
+                if fault=='record':value['evidence']['record']['result']['status']='passed'
+                elif fault=='turn':value['evidence']['turn']+=1
+                elif fault=='cleanup':value['session_absent']=False
+                else:
+                    refresh_record(f,0,lambda r:r['issues'][0].update(code='unclassified'))
+                    value['evidence']['record']=json.loads(f['records'][f['receipt']['rows'][0]['recording_file']])
+                evidence['sidecars'][q[key+'_file']]=wire(value);q[key+'_sha256']=digest(wire(value));refresh_links(f)
+            with self.subTest(fault=fault),self.assertRaises(ValueError):
+                self.adapter.build_window_score_plan(*arguments(f),epoch6_evidence=evidence)
+
+
+    def test_no_quality_window_never_reads_runtime_or_runs_helper(self):
+        f,evidence=quality_v6_fixture(self.adapter,quality=False);args=arguments(f)
+        with patch.object(self.adapter.subprocess,'run',side_effect=AssertionError('helper executed')):
+            result=self.adapter.verify_window_quality_v6(args[0],args[2],args[3],args[5],epoch6_evidence=evidence,
+                source_root='/missing',output_dir='/missing',runtime={},execute=True)
+        self.assertIsNone(result)
+
+    def test_all_preview_halt_origins_remain_pending_including_incomplete(self):
+        for code in ('preview_arguments','pending_identity','unexpected_pending','unauthorized_tool','pending_not_cleared'):
+            f,evidence=quality_v6_fixture(self.adapter)
+            refresh_record(f,0,lambda r:r['issues'][0].update(code=code))
+            row=f['receipt']['rows'][0];q=row['quality_end'];value=json.loads(evidence['sidecars'][q['candidate_file']])
+            value['evidence']['record']=json.loads(f['records'][row['recording_file']])
+            evidence['sidecars'][q['candidate_file']]=wire(value);q['candidate_sha256']=digest(wire(value));refresh_links(f)
+            with self.subTest(code=code):
+                plan=self.adapter.build_window_score_plan(*arguments(f),epoch6_evidence=evidence)
+                self.assertEqual(plan['provenance']['quality_v6_source_replay'],'pending')
+        f,evidence=quality_v6_fixture(self.adapter)
+        def incomplete(r):
+            r['result']['errors'].append('unrun suffix')
+            r['issues'].append({'code':'incomplete','turn':1,'error_index':1,'disposition':'halt'})
+        refresh_record(f,0,incomplete);row=f['receipt']['rows'][0];q=row['quality_end'];record=json.loads(f['records'][row['recording_file']])
+        f['review']['rows'][0]['original_errors']=record['result']['errors']
+        value=json.loads(evidence['sidecars'][q['candidate_file']]);value['evidence']['record']=record
+        evidence['sidecars'][q['candidate_file']]=wire(value);q['candidate_sha256']=digest(wire(value));refresh_links(f)
+        self.assertEqual(self.adapter.build_window_score_plan(*arguments(f),epoch6_evidence=evidence)['rows'][0]['strict_task_verdict'],'failed')
+
+    def test_quality_proof_cross_receipt_source_and_manifest_fail_before_registry(self):
+        f,evidence=quality_v6_fixture(self.adapter);args=arguments(f)
+        plan=self.adapter.build_window_score_plan(*args,epoch6_evidence=evidence)
+        _,_,_,binding=self.adapter._quality_v6_inputs(args[0],args[2],args[3],args[5],evidence)
+        data={**binding,'quality_v6_inputs_sha256':digest(self.adapter._json_bytes(binding))}
+        for field in ('manifest_sha256','receipt_sha256','quality_v6_inputs_sha256'):
+            altered={**data,field:'0'*64}
+            proof=self.adapter._PublicationProof(self.adapter._PUBLICATION_SEAL,'quality_v6',altered)
+            with self.subTest(field=field),patch.object(self.adapter,'_open_publication_registry',side_effect=AssertionError('registry touched')):
+                with self.assertRaisesRegex(ValueError,'[Qq]uality|manifest'):
+                    self.adapter.publish_window_scores(plan,None,None,None,None,execute=True,quality_proof=proof)
+
+
+    def test_quality_proof_cannot_follow_copied_marker_into_changed_sidecar_plan(self):
+        f,evidence=quality_v6_fixture(self.adapter);args=arguments(f)
+        plan=self.adapter.build_window_score_plan(*args,epoch6_evidence=evidence)
+        _,_,_,binding=self.adapter._quality_v6_inputs(args[0],args[2],args[3],args[5],evidence)
+        proof=self.adapter._PublicationProof(self.adapter._PUBLICATION_SEAL,'quality_v6',
+            {**binding,'quality_v6_inputs_sha256':digest(self.adapter._json_bytes(binding))})
+        plan['rows'][0]['quality_end']['candidate_sha256']='0'*64
+        with patch.object(self.adapter,'_open_publication_registry',side_effect=AssertionError('registry touched')):
+            with self.assertRaisesRegex(ValueError,'Quality proof row/sidecar'):
+                self.adapter.publish_window_scores(plan,None,None,None,None,execute=True,quality_proof=proof)
+
+
+    def test_explicit_cli_publication_forwards_evidence_and_quality_runtime(self):
+        f,evidence=quality_v6_fixture(self.adapter);f['manifest']['source_root']='/owned/frozen';refresh_links(f)
+        inputs=arguments(f);plan=self.adapter.build_window_score_plan(*inputs,epoch6_evidence=evidence)
+        with tempfile.TemporaryDirectory() as folder:
+            path=Path(folder)/'attestation.json';path.write_bytes(b'{}')
+            job={'chain':[],'attestation_path':str(path),'attestation_sha256':'a'*64,'binary_path':'/unused',
+                 'runtime':{'sdk_settings_sha256':'b'*64},'attestation_output':'/owned/signature',
+                 'projection_output':'/owned/projection','quality_output':'/owned/quality','_epoch6_evidence':evidence}
+            with patch.object(self.adapter,'_read_score_job',return_value=(job,inputs,plan)), \
+                 patch.object(self.adapter,'verify_window_receipt_chain'), patch.object(self.adapter,'verify_window_attestation'), \
+                 patch.object(self.adapter,'verify_window_quality_v6') as quality, \
+                 patch.object(self.adapter,'project_window_content',side_effect=ValueError('stop before client')) as projection, \
+                 patch.object(self.adapter,'load_window_score_client',side_effect=AssertionError('client touched')), \
+                 patch('sys.stderr',new_callable=io.StringIO):
+                self.assertEqual(self.adapter.main(['publish','--execute','--job','owned']),2)
+            self.assertIs(quality.call_args.kwargs['epoch6_evidence'],evidence)
+            self.assertEqual(quality.call_args.args,(inputs[0],inputs[2],inputs[3],inputs[5]))
+            self.assertEqual(quality.call_args.kwargs['output_dir'],job['quality_output'])
+            self.assertIs(quality.call_args.kwargs['runtime'],job['runtime'])
+            self.assertTrue(quality.call_args.kwargs['execute'])
+            self.assertIs(projection.call_args.kwargs['epoch6_evidence'],evidence)
+
+
+
+class QualityV6RunnerTests(unittest.TestCase):
+    setUpClass = classmethod(WindowScorePlanTests.setUpClass.__func__)
+
+    def setUp(self):
+        self.work=SCRIPT.parents[1]/'.tmp/task6-quality6'
+        self.fixture=self.work/'proof-integration3'
+        if not (self.fixture/'pins.json').is_file():self.skipTest('Owned source-built Task6 fixture unavailable')
+        self.manifest_raw=(self.fixture/'manifest.json').read_bytes()
+        self.receipt_raw=(self.fixture/'receipt.json').read_bytes()
+        self.pins=json.loads((self.fixture/'pins.json').read_bytes())
+        source=json.loads(self.manifest_raw);self.source=source['source_root']
+        self.records={name:(self.work/'fixtures/true'/name).read_bytes() for name in self.pins['records']}
+        evidence=json.loads((self.fixture/'evidence.json').read_bytes())
+        self.evidence={'envelope_raw':evidence['envelope'].encode(),'sidecars':{name:value.encode() for name,value in evidence['sidecars'].items()}}
+        runtime=SCRIPT.parents[1]/'.tmp/paired-live-private/full1220-actual-v6-freeze-20261029/offline-runtime-preparation.json'
+        self.runtime=json.loads(runtime.read_bytes())
+        self.temp=tempfile.TemporaryDirectory();self.addCleanup(self.temp.cleanup)
+        self.output=Path(self.temp.name).resolve()/'proof'
+
+    def verify(self):
+        return self.adapter.verify_window_quality_v6(self.manifest_raw,self.receipt_raw,self.records,self.pins,
+            epoch6_evidence=self.evidence,source_root=self.source,output_dir=self.output,runtime=self.runtime,execute=True)
+
+    def test_real_source_built_zero_and_nonzero_sidecars_pass_pure_linkage(self):
+        for suffix in ('true','false'):
+            directory=self.work/'fixtures'/suffix;job=json.loads((directory/'job.json').read_bytes());row=job['rows'][0]
+            raw=(directory/row['recording_file']).read_bytes()
+            sidecars={row['quality_end'][k+'_file']:(directory/row['quality_end'][k+'_file']).read_bytes() for k in ('candidate','cleanup')}
+            self.adapter._quality_v6_record(row,raw,sidecars,job['scope']['bindings']['policy_sha256'])
+            self.assertEqual(row['quality_end']['unrun_turns']==0,suffix=='true')
+        self.assertIn('incomplete',[i['code'] for i in json.loads(raw)['issues']])
+
+    def test_helper_runtime_sdk_and_archive_identity_pins_reject_before_output(self):
+        original_runtime=dict(self.runtime);original_pins=dict(self.pins)
+        for fault in ('helper','go','sdk','tree','root'):
+            self.runtime=dict(original_runtime);self.pins=dict(original_pins)
+            mr=self.manifest_raw;oldsource=self.source
+            if fault=='helper':self.pins['quality_helper_sha256']='0'*64
+            elif fault=='go':self.runtime['go_sha256']='0'*64
+            elif fault=='sdk':self.runtime['sdk_settings_sha256']='0'*64
+            elif fault=='root':self.source=str(Path(self.source).parent)
+            else:
+                m=json.loads(mr);m['archive_tree']='0'*40;self.manifest_raw=wire(m);self.pins['manifest_sha256']=digest(self.manifest_raw)
+            with self.subTest(fault=fault),self.assertRaises(ValueError):self.verify()
+            self.assertFalse(self.output.exists());self.manifest_raw=mr;self.source=oldsource
+
+    def test_invalid_process_output_or_mutated_staged_evidence_never_mints_proof(self):
+        original_run=self.adapter.subprocess.run
+        for fault in ('exit','missing-receipt','wrong-receipt','binding','record'):
+            output=self.output.parent/fault;self.output=output
+            def fake_process(command,**kwargs):
+                if command[0]=='/usr/bin/git':return original_run(command,**kwargs)
+                job_raw=(output/'input.json').read_bytes();job=json.loads(job_raw)
+                payload={'schema':'full1220-quality-v6-replay.v1','input_sha256':digest(job_raw),'binding':job['binding']}
+                if fault=='binding':payload['binding']['receipt_sha256']='0'*64
+                raw=wire(payload);(output/'quality.json').write_bytes(raw)
+                if fault=='record':
+                    name=next(iter(self.records));(output/'records'/name).write_bytes(self.records[name]+b' ')
+                sha='0'*64 if fault=='wrong-receipt' else digest(raw)
+                stdout=b'' if fault=='missing-receipt' else ('    full1220_quality_v6_test.go:99: FULL1220_QUALITY_OUTPUT_SHA256='+sha+'\n').encode()
+                return subprocess.CompletedProcess(command,1 if fault=='exit' else 0,stdout,b'')
+            with self.subTest(fault=fault),patch.object(self.adapter.subprocess,'run',side_effect=fake_process):
+                with self.assertRaises(ValueError):self.verify()
 
 if __name__ == '__main__': unittest.main()
