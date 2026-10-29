@@ -14,7 +14,7 @@
 
 - Original 1220 × 3 = 3660 pairs / 7320 arms / 11772 defined turns; 1851 boundaries separate.
 - Customer50e/v5, both knowledge off; no original source-case/rubric or reply-repair/model-parameter changes.
-- Parent ¥105+$1; 32 permanent claims42961430µCNY/344493µUSD, original risk2023424/65 and old held74752/2688 retained. No new paid scope/claim/inference in this plan.
+- Current global parent ¥130+$1 was explicitly approved (artifact SHAef6322fe60807a7a608a2707edf016501717f85e9d649e28d0311de2b6ed4bce). Stopped R2 history and Task2 historical baseline retain their original parent¥105+$1; a future current-budget epoch must separately bind the new130 approval. 32 permanent claims42961430µCNY/344493µUSD, original risk2023424/65 and old held74752/2688 retained. Tasks1–3 are offline only; no new actual entry/paid claim/inference is authorized by their implementation.
 - R2 owner30726 is permanently closed, exit0 after external verification refusal. Claim4 reserved/unrun; no ledger4/checkpoint4/claim5. Never resume/reclaim/release or rewrite any frozen source/tool/record.
 - Work directly on main. Preserve unrelated web/dist, integrations, plate_sim.py and all old archives. Python -B and dont_write_bytecode before imports; never import frozen modules.
 - Full Go validation uses the approved original20m window; single DB/HTTP timeouts and failure-stop policies unchanged. No full-suite repetition per tiny step: targeted checks per unit, one complete run after final combined implementation before claiming completion.
@@ -59,15 +59,33 @@
 
 - [x] Freeze new private descriptor `.tmp/stopped-v5-proof-work/stopped-v5.private.json` (schema `full-window-stopped-baseline.v5`, SHA `b363ba194e641374a8a63bfacc7a1312a5b080718f637036ab4040fc075a3fc1`), binding previous concrete28 descriptor, original R2 root and exact105 budget approval. Fixed top24 pins are `.tmp/stopped-v5-proof-work/artifact-pins.json` SHA `cbe4ea0fa7bac59bdc73dd51ed5bea2c818557a1bc7be2232b3ae0c7624707a3`; complete claim32 map is beside it, canonicalSHA `7f6a967d739a1e338b69153413a5e9f06dcc3fb7d7bae05b64e2988686b5dc1b`. These are factual inputs, not a returned proof or paid readiness. No old file writes.
 - [ ] Write RED positive actual-evidence loader and owned local-fixture tests, then missing/tampered top-file/native-body/record/checkpoint/claim tests. Invalid new-root/old-root alias, ledger4/checkpoint4/claim5, modified terminal/ownerexit and any altered fact-negative record must reject before returning a baseline.
-- [ ] Implement bounded concrete reader with previous28 fresh before/after, exact campaign/records inventories, schema5/131schedule/old28map/105 bindings, per-window original accountingschema2 replay and every original native descriptor/body SHA/usage. Sum 391 packets and168 records, require the observed R2 zero quality-end sidecar set in all3 windows (negative-arm counts3/0/2), leave ancestor P4 quality-end validation unchanged, and bind the two exact structurally-valid fact failures71/79 without promoting status or Success.
+- [ ] Implement bounded concrete reader with previous28 fresh before/after, exact campaign/records inventories, schema5/131schedule/old28map/105 bindings, per-window original accountingschema2 replay, bounded native descriptor decoding plus typed semantic equality with pinned payload metadata, and every native body/record raw SHA and usage; lexical descriptor JSON bytes are outside this inherited loader guarantee, while the separate before/after original-root inventory audits byte identity. Sum 391 packets and168 records, require the observed R2 zero quality-end sidecar set in all3 windows (negative-arm counts3/0/2), leave ancestor P4 quality-end validation unchanged, and bind the two exact structurally-valid fact failures71/79 without promoting status or Success.
 - [ ] Preserve the exact two previous summaries and summary3.closed=false; require terminal.closed=true/acquisition_done=false/exit0/relaunchfalse and fourth claim permanently reserved with no descendants.
 - [ ] Run pure unit/race tests; run one readonly actual bundle check and compare original explicit evidence inventories before/after. No new campaign constructor, no paid owner, no API/DB call.
 - [ ] Independent review; commit only task files/descriptor public hashes/docs. Do not claim actual6 readiness.
 
 ### Final combined validation and next decision
 
-Controller-owned after both task reviews; task implementers do not launch this combined suite.
+Controller-owned after all selected implementation task reviews; task implementers do not launch this combined suite.
 
 - [ ] Run original `go test ./... -count=1 -timeout=20m -json` once on the final selected source, restore the same owned9 services/identities and retain failures if any. This run does not authorize inference.
 - [ ] Before any future runtime verifier is frozen, replay R2 complete3windows/4claims and all eight original quality issue codes, legitimate structuraltrue fact failures, zero/nonzero quality suffixes and technical unknowns. Positive state may never be obtained by rewriting original errors/status or removing evidence.
 - [ ] Review complete-scope budget using all current bounds and declared conditional admission, not an unsupported worst-case-completion guarantee or linear extrapolation of84pairs. No automatic expansion, no shrinking/splicing3660 and no new paid freeze merely because caps can be made smaller.
+
+
+### Task 3: Independent v6 scope and current130 campaign accounting
+
+**Files:** Create focused `window_scope_v6.go`, `window_campaign_v6.go`, `window_budget130.go` and their tests in internal/taskbench; minimally modify common window_scope.go/window_campaign.go. No actual-ready/CLI/score changes in this unit.
+
+**Interfaces:** Prepare/validate `full-window-scope.v6`; fixed width28,131windows, full original3660 schedule, exact cap-vector canonicalSHA30c8151031f40cb05562b255b789b9fb021a93467288e677c4eb39d87806113d totals85000000/600000. Baseline descriptorb363ba194e641374a8a63bfacc7a1312a5b080718f637036ab4040fc075a3fc1 and approvalef6322fe60807a7a608a2707edf016501717f85e9d649e28d0311de2b6ed4bce. Concrete constructor accepts windowStoppedV5Baseline and windowActualFile approval; no arbitrary caller verifier/provider/issuer.
+
+- [ ] Independently recompute candidate vector from .tmp/full1220-v6-design-20261029/candidate.json and referenced conditional scenario tables: fixed minima plus largest-remainder surplus weights; write a private arithmetic report. Conditional stress assumptions are not an invoice or completion guarantee.
+- [ ] RED tests first: preserve old1–5 canonical behavior, reject fixedvector/width/historical/approval/currentparent mutations and overflow. Extract existing pure schedule builder with explicit per-currency bounds, keep original prepareFullWindowScope wrapper bounds70938880/776896 exactly; v6 uses afterrisk85015146/655442 and fixed vector validation. No placeholder caps followed by overwriting a scope.
+- [ ] New named-field concrete130 history wrapper rereads exact approval SHA bounded, fresh-revalidates concrete32 at original105, compares expected historical32 baseline, then clones map and projects only parent130000000/1000000 and remaining87038570/655507. Permanent42961430/344493, actual2292/585 and exact32map unchanged. Forward five predecessor roots, disjoint new root. No historical evidence writes. This wrapper supplies fresh revalidation before every claim.
+- [ ] Add v6-only campaign validation/accounting/claim branches. Accountingschema2 cache prices and original74752/2688 holds, risk2023424/65, ceilings58860/5886 unchanged. Claim schema full-window-campaign-claim.v6 binds new approval/baseline, current130 parent, old32 plus claimed-prefix liabilities. Keep historical1–5 constructors and byte behavior unchanged. Only concrete v6 factory can reach actual campaign; local_stub tests may use existing internal test history interface, not exported capability.
+- [ ] Focused unit/race and closed no-provider campaign tests for new declaration, current130 projection, claim permanence/fresh tamper/root overlap and old epoch compatibility. Private actual-history check may use test overlay against read-only original evidence; no DB/API/real claim under private old roots. Save output under .tmp and task report; controller owns final combined fullGo.
+- [ ] Commit only task code/tests. Fresh task review afterward; no new actual6 readiness claim.
+
+### Subsequent integration boundary
+
+Task3 creates no actual entry. After its review, controller will specify separate actual6/score6 compatibility units including exact approval in envelope basis, complete R2 state replay and source-backed handling of legal negative states before any freeze. Existing actual5 remains permanently closed. One combined fullGo runs on final selected implementation; independent freeze and authenticated fee/token/zero-inference Langfuse checks precede any new paid scope.
