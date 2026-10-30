@@ -131,7 +131,7 @@ func conversationTerminalErrors(c ConversationCase, f Fixture, initial, final Co
 	if err := validateConversationState(final, f); err != nil {
 		errors = append(errors, err)
 	}
-	if !reflect.DeepEqual(initial.Controls, final.Controls) {
+	if !sameConversationControls(initial.Controls, final.Controls) {
 		bad("foreign controls")
 	}
 	executed := 0

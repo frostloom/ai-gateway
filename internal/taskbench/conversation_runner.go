@@ -99,7 +99,7 @@ func runConversation(ctx context.Context, c ConversationCase, d ConversationDriv
 		if err = validateConversationState(obs.State, f); err != nil {
 			fail(err)
 		}
-		if !reflect.DeepEqual(initial.Controls, obs.State.Controls) {
+		if !sameConversationControls(initial.Controls, obs.State.Controls) {
 			issue("foreign_control", fmt.Errorf("turn %d foreign control changed", i+1))
 		}
 		// Missing semantic annotation is pending review, not evidence that a
@@ -310,7 +310,7 @@ func conversationPendingCorrect(c ConversationCase, f Fixture, p *Pending) bool 
 	return PendingCorrect(legacy, f, *p)
 }
 func sameConversationBusiness(a, b ConversationState) bool {
-	return sameConversationOwn(a, b) && reflect.DeepEqual(a.Controls, b.Controls)
+	return sameConversationOwn(a, b) && sameConversationControls(a.Controls, b.Controls)
 }
 func sameConversationOwn(a, b ConversationState) bool {
 	return sameDomain(a.Own, b.Own) && reflect.DeepEqual(a.Allowance, b.Allowance)
