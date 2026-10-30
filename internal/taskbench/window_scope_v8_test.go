@@ -49,7 +49,7 @@ func TestWindowV8RejectsRuntimeBeforeMutations(t *testing.T) {
 		t.Error("V8 partially accepted by existing campaign")
 	}
 	ready := &FullWindowActualReady{manifest: windowActualManifest{Schema: "full-window-actual-ready.v8", Scope: scope, SessionRoot: filepath.Join(parent, "session"), CampaignRoot: root}}
-	if _, err = OpenFullWindowActual(context.Background(), ready, filepath.Join(parent, "missing-settings")); err == nil || !strings.Contains(err.Error(), "v7") {
+	if _, err = OpenFullWindowActual(context.Background(), ready, filepath.Join(parent, "missing-settings")); err == nil || !strings.Contains(err.Error(), "v9 delegated authority required before settings") {
 		t.Fatalf("actual must reject epoch before settings: %v", err)
 	}
 	if windowActualSupportedEpoch(ready.manifest) {

@@ -96,7 +96,11 @@ func TestWindowV8AuthorityRecheckedBeforeWindowOutputs(t *testing.T) {
 				case "claim":
 					err = c.persistClaimWindowCampaign(1, c.claimSHA, "")
 				}
-				if err == nil || !strings.Contains(err.Error(), "v8 execution authority") {
+				expectedReason := "v8 execution authority"
+				if mode == "missing" && boundary != "session" {
+					expectedReason = "native exact epoch authority absent"
+				}
+				if err == nil || !strings.Contains(err.Error(), expectedReason) {
 					t.Fatalf("final auth was not the first V8 window input gate: %v", err)
 				}
 				if boundary == "ledger" {
