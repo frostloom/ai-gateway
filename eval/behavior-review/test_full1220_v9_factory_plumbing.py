@@ -87,8 +87,10 @@ if Path(os.environ['FULL1220_V9_SOURCE_INPUT']).parent.name=='bad':print(line)
         code='''import os,sys,json,hashlib
 from pathlib import Path
 assert Path.cwd().name=='observability'
+assert Path(os.environ['SDKROOT']).name=='MacOSX26.5.sdk'
 assert hashlib.sha256(sys.stdin.buffer.read()).hexdigest()=='''+repr(digest)+'''
 raw=Path(os.environ['FULL1220_PROJECTION_INPUT']).read_bytes()
+assert json.loads(raw)['schema']=='full1220-content-projection-input.v1'
 out=json.dumps({'schema':'full1220-content-projection.v1','input_sha256':hashlib.sha256(raw).hexdigest(),'rows':[]},separators=(',',':')).encode()
 with Path(os.environ['FULL1220_PROJECTION_OUTPUT']).open('xb') as f:f.write(out)
 print('    full1220_content_projection_v8_test.go:218: FULL1220_PROJECTION_OUTPUT_SHA256='+hashlib.sha256(out).hexdigest())
@@ -105,7 +107,7 @@ print('    full1220_content_projection_v8_test.go:218: FULL1220_PROJECTION_OUTPU
         proof=types.SimpleNamespace(_module=module,payload_raw=b'{"packets":[]}') # explicitly NOT _ScoreActualProof
         checked=[]
         def check(payload,job,raw,records):checked.append(payload['input_sha256']);self.assertEqual(payload['input_sha256'],hashlib.sha256(raw).hexdigest())
-        with patch.object(s,'build_window_score_plan',return_value={'unit_mock':True}),patch.object(s,'_projection_job',return_value={}),\
+        with patch.object(s,'build_window_score_plan',return_value={'unit_mock':True}),patch.object(s,'_projection_job',return_value={'schema':'full1220-content-projection-input.v1'}),\
              patch.object(s,'_check_projected_output',side_effect=check),patch.object(self.p,'select_helper',return_value=selected),\
              patch.object(s,'_ContentProjection',return_value={'unit_mock':True,'not_content_proof':True}):
             result=s.project_window_content(json.dumps(manifest).encode(),b'{}',b'{}',{},b'{}',{'projection_helper_sha256':s._PROJECTION_HELPER_SHA256},

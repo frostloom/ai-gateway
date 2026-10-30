@@ -32,6 +32,7 @@ HISTORICAL_JEV = 408701
 FROZEN_ROOT = FROZEN_MANIFEST_SHA256 = FROZEN_SOURCE_SHA256 = 'UNFROZEN'
 FROZEN_BINARY_SHA256 = FROZEN_NODE_SHA256 = 'UNFROZEN'
 FROZEN_HELPER_CATALOG_SHA256 = 'UNFROZEN'
+CAPTURE_INPUT_SCHEMA = 'full1220-content-projection-input.v1'
 
 
 def need(ok, message):
@@ -840,7 +841,7 @@ def _load_helper_artifacts(context):
     tools={name:p.pin_tool(Path(value['path'])) for name,value in catalog['identity']['tools'].items()}
     runtime=p.pin_tree(root/'helper-build/runtime',runtime_map)
     specs={'source':('TestFull1220SourceV9','full1220-source-v9-job.v1','full1220-source-v9-replay.v1','internal/taskbench/full1220_source_v9_test.go'),
-           'capture':('TestFull1220FrozenContentProjection','full1220-content-projection-job.v1','full1220-content-projection.v1','internal/observability/full1220_content_projection_v8_test.go')}
+           'capture':('TestFull1220FrozenContentProjection',CAPTURE_INPUT_SCHEMA,'full1220-content-projection.v1','internal/observability/full1220_content_projection_v8_test.go')}
     for kind,(test,inschema,outschema,helperpath) in specs.items():
         entry=next(e for e in catalog['artifacts'] if e['kind']==kind)
         need(entry['path']==f'helper-build/{kind}.test' and entry['test']==test and entry['input_schema']==inschema and

@@ -1610,7 +1610,7 @@ def project_window_content(manifest_raw,summary_raw,receipt_raw,records,review_r
     output.mkdir(mode=0o700);rd=output/'records';rd.mkdir(mode=0o700);(output/'tmp').mkdir(mode=0o700)
     for name,raw in records.items():_exclusive_write(rd/name,raw)
     job=_projection_job(plan,manifest);input_raw=_json_bytes(job);_exclusive_write(output/'input.json',input_raw)
-    env={'PATH':'/usr/bin:/bin:/usr/sbin:/sbin','TMPDIR':str(output/'tmp'),
+    env={'PATH':'/usr/bin:/bin:/usr/sbin:/sbin','TMPDIR':str(output/'tmp'),'SDKROOT':_PROJECTION_SDKROOT,
          'FULL1220_PROJECTION_INPUT':str(output/'input.json'),'FULL1220_PROJECTION_OUTPUT':str(output/'projection.json'),
          'FULL1220_PROJECTION_INPUT_SHA256':_sha(input_raw)}
     names=set(manifest['sources'])|({'.git'} if git_pointer is not None else set())

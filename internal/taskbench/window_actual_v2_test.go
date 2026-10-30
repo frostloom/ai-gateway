@@ -26,8 +26,8 @@ func TestActualV2ManifestPreservesStoppedEvidenceBinding(t *testing.T) {
 
 func TestActualCurrentEpochRequiresStoppedProofBeforeOpenAndWindowInputs(t *testing.T) {
 	r := &FullWindowActualReady{manifestRaw: []byte(`{}`), manifest: windowActualManifest{Schema: "full-window-actual-ready.v7", Scope: fullWindowScope{Schema: "full-window-scope.v7"}}}
-	if s, err := OpenFullWindowActual(context.Background(), r, "/never-read-settings"); err == nil || s != nil || !strings.Contains(err.Error(), "stopped") {
-		t.Fatal("Open did not check stopped evidence first", err)
+	if s, err := OpenFullWindowActual(context.Background(), r, "/never-read-settings"); err == nil || s != nil || !strings.Contains(err.Error(), "v9 delegated authority required before settings") {
+		t.Fatal("Open did not reject consumed epoch before settings", err)
 	}
 	s := &FullWindowActualSession{ready: r}
 	if err := s.verifyInputs(); err == nil || !strings.Contains(err.Error(), "stopped") {

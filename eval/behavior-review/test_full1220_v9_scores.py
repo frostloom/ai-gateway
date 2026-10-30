@@ -19,6 +19,14 @@ def load():
     return m
 
 class Scores(unittest.TestCase):
+    def test_real_capture_contract_schema_matches_catalog_and_sdk26_5(self):
+        m=load();path=HERE/'full1220-v9-window.py';w=types.ModuleType('unit_v9_capture_contract');w.__file__=str(path)
+        exec(compile(path.read_bytes(),str(path),'exec'),w.__dict__)
+        provenance={key:'a'*64 for key in ('manifest_sha256','receipt_sha256','scope_sha256','execution_sha256','archive_commit','archive_tree')}
+        job=m._projection_job({'rows':[],'provenance':provenance,'window_id':'window-001'}, {'private_settings_sha256':'b'*64})
+        self.assertEqual(job['schema'],'full1220-content-projection-input.v1')
+        self.assertEqual(w.CAPTURE_INPUT_SCHEMA,job['schema'])
+        self.assertEqual(Path(m._PROJECTION_SDKROOT).name,'MacOSX26.5.sdk')
     def test_prebuilt_projection_rejects_untrusted_proof_before_key_or_runtime(self):
         m=load()
         def forbidden(*a,**kw):raise AssertionError('untrusted capture read key/runtime')
