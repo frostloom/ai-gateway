@@ -12,6 +12,10 @@ import (
 // bodies must still be read and checked, rather than accepting their manifests
 // as proof that those bytes exist. No old accounting state is mutated.
 func readWindowStoppedV4Bundle(root string, m windowActualManifest, first fullWindowBaseline, files map[string][]byte) (fullWindowBaseline, error) {
+	return readWindowStoppedV4BundleWithPass(nil, root, m, first, files)
+}
+
+func readWindowStoppedV4BundleWithPass(p *historyReadPass, root string, m windowActualManifest, first fullWindowBaseline, files map[string][]byte) (fullWindowBaseline, error) {
 	reject := func() (fullWindowBaseline, error) {
 		return fullWindowBaseline{}, fmt.Errorf("stopped v4 bundle linkage rejected")
 	}
@@ -92,7 +96,7 @@ func readWindowStoppedV4Bundle(root string, m windowActualManifest, first fullWi
 			campaignNames["claim-000003.json"] = false
 			continue
 		}
-		audit, err := readWindowStoppedV4Native(filepath.Join(root, wd, "native-payloads"), payload, files[ledgerName])
+		audit, err := readWindowStoppedV4NativeWithPass(p, filepath.Join(root, wd, "native-payloads"), payload, files[ledgerName])
 		if err != nil {
 			return reject()
 		}
@@ -139,7 +143,7 @@ func readWindowStoppedV4Bundle(root string, m windowActualManifest, first fullWi
 				return reject()
 			}
 			traces[row.TraceID] = true
-			raw, err := readWindowActualFile(filepath.Join(root, wd, row.RecordingFile), row.RecordingSHA256, 8<<20)
+			raw, err := historyStoppedFile(p, filepath.Join(root, wd, row.RecordingFile), row.RecordingSHA256, 8<<20)
 			if err != nil {
 				return reject()
 			}
@@ -157,7 +161,7 @@ func readWindowStoppedV4Bundle(root string, m windowActualManifest, first fullWi
 				}
 			}
 			if row.QualityEnd != nil {
-				if _, err := readWindowStoppedV4Quality(filepath.Join(root, wd), m.Scope.Bindings.PolicySHA256, slot, row, record); err != nil {
+				if _, err := readWindowStoppedV4QualityWithPass(p, filepath.Join(root, wd), m.Scope.Bindings.PolicySHA256, slot, row, record); err != nil {
 					return reject()
 				}
 				names[row.QualityEnd.CandidateFile] = false
@@ -198,10 +202,10 @@ func readWindowStoppedV4Bundle(root string, m windowActualManifest, first fullWi
 		if negative != r.QualityNegativeArms || models != audit.State.ModelAttempts || jevs != audit.State.JEVAttempts || attempted != r.AttemptedArms || finished != r.FinishedArms || turns != r.ObservedTurns || r.UnrunArms != 56-attempted {
 			return reject()
 		}
-		if err = validateWindowStoppedV2Dir(filepath.Join(root, wd), names); err != nil {
+		if err = historyStoppedDir(p, filepath.Join(root, wd), names); err != nil {
 			return fullWindowBaseline{}, err
 		}
-		if err = validateWindowStoppedV2Dir(filepath.Join(root, "campaign", fmt.Sprintf("ledger-%06d", i)), map[string]bool{"accounting.jsonl": false}); err != nil {
+		if err = historyStoppedDir(p, filepath.Join(root, "campaign", fmt.Sprintf("ledger-%06d", i)), map[string]bool{"accounting.jsonl": false}); err != nil {
 			return fullWindowBaseline{}, err
 		}
 		want := FullWindowActualStatus{EvidenceKind: "recorded_run", NextWindowIndex: i + 1, PlannedPairs: 3660, PlannedArms: 7320, DefinedTurns: 11772, BoundariesExcluded: 1851, AttemptedArms: prior.AttemptedArms + attempted, FinishedArms: prior.FinishedArms + finished, FailedAttemptedArms: prior.FailedAttemptedArms + attempted - finished, ObservedTurns: prior.ObservedTurns + turns, QualityEndUnrunTurns: prior.QualityEndUnrunTurns + qualityUnrun, ModelAttempts: prior.ModelAttempts + models, JEVAttempts: prior.JEVAttempts + jevs}
@@ -258,10 +262,10 @@ func readWindowStoppedV4Bundle(root string, m windowActualManifest, first fullWi
 		return reject()
 	}
 
-	if err := validateWindowStoppedV2Dir(filepath.Join(root, "campaign"), campaignNames); err != nil {
+	if err := historyStoppedDir(p, filepath.Join(root, "campaign"), campaignNames); err != nil {
 		return fullWindowBaseline{}, err
 	}
-	if err := validateWindowStoppedV2Dir(filepath.Join(root, "records"), recordNames); err != nil {
+	if err := historyStoppedDir(p, filepath.Join(root, "records"), recordNames); err != nil {
 		return fullWindowBaseline{}, err
 	}
 	base.TotalModel = 105000000

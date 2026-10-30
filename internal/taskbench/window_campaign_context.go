@@ -22,3 +22,14 @@ func windowCampaignSuppliedContext(ctx context.Context) error {
 	}
 	return ctx.Err()
 }
+
+// Join the supplied cancellation to the exact operation already bound at ledger
+// open. The original bound deadline stays visible to every historical leaf.
+func (c *windowCampaign) windowCampaignHistoryContextLocked(ctx context.Context) (context.Context, func()) {
+	if c.acquisitionContext == nil {
+		return ctx, func() {}
+	}
+	joined, cancel := context.WithCancel(c.acquisitionContext)
+	stop := context.AfterFunc(ctx, cancel)
+	return joined, func() { stop(); cancel() }
+}

@@ -250,7 +250,7 @@ func openWindowAcquisition(ctx context.Context, auth *windowAcquisitionAuthoriza
 	run := &windowAcquisitionRun{auth: *auth, scope: scope, window: scope.Windows[index-1], recordFiles: map[string]string{}, started: time.Now()}
 	run.auth.source = source
 	run.receipt = windowAcquisitionReceipt{Schema: "full-window-acquisition-receipt.v1", EvidenceKind: auth.evidenceKind, Status: "stopped", ScopeSHA256: scopeSHA, ExecutionSHA256: executionSHA, WindowID: run.window.ID, WindowIndex: index, PlannedCampaignPairs: totals.Pairs, PlannedCampaignArms: totals.Arms, PlannedCampaignTurns: totals.DefinedUserTurns, PlannedCurrentPairs: run.window.LastOrdinal - run.window.FirstOrdinal + 1, OperationLimitSeconds: 300}
-	if scope.Schema == "full-window-scope.v8" {
+	if windowScopeUsesNativeV8(scope.Schema) {
 		run.receipt.Schema = "full-window-acquisition-receipt.v8"
 	}
 	run.receipt.OperationDeadline, _ = ctx.Deadline()
@@ -447,7 +447,7 @@ func (r *windowAcquisitionRun) completeWindowAcquisition(ctx context.Context) er
 	if len(r.permit.proofs) != len(r.receipt.Rows) || r.permit.active != nil || r.permit.nextArm != len(r.receipt.Rows) {
 		return r.failWindowAcquisition("window_proofs", 0, "")
 	}
-	if r.scope.Schema == "full-window-scope.v8" {
+	if windowScopeUsesNativeV8(r.scope.Schema) {
 		c := r.auth.campaign
 		c.mu.Lock()
 		err := c.validateWindowV8ExtrasLocked(r.ledger.Snapshot())

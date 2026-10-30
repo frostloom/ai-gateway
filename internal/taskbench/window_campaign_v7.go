@@ -38,7 +38,7 @@ func (h windowV7CurrentHistory) windowStoppedPredecessorRootsV7() [6]string {
 }
 
 func validateWindowCampaignV7OrHistoricalLimits(scope fullWindowScope, limits windowCampaignLimits) error {
-	if scope.Schema == "full-window-scope.v7" || scope.Schema == "full-window-scope.v8" {
+	if scope.Schema == "full-window-scope.v7" || windowScopeUsesNativeV8(scope.Schema) {
 		if limits != windowV4ExpectedLimits() {
 			return fmt.Errorf("v7 exact cache tariff and original envelopes required")
 		}

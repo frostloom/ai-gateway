@@ -12,6 +12,10 @@ import (
 // bodies must still be read and checked, rather than accepting their manifests
 // as proof that those bytes exist. No old accounting state is mutated.
 func readWindowStoppedV2Bundle(root string, m windowActualManifest, first fullWindowBaseline, files map[string][]byte) (fullWindowBaseline, error) {
+	return readWindowStoppedV2BundleWithPass(nil, root, m, first, files)
+}
+
+func readWindowStoppedV2BundleWithPass(p *historyReadPass, root string, m windowActualManifest, first fullWindowBaseline, files map[string][]byte) (fullWindowBaseline, error) {
 	reject := func() (fullWindowBaseline, error) {
 		return fullWindowBaseline{}, fmt.Errorf("stopped v2 bundle linkage rejected")
 	}
@@ -67,7 +71,7 @@ func readWindowStoppedV2Bundle(root string, m windowActualManifest, first fullWi
 		if s.ReportSHA256 != conversationHash(files[wd+"/receipt.json"]) || r.PayloadManifestSHA256 != conversationHash(files[wd+"/payload-manifest.json"]) || s.PayloadManifestSHA256 != r.PayloadManifestSHA256 || r.PayloadPackets != len(payload.Packets) || r.ScopeSHA256 != m.ScopeSHA256 || r.ExecutionSHA256 != m.ExecutionSHA256 || r.WindowIndex != i || r.WindowID != w.ID || r.EvidenceKind != "recorded_run" || r.OperationLimitSeconds != 300 || len(r.Rows) != 56 {
 			return reject()
 		}
-		if err = readWindowStoppedV2Payload(filepath.Join(root, wd, "native-payloads"), payload); err != nil {
+		if err = readWindowStoppedV2PayloadWithPass(p, filepath.Join(root, wd, "native-payloads"), payload); err != nil {
 			return fullWindowBaseline{}, err
 		}
 		names := map[string]bool{"receipt.json": false, "payload-manifest.json": false, "native-payloads": true}
@@ -100,7 +104,7 @@ func readWindowStoppedV2Bundle(root string, m windowActualManifest, first fullWi
 			if len(specs) == 0 {
 				continue
 			}
-			records, err := readWindowStoppedBatch4(specs)
+			records, err := historyStoppedBatch(p, specs)
 			if err != nil {
 				return reject()
 			}
@@ -143,10 +147,10 @@ func readWindowStoppedV2Bundle(root string, m windowActualManifest, first fullWi
 		if models != audit.State.ModelAttempts || jevs != audit.State.JEVAttempts || attempted != r.AttemptedArms || finished != r.FinishedArms || turns != r.ObservedTurns || r.UnrunArms != 56-attempted {
 			return reject()
 		}
-		if err = validateWindowStoppedV2Dir(filepath.Join(root, wd), names); err != nil {
+		if err = historyStoppedDir(p, filepath.Join(root, wd), names); err != nil {
 			return fullWindowBaseline{}, err
 		}
-		if err = validateWindowStoppedV2Dir(filepath.Join(root, "campaign", fmt.Sprintf("ledger-%06d", i)), map[string]bool{"accounting.jsonl": false}); err != nil {
+		if err = historyStoppedDir(p, filepath.Join(root, "campaign", fmt.Sprintf("ledger-%06d", i)), map[string]bool{"accounting.jsonl": false}); err != nil {
 			return fullWindowBaseline{}, err
 		}
 		want := FullWindowActualStatus{EvidenceKind: "recorded_run", NextWindowIndex: i + 1, PlannedPairs: 3660, PlannedArms: 7320, DefinedTurns: 11772, BoundariesExcluded: 1851, AttemptedArms: prior.AttemptedArms + attempted, FinishedArms: prior.FinishedArms + finished, FailedAttemptedArms: prior.FailedAttemptedArms + attempted - finished, ObservedTurns: prior.ObservedTurns + turns, ModelAttempts: prior.ModelAttempts + models, JEVAttempts: prior.JEVAttempts + jevs}
@@ -190,10 +194,10 @@ func readWindowStoppedV2Bundle(root string, m windowActualManifest, first fullWi
 	if !reflect.DeepEqual(terminal, want) || terminal.AttemptedArms != 334 || terminal.FinishedArms != 333 || terminal.ObservedTurns != 396 || terminal.ModelAttempts != 665 || terminal.JEVAttempts != 167 || totalRecords != 334 || totalPackets != 832 || unknown != 1 || lastAudit.State.Pending.Sequence != 140 {
 		return reject()
 	}
-	if err := validateWindowStoppedV2Dir(filepath.Join(root, "campaign"), campaignNames); err != nil {
+	if err := historyStoppedDir(p, filepath.Join(root, "campaign"), campaignNames); err != nil {
 		return fullWindowBaseline{}, err
 	}
-	if err := validateWindowStoppedV2Dir(filepath.Join(root, "records"), recordNames); err != nil {
+	if err := historyStoppedDir(p, filepath.Join(root, "records"), recordNames); err != nil {
 		return fullWindowBaseline{}, err
 	}
 	base.TotalModel = 105000000

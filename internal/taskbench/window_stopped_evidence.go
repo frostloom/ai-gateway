@@ -1,6 +1,7 @@
 package taskbench
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -33,8 +34,25 @@ func windowStoppedArtifactPins() map[string]string {
 }
 
 func loadWindowStoppedBaseline(path, expectedSHA string) (windowStoppedBaseline, error) {
+	return loadWindowStoppedBaselineContext(context.Background(), path, expectedSHA)
+}
+
+// Context carries the caller's deadline through every nested historical read.
+func loadWindowStoppedBaselineContext(ctx context.Context, path, expectedSHA string) (windowStoppedBaseline, error) {
+	return runHistoryReadPass(ctx, func(p *historyReadPass) (windowStoppedBaseline, error) {
+		return loadWindowStoppedBaselineWithPass(p, path, expectedSHA)
+	})
+}
+
+func loadWindowStoppedBaselineWithPass(p *historyReadPass, path, expectedSHA string) (windowStoppedBaseline, error) {
+	if p == nil {
+		return windowStoppedBaseline{}, fmt.Errorf("historical pass required")
+	}
+	if err := historyStoppedRoot(p, filepath.Dir(path)); err != nil {
+		return windowStoppedBaseline{}, err
+	}
 	var out windowStoppedBaseline
-	raw, err := readWindowActualFile(path, expectedSHA, 65536)
+	raw, err := historyStoppedFile(p, path, expectedSHA, 65536)
 	if err != nil {
 		return out, err
 	}
@@ -47,16 +65,19 @@ func loadWindowStoppedBaseline(path, expectedSHA string) (windowStoppedBaseline,
 		return out, fmt.Errorf("original stopped root must be canonical")
 	}
 	// Establish the exact old namespace before touching even its existing lock.
-	manifestRaw, e := readWindowActualFile(filepath.Join(evidence.OriginalRoot, "actual-manifest.json"), windowStoppedArtifactPins()["actual-manifest.json"], 8<<20)
+	if err := historyStoppedRoot(p, evidence.OriginalRoot); err != nil {
+		return windowStoppedBaseline{}, err
+	}
+	manifestRaw, e := historyStoppedFile(p, filepath.Join(evidence.OriginalRoot, "actual-manifest.json"), windowStoppedArtifactPins()["actual-manifest.json"], 8<<20)
 	var original windowActualManifest
 	if e != nil || decodeWindowActualJSON(manifestRaw, &original) != nil || original.CampaignRoot != filepath.Join(evidence.OriginalRoot, "campaign") || original.SessionRoot != filepath.Join(evidence.OriginalRoot, "records") || original.ClaimsDir != evidence.HistoricalClaimsDir {
 		return out, fmt.Errorf("stopped namespace differs from original manifest")
 	}
-	err = withWindowStoppedLock(filepath.Join(evidence.OriginalRoot, "campaign/.lock"), func() error {
-		if err := validateWindowStoppedInventory(evidence.OriginalRoot); err != nil {
+	err = historyStoppedLock(p, 1, filepath.Join(evidence.OriginalRoot, "campaign/.lock"), func() error {
+		if err := validateWindowStoppedInventoryWithPass(p, evidence.OriginalRoot); err != nil {
 			return err
 		}
-		files, err := readWindowStoppedFiles(evidence.OriginalRoot, windowStoppedArtifactPins(), 8<<20)
+		files, err := readWindowStoppedFilesWithPass(p, evidence.OriginalRoot, windowStoppedArtifactPins(), 8<<20)
 		if err != nil {
 			return err
 		}
@@ -67,11 +88,14 @@ func loadWindowStoppedBaseline(path, expectedSHA string) (windowStoppedBaseline,
 		if b.manifest.CampaignRoot != filepath.Join(evidence.OriginalRoot, "campaign") || b.manifest.SessionRoot != filepath.Join(evidence.OriginalRoot, "records") || b.manifest.ClaimsDir != evidence.HistoricalClaimsDir {
 			return fmt.Errorf("stopped roots differ from original frozen manifest")
 		}
+		if err := historyStoppedRoot(p, evidence.HistoricalClaimsDir); err != nil {
+			return err
+		}
 		pins := map[string]string{}
 		for id, sha := range fullWindowCanonicalClaims() {
 			pins[id+".json"] = sha
 		}
-		original, err := readWindowStoppedFiles(evidence.HistoricalClaimsDir, pins, 65536)
+		original, err := readWindowStoppedFilesWithPass(p, evidence.HistoricalClaimsDir, pins, 65536)
 		if err != nil {
 			return err
 		}
@@ -87,7 +111,7 @@ func loadWindowStoppedBaseline(path, expectedSHA string) (windowStoppedBaseline,
 		if err != nil {
 			return err
 		}
-		if err = validateWindowStoppedInventory(evidence.OriginalRoot); err != nil {
+		if err = validateWindowStoppedInventoryWithPass(p, evidence.OriginalRoot); err != nil {
 			return err
 		}
 		out = windowStoppedBaseline{base: next, evidencePath: path, evidenceSHA256: expectedSHA, originalRoot: evidence.OriginalRoot, historicalDir: evidence.HistoricalClaimsDir, liabilityMicroCNY: liability}
@@ -100,6 +124,10 @@ func loadWindowStoppedBaseline(path, expectedSHA string) (windowStoppedBaseline,
 }
 
 func readWindowStoppedFiles(root string, pins map[string]string, max int64) (map[string][]byte, error) {
+	return readWindowStoppedFilesWithPass(nil, root, pins, max)
+}
+
+func readWindowStoppedFilesWithPass(p *historyReadPass, root string, pins map[string]string, max int64) (map[string][]byte, error) {
 	canonical, err := filepath.EvalSymlinks(root)
 	if err != nil || !filepath.IsAbs(root) || filepath.Clean(root) != root || canonical != root || max < 1 || max > 8<<20 || len(pins) < 1 || len(pins) > 32 {
 		return nil, fmt.Errorf("bounded canonical stopped evidence root required")
@@ -119,7 +147,7 @@ func readWindowStoppedFiles(root string, pins map[string]string, max int64) (map
 		for i, name := range names[start:end] {
 			specs[i] = windowStoppedReadSpec{path: filepath.Join(root, filepath.FromSlash(name)), sha256: pins[name], maxBytes: max, kind: windowStoppedReadFile}
 		}
-		raw, err := readWindowStoppedBatch4(specs)
+		raw, err := historyStoppedBatch(p, specs)
 		if err != nil {
 			return nil, err
 		}
@@ -198,6 +226,10 @@ func decodeWindowStoppedBundle(raw map[string][]byte) (windowStoppedBundle, erro
 }
 
 func validateWindowStoppedInventory(root string) error {
+	return validateWindowStoppedInventoryWithPass(nil, root)
+}
+
+func validateWindowStoppedInventoryWithPass(p *historyReadPass, root string) error {
 	// An extra permanent claim cannot be silently excluded from the new baseline.
 	dirs := map[string]map[string]bool{
 		"campaign":                              {".lock": false, "claim-000001.json": false, "ledger-000001": true},
@@ -207,6 +239,11 @@ func validateWindowStoppedInventory(root string) error {
 		"records/window-000001/native-payloads": {"store.json": false, "request-000001.json": false, "request-000001.body": false, "response-000001.json": false, "response-000001.body": false},
 	}
 	for dir, names := range dirs {
+		if p != nil {
+			if err := historyStoppedDir(p, filepath.Join(root, dir), names); err != nil {
+				return err
+			}
+		}
 		entries, err := os.ReadDir(filepath.Join(root, dir))
 		if err != nil || len(entries) != len(names) {
 			return fmt.Errorf("stopped execution inventory changed")

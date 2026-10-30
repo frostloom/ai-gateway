@@ -9,9 +9,13 @@ import (
 )
 
 func readWindowStoppedV3Files(root string) (map[string][]byte, error) {
+	return readWindowStoppedV3FilesWithPass(nil, root)
+}
+
+func readWindowStoppedV3FilesWithPass(p *historyReadPass, root string) (map[string][]byte, error) {
 	files := map[string][]byte{}
 	for name, sha := range windowStoppedV3ArtifactPins() {
-		raw, err := readWindowActualFile(filepath.Join(root, filepath.FromSlash(name)), sha, 8<<20)
+		raw, err := historyStoppedFile(p, filepath.Join(root, filepath.FromSlash(name)), sha, 8<<20)
 		if err != nil {
 			return nil, fmt.Errorf("stopped v3 original top artifact changed: %s", name)
 		}
@@ -25,6 +29,10 @@ func readWindowStoppedV3Files(root string) (map[string][]byte, error) {
 // intent+settle identity, retained response SHA and freshly parsed native usage.
 // This proves configured accounting, not a provider invoice or paid capability.
 func readWindowStoppedV3Native(dir string, payload windowPayloadManifest, ledger []byte) (windowAccountingAudit, error) {
+	return readWindowStoppedV3NativeWithPass(nil, dir, payload, ledger)
+}
+
+func readWindowStoppedV3NativeWithPass(p *historyReadPass, dir string, payload windowPayloadManifest, ledger []byte) (windowAccountingAudit, error) {
 	reject := func() (windowAccountingAudit, error) {
 		return windowAccountingAudit{}, fmt.Errorf("stopped v3 native/ledger linkage rejected")
 	}
@@ -32,7 +40,7 @@ func readWindowStoppedV3Native(dir string, payload windowPayloadManifest, ledger
 	if err != nil || !reflect.DeepEqual(audit.Contract, payload.Contract) || !audit.State.Closed || audit.State.Pending != nil || audit.State.ModelHeld != 0 || audit.State.JEVHeld != 0 || audit.State.EnvelopeViolation {
 		return reject()
 	}
-	if err = readWindowStoppedV2Payload(dir, payload); err != nil {
+	if err = readWindowStoppedV2PayloadWithPass(p, dir, payload); err != nil {
 		return windowAccountingAudit{}, err
 	}
 	intents, settles := map[int]windowAccountingEvent{}, map[int]windowAccountingEvent{}
@@ -71,11 +79,11 @@ func readWindowStoppedV3Native(dir string, payload windowPayloadManifest, ledger
 		if err != nil {
 			return reject()
 		}
-		request, err := readWindowActualFile(filepath.Join(dir, packet.Request.File), packet.Request.FullSHA256, windowMaxResponseBytes)
+		request, err := historyStoppedFile(p, filepath.Join(dir, packet.Request.File), packet.Request.FullSHA256, windowMaxResponseBytes)
 		if err != nil || validateWindowPOST(packet.Identity.Provider, "POST", endpoint, request, limits, packet.Identity) != nil {
 			return reject()
 		}
-		response, err := readWindowActualFile(filepath.Join(dir, packet.Response.Body.File), packet.Response.Body.FullSHA256, windowMaxResponseBytes)
+		response, err := historyStoppedFile(p, filepath.Join(dir, packet.Response.Body.File), packet.Response.Body.FullSHA256, windowMaxResponseBytes)
 		if err != nil || settle.ResponseSHA256 != conversationHash(response) {
 			return reject()
 		}

@@ -240,3 +240,28 @@ func TestWindowCampaignContextNextLedgerGetsItsOwnOperation(t *testing.T) {
 		t.Fatalf("next cancellation bypassed: %v", err)
 	}
 }
+
+func TestWindowCampaignContextHistoryKeepsBothCancellations(t *testing.T) {
+	bound, boundCancel := context.WithCancel(context.Background())
+	defer boundCancel()
+	c := &windowCampaign{acquisitionContext: bound}
+	joined, done := c.windowCampaignHistoryContextLocked(context.Background())
+	defer done()
+	boundCancel()
+	<-joined.Done()
+	if !errors.Is(joined.Err(), context.Canceled) {
+		t.Fatal("bound operation cancellation lost")
+	}
+	bound2, cancel2 := context.WithCancel(context.Background())
+	defer cancel2()
+	supplied, cancelSupplied := context.WithCancel(context.Background())
+	defer cancelSupplied()
+	c.acquisitionContext = bound2
+	joined2, done2 := c.windowCampaignHistoryContextLocked(supplied)
+	defer done2()
+	cancelSupplied()
+	<-joined2.Done()
+	if !errors.Is(joined2.Err(), context.Canceled) || bound2.Err() != nil {
+		t.Fatal("supplied cancellation lost or canceled its parent")
+	}
+}

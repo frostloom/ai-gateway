@@ -1,0 +1,13 @@
+{
+  "answer": "是的，尽快开启真实评测吧，预算可以放到200➕4",
+  "approved_global_total_micro_cny": 200000000,
+  "approved_global_total_micro_usd": 4000000,
+  "interpretation": "Affirmative approval of the exact V8 scope and TLS policy; higher overall cap. Preserve the narrower already-frozen scope parent and quotas; extra global balance does not add requests.",
+  "question": "技术冻结及独审已完成，报告已推送 main（2b629c72）：是否将总预算从 ¥130＋$1 调整为 ¥140＋$1.1，并批准一次固定 V8 完整评测？范围为原1220×3＝3660对、7320臂、11772定义轮，两臂均knowledge=off；固定源码aa9147b9、binary7bee52c6、scope d5acd131。向DeepSeek deepseek-flash发送合成租户对话/工具上下文，向TypeSafe jev-1.13.0发送合成判断状态。最多58860/5886次逻辑模型/JEV调用；仅首个TLS握手纯EOF、无提供者HTTP写入等完整条件成立时，在原上下文内对同body最多补一次native2，每提供者全范围最多20次，native总上限58880/5906。旧44份永久预留不释放，连全部基础窗口、额外预留及风险总责任¥139.218667＋$1.053354，超过现已批总额，因此需要这一次预算及策略变更批准。其他技术失败停止、不续旧scope/重领/重试、不将余量用于额外实验；批准后我按既有自主授权连续完成执行、独立复核与Langfuse评分读回，不逐窗确认。完整材料：docs/full1220-v8-frozen-2026-10-30.md。",
+  "question_item_id": "[\"request_user_input_async\",\"call_f1bec9fd6a2244568acb6bbae982dad1\",0]",
+  "recorded_utc": "2026-10-30T02:14:21.103197+00:00",
+  "schema": "full1220-v8-explicit-human-approval-evidence.v1",
+  "source": "actual user asynchronous question reply in current chat",
+  "this_frozen_scope_parent_micro_cny": 140000000,
+  "this_frozen_scope_parent_micro_usd": 1100000
+}

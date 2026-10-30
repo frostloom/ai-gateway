@@ -38,6 +38,7 @@ type windowV8ExecutionAuthorization struct {
 	Signature string `json:"signature"`
 }
 type windowV8Authority struct {
+	v9                                                          *windowV9Authority
 	manifest                                                    windowActualManifest
 	manifestSHA, binarySHA, authorizationPath, authorizationSHA string
 	raw                                                         []byte
@@ -82,6 +83,13 @@ func verifyWindowV8ExecutionAuthorization(raw []byte, m windowActualManifest, ma
 }
 
 func (a *windowV8Authority) revalidate() error {
+	if a != nil && a.v9 != nil {
+		v := a.v9
+		if a.binding != v.binding.windowV8ExecutionBinding || a.authorizationPath != v.authorizationPath || a.authorizationSHA != v.authorizationSHA || a.manifestSHA != v.manifestSHA || a.binarySHA != v.binarySHA || !bytes.Equal(a.raw, v.raw) || !reflect.DeepEqual(a.manifest, v.manifest) {
+			return fmt.Errorf("v9 native authority view changed")
+		}
+		return v.revalidate()
+	}
 	if a == nil || a.authorizationPath == "" || !comparisonDigest(a.authorizationSHA) {
 		return fmt.Errorf("v8 authority absent")
 	}
@@ -142,6 +150,9 @@ func (r *FullWindowActualReady) revalidateV8() error {
 	return nil
 }
 func windowActualBuildAnchors(m windowActualManifest) (string, string, string) {
+	if m.Schema == "full-window-actual-ready.v9" {
+		return fullWindowV9ManifestSHA, fullWindowV9ArchiveCommit, fullWindowV9ArchiveTree
+	}
 	if m.Schema == "full-window-actual-ready.v8" {
 		return fullWindowV8ManifestSHA, fullWindowV8ArchiveCommit, fullWindowV8ArchiveTree
 	}

@@ -65,7 +65,7 @@ func (c *windowCampaign) claimWindowExtra(r windowOwnedRetryContext) (*windowExt
 		c.poisoned = true
 		return nil, fmt.Errorf("v8 exclusive extra rejected")
 	}
-	if c.prepared.scope.Schema != "full-window-scope.v8" || c.closed || c.poisoned || c.ledger == nil || c.ledger != r.driver.ledger || c.prepared.v8Authority == nil || c.prepared.v8Authority.revalidate() != nil || c.inventoryWindowCampaign() != nil {
+	if !windowScopeUsesNativeV8(c.prepared.scope.Schema) || c.closed || c.poisoned || c.ledger == nil || c.ledger != r.driver.ledger || c.revalidateWindowV8AuthorityLocked() != nil || c.inventoryWindowCampaign() != nil {
 		return fail()
 	}
 	scopeRaw, _ := json.Marshal(c.prepared.scope)
@@ -121,7 +121,8 @@ func (c *windowCampaign) claimWindowExtra(r windowOwnedRetryContext) (*windowExt
 	if err != nil {
 		return fail()
 	}
-	if model > 140000000-2023424 || jev > 1100000-65 {
+	parent := windowNativeParent(c.prepared.scope)
+	if model > parent.Model-2023424 || jev > parent.JEV-65 {
 		return fail()
 	}
 	a := c.prepared.v8Authority
@@ -156,7 +157,7 @@ func (r *windowExtraFundingReceipt) recordFunding() error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	fail := func() error { c.poisoned = true; return fmt.Errorf("v8 owned funding receipt rejected") }
-	if r.consumed || c.closed || c.poisoned || c.ledger != r.ledger || c.prepared.v8Authority == nil || c.prepared.v8Authority.revalidate() != nil || c.inventoryWindowCampaign() != nil || r.claim.Index < 1 || r.claim.Index > len(c.extras) || c.extras[r.claim.Index-1] != r.claim || c.files[fmt.Sprintf("extra-%06d.json", r.claim.Index)] != r.sha {
+	if r.consumed || c.closed || c.poisoned || c.ledger != r.ledger || c.revalidateWindowV8AuthorityLocked() != nil || c.inventoryWindowCampaign() != nil || r.claim.Index < 1 || r.claim.Index > len(c.extras) || c.extras[r.claim.Index-1] != r.claim || c.files[fmt.Sprintf("extra-%06d.json", r.claim.Index)] != r.sha {
 		return fail()
 	}
 	r.consumed = true

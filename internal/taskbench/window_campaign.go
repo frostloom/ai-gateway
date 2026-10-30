@@ -172,7 +172,7 @@ func contractWindowCampaign(scope fullWindowScope, sha string, w fullWindowDecla
 	if scope.Schema == "full-window-scope.v4" || scope.Schema == "full-window-scope.v5" || scope.Schema == "full-window-scope.v6" || scope.Schema == "full-window-scope.v7" {
 		schema = "full-window-accounting.v2"
 	}
-	if scope.Schema == "full-window-scope.v8" {
+	if windowScopeUsesNativeV8(scope.Schema) {
 		schema = windowAccountingV3
 		w.MaxModelCalls += 20
 		w.MaxJEVCalls += 20
@@ -181,7 +181,7 @@ func contractWindowCampaign(scope fullWindowScope, sha string, w fullWindowDecla
 }
 func prepareWindowCampaign(root, frozenRoot string, scope fullWindowScope, source ConversationSuite, profiles PairedProfiles, bindings fullWindowBindings, frozenSHA, frozenExecutionSHA string, limits windowCampaignLimits) (windowCampaignPrepared, error) {
 	var out windowCampaignPrepared
-	if scope.Schema == "full-window-scope.v8" {
+	if windowScopeUsesNativeV8(scope.Schema) {
 		return out, fmt.Errorf("v8 is a data-only declaration; campaign integration unavailable")
 	}
 	return prepareWindowCampaignData(root, frozenRoot, scope, source, profiles, bindings, frozenSHA, frozenExecutionSHA, limits)
@@ -262,7 +262,7 @@ func newWindowCampaign(root, frozenRoot, historicalDir string, scope fullWindowS
 // Internal primitive accepts already prepared private data. Only the validating
 // wrapper calls it in production. It creates no provider capability or token.
 func startWindowCampaign(p windowCampaignPrepared, baseline fullWindowBaseline) (*windowCampaign, error) {
-	if p.scope.Schema == "full-window-scope.v8" && (p.v8Authority == nil || p.v8Authority.revalidate() != nil) {
+	if validateWindowCampaignNativeAuthority(p) != nil {
 		return nil, fmt.Errorf("v8 signed authority required")
 	}
 	if e := validatePreparedWindowCampaign(p, baseline); e != nil {
@@ -307,6 +307,10 @@ func validatePreparedWindowCampaign(p windowCampaignPrepared, b fullWindowBaseli
 		return e
 	}
 	switch p.scope.Schema {
+	case "full-window-scope.v9":
+		if err := validateStoppedV9CampaignHistory(p, b); err != nil {
+			return err
+		}
 	case "full-window-scope.v8":
 		if err := validateStoppedV8CampaignHistory(p, b); err != nil {
 			return err
@@ -367,8 +371,11 @@ func validatePreparedWindowCampaign(p windowCampaignPrepared, b fullWindowBaseli
 		claimModelBound, claimJEVBound = 85015146, 655442
 	} else if p.scope.Schema == "full-window-scope.v7" {
 		claimModelBound, claimJEVBound = 84510611, 650855
-	} else if p.scope.Schema == "full-window-scope.v8" {
+	} else if windowScopeUsesNativeV8(p.scope.Schema) {
 		claimModelBound, claimJEVBound = 84500000, 600000
+		if p.scope.Schema == "full-window-scope.v9" {
+			claimModelBound, claimJEVBound = 123827032, 2037474
+		}
 	}
 	if e := d.validateWithBounds(claimModelBound, claimJEVBound); e != nil {
 		return e
@@ -470,8 +477,16 @@ func (c *windowCampaign) persistClaimWindowCampaignContext(ctx context.Context, 
 			return fmt.Errorf("historical claim chain changed")
 		}
 	}
-	if c.prepared.scope.Schema == "full-window-scope.v8" {
-		if err := validateStoppedV8CampaignHistory(c.prepared, c.baseline); err != nil {
+	if windowScopeUsesNativeV8(c.prepared.scope.Schema) {
+		historyCtx, done := c.windowCampaignHistoryContextLocked(ctx)
+		defer done()
+		var err error
+		if c.prepared.scope.Schema == "full-window-scope.v9" {
+			err = validateStoppedV9CampaignHistoryContext(historyCtx, c.prepared, c.baseline)
+		} else {
+			err = validateStoppedV8CampaignHistory(c.prepared, c.baseline)
+		}
+		if err != nil {
 			return err
 		}
 	}
@@ -483,8 +498,9 @@ func (c *windowCampaign) persistClaimWindowCampaignContext(ctx context.Context, 
 	if c.prepared.scope.Schema == "full-window-scope.v3" || c.prepared.scope.Schema == "full-window-scope.v4" || c.prepared.scope.Schema == "full-window-scope.v5" || c.prepared.scope.Schema == "full-window-scope.v6" || c.prepared.scope.Schema == "full-window-scope.v7" {
 		parentModel, parentJEV = c.baseline.TotalModel, c.baseline.TotalJEV
 	}
-	if c.prepared.scope.Schema == "full-window-scope.v8" {
-		parentModel, parentJEV = 140000000, 1100000
+	if windowScopeUsesNativeV8(c.prepared.scope.Schema) {
+		parent := windowNativeParent(c.prepared.scope)
+		parentModel, parentJEV = parent.Model, parent.JEV
 	}
 	if w.ModelCap > parentModel-c.model || w.JEVCap > parentJEV-c.jev {
 		return fmt.Errorf("permanent currency cap exhausted")
@@ -524,8 +540,11 @@ func (c *windowCampaign) persistClaimWindowCampaignContext(ctx context.Context, 
 		r.ParentModel = parentModel
 		r.ParentJEV = parentJEV
 	}
-	if d.Schema == "full-window-scope.v8" {
+	if windowScopeUsesNativeV8(d.Schema) {
 		r.Schema = "full-window-campaign-claim.v8"
+		if d.Schema == "full-window-scope.v9" {
+			r.Schema = "full-window-campaign-claim.v9"
+		}
 		r.BaselineEvidenceSHA256 = d.BaselineEvidenceSHA256
 		r.BudgetApprovalSHA256 = c.prepared.v8Authority.authorizationSHA
 		r.ParentModel = parentModel
@@ -553,7 +572,7 @@ func (c *windowCampaign) inventoryWindowCampaign() error {
 		return fmt.Errorf("root identity changed")
 	}
 	lockInfo, e := c.lock.Stat()
-	if e != nil || lockInfo.Size() != 0 || c.prepared.scope.Schema == "full-window-scope.v8" && !windowStoppedV7SingleLink(lockInfo) {
+	if e != nil || lockInfo.Size() != 0 || windowScopeUsesNativeV8(c.prepared.scope.Schema) && !windowStoppedV7SingleLink(lockInfo) {
 		return fmt.Errorf("owned lock content changed")
 	}
 	pathInfo, e := os.Lstat(filepath.Join(c.root, ".lock"))
@@ -580,7 +599,7 @@ func (c *windowCampaign) inventoryWindowCampaign() error {
 			continue
 		}
 		if sha, ok := c.ledgerAudits[name]; ok && entry.IsDir() {
-			if c.prepared.scope.Schema == "full-window-scope.v8" {
+			if windowScopeUsesNativeV8(c.prepared.scope.Schema) {
 				if _, err := readWindowStoppedV7File(filepath.Join(c.root, name, "accounting.jsonl"), sha, 64<<20); err != nil {
 					return fmt.Errorf("v8 sealed ledger changed")
 				}
@@ -595,7 +614,7 @@ func (c *windowCampaign) inventoryWindowCampaign() error {
 			return fmt.Errorf("unknown registry entry")
 		}
 		var raw []byte
-		if c.prepared.scope.Schema == "full-window-scope.v8" {
+		if windowScopeUsesNativeV8(c.prepared.scope.Schema) {
 			raw, e = readWindowStoppedV7File(filepath.Join(c.root, name), h, 8<<20)
 		} else {
 			raw, e = os.ReadFile(filepath.Join(c.root, name))
@@ -762,7 +781,7 @@ func (c *windowCampaign) advanceWindowCampaignContext(ctx context.Context, p *wi
 	}
 	d := c.prepared.scope
 	checkpoint := windowCampaignCheckpoint{Schema: "full-window-campaign-owned-checkpoint.v1", Index: c.index, ScopeSHA256: c.prepared.scopeSHA, ExecutionSHA256: c.prepared.executionSHA, DefinitionSHA256: d.DefinitionSHA256, ScheduleSHA256: d.ScheduleSHA256, PolicySHA256: d.Bindings.PolicySHA256, ClaimSHA256: c.claimSHA, LedgerSHA256: audit.JournalSHA256, Evidence: append([]windowCampaignArmEvidence(nil), p.evidence...)}
-	if d.Schema == "full-window-scope.v8" {
+	if windowScopeUsesNativeV8(d.Schema) {
 		if c.validateWindowV8ExtrasLocked(audit.State) != nil {
 			return fail(fmt.Errorf("v8 extras unresolved"))
 		}

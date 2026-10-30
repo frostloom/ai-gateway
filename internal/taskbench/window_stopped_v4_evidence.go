@@ -9,9 +9,13 @@ import (
 )
 
 func readWindowStoppedV4Files(root string) (map[string][]byte, error) {
+	return readWindowStoppedV4FilesWithPass(nil, root)
+}
+
+func readWindowStoppedV4FilesWithPass(p *historyReadPass, root string) (map[string][]byte, error) {
 	files := map[string][]byte{}
 	for name, sha := range windowStoppedV4ArtifactPins() {
-		raw, err := readWindowActualFile(filepath.Join(root, filepath.FromSlash(name)), sha, 8<<20)
+		raw, err := historyStoppedFile(p, filepath.Join(root, filepath.FromSlash(name)), sha, 8<<20)
 		if err != nil {
 			return nil, fmt.Errorf("stopped v4 original top artifact changed: %s", name)
 		}
@@ -25,10 +29,14 @@ func readWindowStoppedV4Files(root string) (map[string][]byte, error) {
 // Independently add parsed native weighted input/output or JEV input costs to
 // reconcile canonical replay. This is configured liability, not an invoice.
 func readWindowStoppedV4Native(dir string, payload windowPayloadManifest, ledger []byte) (windowAccountingAudit, error) {
+	return readWindowStoppedV4NativeWithPass(nil, dir, payload, ledger)
+}
+
+func readWindowStoppedV4NativeWithPass(p *historyReadPass, dir string, payload windowPayloadManifest, ledger []byte) (windowAccountingAudit, error) {
 	reject := func() (windowAccountingAudit, error) {
 		return windowAccountingAudit{}, fmt.Errorf("stopped v4 weighted native linkage rejected")
 	}
-	audit, err := readWindowStoppedV3Native(dir, payload, ledger)
+	audit, err := readWindowStoppedV3NativeWithPass(p, dir, payload, ledger)
 	if err != nil {
 		return windowAccountingAudit{}, err
 	}
@@ -59,7 +67,7 @@ func readWindowStoppedV4Native(dir string, payload windowPayloadManifest, ledger
 		if identity.Attempt != attempts[key] || identity.Attempt > max {
 			return reject()
 		}
-		raw, err := readWindowActualFile(filepath.Join(dir, packet.Response.Body.File), packet.Response.Body.FullSHA256, windowMaxResponseBytes)
+		raw, err := historyStoppedFile(p, filepath.Join(dir, packet.Response.Body.File), packet.Response.Body.FullSHA256, windowMaxResponseBytes)
 		if err != nil {
 			return reject()
 		}
@@ -96,6 +104,10 @@ func decodeWindowStoppedV4QualityData(raw []byte, target any) error {
 	return d.Decode(target)
 }
 func readWindowStoppedV4Quality(dir, policy string, slot fullWindowSlot, row windowAcquisitionRow, record collectionRecording) (*windowQualityOwnedEnd, error) {
+	return readWindowStoppedV4QualityWithPass(nil, dir, policy, slot, row, record)
+}
+
+func readWindowStoppedV4QualityWithPass(p *historyReadPass, dir, policy string, slot fullWindowSlot, row windowAcquisitionRow, record collectionRecording) (*windowQualityOwnedEnd, error) {
 	reject := func() (*windowQualityOwnedEnd, error) {
 		return nil, fmt.Errorf("stopped v4 quality sidecar linkage rejected")
 	}
@@ -103,7 +115,7 @@ func readWindowStoppedV4Quality(dir, policy string, slot fullWindowSlot, row win
 	if validateWindowQualityEndEvidence(policy, slot, row.Arm, row.ObservedTurns, q) != nil || row.Status != "failed" || row.StructuralPass || row.Success || record.Disposition != "halt" || q.CandidateFile != fmt.Sprintf("quality-%06d-%s-candidate.json", row.Ordinal, row.Arm) || q.CleanupFile != fmt.Sprintf("quality-%06d-%s-cleanup.json", row.Ordinal, row.Arm) {
 		return reject()
 	}
-	candidateRaw, err := readWindowActualFile(filepath.Join(dir, q.CandidateFile), q.CandidateSHA256, 16<<20)
+	candidateRaw, err := historyStoppedFile(p, filepath.Join(dir, q.CandidateFile), q.CandidateSHA256, 16<<20)
 	if err != nil {
 		return reject()
 	}
@@ -111,7 +123,7 @@ func readWindowStoppedV4Quality(dir, policy string, slot fullWindowSlot, row win
 	if decodeWindowStoppedV4QualityData(candidateRaw, &candidate) != nil || verifyQualityPreviewSidecar(candidate) != nil || !reflect.DeepEqual(candidate.Evidence.Record, record) || candidate.SourceSHA256 != q.SourceSHA256 || candidate.RuleSHA256 != q.RuleSHA256 || len(candidate.Unrun) != q.UnrunTurns {
 		return reject()
 	}
-	cleanupRaw, err := readWindowActualFile(filepath.Join(dir, q.CleanupFile), q.CleanupSHA256, 16<<20)
+	cleanupRaw, err := historyStoppedFile(p, filepath.Join(dir, q.CleanupFile), q.CleanupSHA256, 16<<20)
 	if err != nil {
 		return reject()
 	}

@@ -284,15 +284,10 @@ func OpenFullWindowActual(ctx context.Context, ready *FullWindowActualReady, pri
 	if ctx == nil || ctx.Err() != nil {
 		return nil, fmt.Errorf("actual session context rejected")
 	}
-	// Actual v1 through v6 owners are permanently consumed. New execution must
-	// include them in the separately verified v7 budget epoch, even if a caller
-	// can still read an old readiness snapshot. No settings or claim first.
-	v8 := ready != nil && ready.manifest.Schema == "full-window-actual-ready.v8" && ready.manifest.Scope.Schema == "full-window-scope.v8"
-	if v8 && (ready.v8Authority == nil || ready.v8Authority.revalidate() != nil) {
-		return nil, fmt.Errorf("actual v7 or signed v8 final authority required before settings")
-	}
-	if !v8 && (ready == nil || ready.manifest.Schema != "full-window-actual-ready.v7" || ready.manifest.Scope.Schema != "full-window-scope.v7") {
-		return nil, fmt.Errorf("actual v7 scope required for current budget epoch")
+	// All older owners are permanently consumed. V9 is the only new actual
+	// epoch; old manifests remain readable through their technical checkers.
+	if ready == nil || ready.manifest.Schema != "full-window-actual-ready.v9" || ready.manifest.Scope.Schema != "full-window-scope.v9" || ready.v8Authority == nil || ready.v8Authority.v9 == nil || ready.v8Authority.revalidate() != nil {
+		return nil, fmt.Errorf("actual v9 delegated authority required before settings")
 	}
 	if e := ready.revalidateStopped(); e != nil {
 		return nil, e
@@ -350,11 +345,7 @@ func OpenFullWindowActual(ctx context.Context, ready *FullWindowActualReady, pri
 		return nil, e
 	}
 	m := ready.manifest
-	if v8 {
-		s.campaign, e = startWindowCampaign(ready.prepared, ready.baseline)
-	} else {
-		s.campaign, e = newWindowCampaignV7(m.CampaignRoot, m.CampaignRoot, m.Scope, ready.source, ready.profiles, m.Scope.Bindings, m.ScopeSHA256, m.ExecutionSHA256, m.Limits, ready.stoppedV6, ready.approval130)
-	}
+	s.campaign, e = startWindowCampaign(ready.prepared, ready.baseline)
 	if e != nil {
 		return nil, e
 	}
@@ -610,7 +601,7 @@ func (s *FullWindowActualSession) verifyInputs() error {
 	if r == nil || len(r.manifestRaw) == 0 {
 		return fmt.Errorf("actual frozen inputs absent")
 	}
-	if r.manifest.Schema == "full-window-actual-ready.v8" {
+	if r.manifest.Schema == "full-window-actual-ready.v8" || r.manifest.Schema == "full-window-actual-ready.v9" {
 		if e := requireWindowV8ExecutionAuthority(r.v8Authority); e != nil {
 			return e
 		}
@@ -619,6 +610,10 @@ func (s *FullWindowActualSession) verifyInputs() error {
 		return e
 	}
 	m := r.manifest
+	if err := validateWindowActualHelperCatalog(m, r.manifestPath); err != nil {
+		return err
+	}
+
 	raw, e := readWindowActualFile(r.manifestPath, windowActualManifestAnchor(r.manifest), 8<<20)
 	if e != nil || !reflect.DeepEqual(raw, r.manifestRaw) {
 		return fmt.Errorf("actual manifest changed")

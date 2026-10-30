@@ -1,6 +1,7 @@
 package taskbench
 
 import (
+	"context"
 	"fmt"
 	"path/filepath"
 	"reflect"
@@ -21,19 +22,36 @@ type windowStoppedV2Baseline struct {
 }
 
 func loadWindowStoppedV2Baseline(path, expectedSHA string) (windowStoppedV2Baseline, error) {
+	return loadWindowStoppedV2BaselineContext(context.Background(), path, expectedSHA)
+}
+
+// Context carries the caller's deadline through every nested historical read.
+func loadWindowStoppedV2BaselineContext(ctx context.Context, path, expectedSHA string) (windowStoppedV2Baseline, error) {
+	return runHistoryReadPass(ctx, func(p *historyReadPass) (windowStoppedV2Baseline, error) {
+		return loadWindowStoppedV2BaselineWithPass(p, path, expectedSHA)
+	})
+}
+
+func loadWindowStoppedV2BaselineWithPass(p *historyReadPass, path, expectedSHA string) (windowStoppedV2Baseline, error) {
+	if p == nil {
+		return windowStoppedV2Baseline{}, fmt.Errorf("historical pass required")
+	}
+	if err := historyStoppedRoot(p, filepath.Dir(path)); err != nil {
+		return windowStoppedV2Baseline{}, err
+	}
 	var out windowStoppedV2Baseline
 	reject := func() (windowStoppedV2Baseline, error) {
 		return out, fmt.Errorf("stopped v2 concrete evidence rejected")
 	}
-	raw, err := readWindowActualFile(path, expectedSHA, 65536)
+	raw, err := historyStoppedFile(p, path, expectedSHA, 65536)
 	var e windowStoppedV2Evidence
 	if err != nil || decodeWindowActualJSON(raw, &e) != nil || e.Schema != "full-window-stopped-baseline.v2" || e.FirstBaseline.SHA256 != "4c55d694405c61948857dfd72279118243e5ea4dbd2de72b6254687ab08d1dbf" || e.BudgetApproval.SHA256 != windowBudget105ApprovalSHA {
 		return reject()
 	}
-	if _, err = readWindowActualFile(e.BudgetApproval.Path, e.BudgetApproval.SHA256, 65536); err != nil {
+	if _, err = historyStoppedFile(p, e.BudgetApproval.Path, e.BudgetApproval.SHA256, 65536); err != nil {
 		return reject()
 	}
-	first, err := loadWindowStoppedBaseline(e.FirstBaseline.Path, e.FirstBaseline.SHA256)
+	first, err := loadWindowStoppedBaselineWithPass(p, e.FirstBaseline.Path, e.FirstBaseline.SHA256)
 	if err != nil || !reflect.DeepEqual(first.base, expectedStoppedWindowBaseline()) {
 		return reject()
 	}
@@ -42,12 +60,15 @@ func loadWindowStoppedV2Baseline(path, expectedSHA string) (windowStoppedV2Basel
 		return reject()
 	}
 	pins := windowStoppedV2ArtifactPins()
-	manifestRaw, err := readWindowActualFile(filepath.Join(e.OriginalRoot, "actual-manifest.json"), pins["actual-manifest.json"], 8<<20)
+	if err := historyStoppedRoot(p, e.OriginalRoot); err != nil {
+		return windowStoppedV2Baseline{}, err
+	}
+	manifestRaw, err := historyStoppedFile(p, filepath.Join(e.OriginalRoot, "actual-manifest.json"), pins["actual-manifest.json"], 8<<20)
 	var m windowActualManifest
 	if err != nil || decodeWindowActualJSON(manifestRaw, &m) != nil || validateWindowStoppedV2Namespace(m, e, first) != nil {
 		return reject()
 	}
-	err = withWindowStoppedLock(filepath.Join(e.OriginalRoot, "campaign/.lock"), func() error {
+	err = historyStoppedLock(p, 2, filepath.Join(e.OriginalRoot, "campaign/.lock"), func() error {
 		files := map[string][]byte{}
 		names := make([]string, 0, len(pins))
 		for name := range pins {
@@ -60,7 +81,7 @@ func loadWindowStoppedV2Baseline(path, expectedSHA string) (windowStoppedV2Basel
 			for i, name := range names[start:end] {
 				specs[i] = windowStoppedReadSpec{path: filepath.Join(e.OriginalRoot, filepath.FromSlash(name)), sha256: pins[name], maxBytes: 8 << 20, kind: windowStoppedReadFile}
 			}
-			b, err := readWindowStoppedBatch4(specs)
+			b, err := historyStoppedBatch(p, specs)
 			if err != nil {
 				return fmt.Errorf("stopped v2 top artifact missing or changed")
 			}
@@ -68,7 +89,7 @@ func loadWindowStoppedV2Baseline(path, expectedSHA string) (windowStoppedV2Basel
 				files[name] = b[i]
 			}
 		}
-		base, err := readWindowStoppedV2Bundle(e.OriginalRoot, m, first.base, files)
+		base, err := readWindowStoppedV2BundleWithPass(p, e.OriginalRoot, m, first.base, files)
 		if err != nil {
 			return err
 		}
@@ -80,11 +101,11 @@ func loadWindowStoppedV2Baseline(path, expectedSHA string) (windowStoppedV2Basel
 	}
 	// Re-read the first stopped proof after the second owner's immutable bundle;
 	// each owner uses its own existing read-only lock, never a new lock or writer.
-	fresh, err := loadWindowStoppedBaseline(e.FirstBaseline.Path, e.FirstBaseline.SHA256)
+	fresh, err := loadWindowStoppedBaselineWithPass(p, e.FirstBaseline.Path, e.FirstBaseline.SHA256)
 	if err != nil || !reflect.DeepEqual(first, fresh) {
 		return windowStoppedV2Baseline{}, fmt.Errorf("first stopped predecessor changed")
 	}
-	if _, err = readWindowActualFile(path, expectedSHA, 65536); err != nil {
+	if _, err = historyStoppedFile(p, path, expectedSHA, 65536); err != nil {
 		return windowStoppedV2Baseline{}, err
 	}
 	return out, nil

@@ -10,6 +10,10 @@ import (
 // A historical replay, not an acquisition completion or a paid-ready token.
 // Fixed top hashes retain the original failed flags; descendants are all read.
 func readWindowStoppedV6Bundle(root string, m windowActualManifest, first fullWindowBaseline, files map[string][]byte) (fullWindowBaseline, error) {
+	return readWindowStoppedV6BundleWithPass(nil, root, m, first, files)
+}
+
+func readWindowStoppedV6BundleWithPass(p *historyReadPass, root string, m windowActualManifest, first fullWindowBaseline, files map[string][]byte) (fullWindowBaseline, error) {
 	reject := func(reason string) (fullWindowBaseline, error) {
 		return fullWindowBaseline{}, fmt.Errorf("stopped v6 bundle rejected: %s", reason)
 	}
@@ -25,7 +29,7 @@ func readWindowStoppedV6Bundle(root string, m windowActualManifest, first fullWi
 	if decodeWindowActualJSON(files["actual-manifest.json"], &original) != nil || !reflect.DeepEqual(original, m) {
 		return reject("manifest")
 	}
-	if err := validateWindowActualBinaryAttestation(files["actual-manifest.json.binary-attestation.json"], m, windowStoppedV6ArtifactPins()["actual-manifest.json"], filepath.Join(root, "full-window-actual-v6")); err != nil {
+	if err := historyStoppedBinaryAttestation(p, files["actual-manifest.json.binary-attestation.json"], m, windowStoppedV6ArtifactPins()["actual-manifest.json"], filepath.Join(root, "full-window-actual-v6")); err != nil {
 		return reject("signed original binary")
 	}
 	var actor struct {
@@ -60,7 +64,7 @@ func readWindowStoppedV6Bundle(root string, m windowActualManifest, first fullWi
 	if c.DefinitionSHA256 != m.Scope.DefinitionSHA256 || c.ManifestSHA256 != m.Scope.ManifestSHA256 || c.SelectionSHA256 != m.Scope.SelectionSHA256 || c.ProfileSHA256 != m.Scope.ProfileSHA256 || c.ScheduleSHA256 != m.Scope.ScheduleSHA256 || c.PolicySHA256 != m.Scope.Bindings.PolicySHA256 {
 		return reject("claim bindings")
 	}
-	audit, err := readWindowStoppedV6Native(filepath.Join(root, wd, "native-payloads"), payload, files[ledgerName])
+	audit, err := readWindowStoppedV6NativeWithPass(p, filepath.Join(root, wd, "native-payloads"), payload, files[ledgerName])
 	if err != nil {
 		return reject("native: " + err.Error())
 	}
@@ -110,7 +114,7 @@ func readWindowStoppedV6Bundle(root string, m windowActualManifest, first fullWi
 			return reject("record/trace identity")
 		}
 		traces[row.TraceID] = true
-		raw, err := readWindowActualFile(filepath.Join(root, wd, row.RecordingFile), row.RecordingSHA256, 8<<20)
+		raw, err := historyStoppedFile(p, filepath.Join(root, wd, row.RecordingFile), row.RecordingSHA256, 8<<20)
 		if err != nil {
 			return reject("record bytes")
 		}
@@ -155,7 +159,7 @@ func readWindowStoppedV6Bundle(root string, m windowActualManifest, first fullWi
 		return reject("terminal")
 	}
 	for dir, inventory := range map[string]map[string]bool{wd: names, "campaign/ledger-000001": {"accounting.jsonl": false}, "campaign": {".lock": false, "claim-000001.json": false, "ledger-000001": true}, "records": {"startup.json": false, "terminal.json": false, "window-000001-summary.json": false, "window-000001": true}} {
-		if err := validateWindowStoppedV2Dir(filepath.Join(root, dir), inventory); err != nil {
+		if err := historyStoppedDir(p, filepath.Join(root, dir), inventory); err != nil {
 			return reject("inventory: " + err.Error())
 		}
 	}

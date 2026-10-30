@@ -1,6 +1,7 @@
 package taskbench
 
 import (
+	"context"
 	"crypto/sha256"
 	"fmt"
 	"io"
@@ -41,6 +42,20 @@ type windowStoppedV7Inventory struct {
 }
 
 func loadWindowStoppedV7Baseline(path, expectedSHA string) (windowStoppedV7Baseline, error) {
+	return loadWindowStoppedV7BaselineContext(context.Background(), path, expectedSHA)
+}
+
+// Context carries the caller's deadline through every nested historical read.
+func loadWindowStoppedV7BaselineContext(ctx context.Context, path, expectedSHA string) (windowStoppedV7Baseline, error) {
+	return runHistoryReadPass(ctx, func(p *historyReadPass) (windowStoppedV7Baseline, error) {
+		return loadWindowStoppedV7BaselineWithPass(p, path, expectedSHA)
+	})
+}
+
+func loadWindowStoppedV7BaselineWithPass(p *historyReadPass, path, expectedSHA string) (windowStoppedV7Baseline, error) {
+	if p == nil {
+		return windowStoppedV7Baseline{}, fmt.Errorf("historical pass required")
+	}
 	reject := func(reason string) (windowStoppedV7Baseline, error) {
 		return windowStoppedV7Baseline{}, fmt.Errorf("stopped v7 evidence rejected: %s", reason)
 	}
@@ -48,7 +63,10 @@ func loadWindowStoppedV7Baseline(path, expectedSHA string) (windowStoppedV7Basel
 	if expectedSHA != windowStoppedV7DescriptorSHA {
 		return reject("descriptor anchor")
 	}
-	raw, err := readWindowStoppedV7File(path, expectedSHA, 65536)
+	if err := historyStoppedRoot(p, filepath.Dir(path)); err != nil {
+		return windowStoppedV7Baseline{}, err
+	}
+	raw, err := historyStoppedV7File(p, path, expectedSHA, 65536)
 	var e windowStoppedV7Evidence
 	if err != nil || decodeWindowActualJSON(raw, &e) != nil || e.Schema != "full-window-stopped-baseline.v7" || e.PreviousBaseline.SHA256 != windowStoppedV7PreviousSHA || e.BudgetApproval.SHA256 != windowBudget130ApprovalSHA || e.StoppedAudit.SHA256 != windowStoppedV7AuditSHA || e.Inventory.SHA256 != windowStoppedV7InventorySHA {
 		return reject("descriptor")
@@ -58,11 +76,14 @@ func loadWindowStoppedV7Baseline(path, expectedSHA string) (windowStoppedV7Basel
 	if err != nil || !filepath.IsAbs(root) || filepath.Clean(root) != root || canonical != root || e.StoppedAudit.Path != filepath.Join(root, "stopped-audit/result.json") || e.Inventory.Path != filepath.Join(root, "stopped-audit/inventory.json") {
 		return reject("root")
 	}
+	if err := historyStoppedRoot(p, root); err != nil {
+		return windowStoppedV7Baseline{}, err
+	}
 	rootInfo, err := os.Stat(root)
 	if err != nil || !rootInfo.IsDir() {
 		return reject("root identity")
 	}
-	previous, err := loadWindowStoppedV6Baseline(e.PreviousBaseline.Path, e.PreviousBaseline.SHA256)
+	previous, err := loadWindowStoppedV6BaselineWithPass(p, e.PreviousBaseline.Path, e.PreviousBaseline.SHA256)
 	if err != nil || !reflect.DeepEqual(previous.base, expectedStoppedV6WindowBaseline()) {
 		return reject("concrete predecessor")
 	}
@@ -71,22 +92,22 @@ func loadWindowStoppedV7Baseline(path, expectedSHA string) (windowStoppedV7Basel
 			return reject("crossed roots")
 		}
 	}
-	if _, err = readWindowStoppedV7File(e.BudgetApproval.Path, e.BudgetApproval.SHA256, 65536); err != nil {
+	if _, err = historyStoppedV7File(p, e.BudgetApproval.Path, e.BudgetApproval.SHA256, 65536); err != nil {
 		return reject("historical approval")
 	}
 	var out windowStoppedV7Baseline
-	err = withWindowStoppedLock(filepath.Join(root, "campaign/.lock"), func() error {
+	err = historyStoppedLock(p, 7, filepath.Join(root, "campaign/.lock"), func() error {
 		// The reviewed audit's reasoning is an explicit trust dependency. Exact bytes
 		// authenticate that audit; this does not re-prove its native/quality reasoning.
-		if _, err := readWindowStoppedV7File(e.StoppedAudit.Path, e.StoppedAudit.SHA256, 8<<20); err != nil {
+		if _, err := historyStoppedV7File(p, e.StoppedAudit.Path, e.StoppedAudit.SHA256, 8<<20); err != nil {
 			return err
 		}
-		raw, err := readWindowStoppedV7File(e.Inventory.Path, e.Inventory.SHA256, 8<<20)
+		raw, err := historyStoppedV7File(p, e.Inventory.Path, e.Inventory.SHA256, 8<<20)
 		var inv windowStoppedV7Inventory
 		if err != nil || decodeWindowActualJSON(raw, &inv) != nil || inv.Schema != "full1220-v7-stopped-explicit-sha-inventory.v1" || inv.Root != root || len(inv.Files) != 6395 || inv.OwnedFiles != 6376 || !inv.NoCacheWalk || inv.PrivateSettingsRead {
 			return fmt.Errorf("stopped v7 fixed inventory rejected")
 		}
-		files, before, err := readWindowStoppedV7Inventory(root, inv)
+		files, before, err := readWindowStoppedV7InventoryWithPass(p, root, inv)
 		if err != nil {
 			return err
 		}
@@ -97,7 +118,7 @@ func loadWindowStoppedV7Baseline(path, expectedSHA string) (windowStoppedV7Basel
 		if m.Schema != "full-window-actual-ready.v7" || m.Scope.Schema != "full-window-scope.v7" || m.ArchiveCommit != "616c0abd16451182fbe2f320f73164604363c018" || m.ArchiveTree != "cf1570f382d1e8c2638c5d3e558f3caa4f55ecb1" || m.SourceRoot != filepath.Join(root, "regression/source") || m.ScopeSHA256 != windowStoppedV7ScopeSHA || m.ExecutionSHA256 != windowStoppedV7ExecutionSHA || m.CampaignRoot != filepath.Join(root, "campaign") || m.SessionRoot != filepath.Join(root, "records") || m.ClaimsDir != previous.historicalDir || m.BaselineEvidence == nil || *m.BaselineEvidence != e.PreviousBaseline || !reflect.DeepEqual(m.HistoricalClaims, previous.base.ClaimSHA256) || m.Scope.BaselineEvidenceSHA256 != windowStoppedV7PreviousSHA || m.Scope.BudgetApprovalSHA256 != windowBudget130ApprovalSHA || m.EvidenceKind != "actual" || m.KnowledgeModel != "off" || m.KnowledgeJEV != "off" || m.Scope.AllowPaid || m.Scope.ReadyForPaidRun || m.Limits != windowV4ExpectedLimits() || len(m.Scope.Windows) != 131 || len(m.Scope.Slots) != 3660 {
 			return fmt.Errorf("stopped v7 original namespace changed")
 		}
-		if err = validateWindowActualBinaryAttestation(files["actual-manifest.json.binary-attestation.json"], m, windowStoppedV7ManifestSHA, filepath.Join(root, "full-window-actual-v7")); err != nil {
+		if err = historyStoppedBinaryAttestation(p, files["actual-manifest.json.binary-attestation.json"], m, windowStoppedV7ManifestSHA, filepath.Join(root, "full-window-actual-v7")); err != nil {
 			return err
 		}
 		for i, sha := range windowStoppedV7ClaimPins() {
@@ -112,12 +133,12 @@ func loadWindowStoppedV7Baseline(path, expectedSHA string) (windowStoppedV7Basel
 		if !reflect.DeepEqual(base, expectedStoppedV7WindowBaseline()) {
 			return fmt.Errorf("stopped v7 derived44 mismatch")
 		}
-		again, after, err := readWindowStoppedV7Inventory(root, inv)
+		again, after, err := readWindowStoppedV7InventoryWithPass(p, root, inv)
 		if err != nil || !reflect.DeepEqual(files, again) || compareWindowStoppedV7Identity(before, after) != nil {
 			return fmt.Errorf("stopped v7 original bytes/identity changed")
 		}
 		for _, ref := range []windowActualFile{e.StoppedAudit, e.Inventory} {
-			if _, err = readWindowStoppedV7File(ref.Path, ref.SHA256, 8<<20); err != nil {
+			if _, err = historyStoppedV7File(p, ref.Path, ref.SHA256, 8<<20); err != nil {
 				return err
 			}
 		}
@@ -127,14 +148,14 @@ func loadWindowStoppedV7Baseline(path, expectedSHA string) (windowStoppedV7Basel
 	if err != nil {
 		return reject(err.Error())
 	}
-	fresh, err := loadWindowStoppedV6Baseline(e.PreviousBaseline.Path, e.PreviousBaseline.SHA256)
+	fresh, err := loadWindowStoppedV6BaselineWithPass(p, e.PreviousBaseline.Path, e.PreviousBaseline.SHA256)
 	if err != nil || !reflect.DeepEqual(previous, fresh) {
 		return reject("predecessor changed")
 	}
-	if _, err = readWindowStoppedV7File(path, expectedSHA, 65536); err != nil {
+	if _, err = historyStoppedV7File(p, path, expectedSHA, 65536); err != nil {
 		return reject("descriptor changed")
 	}
-	if _, err = readWindowStoppedV7File(e.BudgetApproval.Path, e.BudgetApproval.SHA256, 65536); err != nil {
+	if _, err = historyStoppedV7File(p, e.BudgetApproval.Path, e.BudgetApproval.SHA256, 65536); err != nil {
 		return reject("approval changed")
 	}
 	after, err := os.Stat(root)
@@ -277,6 +298,10 @@ func readWindowStoppedV7Bundle(root string, m windowActualManifest, first fullWi
 // Streaming verification follows only explicit inventory paths. Directory reads
 // are restricted to the owned campaign/records namespace, never cache/source.
 func readWindowStoppedV7Inventory(root string, inv windowStoppedV7Inventory) (map[string][]byte, map[string]os.FileInfo, error) {
+	return readWindowStoppedV7InventoryWithPass(nil, root, inv)
+}
+
+func readWindowStoppedV7InventoryWithPass(p *historyReadPass, root string, inv windowStoppedV7Inventory) (map[string][]byte, map[string]os.FileInfo, error) {
 	reject := func(reason string) (map[string][]byte, map[string]os.FileInfo, error) {
 		return nil, nil, fmt.Errorf("stopped v7 inventory rejected: %s", reason)
 	}
@@ -310,24 +335,36 @@ func readWindowStoppedV7Inventory(root string, inv windowStoppedV7Inventory) (ma
 		if !windowStoppedV7SingleLink(before) {
 			return reject("entry hardlink " + name)
 		}
-		fd, err := syscall.Open(path, syscall.O_RDONLY|syscall.O_NOFOLLOW|syscall.O_NONBLOCK, 0)
-		if err != nil {
-			return reject("open " + name)
+		if p != nil {
+			// Uncached direct stream: every original traversal still performs IO.
+			// The pass's stream obtains the full identity from its supplying FD,
+			// and registers that same observation for the fresh End sweep.
+			_, streamErr := p.Stream(historyReadInventoryStream, path, entry.SHA256, max(1, entry.Bytes))
+			after, ae := os.Lstat(path)
+			if streamErr != nil || ae != nil || validateWindowStoppedV7ReadMetadata(before, before, after, after) != nil || after.Size() != entry.Bytes {
+				return reject("entry changed " + name)
+			}
+			identities[name] = after
+		} else {
+			fd, err := syscall.Open(path, syscall.O_RDONLY|syscall.O_NOFOLLOW|syscall.O_NONBLOCK, 0)
+			if err != nil {
+				return reject("open " + name)
+			}
+			f := os.NewFile(uintptr(fd), path)
+			opened, oe := f.Stat()
+			h := sha256.New()
+			n, copyErr := io.Copy(h, io.LimitReader(f, entry.Bytes+1))
+			final, fe := f.Stat()
+			closeErr := f.Close()
+			after, ae := os.Lstat(path)
+			if oe != nil || fe != nil || ae != nil || copyErr != nil || closeErr != nil || validateWindowStoppedV7ReadMetadata(before, opened, final, after) != nil || n != entry.Bytes || final.Size() != entry.Bytes || fmt.Sprintf("%x", h.Sum(nil)) != entry.SHA256 {
+				return reject("entry changed " + name)
+			}
+			identities[name] = after
 		}
-		f := os.NewFile(uintptr(fd), path)
-		opened, oe := f.Stat()
-		h := sha256.New()
-		n, copyErr := io.Copy(h, io.LimitReader(f, entry.Bytes+1))
-		final, fe := f.Stat()
-		closeErr := f.Close()
-		after, ae := os.Lstat(path)
-		if oe != nil || fe != nil || ae != nil || copyErr != nil || closeErr != nil || validateWindowStoppedV7ReadMetadata(before, opened, final, after) != nil || n != entry.Bytes || final.Size() != entry.Bytes || fmt.Sprintf("%x", h.Sum(nil)) != entry.SHA256 {
-			return reject("entry changed " + name)
-		}
-		identities[name] = after
 		// Retain only bounded structural files, not native/body payloads or source.
 		if name == "actual-manifest.json" || name == "actual-manifest.json.binary-attestation.json" || name == "actual-owner-exit.json" || strings.HasPrefix(name, "campaign/claim-") || strings.HasPrefix(name, "campaign/checkpoint-") || strings.HasSuffix(name, "/accounting.jsonl") || name == "records/terminal.json" || strings.HasSuffix(name, "-summary.json") || strings.HasSuffix(name, "/receipt.json") || strings.HasSuffix(name, "/payload-manifest.json") {
-			raw, err := readWindowStoppedV7File(path, entry.SHA256, 8<<20)
+			raw, err := historyStoppedV7File(p, path, entry.SHA256, 8<<20)
 			if err != nil {
 				return reject("structural bytes " + name)
 			}
@@ -351,7 +388,7 @@ func readWindowStoppedV7Inventory(root string, inv windowStoppedV7Inventory) (ma
 	for dir, names := range dirs {
 		path := filepath.Join(root, filepath.FromSlash(dir))
 		before, err := os.Lstat(path)
-		if err != nil || !before.IsDir() || validateWindowStoppedV2Dir(path, names) != nil {
+		if err != nil || !before.IsDir() || historyStoppedDir(p, path, names) != nil {
 			return reject("owned namespace " + dir)
 		}
 		after, err := os.Lstat(path)

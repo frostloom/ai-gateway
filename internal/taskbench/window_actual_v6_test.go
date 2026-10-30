@@ -19,7 +19,7 @@ func TestActualV6EpochAndConsumedOpenBoundary(t *testing.T) {
 				t.Errorf("readonly epoch %s/%s", a, b)
 			}
 			s, e := OpenFullWindowActual(context.Background(), &FullWindowActualReady{manifest: m}, "/never-read-settings")
-			if s != nil || e == nil || !strings.Contains(e.Error(), "v7 scope required") {
+			if s != nil || e == nil || !strings.Contains(e.Error(), "v9 delegated authority required before settings") {
 				t.Errorf("open %s/%s: %v", a, b, e)
 			}
 		}

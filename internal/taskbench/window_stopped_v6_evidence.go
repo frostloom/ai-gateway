@@ -7,9 +7,13 @@ import (
 )
 
 func readWindowStoppedV6Files(root string) (map[string][]byte, error) {
+	return readWindowStoppedV6FilesWithPass(nil, root)
+}
+
+func readWindowStoppedV6FilesWithPass(p *historyReadPass, root string) (map[string][]byte, error) {
 	files := map[string][]byte{}
 	for name, sha := range windowStoppedV6ArtifactPins() {
-		raw, err := readWindowActualFile(filepath.Join(root, filepath.FromSlash(name)), sha, 8<<20)
+		raw, err := historyStoppedFile(p, filepath.Join(root, filepath.FromSlash(name)), sha, 8<<20)
 		if err != nil {
 			return nil, fmt.Errorf("stopped v6 original top artifact changed: %s", name)
 		}
@@ -23,10 +27,14 @@ func readWindowStoppedV6Files(root string) (map[string][]byte, error) {
 // Independently add parsed native weighted input/output or JEV input costs to
 // reconcile canonical replay. This is configured liability, not an invoice.
 func readWindowStoppedV6Native(dir string, payload windowPayloadManifest, ledger []byte) (windowAccountingAudit, error) {
+	return readWindowStoppedV6NativeWithPass(nil, dir, payload, ledger)
+}
+
+func readWindowStoppedV6NativeWithPass(p *historyReadPass, dir string, payload windowPayloadManifest, ledger []byte) (windowAccountingAudit, error) {
 	reject := func() (windowAccountingAudit, error) {
 		return windowAccountingAudit{}, fmt.Errorf("stopped v6 weighted native linkage rejected")
 	}
-	audit, err := readWindowStoppedV3Native(dir, payload, ledger)
+	audit, err := readWindowStoppedV3NativeWithPass(p, dir, payload, ledger)
 	if err != nil {
 		return windowAccountingAudit{}, err
 	}
@@ -57,7 +65,7 @@ func readWindowStoppedV6Native(dir string, payload windowPayloadManifest, ledger
 		if identity.Attempt != attempts[key] || identity.Attempt > max {
 			return reject()
 		}
-		raw, err := readWindowActualFile(filepath.Join(dir, packet.Response.Body.File), packet.Response.Body.FullSHA256, windowMaxResponseBytes)
+		raw, err := historyStoppedFile(p, filepath.Join(dir, packet.Response.Body.File), packet.Response.Body.FullSHA256, windowMaxResponseBytes)
 		if err != nil {
 			return reject()
 		}

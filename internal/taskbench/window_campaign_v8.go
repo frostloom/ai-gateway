@@ -45,17 +45,31 @@ func validateStoppedV8CampaignHistory(p windowCampaignPrepared, base fullWindowB
 
 // Runtime owners check the final external artifact before any window output or
 // historical/source scan. Technical preparation deliberately has no such owner.
-func (c *windowCampaign) revalidateWindowV8AuthorityLocked() error {
-	if c.prepared.scope.Schema != "full-window-scope.v8" {
+func validateWindowCampaignNativeAuthority(p windowCampaignPrepared) error {
+	if !windowScopeUsesNativeV8(p.scope.Schema) {
 		return nil
 	}
-	if err := requireWindowV8ExecutionAuthority(c.prepared.v8Authority); err != nil {
+	a := p.v8Authority
+	if a == nil || validateWindowNativeDeclarations(p.scope) != nil {
+		return fmt.Errorf("native exact epoch authority absent")
+	}
+	if p.scope.Schema == "full-window-scope.v9" {
+		if a.v9 == nil || a.manifest.Schema != "full-window-actual-ready.v9" || a.manifest.Scope.Schema != "full-window-scope.v9" || a.binding.Schema != "full-window-delegated-execution-authorization.v9" {
+			return fmt.Errorf("v9 delegated authority epoch mismatch")
+		}
+	} else if a.v9 != nil || a.manifest.Schema != "full-window-actual-ready.v8" || a.binding.Schema != "full-window-execution-authorization.v8" {
+		return fmt.Errorf("v8 authority epoch mismatch")
+	}
+	if err := requireWindowV8ExecutionAuthority(a); err != nil {
 		return err
 	}
-	if c.prepared.v8Authority.binding.ScopeSHA256 != c.prepared.scopeSHA || c.prepared.v8Authority.binding.ExecutionSHA256 != c.prepared.executionSHA {
-		return fmt.Errorf("v8 execution authority scope changed before window outputs")
+	if a.binding.ScopeSHA256 != p.scopeSHA || a.binding.ExecutionSHA256 != p.executionSHA {
+		return fmt.Errorf("native execution authority scope changed before window outputs")
 	}
 	return nil
+}
+func (c *windowCampaign) revalidateWindowV8AuthorityLocked() error {
+	return validateWindowCampaignNativeAuthority(c.prepared)
 }
 func (c *windowCampaign) revalidateWindowV8Authority() error {
 	c.mu.Lock()

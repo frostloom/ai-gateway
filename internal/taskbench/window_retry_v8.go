@@ -79,7 +79,7 @@ func (t *windowProviderTransport) guardWindowV8(req *http.Request, r windowReque
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	scopeRaw, _ := json.Marshal(c.prepared.scope)
-	if c.prepared.scope.Schema != "full-window-scope.v8" || conversationHash(scopeRaw) != c.prepared.scopeSHA || validateWindowV8Declarations(c.prepared.scope) != nil || c.prepared.v8Authority == nil || c.prepared.v8Authority.revalidate() != nil || c.prepared.v8Authority.binding.ScopeSHA256 != c.prepared.scopeSHA || c.prepared.v8Authority.binding.ExecutionSHA256 != c.prepared.executionSHA {
+	if !windowScopeUsesNativeV8(c.prepared.scope.Schema) || conversationHash(scopeRaw) != c.prepared.scopeSHA || validateWindowNativeDeclarations(c.prepared.scope) != nil || c.revalidateWindowV8AuthorityLocked() != nil || c.prepared.v8Authority.binding.ScopeSHA256 != c.prepared.scopeSHA || c.prepared.v8Authority.binding.ExecutionSHA256 != c.prepared.executionSHA {
 		return fmt.Errorf("v8 live execution authority rejected")
 	}
 	if p.evidenceKind == "recorded_run" {

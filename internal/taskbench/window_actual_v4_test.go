@@ -30,7 +30,7 @@ func TestActualV4ConsistencyPreservesEveryHistoricalClaimAndFixedCachePrice(t *t
 		t.Fatal("historical denominator changed")
 	}
 	r := &FullWindowActualReady{manifestRaw: []byte(`{}`), manifest: m, baseline: proof.base, stoppedV3: proof}
-	if s, err := OpenFullWindowActual(context.Background(), r, "/never-read-settings"); s != nil || err == nil || !strings.Contains(err.Error(), "v7 scope required") {
+	if s, err := OpenFullWindowActual(context.Background(), r, "/never-read-settings"); s != nil || err == nil || !strings.Contains(err.Error(), "v9 delegated authority required before settings") {
 		t.Fatal("memory mirror reached settings or claim", err)
 	}
 	if err := (&FullWindowActualSession{ready: r}).verifyInputs(); err == nil || !strings.Contains(err.Error(), "stopped") {
@@ -143,7 +143,7 @@ func TestActualV4OpenRejectsEveryConsumedEpochBeforeSettings(t *testing.T) {
 	for _, epoch := range []string{"v1", "v2", "v3"} {
 		r := &FullWindowActualReady{manifest: windowActualManifest{Schema: "full-window-actual-ready." + epoch, Scope: fullWindowScope{Schema: "full-window-scope." + epoch}}}
 		s, err := OpenFullWindowActual(context.Background(), r, "/never-read-settings")
-		if s != nil || err == nil || !strings.Contains(err.Error(), "v7 scope required") {
+		if s != nil || err == nil || !strings.Contains(err.Error(), "v9 delegated authority required before settings") {
 			t.Fatalf("consumed epoch %s reached proof/settings boundary: %v", epoch, err)
 		}
 	}

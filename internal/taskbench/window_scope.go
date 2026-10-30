@@ -164,6 +164,11 @@ func validateFullWindowScope(scope fullWindowScope, s ConversationSuite, p Paire
 			return "", totals, err
 		}
 		expected, e = prepareFullWindowScopeV8(s, p, scope.Width, caps, b, scope.BaselineEvidenceSHA256)
+	case "full-window-scope.v9":
+		if err := validateWindowV9Declarations(scope); err != nil {
+			return "", totals, err
+		}
+		expected, e = prepareFullWindowScopeV9(s, p, caps, b, scope.BaselineEvidenceSHA256)
 	default:
 		return "", totals, fmt.Errorf("unsupported complete-window scope version")
 	}

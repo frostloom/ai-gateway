@@ -57,7 +57,7 @@ func (r *FullWindowActualReady) revalidateStoppedV7() error {
 }
 
 func windowObserverTimeoutForScope(schema string) int64 {
-	if schema == "full-window-scope.v7" || schema == "full-window-scope.v8" {
+	if schema == "full-window-scope.v7" || windowScopeUsesNativeV8(schema) {
 		return 10000
 	}
 	return 2000
@@ -66,7 +66,7 @@ func windowObserverTimeoutForScope(schema string) int64 {
 // windowActualGoCommand binds each epoch to its independently reviewed full regression.
 func windowActualGoCommand(schema string) []string {
 	timeout := "-timeout=20m"
-	if schema == "full-window-actual-ready.v7" || schema == "full-window-actual-ready.v8" {
+	if schema == "full-window-actual-ready.v7" || (schema == "full-window-actual-ready.v8" || schema == "full-window-actual-ready.v9") {
 		timeout = "-timeout=30m"
 	}
 	return []string{"go", "test", "./...", "-count=1", timeout, "-json"}

@@ -1,6 +1,7 @@
 package taskbench
 
 import (
+	"context"
 	"fmt"
 	"path/filepath"
 	"reflect"
@@ -24,18 +25,35 @@ type windowStoppedV4Baseline struct {
 }
 
 func loadWindowStoppedV4Baseline(path, expectedSHA string) (windowStoppedV4Baseline, error) {
+	return loadWindowStoppedV4BaselineContext(context.Background(), path, expectedSHA)
+}
+
+// Context carries the caller's deadline through every nested historical read.
+func loadWindowStoppedV4BaselineContext(ctx context.Context, path, expectedSHA string) (windowStoppedV4Baseline, error) {
+	return runHistoryReadPass(ctx, func(p *historyReadPass) (windowStoppedV4Baseline, error) {
+		return loadWindowStoppedV4BaselineWithPass(p, path, expectedSHA)
+	})
+}
+
+func loadWindowStoppedV4BaselineWithPass(p *historyReadPass, path, expectedSHA string) (windowStoppedV4Baseline, error) {
+	if p == nil {
+		return windowStoppedV4Baseline{}, fmt.Errorf("historical pass required")
+	}
+	if err := historyStoppedRoot(p, filepath.Dir(path)); err != nil {
+		return windowStoppedV4Baseline{}, err
+	}
 	reject := func() (windowStoppedV4Baseline, error) {
 		return windowStoppedV4Baseline{}, fmt.Errorf("stopped v4 concrete evidence rejected")
 	}
-	raw, err := readWindowActualFile(path, expectedSHA, 65536)
+	raw, err := historyStoppedFile(p, path, expectedSHA, 65536)
 	var e windowStoppedV4Evidence
 	if err != nil || decodeWindowActualJSON(raw, &e) != nil || e.Schema != "full-window-stopped-baseline.v4" || e.PreviousBaseline.SHA256 != windowStoppedV4PreviousSHA || e.BudgetApproval.SHA256 != windowBudget105ApprovalSHA {
 		return reject()
 	}
-	if _, err = readWindowActualFile(e.BudgetApproval.Path, e.BudgetApproval.SHA256, 65536); err != nil {
+	if _, err = historyStoppedFile(p, e.BudgetApproval.Path, e.BudgetApproval.SHA256, 65536); err != nil {
 		return reject()
 	}
-	previous, err := loadWindowStoppedV3Baseline(e.PreviousBaseline.Path, e.PreviousBaseline.SHA256)
+	previous, err := loadWindowStoppedV3BaselineWithPass(p, e.PreviousBaseline.Path, e.PreviousBaseline.SHA256)
 	if err != nil || !reflect.DeepEqual(previous.base, expectedStoppedV3WindowBaseline()) {
 		return reject()
 	}
@@ -43,24 +61,27 @@ func loadWindowStoppedV4Baseline(path, expectedSHA string) (windowStoppedV4Basel
 	if err != nil || !filepath.IsAbs(e.OriginalRoot) || filepath.Clean(e.OriginalRoot) != e.OriginalRoot || canonical != e.OriginalRoot {
 		return reject()
 	}
-	manifestRaw, err := readWindowActualFile(filepath.Join(e.OriginalRoot, "actual-manifest.json"), windowStoppedV4ArtifactPins()["actual-manifest.json"], 8<<20)
+	if err := historyStoppedRoot(p, e.OriginalRoot); err != nil {
+		return windowStoppedV4Baseline{}, err
+	}
+	manifestRaw, err := historyStoppedFile(p, filepath.Join(e.OriginalRoot, "actual-manifest.json"), windowStoppedV4ArtifactPins()["actual-manifest.json"], 8<<20)
 	var m windowActualManifest
 	if err != nil || decodeWindowActualJSON(manifestRaw, &m) != nil || validateWindowStoppedV4Namespace(m, e, previous) != nil {
 		return reject()
 	}
 	var out windowStoppedV4Baseline
-	err = withWindowStoppedLock(filepath.Join(e.OriginalRoot, "campaign/.lock"), func() error {
-		files, err := readWindowStoppedV4Files(e.OriginalRoot)
+	err = historyStoppedLock(p, 4, filepath.Join(e.OriginalRoot, "campaign/.lock"), func() error {
+		files, err := readWindowStoppedV4FilesWithPass(p, e.OriginalRoot)
 		if err != nil {
 			return err
 		}
-		base, err := readWindowStoppedV4Bundle(e.OriginalRoot, m, previous.base, files)
+		base, err := readWindowStoppedV4BundleWithPass(p, e.OriginalRoot, m, previous.base, files)
 		if err != nil {
 			return err
 		}
 		// Every pinned top artifact is re-read after all descendants under the same
 		// original read-only lock, including original failed/audit-only metadata.
-		if _, err = readWindowStoppedV4Files(e.OriginalRoot); err != nil {
+		if _, err = readWindowStoppedV4FilesWithPass(p, e.OriginalRoot); err != nil {
 			return err
 		}
 		out = windowStoppedV4Baseline{base: base, previous: previous, evidencePath: path, evidenceSHA256: expectedSHA, originalRoot: e.OriginalRoot, historicalDir: previous.historicalDir}
@@ -69,14 +90,14 @@ func loadWindowStoppedV4Baseline(path, expectedSHA string) (windowStoppedV4Basel
 	if err != nil {
 		return windowStoppedV4Baseline{}, err
 	}
-	fresh, err := loadWindowStoppedV3Baseline(e.PreviousBaseline.Path, e.PreviousBaseline.SHA256)
+	fresh, err := loadWindowStoppedV3BaselineWithPass(p, e.PreviousBaseline.Path, e.PreviousBaseline.SHA256)
 	if err != nil || !reflect.DeepEqual(previous, fresh) {
 		return windowStoppedV4Baseline{}, fmt.Errorf("twenty-five-claim predecessor changed")
 	}
-	if _, err = readWindowActualFile(path, expectedSHA, 65536); err != nil {
+	if _, err = historyStoppedFile(p, path, expectedSHA, 65536); err != nil {
 		return windowStoppedV4Baseline{}, err
 	}
-	if _, err = readWindowActualFile(e.BudgetApproval.Path, e.BudgetApproval.SHA256, 65536); err != nil {
+	if _, err = historyStoppedFile(p, e.BudgetApproval.Path, e.BudgetApproval.SHA256, 65536); err != nil {
 		return windowStoppedV4Baseline{}, err
 	}
 	return out, nil

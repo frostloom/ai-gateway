@@ -36,7 +36,7 @@ func (c *windowCampaign) snapshotWindowV8Runtime(state windowAccountingState, wi
 	return c.snapshotWindowV8RuntimeLocked(state, windowID)
 }
 func (c *windowCampaign) snapshotWindowV8RuntimeLocked(state windowAccountingState, windowID string) *windowV8RuntimeSummary {
-	if c.prepared.scope.Schema != "full-window-scope.v8" {
+	if !windowScopeUsesNativeV8(c.prepared.scope.Schema) {
 		return nil
 	}
 	out := &windowV8RuntimeSummary{Schema: "full-window-runtime-evidence.v8", NativeModelIntents: state.ModelAttempts, NativeJEVIntents: state.JEVAttempts, NativeUnknown: len(state.UnknownIntents), RetryRequired: state.RetryRequired != nil, Halt: state.Halt, Known: windowV8Amounts{state.ModelKnown, state.JEVKnown}, UnknownHeld: windowV8Amounts{state.ModelUnknownHeld, state.JEVUnknownHeld}, PendingHeld: windowV8Amounts{state.ModelHeld, state.JEVHeld}, HistoricalPermanent: windowV8Amounts{c.baseline.PermanentModel, c.baseline.PermanentJEV}, ExtraPermanent: windowV8Amounts{int64(c.modelExtras) * 74752, int64(c.jevExtras) * 2688}, TotalPermanent: windowV8Amounts{c.model, c.jev}, UnknownIntents: []windowV8UnknownRecord{}, Extras: append([]windowV8ExtraClaim{}, c.extras...)}
