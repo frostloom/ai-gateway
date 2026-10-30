@@ -281,7 +281,12 @@ func (l *windowAccounting) validatePathLocked() error {
 	if err != nil || !named.Mode().IsRegular() || !os.SameFile(live, named) || named.Size() > 64<<20 {
 		return reject()
 	}
-	raw, err := os.ReadFile(path)
+	var raw []byte
+	if l.contract.Schema == windowAccountingV3 {
+		raw, err = readWindowStoppedV7File(path, fmt.Sprintf("%x", l.journalDigest.Sum(nil)), 64<<20)
+	} else {
+		raw, err = os.ReadFile(path)
+	}
 	if err != nil || conversationHash(raw) != fmt.Sprintf("%x", l.journalDigest.Sum(nil)) {
 		return reject()
 	}

@@ -60,49 +60,50 @@ type windowAcquisitionRow struct {
 	DurationMS                    float64                   `json:"duration_ms"`
 }
 type windowAcquisitionReceipt struct {
-	QualityEndArms             int                    `json:"quality_end_arms,omitempty"`
-	QualityEndUnrunTurns       int                    `json:"quality_end_unrun_turns,omitempty"`
-	GlobalUnrunTurns           int                    `json:"global_unrun_turns,omitempty"`
-	Schema                     string                 `json:"schema"`
-	EvidenceKind               string                 `json:"evidence_kind"`
-	Status                     string                 `json:"status"`
-	ScopeSHA256                string                 `json:"scope_sha256"`
-	ExecutionSHA256            string                 `json:"execution_sha256"`
-	WindowID                   string                 `json:"window_id"`
-	WindowIndex                int                    `json:"window_index"`
-	PlannedCampaignPairs       int                    `json:"planned_campaign_pairs"`
-	PlannedCampaignArms        int                    `json:"planned_campaign_arms"`
-	PlannedCampaignTurns       int                    `json:"planned_campaign_turns"`
-	PlannedCurrentPairs        int                    `json:"planned_current_pairs"`
-	PlannedCurrentArms         int                    `json:"planned_current_arms"`
-	PlannedCurrentTurns        int                    `json:"planned_current_turns"`
-	AttemptedArms              int                    `json:"attempted_arms"`
-	FinishedArms               int                    `json:"finished_arms"`
-	UnrunArms                  int                    `json:"unrun_arms"`
-	ObservedTurns              int                    `json:"observed_turns"`
-	QualityNegativeArms        int                    `json:"quality_negative_arms"`
-	Rows                       []windowAcquisitionRow `json:"rows"`
-	FirstFailureStage          string                 `json:"first_failure_stage"`
-	FirstFailureOrdinal        int                    `json:"first_failure_ordinal"`
-	FirstFailureArm            string                 `json:"first_failure_arm"`
-	Cleanup                    bool                   `json:"cleanup"`
-	EnvironmentCleanup         bool                   `json:"environment_cleanup"`
-	Observer                   bool                   `json:"observer"`
-	Advanced                   bool                   `json:"advanced"`
-	NextClaimSHA256            string                 `json:"next_claim_sha256"`
-	LedgerSHA256               string                 `json:"ledger_sha256"`
-	LedgerCompletionProof      string                 `json:"ledger_completion_proof"`
-	Accounting                 windowAccountingState  `json:"accounting"`
-	AccountingSource           string                 `json:"accounting_source"`
-	ObserverCountersCumulative observability.Stats    `json:"observer_counters_cumulative"`
-	OperationLimitSeconds      int                    `json:"operation_limit_seconds"`
-	OperationDeadline          time.Time              `json:"operation_deadline"`
-	PayloadManifestSHA256      string                 `json:"payload_manifest_sha256"`
-	PayloadAuditOnlyCompletion string                 `json:"payload_audit_only_completion"`
-	PayloadPackets             int                    `json:"payload_packets"`
-	PayloadVerified            bool                   `json:"payload_verified"`
-	PayloadStatus              string                 `json:"payload_status"`
-	DurationMS                 float64                `json:"duration_ms"`
+	V8                         *windowV8RuntimeSummary `json:"v8,omitempty"`
+	QualityEndArms             int                     `json:"quality_end_arms,omitempty"`
+	QualityEndUnrunTurns       int                     `json:"quality_end_unrun_turns,omitempty"`
+	GlobalUnrunTurns           int                     `json:"global_unrun_turns,omitempty"`
+	Schema                     string                  `json:"schema"`
+	EvidenceKind               string                  `json:"evidence_kind"`
+	Status                     string                  `json:"status"`
+	ScopeSHA256                string                  `json:"scope_sha256"`
+	ExecutionSHA256            string                  `json:"execution_sha256"`
+	WindowID                   string                  `json:"window_id"`
+	WindowIndex                int                     `json:"window_index"`
+	PlannedCampaignPairs       int                     `json:"planned_campaign_pairs"`
+	PlannedCampaignArms        int                     `json:"planned_campaign_arms"`
+	PlannedCampaignTurns       int                     `json:"planned_campaign_turns"`
+	PlannedCurrentPairs        int                     `json:"planned_current_pairs"`
+	PlannedCurrentArms         int                     `json:"planned_current_arms"`
+	PlannedCurrentTurns        int                     `json:"planned_current_turns"`
+	AttemptedArms              int                     `json:"attempted_arms"`
+	FinishedArms               int                     `json:"finished_arms"`
+	UnrunArms                  int                     `json:"unrun_arms"`
+	ObservedTurns              int                     `json:"observed_turns"`
+	QualityNegativeArms        int                     `json:"quality_negative_arms"`
+	Rows                       []windowAcquisitionRow  `json:"rows"`
+	FirstFailureStage          string                  `json:"first_failure_stage"`
+	FirstFailureOrdinal        int                     `json:"first_failure_ordinal"`
+	FirstFailureArm            string                  `json:"first_failure_arm"`
+	Cleanup                    bool                    `json:"cleanup"`
+	EnvironmentCleanup         bool                    `json:"environment_cleanup"`
+	Observer                   bool                    `json:"observer"`
+	Advanced                   bool                    `json:"advanced"`
+	NextClaimSHA256            string                  `json:"next_claim_sha256"`
+	LedgerSHA256               string                  `json:"ledger_sha256"`
+	LedgerCompletionProof      string                  `json:"ledger_completion_proof"`
+	Accounting                 windowAccountingState   `json:"accounting"`
+	AccountingSource           string                  `json:"accounting_source"`
+	ObserverCountersCumulative observability.Stats     `json:"observer_counters_cumulative"`
+	OperationLimitSeconds      int                     `json:"operation_limit_seconds"`
+	OperationDeadline          time.Time               `json:"operation_deadline"`
+	PayloadManifestSHA256      string                  `json:"payload_manifest_sha256"`
+	PayloadAuditOnlyCompletion string                  `json:"payload_audit_only_completion"`
+	PayloadPackets             int                     `json:"payload_packets"`
+	PayloadVerified            bool                    `json:"payload_verified"`
+	PayloadStatus              string                  `json:"payload_status"`
+	DurationMS                 float64                 `json:"duration_ms"`
 }
 type windowAcquisitionRun struct {
 	payload     *windowPayloadStore
@@ -192,6 +193,9 @@ func openWindowAcquisition(ctx context.Context, auth *windowAcquisitionAuthoriza
 	if ctx == nil || ctx.Err() != nil || auth == nil || auth.campaign == nil || auth.observer == nil || strings.TrimSpace(auth.modelKey) == "" || strings.TrimSpace(auth.jevKey) == "" || windowTransportNil(auth.modelUpstream) || windowTransportNil(auth.jevUpstream) || !hasString([]string{"local_stub", "recorded_run"}, auth.evidenceKind) || !auth.fixtureOptions.AllowFixtureCreation {
 		return reject()
 	}
+	if err := auth.campaign.revalidateWindowV8Authority(); err != nil {
+		return nil, err
+	}
 	identity := auth.observer.EvaluationIdentity()
 	if identity != auth.observerIdentity || !identity.Enabled || !identity.CaptureContent || identity.SampleRate != 1 || identity.Environment != "evaluation" || identity.Release == "" || identity.Release == "unknown" || identity.ExportTimeoutMS != windowObserverTimeoutForScope(auth.campaign.prepared.scope.Schema) || identity.QueueSize < 1 || !comparisonDigest(identity.EndpointSHA256) || !comparisonDigest(identity.ProjectSHA256) {
 		return reject()
@@ -246,6 +250,9 @@ func openWindowAcquisition(ctx context.Context, auth *windowAcquisitionAuthoriza
 	run := &windowAcquisitionRun{auth: *auth, scope: scope, window: scope.Windows[index-1], recordFiles: map[string]string{}, started: time.Now()}
 	run.auth.source = source
 	run.receipt = windowAcquisitionReceipt{Schema: "full-window-acquisition-receipt.v1", EvidenceKind: auth.evidenceKind, Status: "stopped", ScopeSHA256: scopeSHA, ExecutionSHA256: executionSHA, WindowID: run.window.ID, WindowIndex: index, PlannedCampaignPairs: totals.Pairs, PlannedCampaignArms: totals.Arms, PlannedCampaignTurns: totals.DefinedUserTurns, PlannedCurrentPairs: run.window.LastOrdinal - run.window.FirstOrdinal + 1, OperationLimitSeconds: 300}
+	if scope.Schema == "full-window-scope.v8" {
+		run.receipt.Schema = "full-window-acquisition-receipt.v8"
+	}
 	run.receipt.OperationDeadline, _ = ctx.Deadline()
 	for _, slot := range scope.Slots[run.window.FirstOrdinal-1 : run.window.LastOrdinal] {
 		for _, arm := range slot.ArmOrder {
@@ -440,6 +447,15 @@ func (r *windowAcquisitionRun) completeWindowAcquisition(ctx context.Context) er
 	if len(r.permit.proofs) != len(r.receipt.Rows) || r.permit.active != nil || r.permit.nextArm != len(r.receipt.Rows) {
 		return r.failWindowAcquisition("window_proofs", 0, "")
 	}
+	if r.scope.Schema == "full-window-scope.v8" {
+		c := r.auth.campaign
+		c.mu.Lock()
+		err := c.validateWindowV8ExtrasLocked(r.ledger.Snapshot())
+		c.mu.Unlock()
+		if err != nil {
+			return r.failWindowAcquisition("extra_linkage", 0, "")
+		}
+	}
 	if e := r.captureWindowAcquisitionPayload(true); e != nil {
 		return r.failWindowAcquisition("payload_linkage", 0, "")
 	}
@@ -489,6 +505,9 @@ func (r *windowAcquisitionRun) captureWindowAcquisitionAccounting() {
 	r.receipt.LedgerCompletionProof = "unavailable_journal_read_failed"
 	if r.ledger != nil {
 		r.receipt.Accounting = r.ledger.Snapshot()
+		if r.auth.campaign != nil {
+			r.receipt.V8 = r.auth.campaign.snapshotWindowV8Runtime(r.receipt.Accounting, r.ledger.contract.WindowID)
+		}
 		r.receipt.AccountingSource = "live_owner_snapshot"
 	}
 	// Readable bytes can include an event whose fsync failed. They provide an
@@ -521,7 +540,7 @@ func validateWindowAcquisitionPayloadLinkage(ledger *windowAccounting, ledgerDir
 	ledger.mu.Lock()
 	contract, state, events, previous, poisoned := ledger.contract, ledger.state, ledger.events, ledger.previous, ledger.poisoned
 	ledger.mu.Unlock()
-	if poisoned || state.Halt != "" || state.Pending != nil || state.ModelHeld != 0 || state.JEVHeld != 0 || manifest.Schema != "full-window-payload.v1" || manifest.EvidenceKind != kind || manifest.CompletionProof != "unavailable_from_payload_capture" || manifest.Contract != contract {
+	if poisoned || state.Halt != "" || state.Pending != nil || state.RetryRequired != nil || state.ModelHeld != 0 || state.JEVHeld != 0 || manifest.Schema != windowPayloadSchema(contract) || manifest.EvidenceKind != kind || manifest.CompletionProof != "unavailable_from_payload_capture" || manifest.Contract != contract {
 		return reject()
 	}
 	audit, e := readWindowAccounting(ledgerDir)
@@ -562,7 +581,16 @@ func validateWindowAcquisitionPayloadLinkage(ledger *windowAccounting, ledgerDir
 		}
 	}
 	total := state.ModelAttempts + state.JEVAttempts
-	if len(manifest.Packets) != total || len(intents) != total || len(settled) != total {
+	unknown := map[int]windowUnknownIntent{}
+	if contract.Schema == windowAccountingV3 {
+		for _, u := range state.UnknownIntents {
+			if _, ok := unknown[u.Sequence]; ok {
+				return reject()
+			}
+			unknown[u.Sequence] = u
+		}
+	}
+	if len(manifest.Packets) != total || len(intents) != total || len(settled)+len(unknown) != total {
 		return reject()
 	}
 	for i, packet := range manifest.Packets {
@@ -572,6 +600,35 @@ func validateWindowAcquisitionPayloadLinkage(ledger *windowAccounting, ledgerDir
 			return reject()
 		}
 		response := packet.Response
+		if u, ok := unknown[seq]; ok {
+			if _, duplicate := settled[seq]; duplicate || u.Request != request || request.NativeAttempt != 1 || !comparisonDigest(u.ExtraClaimSHA256) || packet.FailureDescriptorSHA256 != u.DescriptorSHA256 || !windowV8UnknownResponse(response) {
+				return reject()
+			}
+			matches := 0
+			for retrySeq, retry := range intents {
+				if retry.NativeAttempt == 2 && windowSameLogical(request, retry) && settled[retrySeq] != "" {
+					matches++
+				}
+			}
+			if matches != 1 {
+				return reject()
+			}
+			continue
+		}
+		if request.NativeAttempt == 2 {
+			matches := 0
+			for _, u := range unknown {
+				if windowSameLogical(u.Request, request) {
+					matches++
+				}
+			}
+			if matches != 1 {
+				return reject()
+			}
+		}
+		if packet.FailureDescriptorSHA256 != "" {
+			return reject()
+		}
 		if response == nil || response.Status != http.StatusOK || response.Code != "complete" || !response.Complete || !response.Available || response.Body == nil || !response.Body.Complete || response.Body.PrefixSHA256 != "" || response.Body.FullSHA256 != settled[seq] || !comparisonDigest(response.Body.FullSHA256) || response.Body.Bytes < 0 || response.Body.Bytes > windowMaxResponseBytes {
 			return reject()
 		}

@@ -50,6 +50,7 @@ func (d *windowOwnedDriver) windowPayloadEvidence() (*windowPayloadStore, bool) 
 }
 
 type windowOwnedPhase struct {
+	parent     context.Context
 	driver     *windowOwnedDriver
 	nonce      string
 	model, jev int
@@ -308,7 +309,7 @@ func (d *windowOwnedDriver) Step(ctx context.Context, f Fixture, session, messag
 		p.mu.Unlock()
 		return ConversationObservation{}, d.stopWindowOwned()
 	}
-	phase := &windowOwnedPhase{nonce: randomID(), driver: d}
+	phase := &windowOwnedPhase{nonce: randomID(), driver: d, parent: ctx}
 	d.phase = phase
 	p.mu.Unlock()
 	d.failureStepInputSession = d.session
@@ -333,7 +334,7 @@ func (d *windowOwnedDriver) Step(ctx context.Context, f Fixture, session, messag
 		return obs, d.stopWindowOwned()
 	}
 	state := d.ledger.Snapshot()
-	if state.Halt != "" || state.Closed || state.Pending != nil {
+	if state.Halt != "" || state.Closed || state.Pending != nil || state.RetryRequired != nil {
 		return obs, d.stopWindowOwned()
 	}
 	// Replay only the observed prefix through the SAME origin-typed policy. A
@@ -498,7 +499,11 @@ func (d *windowOwnedDriver) windowNextRequest(ctx context.Context, provider stri
 	default:
 		return fail()
 	}
-	return windowRequestIdentity{Provider: provider, Model: model, CaseKey: d.slot.CaseKey, Pass: d.slot.Pass, Arm: d.arm, Turn: d.nextTurn + 1, Attempt: attempt}, nil
+	native := 0
+	if d.ledger.contract.Schema == windowAccountingV3 {
+		native = 1
+	}
+	return windowRequestIdentity{NativeAttempt: native, Provider: provider, Model: model, CaseKey: d.slot.CaseKey, Pass: d.slot.Pass, Arm: d.arm, Turn: d.nextTurn + 1, Attempt: attempt}, nil
 }
 func (d *windowOwnedDriver) finishWindowOwnedArm(ctx context.Context, record collectionRecording) (*windowOwnedArmProof, error) {
 	if d == nil {
@@ -664,7 +669,7 @@ func validateWindowOwnedArmProof(permit *windowAcquisitionPermit, proof *windowO
 		return fail()
 	}
 	state := permit.ledger.Snapshot()
-	if state.Halt != "" || state.Pending != nil {
+	if state.Halt != "" || state.Pending != nil || state.RetryRequired != nil {
 		return fail()
 	}
 	if permit.observer == nil || permit.observer.EvaluationIdentity() != permit.observerIdentity {

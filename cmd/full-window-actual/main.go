@@ -42,6 +42,8 @@ func runActualCLI(ctx context.Context, args []string, in io.ReadCloser, out io.W
 	fs := flag.NewFlagSet("full-window-actual", flag.ContinueOnError)
 	fs.SetOutput(io.Discard)
 	checkOnly := fs.Bool("check", false, "read-only frozen readiness check")
+	prepareV8 := fs.Bool("prepare-v8", false, "read-only V8 technical preparation; never execution authority")
+	authorization := fs.String("authorization", "", "external exact-scope signed V8 human authorization")
 	serve := fs.Bool("serve-actual", false, "retain one actual owner; only explicit stdin operations execute")
 	manifest := fs.String("manifest", "", "independently pinned actual manifest")
 	settings := fs.String("private-settings", "", "0600 private settings; read only after readiness")
@@ -52,10 +54,10 @@ func runActualCLI(ctx context.Context, args []string, in io.ReadCloser, out io.W
 		}
 		return actualCLIError(out, "invalid_flags")
 	}
-	if fs.NArg() != 0 || ctx == nil || ctx.Err() != nil || (*checkOnly && *serve) {
+	if fs.NArg() != 0 || ctx == nil || ctx.Err() != nil || (*checkOnly && *serve) || (*prepareV8 && (*checkOnly || *serve || *settings != "" || *authorization != "")) || (*authorization != "" && !*serve) {
 		return actualCLIError(out, "invalid_start")
 	}
-	if !*checkOnly && !*serve {
+	if !*checkOnly && !*serve && !*prepareV8 {
 		if *manifest != "" || *settings != "" {
 			return actualCLIError(out, "explicit_mode_required")
 		}
@@ -64,10 +66,34 @@ func runActualCLI(ctx context.Context, args []string, in io.ReadCloser, out io.W
 		}
 		return 0
 	}
-	if *manifest == "" || check == nil || (*checkOnly && *settings != "") || (*serve && (*settings == "" || open == nil || in == nil)) {
+	if *manifest == "" || (!*prepareV8 && *authorization == "" && check == nil) || (*checkOnly && *settings != "") || (*serve && (*settings == "" || open == nil || in == nil)) {
 		return actualCLIError(out, "incomplete_actual_declaration")
 	}
-	summary, ready, err := check(taskbench.FullWindowActualReadyOptions{ManifestPath: *manifest})
+	if *prepareV8 {
+		summary, prepared, err := taskbench.CheckFullWindowV8Preparation(taskbench.FullWindowActualReadyOptions{ManifestPath: *manifest})
+		if err != nil || prepared == nil {
+			return actualCLIError(out, "actual_v8_preparation_rejected")
+		}
+		if actualEmit(out, map[string]any{"type": "prepared", "read_only": true, "actual_execution_authorized": false, "retry_policy_approved": false, "preparation": summary}) != nil {
+			return 1
+		}
+		return 0
+	}
+	var summary taskbench.FullWindowActualReadySummary
+	var ready *taskbench.FullWindowActualReady
+	var err error
+	if *authorization != "" {
+		var prepared *taskbench.FullWindowV8Preparation
+		summary, prepared, err = taskbench.CheckFullWindowV8Preparation(taskbench.FullWindowActualReadyOptions{ManifestPath: *manifest})
+		if err == nil && prepared != nil {
+			ready, err = taskbench.AuthorizeFullWindowV8Preparation(prepared, *authorization)
+		}
+		if err != nil || ready == nil {
+			return actualCLIError(out, "actual_v8_authorization_rejected")
+		}
+	} else {
+		summary, ready, err = check(taskbench.FullWindowActualReadyOptions{ManifestPath: *manifest})
+	}
 	if err != nil || ready == nil {
 		return actualCLIError(out, "actual_readiness_rejected")
 	}

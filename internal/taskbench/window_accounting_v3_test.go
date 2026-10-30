@@ -28,7 +28,7 @@ func windowV3Contract() windowAccountingContract {
 	return c
 }
 func TestWindowAccountingV3Declaration(t *testing.T) {
-	l, err := newWindowAccounting(filepath.Join(t.TempDir(), "window"), windowV3Contract())
+	l, err := newWindowAccounting(filepath.Join(stoppedEvidenceRoot(t), "window"), windowV3Contract())
 	if err != nil {
 		t.Fatal("v3 isolated accounting declaration rejected:", err)
 	}
@@ -63,7 +63,7 @@ func windowV3Request(provider string, native int) windowRequestIdentity {
 }
 func windowV3New(t *testing.T, provider string, funded bool) (*windowAccounting, windowV3Operations, windowRequestIdentity, windowRequestTicket) {
 	t.Helper()
-	l, e := newWindowAccounting(filepath.Join(t.TempDir(), "window"), windowV3Contract())
+	l, e := newWindowAccounting(filepath.Join(stoppedEvidenceRoot(t), "window"), windowV3Contract())
 	if e != nil {
 		t.Fatal(e)
 	}
@@ -283,7 +283,7 @@ func TestWindowAccountingV3CloseUnresolved(t *testing.T) {
 func TestWindowAccountingV3FirstNativeAndDuplicate(t *testing.T) {
 	for _, native := range []int{0, 2, 3} {
 		t.Run(fmt.Sprint(native), func(t *testing.T) {
-			l, e := newWindowAccounting(filepath.Join(t.TempDir(), "window"), windowV3Contract())
+			l, e := newWindowAccounting(filepath.Join(stoppedEvidenceRoot(t), "window"), windowV3Contract())
 			if e != nil {
 				t.Fatal(e)
 			}
@@ -314,7 +314,7 @@ func TestWindowAccountingV3FirstNativeAndDuplicate(t *testing.T) {
 func TestWindowAccountingV3NormalSettlementAndUnknownRetention(t *testing.T) {
 	c := windowV3Contract()
 	c.JEVCap = 2688 * 5
-	l, e := newWindowAccounting(filepath.Join(t.TempDir(), "window"), c)
+	l, e := newWindowAccounting(filepath.Join(stoppedEvidenceRoot(t), "window"), c)
 	if e != nil {
 		t.Fatal(e)
 	}
@@ -367,7 +367,7 @@ func TestWindowAccountingV3DuplicateClaimAndLocalLimit(t *testing.T) {
 			if mode == "attempt-limit" {
 				c.JEV.MaxAttempts = 1
 			}
-			l, e := newWindowAccounting(filepath.Join(t.TempDir(), "window"), c)
+			l, e := newWindowAccounting(filepath.Join(stoppedEvidenceRoot(t), "window"), c)
 			if e != nil {
 				t.Fatal(e)
 			}
@@ -436,7 +436,7 @@ func TestWindowAccountingV3LegacyFieldIsolation(t *testing.T) {
 			if strings.HasSuffix(schema, "v2") {
 				c = windowCacheContract()
 			}
-			l, e := newWindowAccounting(filepath.Join(t.TempDir(), "window"), c)
+			l, e := newWindowAccounting(filepath.Join(stoppedEvidenceRoot(t), "window"), c)
 			if e != nil {
 				t.Fatal(e)
 			}
@@ -579,7 +579,7 @@ func TestWindowAccountingV3PersistencePoison(t *testing.T) {
 		for _, fault := range []string{"write", "short", "sync", "identity"} {
 			t.Run(stage+"/"+fault, func(t *testing.T) {
 				c := windowV3Contract()
-				dir := filepath.Join(t.TempDir(), "window")
+				dir := filepath.Join(stoppedEvidenceRoot(t), "window")
 				var bad *failingWindowFile
 				var hook *windowV3HookFile
 				l, e := newWindowAccountingWithFile(dir, c, func(f *os.File) windowJournalFile {
@@ -674,7 +674,7 @@ func TestWindowAccountingV3PersistencePoison(t *testing.T) {
 func TestWindowAccountingV3FailedFirstCannotRecover(t *testing.T) {
 	for _, mode := range []string{"fail", "usage-missing", "usage-bounds", "cache-invalid", "bad-descriptor"} {
 		t.Run(mode, func(t *testing.T) {
-			l, e := newWindowAccounting(filepath.Join(t.TempDir(), "window"), windowV3Contract())
+			l, e := newWindowAccounting(filepath.Join(stoppedEvidenceRoot(t), "window"), windowV3Contract())
 			if e != nil {
 				t.Fatal(e)
 			}
@@ -711,7 +711,7 @@ func TestWindowAccountingV3FailedFirstCannotRecover(t *testing.T) {
 func TestWindowAccountingV3ConcurrentOperations(t *testing.T) {
 	for _, stage := range []string{"begin", "unknown", "funding"} {
 		t.Run(stage, func(t *testing.T) {
-			l, e := newWindowAccounting(filepath.Join(t.TempDir(), "window"), windowV3Contract())
+			l, e := newWindowAccounting(filepath.Join(stoppedEvidenceRoot(t), "window"), windowV3Contract())
 			if e != nil {
 				t.Fatal(e)
 			}
@@ -812,7 +812,7 @@ func TestWindowAccountingV3LegacyBytes(t *testing.T) {
 			if string(got) != expected {
 				t.Fatal("legacy state bytes changed", string(got))
 			}
-			l, e := newWindowAccounting(filepath.Join(t.TempDir(), "window"), c)
+			l, e := newWindowAccounting(filepath.Join(stoppedEvidenceRoot(t), "window"), c)
 			if e != nil {
 				t.Fatal(e)
 			}

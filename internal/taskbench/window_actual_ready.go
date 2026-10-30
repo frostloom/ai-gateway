@@ -58,6 +58,8 @@ type FullWindowActualReady struct {
 	stoppedV5      windowStoppedV5Baseline
 	stoppedV6      windowStoppedV6Baseline
 	approval130    windowActualFile
+	stoppedV7      windowStoppedV7Baseline
+	v8Authority    *windowV8Authority
 	source         ConversationSuite
 	profiles       PairedProfiles
 }
@@ -113,19 +115,26 @@ type windowActualProviderEvidence struct {
 }
 
 func CheckFullWindowActualReady(o FullWindowActualReadyOptions) (FullWindowActualReadySummary, *FullWindowActualReady, error) {
+	return checkFullWindowActualReady(o, false)
+}
+func checkFullWindowActualReady(o FullWindowActualReadyOptions, v8 bool) (FullWindowActualReadySummary, *FullWindowActualReady, error) {
+	manifestSHA, archiveCommit, archiveTree := fullWindowActualManifestSHA, fullWindowActualArchiveCommit, fullWindowActualArchiveTree
+	if v8 {
+		manifestSHA, archiveCommit, archiveTree = fullWindowV8ManifestSHA, fullWindowV8ArchiveCommit, fullWindowV8ArchiveTree
+	}
 	var summary FullWindowActualReadySummary
 	reject := func() (FullWindowActualReadySummary, *FullWindowActualReady, error) {
 		return summary, nil, fmt.Errorf("actual readiness rejected")
 	}
-	if !comparisonDigest(fullWindowActualManifestSHA) || !windowActualRevision(fullWindowActualArchiveCommit) || !windowActualRevision(fullWindowActualArchiveTree) {
+	if !comparisonDigest(manifestSHA) || !windowActualRevision(archiveCommit) || !windowActualRevision(archiveTree) {
 		return reject()
 	}
-	raw, err := readWindowActualFile(o.ManifestPath, fullWindowActualManifestSHA, 8<<20)
+	raw, err := readWindowActualFile(o.ManifestPath, manifestSHA, 8<<20)
 	if err != nil {
 		return reject()
 	}
 	var m windowActualManifest
-	if decodeWindowActualJSON(raw, &m) != nil || validateWindowActualPrivateSettingsBinding(&m) != nil || !windowActualSupportedEpoch(m) || m.EvidenceKind != "actual" || m.ArchiveCommit != fullWindowActualArchiveCommit || m.ArchiveTree != fullWindowActualArchiveTree {
+	if decodeWindowActualJSON(raw, &m) != nil || validateWindowActualPrivateSettingsBinding(&m) != nil || !(windowActualSupportedEpoch(m) && !v8 || v8 && m.Schema == "full-window-actual-ready.v8" && m.Scope.Schema == "full-window-scope.v8") || m.EvidenceKind != "actual" || m.ArchiveCommit != archiveCommit || m.ArchiveTree != archiveTree {
 		return reject()
 	}
 	attestationRaw, err := readWindowActualBytes(o.ManifestPath+".binary-attestation.json", "", 65536)
@@ -137,7 +146,7 @@ func CheckFullWindowActualReady(o FullWindowActualReadyOptions) (FullWindowActua
 		return reject()
 	}
 	executable, err = filepath.EvalSymlinks(executable)
-	if err != nil || validateWindowActualBinaryAttestation(attestationRaw, m, fullWindowActualManifestSHA, executable) != nil {
+	if err != nil || validateWindowActualBinaryAttestation(attestationRaw, m, manifestSHA, executable) != nil {
 		return reject()
 	}
 	if validateWindowActualRoots(m.SessionRoot, m.CampaignRoot) != nil || m.KnowledgeModel != "off" || m.KnowledgeJEV != "off" || m.Scope.AllowPaid || m.Scope.ReadyForPaidRun {
@@ -179,7 +188,7 @@ func CheckFullWindowActualReady(o FullWindowActualReadyOptions) (FullWindowActua
 	}
 	id := m.Observer
 	exportTimeoutMS := int64(2000)
-	if m.Schema == "full-window-actual-ready.v7" {
+	if v8 || m.Schema == "full-window-actual-ready.v7" {
 		exportTimeoutMS = 10000
 	}
 	if !id.Enabled || !id.CaptureContent || id.SampleRate != 1 || id.Environment != "evaluation" || id.Release != m.ArchiveCommit || id.ExportTimeoutMS != exportTimeoutMS || id.QueueSize < 1 || !comparisonDigest(id.EndpointSHA256) || !comparisonDigest(id.ProjectSHA256) {
@@ -197,7 +206,11 @@ func CheckFullWindowActualReady(o FullWindowActualReadyOptions) (FullWindowActua
 	if err != nil {
 		return reject()
 	}
-	prepared, err := prepareWindowCampaign(m.CampaignRoot, m.CampaignRoot, m.Scope, source, profiles, m.Scope.Bindings, m.ScopeSHA256, m.ExecutionSHA256, m.Limits)
+	prepare := prepareWindowCampaign
+	if v8 {
+		prepare = prepareWindowCampaignV8Technical
+	}
+	prepared, err := prepare(m.CampaignRoot, m.CampaignRoot, m.Scope, source, profiles, m.Scope.Bindings, m.ScopeSHA256, m.ExecutionSHA256, m.Limits)
 	if err != nil {
 		return reject()
 	}
@@ -206,7 +219,13 @@ func CheckFullWindowActualReady(o FullWindowActualReadyOptions) (FullWindowActua
 		return reject()
 	}
 	candidate := &FullWindowActualReady{manifestPath: o.ManifestPath, manifestRaw: append([]byte(nil), raw...), attestationRaw: append([]byte(nil), attestationRaw...), manifest: m, prepared: prepared, source: source, profiles: profiles}
-	if m.Schema == "full-window-actual-ready.v7" {
+	if v8 {
+		proof, e := loadWindowActualStoppedBaselineV8(m)
+		if e != nil {
+			return reject()
+		}
+		candidate.baseline, candidate.stoppedV7, candidate.prepared.stoppedHistory = windowV8CandidateBaseline(proof.base), proof, proof
+	} else if m.Schema == "full-window-actual-ready.v7" {
 		proof, approval, err := loadWindowActualStoppedBaselineV7(m)
 		if err != nil {
 			return reject()
@@ -251,12 +270,15 @@ func CheckFullWindowActualReady(o FullWindowActualReadyOptions) (FullWindowActua
 	if validatePreparedWindowCampaign(candidate.prepared, candidate.baseline) != nil {
 		return reject()
 	}
-	summary = FullWindowActualReadySummary{fullWindowActualManifestSHA, m.ScopeSHA256, m.ExecutionSHA256, 3660, 7320, 11772, 1851}
+	summary = FullWindowActualReadySummary{manifestSHA, m.ScopeSHA256, m.ExecutionSHA256, 3660, 7320, 11772, 1851}
 	return summary, candidate, nil
 }
 
 // Future session startup must recheck before any credential load or claim write.
 func (r *FullWindowActualReady) revalidate() error {
+	if r != nil && r.manifest.Schema == "full-window-actual-ready.v8" {
+		return r.revalidateV8()
+	}
 	if r == nil || len(r.manifestRaw) == 0 || r.manifestPath == "" {
 		return fmt.Errorf("actual ready token absent")
 	}
@@ -485,11 +507,12 @@ func validateWindowActualSource(m windowActualManifest) ([]string, error) {
 		return nil, fmt.Errorf("source tree mismatch")
 	}
 	info, ok := debug.ReadBuildInfo()
-	if !ok || validateWindowActualBuildPins(info, m, fullWindowActualManifestSHA) != nil {
+	if !ok || validateWindowActualBuildPins(info, m, windowActualManifestAnchor(m)) != nil {
 		return nil, fmt.Errorf("actual archive build identity unavailable")
 	}
 	// Archive pins are the executing build's provenance, not caller assertions.
-	if m.ArchiveCommit != fullWindowActualArchiveCommit || m.ArchiveTree != fullWindowActualArchiveTree {
+	_, archiveCommit, archiveTree := windowActualBuildAnchors(m)
+	if m.ArchiveCommit != archiveCommit || m.ArchiveTree != archiveTree {
 		return nil, fmt.Errorf("archive provenance mismatch")
 	}
 	entries, err := git("ls-tree", "-r", "-l", "-z", "HEAD")
@@ -587,6 +610,9 @@ func validateWindowActualBuildPins(info *debug.BuildInfo, m windowActualManifest
 	}
 	prefix := "github.com/frostloom/ai-gateway/internal/taskbench."
 	expected := map[string]string{prefix + "fullWindowActualManifestSHA": sha, prefix + "fullWindowActualArchiveCommit": m.ArchiveCommit, prefix + "fullWindowActualArchiveTree": m.ArchiveTree}
+	if m.Schema == "full-window-actual-ready.v8" {
+		expected = map[string]string{prefix + "fullWindowV8ManifestSHA": sha, prefix + "fullWindowV8ArchiveCommit": m.ArchiveCommit, prefix + "fullWindowV8ArchiveTree": m.ArchiveTree}
+	}
 	found := map[string]bool{}
 	for _, setting := range info.Settings {
 		if setting.Key != "-ldflags" {
@@ -799,7 +825,7 @@ func verifyWindowActualExecutable(path, sha string) error {
 // Live sessions can verify the immutable signature without the startup-only
 // requirement that their newly owned output roots remain absent.
 func (r *FullWindowActualReady) verifyBinaryAttestation() error {
-	if r == nil || len(r.attestationRaw) == 0 || len(r.manifestRaw) == 0 || conversationHash(r.manifestRaw) != fullWindowActualManifestSHA {
+	if r == nil || len(r.attestationRaw) == 0 || len(r.manifestRaw) == 0 || conversationHash(r.manifestRaw) != windowActualManifestAnchor(r.manifest) {
 		return fmt.Errorf("signed actual ready snapshot absent")
 	}
 	raw, err := readWindowActualBytes(r.manifestPath+".binary-attestation.json", "", 65536)
@@ -814,7 +840,7 @@ func (r *FullWindowActualReady) verifyBinaryAttestation() error {
 	if err != nil {
 		return err
 	}
-	return validateWindowActualBinaryAttestation(raw, r.manifest, fullWindowActualManifestSHA, executable)
+	return validateWindowActualBinaryAttestation(raw, r.manifest, windowActualManifestAnchor(r.manifest), executable)
 }
 
 func validateWindowActualPrivateSettingsBinding(m *windowActualManifest) error {

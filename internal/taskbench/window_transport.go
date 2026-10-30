@@ -5,6 +5,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/frostloom/ai-gateway/internal/observability"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 	"io"
 	"mime"
 	"net/http"
@@ -30,6 +33,7 @@ type windowProviderTransport struct {
 	upstream    http.RoundTripper
 	payload     *windowPayloadStore
 	diagnostics *windowFailureRecorder
+	v8Base      *http.Transport
 }
 
 func windowTransportNil(value any) bool {
@@ -76,7 +80,15 @@ func newWindowProviderTransport(capability windowProviderCapability, provider st
 	if sink, ok := capability.(windowFailureDiagnosticCapability); ok {
 		diagnostics = sink.windowFailureDiagnostics()
 	}
-	return &windowProviderTransport{capability: capability, ledger: l, provider: provider, upstream: upstream, payload: payload, diagnostics: diagnostics}, nil
+	var v8Base *http.Transport
+	if l.contract.Schema == windowAccountingV3 {
+		owned, ok := upstream.(*windowActualNoRedirectTransport)
+		if !ok || owned == nil || owned.base == nil {
+			return nil, fmt.Errorf("v8 concrete owned transport required")
+		}
+		v8Base = owned.base
+	}
+	return &windowProviderTransport{capability: capability, ledger: l, provider: provider, upstream: upstream, payload: payload, diagnostics: diagnostics, v8Base: v8Base}, nil
 }
 
 func windowTransportStop(l *windowAccounting, code string) error {
@@ -146,12 +158,32 @@ func (t *windowProviderTransport) RoundTrip(req *http.Request) (*http.Response, 
 	if validateWindowPOST(t.provider, req.Method, req.URL.String(), raw, p, identity) != nil {
 		return reject()
 	}
+	v8 := t.ledger.contract.Schema == windowAccountingV3
+	phase, _ := req.Context().Value(windowOwnedPhaseKey{}).(*windowOwnedPhase)
+	if v8 && t.guardWindowV8(req, identity, phase) != nil {
+		return reject()
+	}
 	ticket, e := t.ledger.Begin(identity)
 	if e != nil {
 		return nil, fmt.Errorf("window request admission stopped")
 	}
+	var nativeOp *observability.Operation
+	var nativeSpan trace.Span
+	endNative := func(code string) {
+		if nativeOp != nil {
+			nativeSpan.SetAttributes(attribute.String("langfuse.observation.metadata.native_outcome", code))
+			var err error
+			if code != "settled" {
+				err = fmt.Errorf("%s", code)
+			}
+			nativeOp.End(err)
+			nativeOp = nil
+		}
+	}
+	defer func() { endNative("stopped") }()
 	evidence := windowFailureTransportEvidence{Sequence: ticket.sequence, Provider: t.provider, RequestPersistence: "not_attempted", DescriptorPersistence: "not_attempted", LedgerPersistence: "unknown"}
 	fail := func(code string) (*http.Response, error) {
+		endNative(code)
 		t.ledger.mu.Lock()
 		eventsBefore := t.ledger.events
 		t.ledger.mu.Unlock()
@@ -181,6 +213,15 @@ func (t *windowProviderTransport) RoundTrip(req *http.Request) (*http.Response, 
 		evidence.RequestPersistence = "verified"
 	}
 	writeResponse := func(status int, body []byte, complete bool, code string, failure *windowTransportFailure) error {
+		// Native observations never copy provider content. Captured-byte digests and
+		// lengths join to the exact private packet; partial captures remain explicit.
+		if v8 && nativeSpan != nil {
+			nativeSpan.SetAttributes(attribute.Int("langfuse.observation.metadata.response_status", status), attribute.Int("langfuse.observation.metadata.response_bytes", len(body)), attribute.Bool("langfuse.observation.metadata.response_complete", complete), attribute.Bool("langfuse.observation.metadata.response_available", body != nil || complete))
+			if body != nil {
+				nativeSpan.SetAttributes(attribute.String("langfuse.observation.metadata.response_capture_sha256", conversationHash(body)))
+			}
+		}
+
 		// Keep the original response classification even if its descriptor cannot
 		// be persisted. The ledger's protocol_failure is a separate outcome.
 		evidence.ResponseStage = code
@@ -209,6 +250,8 @@ func (t *windowProviderTransport) RoundTrip(req *http.Request) (*http.Response, 
 		}
 		return err
 	}
+	var witness *windowTLSRetryWitness
+dispatchNative:
 	if req.Context().Err() != nil {
 		writeResponse(0, nil, false, "round_trip", &windowTransportFailure{Cause: jev.ClassifyTransportFailureCause(req.Context().Err()), Phase: "before_send"})
 		return fail("upstream_failure")
@@ -217,13 +260,50 @@ func (t *windowProviderTransport) RoundTrip(req *http.Request) (*http.Response, 
 	frozen.Body = io.NopCloser(bytes.NewReader(raw))
 	frozen.GetBody = nil
 	frozen.ContentLength = int64(len(raw))
+	if v8 {
+		ctx, op := observability.Start(frozen.Context(), "window.native", "span")
+		nativeOp = op
+		frozen = frozen.WithContext(ctx)
+		nativeSpan = trace.SpanFromContext(ctx)
+		if d, ok := t.capability.(*windowOwnedDriver); ok && d.observer != nil && (nativeOp == nil || !nativeSpan.IsRecording()) {
+			return fail("protocol_failure")
+		}
+		nativeID := windowV8DeclarationSHA(struct {
+			Claim    string
+			Sequence int
+			Request  windowRequestIdentity
+		}{t.ledger.contract.ClaimSHA256, ticket.sequence, identity})
+		nativeSpan.SetAttributes(attribute.String("langfuse.observation.metadata.native_schema", "full-window-native.v8"), attribute.String("langfuse.observation.metadata.native_id", nativeID), attribute.Int("langfuse.observation.metadata.native_sequence", ticket.sequence), attribute.Int("langfuse.observation.metadata.native_attempt", identity.NativeAttempt), attribute.String("langfuse.observation.metadata.provider", identity.Provider), attribute.String("langfuse.observation.metadata.body_sha256", identity.BodySHA256), attribute.Int("langfuse.observation.metadata.request_bytes", identity.Bytes), attribute.String("langfuse.observation.metadata.native_content_mode", "metadata_only"), attribute.String("langfuse.observation.metadata.claim_sha256", t.ledger.contract.ClaimSHA256), attribute.String("langfuse.observation.metadata.case_key", identity.CaseKey), attribute.Int("langfuse.observation.metadata.pass", identity.Pass), attribute.String("langfuse.observation.metadata.arm", identity.Arm), attribute.Int("langfuse.observation.metadata.turn", identity.Turn), attribute.Int("langfuse.observation.metadata.logical_attempt", identity.Attempt))
+	}
 	var probe *windowTransportProbe
 	if t.payload != nil || t.diagnostics != nil {
 		var ctx context.Context
 		ctx, probe = newWindowTransportProbe(frozen.Context())
 		frozen = frozen.WithContext(ctx)
 	}
-	response, upErr := t.upstream.RoundTrip(frozen)
+	if v8 && identity.NativeAttempt == 1 {
+		ctx, w := newWindowTLSRetryWitness(frozen.Context(), phase.parent)
+		witness = w
+		frozen = frozen.WithContext(ctx)
+	}
+	var response *http.Response
+	var upErr error
+	if v8 && identity.NativeAttempt == 2 {
+		response, upErr = witness.dispatchWindowV8(func() (*http.Response, error) {
+			if t.guardWindowV8(req, identity, phase) != nil {
+				return nil, fmt.Errorf("v8 pre-dispatch owner changed")
+			}
+			return t.upstream.RoundTrip(frozen)
+		})
+	} else {
+		if v8 && t.guardWindowV8(req, identity, phase) != nil {
+			return fail("upstream_failure")
+		}
+		response, upErr = t.upstream.RoundTrip(frozen)
+	}
+	if v8 && identity.NativeAttempt == 1 {
+		witness.seal(response, upErr)
+	}
 	if upErr != nil || response == nil || response.Body == nil {
 		status := 0
 		if response != nil && response.Body != nil {
@@ -231,6 +311,47 @@ func (t *windowProviderTransport) RoundTrip(req *http.Request) (*http.Response, 
 				status = response.StatusCode
 			}
 			_ = response.Body.Close()
+		}
+		if v8 && identity.NativeAttempt == 1 && response == nil && witness.eligible() {
+			// Persist the complete native1 failure before ending its active ticket.
+			if writeResponse(status, nil, false, "round_trip", probe.snapshot(upErr, "")) != nil {
+				return fail("protocol_failure")
+			}
+			descriptor, err := windowV8FailureDescriptor(t.payload, ticket.sequence, identity)
+			if err != nil {
+				return fail("protocol_failure")
+			}
+			d := t.capability.(*windowOwnedDriver)
+			if witness.handoffWindowV8(func() { _ = d.stopWindowOwned() }) != nil {
+				return fail("upstream_failure")
+			}
+			nativeSpan.SetAttributes(attribute.String("langfuse.observation.metadata.failure_descriptor_sha256", descriptor))
+			endNative("tls_eof_unknown")
+			if err = t.ledger.EndUnknown(ticket, descriptor); err != nil {
+				return t.stopWindowV8Transition()
+			}
+			if witness.checkWindowV8() != nil || t.guardWindowV8(req, identity, phase) != nil {
+				return t.stopWindowV8Transition()
+			}
+			receipt, err := d.permit.campaign.claimWindowExtra(windowOwnedRetryContext{driver: d, phase: phase, sequence: ticket.sequence, request: identity, descriptorSHA: descriptor, requestContext: req.Context()})
+			if err != nil || receipt.recordFunding() != nil {
+				return t.stopWindowV8Transition()
+			}
+			if witness.checkWindowV8() != nil || t.guardWindowV8(req, identity, phase) != nil {
+				return t.stopWindowV8Transition()
+			}
+			identity.NativeAttempt = 2
+			nextTicket, err := t.ledger.Begin(identity)
+			if err != nil {
+				return t.stopWindowV8Transition()
+			}
+			ticket = nextTicket
+			evidence = windowFailureTransportEvidence{Sequence: ticket.sequence, Provider: t.provider, RequestPersistence: "failed", DescriptorPersistence: "not_attempted", LedgerPersistence: "unknown"}
+			if t.payload.writeWindowRequest(ticket.sequence, identity, raw) != nil {
+				return fail("protocol_failure")
+			}
+			evidence.RequestPersistence = "verified"
+			goto dispatchNative
 		}
 		writeResponse(status, nil, false, "round_trip", probe.snapshot(upErr, ""))
 		return fail("upstream_failure")
@@ -268,9 +389,13 @@ func (t *windowProviderTransport) RoundTrip(req *http.Request) (*http.Response, 
 		}
 		return fail("protocol_failure")
 	}
+	if v8 && (t.guardWindowV8(req, identity, phase) != nil || identity.NativeAttempt == 2 && witness.checkWindowV8() != nil) {
+		return fail("upstream_failure")
+	}
 	if e = t.ledger.Settle(ticket, conversationHash(body), usage); e != nil {
 		return nil, fmt.Errorf("window usage settlement stopped")
 	}
+	endNative("settled")
 	response.Body = io.NopCloser(bytes.NewReader(body))
 	response.ContentLength = int64(len(body))
 	return response, nil

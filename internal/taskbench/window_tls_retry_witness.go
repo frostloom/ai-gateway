@@ -27,10 +27,12 @@ type windowTLSRetrySnapshot struct {
 // live object must be checked after sealing; a copied snapshot is no authority.
 // It performs no retry, accounting, network operation or capability issuance.
 type windowTLSRetryWitness struct {
-	mu              sync.Mutex
-	request, parent context.Context
-	state           windowTLSRetrySnapshot
-	outcomeEOF      bool
+	mu                                sync.Mutex
+	request, parent                   context.Context
+	state                             windowTLSRetrySnapshot
+	outcomeEOF                        bool
+	runtimeStop                       func()
+	runtimeHandoff, runtimeDispatched bool
 }
 
 // Keep both original contexts. WithClientTrace adds callbacks to the existing
@@ -88,12 +90,17 @@ func newWindowTLSRetryWitness(request, parent context.Context) (context.Context,
 
 func (w *windowTLSRetryWitness) event(update func(*windowTLSRetrySnapshot)) {
 	w.mu.Lock()
-	defer w.mu.Unlock()
 	if w.state.SealCalls != 0 {
 		w.state.LateEvents++
 		w.state.Invalid = true
 	}
 	update(&w.state)
+	stop := w.runtimeStop
+	late := w.state.LateEvents != 0
+	w.mu.Unlock()
+	if late && stop != nil {
+		stop()
+	}
 }
 
 // Seal only a controlled RoundTrip result, once. Repeated sealing permanently
@@ -116,6 +123,9 @@ func (w *windowTLSRetryWitness) seal(response *http.Response, err error) {
 func (w *windowTLSRetryWitness) eligible() bool {
 	w.mu.Lock()
 	defer w.mu.Unlock()
+	return w.eligibleWindowLocked()
+}
+func (w *windowTLSRetryWitness) eligibleWindowLocked() bool {
 	s := w.state
 	return s.SealCalls == 1 && !s.Invalid && s.LateEvents == 0 && w.outcomeEOF &&
 		s.TLSStarts == 1 && s.TLSDone == 1 && s.TLSFailedEOF == 1 && s.TLSSuccess == 0 &&

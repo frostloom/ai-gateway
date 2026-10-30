@@ -29,14 +29,15 @@ type windowPayloadResponse struct {
 	TransportFailure *windowTransportFailure `json:"transport_failure,omitempty"`
 }
 type windowPayloadPacket struct {
-	Sequence              int                    `json:"sequence"`
-	Identity              windowRequestIdentity  `json:"identity"`
-	ScopeSHA256           string                 `json:"scope_sha256"`
-	ClaimSHA256           string                 `json:"claim_sha256"`
-	WindowID              string                 `json:"window_id"`
-	Request               windowPayloadBody      `json:"request"`
-	RequestDescriptorFile string                 `json:"request_descriptor_file"`
-	Response              *windowPayloadResponse `json:"response,omitempty"`
+	FailureDescriptorSHA256 string                 `json:"failure_descriptor_sha256,omitempty"`
+	Sequence                int                    `json:"sequence"`
+	Identity                windowRequestIdentity  `json:"identity"`
+	ScopeSHA256             string                 `json:"scope_sha256"`
+	ClaimSHA256             string                 `json:"claim_sha256"`
+	WindowID                string                 `json:"window_id"`
+	Request                 windowPayloadBody      `json:"request"`
+	RequestDescriptorFile   string                 `json:"request_descriptor_file"`
+	Response                *windowPayloadResponse `json:"response,omitempty"`
 }
 type windowPayloadManifest struct {
 	Schema          string                   `json:"schema"`
@@ -124,7 +125,7 @@ func newWindowPayloadStore(dir, campaignRoot string, contract windowAccountingCo
 		return reject()
 	}
 	s := &windowPayloadStore{dir: canonicalDir, root: root, directoryInfo: info, contract: contract, kind: kind, files: map[string]windowPayloadExpected{}, seen: map[string]bool{}}
-	declaration := windowPayloadManifest{Schema: "full-window-payload.v1", EvidenceKind: kind, CompletionProof: "unavailable_from_payload_capture", Contract: contract, Packets: []windowPayloadPacket{}}
+	declaration := windowPayloadManifest{Schema: windowPayloadSchema(contract), EvidenceKind: kind, CompletionProof: "unavailable_from_payload_capture", Contract: contract, Packets: []windowPayloadPacket{}}
 	raw, e := json.Marshal(declaration)
 	if e == nil {
 		e = s.writeFreshLocked("store.json", raw)
@@ -290,6 +291,9 @@ func (s *windowPayloadStore) writeWindowResponseWithFailure(sequence int, identi
 		return s.poisonLocked()
 	}
 	s.packets[sequence-1].Response = &response
+	if s.contract.Schema == windowAccountingV3 && code != "complete" {
+		s.packets[sequence-1].FailureDescriptorSHA256 = conversationHash(raw)
+	}
 	return nil
 }
 
@@ -332,8 +336,14 @@ func verifyWindowPayloadStore(s *windowPayloadStore) (windowPayloadManifest, str
 			return fail()
 		}
 		info, e := root.Lstat(entry.Name())
-		if e != nil || !info.Mode().IsRegular() || info.Mode().Perm() != 0600 || info.Size() != int64(expected.bytes) || !os.SameFile(info, expected.info) {
+		if e != nil || !info.Mode().IsRegular() || info.Mode().Perm() != 0600 || info.Size() != int64(expected.bytes) || !os.SameFile(info, expected.info) || s.contract.Schema == windowAccountingV3 && !windowStoppedV7SingleLink(info) {
 			return fail()
+		}
+		if s.contract.Schema == windowAccountingV3 {
+			if _, err := readWindowStoppedV7File(filepath.Join(s.dir, entry.Name()), expected.sha, int64(expected.bytes)+1); err != nil {
+				return fail()
+			}
+			continue
 		}
 		f, e := root.Open(entry.Name())
 		if e != nil {
@@ -350,7 +360,7 @@ func verifyWindowPayloadStore(s *windowPayloadStore) (windowPayloadManifest, str
 			return fail()
 		}
 	}
-	manifest := windowPayloadManifest{Schema: "full-window-payload.v1", EvidenceKind: s.kind, CompletionProof: "unavailable_from_payload_capture", Contract: s.contract, Packets: s.packets}
+	manifest := windowPayloadManifest{Schema: windowPayloadSchema(s.contract), EvidenceKind: s.kind, CompletionProof: "unavailable_from_payload_capture", Contract: s.contract, Packets: s.packets}
 	if manifest.Packets == nil {
 		manifest.Packets = []windowPayloadPacket{}
 	}
@@ -381,4 +391,11 @@ func (s *windowPayloadStore) Close() error {
 		return nil
 	}
 	return s.root.Close()
+}
+
+func windowPayloadSchema(c windowAccountingContract) string {
+	if c.Schema == windowAccountingV3 {
+		return "full-window-payload.v2"
+	}
+	return "full-window-payload.v1"
 }
