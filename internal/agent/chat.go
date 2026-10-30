@@ -102,6 +102,15 @@ func NewHandler(b *client.Billing, tb *Toolbox, llm *LLMClient, st *store.Store,
 		jevGuardMin: 0.8, jevBlockMin: 0.30, jevWarnMin: 0.60, jevIntentMin: 0.75}
 }
 
+func (h *Handler) observabilitySummary(stats *TurnTelemetry, pending bool) observability.Summary {
+	tool := stats.JevFastPathTool
+	if tool != "" && (h.tb == nil || h.tb.tools[tool] == nil) {
+		tool = "invalid"
+	}
+	return observability.Summary{Stage: stats.TurnStage, LLMCalls: stats.LLMCalls, JevCalls: stats.JevCalls, JevErrors: stats.JevErrors, LLMUsageMissing: stats.LLMUsageMissing, JevUsageMissing: stats.JevUsageMissing, FastPath: stats.JevFastPath, FastReason: stats.JevFastPathReason, Intent: stats.JevIntent, IntentConfidence: stats.JevIntentConfidence, Pending: pending,
+		JevEnabled: stats.JevEnabled, JevBlocked: stats.JevBlocked, JevShortCircuit: stats.JevShortCircuit, RouteShape: stats.JevRouteShape, ShapeConfidence: stats.JevShapeConfidence, LegitProbability: stats.JevLegitProbability, RiskScore: stats.JevRiskScore, RiskConfidence: stats.JevRiskConfidence, FastPathEligible: stats.JevFastPathEligible, FastPathTool: tool}
+}
+
 // ServeHTTP POST /chat：body {session_id?, message, tenant_id?}。
 //
 // 两种身份（都从「执行层」解析，LLM 永远无法覆盖 tenant）：
@@ -117,7 +126,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ctx, observedTurn := h.observer.StartTurn(ctx, string(h.RoutingMode()))
 	stats.LangfuseTraceID = observedTurn.TraceID()
 	defer func() {
-		observedTurn.End(tw.status, observability.Summary{Stage: stats.TurnStage, LLMCalls: stats.LLMCalls, JevCalls: stats.JevCalls, JevErrors: stats.JevErrors, LLMUsageMissing: stats.LLMUsageMissing, JevUsageMissing: stats.JevUsageMissing, FastPath: stats.JevFastPath, FastReason: stats.JevFastPathReason, Intent: stats.JevIntent, IntentConfidence: stats.JevIntentConfidence, Pending: tw.pending})
+		observedTurn.End(tw.status, h.observabilitySummary(stats, tw.pending))
 	}()
 
 	var req struct {

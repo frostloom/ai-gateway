@@ -7,6 +7,7 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
+	"math"
 	"net/http"
 	"strconv"
 	"sync"
@@ -50,6 +51,10 @@ type Summary struct {
 	FastPath                                                        bool
 	FastReason, Intent                                              string
 	IntentConfidence                                                float64
+	JevEnabled, JevBlocked, JevShortCircuit                         bool
+	RouteShape, FastPathTool                                        string
+	ShapeConfidence, LegitProbability, RiskScore, RiskConfidence    float64
+	FastPathEligible                                                bool
 }
 
 func New(ctx context.Context, c Config) (*Observer, error) {
@@ -226,10 +231,38 @@ func (t *Turn) End(status int, s Summary) {
 		return
 	}
 	t.root.SetAttributes(meta("http_status", strconv.Itoa(status)), meta("stage", s.Stage), meta("pending_confirm", strconv.FormatBool(s.Pending)), meta("llm_calls", strconv.Itoa(s.LLMCalls)), meta("jev_calls", strconv.Itoa(s.JevCalls)), meta("jev_errors", strconv.Itoa(s.JevErrors)), meta("llm_usage_missing", strconv.Itoa(s.LLMUsageMissing)), meta("jev_usage_missing", strconv.Itoa(s.JevUsageMissing)), meta("jev_fast_path", strconv.FormatBool(s.FastPath)), meta("jev_fast_path_reason", s.FastReason), meta("jev_intent", s.Intent), meta("jev_intent_confidence", strconv.FormatFloat(s.IntentConfidence, 'f', -1, 64)))
+	if s.JevCalls > 0 {
+		shape := s.RouteShape
+		if shape != "" && shape != "single_read" && shape != "complex" {
+			shape = "invalid"
+		}
+		t.root.SetAttributes(meta("jev_enabled", strconv.FormatBool(s.JevEnabled)), meta("jev_blocked", strconv.FormatBool(s.JevBlocked)), meta("jev_short_circuit", strconv.FormatBool(s.JevShortCircuit)), meta("jev_route_shape", shape), meta("jev_shape_confidence", routingScalar(s.ShapeConfidence, 1)), meta("jev_legit_probability", routingScalar(s.LegitProbability, 1)), meta("jev_risk_score", routingScalar(s.RiskScore, 2)), meta("jev_risk_confidence", routingScalar(s.RiskConfidence, 1)), meta("jev_fast_path_eligible", strconv.FormatBool(s.FastPathEligible)), meta("jev_fast_path_tool", routingToolID(s.FastPathTool)))
+	}
 	if status >= 400 {
 		t.root.SetStatus(codes.Error, "request failed")
 	}
 	t.root.End()
+}
+
+// These bounds sanitize observation metadata only; they never affect routing.
+func routingScalar(value, maximum float64) string {
+	if math.IsNaN(value) || math.IsInf(value, 0) || value < 0 || value > maximum {
+		return "invalid"
+	}
+	return strconv.FormatFloat(value, 'f', -1, 64)
+}
+
+func routingToolID(value string) string {
+	if len(value) > 64 {
+		return "invalid"
+	}
+	for i := 0; i < len(value); i++ {
+		if value[i] >= 'a' && value[i] <= 'z' || i > 0 && (value[i] >= '0' && value[i] <= '9' || value[i] == '_') {
+			continue
+		}
+		return "invalid"
+	}
+	return value
 }
 
 func (o *Operation) Phase(phase string) {
