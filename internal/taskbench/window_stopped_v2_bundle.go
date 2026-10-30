@@ -73,41 +73,55 @@ func readWindowStoppedV2Bundle(root string, m windowActualManifest, first fullWi
 		names := map[string]bool{"receipt.json": false, "payload-manifest.json": false, "native-payloads": true}
 		attempted, finished, turns, models, jevs := 0, 0, 0, 0, 0
 		rows := map[string]windowAcquisitionRow{}
-		for j, row := range r.Rows {
-			ordinal := w.FirstOrdinal + j/2
-			slot := m.Scope.Slots[ordinal-1]
-			if row.Ordinal != ordinal || row.Pass != slot.Pass || row.CaseKey != slot.CaseKey || row.Arm != slot.ArmOrder[j%2] || row.DefinedTurns != slot.UserTurns {
-				return reject()
-			}
-			if !row.Attempted {
-				if row.Finished || row.ObservedTurns != 0 || row.RecordingFile != "" || row.RecordingSHA256 != "" || row.TraceID != "" {
+		for start := 0; start < len(r.Rows); start += 4 {
+			end := min(start+4, len(r.Rows))
+			var specs []windowStoppedReadSpec
+			var attemptedRows []windowAcquisitionRow
+			for offset, row := range r.Rows[start:end] {
+				j := start + offset
+				ordinal := w.FirstOrdinal + j/2
+				slot := m.Scope.Slots[ordinal-1]
+				if row.Ordinal != ordinal || row.Pass != slot.Pass || row.CaseKey != slot.CaseKey || row.Arm != slot.ArmOrder[j%2] || row.DefinedTurns != slot.UserTurns {
 					return reject()
 				}
+				if !row.Attempted {
+					if row.Finished || row.ObservedTurns != 0 || row.RecordingFile != "" || row.RecordingSHA256 != "" || row.TraceID != "" {
+						return reject()
+					}
+					continue
+				}
+				if row.RecordingFile != fmt.Sprintf("arm-%06d-%s.json", ordinal, row.Arm) || row.TraceID == "" || traces[row.TraceID] {
+					return reject()
+				}
+				traces[row.TraceID] = true
+				specs = append(specs, windowStoppedReadSpec{path: filepath.Join(root, wd, row.RecordingFile), sha256: row.RecordingSHA256, maxBytes: 8 << 20, kind: windowStoppedReadFile})
+				attemptedRows = append(attemptedRows, row)
+			}
+			if len(specs) == 0 {
 				continue
 			}
-			if row.RecordingFile != fmt.Sprintf("arm-%06d-%s.json", ordinal, row.Arm) || row.TraceID == "" || traces[row.TraceID] {
-				return reject()
-			}
-			traces[row.TraceID] = true
-			raw, err := readWindowActualFile(filepath.Join(root, wd, row.RecordingFile), row.RecordingSHA256, 8<<20)
+			records, err := readWindowStoppedBatch4(specs)
 			if err != nil {
 				return reject()
 			}
-			record, decodeErr := decodeWindowStoppedV2Recording(raw)
-			if decodeErr != nil || record.Result.Case.Key() != row.CaseKey || len(record.Result.Observations) != row.ObservedTurns || record.Result.Status != row.Status || record.Result.Success != row.Success {
-				return reject()
+			for index, row := range attemptedRows {
+				raw := records[index]
+				record, decodeErr := decodeWindowStoppedV2Recording(raw)
+				if decodeErr != nil || record.Result.Case.Key() != row.CaseKey || len(record.Result.Observations) != row.ObservedTurns || record.Result.Status != row.Status || record.Result.Success != row.Success {
+					return reject()
+				}
+				resultRaw, err := json.Marshal(record.Result)
+				if err != nil || conversationHash(resultRaw) != record.ResultSHA256 {
+					return reject()
+				}
+				names[row.RecordingFile] = false
+				rows[row.CaseKey+"/"+row.Arm] = row
+				attempted++
+				if row.Finished {
+					finished++
+				}
+				turns += row.ObservedTurns
 			}
-			resultRaw, err := json.Marshal(record.Result)
-			if err != nil || conversationHash(resultRaw) != record.ResultSHA256 {
-				return reject()
-			}
-			names[row.RecordingFile] = false
-			rows[row.CaseKey+"/"+row.Arm] = row
-			attempted++
-			if row.Finished {
-				finished++
-			}
-			turns += row.ObservedTurns
 		}
 		for _, p := range payload.Packets {
 			row, ok := rows[p.Identity.CaseKey+"/"+p.Identity.Arm]

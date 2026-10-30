@@ -33,15 +33,17 @@ func readWindowStoppedV2Payload(dir string, expected windowPayloadManifest) erro
 		if p.RequestDescriptorFile != requestFile || p.Request.File != fmt.Sprintf("request-%06d.body", seq) || !p.Request.Complete || p.Request.PrefixSHA256 != "" || p.Request.FullSHA256 != p.Identity.BodySHA256 || p.Request.Bytes != p.Identity.Bytes {
 			return reject()
 		}
-		body, err := readWindowActualFile(filepath.Join(dir, p.Request.File), p.Request.FullSHA256, windowMaxResponseBytes)
-		if err != nil || len(body) != p.Identity.Bytes {
+		requestRaw, err := readWindowStoppedBatch4([]windowStoppedReadSpec{
+			{path: filepath.Join(dir, p.Request.File), sha256: p.Request.FullSHA256, maxBytes: windowMaxResponseBytes, kind: windowStoppedReadFile},
+			{path: filepath.Join(dir, requestFile), maxBytes: 65536, kind: windowStoppedReadBytes},
+		})
+		if err != nil || len(requestRaw[0]) != p.Identity.Bytes {
 			return reject()
 		}
-		raw, err := readWindowActualBytes(filepath.Join(dir, requestFile), "", 65536)
 		var request windowPayloadPacket
 		wantRequest := p
 		wantRequest.Response = nil
-		if err != nil || decodeWindowActualJSON(raw, &request) != nil || !reflect.DeepEqual(request, wantRequest) {
+		if decodeWindowActualJSON(requestRaw[1], &request) != nil || !reflect.DeepEqual(request, wantRequest) {
 			return reject()
 		}
 		names[requestFile], names[p.Request.File] = false, false
@@ -49,27 +51,30 @@ func readWindowStoppedV2Payload(dir string, expected windowPayloadManifest) erro
 		if p.Response == nil || p.Response.DescriptorFile != responseFile || p.Response.TransportFailure != nil {
 			return reject()
 		}
-		raw, err = readWindowActualBytes(filepath.Join(dir, responseFile), "", 65536)
+		r := p.Response
+		responseSpecs := []windowStoppedReadSpec{{path: filepath.Join(dir, responseFile), maxBytes: 65536, kind: windowStoppedReadBytes}}
+		if r.Available {
+			if !r.Complete || r.Status != 200 || r.Code != "complete" || r.Body == nil || !r.Body.Complete || r.Body.PrefixSHA256 != "" || r.Body.File != fmt.Sprintf("response-%06d.body", seq) {
+				return reject()
+			}
+			responseSpecs = append(responseSpecs, windowStoppedReadSpec{path: filepath.Join(dir, r.Body.File), sha256: r.Body.FullSHA256, maxBytes: windowMaxResponseBytes, kind: windowStoppedReadFile})
+		}
+		responseRaw, err := readWindowStoppedBatch4(responseSpecs)
 		var response windowPayloadPacket
 		wantResponse := p
 		wantResponse.Request = windowPayloadBody{}
 		wantResponse.RequestDescriptorFile = ""
-		if err != nil || decodeWindowActualJSON(raw, &response) != nil || !reflect.DeepEqual(response, wantResponse) {
+		if err != nil || decodeWindowActualJSON(responseRaw[0], &response) != nil || !reflect.DeepEqual(response, wantResponse) {
 			return reject()
 		}
 		names[responseFile] = false
-		r := p.Response
 		if !r.Available {
 			if r.Complete || r.Status != 0 || r.Code != "round_trip" || r.Body != nil {
 				return reject()
 			}
 			continue
 		}
-		if !r.Complete || r.Status != 200 || r.Code != "complete" || r.Body == nil || !r.Body.Complete || r.Body.PrefixSHA256 != "" || r.Body.File != fmt.Sprintf("response-%06d.body", seq) {
-			return reject()
-		}
-		body, err = readWindowActualFile(filepath.Join(dir, r.Body.File), r.Body.FullSHA256, windowMaxResponseBytes)
-		if err != nil || len(body) != r.Body.Bytes {
+		if len(responseRaw[1]) != r.Body.Bytes {
 			return reject()
 		}
 		names[r.Body.File] = false

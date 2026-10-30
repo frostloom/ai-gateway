@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"sort"
 	"strings"
 	"syscall"
 )
@@ -104,15 +105,27 @@ func readWindowStoppedFiles(root string, pins map[string]string, max int64) (map
 		return nil, fmt.Errorf("bounded canonical stopped evidence root required")
 	}
 	files := map[string][]byte{}
-	for name, sha := range pins {
+	names := make([]string, 0, len(pins))
+	for name := range pins {
 		if name == "" || name == "." || filepath.IsAbs(name) || filepath.ToSlash(filepath.Clean(name)) != name || name == ".." || strings.HasPrefix(name, "../") {
 			return nil, fmt.Errorf("invalid stopped evidence name")
 		}
-		raw, err := readWindowActualFile(filepath.Join(root, filepath.FromSlash(name)), sha, max)
+		names = append(names, name)
+	}
+	sort.Strings(names)
+	for start := 0; start < len(names); start += 4 {
+		end := min(start+4, len(names))
+		specs := make([]windowStoppedReadSpec, end-start)
+		for i, name := range names[start:end] {
+			specs[i] = windowStoppedReadSpec{path: filepath.Join(root, filepath.FromSlash(name)), sha256: pins[name], maxBytes: max, kind: windowStoppedReadFile}
+		}
+		raw, err := readWindowStoppedBatch4(specs)
 		if err != nil {
 			return nil, err
 		}
-		files[name] = raw
+		for i, name := range names[start:end] {
+			files[name] = raw[i]
+		}
 	}
 	return files, nil
 }

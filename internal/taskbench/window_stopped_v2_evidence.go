@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"reflect"
+	"sort"
 )
 
 type windowStoppedV2Evidence struct {
@@ -48,12 +49,24 @@ func loadWindowStoppedV2Baseline(path, expectedSHA string) (windowStoppedV2Basel
 	}
 	err = withWindowStoppedLock(filepath.Join(e.OriginalRoot, "campaign/.lock"), func() error {
 		files := map[string][]byte{}
-		for name, sha := range pins {
-			b, err := readWindowActualFile(filepath.Join(e.OriginalRoot, filepath.FromSlash(name)), sha, 8<<20)
+		names := make([]string, 0, len(pins))
+		for name := range pins {
+			names = append(names, name)
+		}
+		sort.Strings(names)
+		for start := 0; start < len(names); start += 4 {
+			end := min(start+4, len(names))
+			specs := make([]windowStoppedReadSpec, end-start)
+			for i, name := range names[start:end] {
+				specs[i] = windowStoppedReadSpec{path: filepath.Join(e.OriginalRoot, filepath.FromSlash(name)), sha256: pins[name], maxBytes: 8 << 20, kind: windowStoppedReadFile}
+			}
+			b, err := readWindowStoppedBatch4(specs)
 			if err != nil {
 				return fmt.Errorf("stopped v2 top artifact missing or changed")
 			}
-			files[name] = b
+			for i, name := range names[start:end] {
+				files[name] = b[i]
+			}
 		}
 		base, err := readWindowStoppedV2Bundle(e.OriginalRoot, m, first.base, files)
 		if err != nil {
