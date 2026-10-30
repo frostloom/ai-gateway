@@ -1,6 +1,7 @@
 package taskbench
 
 import (
+	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
@@ -129,26 +130,28 @@ type windowCampaignCheckpoint struct {
 	Evidence         []windowCampaignArmEvidence `json:"evidence"`
 }
 type windowCampaign struct {
-	mu                     sync.Mutex
-	root                   string
-	rootInfo               os.FileInfo
-	lock                   *os.File
-	openFile               func(string) (windowJournalFile, error)
-	prepared               windowCampaignPrepared
-	baseline               fullWindowBaseline
-	historicalDir          string
-	index                  int
-	model, jev             int64
-	claimSHA               string
-	files                  map[string]string
-	ledgerAudits           map[string]string
-	ledger                 *windowAccounting
-	ledgerDir              string
-	poisoned, closed       bool
-	closeErr               error
-	extras                 []windowV8ExtraClaim
-	extraSHA               string
-	modelExtras, jevExtras int
+	acquisitionContext      context.Context
+	acquisitionContextIndex int
+	mu                      sync.Mutex
+	root                    string
+	rootInfo                os.FileInfo
+	lock                    *os.File
+	openFile                func(string) (windowJournalFile, error)
+	prepared                windowCampaignPrepared
+	baseline                fullWindowBaseline
+	historicalDir           string
+	index                   int
+	model, jev              int64
+	claimSHA                string
+	files                   map[string]string
+	ledgerAudits            map[string]string
+	ledger                  *windowAccounting
+	ledgerDir               string
+	poisoned, closed        bool
+	closeErr                error
+	extras                  []windowV8ExtraClaim
+	extraSHA                string
+	modelExtras, jevExtras  int
 }
 
 func canonicalRootWindowCampaign(root string) error {
@@ -385,11 +388,17 @@ func validatePreparedWindowCampaign(p windowCampaignPrepared, b fullWindowBaseli
 	return nil
 }
 func (c *windowCampaign) persistWindowCampaign(name string, v any) error {
+	return c.persistWindowCampaignContext(context.Background(), name, v)
+}
+func (c *windowCampaign) persistWindowCampaignContext(ctx context.Context, name string, v any) error {
 	raw, e := json.Marshal(v)
 	if e != nil {
 		return e
 	}
 	raw = append(raw, '\n')
+	if err := c.checkWindowCampaignContextLocked(ctx); err != nil {
+		return err
+	}
 	var f windowJournalFile
 	if c.openFile != nil {
 		f, e = c.openFile(filepath.Join(c.root, name))
@@ -405,16 +414,30 @@ func (c *windowCampaign) persistWindowCampaign(name string, v any) error {
 	}
 	e = errors.Join(w, f.Sync(), f.Close(), windowSyncDirectory(c.root), windowSyncDirectory(filepath.Dir(c.root)))
 	if e != nil {
-		return e
+		return errors.Join(e, c.checkWindowCampaignContextLocked(ctx))
 	}
 	c.files[name] = conversationHash(raw)
-	return nil
+	return c.checkWindowCampaignContextLocked(ctx)
 }
 func (c *windowCampaign) persistClaimWindowCampaign(i int, previous, checkpoint string) error {
+	return c.persistClaimWindowCampaignContext(context.Background(), i, previous, checkpoint)
+}
+func (c *windowCampaign) persistClaimWindowCampaignContext(ctx context.Context, i int, previous, checkpoint string) (result error) {
+	defer func() {
+		if result != nil {
+			c.poisoned = true
+		}
+	}()
+	if err := c.checkWindowCampaignContextLocked(ctx); err != nil {
+		return err
+	}
 	if i < 0 || i >= len(c.prepared.scope.Windows) {
 		return fmt.Errorf("no next window")
 	}
 	if err := c.revalidateWindowV8AuthorityLocked(); err != nil {
+		return err
+	}
+	if err := c.checkWindowCampaignContextLocked(ctx); err != nil {
 		return err
 	}
 	if c.prepared.scope.Schema == "full-window-scope.v2" {
@@ -451,6 +474,9 @@ func (c *windowCampaign) persistClaimWindowCampaign(i int, previous, checkpoint 
 		if err := validateStoppedV8CampaignHistory(c.prepared, c.baseline); err != nil {
 			return err
 		}
+	}
+	if err := c.checkWindowCampaignContextLocked(ctx); err != nil {
+		return err
 	}
 	w := c.prepared.scope.Windows[i]
 	parentModel, parentJEV := int64(100000000), int64(1000000)
@@ -508,10 +534,13 @@ func (c *windowCampaign) persistClaimWindowCampaign(i int, previous, checkpoint 
 	// A claim attempt consumes its whole cap conservatively even if the new
 	// claim file is partial or its directory sync fails. This owner then halts;
 	// reopening is prohibited and cannot interpret a partial claim as free.
+	if err := c.checkWindowCampaignContextLocked(ctx); err != nil {
+		return err
+	}
 	c.model = r.ModelPermanent
 	c.jev = r.JEVPermanent
 	name := fmt.Sprintf("claim-%06d.json", i+1)
-	if e := c.persistWindowCampaign(name, r); e != nil {
+	if e := c.persistWindowCampaignContext(ctx, name, r); e != nil {
 		return e
 	}
 	c.index = i + 1
@@ -616,8 +645,21 @@ func verifySealedWindowAccounting(dir, expectedSHA string) error {
 // openLedger binds a fresh live ledger to this owner's current durable claim.
 // This creates no provider capability and cannot mint completion permission.
 func (c *windowCampaign) openWindowCampaignLedger() (*windowAccounting, error) {
+	return c.openWindowCampaignLedgerContext(context.Background())
+}
+func (c *windowCampaign) openWindowCampaignLedgerContext(ctx context.Context) (*windowAccounting, error) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
+	if err := windowCampaignSuppliedContext(ctx); err != nil {
+		c.poisoned = true
+		return nil, err
+	}
+	if c.acquisitionContextIndex == c.index {
+		if err := c.checkWindowCampaignContextLocked(ctx); err != nil {
+			c.poisoned = true
+			return nil, err
+		}
+	}
 	if err := c.revalidateWindowV8AuthorityLocked(); err != nil {
 		return nil, err
 	}
@@ -627,6 +669,18 @@ func (c *windowCampaign) openWindowCampaignLedger() (*windowAccounting, error) {
 	if e := c.inventoryWindowCampaign(); e != nil {
 		c.poisoned = true
 		return nil, e
+	}
+	if err := windowCampaignSuppliedContext(ctx); err != nil {
+		c.poisoned = true
+		return nil, err
+	}
+	if c.acquisitionContextIndex != c.index {
+		c.acquisitionContext = ctx
+		c.acquisitionContextIndex = c.index
+	}
+	if err := c.checkWindowCampaignContextLocked(ctx); err != nil {
+		c.poisoned = true
+		return nil, err
 	}
 	contract := c.prepared.contracts[c.index-1]
 	contract.ClaimSHA256 = c.claimSHA
@@ -638,6 +692,10 @@ func (c *windowCampaign) openWindowCampaignLedger() (*windowAccounting, error) {
 	}
 	c.ledger = l
 	c.ledgerDir = dir
+	if err := c.checkWindowCampaignContextLocked(ctx); err != nil {
+		c.poisoned = true
+		return nil, err
+	}
 	return l, nil
 }
 func (c *windowCampaign) validateEvidenceWindowCampaign(p *windowCampaignOwnedCheckpoint) error {
@@ -665,24 +723,42 @@ func (c *windowCampaign) validateEvidenceWindowCampaign(p *windowCampaignOwnedCh
 	return nil
 }
 func (c *windowCampaign) advanceWindowCampaign(p *windowCampaignOwnedCheckpoint) (string, error) {
+	return c.advanceWindowCampaignContext(context.Background(), p)
+}
+func (c *windowCampaign) advanceWindowCampaignContext(ctx context.Context, p *windowCampaignOwnedCheckpoint) (string, error) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	if c.closed || c.poisoned {
 		return "", fmt.Errorf("owner halted")
 	}
 	fail := func(e error) (string, error) { c.poisoned = true; return "", e }
+	if err := c.checkWindowCampaignContextLocked(ctx); err != nil {
+		return fail(err)
+	}
 	if e := c.validateEvidenceWindowCampaign(p); e != nil {
 		return fail(e)
+	}
+	if err := c.checkWindowCampaignContextLocked(ctx); err != nil {
+		return fail(err)
 	}
 	if e := c.inventoryWindowCampaign(); e != nil {
 		return fail(e)
 	}
+	if err := c.checkWindowCampaignContextLocked(ctx); err != nil {
+		return fail(err)
+	}
 	if e := c.ledger.Close(); e != nil {
 		return fail(e)
+	}
+	if err := c.checkWindowCampaignContextLocked(ctx); err != nil {
+		return fail(err)
 	}
 	audit, e := readWindowAccounting(c.ledgerDir)
 	if e != nil || audit.CompletionProof != "unavailable_from_journal" || !audit.State.Closed || audit.State.Halt != "" || audit.State.Pending != nil {
 		return fail(fmt.Errorf("live ledger closure not verified"))
+	}
+	if err := c.checkWindowCampaignContextLocked(ctx); err != nil {
+		return fail(err)
 	}
 	d := c.prepared.scope
 	checkpoint := windowCampaignCheckpoint{Schema: "full-window-campaign-owned-checkpoint.v1", Index: c.index, ScopeSHA256: c.prepared.scopeSHA, ExecutionSHA256: c.prepared.executionSHA, DefinitionSHA256: d.DefinitionSHA256, ScheduleSHA256: d.ScheduleSHA256, PolicySHA256: d.Bindings.PolicySHA256, ClaimSHA256: c.claimSHA, LedgerSHA256: audit.JournalSHA256, Evidence: append([]windowCampaignArmEvidence(nil), p.evidence...)}
@@ -694,11 +770,17 @@ func (c *windowCampaign) advanceWindowCampaign(p *windowCampaignOwnedCheckpoint)
 		checkpoint.V8 = c.snapshotWindowV8RuntimeLocked(audit.State, c.ledger.contract.WindowID)
 	}
 	name := fmt.Sprintf("checkpoint-%06d.json", c.index)
-	if e := c.persistWindowCampaign(name, checkpoint); e != nil {
+	if e := c.persistWindowCampaignContext(ctx, name, checkpoint); e != nil {
 		return fail(e)
+	}
+	if err := c.checkWindowCampaignContextLocked(ctx); err != nil {
+		return fail(err)
 	}
 	if e := c.inventoryWindowCampaign(); e != nil {
 		return fail(e)
+	}
+	if err := c.checkWindowCampaignContextLocked(ctx); err != nil {
+		return fail(err)
 	}
 	previous := c.claimSHA
 	checkpointSHA := c.files[name]
@@ -710,8 +792,11 @@ func (c *windowCampaign) advanceWindowCampaign(p *windowCampaignOwnedCheckpoint)
 	c.ledgerAudits[filepath.Base(c.ledgerDir)] = audit.JournalSHA256
 	c.ledger = nil
 	c.ledgerDir = ""
-	if e := c.persistClaimWindowCampaign(c.index, previous, checkpointSHA); e != nil {
+	if e := c.persistClaimWindowCampaignContext(ctx, c.index, previous, checkpointSHA); e != nil {
 		return fail(e)
+	}
+	if err := c.checkWindowCampaignContextLocked(ctx); err != nil {
+		return fail(err)
 	}
 	return c.claimSHA, nil
 }

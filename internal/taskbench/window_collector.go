@@ -265,7 +265,7 @@ func openWindowAcquisition(ctx context.Context, auth *windowAcquisitionAuthoriza
 	if e = run.openWindowAcquisitionReportRoot(); e != nil {
 		return run, e
 	}
-	run.ledger, e = c.openWindowCampaignLedger()
+	run.ledger, e = c.openWindowCampaignLedgerContext(ctx)
 	if e != nil {
 		run.failWindowAcquisition("ledger_open", 0, "")
 		run.stopWindowAcquisition()
@@ -481,8 +481,11 @@ func (r *windowAcquisitionRun) completeWindowAcquisition(ctx context.Context) er
 	r.receipt.Observer = true
 	r.receipt.Cleanup = true
 	checkpoint := &windowCampaignOwnedCheckpoint{owner: r.auth.campaign, ledger: r.ledger, index: r.receipt.WindowIndex, evidence: append([]windowCampaignArmEvidence(nil), r.evidence...)}
-	next, e := r.auth.campaign.advanceWindowCampaign(checkpoint)
-	if e != nil {
+	if ctx.Err() != nil {
+		return r.failWindowAcquisition("campaign_advance", 0, "")
+	}
+	next, e := r.auth.campaign.advanceWindowCampaignContext(ctx, checkpoint)
+	if e != nil || ctx.Err() != nil {
 		return r.failWindowAcquisition("campaign_advance", 0, "")
 	}
 	r.receipt.Advanced = true
