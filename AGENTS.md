@@ -1,3 +1,5 @@
+2026-10-30 V9冻结审查发现ready单独2s/10s条件漏v9，导致合法10s manifest被拒；现就绪检查复用既有windowObserverTimeoutForScope，旧1–6仍2s、7–9仍10s，不扩大业务300/模型90/JEV10。相关既有3top定向过/包0.906s，不冒称实际prepare已通过；R2 exact全Go已主动中断保留，待集中兼容审查后新归档/fullGo/真实prepare。无新paid/claim/部署，3557/918、46永久52654504+408701、global200+4与原3660完整目标不变。
+
 2026-10-30 V9首次精确归档80dd5968全Go发现四旧入口错误文字断言落后，主动SIGTERM保留原失败/exit1，不作整套通过；owned58498已回收空组、原九服务同ID/image/config/mount恢复healthy、2315原源SHA同。仅三旧test文件四断言改为凭据前V9 delegated拒绝，原无副作用与verifyInputs stopped断言保留，定向4top pass/1.047s。另修capture固定SDKROOT漏传及catalog capture输入schema job.v1误记为input.v1，原Go helper不动。修后需新exact归档/fullGo/冻结，未新paid/claim/部署，3557/918、46永久52654504+408701、global200+4及原3660完整目标不变。见docs/full1220-v9-offline-integration-2026-10-30.md。
 
 2026-10-30 V9最终离线补充：root完整新Python suite66项0fail/skip25.673s，旧epoch只读/消费拒绝测试7处错误文字由v7转当前v9 delegated authority，7top实际RED→GREEN/1.268s，未放宽拒绝或credentials前检查；最终Go私有final511分支向量d0a674已真跑0.22s，return原checkpointSHA且无claim512，非511已采。预构建操作脚本+最终token c85ab独审0P1/P2，真正Go预构建/完整archive回归仍待，不作为actual-ready。新增真实模型/JEV/金融claim/评分/部署0，原3557/918/46永久/global200+4同。

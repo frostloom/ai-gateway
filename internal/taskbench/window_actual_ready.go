@@ -212,10 +212,7 @@ func checkFullWindowActualReadyEpoch(o FullWindowActualReadyOptions, epoch int) 
 		}
 	}
 	id := m.Observer
-	exportTimeoutMS := int64(2000)
-	if v8 || m.Schema == "full-window-actual-ready.v7" {
-		exportTimeoutMS = 10000
-	}
+	exportTimeoutMS := windowObserverTimeoutForScope(m.Scope.Schema)
 	if !id.Enabled || !id.CaptureContent || id.SampleRate != 1 || id.Environment != "evaluation" || id.Release != m.ArchiveCommit || id.ExportTimeoutMS != exportTimeoutMS || id.QueueSize < 1 || !comparisonDigest(id.EndpointSHA256) || !comparisonDigest(id.ProjectSHA256) {
 		return reject()
 	}
