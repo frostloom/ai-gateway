@@ -513,7 +513,9 @@ func qualityAuditProjection(state ConversationState, rows []store.AgentAuditLog,
 		}
 		seen := map[uint64]bool{}
 		for _, row := range snapshot.Audits {
-			if seen[row.ID] || !reflect.DeepEqual(actual[row.ID], row) {
+			got, e1 := cloneWindowOwned(actual[row.ID])
+			want, e2 := cloneWindowOwned(row)
+			if seen[row.ID] || e1 != nil || e2 != nil || !reflect.DeepEqual(got, want) {
 				return false
 			}
 			seen[row.ID] = true

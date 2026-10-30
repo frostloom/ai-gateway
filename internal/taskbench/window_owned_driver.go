@@ -205,6 +205,11 @@ func newWindowOwnedDriver(permit *windowAcquisitionPermit, source ConversationSu
 	constructionFailed = false
 	return d, nil
 }
+func canonicalEqual[T any](a, b T) bool {
+	aa, ea := cloneWindowOwned(a)
+	bb, eb := cloneWindowOwned(b)
+	return ea == nil && eb == nil && reflect.DeepEqual(aa, bb)
+}
 func cloneWindowOwned[T any](value T) (T, error) {
 	var out T
 	raw, e := json.Marshal(value)

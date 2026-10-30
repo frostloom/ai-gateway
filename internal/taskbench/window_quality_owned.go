@@ -165,7 +165,7 @@ func (d *windowOwnedDriver) finishWindowQualityOwned(ctx context.Context, record
 		return fail()
 	}
 	finalCapture, err := captureWindowQualityEffects(ctx, d)
-	if err != nil || !reflect.DeepEqual(finalCapture.Tables, candidate.Evidence.After.Tables) || !reflect.DeepEqual(finalCapture.Audits, candidate.Evidence.After.Audits) || !reflect.DeepEqual(finalCapture.Sessions, candidate.Evidence.After.Sessions) || !sameWindowQualityCapturedState(d.final, finalCapture.State) {
+	if err != nil || !reflect.DeepEqual(finalCapture.Tables, candidate.Evidence.After.Tables) || !canonicalEqual(finalCapture.Audits, candidate.Evidence.After.Audits) || !canonicalEqual(finalCapture.Sessions, candidate.Evidence.After.Sessions) || !sameWindowQualityCapturedState(d.final, finalCapture.State) {
 		return fail()
 	}
 	// Re-read the exact live pending immediately before durability and deletion.
