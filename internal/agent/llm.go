@@ -296,6 +296,7 @@ func (c *LLMClient) chatOpenAI(ctx context.Context, messages []Message, tools []
 	req.Header.Set("Authorization", "Bearer "+c.apiKey)
 
 	ctx, finishAttempt := beginLLMAttempt(ctx, protoOpenAI)
+	req = req.WithContext(ctx)
 	defer func() { finishAttempt(err) }()
 	resp, err := c.cli.Do(req)
 	if err != nil {

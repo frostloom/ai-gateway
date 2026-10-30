@@ -145,6 +145,7 @@ func (c *LLMClient) chatAnthropicRaw(ctx context.Context, raw []byte) (result *M
 	httpReq.Header.Set("anthropic-version", "2023-06-01")
 
 	ctx, finishAttempt := beginLLMAttempt(ctx, protoAnthropic)
+	httpReq = httpReq.WithContext(ctx)
 	defer func() { finishAttempt(err) }()
 	resp, err := c.cli.Do(httpReq)
 	if err != nil {
@@ -208,6 +209,7 @@ func (c *LLMClient) chatAnthropic(ctx context.Context, messages []Message, tools
 	httpReq.Header.Set("anthropic-version", "2023-06-01")
 
 	ctx, finishAttempt := beginLLMAttempt(ctx, protoAnthropic)
+	httpReq = httpReq.WithContext(ctx)
 	defer func() { finishAttempt(err) }()
 	resp, err := c.cli.Do(httpReq)
 	if err != nil {

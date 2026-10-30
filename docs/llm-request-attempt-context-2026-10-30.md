@@ -1,0 +1,9 @@
+# LLM请求继承逻辑调用的观测context
+
+V8首条真实Langfuse GET返回200，但严格内容校验发现window.native与llm.attempt同为agent.turn子节点。原响应SHA为`52f69076ab68bbc2d5d1ad6a4935550dec1d15b218ed1b76d5f14762c206ef33`，原投影及失败保留，不重发trace或放宽原验证器。此例不能外推JEV父链也有同一问题。
+
+三个LLM发送入口先建HTTP request，随后beginLLMAttempt派生新context，发送时却仍使用旧request context。仅在OpenAI、Anthropic普通及raw入口各加一行WithContext，将现有attempt context绑定回原request；没有调整prompt、路由、业务工具、调用次数或重试策略。新context继承原deadline、取消和lease/phase值，请求body、GetBody、header、URL、method及长度保持。
+
+真实loopback HTTP与现有OTLP observer的RED捕获9处父链断言失败；首次sandbox监听拒绝单独保留，不当作有效RED。修复后23个顶级测试／45项测试及子测试normal与race均通过，分别3.149／4.667秒，0失败／跳过，race链接警告保留。测试同时覆盖实际请求字节/头、deadline/context值及取消传到服务端。独审无确认P1/P2，报告SHA：`8603933216c5ca55e9e5b8d5e446a315f81d8e93107c839b093fc263436a44d8`。
+
+这些证据来自本地HTTP替身，并非新真实评测窗口或部署验收。生产agent两文件指纹已改变，后续新范围必须绑定新源码，不能再声明客服15文件与旧50e/v5逐字节相同。旧AA归档、旧Langfuse父链和已停止V8范围都不改；全部旧评分继续hold。新增模型/JEV/claim/部署均0，新版本全Go及完整范围冻结仍待完成，原3660对目标不变。
