@@ -172,4 +172,54 @@ class RangePartition(unittest.TestCase):
             elif kind=='foreign_hash':value['results'][0]['body_sha256']='e'*64
             with self.subTest(kind=kind),self.assertRaises(ValueError):d._range_result(value,batches)
 
+class InitialReadbackPin(unittest.TestCase):
+    def test_factory_rejects_mutation_between_get_and_final_snapshot(self):
+        """Only cohort/catalog/semantic gates and HTTP connection are synthetic.
+
+        Real client receives original bytes; real factory and checker must not
+        establish provenance from a disk baseline first captured afterwards.
+        No sockets, keys, signing or actual settings are used by this regression.
+        """
+        import types
+        for mutation in ('none','bytes','same_bytes_replacement','root_replacement','foreign'):
+            with self.subTest(mutation=mutation),tempfile.TemporaryDirectory() as temp:
+                d=load();root=Path(temp).resolve();(root/'delivery-readbacks').mkdir()
+                path=root/'delivery-readbacks/attempt';trace='1'*32;sid='2'*16
+                binding={'manifest_sha256':'a'*64,'scope_sha256':'b'*64,'execution_sha256':'c'*64,'receipt_sha256':'d'*64,'summary_sha256':'e'*64,'content_helper_sha256':d._CONTENT_HELPER,'trace_ids':[trace]}
+                original=d.wire({'data':[{'id':sid,'traceId':trace,'parentObservationId':None,'output':'original'}],'meta':{}})
+                class Connection:
+                    def __init__(self,*a,**kw):pass
+                    def request(self,method,*a,**kw):self.method=method
+                    def getresponse(self):
+                        self_outer.assertEqual(self.method,'GET')
+                        return types.SimpleNamespace(status=200,read=lambda limit:original)
+                    def close(self):pass
+                self_outer=self
+                settings={'OTEL_EXPORTER_OTLP_TRACES_ENDPOINT':'http://127.0.0.1:1/api/public/otel/v1/traces','LANGFUSE_PUBLIC_KEY':'unit','LANGFUSE_SECRET_KEY':'unit'}
+                window=types.SimpleNamespace(_inputs=d.wire({k:binding[k] for k in ('manifest_sha256','receipt_sha256','summary_sha256')}))
+                v=types.SimpleNamespace(window_proof=lambda *a:window,check_verified_window=lambda *a:{'final_normal_cohort':True},check_verified_cohort=lambda *a:None)
+                cohort=types.SimpleNamespace(_context=types.SimpleNamespace(manifest={}))
+                class Projection:pass
+                def validate(plan,projection,client):
+                    self.assertEqual(client.observations(trace)[0]['output'],'original')
+                    leaf=path/(trace+'.response')
+                    if mutation=='bytes':leaf.write_bytes(original.replace(b'original',b'modified'))
+                    elif mutation=='same_bytes_replacement':leaf.unlink();leaf.write_bytes(original)
+                    elif mutation=='root_replacement':
+                        import shutil
+                        path.rename(path.with_name('retained-original'));shutil.copytree(path.with_name('retained-original'),path)
+                    elif mutation=='foreign':(path/'foreign').write_bytes(b'foreign')
+                    return {'all_pass':True}
+                score=types.SimpleNamespace(_ContentProjection=Projection,_validate_projection_plan_binding=lambda *a:None,remote_binding=lambda *a:binding,validate_window_traces=validate)
+                selected=(root,{},types.SimpleNamespace(recheck=lambda:None),{'scope_sha256':binding['scope_sha256'],'execution_sha256':binding['execution_sha256'],'spans':[(trace,sid,'')]})
+                with patch.object(d,'_selected',return_value=selected),patch.object(d,'_read_settings',return_value=settings),patch.object(d.http.client,'HTTPConnection',Connection):
+                    call=lambda:d.verify_remote_window(verifier=v,cohort=cohort,window_index=1,binding=binding,plan={'window_index':1},projection=Projection(),readback_root=path,score_module=score)
+                    if mutation=='none':
+                        proof=call();self.assertTrue(d.check_verified_remote_window(proof,binding)['all_verified'])
+                        (path/(trace+'.response')).write_bytes(original+b' ')
+                        with self.assertRaises(ValueError):d.check_verified_remote_window(proof,binding)
+                    else:
+                        with self.assertRaises(ValueError):call()
+                        self.assertTrue((path/(trace+'.response')).exists())
+
 if __name__=='__main__':unittest.main()

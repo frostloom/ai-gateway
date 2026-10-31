@@ -60,14 +60,25 @@ def _exclusive(path,raw):
     fd=os.open(path,os.O_WRONLY|os.O_CREAT|os.O_EXCL|os.O_NOFOLLOW,0o600)
     try:
         with os.fdopen(fd,'wb',closefd=False) as f:f.write(raw);f.flush();os.fsync(fd)
+        marker=_identity(os.fstat(fd))
     finally:os.close(fd)
     _sync(path.parent)
+    need(_identity(path.lstat())==marker and _raw(path)==raw,'exclusive write bytes/FD identity changed')
+    return marker
 
 class _Snapshot:
     """Fresh original bytes plus closed namespace/ancestor/FD identity checks."""
-    def __init__(self,root):self.root=_canonical(root);self.files={};self.directories={}
-    def capture(self):
+    def __init__(self,root):
+        self.root=_canonical(root);self.files={}
         self.directories={p:(p.stat().st_dev,p.stat().st_ino,p.stat().st_mode) for p in (self.root,*self.root.parents)}
+    def write(self,name,raw):
+        path=self.root/name;need(path.parent==self.root and path not in self.files,'new readback leaf required')
+        self.check()
+        marker=_exclusive(path,raw)
+        self.files[path]=(marker,sha(raw))
+        self.check()
+    def capture(self):
+        need(not self.files,'readback baseline cannot be recaptured')
         for base,dirs,names in os.walk(self.root,followlinks=False):
             for name in dirs:
                 p=_canonical(Path(base)/name);self.directories[p]=(p.stat().st_dev,p.stat().st_ino,p.stat().st_mode)
@@ -130,13 +141,17 @@ def _endpoint(settings):
 
 class _ReadbackClient:
     """GET-only client; no redirects, proxies, SDK, retries or score interface."""
-    def __init__(self,settings,root):self.settings=settings;self.root=_canonical(root);self.rows={}
+    def __init__(self,settings,root,snapshot=None):
+        self.settings=settings;self.root=_canonical(root);self.rows={}
+        self.snapshot=snapshot if snapshot is not None else _Snapshot(self.root)
+        if snapshot is None:self.snapshot.capture()
+        need(self.snapshot.root==self.root,'original readback snapshot root');self.snapshot.check()
     def observations(self,trace):
         need(type(trace) is str and re.fullmatch('[0-9a-f]{32}',trace) and trace!='0'*32,'original trace ID')
         need(trace not in self.rows,'one GET per trace in a readback attempt')
         self.rows[trace]=None
         intent=self.root/(trace+'.intent.json')
-        try:_exclusive(intent,wire({'schema':'full1220-v11-readback-intent.v1','trace_id':trace,'method':'GET'}))
+        try:self.snapshot.write(intent.name,wire({'schema':'full1220-v11-readback-intent.v1','trace_id':trace,'method':'GET'}))
         except FileExistsError:raise ValueError('prior GET intent retained; use a fresh GET-only attempt') from None
         endpoint=_endpoint(self.settings)
         cls=http.client.HTTPSConnection if endpoint.scheme=='https' else http.client.HTTPConnection
@@ -146,13 +161,13 @@ class _ReadbackClient:
             path='/api/public/v2/observations?'+urllib.parse.urlencode({'traceId':trace,'limit':1000,'fields':'core,basic,metadata,usage,io'})
             conn.request('GET',path,headers={'Authorization':'Basic '+auth,'Connection':'close'})
             response=conn.getresponse();status=response.status;raw=response.read((2<<20)+1)
-            _exclusive(self.root/(trace+'.response'),raw)
+            self.snapshot.write(trace+'.response',raw)
             need(status==200 and len(raw)<=2<<20,'GET status/size rejected')
             value=document(raw);need(type(value) is dict and type(value.get('data')) is list and len(value['data'])<=1000 and not value.get('meta',{}).get('cursor'),'bounded complete GET page required')
             self.rows[trace]=value['data'];outcome='received';return value['data']
         except (OSError,TimeoutError,http.client.HTTPException,json.JSONDecodeError,UnicodeError,ValueError):raise ValueError('remote GET unavailable or invalid; no POST permission') from None
         finally:
-            conn.close();_exclusive(self.root/(trace+'.result.json'),wire({'schema':'full1220-v11-readback-result.v1','trace_id':trace,'http_status':status,'outcome':outcome}))
+            conn.close();self.snapshot.write(trace+'.result.json',wire({'schema':'full1220-v11-readback-result.v1','trace_id':trace,'http_status':status,'outcome':outcome}))
 
 
 def _exact_coverage(spans,rows,traces):
@@ -192,17 +207,17 @@ def verify_remote_window(*,verifier,cohort,window_index,binding,plan,projection,
     path=_canonical(readback_root)
     need(path.parent==root/'delivery-readbacks' and not path.exists(),'fresh fixed GET-only readback attempt')
     path.mkdir(mode=0o700);_sync(path.parent)
-    _exclusive(path/'binding.json',wire(binding))
+    snapshot=_Snapshot(path);snapshot.write('binding.json',wire(binding))
     # This LF-only loader is independent of the remote-gated score key loader.
     settings=_read_settings(root,catalog,cohort._context.manifest)
-    client=_ReadbackClient(settings,path)
+    client=_ReadbackClient(settings,path,snapshot)
     validation=score_module.validate_window_traces(plan,projection,client)
-    _exclusive(path/'validation.json',wire(validation))
+    snapshot.write('validation.json',wire(validation))
     need(validation.get('all_pass') is True,'actual original metadata/content readback incomplete')
     _exact_coverage(report['spans'],client.rows,binding['trace_ids'])
     verifier.check_verified_cohort(cohort);catalog_reader.recheck()
     _selected(verifier,cohort,score_module)
-    snapshot=_Snapshot(path);snapshot.capture()
+    snapshot.check()
     result=VerifiedRemoteWindow(_SEAL,binding,snapshot,verifier,cohort,score_module,window_index,catalog_reader)
     check_verified_remote_window(result,binding);return result
 
