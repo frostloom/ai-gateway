@@ -992,6 +992,17 @@ def _exclusive_write(path, raw):
         stream.write(raw); stream.flush(); os.fsync(stream.fileno())
 
 
+def _clean_gitdir_target(target):
+    """Accept a canonical POSIX absolute path, or a canonical native absolute path."""
+    if target != target.strip() or any(ord(char) < 32 or ord(char) == 127 for char in target):
+        return False
+    posix = PurePosixPath(target)
+    if posix.is_absolute() and str(posix) == target and '..' not in posix.parts:
+        return True
+    native = Path(target)
+    return native.is_absolute() and str(native) == target and '..' not in native.parts
+
+
 def _verify_frozen_sources(root, sources, extras=None, *, allow_root_git_pointer=False):
     _require(root.is_dir() and not root.is_symlink(), 'Explicit regular frozen source directory required')
     expected = {**sources, **(extras or {})}; actual = set(); git_pointer_sha = None
@@ -1008,11 +1019,7 @@ def _verify_frozen_sources(root, sources, extras=None, *, allow_root_git_pointer
                 match = re.fullmatch(rb'gitdir: ([^\r\n\x00]+)\n', pointer)
                 _require(match is not None, 'Canonical bounded gitdir pointer required')
                 target = match[1].decode('utf-8', errors='strict')
-                # Frozen pointers are POSIX absolute paths. Windows Path treats /foo as relative.
-                posix = PurePosixPath(target)
-                _require(posix.is_absolute() and str(posix) == target and target == target.strip()
-                         and '..' not in posix.parts and all(ord(char) >= 32 and ord(char) != 127 for char in target),
-                         'Absolute clean gitdir path required')
+                _require(_clean_gitdir_target(target), 'Absolute clean gitdir path required')
                 git_pointer_sha = _sha(pointer)
                 continue
             _require(relative in expected, 'Unexpected source inventory file')
