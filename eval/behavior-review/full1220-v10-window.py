@@ -214,6 +214,9 @@ def _extra_local_index(scope,extra):
 
 
 def _executor_only_path(name):
+    # Exact epoch-neutral capture executor and synthetic codec vectors only.
+    if name in ('eval/behavior-review/fixtures/v10-contracts/go-declarations.json', 'eval/behavior-review/fixtures/v10-contracts/go-delegated-authority.json', 'eval/behavior-review/full1220-capture-input-operator.py', 'eval/behavior-review/full1220-capture-input-v1.py', 'eval/behavior-review/helpers/full1220_content_projection_input_v1_test.go.txt', 'eval/behavior-review/test_full1220_capture_input_operator.py', 'eval/behavior-review/test_full1220_capture_input_projection.py', 'eval/behavior-review/test_full1220_capture_input_v1.py'):
+        return True
     """Same finite production-path admission as the V10 Go preparation."""
     if type(name) is not str or name.startswith('/') or any(x in ('','.','..') for x in name.split('/')):
         return False

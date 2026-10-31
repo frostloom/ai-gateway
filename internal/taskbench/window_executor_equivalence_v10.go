@@ -101,6 +101,9 @@ func windowV10ExecutorOnlyPath(name string) bool {
 		return true
 	}
 	switch name {
+	// Exact epoch-neutral capture executor and synthetic codec vectors.
+	case "eval/behavior-review/fixtures/v10-contracts/go-declarations.json", "eval/behavior-review/fixtures/v10-contracts/go-delegated-authority.json", "eval/behavior-review/full1220-capture-input-operator.py", "eval/behavior-review/full1220-capture-input-v1.py", "eval/behavior-review/helpers/full1220_content_projection_input_v1_test.go.txt", "eval/behavior-review/test_full1220_capture_input_operator.py", "eval/behavior-review/test_full1220_capture_input_projection.py", "eval/behavior-review/test_full1220_capture_input_v1.py":
+		return true
 	case "internal/taskbench/window_actual_ready.go", "internal/taskbench/window_json_shape.go", "internal/taskbench/window_stopped_v2_bundle.go", "internal/taskbench/window_stopped_v4_evidence.go",
 		"internal/taskbench/window_stopped_v9.go", "internal/taskbench/window_stopped_v9_bundle.go", "internal/taskbench/window_stopped_v9_pins.go", "internal/taskbench/window_history_read_pass.go",
 		"internal/taskbench/window_completion_v10.go", "internal/taskbench/window_scope_v10.go", "internal/taskbench/window_claim_v10.go", "internal/taskbench/window_scope.go", "internal/taskbench/window_claim.go",

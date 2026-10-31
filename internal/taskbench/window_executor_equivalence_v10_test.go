@@ -26,3 +26,16 @@ func TestWindowV10ExecutorEquivalenceCannotSelfDeclareOriginalSources(t *testing
 		t.Fatal("old epoch equivalence accepted")
 	}
 }
+
+func TestWindowV10ExistingCaptureAndCodecArtifacts(t *testing.T) {
+	for _, name := range []string{"eval/behavior-review/fixtures/v10-contracts/go-declarations.json", "eval/behavior-review/fixtures/v10-contracts/go-delegated-authority.json", "eval/behavior-review/full1220-capture-input-operator.py", "eval/behavior-review/full1220-capture-input-v1.py", "eval/behavior-review/helpers/full1220_content_projection_input_v1_test.go.txt", "eval/behavior-review/test_full1220_capture_input_operator.py", "eval/behavior-review/test_full1220_capture_input_projection.py", "eval/behavior-review/test_full1220_capture_input_v1.py"} {
+		if !windowV10ExecutorOnlyPath(name) {
+			t.Errorf("required executor-only artifact rejected: %s", name)
+		}
+	}
+	for _, name := range []string{"eval/behavior-review/fixtures/v10-contracts/customer.json", "eval/behavior-review/full1220-capture-input-v2.py", "eval/behavior-review/helpers/full1220_content_projection_unknown_test.go.txt", "internal/agent/llm.go"} {
+		if windowV10ExecutorOnlyPath(name) {
+			t.Errorf("unreviewed neighbor allowed: %s", name)
+		}
+	}
+}

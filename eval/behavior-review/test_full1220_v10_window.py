@@ -124,6 +124,12 @@ class Window(unittest.TestCase):
             summaries,receipts=self.summaries(1);summary=json.loads(summaries[0]);summary[field]=value;summaries[0]=self.n.wire(summary)
             with self.subTest(field=field),self.assertRaises(ValueError):self.m.verify_summary_chain(summaries,receipts,self.scope,self.m.sha(summaries[-1]))
 
+    def test_only_exact_existing_capture_and_codec_artifacts_are_allowed(self):
+        for name in ['eval/behavior-review/fixtures/v10-contracts/go-declarations.json', 'eval/behavior-review/fixtures/v10-contracts/go-delegated-authority.json', 'eval/behavior-review/full1220-capture-input-operator.py', 'eval/behavior-review/full1220-capture-input-v1.py', 'eval/behavior-review/helpers/full1220_content_projection_input_v1_test.go.txt', 'eval/behavior-review/test_full1220_capture_input_operator.py', 'eval/behavior-review/test_full1220_capture_input_projection.py', 'eval/behavior-review/test_full1220_capture_input_v1.py']:
+            self.assertTrue(self.m._executor_only_path(name),name)
+        for name in ("eval/behavior-review/fixtures/v10-contracts/customer.json","eval/behavior-review/full1220-capture-input-v2.py","eval/behavior-review/helpers/full1220_content_projection_unknown_test.go.txt","internal/agent/llm.go"):
+            self.assertFalse(self.m._executor_only_path(name),name)
+
     def test_equivalence_exact_diff_rejects_customer_change_and_unlisted_or_stale_change(self):
         # Toy source maps isolate the data comparator, never actual source proof.
         old={'internal/agent/llm.go':'a'*64,'internal/taskbench/window_actual_v10.go':'b'*64}
