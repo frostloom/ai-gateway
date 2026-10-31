@@ -1,5 +1,17 @@
 # Original3660 completion V10 stopped progress
 
+## Next execution design, not yet actual-ready
+
+The complete original goal is unchanged. The next proposed primary is one new full3660-pair/511-window scope, rather than further composing R5's385 pairs, V10's5 pairs and another suffix. All earlier390 normally collected pairs and every stopped/failed/NA attempt remain historical/supplemental and project cost/reliability evidence. They are not silently selected or discarded. The new full primary has not started.
+
+Two independent calculations from the original511 cap vector agree: retain104 holds66825427/638655 micro-units, add full base123827032/2037474, risk2023424/65 and20+20 native extras1495040/53760; total194170923 microCNY+2729954 microUSD, below authorized200 CNY+4 USD. The candidate new Parent195 CNY+3 USD is not a claim or execution authorization. Full scope costs13.817557 CNY+0.222413 USD additional declared caps versus preserving the390 primary prefix; it removes primary cross-scope/historical-score composition and keeps one coherent complete cohort. No old hold is released or credited.
+
+The zero-inference connection diagnostic completed six new synthetic OTLP requests/HTTP200 in25.427274s, with6 accepted/exported spans,0 failed/dropped/queue and clean process reaping. It observed normal idle peer EOF and a new connection, not the original failure. The ignored timeout argument is a real configuration discrepancy but is not established as this failure's cause. No service/timeouts/retry policy or old span was changed/replayed.
+
+The new design uses the existing public OTel client interface to durably store original SDK-transformed observations locally before acknowledging local persistence. Persisted and remotely exported counters/proofs are separate; no fake HTTP200/proxy is used. Normal full511 acquisition and owner reaping precede actual Langfuse shipment; real ID/parent/content readback precedes every score. Pinned receiver inspection does not support strict idempotent replay, so once any body byte is exposed to transport the batch is never POSTed again; unknowns are retained and independently GET-verified only. Full completion still requires all actual remote content/score readbacks.
+
+The design and five-task implementation plan are committed under `docs/superpowers/specs/2026-11-01-full3660-durable-observation-design.md` and `docs/superpowers/plans/2026-11-01-full3660-durable-v11.md`. Builder-check questions are resolved explicitly. The first implementation task is the durable exporter with focused durability/concurrency tests, followed by independent review. No new model/JEV request, financial claim, actualscope or signer has occurred since V10 stopped.
+
 ## Latest: permanent technical stop in second window
 
 The V10 owner is now permanently stopped. Its driver exited1 after the second-window stopped response; the supervisor and native owner were reaped and their groups are empty. There is no third claim or checkpoint2. Do not restart, continue this scope, resend commands, release reserves or relabel the stopped window as normally collected. The earlier live descriptions below are historical first-window evidence.
