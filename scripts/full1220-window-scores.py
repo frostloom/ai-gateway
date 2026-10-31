@@ -20,13 +20,86 @@ import json
 import math
 import re
 import os
-import fcntl
 import base64
 import argparse
 import importlib.util
 import stat
 import subprocess
-from pathlib import Path
+from pathlib import Path, PurePosixPath
+
+
+# O_NOFOLLOW / O_DIRECTORY / flock are Unix. Windows CI still imports this module.
+_O_NOFOLLOW = getattr(os, 'O_NOFOLLOW', 0)
+
+
+def _owned_private(info, mode):
+    """Unix owner and mode are the private-file boundary. Windows ACLs do not round-trip chmod."""
+    if os.name == 'nt':
+        return True
+    return info.st_uid == os.geteuid() and stat.S_IMODE(info.st_mode) == mode
+
+
+def _open_directory(path):
+    # Windows directory handles cannot be fsync'd or fstat'd through the CRT.
+    # Callers recheck the saved lstat instead.
+    if os.name == 'nt':
+        return None
+    return os.open(path, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+
+
+def _open_at(dir_fd, relative, path, flags, mode=None):
+    """dir_fd is Unix-only. Windows opens the already-resolved path."""
+    flags |= _O_NOFOLLOW
+    if os.name != 'nt' and dir_fd is not None:
+        if mode is None:
+            return os.open(relative, flags, dir_fd=dir_fd)
+        return os.open(relative, flags, mode, dir_fd=dir_fd)
+    if mode is None:
+        return os.open(path, flags)
+    return os.open(path, flags, mode)
+
+
+def _lock_exclusive_nonblocking(fd):
+    if os.name == 'nt':
+        import msvcrt
+        import threading
+        os.lseek(fd, 0, os.SEEK_SET)
+        try:
+            msvcrt.locking(fd, msvcrt.LK_NBLCK, 1)
+        except OSError as error:
+            raise BlockingIOError(11, 'registry lock busy') from error
+        # The CRT lock does not exclude another thread in this process.
+        info = os.fstat(fd)
+        key = (info.st_dev, info.st_ino)
+        with _WIN_LOCK_GUARD:
+            thread_lock = _WIN_THREAD_LOCKS.setdefault(key, threading.Lock())
+        if not thread_lock.acquire(blocking=False):
+            msvcrt.locking(fd, msvcrt.LK_UNLCK, 1)
+            raise BlockingIOError(11, 'registry lock busy')
+        return
+    import fcntl
+    fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+
+
+def _unlock_windows(fd):
+    if os.name != 'nt' or fd is None:
+        return
+    import msvcrt
+    info = os.fstat(fd)
+    key = (info.st_dev, info.st_ino)
+    with _WIN_LOCK_GUARD:
+        thread_lock = _WIN_THREAD_LOCKS.get(key)
+    if thread_lock is not None and thread_lock.locked():
+        thread_lock.release()
+    try:
+        os.lseek(fd, 0, os.SEEK_SET)
+        msvcrt.locking(fd, msvcrt.LK_UNLCK, 1)
+    except OSError:
+        pass
+
+
+_WIN_THREAD_LOCKS = {}
+_WIN_LOCK_GUARD = __import__('threading').Lock()
 
 
 NAMESPACE = 'full1220.v1.'
@@ -900,7 +973,7 @@ def _regular_bytes(path, limit=64 << 20):
     path = Path(path)
     before = path.lstat()
     _require(stat.S_ISREG(before.st_mode) and before.st_size <= limit, 'Bounded regular file required')
-    descriptor = os.open(path, os.O_RDONLY | os.O_NOFOLLOW)
+    descriptor = os.open(path, os.O_RDONLY | _O_NOFOLLOW)
     with os.fdopen(descriptor, 'rb') as stream:
         opened = os.fstat(stream.fileno())
         _require(os.path.samestat(before, opened), 'File identity changed before read')
@@ -914,9 +987,20 @@ def _regular_bytes(path, limit=64 << 20):
 
 
 def _exclusive_write(path, raw):
-    descriptor = os.open(path, os.O_CREAT | os.O_EXCL | os.O_WRONLY | os.O_NOFOLLOW, 0o600)
+    descriptor = os.open(path, os.O_CREAT | os.O_EXCL | os.O_WRONLY | _O_NOFOLLOW, 0o600)
     with os.fdopen(descriptor, 'wb') as stream:
         stream.write(raw); stream.flush(); os.fsync(stream.fileno())
+
+
+def _clean_gitdir_target(target):
+    """Accept a canonical POSIX absolute path, or a canonical native absolute path."""
+    if target != target.strip() or any(ord(char) < 32 or ord(char) == 127 for char in target):
+        return False
+    posix = PurePosixPath(target)
+    if posix.is_absolute() and str(posix) == target and '..' not in posix.parts:
+        return True
+    native = Path(target)
+    return native.is_absolute() and str(native) == target and '..' not in native.parts
 
 
 def _verify_frozen_sources(root, sources, extras=None, *, allow_root_git_pointer=False):
@@ -935,9 +1019,7 @@ def _verify_frozen_sources(root, sources, extras=None, *, allow_root_git_pointer
                 match = re.fullmatch(rb'gitdir: ([^\r\n\x00]+)\n', pointer)
                 _require(match is not None, 'Canonical bounded gitdir pointer required')
                 target = match[1].decode('utf-8', errors='strict')
-                _require(Path(target).is_absolute() and str(Path(target)) == target and target == target.strip()
-                         and '..' not in Path(target).parts and all(ord(char) >= 32 and ord(char) != 127 for char in target),
-                         'Absolute clean gitdir path required')
+                _require(_clean_gitdir_target(target), 'Absolute clean gitdir path required')
                 git_pointer_sha = _sha(pointer)
                 continue
             _require(relative in expected, 'Unexpected source inventory file')
@@ -1390,7 +1472,7 @@ def _quality_v6_source_identity(root, manifest):
         raw = _regular_bytes(root/name)
         _equal(hashlib.sha1(b'blob '+str(len(raw)).encode()+b'\0'+raw).hexdigest(), sha.decode(), 'Quality source differs from Git blob')
     _require(names == set(manifest['sources']), 'Quality Git/source inventories differ')
-    _equal(sorted(_source_directories(manifest['sources'])), sorted(str(Path(directory).relative_to(root)) for directory,_,_ in os.walk(root) if Path(directory) != root), 'Quality source directory inventory mismatch')
+    _equal(sorted(_source_directories(manifest['sources'])), sorted(Path(directory).relative_to(root).as_posix() for directory,_,_ in os.walk(root) if Path(directory) != root), 'Quality source directory inventory mismatch')
     return {'git_pointer_sha256':pointer_sha, 'tree_listing_sha256':_sha(entries)}
 
 
@@ -1632,7 +1714,7 @@ def load_window_score_client(manifest_raw, settings_path):
     """Only explicit owner0600 evaluation-only JSON; never load model settings."""
     try:
         info = Path(settings_path).lstat()
-        _require(info.st_uid == os.geteuid() and stat.S_IMODE(info.st_mode) == 0o600, 'Private owner0600 evaluation settings required')
+        _require(stat.S_ISREG(info.st_mode) and _owned_private(info, 0o600), 'Private owner0600 evaluation settings required')
         settings = _Document(_regular_bytes(settings_path, 16384)).value
         _require(set(settings) == {'OTEL_EXPORTER_OTLP_TRACES_ENDPOINT', 'AGENT_LANGFUSE_ENVIRONMENT', 'LANGFUSE_PUBLIC_KEY', 'LANGFUSE_SECRET_KEY'},
                  'Evaluation-only client configuration required')
@@ -1647,14 +1729,16 @@ def load_window_score_client(manifest_raw, settings_path):
 
 def _private_directory(path):
     info = path.lstat()
-    _require(stat.S_ISDIR(info.st_mode) and info.st_uid == os.geteuid() and stat.S_IMODE(info.st_mode) == 0o700,
+    _require(stat.S_ISDIR(info.st_mode) and _owned_private(info, 0o700),
              'Private owner0700 registry directory required')
     _require(path.resolve() == path.absolute(), 'Registry path must have no symlink aliases')
     return info
 
 
 def _sync_directory(path):
-    descriptor = os.open(path, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+    if os.name == 'nt':
+        return
+    descriptor = _open_directory(path)
     try:
         os.fsync(descriptor)
     finally:
@@ -1665,15 +1749,23 @@ class _RegistryHandle:
     def __init__(self, root, scope, root_fd, scope_fd, lock_fd, anchor):
         self.root = root; self.scope = scope; self.root_fd = root_fd; self.scope_fd = scope_fd
         self.lock_fd = lock_fd; self.anchor = anchor
+        self.root_stat = None if root_fd is not None else root.lstat()
+        self.scope_stat = None if scope_fd is not None else scope.lstat()
     def check(self):
         root_info, scope_info = _private_directory(self.root), _private_directory(self.scope)
-        _require(os.path.samestat(root_info, os.fstat(self.root_fd)) and os.path.samestat(scope_info, os.fstat(self.scope_fd)), 'Publication registry directory moved or replaced')
+        if self.root_fd is None:
+            same = os.path.samestat(root_info, self.root_stat) and os.path.samestat(scope_info, self.scope_stat)
+        else:
+            same = os.path.samestat(root_info, os.fstat(self.root_fd)) and os.path.samestat(scope_info, os.fstat(self.scope_fd))
+        _require(same, 'Publication registry directory moved or replaced')
         _equal([scope_info.st_dev, scope_info.st_ino], self.anchor['directory_identity'], 'Fixed scope directory identity changed')
         _equal(_Document(_regular_bytes(self.root/(self.scope.name+'.anchor.json'), 16384)).value, self.anchor, 'Fixed scope anchor changed')
         _equal(_Document(_regular_bytes(self.scope/'scope.json', 16384)).value['nonce'], self.anchor['nonce'], 'Fixed scope nonce changed')
     def close(self):
+        _unlock_windows(self.lock_fd)
         for descriptor in (self.scope_fd, self.lock_fd, self.root_fd):
-            os.close(descriptor)
+            if descriptor is not None:
+                os.close(descriptor)
 
 
 def _open_publication_registry(scope, *, create=False):
@@ -1685,14 +1777,14 @@ def _open_publication_registry(scope, *, create=False):
             return None
         root.mkdir(mode=0o700); _sync_directory(root.parent)
     _private_directory(root)
-    root_fd = os.open(root, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+    root_fd = _open_directory(root)
     lock_fd = scope_fd = None
     try:
-        flags = os.O_RDWR | os.O_NOFOLLOW | (os.O_CREAT if create else 0)
-        lock_fd = os.open('.lock', flags, 0o600, dir_fd=root_fd)
+        flags = os.O_RDWR | (os.O_CREAT if create else 0)
+        lock_fd = _open_at(root_fd, '.lock', root/'.lock', flags, 0o600)
         lock_info = os.fstat(lock_fd)
-        _require(stat.S_ISREG(lock_info.st_mode) and lock_info.st_uid == os.geteuid() and stat.S_IMODE(lock_info.st_mode) == 0o600, 'Private stable registry lock required')
-        fcntl.flock(lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        _require(stat.S_ISREG(lock_info.st_mode) and _owned_private(lock_info, 0o600), 'Private stable registry lock required')
+        _lock_exclusive_nonblocking(lock_fd)
         directory = root/scope; anchor_path = root/(scope+'.anchor.json')
         if not anchor_path.exists():
             if not create:
@@ -1708,10 +1800,11 @@ def _open_publication_registry(scope, *, create=False):
         anchor = _Document(_regular_bytes(anchor_path, 16384)).value
         _equal(anchor['schema'], 'full1220-fixed-scope-registry.v1', 'Scope anchor schema mismatch')
         _equal(anchor['scope_sha256'], scope, 'Scope anchor mismatch')
-        scope_fd = os.open(directory, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+        scope_fd = _open_directory(directory)
         handle = _RegistryHandle(root, directory, root_fd, scope_fd, lock_fd, anchor); handle.check()
         return handle
     except BaseException:
+        _unlock_windows(lock_fd)
         for descriptor in (scope_fd, lock_fd, root_fd):
             if descriptor is not None:
                 os.close(descriptor)
@@ -1721,10 +1814,12 @@ def _open_publication_registry(scope, *, create=False):
 def _publication_event(handle, name, event):
     handle.check()
     _require(re.fullmatch(r'[a-z0-9.-]+', name) is not None, 'Fixed event filename required')
-    descriptor = os.open(name, os.O_CREAT | os.O_EXCL | os.O_WRONLY | os.O_NOFOLLOW, 0o600, dir_fd=handle.scope_fd)
+    descriptor = _open_at(handle.scope_fd, name, handle.scope/name, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
     with os.fdopen(descriptor, 'wb') as stream:
         stream.write(_json_bytes(event)); stream.flush(); os.fsync(stream.fileno())
-    os.fsync(handle.scope_fd); handle.check()
+    if handle.scope_fd is not None:
+        os.fsync(handle.scope_fd)
+    handle.check()
 
 
 def _publication_scores(plan):

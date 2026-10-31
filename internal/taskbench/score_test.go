@@ -1,9 +1,12 @@
 package taskbench
 
 import (
-	"github.com/frostloom/ai-gateway/internal/billing/store"
+	"encoding/json"
+	"reflect"
 	"testing"
 	"time"
+
+	"github.com/frostloom/ai-gateway/internal/billing/store"
 )
 
 // Losing the exact ledger/order/confirmation checks would accept a plausible tool trace.
@@ -129,6 +132,42 @@ func TestClarificationRequiresSlotQuestion(t *testing.T) {
 		if got := Clarifies(tt.reply, tt.slot); got != tt.want {
 			t.Errorf("%q: got %v want %v", tt.reply, got, tt.want)
 		}
+	}
+}
+func TestSameInstantSurvivesLocationAndRealFieldsStillDiffer(t *testing.T) {
+	wall := time.Date(2026, 10, 31, 14, 27, 50, 486000000, time.FixedZone("CST", 8*3600))
+	raw, err := json.Marshal(wall)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var cloned time.Time
+	if err = json.Unmarshal(raw, &cloned); err != nil {
+		t.Fatal(err)
+	}
+	if reflect.DeepEqual(wall, cloned) || !wall.Equal(cloned) {
+		t.Fatalf("location fixture did not isolate the instant: deep=%v equal=%v", reflect.DeepEqual(wall, cloned), wall.Equal(cloned))
+	}
+	order := func(at time.Time, amount int64) store.RechargeOrder {
+		paid := at
+		return store.RechargeOrder{TenantID: 2, OrderNo: "foreign", AmountCent: amount, PaidAt: &paid, CreatedAt: at, UpdatedAt: at}
+	}
+	localSnap := Snapshot{BalanceCent: 1, LedgerBalance: 1, Consistent: true, Orders: []store.RechargeOrder{order(wall, 10000)}, Audits: []store.AgentAuditLog{{ID: 1, Tool: "get_balance", CreatedAt: wall}}}
+	utcSnap := Snapshot{BalanceCent: 1, LedgerBalance: 1, Consistent: true, Orders: []store.RechargeOrder{order(cloned, 10000)}, Audits: []store.AgentAuditLog{{ID: 1, Tool: "get_balance", CreatedAt: cloned}}}
+	if !sameDomain(localSnap, utcSnap) || !sameConversationControls(map[uint64]Snapshot{2: localSnap}, map[uint64]Snapshot{2: utcSnap}) {
+		t.Fatal("same instant was treated as a foreign-control change")
+	}
+	changed := utcSnap
+	changed.Orders = []store.RechargeOrder{order(cloned, 10001)}
+	if sameDomain(localSnap, changed) || sameConversationControls(map[uint64]Snapshot{2: localSnap}, map[uint64]Snapshot{2: changed}) {
+		t.Fatal("order amount change was ignored")
+	}
+	changed = utcSnap
+	changed.Audits = []store.AgentAuditLog{{ID: 1, Tool: "refund_recharge", CreatedAt: cloned}}
+	if !sameDomain(localSnap, changed) || sameControlSnapshot(localSnap, changed) || sameConversationControls(map[uint64]Snapshot{2: localSnap}, map[uint64]Snapshot{2: changed}) {
+		t.Fatal("audit field change was classified incorrectly")
+	}
+	if sameConversationControls(map[uint64]Snapshot{2: localSnap}, map[uint64]Snapshot{}) {
+		t.Fatal("missing control tenant was accepted")
 	}
 }
 func TestMetricsIncludesFixtureFailuresInDenominator(t *testing.T) {

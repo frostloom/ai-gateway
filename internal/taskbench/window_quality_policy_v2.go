@@ -110,7 +110,7 @@ func qualityPreviewCandidate(in qualityPreviewInput) (qualityPreviewSidecar, err
 	if in.Turn > 1 {
 		before = r.Observations[in.Turn-2].State
 	}
-	if !reflect.DeepEqual(before, in.Before.State) || !reflect.DeepEqual(obs.State, in.After.State) || !qualitySameEffectState(in.Before.State, in.After.State, r.Fixture) || !reflect.DeepEqual(in.Before.State.Controls, in.After.State.Controls) || !qualitySameEffectState(obs.State, r.Final, r.Fixture) {
+	if !canonicalEqual(before, in.Before.State) || !canonicalEqual(obs.State, in.After.State) || !qualitySameEffectState(in.Before.State, in.After.State, r.Fixture) || !canonicalEqual(in.Before.State.Controls, in.After.State.Controls) || !qualitySameEffectState(obs.State, r.Final, r.Fixture) {
 		return fail("state linkage or effects")
 	}
 	if err := validateConversationState(in.Before.State, r.Fixture); err != nil {
@@ -513,7 +513,7 @@ func qualityAuditProjection(state ConversationState, rows []store.AgentAuditLog,
 		}
 		seen := map[uint64]bool{}
 		for _, row := range snapshot.Audits {
-			if seen[row.ID] || !reflect.DeepEqual(actual[row.ID], row) {
+			if seen[row.ID] || !canonicalEqual(actual[row.ID], row) {
 				return false
 			}
 			seen[row.ID] = true
@@ -555,7 +555,7 @@ func qualitySameEffectState(a, b ConversationState, f Fixture) bool {
 	b.CapturedAt = time.Time{}
 	a.Own.Audits = nil
 	b.Own.Audits = nil
-	return reflect.DeepEqual(a, b)
+	return canonicalEqual(a, b)
 }
 
 func qualitySessionTableCapture(rows []store.AgentSession, columns []string) (qualityTableCapture, error) {

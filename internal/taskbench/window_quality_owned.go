@@ -165,7 +165,7 @@ func (d *windowOwnedDriver) finishWindowQualityOwned(ctx context.Context, record
 		return fail()
 	}
 	finalCapture, err := captureWindowQualityEffects(ctx, d)
-	if err != nil || !reflect.DeepEqual(finalCapture.Tables, candidate.Evidence.After.Tables) || !reflect.DeepEqual(finalCapture.Audits, candidate.Evidence.After.Audits) || !reflect.DeepEqual(finalCapture.Sessions, candidate.Evidence.After.Sessions) || !sameWindowQualityCapturedState(d.final, finalCapture.State) {
+	if err != nil || !reflect.DeepEqual(finalCapture.Tables, candidate.Evidence.After.Tables) || !canonicalEqual(finalCapture.Audits, candidate.Evidence.After.Audits) || !canonicalEqual(finalCapture.Sessions, candidate.Evidence.After.Sessions) || !sameWindowQualityCapturedState(d.final, finalCapture.State) {
 		return fail()
 	}
 	// Re-read the exact live pending immediately before durability and deletion.
@@ -196,7 +196,7 @@ func (d *windowOwnedDriver) finishWindowQualityOwned(ctx context.Context, record
 	}
 	d.recordFailureCleanup("verified", true)
 	post, err := captureWindowQualityEffects(ctx, d)
-	if err != nil || !reflect.DeepEqual(post.Tables, finalCapture.Tables) || !reflect.DeepEqual(post.Audits, finalCapture.Audits) || !reflect.DeepEqual(post.Sessions, finalCapture.Sessions) || !sameWindowQualityCapturedState(post.State, finalCapture.State) {
+	if err != nil || !reflect.DeepEqual(post.Tables, finalCapture.Tables) || !canonicalEqual(post.Audits, finalCapture.Audits) || !canonicalEqual(post.Sessions, finalCapture.Sessions) || !sameWindowQualityCapturedState(post.State, finalCapture.State) {
 		return fail()
 	}
 	if d.observer.ForceFlush(ctx) != nil {
