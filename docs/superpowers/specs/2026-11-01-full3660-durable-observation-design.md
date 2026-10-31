@@ -32,6 +32,8 @@ Spooling runs inside the owned process; no new HTTP proxy, browser UI, service/c
 
 Live arm checks use the genuine owned writer's selected identity, poison state and per-export durable commit counters; do not repeatedly replay the entire growing spool for each arm. Each successful export checks its own exact durable bytes/commit. Full independent body/namespace/trace-ID verification occurs after closure before delivery. This is a live owned receipt boundary, not a persistent derived-history cache or remote delivery proof.
 
+An independent disk reader can prove complete closed-candidate bytes/linkage, not that a historical fsync/close returned success: a failed operation may leave identical readable bytes. Its sealed proof must explicitly be DATA-only, with durability/owner-completion unproven from disk. Do not add a process-local global close-seal registry that prevents separate-process verification. The live writer must propagate every close failure/poison to the actual owner; final shipment additionally requires separately root-pinned genuine owner exit0/reaped and normal runtime closure evidence. A complete marker or data proof alone never authorizes shipment or scores.
+
 ## Separate delivery with original IDs and content
 
 After normal acquisition completion and owner reaping, ship the exact persisted protobuf bytes to the original real Langfuse OTLP endpoint. An independent shipper has no model/JEV keys, inference client, claim or fixture capability. Use only the existing Langfuse project credential in memory. Refuse redirects, unexpected endpoints, transformed body bytes, foreign files or changed source/settings/spool bindings. Keep immutable intent-before-send, attempt/result and readback artifacts; do not edit failures to success.
