@@ -36,22 +36,32 @@ type windowActualSettings struct {
 	AllowFixtureCreation bool                         `json:"allow_fixture_creation"`
 	Observer             windowActualObserverSettings `json:"observer"`
 }
+type windowActualDurableSettings struct {
+	Root     string `json:"root"`
+	RunID    string `json:"run_id"`
+	MaxBytes int64  `json:"max_bytes"`
+}
 type windowActualObserverSettings struct {
-	Enabled         bool    `json:"enabled"`
-	CaptureContent  bool    `json:"capture_content"`
-	Endpoint        string  `json:"endpoint"`
-	PublicKey       string  `json:"public_key"`
-	SecretKey       string  `json:"secret_key"`
-	HashKey         string  `json:"hash_key"`
-	Release         string  `json:"release"`
-	Environment     string  `json:"environment"`
-	SampleRate      float64 `json:"sample_rate"`
-	QueueSize       int     `json:"queue_size"`
-	ExportTimeoutMS int64   `json:"export_timeout_ms"`
+	Durable         *windowActualDurableSettings `json:"durable,omitempty"`
+	Enabled         bool                         `json:"enabled"`
+	CaptureContent  bool                         `json:"capture_content"`
+	Endpoint        string                       `json:"endpoint"`
+	PublicKey       string                       `json:"public_key"`
+	SecretKey       string                       `json:"secret_key"`
+	HashKey         string                       `json:"hash_key"`
+	Release         string                       `json:"release"`
+	Environment     string                       `json:"environment"`
+	SampleRate      float64                      `json:"sample_rate"`
+	QueueSize       int                          `json:"queue_size"`
+	ExportTimeoutMS int64                        `json:"export_timeout_ms"`
 }
 
 func (o windowActualObserverSettings) config() observability.Config {
-	return observability.Config{Enabled: o.Enabled, CaptureContent: o.CaptureContent, Endpoint: o.Endpoint, PublicKey: o.PublicKey, SecretKey: o.SecretKey, HashKey: o.HashKey, Release: o.Release, Environment: o.Environment, SampleRate: o.SampleRate, QueueSize: o.QueueSize, ExportTimeout: time.Duration(o.ExportTimeoutMS) * time.Millisecond}
+	c := observability.Config{Enabled: o.Enabled, CaptureContent: o.CaptureContent, Endpoint: o.Endpoint, PublicKey: o.PublicKey, SecretKey: o.SecretKey, HashKey: o.HashKey, Release: o.Release, Environment: o.Environment, SampleRate: o.SampleRate, QueueSize: o.QueueSize, ExportTimeout: time.Duration(o.ExportTimeoutMS) * time.Millisecond}
+	if o.Durable != nil {
+		c.DurableSpool = &observability.DurableSpoolConfig{Root: o.Durable.Root, RunID: o.Durable.RunID, MaxBytes: o.Durable.MaxBytes}
+	}
+	return c
 }
 func windowActualLoopbackEndpoint(endpoint string) (*url.URL, error) {
 	u, e := url.Parse(endpoint)
@@ -63,7 +73,13 @@ func windowActualLoopbackEndpoint(endpoint string) (*url.URL, error) {
 func readWindowActualSettings(path string) (windowActualSettings, error) {
 	return readWindowActualSettingsForTimeout(path, 2000)
 }
-func readWindowActualSettingsForTimeout(path string, timeoutMS int64) (out windowActualSettings, err error) {
+func readWindowActualSettingsForTimeout(path string, timeoutMS int64) (windowActualSettings, error) {
+	return readWindowActualSettingsMode(path, timeoutMS, false)
+}
+func readWindowActualSettingsV11(path string) (windowActualSettings, error) {
+	return readWindowActualSettingsMode(path, 10000, true)
+}
+func readWindowActualSettingsMode(path string, timeoutMS int64, durable bool) (out windowActualSettings, err error) {
 	reject := func() (windowActualSettings, error) {
 		return windowActualSettings{}, fmt.Errorf("actual private settings rejected")
 	}
@@ -76,7 +92,22 @@ func readWindowActualSettingsForTimeout(path string, timeoutMS int64) (out windo
 	_ = json.Unmarshal(raw, &obj)
 	var obs map[string]json.RawMessage
 	_ = json.Unmarshal(obj["observer"], &obs)
-	if len(obj) != 6 || bytes.Equal(bytes.TrimSpace(obj["jev_https_proxy"]), []byte("null")) || len(obs) != 11 || strings.TrimSpace(out.ModelKey) == "" || strings.TrimSpace(out.JEVKey) == "" || strings.ContainsAny(out.ModelKey+out.JEVKey, "\r\n") || !out.AllowFixtureCreation {
+	expectedKeys := 11
+	if durable {
+		expectedKeys = 12
+		var d map[string]json.RawMessage
+		_ = json.Unmarshal(obs["durable"], &d)
+		if len(d) != 3 || d["root"] == nil || d["run_id"] == nil || d["max_bytes"] == nil || out.Observer.Durable == nil {
+			return reject()
+		}
+		dc := out.Observer.Durable
+		if canonicalRootWindowCampaign(dc.Root) != nil || !comparisonDigest(dc.RunID) || dc.MaxBytes != 4<<30 {
+			return reject()
+		}
+	} else if _, ok := obs["durable"]; ok {
+		return reject()
+	}
+	if len(obj) != 6 || bytes.Equal(bytes.TrimSpace(obj["jev_https_proxy"]), []byte("null")) || len(obs) != expectedKeys || strings.TrimSpace(out.ModelKey) == "" || strings.TrimSpace(out.JEVKey) == "" || strings.ContainsAny(out.ModelKey+out.JEVKey, "\r\n") || !out.AllowFixtureCreation {
 		return reject()
 	}
 	if _, e = windowActualLoopbackEndpoint(out.Observer.Endpoint); e != nil {
@@ -228,6 +259,7 @@ func checkWindowActualHealth(ctx context.Context, o windowActualObserverSettings
 }
 
 type FullWindowActualStatus struct {
+	Observation          *windowObservationReceiptV11    `json:"observation,omitempty"`
 	Completion           *windowCompletionDeclarationV10 `json:"completion,omitempty"`
 	V8                   *windowV8RuntimeSummary         `json:"v8,omitempty"`
 	EvidenceKind         string                          `json:"evidence_kind"`
@@ -285,10 +317,10 @@ func OpenFullWindowActual(ctx context.Context, ready *FullWindowActualReady, pri
 	if ctx == nil || ctx.Err() != nil {
 		return nil, fmt.Errorf("actual session context rejected")
 	}
-	// All older owners are permanently consumed. V10 is the only new actual
+	// All older owners are permanently consumed. V11 is the only new actual
 	// epoch; old manifests remain readable through their technical checkers.
-	if ready == nil || ready.manifest.Schema != "full-window-actual-ready.v10" || ready.manifest.Scope.Schema != "full-window-scope.v10" || ready.v8Authority == nil || ready.v8Authority.v10 == nil || ready.v8Authority.revalidate() != nil {
-		return nil, fmt.Errorf("actual v10 delegated authority required before settings")
+	if ready == nil || ready.manifest.Schema != "full-window-actual-ready.v11" || ready.manifest.Scope.Schema != "full-window-scope.v11" || ready.v8Authority == nil || ready.v8Authority.v11 == nil || ready.v8Authority.revalidate() != nil {
+		return nil, fmt.Errorf("actual v11 delegated authority required before settings")
 	}
 	if e := ready.revalidateStopped(); e != nil {
 		return nil, e
@@ -296,11 +328,11 @@ func OpenFullWindowActual(ctx context.Context, ready *FullWindowActualReady, pri
 	if e := ready.revalidate(); e != nil {
 		return nil, e
 	}
-	settings, e := readWindowActualSettingsForTimeout(privateSettingsPath, 10000)
+	settings, e := readWindowActualSettingsV11(privateSettingsPath)
 	if e != nil {
 		return nil, e
 	}
-	if e = checkWindowActualSettingsDigest(settings, ready.manifest.PrivateSettingsSHA256); e != nil {
+	if e = checkWindowV11SettingsSpool(settings, ready.manifest); e != nil {
 		return nil, e
 	}
 	jevTransport, e := newWindowActualJEVTransport(settings.JEVHTTPSProxy)
@@ -319,14 +351,6 @@ func OpenFullWindowActual(ctx context.Context, ready *FullWindowActualReady, pri
 			_ = s.Close()
 		}
 	}()
-	observer, e := observability.New(lifetime, settings.Observer.config())
-	if e != nil {
-		return nil, fmt.Errorf("actual observer rejected")
-	}
-	s.auth.observer = observer
-	if observer.EvaluationIdentity() != ready.manifest.Observer {
-		return nil, fmt.Errorf("actual observer identity mismatch")
-	}
 	if e = checkWindowActualDatabase(lifetime, settings.LoopbackAdminDSN); e != nil {
 		return nil, e
 	}
@@ -340,6 +364,22 @@ func OpenFullWindowActual(ctx context.Context, ready *FullWindowActualReady, pri
 	if lifetime.Err() != nil {
 		return nil, fmt.Errorf("actual startup canceled")
 	}
+	observer, e := observability.New(lifetime, settings.Observer.config())
+	if e != nil {
+		return nil, fmt.Errorf("actual observer rejected")
+	}
+	s.auth.observer = observer
+	if observer.EvaluationIdentity() != ready.manifest.Observer {
+		return nil, fmt.Errorf("actual observer identity mismatch")
+	}
+	ownedObservation, e := selectWindowV11ObservationOwner(lifetime, ready.manifest, observer)
+	if e != nil {
+		return nil, e
+	}
+	s.status.Observation, e = windowV11Receipt(observer, false)
+	if e != nil {
+		return nil, e
+	}
 	if e = os.Mkdir(ready.manifest.SessionRoot, 0700); e != nil {
 		return nil, e
 	}
@@ -351,7 +391,9 @@ func OpenFullWindowActual(ctx context.Context, ready *FullWindowActualReady, pri
 		return nil, e
 	}
 	m := ready.manifest
-	s.campaign, e = startWindowCampaign(ready.prepared, ready.baseline)
+	prepared := ready.prepared
+	prepared.observationOwner = ownedObservation
+	s.campaign, e = startWindowCampaign(prepared, ready.baseline)
 	if e != nil {
 		return nil, e
 	}
@@ -388,6 +430,7 @@ func (s *FullWindowActualSession) RunWindow(ctx context.Context, index int, prio
 	auth.privateReportRoot = filepath.Join(s.ready.manifest.SessionRoot, name)
 	report, runErr := runWindowAcquisition(operation, &auth)
 	s.mu.Lock()
+	s.status.Observation = report.Observation
 	s.status.V8 = mergeWindowV8Runtime(s.status.V8, report.V8)
 	s.status.ModelAttempts += report.Accounting.ModelAttempts
 	s.status.JEVAttempts += report.Accounting.JEVAttempts
@@ -464,7 +507,15 @@ func (s *FullWindowActualSession) stop() error {
 	}
 	if s.auth.observer != nil {
 		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-		failures = append(failures, s.auth.observer.Shutdown(ctx))
+		shutdownErr := s.auth.observer.Shutdown(ctx)
+		failures = append(failures, shutdownErr)
+		if s.ready != nil && s.ready.manifest.Scope.Schema == "full-window-scope.v11" {
+			receipt, re := windowV11Receipt(s.auth.observer, s.status.AcquisitionDone && shutdownErr == nil && errors.Join(failures...) == nil)
+			failures = append(failures, re)
+			s.mu.Lock()
+			s.status.Observation = receipt
+			s.mu.Unlock()
+		}
 		cancel()
 	}
 	if s.transport != nil {
@@ -658,7 +709,7 @@ func (s *FullWindowActualSession) verifyInputs() error {
 	if s.auth.observer == nil || s.auth.observer.EvaluationIdentity() != m.Observer || s.auth.observerIdentity != m.Observer {
 		return fmt.Errorf("actual observer changed")
 	}
-	return nil
+	return checkWindowObservationReceipt(s.lifetime, m.Scope.Schema, s.auth.observer, m.Observer)
 }
 func (s *FullWindowActualSession) verify() error {
 	if e := s.verifyInputs(); e != nil {

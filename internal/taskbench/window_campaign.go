@@ -67,15 +67,17 @@ func executionSHAWindowCampaign(scopeSHA, absoluteRoot string, limits windowCamp
 }
 
 type windowCampaignPrepared struct {
-	root           string
-	scopeSHA       string
-	executionSHA   string
-	limits         windowCampaignLimits
-	scope          fullWindowScope
-	contracts      []windowAccountingContract
-	stoppedHistory windowStoppedHistory
-	stoppedV9      *windowStoppedV9Baseline
-	v8Authority    *windowV8Authority
+	root             string
+	scopeSHA         string
+	executionSHA     string
+	limits           windowCampaignLimits
+	scope            fullWindowScope
+	contracts        []windowAccountingContract
+	stoppedHistory   windowStoppedHistory
+	stoppedV9        *windowStoppedV9Baseline
+	stoppedV10       *windowStoppedV10Baseline
+	observationOwner *windowV11ObservationOwner
+	v8Authority      *windowV8Authority
 }
 type windowCampaignArmEvidence struct {
 	QualityEnd                   *windowQualityEndEvidence `json:",omitempty"`
@@ -263,6 +265,13 @@ func newWindowCampaign(root, frozenRoot, historicalDir string, scope fullWindowS
 // Internal primitive accepts already prepared private data. Only the validating
 // wrapper calls it in production. It creates no provider capability or token.
 func startWindowCampaign(p windowCampaignPrepared, baseline fullWindowBaseline) (*windowCampaign, error) {
+	startupCtx := context.Background()
+	if p.scope.Schema == "full-window-scope.v11" {
+		if p.observationOwner == nil || p.observationOwner.context == nil {
+			return nil, fmt.Errorf("v11 bound observer context required")
+		}
+		startupCtx = p.observationOwner.context
+	}
 	if validateWindowCampaignNativeAuthority(p) != nil {
 		return nil, fmt.Errorf("v8 signed authority required")
 	}
@@ -279,6 +288,9 @@ func startWindowCampaign(p windowCampaignPrepared, baseline fullWindowBaseline) 
 	}
 	p.scope = detached
 	p.contracts = append([]windowAccountingContract(nil), p.contracts...)
+	if err := startupCtx.Err(); err != nil {
+		return nil, err
+	}
 	if e = os.Mkdir(p.root, 0700); e != nil {
 		return nil, fmt.Errorf("existing or unavailable registry; audit only: %w", e)
 	}
@@ -297,7 +309,7 @@ func startWindowCampaign(p windowCampaignPrepared, baseline fullWindowBaseline) 
 	}
 	c := &windowCampaign{root: p.root, rootInfo: info, lock: lock, prepared: p, baseline: baseline, model: baseline.PermanentModel, jev: baseline.PermanentJEV, files: map[string]string{}, ledgerAudits: map[string]string{}}
 	c.baseline.ClaimSHA256 = cloneWindowHistoricalClaims(baseline.ClaimSHA256)
-	if e = c.persistClaimWindowCampaign(0, "", ""); e != nil {
+	if e = c.persistClaimWindowCampaignContext(startupCtx, 0, "", ""); e != nil {
 		c.closeWindowCampaign()
 		return nil, e
 	}
@@ -308,6 +320,10 @@ func validatePreparedWindowCampaign(p windowCampaignPrepared, b fullWindowBaseli
 		return e
 	}
 	switch p.scope.Schema {
+	case "full-window-scope.v11":
+		if err := validateStoppedV11CampaignHistory(p, b); err != nil {
+			return err
+		}
 	case "full-window-scope.v10":
 		if err := validateStoppedV10CampaignHistory(p, b); err != nil {
 			return err
@@ -378,11 +394,15 @@ func validatePreparedWindowCampaign(p windowCampaignPrepared, b fullWindowBaseli
 		claimModelBound, claimJEVBound = 84510611, 650855
 	} else if windowScopeUsesNativeV8(p.scope.Schema) {
 		claimModelBound, claimJEVBound = 84500000, 600000
-		if p.scope.Schema == "full-window-scope.v9" {
+		if p.scope.Schema == "full-window-scope.v9" || p.scope.Schema == "full-window-scope.v11" {
 			claimModelBound, claimJEVBound = 123827032, 2037474
 		}
 	}
-	if p.scope.Schema == "full-window-scope.v10" {
+	if p.scope.Schema == "full-window-scope.v11" {
+		if e := validateV11ClaimDeclaration(d); e != nil {
+			return e
+		}
+	} else if p.scope.Schema == "full-window-scope.v10" {
 		if d.ScopeSHA256 != p.scopeSHA || d.PolicySHA256 != p.scope.Bindings.PolicySHA256 {
 			return fmt.Errorf("v10 frozen claim identity changed")
 		}
@@ -493,7 +513,9 @@ func (c *windowCampaign) persistClaimWindowCampaignContext(ctx context.Context, 
 		historyCtx, done := c.windowCampaignHistoryContextLocked(ctx)
 		defer done()
 		var err error
-		if c.prepared.scope.Schema == "full-window-scope.v10" {
+		if c.prepared.scope.Schema == "full-window-scope.v11" {
+			err = validateStoppedV11CampaignHistoryContext(historyCtx, c.prepared, c.baseline)
+		} else if c.prepared.scope.Schema == "full-window-scope.v10" {
 			err = validateStoppedV10CampaignHistoryContext(historyCtx, c.prepared, c.baseline)
 		} else if c.prepared.scope.Schema == "full-window-scope.v9" {
 			err = validateStoppedV9CampaignHistoryContext(historyCtx, c.prepared, c.baseline)
@@ -556,6 +578,9 @@ func (c *windowCampaign) persistClaimWindowCampaignContext(ctx context.Context, 
 	}
 	if windowScopeUsesNativeV8(d.Schema) {
 		r.Schema = "full-window-campaign-claim.v8"
+		if d.Schema == "full-window-scope.v11" {
+			r.Schema = "full-window-campaign-claim.v11"
+		}
 		if d.Schema == "full-window-scope.v9" {
 			r.Schema = "full-window-campaign-claim.v9"
 		}
@@ -572,6 +597,18 @@ func (c *windowCampaign) persistClaimWindowCampaignContext(ctx context.Context, 
 	// reopening is prohibited and cannot interpret a partial claim as free.
 	if err := c.checkWindowCampaignContextLocked(ctx); err != nil {
 		return err
+	}
+	if d.Schema == "full-window-scope.v11" {
+		o := c.prepared.observationOwner
+		if o == nil {
+			return fmt.Errorf("v11 observer owner absent before claim")
+		}
+		if e := o.healthy(ctx, c.prepared.v8Authority.manifest); e != nil {
+			return e
+		}
+		if e := checkWindowObservationReceipt(ctx, d.Schema, o.observer, o.identity); e != nil {
+			return e
+		}
 	}
 	c.model = r.ModelPermanent
 	c.jev = r.JEVPermanent
@@ -803,6 +840,9 @@ func (c *windowCampaign) advanceWindowCampaignContext(ctx context.Context, p *wi
 			return fail(fmt.Errorf("v8 extras unresolved"))
 		}
 		checkpoint.Schema = "full-window-campaign-owned-checkpoint.v8"
+		if d.Schema == "full-window-scope.v11" {
+			checkpoint.Schema = "full-window-campaign-owned-checkpoint.v11"
+		}
 		if d.Schema == "full-window-scope.v10" {
 			checkpoint.Schema = "full-window-campaign-owned-checkpoint.v10"
 		}

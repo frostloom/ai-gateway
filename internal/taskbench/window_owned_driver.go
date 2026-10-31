@@ -575,8 +575,7 @@ func (d *windowOwnedDriver) finishWindowOwnedArm(ctx context.Context, record col
 		}
 		return nil, d.stopWindowOwned()
 	}
-	stats := d.observer.Stats()
-	if d.observer.EvaluationIdentity() != d.permit.observerIdentity || stats.Failed != 0 || stats.Dropped != 0 || stats.QueueDepth != 0 || stats.Turns-d.observerStart.Turns != uint64(d.nextTurn) || stats.SampledTurns-d.observerStart.SampledTurns != uint64(d.nextTurn) || stats.Accepted != stats.Exported {
+	if checkWindowArmObservationReceipt(ctx, d.permit.campaign.prepared.scope.Schema, d.observer, d.permit.observerIdentity, d.observerStart, d.nextTurn) != nil {
 		return nil, d.stopWindowOwned()
 	}
 	p := d.permit
@@ -675,8 +674,7 @@ func validateWindowOwnedArmProof(permit *windowAcquisitionPermit, proof *windowO
 	if permit.observer == nil || permit.observer.EvaluationIdentity() != permit.observerIdentity {
 		return fail()
 	}
-	stats := permit.observer.Stats()
-	if stats.Failed != 0 || stats.Dropped != 0 || stats.QueueDepth != 0 || stats.Accepted != stats.Exported {
+	if checkWindowObservationReceipt(context.Background(), permit.campaign.prepared.scope.Schema, permit.observer, permit.observerIdentity) != nil {
 		return fail()
 	}
 	for i, known := range permit.proofs {

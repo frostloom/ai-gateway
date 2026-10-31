@@ -187,6 +187,10 @@ func (a *windowV10Authority) nativeView() *windowV8Authority {
 
 // Public summaries must not expose mutable private completion snapshots.
 func detachedWindowActualStatusV10(in FullWindowActualStatus) FullWindowActualStatus {
+	if in.Observation != nil {
+		value := *in.Observation
+		in.Observation = &value
+	}
 	if in.Completion != nil {
 		value := *in.Completion
 		value.PrefixWindowIDs = append([]string(nil), value.PrefixWindowIDs...)

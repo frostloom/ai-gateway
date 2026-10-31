@@ -60,6 +60,7 @@ type windowAcquisitionRow struct {
 	DurationMS                    float64                   `json:"duration_ms"`
 }
 type windowAcquisitionReceipt struct {
+	Observation                *windowObservationReceiptV11    `json:"observation,omitempty"`
 	Completion                 *windowCompletionDeclarationV10 `json:"completion,omitempty"`
 	V8                         *windowV8RuntimeSummary         `json:"v8,omitempty"`
 	QualityEndArms             int                             `json:"quality_end_arms,omitempty"`
@@ -138,6 +139,14 @@ func runWindowAcquisition(ctx context.Context, auth *windowAcquisitionAuthorizat
 	runErr = err
 	run.started = started
 	defer func() {
+		if run.scope.Schema == "full-window-scope.v11" {
+			receipt, re := windowV11Receipt(run.auth.observer, false)
+			run.receipt.Observation = receipt
+			if re != nil && runErr == nil {
+				runErr = run.failWindowAcquisition("observer_receipt", 0, "")
+			}
+			runErr = errors.Join(runErr, re)
+		}
 		if runErr != nil {
 			run.receipt.Status = "stopped"
 			run.stopWindowAcquisition()
@@ -253,6 +262,9 @@ func openWindowAcquisition(ctx context.Context, auth *windowAcquisitionAuthoriza
 	run.receipt = windowAcquisitionReceipt{Schema: "full-window-acquisition-receipt.v1", EvidenceKind: auth.evidenceKind, Status: "stopped", ScopeSHA256: scopeSHA, ExecutionSHA256: executionSHA, WindowID: run.window.ID, WindowIndex: index, PlannedCampaignPairs: totals.Pairs, PlannedCampaignArms: totals.Arms, PlannedCampaignTurns: totals.DefinedUserTurns, PlannedCurrentPairs: run.window.LastOrdinal - run.window.FirstOrdinal + 1, OperationLimitSeconds: 300}
 	if windowScopeUsesNativeV8(scope.Schema) {
 		run.receipt.Schema = "full-window-acquisition-receipt.v8"
+	}
+	if scope.Schema == "full-window-scope.v11" {
+		run.receipt.Schema = "full-window-acquisition-receipt.v11"
 	}
 	if scope.Schema == "full-window-scope.v10" {
 		run.receipt.Completion = scope.Completion
@@ -476,8 +488,7 @@ func (r *windowAcquisitionRun) completeWindowAcquisition(ctx context.Context) er
 	if r.auth.observer.EvaluationIdentity() != r.auth.observerIdentity || r.auth.observer.ForceFlush(ctx) != nil {
 		return r.failWindowAcquisition("observer_flush", 0, "")
 	}
-	stats := r.auth.observer.Stats()
-	if stats.Failed != 0 || stats.Dropped != 0 || stats.QueueDepth != 0 || stats.Accepted != stats.Exported {
+	if checkWindowObservationReceipt(ctx, r.scope.Schema, r.auth.observer, r.auth.observerIdentity) != nil {
 		return r.failWindowAcquisition("observer_stats", 0, "")
 	}
 	if e := r.captureWindowAcquisitionPayload(true); e != nil {

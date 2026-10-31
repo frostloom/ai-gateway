@@ -38,7 +38,8 @@ type fullWindowDeclaration struct {
 	fullWindowCaps
 }
 type fullWindowScope struct {
-	Completion *windowCompletionDeclarationV10 `json:"completion,omitempty"`
+	Observation *windowObservationDeclarationV11 `json:"observation,omitempty"`
+	Completion  *windowCompletionDeclarationV10  `json:"completion,omitempty"`
 
 	BudgetDeclaration        *windowV8BudgetDeclaration `json:"budget_declaration,omitempty"`
 	RetryDeclaration         *windowV8RetryDeclaration  `json:"retry_declaration,omitempty"`
@@ -171,6 +172,8 @@ func validateFullWindowScope(scope fullWindowScope, s ConversationSuite, p Paire
 			return "", totals, err
 		}
 		expected, e = prepareFullWindowScopeV9(s, p, caps, b, scope.BaselineEvidenceSHA256)
+	case "full-window-scope.v11":
+		expected, e = prepareFullWindowScopeV11(s, p, caps, b, scope.BaselineEvidenceSHA256, scope.Observation)
 	case "full-window-scope.v10":
 		if err := validateWindowV10Declarations(scope); err != nil {
 			return "", totals, err

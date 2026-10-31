@@ -61,6 +61,7 @@ type FullWindowActualReady struct {
 	stoppedV7      windowStoppedV7Baseline
 	stoppedV8      windowStoppedV8Baseline
 	stoppedV9      windowStoppedV9Baseline
+	stoppedV10     windowStoppedV10Baseline
 	v8Authority    *windowV8Authority
 	source         ConversationSuite
 	profiles       PairedProfiles
@@ -76,6 +77,7 @@ type windowActualGoEvidence struct {
 	Packages     []string         `json:"packages"`
 }
 type windowActualManifest struct {
+	SpoolRoot                 string                           `json:"spool_root,omitempty"`
 	ExecutorEquivalence       *windowActualFile                `json:"executor_equivalence,omitempty"`
 	HelperCatalog             *windowActualFile                `json:"helper_catalog,omitempty"`
 	PrivateSettingsSHA256     string                           `json:"private_settings_sha256"`
@@ -132,12 +134,16 @@ func checkFullWindowActualReadyEpoch(o FullWindowActualReadyOptions, epoch int) 
 	v8 := epoch == 8
 	v9 := epoch == 9
 	v10 := epoch == 10
+	v11 := epoch == 11
 	manifestSHA, archiveCommit, archiveTree := fullWindowActualManifestSHA, fullWindowActualArchiveCommit, fullWindowActualArchiveTree
 	if v8 {
 		manifestSHA, archiveCommit, archiveTree = fullWindowV8ManifestSHA, fullWindowV8ArchiveCommit, fullWindowV8ArchiveTree
 	}
 	if v9 {
 		manifestSHA, archiveCommit, archiveTree = fullWindowV9ManifestSHA, fullWindowV9ArchiveCommit, fullWindowV9ArchiveTree
+	}
+	if v11 {
+		manifestSHA, archiveCommit, archiveTree = fullWindowV11ManifestSHA, fullWindowV11ArchiveCommit, fullWindowV11ArchiveTree
 	}
 	if v10 {
 		manifestSHA, archiveCommit, archiveTree = fullWindowV10ManifestSHA, fullWindowV10ArchiveCommit, fullWindowV10ArchiveTree
@@ -146,7 +152,7 @@ func checkFullWindowActualReadyEpoch(o FullWindowActualReadyOptions, epoch int) 
 	reject := func() (FullWindowActualReadySummary, *FullWindowActualReady, error) {
 		return summary, nil, fmt.Errorf("actual readiness rejected")
 	}
-	if epoch != 0 && epoch != 8 && epoch != 9 && epoch != 10 {
+	if epoch != 0 && epoch != 8 && epoch != 9 && epoch != 10 && epoch != 11 {
 		return reject()
 	}
 	if !comparisonDigest(manifestSHA) || !windowActualRevision(archiveCommit) || !windowActualRevision(archiveTree) {
@@ -157,7 +163,7 @@ func checkFullWindowActualReadyEpoch(o FullWindowActualReadyOptions, epoch int) 
 		return reject()
 	}
 	var m windowActualManifest
-	if decodeWindowActualJSON(raw, &m) != nil || validateWindowActualPrivateSettingsBinding(&m) != nil || !(windowActualSupportedEpoch(m) && epoch == 0 || v8 && m.Schema == "full-window-actual-ready.v8" && m.Scope.Schema == "full-window-scope.v8" || v9 && m.Schema == "full-window-actual-ready.v9" && m.Scope.Schema == "full-window-scope.v9" || v10 && m.Schema == "full-window-actual-ready.v10" && m.Scope.Schema == "full-window-scope.v10") || m.EvidenceKind != "actual" || m.ArchiveCommit != archiveCommit || m.ArchiveTree != archiveTree {
+	if decodeWindowActualJSON(raw, &m) != nil || validateWindowActualPrivateSettingsBinding(&m) != nil || !(windowActualSupportedEpoch(m) && epoch == 0 || v8 && m.Schema == "full-window-actual-ready.v8" && m.Scope.Schema == "full-window-scope.v8" || v9 && m.Schema == "full-window-actual-ready.v9" && m.Scope.Schema == "full-window-scope.v9" || v10 && m.Schema == "full-window-actual-ready.v10" && m.Scope.Schema == "full-window-scope.v10" || v11 && m.Schema == "full-window-actual-ready.v11" && m.Scope.Schema == "full-window-scope.v11") || m.EvidenceKind != "actual" || m.ArchiveCommit != archiveCommit || m.ArchiveTree != archiveTree {
 		return reject()
 	}
 	attestationRaw, err := readWindowActualBytes(o.ManifestPath+".binary-attestation.json", "", 65536)
@@ -179,7 +185,7 @@ func checkFullWindowActualReadyEpoch(o FullWindowActualReadyOptions, epoch int) 
 	if err := validateWindowActualHelperCatalog(m, o.ManifestPath); err != nil {
 		return reject()
 	}
-	if v9 || v10 {
+	if v9 || v10 || v11 {
 		customerRevision = m.ArchiveCommit
 	}
 
@@ -220,6 +226,9 @@ func checkFullWindowActualReadyEpoch(o FullWindowActualReadyOptions, epoch int) 
 			return reject()
 		}
 	}
+	if checkWindowV11FreshSpool(m) != nil {
+		return reject()
+	}
 	id := m.Observer
 	exportTimeoutMS := windowObserverTimeoutForScope(m.Scope.Schema)
 	if !id.Enabled || !id.CaptureContent || id.SampleRate != 1 || id.Environment != "evaluation" || id.Release != m.ArchiveCommit || id.ExportTimeoutMS != exportTimeoutMS || id.QueueSize < 1 || !comparisonDigest(id.EndpointSHA256) || !comparisonDigest(id.ProjectSHA256) {
@@ -244,6 +253,9 @@ func checkFullWindowActualReadyEpoch(o FullWindowActualReadyOptions, epoch int) 
 	if v9 {
 		prepare = prepareWindowCampaignV9Technical
 	}
+	if v11 {
+		prepare = prepareWindowCampaignV11Technical
+	}
 	if v10 {
 		prepare = prepareWindowCampaignV10Technical
 	}
@@ -260,7 +272,13 @@ func checkFullWindowActualReadyEpoch(o FullWindowActualReadyOptions, epoch int) 
 		return reject()
 	}
 	candidate := &FullWindowActualReady{manifestPath: o.ManifestPath, manifestRaw: append([]byte(nil), raw...), attestationRaw: append([]byte(nil), attestationRaw...), manifest: m, prepared: prepared, source: source, profiles: profiles}
-	if v10 {
+	if v11 {
+		proof, e := loadWindowActualStoppedBaselineV11(m)
+		if e != nil {
+			return reject()
+		}
+		candidate.baseline, candidate.stoppedV10, candidate.prepared.stoppedV10 = windowV11CandidateBaseline(proof.base), proof, &proof
+	} else if v10 {
 		proof, e := loadWindowActualStoppedBaselineV10(m)
 		if e != nil {
 			return reject()
@@ -329,6 +347,9 @@ func checkFullWindowActualReadyEpoch(o FullWindowActualReadyOptions, epoch int) 
 
 // Future session startup must recheck before any credential load or claim write.
 func (r *FullWindowActualReady) revalidate() error {
+	if r != nil && r.manifest.Schema == "full-window-actual-ready.v11" {
+		return r.revalidateV11()
+	}
 	if r != nil && r.manifest.Schema == "full-window-actual-ready.v10" {
 		return r.revalidateV10()
 	}
@@ -645,6 +666,9 @@ func validateWindowActualBuildPins(info *debug.BuildInfo, m windowActualManifest
 	}
 	prefix := "github.com/frostloom/ai-gateway/internal/taskbench."
 	expected := map[string]string{prefix + "fullWindowActualManifestSHA": sha, prefix + "fullWindowActualArchiveCommit": m.ArchiveCommit, prefix + "fullWindowActualArchiveTree": m.ArchiveTree}
+	if m.Schema == "full-window-actual-ready.v11" {
+		expected = map[string]string{prefix + "fullWindowV11ManifestSHA": sha, prefix + "fullWindowV11ArchiveCommit": m.ArchiveCommit, prefix + "fullWindowV11ArchiveTree": m.ArchiveTree}
+	}
 	if m.Schema == "full-window-actual-ready.v10" {
 		expected = map[string]string{prefix + "fullWindowV10ManifestSHA": sha, prefix + "fullWindowV10ArchiveCommit": m.ArchiveCommit, prefix + "fullWindowV10ArchiveTree": m.ArchiveTree}
 	} else if m.Schema == "full-window-actual-ready.v9" {

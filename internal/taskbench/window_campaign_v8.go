@@ -1,6 +1,7 @@
 package taskbench
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"path/filepath"
@@ -54,7 +55,16 @@ func validateWindowCampaignNativeAuthority(p windowCampaignPrepared) error {
 	if a == nil || validateWindowNativeDeclarations(p.scope) != nil {
 		return fmt.Errorf("native exact epoch authority absent")
 	}
-	if p.scope.Schema == "full-window-scope.v10" {
+	if p.scope.Schema == "full-window-scope.v11" {
+		if a.v11 == nil || a.v10 != nil || a.v9 != nil || a.manifest.Schema != "full-window-actual-ready.v11" || a.binding.Schema != "full-window-delegated-execution-authorization.v11" || !reflect.DeepEqual(a.manifest.Scope, p.scope) || windowV8DeclarationSHA(p.scope) != p.scopeSHA {
+			return fmt.Errorf("v11 exact authority mismatch")
+		}
+		if e := p.observationOwner.healthy(context.Background(), a.manifest); e != nil {
+			return e
+		}
+	} else if a.v11 != nil {
+		return fmt.Errorf("cross-epoch v11 authority")
+	} else if p.scope.Schema == "full-window-scope.v10" {
 		raw, err := json.Marshal(p.scope)
 		if err != nil || conversationHash(raw) != p.scopeSHA {
 			return fmt.Errorf("v10 prepared scope digest changed")
