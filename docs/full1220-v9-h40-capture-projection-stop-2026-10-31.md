@@ -28,7 +28,9 @@
 
 原失败操作永久不重入。另一个精确冻结、独审的首次发布入口只承接尚未创建的原score IDs：保持原scope和registry，重核全空态，复用七份原完整GET，仅允许剩余三trace各一次首次GET。十个trace严格校验全部通过后，才按原batch→intents→sent-before-POST→ACK顺序首次发布。任何冲突或不确定仍只允许验证／hold，不允许重发。321双臂的原结构失败和语义正分抑制保持，也不能将下期PendingPlan2说成当期Plan1已改。
 
-计划见[capture-input correction](superpowers/plans/2026-10-31-capture-input-correction.md)。当前只完成诊断和设计，尚未激活修复入口；验证和读回闭合后再继续原完整评测，不扩大实验或预算。
+计划见[capture-input correction](superpowers/plans/2026-10-31-capture-input-correction.md)。离线模板修复已在main的3582b34ec提交，经独立审查通过；真实Go投影回归11项、相邻评分测试19项通过，旧helper原样保留。新模板SHA为98a26427ab04797c26c88356e88800d417362e215b5fbf9c39531b2de36c41d9。
+
+补充签名catalog、实际HashKey投影核验、consumer和首次评分恢复入口仍待完成，尚未激活。原H40保持idle，验证和读回闭合后再继续原完整评测，不扩大实验或预算。
 
 | 证据 | SHA256 |
 |---|---|
