@@ -38,6 +38,8 @@ type fullWindowDeclaration struct {
 	fullWindowCaps
 }
 type fullWindowScope struct {
+	Completion *windowCompletionDeclarationV10 `json:"completion,omitempty"`
+
 	BudgetDeclaration        *windowV8BudgetDeclaration `json:"budget_declaration,omitempty"`
 	RetryDeclaration         *windowV8RetryDeclaration  `json:"retry_declaration,omitempty"`
 	BudgetDeclarationSHA256  string                     `json:"budget_declaration_sha256,omitempty"`
@@ -169,6 +171,11 @@ func validateFullWindowScope(scope fullWindowScope, s ConversationSuite, p Paire
 			return "", totals, err
 		}
 		expected, e = prepareFullWindowScopeV9(s, p, caps, b, scope.BaselineEvidenceSHA256)
+	case "full-window-scope.v10":
+		if err := validateWindowV10Declarations(scope); err != nil {
+			return "", totals, err
+		}
+		expected, e = prepareFullWindowScopeV10(s, p, caps, b, scope.BaselineEvidenceSHA256)
 	default:
 		return "", totals, fmt.Errorf("unsupported complete-window scope version")
 	}
@@ -177,6 +184,17 @@ func validateFullWindowScope(scope fullWindowScope, s ConversationSuite, p Paire
 	}
 	if !reflect.DeepEqual(expected, scope) {
 		return "", totals, fmt.Errorf("scope differs from rederived frozen schedule")
+	}
+	if scope.Schema == "full-window-scope.v10" {
+		totals, e = executionTotals(scope)
+		if e != nil {
+			return "", fullWindowTotals{}, e
+		}
+		raw, err := json.Marshal(scope)
+		if err != nil {
+			return "", fullWindowTotals{}, err
+		}
+		return conversationHash(raw), totals, nil
 	}
 	totals = fullWindowTotals{Pairs: 3660, Arms: 7320, Boundaries: 1851}
 	for _, slot := range scope.Slots {
