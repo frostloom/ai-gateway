@@ -174,3 +174,25 @@ class VerifierIssuer(unittest.TestCase):
         foreign=types.SimpleNamespace(__file__='/controlled/v11/verifier-preparation/verify-window.py',window_proof=lambda *a: (_ for _ in ()).throw(AssertionError('foreign issuer invoked')))
         with patch.object(m,'_selection',lambda:None),patch.object(m,'FROZEN_ROOT','/controlled/v11'),patch.object(m,'_regular_bytes',return_value=b'controlled'),patch.object(m,'FROZEN_VERIFIER_SHA256',hashlib.sha256(b'controlled').hexdigest()):
             with self.assertRaises(ValueError):m.verify_actual_score_inputs('/controlled/v11',window_index=1,cohort={'json':True},verifier=foreign)
+
+class ReviewCredentialBoundary(unittest.TestCase):
+    def test_score_client_rejects_before_private_loader_without_remote_proof(self):
+        m=load();calls=[]
+        with patch.object(m,'_check_actual',lambda *a:None),patch.object(m,'_check_remote',side_effect=ValueError('remote proof absent')),patch.object(m,'_load_window_score_client',side_effect=lambda *a:calls.append(a)):
+            with self.assertRaisesRegex(ValueError,'remote proof absent'):
+                m.load_window_score_client(b'{}','/must-not-read-private-settings',actual_proof=object())
+        self.assertEqual(calls,[])
+
+    def test_missing_json_or_foreign_remote_does_not_load_credentials(self):
+        m=load()
+        for remote in (None,{'all_verified':True,'actual_remote_ids_parents_content_verified':True},object()):
+            with self.subTest(remote=type(remote).__name__),patch.object(m,'_check_actual',lambda *a:None),patch.object(m,'_load_window_score_client',side_effect=AssertionError('private loader reached')):
+                with self.assertRaisesRegex(ValueError,'UNFROZEN'):
+                    m.load_window_score_client(b'{}','/never-read',actual_proof=object(),plan={},projection=object(),remote_proof=remote)
+
+    def test_unit_mock_gate_order_before_client_construction(self):
+        m=load();calls=[];raw=b'controlled manifest';proof=types.SimpleNamespace(receipt_raw=b'receipt',summary_raw=b'summary')
+        plan={'provenance':{k:hashlib.sha256(v).hexdigest() for k,v in [('manifest_sha256',raw),('receipt_sha256',proof.receipt_raw),('summary_sha256',proof.summary_raw)]}}
+        with patch.object(m,'_check_actual',side_effect=lambda *a:calls.append('actual')),patch.object(m,'_check_remote',side_effect=lambda *a:calls.append('remote')),patch.object(m,'_validate_projection_plan_binding',side_effect=lambda *a:calls.append('projection')),patch.object(m,'_load_window_score_client',side_effect=lambda *a:calls.append('private')):
+            m.load_window_score_client(raw,'/UNIT-MOCK',actual_proof=proof,plan=plan,projection=object(),remote_proof=object())
+        self.assertEqual(calls,['actual','remote','projection','private'])

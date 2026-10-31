@@ -459,3 +459,57 @@ class CatalogTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+class ReviewFilePinBoundaries(unittest.TestCase):
+    def test_fifo_pin_file_and_tool_reject_without_waiting_for_writer(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp).resolve();fifo=root/'fifo';os.mkfifo(fifo,0o600)
+            for method in ('pin_file','pin_tool'):
+                with self.subTest(method=method):
+                    script="""import sys,types
+from pathlib import Path
+p=Path(sys.argv[1]);m=types.ModuleType('fifo_runtime');m.__file__=str(p);sys.modules[m.__name__]=m
+exec(compile(p.read_bytes(),str(p),'exec'),m.__dict__)
+try:getattr(m,sys.argv[2])(Path(sys.argv[3]))
+except ValueError:print('rejected')
+else:raise AssertionError('FIFO accepted')
+"""
+                    child=subprocess.Popen([sys.executable,'-c',script,str(Path(__file__).with_name('full1220-v11-helper-runtime.py')),method,str(fifo)],stdout=subprocess.PIPE,stderr=subprocess.PIPE,start_new_session=True)
+                    try:
+                        try:out,err=child.communicate(timeout=.5)
+                        except subprocess.TimeoutExpired:self.fail(method+' blocked before regular-file validation')
+                        self.assertEqual(child.returncode,0,err);self.assertEqual(out,b'rejected\n')
+                    finally:
+                        if child.poll() is None:os.killpg(child.pid,signal.SIGKILL);child.communicate(timeout=2)
+    def test_metadata_only_changes_invalidate_regular_file_pin(self):
+        m=module()
+        with tempfile.TemporaryDirectory() as tmp:
+            path=Path(tmp).resolve()/'file';path.write_bytes(b'unchanged');path.chmod(0o400)
+            pin=m.pin_file(path);before=path.stat();os.utime(path,ns=(before.st_atime_ns,before.st_mtime_ns+1000000))
+            with self.assertRaises(ValueError):m.check_file(pin)
+
+    def test_same_inode_restored_bytes_and_mtime_still_invalidate_ctime(self):
+        m=module()
+        with tempfile.TemporaryDirectory() as tmp:
+            path=Path(tmp).resolve()/'file';path.write_bytes(b'original');path.chmod(0o400)
+            before=path.stat();pin=m.pin_file(path)
+            path.chmod(0o600);path.write_bytes(b'modified');path.write_bytes(b'original');path.chmod(0o400)
+            os.utime(path,ns=(before.st_atime_ns,before.st_mtime_ns))
+            self.assertEqual(path.stat().st_ino,before.st_ino);self.assertEqual(path.read_bytes(),b'original')
+            self.assertEqual(path.stat().st_mtime_ns,before.st_mtime_ns)
+            with self.assertRaises(ValueError):m.check_file(pin)
+
+    def test_fifo_substitution_preflight_and_postflight_retain_barrier(self):
+        for phase in ('preflight','postflight'):
+            with self.subTest(phase=phase),tempfile.TemporaryDirectory() as tmp:
+                root=Path(tmp).resolve();m=module();inp=root/'input';inp.write_bytes(b'original');inp.chmod(0o400)
+                pin=m.pin_file(inp);launcher=root/'launcher';launcher.write_text('#!/bin/sh\nexec '+str(Path(sys.executable).resolve())+' "$@"\n');launcher.chmod(0o500)
+                code='pass'
+                if phase=='preflight':inp.unlink();os.mkfifo(inp,0o600)
+                else:code='import os;os.unlink('+repr(str(inp))+');os.mkfifo('+repr(str(inp))+',0o600)'
+                start=time.monotonic()
+                result=m.run_owned(state_root=root/'state',attempt_name='one',argv=[str(launcher),'-I','-c',code],cwd=root,env={'PATH':'/usr/bin:/bin'},executable_pin=m.pin_file(launcher),inputs=[pin],timeout=2)
+                self.assertLess(time.monotonic()-start,1)
+                self.assertFalse(result['accepted']);self.assertTrue((root/'state/active.json').exists())
+                if phase=='preflight':self.assertIsNone(result['owned_pgid'])
+                else:self.assertTrue(result['cleanup']['leader_reaped']);self.assertTrue(result['cleanup']['group_empty'])

@@ -21,7 +21,7 @@ DEPENDENCIES = {
     'native': ('full1220-v8-native.py', '97a0c330b018f72b8aaf0370b3e5ec0a348eca980927b483ba387f12f6781383'),
     'codec': ('full1220-v11-contracts.py', 'd8ede15f09b9dfc33eee33d58083bd7e5c09bd679ca8be34a86ec2472eecbbee'),
     'source': ('full1220-v8-source.py', '9ec4994cee9b9a845487b53dd5bc6bcc8ce91fb05e2536cdba78ffb2978fa9da'),
-    'runner': ('full1220-v11-helper-runtime.py', 'c33b4cd262f30ee79b7781d31a83b49c3a0ef7c8053f9e9f4834ac5d840c4b7d'),
+    'runner': ('full1220-v11-helper-runtime.py', '7a1fcfa81255ef2b081376de5791d1d901159e5745f2db9de33ca2e36666477c'),
 }
 BASELINE = 'a50e6863d5de3a1479f41173052176e83262092e618c3297bfdc6ae59949a517'
 BUDGET = '7e67e78d996109ca54df699be14c2b02956681e3891218a4da11c3cbf6e00678'

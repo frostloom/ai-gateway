@@ -1459,8 +1459,19 @@ def validate_native_observations(observations, packets):
     except (KeyError,TypeError,IndexError) as error:raise ValueError('Invalid native observation: '+type(error).__name__) from error
 
 
-def load_window_score_client(manifest_raw, settings_path, *, actual_proof=None):
+def load_window_score_client(manifest_raw, settings_path, *, actual_proof=None,
+                             plan=None, projection=None, remote_proof=None):
+    """Score credentials are unavailable until the separate remote proof passes.
+
+    Task4's readback-only client and capture HashKey input remain independent;
+    neither uses this score-client loader to obtain its prerequisite proof.
+    """
     _check_actual(actual_proof,manifest_raw)
+    _check_remote(remote_proof,plan,projection)
+    _validate_projection_plan_binding(plan,projection)
+    _equal(plan['provenance']['manifest_sha256'],_sha(manifest_raw),'Score client manifest binding')
+    _equal(plan['provenance']['receipt_sha256'],_sha(actual_proof.receipt_raw),'Score client receipt binding')
+    _equal(plan['provenance']['summary_sha256'],_sha(actual_proof.summary_raw),'Score client summary binding')
     return _load_window_score_client(manifest_raw,settings_path)
 
 

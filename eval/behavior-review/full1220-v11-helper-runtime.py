@@ -113,15 +113,22 @@ class FilePin:
     mode: int
     uid: int
     immutable: bool
+    file_type: int
+    gid: int
+    nlink: int
+    mtime_ns: int
+    ctime_ns: int
 
 
 def pin_file(path, *, immutable=True):
     path = _no_alias(path)
-    fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW)
+    fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
     try:
         before = os.fstat(fd)
         need(stat.S_ISREG(before.st_mode) and before.st_nlink == 1 and before.st_uid == os.getuid(), 'regular single-link owned file')
         need(not immutable or stat.S_IMODE(before.st_mode) in (0o400, 0o500), 'private immutable file mode')
+        fields = lambda s: (s.st_dev, s.st_ino, s.st_mode, s.st_nlink, s.st_uid, s.st_gid, s.st_size, s.st_mtime_ns, s.st_ctime_ns)
+        need(fields(before)==fields(os.stat(path,follow_symlinks=False)), 'opened file/path identity mismatch')
         chunks = []
         while True:
             block = os.read(fd, 1024*1024)
@@ -130,10 +137,10 @@ def pin_file(path, *, immutable=True):
             chunks.append(block)
         after = os.fstat(fd)
         current = os.stat(path, follow_symlinks=False)
-        fields = lambda s: (s.st_dev, s.st_ino, s.st_mode, s.st_nlink, s.st_uid, s.st_size, s.st_mtime_ns, s.st_ctime_ns)
         need(fields(before) == fields(after) == fields(current), 'file changed while reading')
         return FilePin(str(path), sha(b''.join(chunks)), before.st_size, before.st_dev, before.st_ino,
-                       stat.S_IMODE(before.st_mode), before.st_uid, immutable)
+                       stat.S_IMODE(before.st_mode), before.st_uid, immutable, stat.S_IFMT(before.st_mode),
+                       before.st_gid, before.st_nlink, before.st_mtime_ns, before.st_ctime_ns)
     finally:
         os.close(fd)
 
@@ -173,11 +180,13 @@ def pin_tool(path):
     """Trusted caller must compare path/SHA to its signed catalog selection."""
     path=_no_alias(path)
     need(path.resolve()==path,'canonical installed tool path')
-    fd=os.open(path,os.O_RDONLY|os.O_NOFOLLOW)
+    fd=os.open(path,os.O_RDONLY|os.O_NOFOLLOW|os.O_NONBLOCK)
     try:
         before=os.fstat(fd)
         need(stat.S_ISREG(before.st_mode) and before.st_uid in (0,os.getuid()) and before.st_nlink>=1,'regular root/current-user tool')
         need(before.st_mode & 0o022==0,'tool group/world writable')
+        fields=lambda s:(s.st_dev,s.st_ino,s.st_mode,s.st_nlink,s.st_uid,s.st_gid,s.st_size,s.st_mtime_ns,s.st_ctime_ns)
+        need(fields(before)==fields(os.stat(path,follow_symlinks=False)),'opened tool/path identity mismatch')
         digest=hashlib.sha256()
         while True:
             block=os.read(fd,1024*1024)
