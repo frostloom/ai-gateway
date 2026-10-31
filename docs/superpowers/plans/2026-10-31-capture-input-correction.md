@@ -62,7 +62,7 @@
 **Files:**
 - Create eval/behavior-review/full1220-capture-input-operator.py.
 - Create eval/behavior-review/test_full1220_capture_input_operator.py.
-- Render fixed activation jobs/output namespaces under the new private capture-input-v1 directory, never the old t40 operation directory.
+- Render fixed activation jobs/output namespaces under the new private capture-input-v1 directory, never the old t40 operation directory. The unchanged issuer requires fresh source-helper output under runs/capture-input-v1-source/<operation-name>; no original issuer gate changes. Future untouched normal targets additionally reserve an explicitly new-entry-owned legacy namespace sentinel to block the old CLI, without fabricating legacy operation evidence.
 
 **Interfaces:** The H40 completion job binds the original operation-error/plan/publish-intent SHA, exact 28 original score IDs, exact seven GET triples and fixed target/summary/horizon. The replay opener returns only those original bodies for their original observation requests and delegates only the three unrequested trace GETs once. Score verification GETs retain the original client behavior. Future normal once-publication mode uses the same corrected capture path, fresh proofs and original registry/IDs, with no recovery semantics for already attempted windows.
 

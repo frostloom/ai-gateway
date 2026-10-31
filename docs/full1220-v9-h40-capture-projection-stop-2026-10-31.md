@@ -30,7 +30,11 @@
 
 计划见[capture-input correction](superpowers/plans/2026-10-31-capture-input-correction.md)。离线模板修复已在main的3582b34ec提交，经独立审查通过；真实Go投影回归11项、相邻评分测试19项通过，旧helper原样保留。新模板SHA为98a26427ab04797c26c88356e88800d417362e215b5fbf9c39531b2de36c41d9。
 
-补充签名catalog、实际HashKey投影核验、consumer和首次评分恢复入口仍待完成，尚未激活。原H40保持idle，验证和读回闭合后再继续原完整评测，不扩大实验或预算。
+补充consumer已在1a315d412提交并独审通过，19项新测试及121项相关回归通过。隔离构建的两个helper均accepted且cleanup确认；新catalog经限定sign-catalog调用独审、签名和真实验签通过，原catalog保持不变。
+
+实际原工厂与受保护的延迟stdin投影已完成：第40窗原7份GET对应7个trace、15轮、66个observation全部严格匹配；预期仍为10个trace，未读取的3个保持pending，all_pass=false。第39窗原10个trace全部通过，未重新请求任何原GET。首次离线尝试因原issuer输出目录约束在工厂与HashKey前被拒，其原输出保留；后续独立目录遵守原路径限制，未放宽issuer。
+
+首次评分恢复入口fe02c916b已实现，15项新测试及71项相关回归通过，仍待独审及完整变更冻结。当前没有新评分POST、Langfuse GET或第41窗命令。原H40保持idle，首次评分和读回闭合后再继续原完整评测，不扩大实验或预算。
 
 | 证据 | SHA256 |
 |---|---|
@@ -41,3 +45,5 @@
 | 恢复边界设计独审 | ce08f4bd8671d562718dffe9e765526313305f86c5a874945c345d0a948aab22 |
 | 前39窗交付及当前停态独审 | 13bcb70ccbfb6bf202f77e8e0f92a74e748ce67e3ba8df67b112e7de8ee961ef |
 | 前39窗动态累计 | aabc5740ae6a3fc45a5d60f5edefea4e38887ba685efe94bc6dde547a0b74c8b |
+
+补充工程证据：新catalog `2a5ed70eb9eb76b95a77d790aa69f0ae156a48686429636111041efd7a8a0cb8`；binding `561a5ebf8e59e4cea4ff5bece7c29160e2a1d4f77443ee2037a387f19cff0dd7`；真实离线回放结果 `1e9e1c39ef1f5893787e0f4ee306058a020135ffd54f606e09e6aac1988120b9`。这些是校验器交付证据，不是第40窗评分完成证明。
