@@ -134,6 +134,44 @@ class OperatorTests(unittest.TestCase):
             (old/'window-000042-publish-v2-once').symlink_to(self.root/'missing')
             with self.assertRaises(ValueError): self.m.reserve(self.base, 'normal', 42, 'c'*64)
 
+    def test_normal_reservation_failures_permanently_block_original_reserve(self):
+        scores = self.scores()
+        for stage in ('new-mkdir', 'new-fsync', 'new-intent', 'legacy-fsync', 'legacy-marker'):
+            with self.subTest(stage=stage):
+                attempt = self.root/stage; attempt.mkdir(mode=0o700)
+                old, new = attempt/'old', attempt/'new'
+                old.mkdir(mode=0o700); new.mkdir(mode=0o700)
+                output = new/'window-000041-publish-once'
+                sentinel = old/'window-000041-publish-once'
+                mkdir, sync, record = Path.mkdir, self.base.sync_dir, self.base.record
+                def failing_mkdir(path, *a, **kw):
+                    if stage == 'new-mkdir' and path == output: raise OSError('synthetic mkdir failure')
+                    return mkdir(path, *a, **kw)
+                def failing_sync(path):
+                    if (stage == 'new-fsync' and path == new) or (stage == 'legacy-fsync' and path == old):
+                        raise OSError('synthetic directory fsync failure')
+                    return sync(path)
+                def failing_record(path, value):
+                    if stage == 'legacy-marker' and path == sentinel/'new-entry-owned-sentinel.json':
+                        raise OSError('synthetic legacy marker write failure')
+                    record(path, value)
+                    if stage == 'new-intent' and path == output/'operation-intent.json':
+                        raise OSError('synthetic error after new intent persistence')
+                with patch.object(self.m,'OLD_RUNS',old), patch.object(self.m,'RUNS',new):
+                    handle = scores._open_publication_registry(self.m.SCOPE, create=True)
+                    try:
+                        with patch.object(Path,'mkdir',failing_mkdir), patch.object(self.base,'sync_dir',failing_sync), patch.object(self.base,'record',failing_record):
+                            with self.assertRaises(OSError): self.m.reserve(self.base,'normal',41,'a'*64)
+                    finally: handle.close()
+                    # Real legacy reserve, after the failed attempt and lock release.
+                    with patch.object(self.base,'RUNS',old):
+                        with self.assertRaises(ValueError): self.base.reserve('publish',41,None,'b'*64)
+                    with self.assertRaises(ValueError): self.m.reserve(self.base,'normal',41,'c'*64)
+                self.assertTrue(sentinel.is_dir())
+                self.assertFalse((sentinel/'operation-intent.json').exists())
+                if stage.startswith('legacy-'): self.assertFalse(output.exists())
+                # Keep every failed synthetic namespace/partial write as evidence.
+
     def test_completion_rejects_alternate_legacy_operation_even_dangling(self):
         old = self.root/'old'; new = self.root/'new'; old.mkdir(mode=0o700); new.mkdir(mode=0o700)
         (old/'window-000040-publish-once').mkdir(mode=0o700)

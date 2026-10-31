@@ -99,12 +99,9 @@ def reserve(base, mode, index, job_sha):
         for n in os.listdir(RUNS):
             need(not (n.startswith('window-000040-') and ('publish' in n or 'completion' in n)), 'H40 completion namespace consumed')
     output = RUNS/name
-    output.mkdir(mode=0o700); base.sync_dir(RUNS)
-    base.record(output/'operation-intent.json', {'schema':'full1220-capture-input-operation.v1',
-        'entry':'capture-input-v1', 'mode':mode, 'target_index':index, 'job_sha256':job_sha,
-        'reentry_forbidden':True})
     if mode == 'normal':
-        # Legacy reserve checks directory existence before any proof/key work.
+        # Under the original scope lock, consume the legacy namespace FIRST.
+        # Any later marker/output/write failure leaves old reserve blocked.
         # This is explicitly a new-entry-owned sentinel, not an old execution.
         sentinel = OLD_RUNS/f'window-{index:06d}-publish-once'
         sentinel.mkdir(mode=0o700); base.sync_dir(OLD_RUNS)
@@ -112,6 +109,10 @@ def reserve(base, mode, index, job_sha):
             'schema':'full1220-capture-input-legacy-barrier.v1', 'entry':'capture-input-v1',
             'target_index':index, 'job_sha256':job_sha, 'output':str(output),
             'old_operator_executed':False, 'permanent_no_reentry':True})
+    output.mkdir(mode=0o700); base.sync_dir(RUNS)
+    base.record(output/'operation-intent.json', {'schema':'full1220-capture-input-operation.v1',
+        'entry':'capture-input-v1', 'mode':mode, 'target_index':index, 'job_sha256':job_sha,
+        'reentry_forbidden':True})
     return output
 
 
