@@ -55,6 +55,8 @@ class Evidence:
         st = self.root.lstat(); need(stat.S_ISDIR(st.st_mode), 'root directory required')
         self.root_marker = (st.st_dev, st.st_ino, st.st_mode)
         self.markers = {}; self.directory_markers = {}; self.bounds = {}
+        self._inventory_limits = (100000,100000,None)
+        self._spool_snapshot = False
 
     def _root_check(self):
         st = self.root.lstat()
@@ -95,21 +97,37 @@ class Evidence:
         self.markers[name]=marker; self.bounds[name]=bound
         return raw
 
-    def inventory(self, expected):
-        self._root_check(); found=set(); directories=[self.root]
+    def inventory(self, expected=None):
+        # Discovery and every later check share the selected physical limits.
+        # scandir streams entries; listdir/Path.iterdir/os.walk can retain an
+        # oversized directory before the first limit check runs.
+        self._root_check(); found=set(); directories=[self.root]; visited=set(); size=0
+        entries_limit,directory_limit,byte_limit=self._inventory_limits
         while directories:
             directory=directories.pop()
-            for item in directory.iterdir():
-                name=item.relative_to(self.root).as_posix(); st=item.lstat()
-                need(not stat.S_ISLNK(st.st_mode), 'inventory symlink')
-                if stat.S_ISDIR(st.st_mode):
-                    need(any(x.startswith(name+'/') for x in expected), 'orphan directory')
-                    directories.append(item)
-                else:
-                    need(stat.S_ISREG(st.st_mode) and st.st_nlink==1, 'inventory file type/link')
-                    found.add(name)
-                need(len(found)+len(directories)<=100000, 'inventory bound')
-        need(found==set(expected), 'closed namespace inventory mismatch')
+            with os.scandir(directory) as entries:
+                for item in entries:
+                    name=Path(item.path).relative_to(self.root).as_posix(); st=item.stat(follow_symlinks=False)
+                    need(not stat.S_ISLNK(st.st_mode), 'inventory symlink')
+                    need(len(found)+len(visited)<entries_limit, 'inventory bound')
+                    if stat.S_ISDIR(st.st_mode):
+                        need(len(visited)<directory_limit, 'inventory directory bound')
+                        visited.add(name);directories.append(Path(item.path))
+                    else:
+                        need(stat.S_ISREG(st.st_mode) and st.st_nlink==1, 'inventory file type/link')
+                        if self._spool_snapshot:_spool_leaf_size(name,st.st_size)
+                        size+=st.st_size
+                        need(byte_limit is None or size<=byte_limit, 'inventory byte bound')
+                        found.add(name)
+        # Include every ancestor, not only directories still on the DFS stack.
+        ancestors=set()
+        for name in found if expected is None else expected:
+            parts=name.split('/')
+            ancestors.update('/'.join(parts[:i]) for i in range(1,len(parts)))
+        need(visited==ancestors, 'orphan directory')
+        if expected is not None:need(found==set(expected), 'closed namespace inventory mismatch')
+        self._root_check()
+        return found
 
     def recheck(self):
         self._root_check()
@@ -911,7 +929,11 @@ def _records_top_marker(root,expected_names,original=None):
     """Same original closed namespace/set/types before and after source replay."""
     records=Path(root)/'records';st=records.lstat()
     need(stat.S_ISDIR(st.st_mode) and not records.is_symlink(),'records root directory type')
-    names={p.name for p in records.iterdir()}
+    names=set()
+    with os.scandir(records) as entries:
+        for item in entries:
+            need(len(names)<len(expected_names),'records top namespace bound')
+            names.add(item.name)
     need(names==set(expected_names),'closed session namespace; stopped/future output rejected')
     entries=[]
     for name in sorted(expected_names):
@@ -1033,12 +1055,68 @@ class VerifiedV11Cohort:
     def __reduce__(self):raise TypeError('process-local cohort cannot serialize')
 
 
-def _snapshot(root,*,keep_raw=True):
+def _records_limits(scope,index=None):
+    # Four native leaves/packet, arm recording plus two possible quality
+    # sidecars/arm, receipt+payload manifest+store/window, and one native dir.
+    # The whole records root adds each window dir/summary and startup/terminal.
+    windows=scope['windows'] if index is None else [execution_window_at(scope,index)]
+    packets=sum(w['max_model_calls']+w['max_jev_calls'] for w in windows)+40
+    arms=sum(2*(w['last_ordinal']-w['first_ordinal']+1) for w in windows)
+    count=len(windows);directories=count*(2 if index is None else 1)
+    files=4*packets+3*arms+3*count+(count+2 if index is None else 0)
+    return files+directories,directories,None
+
+
+def _campaign_limits():
+    # 511 claims, checkpoints, ledgers and ledger directories; 40 extras; lock.
+    return 4*511+40+1,511,None
+
+
+_SPOOL_CAPACITY=4<<30
+# A valid protobuf batch has >=one span: trace ID (18), span ID (10),
+# nonzero fixed64 start/end (9+9), three enclosing length-delimited tags (6).
+# Its canonical commit contains at least trace hex (32), span hex (16),
+# body SHA hex (64), even ignoring every JSON key/punctuation/other field.
+# These are mathematical lower bounds, not average sizes or a batch quota.
+_SPOOL_MIN_BODY_BYTES=52
+_SPOOL_MIN_COMMIT_BYTES=112
+
+
+def _spool_limits():
+    batches=_SPOOL_CAPACITY//(_SPOOL_MIN_BODY_BYTES+_SPOOL_MIN_COMMIT_BYTES)
+    return 3+2*batches,0,_SPOOL_CAPACITY
+
+
+def _spool_leaf_size(name,size):
+    if name=='lock':need(size==64,'spool leaf lock size');return
+    if name in ('header.json','closed.json'):
+        need(0<size<=4096,'spool leaf control size');return
+    match=re.fullmatch(r'([0-9]{20})\.(pb|commit)',name)
+    need(match is not None,'spool namespace foreign leaf')
+    need(0<int(match[1])<=(_spool_limits()[0]-3)//2,'spool namespace batch bound')
+    low,high=(_SPOOL_MIN_BODY_BYTES,1<<20) if match[2]=='pb' else (_SPOOL_MIN_COMMIT_BYTES,16<<20)
+    need(low<=size<=high,'spool leaf physical size bound')
+
+
+def _tighten_spool_snapshot(reader,summary):
+    # Called only after the one genuine helper and final live-summary/coverage
+    # comparison. Keep the original pre-helper reader, hashes and identities.
+    batches=_number(summary['batches'],(_spool_limits()[0]-3)//2)
+    need(batches<=_number(summary['spans']) and batches*_SPOOL_MIN_BODY_BYTES<=_number(summary['bytes'],_SPOOL_CAPACITY),
+         'closed spool batch/span/byte bound')
+    need(batches*(_SPOOL_MIN_BODY_BYTES+_SPOOL_MIN_COMMIT_BYTES)<=_number(summary['stored_bytes'],_SPOOL_CAPACITY),
+         'closed spool stored byte bound')
+    need(len(reader.markers)==3+2*batches,'closed spool exact helper namespace count')
+    reader._inventory_limits=(3+2*batches,0,_SPOOL_CAPACITY)
+
+
+def _snapshot(root,*,keep_raw=True,limits=None,spool=False):
     r=Evidence(Path(root));files={}
-    for base,dirs,names in os.walk(r.root,followlinks=False):
-        for name in dirs:need(not (Path(base)/name).is_symlink(),'snapshot directory alias')
-        for name in names:
-            rel=(Path(base)/name).relative_to(r.root).as_posix();raw=r.read(rel);files[rel]=raw if keep_raw else None
+    if limits is not None:r._inventory_limits=limits
+    if spool:r._spool_snapshot=True
+    names=r.inventory()  # Reject oversized/foreign-dir trees before body reads.
+    for rel in sorted(names):
+        raw=r.read(rel);files[rel]=raw if keep_raw else None
     r.inventory(files);return r,files
 
 
@@ -1160,7 +1238,9 @@ def verify_actual_cohort(root=None,*,binding_sha256=None,summary_sha256=None,com
     need(context.authority_raw is not None,'authenticated new V11 authority required')
     m=context.manifest;n=dependency('native');reader=context.reader;root=context.root
     terminal=_normal_owner(reader,completion_pins,binding_sha256,FROZEN_MANIFEST_SHA256)
-    records_reader,all_records=_snapshot(root/'records');campaign_reader,all_campaign=_snapshot(root/'campaign');spool_reader,_=_snapshot(m['spool_root'],keep_raw=False)
+    records_reader,all_records=_snapshot(root/'records',limits=_records_limits(m['scope']))
+    campaign_reader,all_campaign=_snapshot(root/'campaign',limits=_campaign_limits())
+    spool_reader,_=_snapshot(m['spool_root'],keep_raw=False,limits=_spool_limits(),spool=True)
     expected_names={'startup.json','terminal.json'}|{f'window-{i:06d}' for i in range(1,512)}|{f'window-{i:06d}-summary.json' for i in range(1,512)}
     _records_top_marker(root,expected_names)
     summaries=[all_records[f'window-{i:06d}-summary.json'] for i in range(1,512)]
@@ -1198,6 +1278,7 @@ def verify_actual_cohort(root=None,*,binding_sha256=None,summary_sha256=None,com
     need(len(native_cache)==511,'each closed ledger replayed exactly once in final factory')
     data=_verify_spool_helper(context,helper_root/'closed-spool')
     spans=validate_spool_coverage(data,final_spool,parsed)
+    _tighten_spool_snapshot(spool_reader,data['summary'])
     for snap in (records_reader,campaign_reader,spool_reader):_fresh_snapshot(snap)
     reader.recheck()
     report={'schema':'full1220-v11-final-cohort-data.v1',**execution_totals(m['scope']),'manifest_sha256':FROZEN_MANIFEST_SHA256,'scope_sha256':m['scope_sha256'],'execution_sha256':m['execution_sha256'],'final_summary_sha256':sha(summaries[-1]),'completion_pins':dict(completion_pins),'observation_receipt_boundary':'durable_local','remote_delivery':'pending','scores_publish_authorized':False,'closed_spool_data_only':True,'normal_owner_verified_separately':True,'spans':list(spans),'cumulative':cumulative}
@@ -1221,7 +1302,7 @@ def verify_live_window(root=None,*,binding_sha256=None,window_index=None,summary
     summaries=[reader.read(f'records/window-{i:06d}-summary.json') for i in range(1,index+1)]
     receipts=[reader.read(f'records/window-{i:06d}/receipt.json',_json(s)['report_sha256']) for i,s in enumerate(summaries,1)]
     verify_summary_chain(summaries,receipts,m['scope'],summary_sha256)
-    rr,current=_snapshot(context.root/f'records/window-{index:06d}');r=_json(receipts[-1]);need(current['receipt.json']==receipts[-1],'live raw receipt')
+    rr,current=_snapshot(context.root/f'records/window-{index:06d}',limits=_records_limits(m['scope'],index));r=_json(receipts[-1]);need(current['receipt.json']==receipts[-1],'live raw receipt')
     validate_observation_receipt(r['observation'],r['observer_counters_cumulative'],m['observer'],final=False)
     records={row['recording_file']:current[row['recording_file']] for row in r['rows']};sidecars={q[k]:current[q[k]] for row in r['rows'] if (q:=row.get('quality_end')) is not None for k in ('candidate_file','cleanup_file')}
     mraw=reader.read('actual-manifest.json',FROZEN_MANIFEST_SHA256);binding=source_binding(mraw,receipts[-1],records,sidecars)

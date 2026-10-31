@@ -90,3 +90,172 @@ class FinalDataBoundaries(unittest.TestCase):
     def test_fake_live_window_never_satisfies_final_projection(self):
         w=self.m._VerifiedWindow(self.m._WINDOW_SEAL,{}, {'final_normal_cohort':False},None)
         with self.assertRaises(ValueError):self.m.check_verified_window(w,{})
+
+class SnapshotScaleBoundaries(unittest.TestCase):
+    """Synthetic namespace entries, never a large tree or an actual proof."""
+    def setUp(self):
+        self.m=load('window')
+
+    def virtual_inventory(self, count, limits, *, spool=False):
+        import stat
+        from unittest.mock import patch
+        from contextlib import contextmanager
+        root=Path('/synthetic-v11-snapshot')
+        reader=object.__new__(self.m.Evidence);reader.root=root
+        reader._root_check=lambda:None
+        reader._inventory_limits=limits;reader._spool_snapshot=spool
+        def names():
+            if spool:
+                yield from ('lock','header.json','closed.json')
+                for i in range(1,(count-3)//2+1):
+                    yield f'{i:020d}.pb';yield f'{i:020d}.commit'
+            else:
+                for i in range(count):yield f'leaf-{i}'
+        expected=set(names())
+        def info(path):
+            size=(64 if Path(path).name=='lock' else 512) if spool else 1
+            return types.SimpleNamespace(st_mode=stat.S_IFREG|0o600,st_nlink=1,st_size=size)
+        @contextmanager
+        def scan(path):
+            yield (types.SimpleNamespace(path=str(root/name),name=name,stat=lambda name=name,**kw:info(root/name)) for name in names())
+        with patch.object(Path,'iterdir',lambda p:(root/name for name in names())),patch.object(Path,'lstat',info),patch.object(self.m.os,'scandir',scan):
+            reader.inventory(expected)
+        return reader
+
+    def test_records_permitted_over_old_ceiling(self):
+        # The inherited 100000 ceiling must not reject this permitted count.
+        try:self.virtual_inventory(100001,(284172,1022,None))
+        except ValueError as exc:self.fail('permitted full records namespace rejected: '+str(exc))
+
+    def test_spool_permitted_49999_batches_over_old_ceiling(self):
+        try:self.virtual_inventory(100001,(100001,0,4294967296),spool=True)
+        except ValueError as exc:self.fail('permitted closed spool namespace rejected: '+str(exc))
+
+    def test_frozen_domain_arithmetic(self):
+        self.assertTrue(hasattr(self.m,'_records_limits'),'frozen domain limit derivation missing')
+        s=scope(self.m)
+        self.assertEqual(self.m._records_limits(s),(284172,1022,None))
+        self.assertEqual(self.m._records_limits(s,1),(764,1,None))
+        self.assertEqual(self.m._campaign_limits(),(2085,511,None))
+        entries,dirs,total=self.m._spool_limits()
+        self.assertEqual(dirs,0);self.assertEqual(total,4294967296)
+        self.assertGreater(entries,100001)
+
+    def test_default_evidence_ceiling_stays_strict(self):
+        with self.assertRaisesRegex(ValueError,'inventory bound'):
+            self.virtual_inventory(100001,(100000,100000,None))
+
+    def test_each_domain_rejects_overbound_during_discovery_before_read(self):
+        import tempfile
+        from unittest.mock import patch
+        # Small projected boundaries exercise the same scanner without huge files.
+        for domain,limits in [('records',(4,2,None)),('campaign',(3,1,None)),('spool',(3,0,4294967296)),('window',(2,1,None))]:
+            with self.subTest(domain=domain),tempfile.TemporaryDirectory() as tmp:
+                root=Path(tmp).resolve()
+                for i in range(limits[0]+1):(root/f'leaf-{i}').write_bytes(b'raw')
+                reader=self.m.Evidence(root);reader._inventory_limits=limits;reader._spool_snapshot=False
+                reads=[];original=reader.read
+                def read(*args,**kwargs):reads.append(args[0]);return original(*args,**kwargs)
+                reader.read=read
+                with patch.object(self.m,'Evidence',return_value=reader):
+                    with self.assertRaisesRegex(ValueError,'inventory bound'):self.m._snapshot(root)
+                self.assertEqual(reads,[],'oversized namespace read before bound rejection')
+
+    def test_each_domain_rejects_orphan_directories_and_rechecks_growth(self):
+        import tempfile
+        from unittest.mock import patch
+        for domain,limits in [('records',(4,2,None)),('campaign',(3,1,None)),('spool',(3,0,None)),('window',(2,1,None))]:
+            with self.subTest(domain=domain),tempfile.TemporaryDirectory() as tmp:
+                root=Path(tmp).resolve();(root/'raw').write_bytes(b'original')
+                reader=self.m.Evidence(root);reader._inventory_limits=limits;reader._spool_snapshot=False
+                with patch.object(self.m,'Evidence',return_value=reader):reader,_=self.m._snapshot(root)
+                (root/'orphan').mkdir()
+                with self.assertRaises(ValueError):self.m._fresh_snapshot(reader)
+                with self.assertRaises(ValueError):self.m._fresh_closed_identity(reader)
+                (root/'orphan').rmdir()
+                for i in range(limits[0]):(root/f'extra-{i}').write_bytes(b'x')
+                with self.assertRaisesRegex(ValueError,'inventory bound'):self.m._fresh_snapshot(reader)
+                with self.assertRaisesRegex(ValueError,'inventory bound'):self.m._fresh_closed_identity(reader)
+
+    def test_directory_budget_counts_visited_directories(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp).resolve();(root/'one').mkdir();(root/'two').mkdir()
+            for d in ('one','two'):(root/d/'raw').write_bytes(b'raw')
+            reader=self.m.Evidence(root);reader._inventory_limits=(10,1,None);reader._spool_snapshot=False
+            with self.assertRaisesRegex(ValueError,'inventory directory bound'):reader.inventory({'one/raw','two/raw'})
+
+    def test_spool_byte_cap_rejects_before_body_reads(self):
+        import tempfile
+        from unittest.mock import patch
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp).resolve();(root/'lock').write_bytes(b'x'*64);(root/'header.json').write_bytes(b'x'*64)
+            reader=self.m.Evidence(root);reader._inventory_limits=(100001,0,100);reader._spool_snapshot=False
+            with patch.object(self.m,'Evidence',return_value=reader),patch.object(reader,'read',side_effect=AssertionError('body read before byte bound')):
+                with self.assertRaisesRegex(ValueError,'inventory byte bound'):self.m._snapshot(root)
+
+    def test_spool_malformed_small_and_foreign_leaves_rejected_during_discovery(self):
+        import tempfile
+        from unittest.mock import patch
+        for name,raw in [('00000000000000000001.pb',b''),('00000000000000000001.commit',b'{}'),('foreign',b'x'*512)]:
+            with self.subTest(name=name),tempfile.TemporaryDirectory() as tmp:
+                root=Path(tmp).resolve();(root/name).write_bytes(raw)
+                reader=self.m.Evidence(root);reader._inventory_limits=(100001,0,4294967296);reader._spool_snapshot=True
+                with patch.object(self.m,'Evidence',return_value=reader),patch.object(reader,'read',side_effect=AssertionError('malformed spool read')):
+                    with self.assertRaisesRegex(ValueError,'spool namespace|spool leaf'):self.m._snapshot(root)
+
+    def test_exact_helper_batch_limit_tightens_original_snapshot(self):
+        import tempfile
+        self.assertTrue(hasattr(self.m,'_tighten_spool_snapshot'),'verified exact spool bound missing')
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp).resolve()
+            for name in ('lock','header.json','closed.json','00000000000000000001.pb','00000000000000000001.commit'):(root/name).write_bytes(b'x'*(64 if name=='lock' else 512))
+            reader,_=self.m._snapshot(root,limits=self.m._spool_limits(),spool=True)
+            original_markers=copy.deepcopy(reader.markers)
+            self.m._tighten_spool_snapshot(reader,{'batches':1,'spans':1,'bytes':512,'stored_bytes':2112})
+            self.assertEqual(reader._inventory_limits,(5,0,4294967296));self.assertEqual(reader.markers,original_markers)
+            self.m._fresh_snapshot(reader);self.m._fresh_closed_identity(reader)
+            (root/'00000000000000000002.pb').write_bytes(b'x'*512)
+            with self.assertRaisesRegex(ValueError,'inventory bound'):self.m._fresh_snapshot(reader)
+            with self.assertRaisesRegex(ValueError,'inventory bound'):self.m._fresh_closed_identity(reader)
+            with self.assertRaises(ValueError):self.m._tighten_spool_snapshot(reader,{'batches':0,'spans':1,'bytes':512,'stored_bytes':2112})
+
+    def test_actual_entry_selects_each_frozen_domain_before_replay(self):
+        """UNIT MOCK gate wiring only; no context/proof/helper is manufactured."""
+        from unittest.mock import patch
+        s=scope(self.m);root=Path('/synthetic-v11-cohort');calls=[]
+        context=types.SimpleNamespace(authority_raw=b'synthetic',manifest={'scope':s,'spool_root':str(root/'spool')},reader=None,root=root)
+        class Done(Exception):pass
+        def snapshot(path,**kwargs):
+            calls.append((path,kwargs))
+            if len(calls)==3:raise Done
+            return None,{}
+        with patch.object(self.m,'_selected'),patch.object(self.m,'load_freeze_binding',return_value=context),patch.object(self.m,'_normal_owner',return_value={}),patch.object(self.m,'_snapshot',side_effect=snapshot):
+            with self.assertRaises(Done):self.m.verify_actual_cohort(root)
+        self.assertEqual(calls[0],(root/'records',{'limits':(284172,1022,None)}))
+        self.assertEqual(calls[1],(root/'campaign',{'limits':(2085,511,None)}))
+        self.assertEqual(calls[2],(str(root/'spool'),{'keep_raw':False,'limits':(52377651,0,4294967296),'spool':True}))
+
+    def test_full_domain_entry_ceiling_plus_one(self):
+        for count,limits in [(284173,(284172,1022,None)),(2086,(2085,511,None)),(765,(764,1,None))]:
+            with self.subTest(limit=limits[0]),self.assertRaisesRegex(ValueError,'inventory bound'):
+                self.virtual_inventory(count,limits)
+
+    def test_top_records_recheck_streams_to_exact_declared_count(self):
+        import tempfile
+        from contextlib import contextmanager
+        from unittest.mock import patch
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp).resolve();(root/'records').mkdir();seen=[]
+            @contextmanager
+            def scan(path):
+                def entries():
+                    for i in range(5):
+                        seen.append(i)
+                        if i==3:raise AssertionError('read beyond exact top namespace bound')
+                        yield types.SimpleNamespace(name=f'orphan-{i}')
+                yield entries()
+            with patch.object(self.m.os,'scandir',scan),patch.object(Path,'iterdir',side_effect=AssertionError('unbounded top listing')):
+                with self.assertRaisesRegex(ValueError,'records top namespace bound'):
+                    self.m._records_top_marker(root,{'startup.json','terminal.json'})
+            self.assertEqual(seen,[0,1,2])
