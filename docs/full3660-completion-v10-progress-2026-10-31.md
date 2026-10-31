@@ -1,0 +1,19 @@
+# Original3660 completion V10 preparation
+
+The complete evaluation is unfinished. Canonical collected data remains the fixed R5 first55 windows:385 pairs/770 arms/1268 defined turns, including failures and NA. R5 stopped56 remains permanently closed; its10 arms/22 turns/23 native calls stay in all-attempt reliability and cost, with scores held. It is never resumed.
+
+V10 explicitly composes that fixed prefix with new original ordinals386..3660:3275 pairs/6550 arms/10504 defined turns. All3660 original Slots/pass/arm order remain fixed; executable declarations are original windows056..511 mapped to new local1..456. Original primary3660/7320/11772 and separate1851 boundaries are unchanged. See the committed design and plan under docs/superpowers. No human exact-scope review is asserted; later execution requires the complete new technical freeze and accurate delegated binding under existing autonomy.
+
+## Verified component results
+
+- Go declarations, concrete102, authority/runtime and Python source/window/owner/score consumers have focused verification and independent reviews in .superpowers/sdd/2026-10-31-full3660-completion-v10. Combined Python78 tests passed in31.457s; subsequent exact-path compatibility check passed Go and Python, independently reviewed. These are component results, not a fullGo or actual-ready claim.
+- Root genuine102 attempt1 failed with masked predecessor error. Distinct attempt2 on3926ac747 proved the unchanged1048576 logical-read limit was exhausted:31828 records/30367612 transcript bytes/111553694 cache bytes. It did not prove changed historical bytes. Both failed outputs remain intact.
+- Fix27a88d219 removes only newV9 redundant recursive old46 traversal. The first old1..8 constructors, quotas, supplying-FD/end physical checks, namespaces, locks and cancellation remain. Eight ancestor claim maps are detached in an invocation-local value snapshot, with full final typed comparison. Focused156 normal/107 race results passed; independent reviewc7ba90c9 found no P1/P2. No cross-pass derived cache was introduced.
+- Root distinct genuine102 attempt3 succeeded in88.61966925s using exact27a archive. The production constructor returned102 exact claims,5137 historical model calls/1308 JEV calls,66472061 microCNY/631114 microUSD permanent reserves and global200m/4m. Full closing validation returned successfully; owned process exited0/reaped/groupempty. This was read-only data verification and issued no actual permission. Evidence: .tmp/full3660-v10-genuine102-v3-20261031/attempt-001.
+- New Go source template compiled and replayed all10 stopped56 data records with V10 suffix mapping; outputSHA5d79126442705d55da067a06b5206838e617d80982e68297e268b9302106f208. Its diagnostic binding is explicitly non-authority. A first generator recipe incorrectly passed511 caps where456 were required; that failure remains intact.
+
+## Remaining gates
+
+The opt-in V10 owned localstub export, final exact archive fullGo, signed source/capture helper catalog, receiver qualification/content readback and final manifest/binary/owner/score/equivalence/delegated signature freeze remain to complete before real new execution. Component proof or localstub evidence cannot substitute for actual acquisition. Then run the remaining3275 pairs continuously, independently review semantics and Langfuse scores/content, and publish the complete composed report with all-attempt failures and overhead.
+
+Global authorization is200 CNY+4 USD. Candidate new Parent185 CNY+3 USD and total maximum liability180181782 microCNY+2503811 microUSD include102 permanent holds, suffix caps, risk and bounded extras. Reserves are not supplier invoices. No new paid model/JEV requests, financial claims or actual owner have occurred during this preparation. No old scope or consumed claim is reused or released.
