@@ -1,0 +1,1734 @@
+"""V10 score/content adapter, default inactive until an authenticated freeze.
+
+Scoring policy/semantic context copied from frozen V7 score helper SHA
+776f86705600e30848352f93ed3c33e81ef8a277b3f9de7b6f7f20f6be5d9f9c.
+V10 uses the exact fixed R5 prefix and independent suffix, a new once registry,
+fixed pre-call preview capture, metadata-only
+native reconciliation, no old signature helper or old epoch execution. The
+original semantic/context/negative suppression, denominators and durable once
+publication protocol are retained. No supplied content proves model use.
+"""
+import sys
+sys.dont_write_bytecode = True
+import hashlib
+import json
+import math
+import re
+import os
+import fcntl
+import base64
+import argparse
+import importlib.util
+import stat
+import subprocess
+from pathlib import Path
+
+
+NAMESPACE = 'full1220.v1.'
+_ACTION = "Independently verify observed action label {action}, allowed actions and reply facts against this turn's definition and authoritative state; no fabricated claims."
+_FINAL = 'Final reply accurately describes the task outcome, amounts, identities, scope and limitations using the verified final state; no false success claim.'
+_HEX64 = re.compile(r'[0-9a-f]{64}\Z')
+_HEX40 = re.compile(r'[0-9a-f]{40}\Z')
+_TRACE = re.compile(r'[0-9a-f]{32}\Z')
+_JSON_SPACE = re.compile(r'("(?:\\.|[^"\\])*")|\s+')
+_CAMPAIGN = {'pairs': 3660, 'arms': 7320, 'defined_turns': 11772, 'boundaries_excluded': 1851}
+_EXECUTION = {'pairs':3275,'arms':6550,'defined_turns':10504,'boundaries_excluded':0}
+_ORIGINAL_SCOPE_SHA256 = 'e38eff5e9b79c7b1ad245cfd7e6eb09400260d7c579affece93ec1281e9976c9'
+_COMPLETION_CANONICAL = '{"schema":"full-window-completion-declaration.v1","human_reviewed_exact_scope":false,"original_manifest_sha256":"aa9a664d767c080648213e3d98c63c340d2207afea9121d104bbb2775fdc7666","original_scope_sha256":"e38eff5e9b79c7b1ad245cfd7e6eb09400260d7c579affece93ec1281e9976c9","original_source_commit":"4ddd37ad5ba44db630bee61ddfebba5402e09d45","original_sources_sha256":"47486b91579a39e5304c721a0ddc140797b4109864e79406b5b54b6831328d00","original_caps_sha256":"e75a0f693700f12d95bb7bf29a2c32d6d7f11e0890433fca3ad49fbf407a244a","original_schedule_sha256":"95469ad60b07de7f11eeaf16c638fbc8e9b677e708eb3b4f7247246535859ccf","suffix_windows_sha256":"e383d21f0a3981e998ab1f44d2bd1eb886072d04320a727dc2c0fea5bb1e24d2","suffix_caps_sha256":"7e67ca0b51e7c1ef087cfa490ebbfbd7eda0d30f91e205e0d50272845116701e","prefix_summary_sha256":"42be06b9399b999bb83e939c0722e0e2d0c952608af529ed923c29046f00206d","prefix_delivery_sha256":"3ed36a445a5e8be86773d707992974c690dba41f63e2967c2066c3948612ef06","prefix_window_ids":["window-001","window-002","window-003","window-004","window-005","window-006","window-007","window-008","window-009","window-010","window-011","window-012","window-013","window-014","window-015","window-016","window-017","window-018","window-019","window-020","window-021","window-022","window-023","window-024","window-025","window-026","window-027","window-028","window-029","window-030","window-031","window-032","window-033","window-034","window-035","window-036","window-037","window-038","window-039","window-040","window-041","window-042","window-043","window-044","window-045","window-046","window-047","window-048","window-049","window-050","window-051","window-052","window-053","window-054","window-055"],"prefix":{"first_ordinal":1,"last_ordinal":385,"first_declared_window":1,"window_count":55,"pairs":385,"arms":770,"defined_user_turns":1268,"max_model_calls":6340,"max_jev_calls":634},"execution":{"first_ordinal":386,"last_ordinal":3660,"first_declared_window":56,"window_count":456,"pairs":3275,"arms":6550,"defined_user_turns":10504,"max_model_calls":52520,"max_jev_calls":5252},"primary":{"pairs":3660,"arms":7320,"defined_user_turns":11772},"boundaries":1851,"prefix_score_count":2300,"prefix_positive_score_holes":10,"stopped_overhead":{"window_id":"window-056","first_ordinal":386,"last_ordinal":390,"pairs":5,"arms":10,"defined_user_turns":22,"native_calls":23,"model_calls":18,"jev_calls":5,"scores_held":true},"all_attempt":{"pairs":3665,"arms":7330,"defined_user_turns":11794},"historical_global":{"model_micro_cny":200000000,"jev_micro_usd":4000000},"original_parent":{"model_micro_cny":180000000,"jev_micro_usd":2500000},"prior_model_extras":0,"prior_jev_extras":0,"cohort_max_model_extras":20,"cohort_max_jev_extras":20}'
+
+def _completion(scope):
+    expected=json.loads(_COMPLETION_CANONICAL)
+    _equal(scope.get('completion'),expected,'Exact fixed V10 completion declaration required')
+    return expected
+
+
+
+def _sha(raw):
+    return hashlib.sha256(raw).hexdigest()
+
+
+def _require(condition, message):
+    if not condition:
+        raise ValueError(message)
+
+
+def _equal(actual, expected, message):
+    # JSON equality is type-sensitive: bool is not an integer counter.
+    _require(json.dumps(actual, sort_keys=True, ensure_ascii=False, allow_nan=False)
+             == json.dumps(expected, sort_keys=True, ensure_ascii=False, allow_nan=False), message)
+
+
+def _string(value):
+    _require(type(value) is str, 'Go context string required')
+    return (json.dumps(value, ensure_ascii=False, separators=(',', ':'))
+            .replace('<', '\\u003c').replace('>', '\\u003e').replace('&', '\\u0026')
+            .replace('\u2028', '\\u2028').replace('\u2029', '\\u2029'))
+
+
+def _hex(value, expression, message):
+    _require(type(value) is str and expression.fullmatch(value) is not None, message)
+    return value
+
+
+def _integer(value, minimum, message):
+    _require(type(value) is int and value >= minimum, message)
+    return value
+
+
+class _Document:
+    """Strict JSON document plus token spans, without lossy reserialization."""
+    def __init__(self, raw, limit=16 << 20):
+        _require(type(raw) is bytes and 0 < len(raw) <= limit, 'Bounded original JSON bytes required')
+        self.text = raw.decode('utf-8', errors='strict')
+        self.spans = {}
+        self.decoder = json.JSONDecoder(parse_constant=self._invalid_constant, parse_float=self._float)
+        self.value, end = self._parse(0, ())
+        _require(not self.text[end:].strip(), 'Trailing JSON data')
+        _require(type(self.value) is dict, 'JSON object required')
+
+    @staticmethod
+    def _invalid_constant(value):
+        raise ValueError('Nonfinite JSON number: ' + value)
+
+    @staticmethod
+    def _float(value):
+        result = float(value)
+        _require(math.isfinite(result), 'Nonfinite JSON number')
+        return result
+
+    def _ws(self, index):
+        while index < len(self.text) and self.text[index] in ' \t\r\n':
+            index += 1
+        return index
+
+    def _parse(self, index, path):
+        index = self._ws(index)
+        _require(index < len(self.text) and len(path) <= 80, 'Invalid or excessively nested JSON')
+        start, char = index, self.text[index]
+        if char == '{':
+            value = {}; index = self._ws(index + 1)
+            while index < len(self.text) and self.text[index] != '}':
+                key, index = self.decoder.raw_decode(self.text, index)
+                _require(type(key) is str and key not in value, 'Duplicate or invalid JSON key')
+                index = self._ws(index)
+                _require(index < len(self.text) and self.text[index] == ':', 'Missing JSON colon')
+                value[key], index = self._parse(index + 1, path + (key,))
+                index = self._ws(index)
+                if index >= len(self.text) or self.text[index] != ',':
+                    break
+                index = self._ws(index + 1)
+                _require(index < len(self.text) and self.text[index] != '}', 'Trailing JSON comma')
+            _require(index < len(self.text) and self.text[index] == '}', 'Missing JSON object end')
+            index += 1
+        elif char == '[':
+            value = []; index = self._ws(index + 1)
+            while index < len(self.text) and self.text[index] != ']':
+                child, index = self._parse(index, path + (len(value),)); value.append(child)
+                index = self._ws(index)
+                if index >= len(self.text) or self.text[index] != ',':
+                    break
+                index = self._ws(index + 1)
+                _require(index < len(self.text) and self.text[index] != ']', 'Trailing JSON comma')
+            _require(index < len(self.text) and self.text[index] == ']', 'Missing JSON array end')
+            index += 1
+        else:
+            value, index = self.decoder.raw_decode(self.text, index)
+        self.spans[path] = (start, index)
+        return value, index
+
+    def fragment(self, *path):
+        start, end = self.spans[path]
+        return _JSON_SPACE.sub(lambda match: match[1] or '', self.text[start:end])
+
+
+def _index(rows, key, description):
+    _require(type(rows) is list, description + ' list required')
+    result = {}
+    for row in rows:
+        _require(type(row) is dict, description + ' object required')
+        identity = key(row)
+        _require(identity not in result, 'Duplicate ' + description)
+        result[identity] = row
+    return result
+
+
+def _identity(row):
+    _integer(row['ordinal'], 1, 'Integer ordinal identity required')
+    _integer(row['pass'], 1, 'Integer pass identity required')
+    _require(type(row['case_key']) is str and row['case_key']
+             and row['arm'] in ('model', 'jev_selective'), 'Case and arm identity required')
+    return (row['ordinal'], row['pass'], row['case_key'], row['arm'])
+
+
+def _requirements(document):
+    """Re-derive the complete Go requirement list from source and observations."""
+    result = document.value['result']; case = result['case']; key = case['source_case_id'] + '/' + case['scenario']['id']
+    observations = result['observations'] or []
+    turns = case['scenario']['turns']
+    _require(type(turns) is list and type(observations) is list and len(observations) <= len(turns),
+             'Observed turn/source definition mismatch')
+    derived = []
+    for index, observation in enumerate(observations):
+        turn = observation['turn']; response = turn['response']; base = ('result', 'observations', index)
+        assertions = [{'id': f'{key}/turn-{index+1}/action-reply',
+                       'requirement': _ACTION.format(action=observation['action'])}]
+        if index == 0:
+            assertions.extend(case['answer_assertions'] or [])
+        if turns[index].get('answer'):
+            assertions.append({'id': f'{key}/turn-{index+1}/answer', 'requirement': document.fragment(
+                'result', 'case', 'scenario', 'turns', index, 'answer')})
+        if index == len(turns)-1 and case['scenario']['full_task_metric_eligible']:
+            assertions.append({'id': key + '/final-reply', 'requirement': _FINAL})
+        for assertion in assertions:
+            fields = [('Case', document.fragment('result', 'case')),
+                      ('Fixture', document.fragment('result', 'fixture')),
+                      ('Initial', document.fragment('result', 'initial')),
+                      ('TurnIndex', str(index)), ('State', document.fragment(*base, 'state')),
+                      ('Trace', document.fragment(*base, 'turn', 'response', 'trace')),
+                      ('Pending', document.fragment(*base, 'pending') if 'pending' in observation else 'null'),
+                      ('Message', _string(turn['message'])), ('Requirement', _string(assertion['requirement']))]
+            context = '{' + ','.join(_string(k) + ':' + v for k, v in fields) + '}'
+            derived.append({'id': assertion['id'], 'turn_index': index, 'requirement': assertion['requirement'],
+                            'requirement_sha256': _sha(context.encode('utf-8')),
+                            'reply_sha256': _sha(response['reply'].encode('utf-8'))})
+    _index(derived, lambda row: (row['id'], row['turn_index']), 'derived requirement')
+    return derived
+
+
+def _aggregate(verdicts):
+    if 'failed' in verdicts:
+        return 'failed'
+    if not verdicts or 'not_assessable' in verdicts:
+        return 'not_assessable'
+    return 'passed'
+
+
+def _validate_observed_evidence(review, result):
+    """Optional legacy evidence projections, when supplied, must match originals."""
+    if 'terminal_evidence' in review:
+        terminal = review['terminal_evidence']
+        _require(type(terminal) is dict, 'Terminal evidence object required')
+        expected = {'initial_balance_cent': result['initial']['own']['balance_cent'],
+                    'final_balance_cent': result['final']['own']['balance_cent'],
+                    'final_ledger_balance': result['final']['own']['ledger_balance'],
+                    'final_consistent': result['final']['own']['consistent'],
+                    'controls_unchanged': result['initial']['controls'] == result['final']['controls']}
+        for key, value in expected.items():
+            if key in terminal:
+                _equal(terminal[key], value, 'Review terminal evidence mismatch: ' + key)
+    if 'observed_evidence' not in review:
+        return
+    observed = result['observations'] or []
+    evidence = _index(review['observed_evidence'], lambda item: item['turn_index'], 'observed evidence')
+    _equal(sorted(evidence), list(range(len(observed))), 'Incomplete observed evidence')
+    for index, observation in enumerate(observed):
+        item = evidence[index]; turn = observation['turn']; response = turn['response']
+        expected = {'message': turn['message'], 'reply': response['reply'],
+                    'reply_sha256': _sha(response['reply'].encode()),
+                    'expected_actions': result['case']['scenario']['turns'][index]['expected_actions'],
+                    'allowed_tools': result['case']['scenario']['turns'][index]['allowed_tools'],
+                    'observed_action_label': observation['action'], 'tool_trace': response['trace'],
+                    'pending_confirm': response['pending_confirm'], 'pending_tool': response['pending_tool'],
+                    'pending_preview': response['pending_preview'],
+                    'oracle_balance_cent': observation['state']['own']['balance_cent'],
+                    'oracle_ledger_balance': observation['state']['own']['ledger_balance'],
+                    'oracle_consistent': observation['state']['own']['consistent']}
+        for key, value in expected.items():
+            if key in item:
+                if key == 'tool_trace':
+                    _require(item[key] is None or type(item[key]) is list, 'Review tool trace must be null or list')
+                    _equal(item[key] or [], value or [], 'Review observed evidence mismatch: ' + key)
+                else:
+                    _equal(item[key], value, 'Review observed evidence mismatch: ' + key)
+
+
+def _planned_rows(manifest, receipt):
+    scope = manifest['scope']; slots = scope['slots']; windows = scope['windows']
+    completion=_completion(scope)
+    _require(scope['schema']=='full-window-scope.v10' and type(windows) is list and len(windows)==456,'Exact V10 suffix456 windows required')
+    _require(type(slots) is list and len(slots) == _CAMPAIGN['pairs'], 'Full original slot denominator required')
+    _equal([slot['ordinal'] for slot in slots], list(range(1, 3661)), 'Full original ordinal order required')
+    _equal(sum(_integer(slot['user_turns'], 1, 'Positive defined turn count required') * 2 for slot in slots),
+           _CAMPAIGN['defined_turns'], 'Full original turn denominator required')
+    window_index = _integer(receipt['window_index'], 1, 'Positive window index required')
+    _require(type(windows) is list and window_index <= len(windows), 'Unknown window index')
+    window = windows[window_index-1]
+    _equal(window['id'],f'window-{window_index+55:03d}','Exact local suffix window mapping required')
+    _require(386<=window['first_ordinal']<=window['last_ordinal']<=3660,'Prefix cannot obtain suffix scores')
+    if window_index==1:_equal(window['first_ordinal'],386,'Suffix must begin at original386')
+    if window_index==456:_equal(window['last_ordinal'],3660,'Suffix must end at original3660')
+    if 'completion' in receipt:_equal(receipt['completion'],completion,'Receipt completion mismatch')
+    _equal(receipt['window_id'], window['id'], 'Wrong window identity')
+    selected = [slot for slot in slots if slot['window_id'] == window['id']]
+    _require(selected and selected[0]['ordinal'] == window['first_ordinal']
+             and selected[-1]['ordinal'] == window['last_ordinal'], 'Window scope range mismatch')
+    identities = []
+    for slot in selected:
+        _integer(slot['pass'], 1, 'Positive pass required')
+        _require(slot['pass'] <= 3 and type(slot['case_key']) is str and slot['case_key'], 'Invalid pass/case identity')
+        _require(slot['arm_order'] in (['model', 'jev_selective'], ['jev_selective', 'model']), 'Exact dual arm order required')
+        for arm in slot['arm_order']:
+            identities.append({'ordinal': slot['ordinal'], 'pass': slot['pass'], 'case_key': slot['case_key'],
+                               'arm': arm, 'defined_turns': slot['user_turns']})
+    _require(type(receipt['rows']) is list and len(receipt['rows']) == len(identities), 'Complete planned window rows required')
+    for row, expected in zip(receipt['rows'], identities):
+        for key, value in expected.items():
+            _equal(row[key], value, 'Receipt/scope identity mismatch: ' + key)
+        for key in ('attempted', 'finished', 'cleanup', 'observer', 'structural_pass', 'success'):
+            _require(type(row[key]) is bool, 'Boolean receipt state required: ' + key)
+        _integer(row['observed_turns'], 0, 'Observed turn count required')
+        _require(row['observed_turns'] <= row['defined_turns'] and (not row['finished'] or row['attempted']),
+                 'Impossible attempted/finished/observed state')
+    for key, expected in [('planned_campaign_pairs', 3275), ('planned_campaign_arms', 6550),
+                          ('planned_campaign_turns', 10504)]:
+        _equal(receipt[key], expected, 'Campaign receipt denominator mismatch: ' + key)
+    quality_rows = []
+    for row in receipt['rows']:
+        quality = row.get('quality_end')
+        if quality is not None:
+            _require(type(quality) is dict and row['attempted'] and row['finished']
+                     and row['disposition'] == 'halt' and row['status'] == 'failed'
+                     and row.get('exclude_complete_task_comparison') is True,
+                     'Quality-end original failure and pair exclusion required')
+            _equal(quality['observed_turns'], row['observed_turns'], 'Quality observed turn mismatch')
+            _equal(quality['unrun_turns'], row['defined_turns']-row['observed_turns'], 'Quality suffix turn mismatch')
+            for key in ('policy_sha256', 'source_sha256', 'rule_sha256', 'candidate_sha256', 'cleanup_sha256', 'envelope_sha256'):
+                _hex(quality[key], _HEX64, 'Quality evidence digest required: ' + key)
+            for key in ('candidate_file', 'cleanup_file'):
+                _require(type(quality[key]) is str and re.fullmatch(r'[A-Za-z0-9_.-]+', quality[key]) is not None
+                         and quality[key] not in ('.', '..'), 'Safe quality evidence filename required')
+            _require(quality['candidate_file'] != quality['cleanup_file'], 'Distinct quality evidence files required')
+            quality_rows.append(row)
+        elif row['finished']:
+            _equal(row['observed_turns'], row['defined_turns'], 'Finished arm requires full observations or explicit quality suffix')
+    quality_suffix = sum(row['quality_end']['unrun_turns'] for row in quality_rows)
+    for key, expected in [('quality_end_arms', len(quality_rows)), ('quality_end_unrun_turns', quality_suffix),
+                          ('global_unrun_turns', sum(row['defined_turns']-row['observed_turns'] for row in receipt['rows'])-quality_suffix)]:
+        if key in receipt:
+            _equal(receipt[key], expected, 'Explicit window suffix denominator mismatch: ' + key)
+        elif quality_rows:
+            # This pinned Go producer omits zero-valued receipt suffix ints.
+            # Only an exactly rederived zero may be absent; unknown producers
+            # and every nonzero component still require explicit evidence.
+            _require(expected == 0 and manifest['sources'].get('internal/taskbench/window_collector.go')
+                     and manifest['schema'] == 'full-window-actual-ready.v10',
+                     'Quality-end requires explicit window suffix denominator: ' + key)
+    for key, expected in [('planned_current_pairs', len(selected)), ('planned_current_arms', len(identities)),
+                          ('planned_current_turns', sum(slot['user_turns']*2 for slot in selected)),
+                          ('attempted_arms', sum(row['attempted'] for row in receipt['rows'])),
+                          ('finished_arms', sum(row['finished'] for row in receipt['rows'])),
+                          ('unrun_arms', sum(not row['attempted'] for row in receipt['rows'])),
+                          ('observed_turns', sum(row['observed_turns'] for row in receipt['rows']))]:
+        _equal(receipt[key], expected, 'Receipt denominator mismatch: ' + key)
+    return identities
+
+
+def _validate_summary(summary, receipt, receipt_sha, manifest):
+    _equal(summary['evidence_kind'], 'recorded_run', 'Recorded summary required')
+    for key, expected in [('planned_pairs', 3275), ('planned_arms', 6550), ('defined_turns', 10504),
+                          ('boundaries_excluded', 0), ('window_index', receipt['window_index']),
+                          ('report_sha256', receipt_sha), ('report_status', receipt['status']),
+                          ('ledger_sha256', receipt['ledger_sha256']),
+                          ('payload_manifest_sha256', receipt['payload_manifest_sha256'])]:
+        _equal(summary[key], expected, 'Summary binding mismatch: ' + key)
+    _equal(summary.get('completion'),_completion(manifest['scope']),'Summary completion mismatch')
+    attempted = _integer(summary['attempted_arms'], 0, 'Cumulative attempted arms required')
+    finished = _integer(summary['finished_arms'], 0, 'Cumulative finished arms required')
+    _require(receipt['attempted_arms'] <= attempted <= 6550 and receipt['finished_arms'] <= finished <= attempted,
+             'Invalid cumulative acquisition counts')
+    _equal(summary['unattempted_arms'], 6550-attempted, 'Cumulative unattempted denominator mismatch')
+    _equal(summary['failed_attempted_arms'], attempted-finished, 'Cumulative failed attempted mismatch')
+    prior_slots = [slot for slot in manifest['scope']['slots'] if 386 <= slot['ordinal'] < receipt['rows'][0]['ordinal']]
+    _equal(attempted, len(prior_slots)*2+receipt['attempted_arms'], 'Cumulative attempts contradict completed prefix and current window')
+    _equal(finished, len(prior_slots)*2+receipt['finished_arms'], 'Cumulative finished arms contradict completed prefix and current window')
+    observed = _integer(summary['observed_turns'], 0, 'Cumulative observed turns required')
+    quality = _integer(summary['quality_end_unrun_turns'], 0, 'Quality-end suffix count required')
+    unrun = _integer(summary['global_unrun_turns'], 0, 'Global unrun turns required')
+    _require(observed >= receipt['observed_turns'], 'Cumulative observed turns below window')
+    _equal(observed+quality+unrun, 10504, 'Defined/observed/quality-end/global suffix partition mismatch')
+    current_quality = sum((row.get('quality_end') or {}).get('unrun_turns', 0) for row in receipt['rows'])
+    _equal(observed+quality, sum(slot['user_turns']*2 for slot in prior_slots)+receipt['observed_turns']+current_quality,
+           'Cumulative turns contradict completed prefix and current observed/quality suffix')
+    _require(quality >= current_quality, 'Cumulative quality suffix below current window')
+    if not prior_slots:
+        _equal(observed, receipt['observed_turns'], 'First-window cumulative observed turns must equal current observations')
+        _equal(quality, current_quality, 'First-window cumulative quality suffix must equal current suffix')
+    # An exact current receipt cannot establish the observed/quality split of
+    # earlier windows. Preserve the claimed components and require replay of
+    # their original receipts before any consumer treats the prefix as proved.
+    return {'status': 'prior_receipt_chain_pending' if prior_slots else 'exact_current_window',
+            'current_window_partition_verified': True,
+            'prior_partition_verified': not prior_slots,
+            'current_window_observed_turns': receipt['observed_turns'],
+            'current_window_quality_end_unrun_turns': current_quality,
+            'claimed_prior_observed_turns': observed-receipt['observed_turns'],
+            'claimed_prior_quality_end_unrun_turns': quality-current_quality}
+
+
+_COLLECTION_QUALITY_CODES = frozenset(('unexpected_action', 'wrong_read_tool', 'missing_read',
+    'missing_preview', 'missing_execution', 'terminal_goal', 'semantic_negative', 'fact_mismatch'))
+_COLLECTION_POLICY_SHA256 = '604c68b1c192c17594ba422b85367579cabd60c31623af6a9632278e401ae970'
+
+
+def validate_completed_record_state(record_raw):
+    """Check bound source-policy state only; does not verify native or semantic evidence."""
+    try:
+        document = _Document(record_raw); record = document.value; result = record['result']
+        _equal(record['policy_id'], 'full-customer-recording-policy.v1', 'Recording policy required')
+        _equal(record['policy_sha256'], _COLLECTION_POLICY_SHA256, 'Source policy digest mismatch')
+        _equal(record['result_sha256'], _sha(document.fragment('result').encode()), 'Result digest mismatch')
+        _equal(record['disposition'], 'continue_recorded', 'Unverified halt cannot be completed')
+        _require(result['errors'] is None or type(result['errors']) is list, 'Error list required')
+        _require(type(record['issues']) is list, 'Issue list required')
+        errors = result['errors'] or []
+        issues = record['issues']
+        _require(type(errors) is list and all(type(e) is str and e for e in errors), 'Errors required')
+        _require(type(issues) is list and len(issues) == len(errors), 'Issue/error coverage required')
+        for index, issue in enumerate(issues):
+            _require(type(issue) is dict and set(issue) == {'code','turn','error_index','disposition'}, 'Typed issue required')
+            _require(issue['code'] in _COLLECTION_QUALITY_CODES and issue['disposition'] == 'continue_recorded', 'Unknown issue origin')
+            _equal(issue['error_index'], index, 'Issue/error index mismatch')
+            _require(type(issue['turn']) is int and 1 <= issue['turn'] <= len(result['observations'] or []), 'Issue turn mismatch')
+        _require(type(result['structural_pass']) is bool and type(result['success']) is bool and result['setup_error'] is False, 'Invalid result flags')
+        if errors:
+            _equal(result['status'], 'failed', 'Negative status required')
+            _equal(result['success'], False, 'Negative success forbidden')
+            pre_review = any(i['code'] not in ('semantic_negative', 'fact_mismatch') for i in issues)
+            _equal(result['structural_pass'], not pre_review, 'Structural state mismatch')
+            return 'recorded_negative'
+        _equal(result['structural_pass'], True, 'Structural pass required')
+        if result['review_requirements']:
+            _equal(result['status'], 'needs_review', 'Review status required')
+            _equal(result['success'], False, 'Unreviewed success forbidden')
+        else:
+            _equal(result['status'], 'passed', 'Pass status required')
+            _equal(result['success'], True, 'Pass success required')
+        return 'recorded_nonnegative'
+    except (KeyError, TypeError, IndexError) as error:
+        raise ValueError('Invalid completed recording: '+type(error).__name__) from error
+
+
+
+
+_QUALITY_HALT_CODES = frozenset(('preview_arguments', 'pending_identity', 'unexpected_pending',
+                               'unauthorized_tool', 'pending_not_cleared'))
+
+
+
+
+
+
+
+
+
+
+def _build(manifest_raw, summary_raw, receipt_raw, records, review_raw, expected_hashes, runtime_binding_sha256):
+    _require(type(expected_hashes) is dict and type(records) is dict, 'Explicit artifact and record SHA anchors required')
+    raw_inputs = {'manifest': manifest_raw, 'summary': summary_raw, 'receipt': receipt_raw, 'review': review_raw}
+    documents = {}
+    for name, raw in raw_inputs.items():
+        expected = _hex(expected_hashes[name+'_sha256'], _HEX64, 'Explicit SHA anchor required: ' + name)
+        _require(type(raw) is bytes and _sha(raw) == expected, 'Artifact SHA mismatch: ' + name)
+        documents[name] = _Document(raw)
+    manifest, summary, receipt, review = (documents[name].value for name in ('manifest', 'summary', 'receipt', 'review'))
+    _equal(manifest['schema'], 'full-window-actual-ready.v10', 'V10 manifest required')
+    _equal(manifest['evidence_kind'], 'actual', 'Actual evidence required')
+    epoch = 'v10'
+    _equal(manifest['scope']['schema'], 'full-window-scope.v10', 'V10 scope required')
+    completion=_completion(manifest['scope'])
+    _require(manifest['scope_sha256']!=_ORIGINAL_SCOPE_SHA256,'Old consumed scope cannot publish V10 scores')
+    cache_accounting = _score_cache_accounting(manifest)
+    quality_rows = [row for row in receipt['rows'] if row.get('quality_end') is not None]
+    _hex(manifest['archive_commit'], _HEX40, 'Archive commit required'); _hex(manifest['archive_tree'], _HEX40, 'Archive tree required')
+    _equal(manifest['scope']['bindings']['executor_revision'], manifest['archive_commit'], 'Source executor revision mismatch')
+    _require(type(manifest['sources']) is dict and manifest['sources'], 'Frozen source inventory required')
+    for name, digest in manifest['sources'].items():
+        _require(type(name) is str and name and not name.startswith('/') and '..' not in name.split('/'), 'Invalid frozen source path')
+        _hex(digest, _HEX64, 'Frozen source SHA required')
+    _require('internal/taskbench/conversation_runner.go' in manifest['sources'], 'Frozen review-context producer required')
+    scope_sha = _hex(manifest['scope_sha256'], _HEX64, 'Scope SHA required')
+    _equal(_sha(documents['manifest'].fragment('scope').encode()), scope_sha, 'Scope SHA recomputation mismatch')
+    execution_sha = _hex(manifest['execution_sha256'], _HEX64, 'Execution SHA required')
+    _equal(manifest['knowledge_model'], 'off', 'Original model knowledge configuration required')
+    _equal(manifest['knowledge_jev'], 'off', 'Original JEV knowledge configuration required')
+    _equal(receipt['schema'], 'full-window-acquisition-receipt.v10', 'Original acquisition receipt required')
+    _equal(receipt['evidence_kind'], 'recorded_run', 'Recorded receipt required')
+    _equal(receipt['scope_sha256'], scope_sha, 'Receipt scope mismatch')
+    _equal(receipt['execution_sha256'], execution_sha, 'Receipt execution mismatch')
+    _require(receipt['status'] in ('collected_window', 'stopped'), 'Unknown acquisition receipt status')
+    _planned_rows(manifest, receipt)
+    cumulative_validation = _validate_summary(summary, receipt, expected_hashes['receipt_sha256'], manifest)
+    _require(review['schema'] == 'full1220-window-independent-review.v1'
+             and review['method'] == 'independent_agent_evidence_review'
+             and type(review['reviewer']) is str and review['reviewer'].strip()
+             and review.get('evidence_kind', receipt['evidence_kind']) == 'recorded_run', 'Full-window independent review required')
+    for key, expected in [('manifest_sha256', expected_hashes['manifest_sha256']), ('scope_sha256', scope_sha),
+                          ('execution_sha256', execution_sha), ('receipt_sha256', expected_hashes['receipt_sha256']),
+                          ('archive_commit', manifest['archive_commit']), ('archive_tree', manifest['archive_tree'])]:
+        _equal(review['bindings'][key], expected, 'Review provenance mismatch: ' + key)
+    review_rows = _index(review['rows'], _identity, 'review identity')
+    _require(set(review_rows) == set(_identity(row) for row in receipt['rows']), 'Complete exact independent review identity set required')
+    required_files = [row['recording_file'] for row in receipt['rows'] if row['attempted']]
+    _require(len(set(required_files)) == len(required_files), 'Duplicate recording association')
+    _require(type(expected_hashes['records']) is dict and set(records) == set(required_files)
+             == set(expected_hashes['records']), 'Exact explicit record inventory required')
+    plan_rows, scores, traces = [], [], {}
+    counts = {'passed': 0, 'failed': 0, 'not_assessable': 0, 'not_started': 0}
+    strict_counts = dict(counts); total_requirements = 0
+    quality_suffix = 0
+    provenance = {key: expected_hashes[key] for key in ('manifest_sha256', 'summary_sha256', 'receipt_sha256', 'review_sha256')}
+    provenance.update({'scope_sha256': scope_sha, 'execution_sha256': execution_sha,
+                       'archive_commit': manifest['archive_commit'], 'archive_tree': manifest['archive_tree'],
+                       'context_producer_sha256': manifest['sources']['internal/taskbench/conversation_runner.go'],
+                       'reviewer': review['reviewer'], 'review_method': review['method'],
+                       'metadata_scope':{'primary':dict(_CAMPAIGN),'execution':dict(_EXECUTION),
+                           'prefix_score_count':completion['prefix_score_count'],'prefix_positive_score_holes':completion['prefix_positive_score_holes'],
+                           'prefix_scores_reference_only':True,'all_attempt':completion['all_attempt'],
+                           'stopped_overhead':completion['stopped_overhead']},
+                       'review_evidence_kind_source': 'review' if 'evidence_kind' in review else 'bound_recorded_run_receipt'})
+    if cache_accounting is not None:
+        provenance['configured_cache_accounting'] = cache_accounting
+    if epoch == 'v10':
+        provenance.update({'epoch': epoch, 'runtime_binding_sha256': runtime_binding_sha256, 'budget_declaration_sha256':manifest['scope']['budget_declaration_sha256'], 'retry_policy_sha256':manifest['scope']['retry_policy_sha256'],
+                           'baseline_evidence_sha256': manifest['scope']['baseline_evidence_sha256'],
+                           'historical_claims_sha256': _sha(_json_bytes(manifest['historical_claims'])),
+                           'envelope_sha256': manifest['envelope']['sha256'],
+                           'parent_budget_micro_cny': manifest['scope']['budget_declaration']['parent']['model_micro_cny'], 'parent_budget_micro_usd':manifest['scope']['budget_declaration']['parent']['jev_micro_usd']})
+        provenance['actual_source_and_native_replay'] = 'verified_by_opaque_v10_window_proof'
+    for row in receipt['rows']:
+        independent = review_rows[_identity(row)]
+        for key in ('defined_turns', 'observed_turns', 'attempted', 'finished'):
+            if key in independent:
+                _equal(independent[key], row[key], 'Review acquisition state mismatch: ' + key)
+        identity = {key: row[key] for key in ('ordinal', 'pass', 'case_key', 'arm')}
+        identity.update({'window_id': receipt['window_id'], 'window_index': receipt['window_index']})
+        if not row['attempted']:
+            _require(row['status'] == 'not_started' and not row['finished'] and not row['observed_turns']
+                     and not row['trace_id'] and not row['recording_file'] and not row['recording_sha256'],
+                     'Unattempted row cannot have a trace, recording or observations')
+            for key in ('trace_id', 'recording_file', 'recording_sha256'):
+                _require(not independent.get(key), 'Unattempted review cannot invent evidence')
+            _equal(independent['original_status'], 'not_started', 'Unattempted original status mismatch')
+            _equal(independent['original_success'], False, 'Unattempted original success must remain false')
+            _equal(independent['pass_score_publish_eligible'], False, 'Unattempted identity cannot authorize pass scores')
+            _require(not row['structural_pass'] and not row['success'] and not row['cleanup'] and not row['observer'],
+                     'Unattempted identity cannot claim completed evidence')
+            _equal(independent['task_verdict'], 'not_started', 'Unattempted strict verdict mismatch')
+            _equal(independent.get('semantic_task_verdict', 'not_started'), 'not_started', 'Unattempted semantic verdict mismatch')
+            _equal(independent['requirements'], [], 'Unattempted review cannot invent requirements')
+            output = {**identity, 'attempted': False, 'finished': False, 'defined_turns': row['defined_turns'],
+                      'observed_turns': 0, 'unrun_turns': row['defined_turns'], 'trace_id': None,
+                      'original_status': 'not_started', 'semantic_task_verdict': 'not_started',
+                      'strict_task_verdict': 'not_started', 'requirements': [], 'scores_planned': 0}
+            plan_rows.append(output); counts['not_started'] += 1; strict_counts['not_started'] += 1
+            continue
+        name = row['recording_file']
+        _equal(name, f"arm-{row['ordinal']:06d}-{row['arm']}.json", 'Canonical recording filename required')
+        record_sha = _hex(expected_hashes['records'][name], _HEX64, 'Explicit record SHA required')
+        _require(type(records[name]) is bytes and _sha(records[name]) == record_sha, 'Record SHA mismatch')
+        _equal(row['recording_sha256'], record_sha, 'Receipt record SHA mismatch')
+        _equal(independent['recording_file'], name, 'Review recording filename mismatch')
+        _equal(independent['recording_sha256'], record_sha, 'Review recording SHA mismatch')
+        document = _Document(records[name]); record = document.value; result = record['result']
+        if epoch == 'v10' and record['disposition'] == 'continue_recorded':
+            validate_completed_record_state(records[name])
+        elif epoch == 'v10':
+            _require(row.get('quality_end') is not None, 'Owned quality evidence required')
+        _equal(record['policy_id'], 'full-customer-recording-policy.v1', 'Frozen recording policy required')
+        _hex(record['policy_sha256'], _HEX64, 'Recording policy SHA required')
+        _equal(record['result_sha256'], _sha(document.fragment('result').encode()), 'Original result digest mismatch')
+        case_key = result['case']['source_case_id'] + '/' + result['case']['scenario']['id']
+        _equal(row['case_key'], case_key, 'Source case identity mismatch')
+        _equal(len(result['case']['scenario']['turns']), row['defined_turns'], 'Source defined turns mismatch')
+        _equal(independent['source_case'], result['case'], 'Independent source/rubric mismatch')
+        _equal(record['disposition'], row['disposition'], 'Original disposition mismatch')
+        _require(record['disposition'] in ('continue_recorded', 'quality_end', 'halt'), 'Unknown collection disposition')
+        for original, actual in [('original_status', 'status'), ('original_structural_pass', 'structural_pass'),
+                                 ('original_success', 'success'), ('original_errors', 'errors')]:
+            if actual == 'errors':
+                _require(independent[original] is None or type(independent[original]) is list, 'Review original errors must be null or list')
+                _equal(independent[original] or [], result[actual] or [], 'Original deterministic review state mismatch: ' + actual)
+            else:
+                _equal(independent[original], result[actual], 'Original deterministic review state mismatch: ' + actual)
+            if actual in row:
+                _equal(row[actual], result[actual], 'Original deterministic receipt state mismatch: ' + actual)
+        _require(result['status'] in ('passed', 'needs_review', 'failed', 'setup_failed'), 'Unknown original result status')
+        observations = result['observations'] or []
+        _equal(len(observations), row['observed_turns'], 'Observed turn count mismatch')
+        trace = row['trace_id']
+        _equal(independent['trace_id'], trace, 'Independent trace identity mismatch')
+        if trace:
+            _require(_TRACE.fullmatch(trace) is not None and trace != '0'*32 and trace not in traces, 'Invalid or duplicate trace')
+        else:
+            _require(not observations and not row['finished'], 'Observed/finished arm requires actual trace')
+        for observation in observations:
+            telemetry = observation['turn']['response'].get('telemetry') or {}
+            _equal(telemetry.get('langfuse_trace_id'), trace, 'Actual record trace mismatch')
+            if 'runtime' in telemetry:
+                _equal(telemetry['runtime']['routing_mode'], row['arm'], 'Actual record arm mismatch')
+        derived = _requirements(document)
+        _equal(result['review_requirements'] or [], derived, 'Recomputed source/context/reply requirement mismatch')
+        requirement_reviews = _index(independent['requirements'], lambda item: (item['id'], item['turn_index']), 'requirement review')
+        _require(set(requirement_reviews) == set((item['id'], item['turn_index']) for item in derived), 'Exact original requirement coverage required')
+        requirements = []
+        for expected in derived:
+            item = requirement_reviews[(expected['id'], expected['turn_index'])]
+            for key, value in expected.items():
+                _equal(item[key], value, 'Independent requirement binding mismatch: ' + key)
+            _require(item['verdict'] in ('passed', 'failed', 'not_assessable')
+                     and type(item['reason']) is str and item['reason'].strip(), 'Reasoned independent requirement verdict required')
+            if 'evidence_turn_indexes' in item:
+                indexes = item['evidence_turn_indexes']
+                _require(type(indexes) is list and indexes and len(set(indexes)) == len(indexes)
+                         and all(type(i) is int and 0 <= i < len(observations) for i in indexes)
+                         and expected['turn_index'] in indexes, 'Bound observed evidence turn indexes required')
+            requirements.append({**expected, 'verdict': item['verdict'], 'reason': item['reason']})
+        _validate_observed_evidence(independent, result)
+        semantic = _aggregate([item['verdict'] for item in requirements])
+        for key in ('semantic_task_verdict', 'semantic_requirements_verdict'):
+            if key in independent:
+                _equal(independent[key], semantic, 'Semantic aggregate contradicts requirement verdicts')
+        negative = (result['status'] in ('failed', 'setup_failed') or result['structural_pass'] is not True
+                    or not row['finished'] or record['disposition'] == 'halt' or bool(result['errors']))
+        strict = 'failed' if negative or semantic == 'failed' else semantic
+        _equal(independent['task_verdict'], strict, 'Strict aggregate contradicts original negatives or semantic verdicts')
+        if 'strict_task_verdict' in independent:
+            _equal(independent['strict_task_verdict'], strict, 'Strict verdict mismatch')
+        eligibility = independent['pass_score_publish_eligible']
+        _require(type(eligibility) is bool and (not eligibility or (not negative and semantic == 'passed')),
+                 'Original negative/unknown cannot authorize a passing score')
+        output = {**identity, 'attempted': True, 'finished': row['finished'], 'defined_turns': row['defined_turns'],
+                  'observed_turns': row['observed_turns'], 'unrun_turns': row['defined_turns']-row['observed_turns'],
+                  'trace_id': trace or None, 'recording_file': name, 'recording_sha256': record_sha,
+                  'original_status': result['status'], 'original_structural_pass': result['structural_pass'],
+                  'original_success': result['success'], 'original_errors': result['errors'],
+                  'disposition': record['disposition'], 'original_issues': record['issues'],
+                  'quality_end': row.get('quality_end'),
+                  'exclude_complete_task_comparison': row.get('exclude_complete_task_comparison', False),
+                  'semantic_task_verdict': semantic, 'strict_task_verdict': strict,
+                  'deterministic_semantic_disagreement': negative and semantic != 'failed',
+                  'independent_disagreement_evidence': independent.get('deterministic_assessment_disagreement',
+                      independent.get('deterministic_semantic_disagreement')),
+                  'positive_score_suppressed': semantic == 'passed' and (negative or not eligibility),
+                  'requirements': requirements}
+        metadata = {**identity, **provenance, 'trace_id': trace or None, 'recording_sha256': record_sha,
+                    'original_status': result['status'], 'original_structural_pass': result['structural_pass'],
+                    'original_success': result['success'], 'original_errors': result['errors'],
+                    'semantic_task_verdict': semantic, 'strict_task_verdict': strict,
+                    'deterministic_semantic_disagreement': output['deterministic_semantic_disagreement'],
+                    'positive_score_suppressed': output['positive_score_suppressed']}
+        candidates = [('original_status', result['status']), ('semantic_task', semantic), ('strict_task', strict)]
+        output['scores_planned'] = 0
+        if trace:
+            traces[trace] = {**metadata, 'expected_observed_turns': len(observations),
+                             'expected_defined_turns': row['defined_turns'],
+                             'turn_metadata':[turn_observer_metadata(o,i) for i,o in enumerate(observations,1)]}
+            for metric, verdict in candidates:
+                if verdict == 'passed' and (negative or not eligibility):
+                    continue
+                logical = {'scope_sha256': scope_sha, 'window_id': receipt['window_id'], 'pass': row['pass'],
+                           'ordinal': row['ordinal'], 'arm': row['arm'], 'trace_id': trace, 'metric': NAMESPACE+metric}
+                logical_raw = json.dumps(logical, sort_keys=True, separators=(',', ':'), ensure_ascii=False)
+                scores.append({'id': _sha(logical_raw.encode()), 'logical_identity': logical_raw,
+                               'traceId': trace, 'name': NAMESPACE+metric, 'value': verdict,
+                               'dataType': 'CATEGORICAL', 'environment': 'evaluation', 'metadata': dict(metadata),
+                               'comment': 'Independent nonblind evidence review; original deterministic results retained. Pure plan, pending content/trace validation.'})
+                output['scores_planned'] += 1
+        quality_suffix += (row.get('quality_end') or {}).get('unrun_turns', 0)
+        total_requirements += len(requirements); counts[semantic] += 1; strict_counts[strict] += 1
+        plan_rows.append(output)
+    return {'schema': 'full1220-window-score-plan.v1', 'namespace': NAMESPACE, 'publish_ready': False,
+            'pending_gates': ['frozen_capture_projection', 'persisted_trace_content_validation', 'single_publication_protocol']
+                + ([] if cumulative_validation['prior_partition_verified'] else ['prior_receipt_turn_partition_chain']),
+            'cumulative_turn_validation': cumulative_validation,
+            'model_calls': 0, 'jev_calls': 0, 'claims_created': 0, 'scores_published': 0,
+            'provenance': provenance, 'window_id': receipt['window_id'], 'window_index': receipt['window_index'],
+            'denominators': {'campaign': dict(_CAMPAIGN), 'execution':dict(_EXECUTION),
+                'fixed_prefix':dict(_completion(manifest['scope'])['prefix']),
+                'all_attempt':dict(_completion(manifest['scope'])['all_attempt']),
+                'stopped_overhead':dict(_completion(manifest['scope'])['stopped_overhead']), 'acquisition_cumulative': {
+                key: summary[key] for key in ('attempted_arms', 'finished_arms', 'failed_attempted_arms',
+                    'unattempted_arms', 'observed_turns', 'quality_end_unrun_turns', 'global_unrun_turns')},
+                'window': {'pairs': receipt['planned_current_pairs'], 'arms': receipt['planned_current_arms'],
+                           'defined_turns': receipt['planned_current_turns'], 'attempted_arms': receipt['attempted_arms'],
+                           'finished_arms': receipt['finished_arms'], 'unattempted_arms': receipt['unrun_arms'],
+                           'observed_turns': receipt['observed_turns'], 'requirements': total_requirements,
+                           'quality_end_unrun_turns': quality_suffix,
+                           'global_unrun_turns': receipt['planned_current_turns']-receipt['observed_turns']-quality_suffix,
+                           'semantic_task_verdicts': counts, 'strict_task_verdicts': strict_counts}},
+            'rows': plan_rows, 'trace_bindings': traces, 'scores': scores,
+            'limitations': ['Independent agent judgments are preserved, not independently proved by hash validation.',
+                            'Source snapshots are externally SHA-anchored; this pure function does not verify an Ed25519 signature or source checkout.',
+                            'Partial windows do not establish completion or a representative score for the full campaign.',
+                            'For later windows, cumulative observed/quality components before the current window remain claims pending original prior-receipt chain replay.',
+                            'No captured-content or persisted Langfuse trace validation has been performed by this function.']}
+
+
+_PROJECTION_SDKROOT = '/Library/Developer/CommandLineTools/SDKs/MacOSX26.5.sdk'
+_PROJECTION_HELPER_SHA256 = '98a26427ab04797c26c88356e88800d417362e215b5fbf9c39531b2de36c41d9'
+_CONTENT_SOURCE_SHA256 = '1c2884a41724bcc116764eac61f807d7c7845bae92285009406580575ace5a73'
+_PROJECTION_HELPER_RELATIVE = 'internal/observability/full1220_content_projection_v8_test.go'
+_PROJECTION_SEAL = object()
+
+
+def _json_bytes(value):
+    return json.dumps(value, sort_keys=True, separators=(',', ':'), ensure_ascii=False, allow_nan=False).encode('utf-8')
+
+
+def _regular_bytes(path, limit=64 << 20):
+    """Bounded O_RDONLY/no-follow read with opened-file identity checks."""
+    path = Path(path)
+    before = path.lstat()
+    _require(stat.S_ISREG(before.st_mode) and before.st_nlink == 1 and before.st_size <= limit, 'Bounded regular file required')
+    descriptor = os.open(path, os.O_RDONLY | os.O_NOFOLLOW)
+    with os.fdopen(descriptor, 'rb') as stream:
+        opened = os.fstat(stream.fileno())
+        _require(os.path.samestat(before, opened), 'File identity changed before read')
+        raw = stream.read(limit+1)
+        after = os.fstat(stream.fileno())
+    final = path.lstat()
+    _require(len(raw) <= limit and len(raw) == before.st_size and os.path.samestat(opened, after)
+             and os.path.samestat(after, final) and before.st_size == after.st_size == final.st_size
+             and before.st_mtime_ns == after.st_mtime_ns == final.st_mtime_ns
+             and before.st_ctime_ns == after.st_ctime_ns == final.st_ctime_ns
+             and before.st_nlink == after.st_nlink == final.st_nlink == 1, 'File changed during read')
+    return raw
+
+
+def _write_all(descriptor, raw):
+    offset=0
+    while offset<len(raw):
+        count=os.write(descriptor,raw[offset:])
+        _require(type(count) is int and 0<count<=len(raw)-offset,'Durable write made no valid progress')
+        offset+=count
+    os.fsync(descriptor)
+    info=os.fstat(descriptor)
+    _require(info.st_size==len(raw) and info.st_nlink==1,'Complete single-link durable write required')
+
+
+def _exclusive_write(path, raw):
+    descriptor = os.open(path, os.O_CREAT | os.O_EXCL | os.O_WRONLY | os.O_NOFOLLOW, 0o600)
+    try:_write_all(descriptor,raw)
+    finally:os.close(descriptor)
+    _require(_regular_bytes(path)==raw,'Exclusive durable bytes changed')
+
+
+def _verify_frozen_sources(root, sources, extras=None, *, allow_root_git_pointer=False):
+    _require(root.is_dir() and not root.is_symlink(), 'Explicit regular frozen source directory required')
+    expected = {**sources, **(extras or {})}; actual = set(); git_pointer_sha = None
+    for directory, subdirs, files in os.walk(root, followlinks=False):
+        for name in subdirs:
+            _require(name != '.git', 'Git metadata directories are not frozen source')
+            _require(not (Path(directory)/name).is_symlink(), 'Source symlink directory forbidden')
+        for name in files:
+            path = Path(directory)/name
+            relative = path.relative_to(root).as_posix()
+            if relative == '.git':
+                _require(allow_root_git_pointer and relative not in expected, 'Only original-root Git pointer metadata is allowed')
+                pointer = _regular_bytes(path, 4096)
+                match = re.fullmatch(rb'gitdir: ([^\r\n\x00]+)\n', pointer)
+                _require(match is not None, 'Canonical bounded gitdir pointer required')
+                target = match[1].decode('utf-8', errors='strict')
+                _require(Path(target).is_absolute() and str(Path(target)) == target and target == target.strip()
+                         and '..' not in Path(target).parts and all(ord(char) >= 32 and ord(char) != 127 for char in target),
+                         'Absolute clean gitdir path required')
+                git_pointer_sha = _sha(pointer)
+                continue
+            _require(relative in expected, 'Unexpected source inventory file')
+            _equal(_sha(_regular_bytes(path)), expected[relative], 'Frozen source SHA mismatch: '+relative)
+            actual.add(relative)
+    _require(actual == set(expected), 'Incomplete frozen source inventory')
+    return git_pointer_sha
+
+
+_CLOSED_P4_ROOT = Path('/Users/a1/项目/ai-gateway/.tmp/paired-live-private/full1220-actual-v4-freeze-20261029')
+_CLOSED_ARCHIVE_EXTRA_POLICY = {
+    'schema': 'full1220-closed-archive-extra-witness.v1', 'phase': 'post_stop_content_projection',
+    'not_actual_ready': True,
+    'manifest_sha256': 'fb48dd1465a452ffc2dfdb2029a107adfeb351f4c176892a071d07e18b95c0ea',
+    'source_map_sha256': '5e7de1c0ed75706390e3625287270376d16d976cb6e3f310a9c0b033f1b472cf',
+    'source_root': str(_CLOSED_P4_ROOT/'regression/source'), 'tracked_file_count': 2108,
+    'extra_files': [{'path': 'scripts/__pycache__/full1220-window-scores.cpython-312.pyc',
+                     'sha256': 'c16f5c7917e7ec91f154c828d596569af2ff24d7f2de24ad5ee23380abda49c4', 'size': 129686}],
+    'extra_directories': ['scripts/__pycache__'],
+    'owner_exit': {'path': str(_CLOSED_P4_ROOT/'actual-owner-exit.json'),
+                   'sha256': '0015af89d829c625c3fef4b21219dd3a40682c54308f9426c7e1bc279f268c66'},
+    'terminal': {'path': str(_CLOSED_P4_ROOT/'records/terminal.json'),
+                 'sha256': '13520b9e02f814b7c7e3c9cb2ca8f40793714d2649c14dd9f2acfdc9886bbe29'},
+    'independent_stop_audit': {'path': str(_CLOSED_P4_ROOT/'stopped-preflight-independent-audit.json'),
+                              'sha256': '2818476f6f36d0cc86cef7e15ef3d16fe0cefce86eb4c17a0f7387a299fa3aac'}}
+
+
+def _source_directories(names):
+    return {parent.as_posix() for name in names for parent in Path(name).parents if parent != Path('.')}
+
+
+
+
+
+
+class _ContentProjection:
+    """Opaque local provenance, deliberately not reconstructible from JSON."""
+    __slots__ = ('_raw', '_raw_sha', '_plan_sha', '_job', '_seal', '_archive_provenance', '_archive_provenance_sha')
+
+    def __init__(self, seal, raw, plan, job, archive_provenance=None):
+        _require(seal is _PROJECTION_SEAL, 'Fixed helper execution proof required')
+        provenance = _json_bytes(archive_provenance) if archive_provenance is not None else None
+        for name, value in (('_raw', raw), ('_raw_sha', _sha(raw)), ('_plan_sha', _sha(_json_bytes(plan))),
+                            ('_job', _json_bytes(job)), ('_seal', seal), ('_archive_provenance', provenance),
+                            ('_archive_provenance_sha', _sha(provenance) if provenance is not None else None)):
+            object.__setattr__(self, name, value)
+
+    def __setattr__(self, name, value):
+        raise AttributeError('Frozen helper proof is immutable')
+
+    def as_dict(self):
+        return _Document(self._raw).value
+
+    def archive_source_provenance(self):
+        if self._archive_provenance is None:
+            return None
+        _equal(_sha(self._archive_provenance), self._archive_provenance_sha, 'Closed archive proof provenance mutated')
+        return _Document(self._archive_provenance).value
+
+
+def _projection_job(plan, manifest):
+    rows = []
+    for row in plan['rows']:
+        if not row['attempted']:
+            continue
+        _require(row['trace_id'], 'Attempted arm without actual trace cannot establish trace content')
+        slot = manifest['scope']['slots'][row['ordinal']-1]
+        metadata = {'run_id': plan['provenance']['scope_sha256'], 'case_key': row['case_key'], 'arm': row['arm'],
+                    'evidence_kind': 'recorded_run', 'pair_id': plan['provenance']['scope_sha256']+'/'+plan['window_id']
+                        + f"/ordinal-{row['ordinal']:06d}/pass-{row['pass']}",
+                    'block_id': plan['window_id'], 'arm_order': ','.join(slot['arm_order']),
+                    'attributes.langfuse.release': plan['provenance']['archive_commit']}
+        rows.append({'trace_id': row['trace_id'], 'recording_file': row['recording_file'],
+                     'recording_sha256': row['recording_sha256'], 'observed_turns': row['observed_turns'], 'metadata': metadata})
+    return {'schema': 'full1220-content-projection-input.v1',
+            **{key: plan['provenance'][key] for key in ('manifest_sha256', 'receipt_sha256', 'scope_sha256',
+                                                       'execution_sha256', 'archive_commit', 'archive_tree')},
+            'content_source_sha256': _CONTENT_SOURCE_SHA256, 'helper_sha256': _PROJECTION_HELPER_SHA256,
+            'window_id': plan['window_id'], 'rows': rows, 'private_settings_sha256':manifest['private_settings_sha256']}
+
+
+def _check_projected_output(payload, job, input_raw, records):
+    _equal(payload['schema'], 'full1220-content-projection.v1', 'Fixed helper output schema required')
+    for key in ('manifest_sha256', 'receipt_sha256', 'scope_sha256', 'execution_sha256', 'archive_commit',
+                'archive_tree', 'content_source_sha256', 'helper_sha256', 'window_id', 'private_settings_sha256'):
+        _equal(payload[key], job[key], 'Projection provenance mismatch: '+key)
+    _equal(payload['input_sha256'], _sha(input_raw), 'Projection input digest mismatch')
+    _equal(payload['new_external_requests'], 0, 'Offline projection required')
+    _equal([row['trace_id'] for row in payload['rows']], [row['trace_id'] for row in job['rows']], 'Exact ordered projection trace set required')
+    for projected, source in zip(payload['rows'], job['rows']):
+        _equal(projected['recording_sha256'], source['recording_sha256'], 'Projected recording digest mismatch')
+        observations = _Document(records[source['recording_file']]).value['result']['observations'] or []
+        _equal([turn['turn_index'] for turn in projected['turns']], list(range(1, len(observations)+1)), 'Exact projection turn coverage required')
+        for turn, observation in zip(projected['turns'], observations):
+            _equal(turn['original_input_sha256'], _sha(observation['turn']['message'].encode()), 'Helper original input digest mismatch')
+            _equal(turn['original_reply_sha256'], _sha(observation['turn']['response']['reply'].encode()), 'Helper original reply digest mismatch')
+            for field in ('input', 'output'):
+                value = turn[field]
+                _require(type(value) in (str, dict), 'Frozen string capture or bounded wrapper required')
+                if type(value) is dict:
+                    _require(set(value) == {'truncated', 'preview'} and value['truncated'] is True
+                             and type(value['preview']) is str and len(value['preview'].encode()) <= 1500,
+                             'Original content wrapper shape required')
+                _require(len(_json_bytes(value)) <= 4096, 'Projected content exceeds frozen capture bound')
+
+
+def _verify_projection_receipt(stdout, projected_raw):
+    output_receipts = re.findall(rb'(?m)^\s+full1220_content_projection_v8_test\.go:[0-9]+: FULL1220_PROJECTION_OUTPUT_SHA256=([0-9a-f]{64})\r?$', stdout)
+    _require(len(output_receipts) == 1 and output_receipts[0].decode() == _sha(projected_raw),
+             'Projection bytes do not match the fixed helper process receipt')
+
+
+
+
+
+
+def _content_matches(actual, expected):
+    if _json_bytes(actual) == _json_bytes(expected):
+        return True
+    if type(actual) is str:
+        try:
+            return _json_bytes(json.loads(actual)) == _json_bytes(expected)
+        except ValueError:
+            return False
+    return False
+
+
+def _validate_projection_plan_binding(plan, projection):
+    """Authenticate the immutable plan seal without client or filesystem I/O."""
+    _require(type(projection) is _ContentProjection and projection._seal is _PROJECTION_SEAL,
+             'Live fixed helper projection proof required; plain JSON/SHA is insufficient')
+    _equal(_sha(projection._raw), projection._raw_sha, 'Projection proof mutated')
+    _equal(_sha(_json_bytes(plan)), projection._plan_sha, 'Projection belongs to another or modified plan')
+
+
+def validate_window_traces(plan, projection, client):
+    """Read each original trace once using client.observations(trace), never POST.
+
+    Missing/delayed observations or IO remain unverified; a provenance, identity,
+    parent, turn or delivered-content contradiction rejects the whole result.
+    Only the opaque fixed-helper proof is accepted. Native LLM payload capture
+    and actual use of included content are never inferred from agent.turn IO.
+    This does not consume or clear the prior receipt partition chain gate.
+    """
+    try:
+        _validate_projection_plan_binding(plan, projection)
+        payload = projection.as_dict(); job = _Document(projection._job).value
+        _require(callable(getattr(client, 'observations', None)), 'Read-only observations client required')
+        projected = {row['trace_id']: row for row in payload['rows']}
+        bound = {row['trace_id']: row for row in job['rows']}
+        _require(set(projected) == set(plan['trace_bindings']) == set(bound), 'Exact projection/plan trace set required')
+        summaries, pending = [], []
+        for trace, binding in plan['trace_bindings'].items():
+            try:
+                observations = client.observations(trace)
+            except (ValueError, OSError, TimeoutError):
+                pending.append({'trace_id': trace, 'reason': 'read_unavailable'}); continue
+            _require(type(observations) is list and len(observations) <= 1000, 'Bounded original observation list required')
+            by_id = _index(observations, lambda row: row['id'], 'observation ID')
+            _require(all(type(key) is str and key for key in by_id), 'Observation ID required')
+            for observation in observations:
+                _equal(observation['traceId'], trace, 'Foreign observation trace')
+                _equal(observation['environment'], 'evaluation', 'Observation environment mismatch')
+                for key, value in bound[trace]['metadata'].items():
+                    _equal(observation['metadata'][key], value, 'Observation frozen identity mismatch: '+key)
+            roots = [row for row in observations if row['name'] == 'evaluation.task']
+            turns = [row for row in observations if row['name'] == 'agent.turn']
+            _require(len(roots) <= 1 and len(turns) <= binding['expected_observed_turns'], 'Extra root or turn observation')
+            if not roots or len(turns) < binding['expected_observed_turns']:
+                pending.append({'trace_id': trace, 'reason': 'missing_root_or_turn'}); continue
+            root = roots[0]
+            _require(root.get('parentObservationId') in (None, ''), 'Evaluation root has foreign parent')
+            expected_success = ('true' if binding['original_status'] == 'passed' else 'false'
+                                if binding['original_status'] in ('failed', 'setup_failed') else 'unknown')
+            for key, value in [('status', binding['original_status']),
+                               ('structural_pass', str(binding['original_structural_pass']).lower()),
+                               ('task_success', expected_success)]:
+                actual = root['metadata'][key]
+                if key in ('structural_pass', 'task_success') and value in ('true', 'false'):
+                    _require((type(actual) is bool and actual is (value == 'true'))
+                             or (type(actual) is str and actual == value),
+                             'Original evaluation boolean metadata mismatch: '+key)
+                else:
+                    _equal(actual, value, 'Original evaluation status mismatch: '+key)
+            indexed_turns = {}
+            for turn in turns:
+                index = turn['metadata']['turn_index']
+                if type(index) is str and re.fullmatch(r'[1-9][0-9]*', index):
+                    index = int(index)
+                _integer(index, 1, 'Canonical observed turn index required')
+                _require(index not in indexed_turns, 'Duplicate observed turn index')
+                indexed_turns[index] = turn
+                _equal(turn['parentObservationId'], root['id'], 'Agent turn belongs to another task root')
+                validate_turn_observer_metadata(turn['metadata'],binding['turn_metadata'][index-1])
+            _equal(sorted(indexed_turns), list(range(1, binding['expected_observed_turns']+1)), 'Exact observed turn index set required')
+            for observation in observations:
+                chain = set(); current = observation
+                while current['id'] != root['id']:
+                    parent = current.get('parentObservationId')
+                    _require(parent in by_id and parent not in chain, 'Foreign or cyclic observation parent chain')
+                    chain.add(parent); current = by_id[parent]
+            packets = [p for p in payload['native_packets'] if (p['identity']['case_key'], p['identity']['pass'], p['identity']['arm']) == (binding['case_key'],binding['pass'],binding['arm'])]
+            validate_native_observations(observations, packets)
+            missing_io = False
+            for expected in projected[trace]['turns']:
+                actual = indexed_turns[expected['turn_index']]
+                for field in ('input', 'output'):
+                    if field not in actual or actual[field] is None:
+                        missing_io = True
+                    else:
+                        _require(_content_matches(actual[field], expected[field]), 'Captured agent turn content mismatch: '+field)
+            if not validate_tool_observations(observations, projected[trace]['turns']):
+                missing_io = True
+            if missing_io:
+                pending.append({'trace_id': trace, 'reason': 'missing_captured_content'}); continue
+            summaries.append({'trace_id': trace, 'observations': len(observations), 'turns': len(turns),
+                              'observation_body_sha256': _sha(_json_bytes(observations)),
+                              'llm_attempts_without_payload_io': sum(row['name'] == 'llm.attempt' and row.get('input') is None
+                                  and row.get('output') is None for row in observations)})
+        all_pass = not pending and len(summaries) == len(plan['trace_bindings'])
+        gates = [gate for gate in plan['pending_gates'] if gate != 'frozen_capture_projection'
+                 and not (all_pass and gate == 'persisted_trace_content_validation')]
+        result = {'schema': 'full1220-window-content-validation.v1', 'all_pass': all_pass, 'publish_ready': False,
+                'verified_traces': len(summaries), 'expected_traces': len(plan['trace_bindings']),
+                'verified_observations': sum(row['observations'] for row in summaries),
+                'verified_turns': sum(row['turns'] for row in summaries), 'summaries': summaries, 'unverified': pending,
+                'pending_gates': gates, 'projection_sha256': projection._raw_sha,
+                'helper_sha256': _PROJECTION_HELPER_SHA256, 'content_source_sha256': _CONTENT_SOURCE_SHA256,
+                'plan_sha256': projection._plan_sha, 'new_external_requests_from_projection': 0,
+                'new_model_calls': 0, 'new_jev_calls': 0, 'claims_created': 0, 'scores_published': 0,
+                'native_llm_payload_io_claimed': False, 'included_does_not_prove_used': True}
+        archive_provenance = projection.archive_source_provenance()
+        if archive_provenance is not None:
+            _equal(archive_provenance['manifest_sha256'], plan['provenance']['manifest_sha256'], 'Closed source proof manifest mismatch')
+            _require(archive_provenance['not_actual_ready'] is True and archive_provenance['checked_before_and_after'] is True,
+                     'Complete post-stop source proof required')
+            result['archive_source_provenance'] = archive_provenance
+        return result
+    except (KeyError, IndexError, TypeError, UnicodeError) as error:
+        raise ValueError('Invalid captured trace evidence: '+type(error).__name__) from error
+
+
+# This registry is intentionally specific to this local project. No command,
+# review, output directory, copied script, or manifest may override its root.
+# The design cannot resist an owner maliciously deleting all disk evidence.
+_PUBLICATION_REGISTRY_ROOT = Path('/Users/a1/项目/ai-gateway/.tmp/full1220-v10-score-publications')
+_PROJECT_ROOT = Path('/Users/a1/项目/ai-gateway')
+_PUBLICATION_SEAL = object()
+
+
+class _PublicationProof:
+    __slots__ = ('_kind', '_plan_sha', '_raw', '_seal')
+
+    def __init__(self, seal, kind, data, plan=None):
+        _require(seal is _PUBLICATION_SEAL, 'Verified gate proof required')
+        for key, value in (('_kind', kind), ('_plan_sha', _sha(_json_bytes(plan)) if plan is not None else None),
+                           ('_raw', _json_bytes(data)), ('_seal', seal)):
+            object.__setattr__(self, key, value)
+
+    def __setattr__(self, name, value):
+        raise AttributeError('Immutable verified gate proof')
+
+    def as_dict(self):
+        return _Document(self._raw).value
+
+
+
+
+
+
+
+
+
+
+def verify_window_receipt_chain(plan, manifest_raw, entries, expected_hashes):
+    """Recompute the complete raw prior-summary → summary → receipt chain.
+
+    entries and SHA pins explicitly contain windows1..current, including the
+    current partial/stopped window. Only prior windows must have completed.
+    No records, directories, historical claims or original files are modified.
+    """
+    try:
+        manifest = _Document(manifest_raw).value
+        _equal(_sha(manifest_raw), plan['provenance']['manifest_sha256'], 'Chain manifest mismatch')
+        _require(type(entries) is list and type(expected_hashes) is list
+                 and len(entries) == len(expected_hashes) == plan['window_index'], 'Complete original prefix chain required')
+        totals = {'attempted_arms': 0, 'finished_arms': 0, 'observed_turns': 0, 'quality_end_unrun_turns': 0}
+        previous = ''; inventory = []
+        for index, (entry, pins) in enumerate(zip(entries, expected_hashes), 1):
+            raw_summary, raw_receipt = entry['summary_raw'], entry['receipt_raw']
+            _require(type(raw_summary) is bytes and type(raw_receipt) is bytes, 'Original chain bytes required')
+            for name, raw in [('summary', raw_summary), ('receipt', raw_receipt)]:
+                _equal(_sha(raw), _hex(pins[name+'_sha256'], _HEX64, 'External chain SHA pin required'), 'Original chain SHA mismatch')
+            summary, receipt = _Document(raw_summary).value, _Document(raw_receipt).value
+            _equal(receipt['schema'], 'full-window-acquisition-receipt.v10', 'Original receipt schema required')
+            _equal(receipt['evidence_kind'], 'recorded_run', 'Original recorded receipt required')
+            _equal(receipt['window_index'], index, 'Contiguous prefix windows required')
+            for key in ('scope_sha256', 'execution_sha256'):
+                _equal(receipt[key], manifest[key], 'Prefix scope/execution mismatch')
+            _planned_rows(manifest, receipt)
+            _validate_summary(summary, receipt, pins['receipt_sha256'], manifest)
+            _equal(summary['last_receipt_sha256'], previous, 'Original prior-summary SHA chain mismatch')
+            if index < len(entries):
+                _require(receipt['status'] == 'collected_window' and receipt['finished_arms'] == receipt['planned_current_arms']
+                         and receipt['attempted_arms'] == receipt['planned_current_arms']
+                         and all(receipt[key] is True for key in ('cleanup', 'environment_cleanup', 'observer', 'advanced', 'payload_verified'))
+                         and summary['closed'] is False, 'Only completed prior windows may form a prefix')
+            for key in ('attempted_arms', 'finished_arms', 'observed_turns'):
+                totals[key] += receipt[key]
+            totals['quality_end_unrun_turns'] += sum((row.get('quality_end') or {}).get('unrun_turns', 0) for row in receipt['rows'])
+            exact = {**totals, 'failed_attempted_arms': totals['attempted_arms']-totals['finished_arms'],
+                     'unattempted_arms': 6550-totals['attempted_arms'],
+                     'global_unrun_turns': 10504-totals['observed_turns']-totals['quality_end_unrun_turns']}
+            for key, value in exact.items():
+                _equal(summary[key], value, 'Original cumulative component mismatch: '+key)
+            previous = pins['summary_sha256']; inventory.append(dict(pins))
+        _equal(previous, plan['provenance']['summary_sha256'], 'Chain must end at exact planned summary')
+        _equal(expected_hashes[-1]['receipt_sha256'], plan['provenance']['receipt_sha256'], 'Chain current receipt mismatch')
+        return _PublicationProof(_PUBLICATION_SEAL, 'receipt_chain', {'manifest_sha256': _sha(manifest_raw),
+            'inventory': inventory, 'chain_sha256': _sha(_json_bytes(inventory)), 'cumulative': exact}, plan)
+    except (KeyError, IndexError, TypeError, UnicodeError) as error:
+        raise ValueError('Invalid original receipt chain: '+type(error).__name__) from error
+
+
+
+
+def _old_langfuse_client_class(manifest):
+    path = Path(manifest['source_root'])/'scripts/langfuse-eval.py'
+    _equal(_sha(_regular_bytes(path, 1 << 20)), manifest['sources']['scripts/langfuse-eval.py'], 'Frozen restricted client changed')
+    spec = importlib.util.spec_from_file_location('full1220_frozen_local_client', path)
+    module = importlib.util.module_from_spec(spec); spec.loader.exec_module(module)
+    return module.Client
+
+
+class _WindowScoreClient:
+    __slots__ = ('_inner', '_manifest_sha', '_seal')
+    def __init__(self, seal, inner, manifest_sha):
+        _require(seal is _PUBLICATION_SEAL, 'Pinned local evaluation client required')
+        self._inner = inner; self._manifest_sha = manifest_sha; self._seal = seal
+    def observations(self, trace):
+        return self._inner.observations(trace)
+    def post_score(self, score):
+        return self._inner.request('/api/public/scores', score)
+    def verify_scores(self, scores):
+        return self._inner.verify_scores(scores)
+
+
+def _load_window_score_client(manifest_raw, settings_path):
+    """Only explicit owner0600 evaluation-only JSON; never load model settings."""
+    try:
+        info = Path(settings_path).lstat()
+        _require(info.st_uid == os.geteuid() and stat.S_IMODE(info.st_mode) == 0o600, 'Private owner0600 evaluation settings required')
+        settings = _Document(_regular_bytes(settings_path, 16384)).value
+        _require(set(settings) == {'OTEL_EXPORTER_OTLP_TRACES_ENDPOINT', 'AGENT_LANGFUSE_ENVIRONMENT', 'LANGFUSE_PUBLIC_KEY', 'LANGFUSE_SECRET_KEY'},
+                 'Evaluation-only client configuration required')
+        manifest = _Document(manifest_raw).value
+        _equal(_sha(settings['OTEL_EXPORTER_OTLP_TRACES_ENDPOINT'].encode()), manifest['observer']['endpoint_sha256'], 'Frozen observer endpoint mismatch')
+        _equal(_sha(settings['LANGFUSE_PUBLIC_KEY'].encode()), manifest['observer']['project_sha256'], 'Frozen observer project mismatch')
+        _equal(settings['AGENT_LANGFUSE_ENVIRONMENT'], 'evaluation', 'Evaluation client required')
+        return _WindowScoreClient(_PUBLICATION_SEAL, _old_langfuse_client_class(manifest)(settings), _sha(manifest_raw))
+    except (KeyError, TypeError, OSError, UnicodeError) as error:
+        raise ValueError('Invalid evaluation client settings: '+type(error).__name__) from error
+
+
+def _private_directory(path):
+    info = path.lstat()
+    _require(stat.S_ISDIR(info.st_mode) and info.st_uid == os.geteuid() and stat.S_IMODE(info.st_mode) == 0o700,
+             'Private owner0700 registry directory required')
+    _require(path.resolve() == path.absolute(), 'Registry path must have no symlink aliases')
+    return info
+
+
+def _sync_directory(path):
+    descriptor = os.open(path, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+    try:
+        os.fsync(descriptor)
+    finally:
+        os.close(descriptor)
+
+
+class _RegistryHandle:
+    def __init__(self, root, scope, root_fd, scope_fd, lock_fd, anchor):
+        self.root = root; self.scope = scope; self.root_fd = root_fd; self.scope_fd = scope_fd
+        self.lock_fd = lock_fd; self.anchor = anchor
+        self.lock_identity=os.fstat(lock_fd);self.events={}
+    def check(self):
+        root_info, scope_info = _private_directory(self.root), _private_directory(self.scope)
+        _require(os.path.samestat(root_info, os.fstat(self.root_fd)) and os.path.samestat(scope_info, os.fstat(self.scope_fd)), 'Publication registry directory moved or replaced')
+        lock_info=(self.root/'.lock').lstat()
+        _require(os.path.samestat(lock_info,self.lock_identity) and os.path.samestat(lock_info,os.fstat(self.lock_fd))
+                 and lock_info.st_nlink==1 and stat.S_IMODE(lock_info.st_mode)==0o600,'Publication lock replaced or aliased')
+        for name,raw in self.events.items():
+            _require(_regular_bytes(self.scope/name)==raw,'Owned durable publication event changed')
+        _equal([scope_info.st_dev, scope_info.st_ino], self.anchor['directory_identity'], 'Fixed scope directory identity changed')
+        _equal(_Document(_regular_bytes(self.root/(self.scope.name+'.anchor.json'), 16384)).value, self.anchor, 'Fixed scope anchor changed')
+        _equal(_Document(_regular_bytes(self.scope/'scope.json', 16384)).value['nonce'], self.anchor['nonce'], 'Fixed scope nonce changed')
+    def close(self):
+        for descriptor in (self.scope_fd, self.lock_fd, self.root_fd):
+            os.close(descriptor)
+
+
+def _open_publication_registry(scope, *, create=False):
+    _hex(scope, _HEX64, 'Scope registry identity required')
+    _require(scope!=_ORIGINAL_SCOPE_SHA256,'Consumed R5 scope is reference only')
+    root = Path(_PUBLICATION_REGISTRY_ROOT)
+    _require(root.is_absolute() and root.resolve()==root and not root.is_symlink(),'Canonical independent V10 registry root required')
+    if not root.exists():
+        _require(not root.is_symlink(), 'Registry alias forbidden')
+        if not create:
+            return None
+        root.mkdir(mode=0o700); _sync_directory(root.parent)
+    _private_directory(root)
+    root_fd = os.open(root, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+    lock_fd = scope_fd = None
+    try:
+        flags = os.O_RDWR | os.O_NOFOLLOW | (os.O_CREAT if create else 0)
+        lock_fd = os.open('.lock', flags, 0o600, dir_fd=root_fd)
+        lock_info = os.fstat(lock_fd)
+        _require(stat.S_ISREG(lock_info.st_mode) and lock_info.st_uid == os.geteuid() and stat.S_IMODE(lock_info.st_mode) == 0o600 and lock_info.st_nlink == 1, 'Private stable registry lock required')
+        fcntl.flock(lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        directory = root/scope; anchor_path = root/(scope+'.anchor.json')
+        if not anchor_path.exists():
+            if not create:
+                _require(not directory.exists(), 'Orphan publication directory')
+                os.close(lock_fd); os.close(root_fd); return None
+            _require(not directory.exists() and not directory.is_symlink(), 'Unanchored publication directory cannot be adopted')
+            directory.mkdir(mode=0o700)
+            info = _private_directory(directory)
+            anchor = {'schema': 'full1220-fixed-scope-registry.v1', 'scope_sha256': scope,
+                      'directory_identity': [info.st_dev, info.st_ino], 'nonce': os.urandom(16).hex()}
+            _exclusive_write(directory/'scope.json', _json_bytes({'nonce': anchor['nonce']})); _sync_directory(directory)
+            _exclusive_write(anchor_path, _json_bytes(anchor)); _sync_directory(root)
+        anchor = _Document(_regular_bytes(anchor_path, 16384)).value
+        _equal(anchor['schema'], 'full1220-fixed-scope-registry.v1', 'Scope anchor schema mismatch')
+        _equal(anchor['scope_sha256'], scope, 'Scope anchor mismatch')
+        scope_fd = os.open(directory, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+        handle = _RegistryHandle(root, directory, root_fd, scope_fd, lock_fd, anchor); handle.check()
+        return handle
+    except BaseException:
+        for descriptor in (scope_fd, lock_fd, root_fd):
+            if descriptor is not None:
+                os.close(descriptor)
+        raise
+
+
+def _publication_event(handle, name, event):
+    handle.check()
+    _require(re.fullmatch(r'[a-z0-9.-]+', name) is not None, 'Fixed event filename required')
+    raw=_json_bytes(event)
+    descriptor=os.open(name,os.O_CREAT|os.O_EXCL|os.O_WRONLY|os.O_NOFOLLOW,0o600,dir_fd=handle.scope_fd)
+    try:_write_all(descriptor,raw)
+    finally:os.close(descriptor)
+    os.fsync(handle.scope_fd)
+    _require(_regular_bytes(handle.scope/name)==raw,'Written publication event identity/bytes changed')
+    handle.events[name]=raw
+    handle.check()
+
+
+def _publication_scores(plan):
+    _equal(plan['schema'], 'full1220-window-score-plan.v1', 'Original full-window plan required')
+    result = []; logicals = set(); ids = set()
+    for score in plan['scores']:
+        metadata = score['metadata']; trace = score['traceId']
+        _require(trace in plan['trace_bindings'] and score['name'] in [NAMESPACE+name for name in ('original_status', 'semantic_task', 'strict_task')], 'Unknown score namespace or trace')
+        logical = {'scope_sha256': plan['provenance']['scope_sha256'], 'window_id': plan['window_id'], 'pass': metadata['pass'],
+                   'ordinal': metadata['ordinal'], 'arm': metadata['arm'], 'trace_id': trace, 'metric': score['name']}
+        raw = _json_bytes(logical).decode()
+        _equal(score['logical_identity'], raw, 'Stable logical identity mismatch')
+        _equal(score['id'], _sha(raw.encode()), 'Stable score ID cannot be replaced')
+        _require(raw not in logicals and score['id'] not in ids, 'Duplicate logical score or score ID')
+        _require(not (score['value'] == 'passed' and (metadata['original_status'] in ('failed', 'setup_failed')
+                     or metadata['original_structural_pass'] is not True)), 'Original negative cannot publish a passing score')
+        logicals.add(raw); ids.add(score['id']); result.append(score)
+    return result
+
+
+def _gate_data(proof, kind, plan):
+    _require(type(proof) is _PublicationProof and proof._seal is _PUBLICATION_SEAL and proof._kind == kind, 'Complete verified '+kind+' gate required')
+    if proof._plan_sha is not None:
+        _equal(proof._plan_sha, _sha(_json_bytes(plan)), 'Gate proof belongs to a different plan')
+    data = proof.as_dict()
+    _equal(data['manifest_sha256'], plan['provenance']['manifest_sha256'], 'Gate manifest mismatch')
+    return data
+
+
+def _batch_source_identity(plan):
+    return {trace: {key: binding[key] for key in ('ordinal', 'pass', 'case_key', 'arm', 'recording_sha256',
+                                                  'expected_defined_turns', 'expected_observed_turns')}
+            for trace, binding in plan['trace_bindings'].items()}
+
+
+def _publish_window_scores(plan, projection, receipt_chain, attestation, client, *, execute=False, quality_proof=None):
+    """One POST per durable intent, fail closed; uncertainty permits verify only.
+
+    Stable logical intent is fsynced before score-ID intent. All scores are
+    reserved before any POST; all traces/gates pass first. No inference, claim,
+    automatic retry, mutable receipt overwrite, or caller publication-root option.
+    """
+    handle = None
+    try:
+        _require(execute is True, 'Explicit --execute required for score publication')
+        quality = None
+        epoch = plan['provenance'].get('epoch')
+        # A fresh chain can seal a caller-modified plan. Removed quality markers
+        # must still fail the original projection seal before registry or reads.
+        _validate_projection_plan_binding(plan, projection)
+        chain = _gate_data(receipt_chain, 'receipt_chain', plan); signed = _gate_data(attestation, 'attestation', plan)
+        _require(type(client) is _WindowScoreClient and client._seal is _PUBLICATION_SEAL, 'Pinned local evaluation client required')
+        _equal(client._manifest_sha, plan['provenance']['manifest_sha256'], 'Client manifest mismatch')
+        _equal(_sha(_regular_bytes(signed['binary_path'], 1 << 30)), signed['binary_sha256'], 'Attested actual binary changed')
+        scores = _publication_scores(plan)
+        handle = _open_publication_registry(plan['provenance']['scope_sha256'], create=True)
+        # The batch fixes the complete original inventory independently of later
+        # reviews, caller outputs, or missing individual intent/link files.
+        batch_name = 'window-%06d.batch.json' % plan['window_index']
+        _require(not os.path.lexists(handle.scope/batch_name), 'Window publication batch exists; verify original batch only')
+        # Refuse the entire operation before reads if any identity was claimed.
+        for score in scores:
+            _require(not any(os.path.lexists(handle.scope/name) for name in (
+                'logical-'+score['id']+'.intent.json', 'score-'+score['id']+'.intent.json',
+                score['id']+'.sent.json', score['id']+'.accepted.json')),
+                'Publication evidence exists; verify only, never resend')
+        _publication_event(handle, 'window-%06d.publish-operation.json' % plan['window_index'],
+            {'schema':'full1220-v10-once-operation.v1','scope_sha256':plan['provenance']['scope_sha256'],
+             'manifest_sha256':plan['provenance']['manifest_sha256'],'window_index':plan['window_index'],
+             'window_id':plan['window_id'],'plan_sha256':_sha(_json_bytes(plan)),'permanent_no_reentry':True})
+        validation = validate_window_traces(plan, projection, client)
+        _require(validation['all_pass'] is True, 'All captured trace content must verify before any score intent')
+        handle.check(); intents = []
+        batch = {'schema': 'full1220-score-batch.v1', 'scope_sha256': plan['provenance']['scope_sha256'],
+                 'manifest_sha256': plan['provenance']['manifest_sha256'], 'window_id': plan['window_id'],
+                 'window_index': plan['window_index'], 'plan_sha256': _sha(_json_bytes(plan)),
+                 'trace_source_identity': _batch_source_identity(plan),
+                 'scores': [{key: score[key] for key in ('id', 'logical_identity', 'traceId', 'name')} for score in scores]}
+        if quality is not None:
+            batch[proof_kind+'_proof'] = quality
+        batch['batch_sha256'] = _sha(_json_bytes(batch))
+        _publication_event(handle, batch_name, batch)
+        for score in scores:
+            payload = json.loads(_json_bytes(score))
+            payload.pop('logical_identity')  # Local lock authority, never an API score field.
+            payload['metadata'].update(plan_sha256=_sha(_json_bytes(plan)), receipt_chain_sha256=chain['chain_sha256'],
+                                       binary_attestation_sha256=signed['attestation_sha256'], actual_binary_sha256=signed['binary_sha256'])
+            event = {'schema': 'full1220-score-intent.v1', 'logical_identity': score['logical_identity'], 'score': payload,
+                     'scope_sha256': plan['provenance']['scope_sha256'], 'window_id': plan['window_id'], 'batch_sha256': batch['batch_sha256']}
+            event['intent_sha256'] = _sha(_json_bytes(event))
+            _publication_event(handle, 'logical-'+score['id']+'.intent.json', event)
+            _publication_event(handle, 'score-'+score['id']+'.intent.json', {'logical_sha256': score['id'], 'intent_sha256': event['intent_sha256']})
+            intents.append(event)
+        for event in intents:
+            score = event['score']; identifier = score['id']
+            handle.check()
+            _publication_event(handle, identifier+'.sent.json', {'intent_sha256': event['intent_sha256'], 'may_have_been_sent': True})
+            handle.check()
+            try:
+                ack = client.post_score(score)
+            except Exception:
+                raise ValueError('Score POST outcome uncertain; intent retained, verify only') from None
+            _require(type(ack) is dict and ack.get('id') == identifier, 'Score ACK unknown; intent retained, verify only')
+            _publication_event(handle, identifier+'.accepted.json', {'intent_sha256': event['intent_sha256'], 'ack_id': identifier})
+        handle.check()
+        try:
+            verified = client.verify_scores([event['score'] for event in intents]) is not False
+        except (ValueError, OSError, TimeoutError):
+            verified = False
+        return {'schema': 'full1220-score-publication.v1', 'all_verified': verified, 'intents': len(intents),
+                'acknowledged': len(intents), 'scores_published_once': len(intents), 'model_calls': 0, 'jev_calls': 0,
+                'actual_claims_created': 0, 'needs_readback': not verified}
+    except (KeyError, IndexError, TypeError, OSError) as error:
+        raise ValueError('Score publication stopped; retained intents permit verify only: '+type(error).__name__) from error
+    finally:
+        if handle is not None:
+            handle.close()
+
+
+def _verify_window_scores(plan, client):
+    """Read original intent payloads and existing score IDs; never create files or POST."""
+    handle = None
+    try:
+        _require(type(client) is _WindowScoreClient and client._seal is _PUBLICATION_SEAL, 'Pinned local evaluation client required')
+        _equal(client._manifest_sha, plan['provenance']['manifest_sha256'], 'Client manifest mismatch')
+        handle = _open_publication_registry(plan['provenance']['scope_sha256'], create=False)
+        if handle is None:
+            return {'all_verified': False, 'reason': 'not_published', 'scores_checked': 0, 'scores_published': 0}
+        batch_path = handle.scope/('window-%06d.batch.json' % plan['window_index'])
+        if not batch_path.exists():
+            return {'all_verified': False, 'reason': 'complete_batch_manifest_missing', 'scores_checked': 0, 'scores_published': 0}
+        batch = _Document(_regular_bytes(batch_path, 1 << 20)).value
+        integrity = dict(batch); batch_sha = integrity.pop('batch_sha256')
+        _equal(_sha(_json_bytes(integrity)), batch_sha, 'Original complete batch manifest tampered')
+        for key, expected in [('schema', 'full1220-score-batch.v1'), ('scope_sha256', plan['provenance']['scope_sha256']),
+                              ('manifest_sha256', plan['provenance']['manifest_sha256']), ('window_id', plan['window_id']),
+                              ('window_index', plan['window_index']), ('plan_sha256',_sha(_json_bytes(plan))), ('trace_source_identity', _batch_source_identity(plan))]:
+            _equal(batch[key], expected, 'Original batch source identity mismatch: '+key)
+        catalog = _index(batch['scores'], lambda item: item['id'], 'original batch score ID')
+        events = {}
+        for path in sorted(handle.scope.glob('logical-*.intent.json')):
+            event = _Document(_regular_bytes(path, 1 << 20)).value
+            integrity = dict(event); claimed = integrity.pop('intent_sha256')
+            _equal(_sha(_json_bytes(integrity)), claimed, 'Original publication intent tampered')
+            if event['window_id'] != plan['window_id']:
+                continue
+            score = event['score']; logical = json.loads(event['logical_identity'])
+            _equal(score['id'], _sha(_json_bytes(logical)), 'Original score identity tampered')
+            _equal(path.name, 'logical-'+score['id']+'.intent.json', 'Original logical filename tampered')
+            _equal(event['scope_sha256'], plan['provenance']['scope_sha256'], 'Publication scope mismatch')
+            _equal(event['batch_sha256'], batch_sha, 'Original intent belongs to a different batch')
+            _equal(score['metadata']['plan_sha256'], batch['plan_sha256'], 'Original intent plan provenance mismatch')
+            _require(score['id'] not in events, 'Duplicate original score intent')
+            events[score['id']] = event
+        if set(events) != set(catalog):
+            return {'all_verified': False, 'reason': 'incomplete_original_intent_inventory', 'scores_checked': 0,
+                    'expected_scores': len(catalog), 'present_intents': len(events), 'scores_published': 0}
+        intents = []
+        for identifier, expected in catalog.items():
+            event = events[identifier]; score = event['score']
+            _equal({key: score[key] for key in ('id', 'traceId', 'name')},
+                   {key: expected[key] for key in ('id', 'traceId', 'name')}, 'Original batch score binding mismatch')
+            _equal(event['logical_identity'], expected['logical_identity'], 'Original batch logical identity mismatch')
+            _require(score['traceId'] in plan['trace_bindings'], 'Original publication trace not in current window')
+            link = _Document(_regular_bytes(handle.scope/('score-'+identifier+'.intent.json'), 16384)).value
+            _equal(link, {'logical_sha256': identifier, 'intent_sha256': event['intent_sha256']}, 'Original score-ID link tampered')
+            intents.append(score)
+        handle.check()
+        if not intents:
+            return {'all_verified': False, 'reason': 'not_published', 'scores_checked': 0, 'scores_published': 0}
+        try:
+            verified = client.verify_scores(intents) is not False
+        except (ValueError, OSError, TimeoutError):
+            verified = False
+        return {'schema': 'full1220-score-verification.v1', 'all_verified': verified, 'scores_checked': len(intents),
+                'scores_published': 0, 'uses_original_intent_metadata': True}
+    except (KeyError, IndexError, TypeError, OSError) as error:
+        raise ValueError('Original score verification unavailable: '+type(error).__name__) from error
+    finally:
+        if handle is not None:
+            handle.close()
+
+
+
+
+
+
+
+# These are independently rendered into the frozen score copy, never job data.
+FROZEN_ROOT = FROZEN_VERIFIER_SHA256 = FROZEN_BINDING_SHA256 = 'UNFROZEN'
+_SCORE_SEAL = object()
+
+
+def _selection():
+    _hex(FROZEN_VERIFIER_SHA256, _HEX64, 'UNFROZEN V10 verifier selection')
+    _hex(FROZEN_BINDING_SHA256, _HEX64, 'UNFROZEN V10 runtime binding')
+    _require(type(FROZEN_ROOT) is str and FROZEN_ROOT.startswith('/') and 'v10' in FROZEN_ROOT,
+             'UNFROZEN independent V10 root')
+
+
+class _ScoreActualProof:
+    __slots__ = ('_seal','_module','_proof','_binding','manifest_raw','summary_raw','receipt_raw','_records','_sidecars','payload_raw','_attestation')
+    def __init__(self, seal, module, proof, binding, manifest, summary, receipt, records, sidecars, payload, attestation):
+        _require(seal is _SCORE_SEAL, 'Authenticated V10 verification issuer required')
+        values=(seal,module,proof,_json_bytes(binding),manifest,summary,receipt,tuple(sorted(records.items())),tuple(sorted(sidecars.items())),payload,_json_bytes(attestation))
+        for key,value in zip(self.__slots__,values):object.__setattr__(self,key,value)
+    def __setattr__(self,key,value):raise AttributeError('Immutable actual score proof')
+
+
+def _check_actual(proof, manifest_raw=None, summary_raw=None, receipt_raw=None, records=None):
+    _selection()
+    _require(type(proof) is _ScoreActualProof and proof._seal is _SCORE_SEAL,
+             'Opaque authenticated V10 actual-window proof required')
+    binding=_Document(proof._binding).value
+    report=proof._module.check_verified_window(proof._proof,binding)
+    for raw,original in ((manifest_raw,proof.manifest_raw),(summary_raw,proof.summary_raw),(receipt_raw,proof.receipt_raw)):
+        if raw is not None:_require(raw==original,'Actual proof raw input mismatch')
+    if records is not None:_equal({k:_sha(v) for k,v in records.items()},binding['records'],'Actual proof record mismatch')
+    _equal(_sha(proof.payload_raw),_Document(proof.receipt_raw).value['payload_manifest_sha256'],'Actual native payload binding')
+    return report
+
+
+def verify_actual_score_inputs(root=None, *, window_index=None, summary_sha256=None, helper_output_dir=None):
+    """Only factory: fresh authenticated full-window replay, no LF/provider IO."""
+    _selection()
+    _require(str(root)==FROZEN_ROOT,'Fixed V10 score root required')
+    import types
+    path=Path(FROZEN_ROOT)/'verifier-preparation/verify-window.py'
+    raw=_regular_bytes(path,4<<20)
+    _equal(_sha(raw),FROZEN_VERIFIER_SHA256,'Frozen V10 verifier bytes changed')
+    module=types.ModuleType('full1220_v10_scores_window');module.__file__=str(path)
+    exec(compile(raw,str(path),'exec'),module.__dict__)
+    proof=module.verify_actual_window(root,binding_sha256=FROZEN_BINDING_SHA256,window_index=window_index,
+        summary_sha256=summary_sha256,helper_output_dir=helper_output_dir)
+    reader=module.Evidence(Path(root));mraw=reader.read('actual-manifest.json',module.FROZEN_MANIFEST_SHA256)
+    sraw=reader.read(f'records/window-{window_index:06d}-summary.json',summary_sha256)
+    summary=_Document(sraw).value;prefix=f'records/window-{window_index:06d}/'
+    rraw=reader.read(prefix+'receipt.json',summary['report_sha256']);receipt=_Document(rraw).value
+    records={row['recording_file']:reader.read(prefix+row['recording_file'],row['recording_sha256']) for row in receipt['rows'] if row['attempted']}
+    sidecars={q[k]:reader.read(prefix+q[k],q[k.replace('_file','_sha256')]) for row in receipt['rows'] if (q:=row.get('quality_end')) is not None for k in ('candidate_file','cleanup_file')}
+    payload=reader.read(prefix+'payload-manifest.json',receipt['payload_manifest_sha256'])
+    binding={**module.source_binding(mraw,rraw,records,sidecars),'summary_sha256':_sha(sraw),'binding_sha256':FROZEN_BINDING_SHA256}
+    module.check_verified_window(proof,binding)
+    rb=_Document(reader.read('runtime-binding.json',FROZEN_BINDING_SHA256)).value
+    attestation={'manifest_sha256':_sha(mraw),'attestation_sha256':rb['artifact_sha256']['actual-manifest.json.binary-attestation.json'],
+                 'binary_sha256':module.FROZEN_BINARY_SHA256,'binary_path':str(Path(root)/'full-window-actual-v10'),
+                 'signature_verified':True,'verification_route':'authenticated_v10_window'}
+    reader.recheck()
+    return _ScoreActualProof(_SCORE_SEAL,module,proof,binding,mraw,sraw,rraw,records,sidecars,payload,attestation)
+
+
+def _score_cache_accounting(manifest):
+    # Exact provider/102-history/caps/authority checks belong to the required
+    # authenticated verifier. These are configuration descriptions, never bills.
+    return {'schema':'full-window-accounting.v3',
+        'model_cache_hit_input_micro_per_million':40000,'model_input_micro_per_million':2000000,
+        'model_output_micro_per_million':8000000,'jev_input_micro_per_million':42000,'jev_output_micro_per_million':0,
+        'model_total_cap_micro_cny':sum(w['model_cap_micro_cny'] for w in manifest['scope']['windows']),
+        'jev_total_cap_micro_usd':sum(w['jev_cap_micro_usd'] for w in manifest['scope']['windows']),
+        'basis':'frozen_configuration_not_invoice_or_observed_cache_split','proves_cache_usage':False,'proves_knowledge_usage':False}
+
+
+def build_window_score_plan(manifest_raw, summary_raw, receipt_raw, records, review_raw, expected_hashes, *, actual_proof=None):
+    _check_actual(actual_proof,manifest_raw,summary_raw,receipt_raw,records)
+    try:return _build(manifest_raw,summary_raw,receipt_raw,records,review_raw,expected_hashes,FROZEN_BINDING_SHA256)
+    except (KeyError,IndexError,TypeError,UnicodeError,OverflowError,RecursionError) as error:
+        raise ValueError('Invalid V10 score evidence: '+type(error).__name__) from error
+
+
+def _canonical_integer(value):
+    if type(value) is str and re.fullmatch(r'0|[1-9][0-9]*',value):return int(value)
+    _require(type(value) is int,'Canonical native metadata integer required')
+    return value
+
+
+def native_metadata(packet):
+    """Pure identity derivation; packet authenticity requires the actual gate."""
+    i=packet['identity']
+    order=('native_attempt','provider','model','case_key','pass','arm','turn','attempt','body_sha256','bytes')
+    identity={k:i[k] for k in order}
+    wire=json.dumps({'Claim':packet['claim_sha256'],'Sequence':packet['sequence'],'Request':identity},ensure_ascii=False,separators=(',',':'))
+    wire=wire.replace('<','\\u003c').replace('>','\\u003e').replace('&','\\u0026').replace('\u2028','\\u2028').replace('\u2029','\\u2029')
+    response=packet['response'];body=response.get('body') or {}
+    result = {'native_schema':'full-window-native.v8','native_id':_sha(wire.encode()),'native_sequence':packet['sequence'],
+        'native_attempt':i['native_attempt'],'provider':i['provider'],'body_sha256':i['body_sha256'],'request_bytes':i['bytes'],
+        'native_content_mode':'metadata_only','claim_sha256':packet['claim_sha256'],'case_key':i['case_key'],'pass':i['pass'],
+        'arm':i['arm'],'turn':i['turn'],'logical_attempt':i['attempt'],
+        'native_outcome':'settled' if response['complete'] else 'tls_eof_unknown',
+        'response_status':response['status'],'response_bytes':body.get('bytes',0),
+        'response_complete':response['complete'],'response_available':response['available']}
+    if body:result['response_capture_sha256']=body['full_sha256']
+    return result
+
+
+def validate_native_observations(observations, packets):
+    """Exact metadata-only native inventory and direct logical/turn parents."""
+    try:
+        natives=[r for r in observations if r['name']=='window.native']
+        _equal(len(natives),len(packets),'Native observation count mismatch')
+        by_id=_index(observations,lambda r:r['id'],'observation ID')
+        expected={p['sequence']:p for p in packets};_equal(len(expected),len(packets),'Duplicate native packet')
+        seen=set();logical_groups={};parent_groups={}
+        for row in natives:
+            _require(row.get('input') is None and row.get('output') is None,'Native observations must be metadata only')
+            metadata=row['metadata'];sequence=_canonical_integer(metadata['native_sequence'])
+            _require(sequence in expected and sequence not in seen,'Unknown or duplicate native sequence');seen.add(sequence)
+            packet=expected[sequence];want=native_metadata(packet)
+            for key,value in want.items():
+                actual=metadata[key]
+                if type(value) is int:actual=_canonical_integer(actual)
+                if type(value) is bool and type(actual) is str and actual in ('true','false'):actual=(actual=='true')
+                _equal(actual,value,'Native observation identity mismatch: '+key)
+            logical=by_id.get(row.get('parentObservationId'))
+            names=('llm.attempt',) if packet['identity']['provider']=='model' else ('jev.intent','jev.guard')
+            _require(logical is not None and logical['name'] in names,'Native direct logical parent mismatch')
+            i=packet['identity'];group=(i['provider'],i['turn'],i['attempt'])
+            _require(group not in logical_groups or logical_groups[group]==logical['id'],'One logical attempt split over foreign parents')
+            _require(logical['id'] not in parent_groups or parent_groups[logical['id']]==group,'Different logical attempts share one parent')
+            logical_groups[group]=logical['id'];parent_groups[logical['id']]=group
+            parent=logical;visited=set()
+            while parent['name']!='agent.turn':
+                _require(parent['id'] not in visited,'Native cyclic parent');visited.add(parent['id'])
+                parent=by_id.get(parent.get('parentObservationId'));_require(parent is not None,'Native missing turn parent')
+            _equal(_canonical_integer(parent['metadata']['turn_index']),packet['identity']['turn'],'Native turn parent mismatch')
+        expected_parents={row['id'] for row in observations if row['name'] in ('llm.attempt','jev.intent','jev.guard')}
+        _require(set(parent_groups)==expected_parents,'Exact logical/native parent inventory required')
+        return len(natives)
+    except (KeyError,TypeError,IndexError) as error:raise ValueError('Invalid native observation: '+type(error).__name__) from error
+
+
+def load_window_score_client(manifest_raw, settings_path, *, actual_proof=None):
+    _check_actual(actual_proof,manifest_raw)
+    return _load_window_score_client(manifest_raw,settings_path)
+
+
+def publish_window_scores(plan, projection, receipt_chain, client, *, actual_proof=None, execute=False):
+    _check_actual(actual_proof)
+    _equal(plan['provenance']['manifest_sha256'],_sha(actual_proof.manifest_raw),'Actual publication manifest mismatch')
+    _equal(plan['provenance']['receipt_sha256'],_sha(actual_proof.receipt_raw),'Actual publication receipt mismatch')
+    _equal(plan['provenance']['summary_sha256'],_sha(actual_proof.summary_raw),'Actual publication summary mismatch')
+    attestation=_PublicationProof(_PUBLICATION_SEAL,'attestation',_Document(actual_proof._attestation).value)
+    return _publish_window_scores(plan,projection,receipt_chain,attestation,client,execute=execute)
+
+
+def verify_window_scores(plan, client, *, actual_proof=None):
+    _check_actual(actual_proof)
+    _equal(plan['provenance']['receipt_sha256'],_sha(actual_proof.receipt_raw),'Actual score verification receipt mismatch')
+    return _verify_window_scores(plan,client)
+
+
+def main(argv=None):
+    parser=argparse.ArgumentParser(description=__doc__)
+    parser.parse_args(argv)
+    print('inactive: use authenticated API after independently frozen V10 pins; no IO performed')
+    return 0
+
+
+def _projection_private_settings(manifest, path):
+    info=Path(path).lstat()
+    _require(info.st_uid==os.geteuid() and stat.S_IMODE(info.st_mode)==0o600, 'Private owner0600 original settings required')
+    raw=_regular_bytes(path,65536)
+    _equal(_sha(raw),manifest['private_settings_sha256'],'Trusted manifest private settings mismatch')
+    settings=_Document(raw).value;observer=settings['observer']
+    _require(observer['enabled'] is True and observer['capture_content'] is True and observer['environment']=='evaluation', 'Original capture switches required')
+    _equal(observer['release'],manifest['archive_commit'],'Original observer release mismatch')
+    _require(type(observer['hash_key']) is str and len(observer['hash_key'].encode())>=32,'Original observer hash key required')
+    return raw,observer['hash_key']
+
+
+def validate_tool_observations(observations, projected_turns):
+    """Exact tool multiset, original phase, turn and redacted captured values."""
+    try:
+        by_id=_index(observations,lambda row:row['id'],'observation ID')
+        expected=[]
+        for turn in projected_turns:
+            for tool in turn['tools']:expected.append((turn['turn_index'],tool))
+        tools=[row for row in observations if row['name'].startswith('tool.')]
+        _equal(len(tools),len(expected),'Exact tool observation count required')
+        missing=False
+        for row in tools:
+            parent=by_id.get(row.get('parentObservationId'));seen=set()
+            while parent is not None and parent['name']!='agent.turn':
+                _require(parent['id'] not in seen,'Cyclic tool parent');seen.add(parent['id'])
+                parent=by_id.get(parent.get('parentObservationId'))
+            _require(parent is not None,'Tool belongs to no original turn')
+            turn=_canonical_integer(parent['metadata']['turn_index'])
+            candidates=[(j,e) for j,(i,e) in enumerate(expected) if i==turn and e['name']==row['name'] and e['phase']==row['metadata']['phase']]
+            _require(candidates,'Tool identity/phase/turn mismatch')
+            complete=[(j,e) for j,e in candidates if all(field in row and row[field] is not None and _content_matches(row[field],e[field]) for field in ('input','output'))]
+            absent=any(field not in row or row[field] is None for field in ('input','output'))
+            if complete:index=complete[0][0]
+            else:
+                _require(absent,'Captured tool content mismatch')
+                # Even an incomplete observation may not contradict a present field.
+                partial=[(j,e) for j,e in candidates if all(row.get(field) is None or _content_matches(row[field],e[field]) for field in ('input','output'))]
+                _require(partial,'Partial captured tool content mismatch');index=partial[0][0];missing=True
+            expected.pop(index)
+        _require(not expected,'Missing original tool observations')
+        return not missing
+    except (KeyError,IndexError,TypeError) as error:raise ValueError('Invalid tool capture: '+type(error).__name__) from error
+
+
+_ROUTING_KEYS=('jev_enabled','jev_blocked','jev_short_circuit','jev_route_shape','jev_shape_confidence',
+               'jev_legit_probability','jev_risk_score','jev_risk_confidence','jev_fast_path_eligible','jev_fast_path_tool')
+_REGISTERED_TOOLS=frozenset(('get_balance','get_consumption','get_recent_bills','list_plans','get_my_subscription',
+                           'list_models','recharge','refund_recharge','subscribe_plan','change_plan','cancel_subscription'))
+
+
+def turn_observer_metadata(observation,index):
+    """Exact current End/observabilitySummary metadata from original telemetry.
+
+    No route is inferred or changed. Scalars use numeric comparisons at readback
+    to avoid pretending Python float formatting is Go strconv.FormatFloat.
+    """
+    turn=observation['turn'];response=turn['response'];tm=response['telemetry']
+    result={'turn_index':index,'http_status':turn['status'],'stage':tm.get('turn_stage',''),
+            'pending_confirm':response.get('pending_confirm',False)}
+    for key in ('llm_calls','jev_calls','jev_errors','llm_usage_missing','jev_usage_missing'):
+        result[key]=_integer(tm.get(key,0),0,'Original telemetry integer: '+key)
+    result.update(jev_fast_path=tm.get('jev_fast_path',False),jev_fast_path_reason=tm.get('jev_fast_path_reason',''),
+                  jev_intent=tm.get('jev_intent',''),jev_intent_confidence=tm.get('jev_intent_confidence',0))
+    if result['jev_calls']>0:
+        for key in ('jev_enabled','jev_blocked','jev_short_circuit','jev_fast_path_eligible'):
+            result[key]=tm.get(key,False);_require(type(result[key]) is bool,'Original routing boolean')
+        shape=tm.get('jev_route_shape','');result['jev_route_shape']=shape if shape in ('','single_read','complex') else 'invalid'
+        for key,maximum in [('jev_shape_confidence',1),('jev_legit_probability',1),('jev_risk_score',2),('jev_risk_confidence',1)]:
+            value=tm.get(key,0)
+            result[key]=value if type(value) in (int,float) and math.isfinite(value) and 0<=value<=maximum else 'invalid'
+        tool=tm.get('jev_fast_path_tool','')
+        result['jev_fast_path_tool']=tool if tool=='' or tool in _REGISTERED_TOOLS else 'invalid'
+    return result
+
+
+def validate_turn_observer_metadata(actual,expected):
+    _require(type(actual) is dict,'Original turn metadata object')
+    for key in _ROUTING_KEYS:
+        if key not in expected:_require(key not in actual,'JEV metadata present without original calls: '+key)
+    for key,value in expected.items():
+        if value=='' and key not in actual:continue  # LF may omit empty string attributes.
+        _require(key in actual,'Missing original turn metadata: '+key)
+        got=actual[key]
+        if type(value) is bool:
+            _require((type(got) is bool and got is value) or (type(got) is str and got==str(value).lower()),'Turn boolean metadata mismatch: '+key)
+        elif type(value) is int and key not in ('jev_intent_confidence','jev_shape_confidence','jev_legit_probability','jev_risk_score','jev_risk_confidence'):
+            _equal(_canonical_integer(got),value,'Turn integer metadata mismatch: '+key)
+        elif type(value) in (int,float):
+            if type(got) is str:
+                _require(re.fullmatch(r'-?[0-9]+(?:\.[0-9]+)?',got) is not None,'Go finite decimal metadata: '+key)
+                got=float(got)
+            _require(type(got) in (int,float) and math.isfinite(got) and float(got)==float(value),'Turn scalar metadata mismatch: '+key)
+        else:_equal(got,value,'Turn metadata mismatch: '+key)
+
+
+def _reserve_capture(root, plan, output):
+    """Consume this new-scope/local-target capture before settings, helper or GET.
+
+    Any interrupted write leaves O_EXCL evidence. There is no recovery entry,
+    legacy sentinel, alternate target output, or authority in these JSON bytes.
+    """
+    root=Path(root);output=Path(output)
+    _require(root.is_absolute() and root.resolve()==root,'Canonical frozen capture root required')
+    index=_integer(plan['window_index'],1,'Exact local capture index required')
+    _require(index<=456 and plan['window_id']==f'window-{index+55:03d}','Exact suffix capture target')
+    expected=root/'score-runs'/f'window-{index:06d}'/'capture'
+    _require(output==expected and output.resolve()==output and not os.path.lexists(output),
+             'Exclusive exact new-scope capture namespace required')
+    _private_directory(expected.parent)
+    handle=_open_publication_registry(plan['provenance']['scope_sha256'],create=True)
+    try:
+        for suffix in ('publish-operation.json','batch.json'):
+            _require(not os.path.lexists(handle.scope/(f'window-{index:06d}.'+suffix)),
+                     'Publication already attempted; verify only')
+        _publication_event(handle,f'window-{index:06d}.capture-operation.json',{
+            'schema':'full1220-v10-once-capture.v1','scope_sha256':plan['provenance']['scope_sha256'],
+            'manifest_sha256':plan['provenance']['manifest_sha256'],'window_index':index,
+            'window_id':plan['window_id'],'plan_sha256':_sha(_json_bytes(plan)),
+            'output':str(output),'helper_sha256':_PROJECTION_HELPER_SHA256,'permanent_no_reentry':True})
+    finally:handle.close()
+
+
+def project_window_content(manifest_raw,summary_raw,receipt_raw,records,review_raw,expected_hashes,*,
+                           source_root,output_dir,runtime=None,execute=False,closed_archive_extra_witness=None,
+                           actual_proof=None,private_settings_path=None):
+    """Actual proof first, authenticated prebuilt artifact, fresh capture process.
+
+    No Go compilation/fallback. HashKey is loaded only by the deferred stdin
+    callback after selected source/catalog/tool/input pins have been rechecked.
+    """
+    _require(execute is True and runtime is None and closed_archive_extra_witness is None,'Explicit prebuilt V10 capture only')
+    plan=build_window_score_plan(manifest_raw,summary_raw,receipt_raw,records,review_raw,expected_hashes,actual_proof=actual_proof)
+    manifest=_Document(manifest_raw).value;module=actual_proof._module
+    context=module.load_freeze_binding(Path(FROZEN_ROOT),'runtime-binding.json',FROZEN_BINDING_SHA256)
+    h=context.helper;p=h['runner']
+    _equal(manifest,context.manifest,'Actual capture selected manifest')
+    _equal(str(source_root),manifest['source_root'],'Exact selected capture source root')
+    _equal(expected_hashes['projection_helper_sha256'],_PROJECTION_HELPER_SHA256,'Fixed capture helper SHA')
+    _equal(manifest['sources']['internal/observability/content.go'],_CONTENT_SOURCE_SHA256,'Supported original content()')
+    for key,value in [('enabled',True),('capture_content',True),('sample_rate',1),('environment','evaluation'),('release',manifest['archive_commit'])]:
+        _equal(manifest['observer'][key],value,'Original capture switch: '+key)
+    root=Path(source_root);git_pointer=_verify_frozen_sources(root,manifest['sources'],allow_root_git_pointer=True)
+    selected=p.select_helper(h['catalog'],'capture',artifact_root=context.root,runtime_tree=h['runtime'],tool_pins=h['tools'])
+    output=Path(output_dir);_reserve_capture(context.root,plan,output)
+    _require(output.is_absolute() and output.resolve()==output and output.parent.is_dir(),'Canonical new capture output')
+    _require(root!=output and root not in output.parents and output not in root.parents,'Capture/source separation')
+    output.mkdir(mode=0o700);rd=output/'records';rd.mkdir(mode=0o700);(output/'tmp').mkdir(mode=0o700)
+    for name,raw in records.items():_exclusive_write(rd/name,raw)
+    job=_projection_job(plan,manifest);input_raw=_json_bytes(job);_exclusive_write(output/'input.json',input_raw)
+    env={'PATH':'/usr/bin:/bin:/usr/sbin:/sbin','TMPDIR':str(output/'tmp'),'SDKROOT':_PROJECTION_SDKROOT,
+         'FULL1220_PROJECTION_INPUT':str(output/'input.json'),'FULL1220_PROJECTION_OUTPUT':str(output/'projection.json'),
+         'FULL1220_PROJECTION_INPUT_SHA256':_sha(input_raw)}
+    names=set(manifest['sources'])|({'.git'} if git_pointer is not None else set())
+    pins=[p.pin_file(root/name,immutable=False) for name in names]
+    pins += [p.pin_file(output/'input.json',immutable=False),p.pin_file(Path(private_settings_path),immutable=False),
+             p.pin_file(context.root/'helper-build/catalog.json')]
+    pins += [p.pin_file(rd/name,immutable=False) for name in records]+list(h['tools'].values())
+    private=[];validated=[]
+    def stdin():
+        raw,key=_projection_private_settings(manifest,private_settings_path)
+        private.append(raw)
+        return _json_bytes({'hash_key':key})
+    def validate(outdir):
+        _require(len(private)==1 and _regular_bytes(private_settings_path,65536)==private[0],'Original settings identity changed')
+        _equal(_verify_frozen_sources(root,manifest['sources'],allow_root_git_pointer=True),git_pointer,'Original capture source/Git identity')
+        rr=module.Evidence(rd)
+        for name,raw in records.items():rr.read(name,_sha(raw))
+        rr.inventory(set(records))
+        projected_raw=_regular_bytes(output/'projection.json',16<<20)
+        _verify_projection_receipt(module.Evidence(outdir).read('stdout',bound=8<<20),projected_raw)
+        _check_projected_output(_Document(projected_raw).value,job,input_raw,records)
+        validated.append(projected_raw)
+    attempt='capture-'+_sha(str(output).encode())[:32]
+    process=p.run_owned(state_root=context.root/'helper-supervision',attempt_name=attempt,argv=list(selected.argv),cwd=Path(selected.cwd),
+        env=env,executable_pin=selected.binary,inputs=pins,trees=[h['runtime']],timeout=125,phase='capture',stdin_factory=stdin,validate_output=validate)
+    _require(process['accepted'] is True and process['cleanup']['confirmed'] is True and process['output_validation_supplied'] is True,'Capture failed/interrupted; no retry/proof')
+    actual=context.root/'helper-supervision/attempts'/attempt/process['receipt_file']
+    _equal(_Document(_regular_bytes(actual)).value,process,'Capture authoritative process receipt')
+    _exclusive_write(output/'process.json',_json_bytes({'path':str(actual),'sha256':_sha(_regular_bytes(actual)),'accepted':True}))
+    _require(len(validated)==1,'Exactly one fresh validated capture output')
+    payload=_Document(validated[0]).value
+    payload['native_packets']=_Document(actual_proof.payload_raw).value['packets']
+    return _ContentProjection(_PROJECTION_SEAL,_json_bytes(payload),plan,job,None)
+
+
+if __name__=='__main__':raise SystemExit(main())
