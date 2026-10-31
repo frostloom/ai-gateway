@@ -337,34 +337,10 @@ func windowActualRevision(s string) bool {
 	return true
 }
 func decodeWindowActualJSON(raw []byte, out any) error {
-	obj, err := windowJSONObject(raw)
-	if err != nil {
+	if err := validateWindowJSONShape(raw, true); err != nil {
 		return err
 	}
-	var nonnull func(any) bool
-	nonnull = func(v any) bool {
-		if v == nil {
-			return false
-		}
-		switch x := v.(type) {
-		case map[string]any:
-			for _, v := range x {
-				if !nonnull(v) {
-					return false
-				}
-			}
-		case []any:
-			for _, v := range x {
-				if !nonnull(v) {
-					return false
-				}
-			}
-		}
-		return true
-	}
-	if !nonnull(obj) {
-		return fmt.Errorf("null actual readiness field")
-	}
+
 	d := json.NewDecoder(bytes.NewReader(raw))
 	d.DisallowUnknownFields()
 	return d.Decode(out)

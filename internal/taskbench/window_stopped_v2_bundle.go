@@ -216,7 +216,7 @@ func decodeWindowStoppedV2Recording(raw []byte) (collectionRecording, error) {
 	// pinned receipt. Records contain legitimate null business state/arrays;
 	// keep duplicate-key, depth, trailing-data and unknown-field rejection, but
 	// do not apply the readiness manifest's recursive non-null constraint.
-	if _, err := windowJSONObject(raw); err != nil {
+	if err := validateWindowJSONShape(raw, false); err != nil {
 		return r, err
 	}
 	d := json.NewDecoder(bytes.NewReader(raw))

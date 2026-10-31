@@ -96,7 +96,7 @@ func readWindowStoppedV4NativeWithPass(p *historyReadPass, dir string, payload w
 // record decoder's duplicate/depth/trailing/unknown-field rules, without the
 // separate readiness non-null constraint. This never mints an owned proof.
 func decodeWindowStoppedV4QualityData(raw []byte, target any) error {
-	if _, err := windowJSONObject(raw); err != nil {
+	if err := validateWindowJSONShape(raw, false); err != nil {
 		return err
 	}
 	d := json.NewDecoder(bytes.NewReader(raw))
