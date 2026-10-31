@@ -1695,7 +1695,7 @@ def verify_remote_score_inputs(plan,projection,*,actual_proof=None,readback_root
     _check_actual(actual_proof)
     _validate_projection_plan_binding(plan,projection)
     issuer=remote_verifier()
-    proof=issuer.verify_remote_window(verifier=actual_proof._module,cohort=actual_proof._proof._cohort,window_index=plan['window_index'],binding=remote_binding(plan,projection),plan=plan,projection=projection,readback_root=readback_root)
+    proof=issuer.verify_remote_window(score_module=sys.modules[__name__],verifier=actual_proof._module,cohort=actual_proof._proof._cohort,window_index=plan['window_index'],binding=remote_binding(plan,projection),plan=plan,projection=projection,readback_root=readback_root)
     _check_remote(proof,plan,projection)
     return proof
 
