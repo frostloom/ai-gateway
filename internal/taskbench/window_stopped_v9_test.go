@@ -91,7 +91,7 @@ func TestWindowStoppedV9HistoryEpochBounded(t *testing.T) {
 		t.Fatal(err)
 	}
 	p, _ = newHistoryReadPass(context.Background())
-	if err := p.WithStoppedLock(10, lock, func() error { return nil }); err == nil {
+	if err := p.WithStoppedLock(11, lock, func() error { return nil }); err == nil {
 		t.Fatal("unbounded epoch accepted")
 	}
 	_ = p.Finish()
