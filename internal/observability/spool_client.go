@@ -250,6 +250,12 @@ func (s *durableSpoolClient) UploadTraces(ctx context.Context, resources []*trac
 		if !bytes.Equal(original, raw) {
 			return s.fail(errors.New("durable duplicate mismatch"))
 		}
+		// The referenced original can be older than the latest-entry check.
+		commitName := spoolCommitName(index)
+		commitWant := s.leaves[commitName]
+		if _, _, e = readSpoolLeaf(ctx, s.root, commitName, 16*durableBatchLimit, &commitWant); e != nil {
+			return s.fail(e)
+		}
 		if e = s.check(ctx, true); e != nil {
 			return s.fail(e)
 		}

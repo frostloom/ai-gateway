@@ -150,6 +150,11 @@ func openSpoolDir(path string) (*os.File, error) {
 	return os.NewFile(uintptr(fd), path), nil
 }
 func openSpoolLeaf(dir *os.File, name string, flags int) (*os.File, error) {
+	// An untrusted same-name FIFO must not wait for a peer before callers can
+	// reject its descriptor type. This also covers the independent reader lock.
+	if flags&unix.O_ACCMODE == unix.O_RDONLY {
+		flags |= unix.O_NONBLOCK
+	}
 	fd, e := unix.Openat(int(dir.Fd()), name, flags|unix.O_NOFOLLOW|unix.O_CLOEXEC, 0600)
 	if e != nil {
 		return nil, e

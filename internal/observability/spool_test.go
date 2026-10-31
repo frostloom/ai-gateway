@@ -6,7 +6,9 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"syscall"
 	"testing"
+	"time"
 )
 
 func TestDurableRejectsReuseAliasesAndInvalidConfig(t *testing.T) {
@@ -367,5 +369,142 @@ func TestDurableSmallCapCannotWritePastLimit(t *testing.T) {
 	}
 	if total > 32 {
 		t.Fatalf("partial initialization wrote past cap: %d", total)
+	}
+}
+
+// A duplicate must reference its own original commit, including when a later
+// committed batch makes the usual latest-entry health check insufficient.
+func TestDurableOlderDuplicateCommitMutation(t *testing.T) {
+	s, c := startSpool(t)
+	ctx := context.Background()
+	original := spoolSpans(3)
+	if e := s.UploadTraces(ctx, original); e != nil {
+		t.Fatal(e)
+	}
+	if e := s.UploadTraces(ctx, spoolSpans(4)); e != nil {
+		t.Fatal(e)
+	}
+	commit := filepath.Join(c.Root, spoolCommitName(1))
+	if e := os.WriteFile(commit, []byte(`{"tampered":true}`), 0600); e != nil {
+		t.Fatal(e)
+	}
+	if e := s.UploadTraces(ctx, original); e == nil {
+		t.Error("older duplicate acknowledged despite modified original commit")
+	}
+	st, e := s.status()
+	if e == nil || !st.Poisoned || st.Batches != 2 {
+		t.Errorf("missing sticky poison or changed committed count: %+v %v", st, e)
+	}
+	if e := s.Stop(ctx); e == nil {
+		t.Error("corrupt original commit closed successfully")
+	}
+	raw, e := os.ReadFile(commit)
+	if e != nil || string(raw) != `{"tampered":true}` {
+		t.Fatal("corrupt evidence changed or removed", e)
+	}
+}
+
+// Keep both the original leaf and the substituted FIFO. The timeout recovery
+// opens only this controlled FIFO to join a broken implementation before failing.
+func durableFIFOReplacement(t *testing.T, c DurableSpoolConfig, name string) string {
+	t.Helper()
+	p := filepath.Join(c.Root, name)
+	if e := os.Rename(p, filepath.Join(filepath.Dir(c.Root), "retained-"+name)); e != nil {
+		t.Fatal(e)
+	}
+	if e := syscall.Mkfifo(p, 0600); e != nil {
+		t.Fatal(e)
+	}
+	return p
+}
+func requireDurablePromptFIFOError(t *testing.T, p string, operation func() error) {
+	t.Helper()
+	done := make(chan error, 1)
+	go func() { done <- operation() }()
+	select {
+	case e := <-done:
+		if e == nil {
+			t.Error("FIFO was accepted")
+		}
+	case <-time.After(200 * time.Millisecond):
+		f, e := os.OpenFile(p, os.O_RDWR|syscall.O_NONBLOCK, 0600)
+		if e != nil {
+			t.Fatal(e)
+		}
+		defer f.Close()
+		select {
+		case <-done:
+		case <-time.After(time.Second):
+			t.Fatal("could not join controlled FIFO operation")
+		}
+		t.Error("nonregular leaf open blocked beyond canceled context")
+	}
+	fi, e := os.Lstat(p)
+	if e != nil || fi.Mode()&os.ModeNamedPipe == 0 {
+		t.Fatal("FIFO evidence removed or changed", e)
+	}
+}
+func TestDurableFIFORejectsLiveOperationsPromptly(t *testing.T) {
+	for _, operation := range []string{"upload", "status", "stop"} {
+		t.Run(operation, func(t *testing.T) {
+			s, c := startSpool(t)
+			if e := s.UploadTraces(context.Background(), spoolSpans(3)); e != nil {
+				t.Fatal(e)
+			}
+			p := durableFIFOReplacement(t, c, spoolBodyName(1))
+			ctx, cancel := context.WithTimeout(context.Background(), 50*time.Millisecond)
+			defer cancel()
+			requireDurablePromptFIFOError(t, p, func() error {
+				switch operation {
+				case "upload":
+					return s.UploadTraces(ctx, spoolSpans(4))
+				case "status":
+					_, e := s.status()
+					return e
+				default:
+					return s.Stop(ctx)
+				}
+			})
+			st, e := s.status()
+			if e == nil || !st.Poisoned || st.Closed || st.Batches != 1 {
+				t.Errorf("FIFO failure not sticky: %+v %v", st, e)
+			}
+			if e := s.Stop(context.Background()); e == nil {
+				t.Error("FIFO poison closed successfully")
+			}
+		})
+	}
+}
+func TestDurableFIFORejectsClosedReadersPromptly(t *testing.T) {
+	for _, operation := range []string{"verify_body", "verify_lock", "read_body", "read_lock"} {
+		t.Run(operation, func(t *testing.T) {
+			s, c := startSpool(t)
+			ctx := context.Background()
+			if e := s.UploadTraces(ctx, spoolSpans(3)); e != nil {
+				t.Fatal(e)
+			}
+			if e := s.Stop(ctx); e != nil {
+				t.Fatal(e)
+			}
+			proof, e := VerifyClosedDurableSpool(ctx, c)
+			if e != nil {
+				t.Fatal(e)
+			}
+			name := spoolBodyName(1)
+			if strings.HasSuffix(operation, "_lock") {
+				name = "lock"
+			}
+			p := durableFIFOReplacement(t, c, name)
+			ctx, cancel := context.WithTimeout(ctx, 50*time.Millisecond)
+			defer cancel()
+			requireDurablePromptFIFOError(t, p, func() error {
+				if strings.HasPrefix(operation, "verify_") {
+					_, e := VerifyClosedDurableSpool(ctx, c)
+					return e
+				}
+				_, e := proof.ReadBatch(ctx, 1)
+				return e
+			})
+		})
 	}
 }
