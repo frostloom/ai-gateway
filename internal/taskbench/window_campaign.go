@@ -74,6 +74,7 @@ type windowCampaignPrepared struct {
 	scope          fullWindowScope
 	contracts      []windowAccountingContract
 	stoppedHistory windowStoppedHistory
+	stoppedV9      *windowStoppedV9Baseline
 	v8Authority    *windowV8Authority
 }
 type windowCampaignArmEvidence struct {
@@ -307,6 +308,10 @@ func validatePreparedWindowCampaign(p windowCampaignPrepared, b fullWindowBaseli
 		return e
 	}
 	switch p.scope.Schema {
+	case "full-window-scope.v10":
+		if err := validateStoppedV10CampaignHistory(p, b); err != nil {
+			return err
+		}
 	case "full-window-scope.v9":
 		if err := validateStoppedV9CampaignHistory(p, b); err != nil {
 			return err
@@ -377,7 +382,14 @@ func validatePreparedWindowCampaign(p windowCampaignPrepared, b fullWindowBaseli
 			claimModelBound, claimJEVBound = 123827032, 2037474
 		}
 	}
-	if e := d.validateWithBounds(claimModelBound, claimJEVBound); e != nil {
+	if p.scope.Schema == "full-window-scope.v10" {
+		if d.ScopeSHA256 != p.scopeSHA || d.PolicySHA256 != p.scope.Bindings.PolicySHA256 {
+			return fmt.Errorf("v10 frozen claim identity changed")
+		}
+		if e := validateV10ClaimDeclaration(d, p.scope.Completion); e != nil {
+			return e
+		}
+	} else if e := d.validateWithBounds(claimModelBound, claimJEVBound); e != nil {
 		return e
 	}
 	if len(p.contracts) != len(d.Windows) {
@@ -481,7 +493,9 @@ func (c *windowCampaign) persistClaimWindowCampaignContext(ctx context.Context, 
 		historyCtx, done := c.windowCampaignHistoryContextLocked(ctx)
 		defer done()
 		var err error
-		if c.prepared.scope.Schema == "full-window-scope.v9" {
+		if c.prepared.scope.Schema == "full-window-scope.v10" {
+			err = validateStoppedV10CampaignHistoryContext(historyCtx, c.prepared, c.baseline)
+		} else if c.prepared.scope.Schema == "full-window-scope.v9" {
 			err = validateStoppedV9CampaignHistoryContext(historyCtx, c.prepared, c.baseline)
 		} else {
 			err = validateStoppedV8CampaignHistory(c.prepared, c.baseline)
@@ -544,6 +558,9 @@ func (c *windowCampaign) persistClaimWindowCampaignContext(ctx context.Context, 
 		r.Schema = "full-window-campaign-claim.v8"
 		if d.Schema == "full-window-scope.v9" {
 			r.Schema = "full-window-campaign-claim.v9"
+		}
+		if d.Schema == "full-window-scope.v10" {
+			r.Schema = "full-window-campaign-claim.v10"
 		}
 		r.BaselineEvidenceSHA256 = d.BaselineEvidenceSHA256
 		r.BudgetApprovalSHA256 = c.prepared.v8Authority.authorizationSHA
@@ -786,6 +803,9 @@ func (c *windowCampaign) advanceWindowCampaignContext(ctx context.Context, p *wi
 			return fail(fmt.Errorf("v8 extras unresolved"))
 		}
 		checkpoint.Schema = "full-window-campaign-owned-checkpoint.v8"
+		if d.Schema == "full-window-scope.v10" {
+			checkpoint.Schema = "full-window-campaign-owned-checkpoint.v10"
+		}
 		checkpoint.V8 = c.snapshotWindowV8RuntimeLocked(audit.State, c.ledger.contract.WindowID)
 	}
 	name := fmt.Sprintf("checkpoint-%06d.json", c.index)

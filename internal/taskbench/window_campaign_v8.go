@@ -1,6 +1,7 @@
 package taskbench
 
 import (
+	"encoding/json"
 	"fmt"
 	"path/filepath"
 	"reflect"
@@ -53,17 +54,25 @@ func validateWindowCampaignNativeAuthority(p windowCampaignPrepared) error {
 	if a == nil || validateWindowNativeDeclarations(p.scope) != nil {
 		return fmt.Errorf("native exact epoch authority absent")
 	}
-	if p.scope.Schema == "full-window-scope.v9" {
-		if a.v9 == nil || a.manifest.Schema != "full-window-actual-ready.v9" || a.manifest.Scope.Schema != "full-window-scope.v9" || a.binding.Schema != "full-window-delegated-execution-authorization.v9" {
+	if p.scope.Schema == "full-window-scope.v10" {
+		raw, err := json.Marshal(p.scope)
+		if err != nil || conversationHash(raw) != p.scopeSHA {
+			return fmt.Errorf("v10 prepared scope digest changed")
+		}
+		if a.v10 == nil || a.v9 != nil || a.manifest.Schema != "full-window-actual-ready.v10" || a.manifest.Scope.Schema != "full-window-scope.v10" || a.binding.Schema != "full-window-delegated-execution-authorization.v10" {
+			return fmt.Errorf("v10 delegated authority epoch mismatch")
+		}
+	} else if p.scope.Schema == "full-window-scope.v9" {
+		if a.v10 != nil || a.v9 == nil || a.manifest.Schema != "full-window-actual-ready.v9" || a.manifest.Scope.Schema != "full-window-scope.v9" || a.binding.Schema != "full-window-delegated-execution-authorization.v9" {
 			return fmt.Errorf("v9 delegated authority epoch mismatch")
 		}
-	} else if a.v9 != nil || a.manifest.Schema != "full-window-actual-ready.v8" || a.binding.Schema != "full-window-execution-authorization.v8" {
+	} else if a.v10 != nil || a.v9 != nil || a.manifest.Schema != "full-window-actual-ready.v8" || a.binding.Schema != "full-window-execution-authorization.v8" {
 		return fmt.Errorf("v8 authority epoch mismatch")
 	}
 	if err := requireWindowV8ExecutionAuthority(a); err != nil {
 		return err
 	}
-	if a.binding.ScopeSHA256 != p.scopeSHA || a.binding.ExecutionSHA256 != p.executionSHA {
+	if a.binding.ScopeSHA256 != p.scopeSHA || a.binding.ExecutionSHA256 != p.executionSHA || p.scope.Schema == "full-window-scope.v10" && (!reflect.DeepEqual(a.manifest.Scope, p.scope) || a.manifest.ScopeSHA256 != p.scopeSHA || a.manifest.ExecutionSHA256 != p.executionSHA) {
 		return fmt.Errorf("native execution authority scope changed before window outputs")
 	}
 	return nil

@@ -228,25 +228,26 @@ func checkWindowActualHealth(ctx context.Context, o windowActualObserverSettings
 }
 
 type FullWindowActualStatus struct {
-	V8                   *windowV8RuntimeSummary `json:"v8,omitempty"`
-	EvidenceKind         string                  `json:"evidence_kind"`
-	AcquisitionDone      bool                    `json:"acquisition_done"` // Collection closure does not establish model quality or goal completion.
-	Closed               bool                    `json:"closed"`
-	NextWindowIndex      int                     `json:"next_window_index"`
-	LastReceiptSHA256    string                  `json:"last_receipt_sha256"`
-	PlannedPairs         int                     `json:"planned_pairs"`
-	PlannedArms          int                     `json:"planned_arms"`
-	DefinedTurns         int                     `json:"defined_turns"`
-	BoundariesExcluded   int                     `json:"boundaries_excluded"`
-	AttemptedArms        int                     `json:"attempted_arms"`
-	FinishedArms         int                     `json:"finished_arms"`
-	FailedAttemptedArms  int                     `json:"failed_attempted_arms"`
-	UnattemptedArms      int                     `json:"unattempted_arms"`
-	ObservedTurns        int                     `json:"observed_turns"`
-	QualityEndUnrunTurns int                     `json:"quality_end_unrun_turns"`
-	GlobalUnrunTurns     int                     `json:"global_unrun_turns"`
-	ModelAttempts        int                     `json:"model_attempts"`
-	JEVAttempts          int                     `json:"jev_attempts"`
+	Completion           *windowCompletionDeclarationV10 `json:"completion,omitempty"`
+	V8                   *windowV8RuntimeSummary         `json:"v8,omitempty"`
+	EvidenceKind         string                          `json:"evidence_kind"`
+	AcquisitionDone      bool                            `json:"acquisition_done"` // Collection closure does not establish model quality or goal completion.
+	Closed               bool                            `json:"closed"`
+	NextWindowIndex      int                             `json:"next_window_index"`
+	LastReceiptSHA256    string                          `json:"last_receipt_sha256"`
+	PlannedPairs         int                             `json:"planned_pairs"`
+	PlannedArms          int                             `json:"planned_arms"`
+	DefinedTurns         int                             `json:"defined_turns"`
+	BoundariesExcluded   int                             `json:"boundaries_excluded"`
+	AttemptedArms        int                             `json:"attempted_arms"`
+	FinishedArms         int                             `json:"finished_arms"`
+	FailedAttemptedArms  int                             `json:"failed_attempted_arms"`
+	UnattemptedArms      int                             `json:"unattempted_arms"`
+	ObservedTurns        int                             `json:"observed_turns"`
+	QualityEndUnrunTurns int                             `json:"quality_end_unrun_turns"`
+	GlobalUnrunTurns     int                             `json:"global_unrun_turns"`
+	ModelAttempts        int                             `json:"model_attempts"`
+	JEVAttempts          int                             `json:"jev_attempts"`
 }
 type FullWindowActualReceipt struct {
 	FullWindowActualStatus
@@ -284,10 +285,10 @@ func OpenFullWindowActual(ctx context.Context, ready *FullWindowActualReady, pri
 	if ctx == nil || ctx.Err() != nil {
 		return nil, fmt.Errorf("actual session context rejected")
 	}
-	// All older owners are permanently consumed. V9 is the only new actual
+	// All older owners are permanently consumed. V10 is the only new actual
 	// epoch; old manifests remain readable through their technical checkers.
-	if ready == nil || ready.manifest.Schema != "full-window-actual-ready.v9" || ready.manifest.Scope.Schema != "full-window-scope.v9" || ready.v8Authority == nil || ready.v8Authority.v9 == nil || ready.v8Authority.revalidate() != nil {
-		return nil, fmt.Errorf("actual v9 delegated authority required before settings")
+	if ready == nil || ready.manifest.Schema != "full-window-actual-ready.v10" || ready.manifest.Scope.Schema != "full-window-scope.v10" || ready.v8Authority == nil || ready.v8Authority.v10 == nil || ready.v8Authority.revalidate() != nil {
+		return nil, fmt.Errorf("actual v10 delegated authority required before settings")
 	}
 	if e := ready.revalidateStopped(); e != nil {
 		return nil, e
@@ -306,8 +307,13 @@ func OpenFullWindowActual(ctx context.Context, ready *FullWindowActualReady, pri
 	if e != nil {
 		return nil, e
 	}
+	totals, e := executionTotals(ready.manifest.Scope)
+	if e != nil {
+		return nil, e
+	}
 	lifetime, cancel := context.WithCancel(ctx)
-	s := &FullWindowActualSession{ready: ready, lifetime: lifetime, cancel: cancel, files: map[string]string{}, reportRoots: map[string]bool{}, reportDirs: map[string]os.FileInfo{}, transport: newWindowActualTransport(), jevTransport: jevTransport, status: FullWindowActualStatus{EvidenceKind: "recorded_run", NextWindowIndex: 1, PlannedPairs: 3660, PlannedArms: 7320, UnattemptedArms: 7320, DefinedTurns: 11772, GlobalUnrunTurns: 11772, BoundariesExcluded: 1851}}
+	s := &FullWindowActualSession{ready: ready, lifetime: lifetime, cancel: cancel, files: map[string]string{}, reportRoots: map[string]bool{}, reportDirs: map[string]os.FileInfo{}, transport: newWindowActualTransport(), jevTransport: jevTransport, status: FullWindowActualStatus{EvidenceKind: "recorded_run", NextWindowIndex: 1, PlannedPairs: totals.Pairs, PlannedArms: totals.Arms, UnattemptedArms: totals.Arms, DefinedTurns: totals.DefinedUserTurns, GlobalUnrunTurns: totals.DefinedUserTurns, BoundariesExcluded: totals.Boundaries}}
+	s.status.Completion = ready.manifest.Scope.Completion
 	defer func() {
 		if err != nil {
 			_ = s.Close()
@@ -361,7 +367,7 @@ func OpenFullWindowActual(ctx context.Context, ready *FullWindowActualReady, pri
 func (s *FullWindowActualSession) Status() FullWindowActualStatus {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	return s.status
+	return detachedWindowActualStatusV10(s.status)
 }
 func (s *FullWindowActualSession) RunWindow(ctx context.Context, index int, priorReceiptSHA string) (out FullWindowActualReceipt, err error) {
 	s.op.Lock()
@@ -414,7 +420,7 @@ func (s *FullWindowActualSession) RunWindow(ctx context.Context, index int, prio
 	if runErr != nil || s.status.AcquisitionDone {
 		s.status.Closed = true
 	}
-	out = FullWindowActualReceipt{FullWindowActualStatus: s.status, WindowIndex: index, ReportSHA256: conversationHash(raw), PayloadManifestSHA256: report.PayloadManifestSHA256, LedgerSHA256: report.LedgerSHA256, ReportStatus: report.Status, FutureUnrunFromOrdinal: s.campaign.prepared.scope.Windows[index-1].LastOrdinal + 1}
+	out = FullWindowActualReceipt{FullWindowActualStatus: detachedWindowActualStatusV10(s.status), WindowIndex: index, ReportSHA256: conversationHash(raw), PayloadManifestSHA256: report.PayloadManifestSHA256, LedgerSHA256: report.LedgerSHA256, ReportStatus: report.Status, FutureUnrunFromOrdinal: s.campaign.prepared.scope.Windows[index-1].LastOrdinal + 1}
 	s.mu.Unlock()
 	out.FirstUnrunOrdinal, out.FirstUnrunArm = closedFirstUnrun(s.campaign.prepared.scope, index, report.Rows)
 	if out.FutureUnrunFromOrdinal > len(s.campaign.prepared.scope.Slots) {
@@ -601,7 +607,7 @@ func (s *FullWindowActualSession) verifyInputs() error {
 	if r == nil || len(r.manifestRaw) == 0 {
 		return fmt.Errorf("actual frozen inputs absent")
 	}
-	if r.manifest.Schema == "full-window-actual-ready.v8" || r.manifest.Schema == "full-window-actual-ready.v9" {
+	if windowScopeUsesNativeV8(r.manifest.Scope.Schema) {
 		if e := requireWindowV8ExecutionAuthority(r.v8Authority); e != nil {
 			return e
 		}

@@ -12,7 +12,7 @@ func TestActualV7RejectsConsumedEpochBeforeSettings(t *testing.T) {
 	for _, epoch := range []string{"v1", "v2", "v3", "v4", "v5", "v6"} {
 		m := windowActualManifest{Schema: "full-window-actual-ready." + epoch, Scope: fullWindowScope{Schema: "full-window-scope." + epoch}}
 		s, err := OpenFullWindowActual(context.Background(), &FullWindowActualReady{manifest: m}, "/never-read-settings")
-		if s != nil || err == nil || !strings.Contains(err.Error(), "v9 delegated authority required before settings") {
+		if s != nil || err == nil || !strings.Contains(err.Error(), "v10 delegated authority required before settings") {
 			t.Errorf("consumed %s must stop before settings: %v", epoch, err)
 		}
 	}

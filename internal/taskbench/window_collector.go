@@ -60,50 +60,51 @@ type windowAcquisitionRow struct {
 	DurationMS                    float64                   `json:"duration_ms"`
 }
 type windowAcquisitionReceipt struct {
-	V8                         *windowV8RuntimeSummary `json:"v8,omitempty"`
-	QualityEndArms             int                     `json:"quality_end_arms,omitempty"`
-	QualityEndUnrunTurns       int                     `json:"quality_end_unrun_turns,omitempty"`
-	GlobalUnrunTurns           int                     `json:"global_unrun_turns,omitempty"`
-	Schema                     string                  `json:"schema"`
-	EvidenceKind               string                  `json:"evidence_kind"`
-	Status                     string                  `json:"status"`
-	ScopeSHA256                string                  `json:"scope_sha256"`
-	ExecutionSHA256            string                  `json:"execution_sha256"`
-	WindowID                   string                  `json:"window_id"`
-	WindowIndex                int                     `json:"window_index"`
-	PlannedCampaignPairs       int                     `json:"planned_campaign_pairs"`
-	PlannedCampaignArms        int                     `json:"planned_campaign_arms"`
-	PlannedCampaignTurns       int                     `json:"planned_campaign_turns"`
-	PlannedCurrentPairs        int                     `json:"planned_current_pairs"`
-	PlannedCurrentArms         int                     `json:"planned_current_arms"`
-	PlannedCurrentTurns        int                     `json:"planned_current_turns"`
-	AttemptedArms              int                     `json:"attempted_arms"`
-	FinishedArms               int                     `json:"finished_arms"`
-	UnrunArms                  int                     `json:"unrun_arms"`
-	ObservedTurns              int                     `json:"observed_turns"`
-	QualityNegativeArms        int                     `json:"quality_negative_arms"`
-	Rows                       []windowAcquisitionRow  `json:"rows"`
-	FirstFailureStage          string                  `json:"first_failure_stage"`
-	FirstFailureOrdinal        int                     `json:"first_failure_ordinal"`
-	FirstFailureArm            string                  `json:"first_failure_arm"`
-	Cleanup                    bool                    `json:"cleanup"`
-	EnvironmentCleanup         bool                    `json:"environment_cleanup"`
-	Observer                   bool                    `json:"observer"`
-	Advanced                   bool                    `json:"advanced"`
-	NextClaimSHA256            string                  `json:"next_claim_sha256"`
-	LedgerSHA256               string                  `json:"ledger_sha256"`
-	LedgerCompletionProof      string                  `json:"ledger_completion_proof"`
-	Accounting                 windowAccountingState   `json:"accounting"`
-	AccountingSource           string                  `json:"accounting_source"`
-	ObserverCountersCumulative observability.Stats     `json:"observer_counters_cumulative"`
-	OperationLimitSeconds      int                     `json:"operation_limit_seconds"`
-	OperationDeadline          time.Time               `json:"operation_deadline"`
-	PayloadManifestSHA256      string                  `json:"payload_manifest_sha256"`
-	PayloadAuditOnlyCompletion string                  `json:"payload_audit_only_completion"`
-	PayloadPackets             int                     `json:"payload_packets"`
-	PayloadVerified            bool                    `json:"payload_verified"`
-	PayloadStatus              string                  `json:"payload_status"`
-	DurationMS                 float64                 `json:"duration_ms"`
+	Completion                 *windowCompletionDeclarationV10 `json:"completion,omitempty"`
+	V8                         *windowV8RuntimeSummary         `json:"v8,omitempty"`
+	QualityEndArms             int                             `json:"quality_end_arms,omitempty"`
+	QualityEndUnrunTurns       int                             `json:"quality_end_unrun_turns,omitempty"`
+	GlobalUnrunTurns           int                             `json:"global_unrun_turns,omitempty"`
+	Schema                     string                          `json:"schema"`
+	EvidenceKind               string                          `json:"evidence_kind"`
+	Status                     string                          `json:"status"`
+	ScopeSHA256                string                          `json:"scope_sha256"`
+	ExecutionSHA256            string                          `json:"execution_sha256"`
+	WindowID                   string                          `json:"window_id"`
+	WindowIndex                int                             `json:"window_index"`
+	PlannedCampaignPairs       int                             `json:"planned_campaign_pairs"`
+	PlannedCampaignArms        int                             `json:"planned_campaign_arms"`
+	PlannedCampaignTurns       int                             `json:"planned_campaign_turns"`
+	PlannedCurrentPairs        int                             `json:"planned_current_pairs"`
+	PlannedCurrentArms         int                             `json:"planned_current_arms"`
+	PlannedCurrentTurns        int                             `json:"planned_current_turns"`
+	AttemptedArms              int                             `json:"attempted_arms"`
+	FinishedArms               int                             `json:"finished_arms"`
+	UnrunArms                  int                             `json:"unrun_arms"`
+	ObservedTurns              int                             `json:"observed_turns"`
+	QualityNegativeArms        int                             `json:"quality_negative_arms"`
+	Rows                       []windowAcquisitionRow          `json:"rows"`
+	FirstFailureStage          string                          `json:"first_failure_stage"`
+	FirstFailureOrdinal        int                             `json:"first_failure_ordinal"`
+	FirstFailureArm            string                          `json:"first_failure_arm"`
+	Cleanup                    bool                            `json:"cleanup"`
+	EnvironmentCleanup         bool                            `json:"environment_cleanup"`
+	Observer                   bool                            `json:"observer"`
+	Advanced                   bool                            `json:"advanced"`
+	NextClaimSHA256            string                          `json:"next_claim_sha256"`
+	LedgerSHA256               string                          `json:"ledger_sha256"`
+	LedgerCompletionProof      string                          `json:"ledger_completion_proof"`
+	Accounting                 windowAccountingState           `json:"accounting"`
+	AccountingSource           string                          `json:"accounting_source"`
+	ObserverCountersCumulative observability.Stats             `json:"observer_counters_cumulative"`
+	OperationLimitSeconds      int                             `json:"operation_limit_seconds"`
+	OperationDeadline          time.Time                       `json:"operation_deadline"`
+	PayloadManifestSHA256      string                          `json:"payload_manifest_sha256"`
+	PayloadAuditOnlyCompletion string                          `json:"payload_audit_only_completion"`
+	PayloadPackets             int                             `json:"payload_packets"`
+	PayloadVerified            bool                            `json:"payload_verified"`
+	PayloadStatus              string                          `json:"payload_status"`
+	DurationMS                 float64                         `json:"duration_ms"`
 }
 type windowAcquisitionRun struct {
 	payload     *windowPayloadStore
@@ -252,6 +253,10 @@ func openWindowAcquisition(ctx context.Context, auth *windowAcquisitionAuthoriza
 	run.receipt = windowAcquisitionReceipt{Schema: "full-window-acquisition-receipt.v1", EvidenceKind: auth.evidenceKind, Status: "stopped", ScopeSHA256: scopeSHA, ExecutionSHA256: executionSHA, WindowID: run.window.ID, WindowIndex: index, PlannedCampaignPairs: totals.Pairs, PlannedCampaignArms: totals.Arms, PlannedCampaignTurns: totals.DefinedUserTurns, PlannedCurrentPairs: run.window.LastOrdinal - run.window.FirstOrdinal + 1, OperationLimitSeconds: 300}
 	if windowScopeUsesNativeV8(scope.Schema) {
 		run.receipt.Schema = "full-window-acquisition-receipt.v8"
+	}
+	if scope.Schema == "full-window-scope.v10" {
+		run.receipt.Completion = scope.Completion
+		run.receipt.Schema = "full-window-acquisition-receipt.v10"
 	}
 	run.receipt.OperationDeadline, _ = ctx.Deadline()
 	for _, slot := range scope.Slots[run.window.FirstOrdinal-1 : run.window.LastOrdinal] {

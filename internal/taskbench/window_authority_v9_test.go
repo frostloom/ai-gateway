@@ -109,10 +109,10 @@ func TestWindowV9DelegatedAuthorityAndSyntheticCanonicalVector(t *testing.T) {
 }
 
 func TestWindowV9RejectsOldActualBeforeSettings(t *testing.T) {
-	for _, epoch := range []string{"v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8"} {
+	for _, epoch := range []string{"v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9"} {
 		t.Run(epoch, func(t *testing.T) {
 			r := &FullWindowActualReady{manifest: windowActualManifest{Schema: "full-window-actual-ready." + epoch, Scope: fullWindowScope{Schema: "full-window-scope." + epoch}}}
-			if _, err := OpenFullWindowActual(context.Background(), r, "/must-not-read-private-settings"); err == nil || !strings.Contains(err.Error(), "v9 delegated authority required before settings") {
+			if _, err := OpenFullWindowActual(context.Background(), r, "/must-not-read-private-settings"); err == nil || !strings.Contains(err.Error(), "v10 delegated authority required before settings") {
 				t.Fatalf("old epoch reached settings: %v", err)
 			}
 		})

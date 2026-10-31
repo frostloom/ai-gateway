@@ -72,7 +72,7 @@ func TestActualV3BindingRejectsCrossedProofBudgetAndEitherOldRoot(t *testing.T) 
 func TestActualV3ConsistentMemoryFixtureCannotReplaceConcreteFileProof(t *testing.T) {
 	m, p := actualV3BindingFixture(t)
 	r := &FullWindowActualReady{manifestRaw: []byte(`{}`), manifest: m, baseline: p.base, stoppedV2: p}
-	if s, err := OpenFullWindowActual(context.Background(), r, "/never-read-settings"); err == nil || s != nil || !strings.Contains(err.Error(), "v9 delegated authority required before settings") {
+	if s, err := OpenFullWindowActual(context.Background(), r, "/never-read-settings"); err == nil || s != nil || !strings.Contains(err.Error(), "v10 delegated authority required before settings") {
 		t.Fatal("consumed v3 reached settings or claim", err)
 	}
 	if err := (&FullWindowActualSession{ready: r}).verifyInputs(); err == nil || !strings.Contains(err.Error(), "stopped") {
