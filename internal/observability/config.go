@@ -10,6 +10,7 @@ import (
 )
 
 type Config struct {
+	DurableSpool                                                  *DurableSpoolConfig `json:",omitempty"`
 	CaptureContent                                                bool
 	Enabled                                                       bool
 	Endpoint, PublicKey, SecretKey, HashKey, Release, Environment string
@@ -55,6 +56,14 @@ func ConfigFromEnv(get func(string) string) (Config, error) {
 }
 
 func (c Config) validate() error {
+	if c.DurableSpool != nil {
+		if c.Environment != "evaluation" {
+			return errors.New("durable observation requires evaluation")
+		}
+		if err := c.DurableSpool.validate(); err != nil {
+			return err
+		}
+	}
 	u, err := url.Parse(c.Endpoint)
 	if err != nil || u.Host == "" || (u.Scheme != "http" && u.Scheme != "https") || u.User != nil || u.RawQuery != "" || u.Fragment != "" || u.Path != "/api/public/otel/v1/traces" {
 		return errors.New("invalid Langfuse OTLP trace endpoint")

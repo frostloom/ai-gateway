@@ -7,6 +7,7 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"math"
 	"net/http"
 	"strconv"
@@ -16,6 +17,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
@@ -23,11 +25,13 @@ import (
 )
 
 type Observer struct {
-	cfg       Config
-	provider  *sdktrace.TracerProvider
-	tracer    trace.Tracer
-	processor *boundedProcessor
-	registry  *prometheus.Registry
+	durable         *durableSpoolClient
+	durableExporter *otlptrace.Exporter
+	cfg             Config
+	provider        *sdktrace.TracerProvider
+	tracer          trace.Tracer
+	processor       *boundedProcessor
+	registry        *prometheus.Registry
 }
 type Turn struct {
 	observer *Observer
@@ -61,6 +65,10 @@ func New(ctx context.Context, c Config) (*Observer, error) {
 	if !c.Enabled {
 		return nil, nil
 	}
+	if c.DurableSpool != nil {
+		copied := *c.DurableSpool
+		c.DurableSpool = &copied
+	}
 	if err := c.validate(); err != nil {
 		return nil, err
 	}
@@ -70,16 +78,27 @@ func New(ctx context.Context, c Config) (*Observer, error) {
 	if c.ExportTimeout == 0 {
 		c.ExportTimeout = 2 * time.Second
 	}
-	auth := base64.StdEncoding.EncodeToString([]byte(c.PublicKey + ":" + c.SecretKey))
-	exp, err := otlptracehttp.New(ctx, otlptracehttp.WithEndpointURL(c.Endpoint), otlptracehttp.WithHeaders(map[string]string{"Authorization": "Basic " + auth, "x-langfuse-ingestion-version": "4"}), otlptracehttp.WithTimeout(c.ExportTimeout), otlptracehttp.WithHTTPClient(&http.Client{Transport: &exportDiagnosticTransport{}, Timeout: c.ExportTimeout, CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}), otlptracehttp.WithMaxRequestSize(1<<20), otlptracehttp.WithRetry(otlptracehttp.RetryConfig{Enabled: false}))
+	var exp *otlptrace.Exporter
+	var err error
+	var durable *durableSpoolClient
+	if c.DurableSpool != nil {
+		durable = newDurableSpoolClient(*c.DurableSpool)
+		exp, err = otlptrace.New(ctx, durable)
+	} else {
+		auth := base64.StdEncoding.EncodeToString([]byte(c.PublicKey + ":" + c.SecretKey))
+		exp, err = otlptracehttp.New(ctx, otlptracehttp.WithEndpointURL(c.Endpoint), otlptracehttp.WithHeaders(map[string]string{"Authorization": "Basic " + auth, "x-langfuse-ingestion-version": "4"}), otlptracehttp.WithTimeout(c.ExportTimeout), otlptracehttp.WithHTTPClient(&http.Client{Transport: &exportDiagnosticTransport{}, Timeout: c.ExportTimeout, CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}), otlptracehttp.WithMaxRequestSize(1<<20), otlptracehttp.WithRetry(otlptracehttp.RetryConfig{Enabled: false}))
+	}
 	if err != nil {
 		return nil, err
 	}
-	processor := newProcessor(exp, c.QueueSize, c.ExportTimeout)
+	processor := newProcessorWithDurable(exp, c.QueueSize, c.ExportTimeout, durable)
 	provider := sdktrace.NewTracerProvider(sdktrace.WithSpanProcessor(processor), sdktrace.WithSampler(sdktrace.ParentBased(sdktrace.TraceIDRatioBased(c.SampleRate))), sdktrace.WithResource(resource.NewSchemaless(attribute.String("service.name", "ai-gateway-agent"))), sdktrace.WithSpanLimits(sdktrace.SpanLimits{AttributeCountLimit: 48, AttributeValueLengthLimit: 4096, EventCountLimit: 0, LinkCountLimit: 0, AttributePerEventCountLimit: 0, AttributePerLinkCountLimit: 0}))
-	o := &Observer{cfg: c, provider: provider, tracer: provider.Tracer("ai-gateway/langfuse"), processor: processor, registry: prometheus.NewRegistry()}
+	o := &Observer{durable: durable, durableExporter: exp, cfg: c, provider: provider, tracer: provider.Tracer("ai-gateway/langfuse"), processor: processor, registry: prometheus.NewRegistry()}
 	for name, read := range map[string]func() float64{"accepted": func() float64 { return float64(processor.counts.accepted.Load()) }, "dropped": func() float64 { return float64(processor.counts.dropped.Load()) }, "exported": func() float64 { return float64(processor.counts.exported.Load()) }, "failed": func() float64 { return float64(processor.counts.failed.Load()) }, "batches": func() float64 { return float64(processor.counts.batches.Load()) }, "turns": func() float64 { return float64(processor.counts.turns.Load()) }, "sampled_turns": func() float64 { return float64(processor.counts.sampledTurns.Load()) }} {
 		o.registry.MustRegister(prometheus.NewCounterFunc(prometheus.CounterOpts{Name: "agent_langfuse_" + name + "_total", Help: "Local telemetry counter: " + name}, read))
+	}
+	if durable != nil {
+		o.registry.MustRegister(prometheus.NewCounterFunc(prometheus.CounterOpts{Name: "agent_langfuse_persisted_total", Help: "Locally persisted telemetry spans"}, func() float64 { return float64(processor.counts.persisted.Load()) }))
 	}
 	o.registry.MustRegister(prometheus.NewGaugeFunc(prometheus.GaugeOpts{Name: "agent_langfuse_queue_depth", Help: "Spans awaiting export"}, func() float64 { return float64(len(processor.queue)) }))
 	return o, nil
@@ -100,11 +119,24 @@ func (o *Observer) Shutdown(ctx context.Context) error {
 	if o == nil {
 		return nil
 	}
+	if o.durable != nil {
+		// The SDK turns subsequent Shutdown calls into no-ops and can skip
+		// processors entirely for a pre-canceled context. Preserve the owned
+		// durable worker's sticky failure and ensure it always receives stop.
+		if ctx.Err() != nil {
+			o.processor.cancel()
+		}
+		err := o.processor.Shutdown(ctx)
+		return errors.Join(err, o.provider.Shutdown(ctx))
+	}
 	return o.provider.Shutdown(ctx)
 }
 func (o *Observer) ForceFlush(ctx context.Context) error {
 	if o == nil {
 		return nil
+	}
+	if o.durable != nil {
+		return o.processor.ForceFlush(ctx)
 	}
 	return o.provider.ForceFlush(ctx)
 }

@@ -10,17 +10,19 @@ import (
 )
 
 type Stats struct {
+	Persisted                                                         uint64 `json:"Persisted,omitempty"`
 	Accepted, Dropped, Exported, Failed, Batches, Turns, SampledTurns uint64
 	QueueDepth                                                        int
 	ExportDiagnostics                                                 *ExportDiagnostics `json:"export_diagnostics,omitempty"`
 }
-type counters struct{ accepted, dropped, exported, failed, batches, turns, sampledTurns atomic.Uint64 }
+type counters struct{ accepted, dropped, exported, persisted, failed, batches, turns, sampledTurns atomic.Uint64 }
 type flushRequest struct{ done chan error }
 
 // boundedProcessor accounts for local drops and exporter outcomes. Failed spans
 // belong to calls that returned an error, not proven delivery loss. OnEnd never
 // waits for the network; only this worker exports. No OTel globals are used.
 type boundedProcessor struct {
+	durable     *durableSpoolClient
 	exporter    sdktrace.SpanExporter
 	queue       chan sdktrace.ReadOnlySpan
 	flush       chan flushRequest
@@ -36,8 +38,11 @@ type boundedProcessor struct {
 }
 
 func newProcessor(exp sdktrace.SpanExporter, size int, timeout time.Duration) *boundedProcessor {
+	return newProcessorWithDurable(exp, size, timeout, nil)
+}
+func newProcessorWithDurable(exp sdktrace.SpanExporter, size int, timeout time.Duration, durable *durableSpoolClient) *boundedProcessor {
 	ctx, cancel := context.WithCancel(context.Background())
-	p := &boundedProcessor{exporter: exp, queue: make(chan sdktrace.ReadOnlySpan, size), flush: make(chan flushRequest), done: make(chan struct{}), ctx: ctx, cancel: cancel, timeout: timeout}
+	p := &boundedProcessor{durable: durable, exporter: exp, queue: make(chan sdktrace.ReadOnlySpan, size), flush: make(chan flushRequest), done: make(chan struct{}), ctx: ctx, cancel: cancel, timeout: timeout}
 	go p.run()
 	return p
 }
@@ -75,15 +80,25 @@ func (p *boundedProcessor) export(batch []sdktrace.ReadOnlySpan) error {
 		p.lastErr = errors.New("telemetry export failed")
 		return p.lastErr
 	}
-	p.counts.exported.Add(uint64(len(batch)))
+	if p.durable != nil {
+		p.counts.persisted.Add(uint64(len(batch)))
+	} else {
+		p.counts.exported.Add(uint64(len(batch)))
+	}
 	return nil
 }
 func (p *boundedProcessor) run() {
 	defer close(p.done)
 	defer func() {
-		ctx, cancel := context.WithTimeout(context.Background(), p.timeout)
+		parent := context.Background()
+		if p.durable != nil {
+			parent = p.ctx
+		}
+		ctx, cancel := context.WithTimeout(parent, p.timeout)
 		defer cancel()
-		_ = p.exporter.Shutdown(ctx)
+		if err := p.exporter.Shutdown(ctx); err != nil && p.durable != nil {
+			p.lastErr = errors.New("durable telemetry shutdown failed")
+		}
 	}()
 	timer := time.NewTicker(250 * time.Millisecond)
 	defer timer.Stop()
@@ -159,5 +174,5 @@ func (p *boundedProcessor) Shutdown(ctx context.Context) error {
 	}
 }
 func (p *boundedProcessor) stats() Stats {
-	return Stats{Accepted: p.counts.accepted.Load(), Dropped: p.counts.dropped.Load(), Exported: p.counts.exported.Load(), Failed: p.counts.failed.Load(), Batches: p.counts.batches.Load(), Turns: p.counts.turns.Load(), SampledTurns: p.counts.sampledTurns.Load(), QueueDepth: len(p.queue), ExportDiagnostics: p.diagnostics.snapshot()}
+	return Stats{Persisted: p.counts.persisted.Load(), Accepted: p.counts.accepted.Load(), Dropped: p.counts.dropped.Load(), Exported: p.counts.exported.Load(), Failed: p.counts.failed.Load(), Batches: p.counts.batches.Load(), Turns: p.counts.turns.Load(), SampledTurns: p.counts.sampledTurns.Load(), QueueDepth: len(p.queue), ExportDiagnostics: p.diagnostics.snapshot()}
 }
