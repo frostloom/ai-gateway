@@ -79,6 +79,7 @@ func loadWindowStoppedV9BaselineWithPass(p *historyReadPass, path, expectedSHA s
 	if err != nil || !reflect.DeepEqual(previous.base, expectedStoppedV8WindowBaseline()) {
 		return reject("concrete predecessor")
 	}
+	frozenPrevious := freezeWindowStoppedV9Predecessor(previous)
 	for _, old := range previous.windowStoppedPredecessorRootsV9() {
 		if !windowPayloadDisjoint(root, old) {
 			return reject("crossed historical roots")
@@ -163,8 +164,7 @@ func loadWindowStoppedV9BaselineWithPass(p *historyReadPass, path, expectedSHA s
 	if err != nil {
 		return reject(err.Error())
 	}
-	fresh, err := loadWindowStoppedV8BaselineWithPass(p, e.PreviousBaseline.Path, e.PreviousBaseline.SHA256)
-	if err = checkWindowStoppedV9Predecessor(p, previous, fresh, err); err != nil {
+	if err = recheckWindowStoppedV9Predecessor(p, frozenPrevious, previous); err != nil {
 		return windowStoppedV9Baseline{}, err
 	}
 	for _, ref := range []windowActualFile{{Path: path, SHA256: expectedSHA}, e.BudgetApproval, e.Manifest, e.StoppedAudit, e.Inventory, e.SourceConfirmation, e.OwnerExit} {
@@ -290,4 +290,28 @@ func checkWindowStoppedV9Predecessor(p *historyReadPass, previous, fresh windowS
 		return fmt.Errorf("stopped v9 evidence rejected: predecessor changed")
 	}
 	return nil
+}
+
+// This snapshot exists only on this invocation's stack after the unchanged old
+// concrete46 constructor has validated every ancestor in this same pass. Strings
+// and scalars are values; these eight claim maps are its only reference fields.
+// No derived value is stored in the pass or reused by a later invocation.
+func freezeWindowStoppedV9Predecessor(previous windowStoppedV8Baseline) windowStoppedV8Baseline {
+	out := previous
+	for _, b := range []*fullWindowBaseline{&out.base, &out.previous.base, &out.previous.previous.base, &out.previous.previous.previous.base, &out.previous.previous.previous.previous.base, &out.previous.previous.previous.previous.previous.base, &out.previous.previous.previous.previous.previous.previous.base, &out.previous.previous.previous.previous.previous.previous.first.base} {
+		if b.ClaimSHA256 != nil {
+			b.ClaimSHA256 = cloneWindowHistoricalClaims(b.ClaimSHA256)
+		}
+	}
+	return out
+}
+func recheckWindowStoppedV9Predecessor(p *historyReadPass, frozen, previous windowStoppedV8Baseline) error {
+	if p == nil {
+		return checkWindowStoppedV9Predecessor(nil, frozen, previous, nil)
+	}
+	// Re-running the old recursive decoder here multiplies logical admission
+	// without adding dependencies. Its first accepted reads remain registered;
+	// Finish freshly re-reads every supplying FD, then final metadata, exact
+	// namespaces and epoch locks. Keep the full typed value immutable meanwhile.
+	return checkWindowStoppedV9Predecessor(p, frozen, previous, p.ctx.Err())
 }

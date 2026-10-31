@@ -590,3 +590,125 @@ func TestWindowStoppedV9PredecessorErrorPreservesExactCause(t *testing.T) {
 		})
 	}
 }
+
+func stoppedV9PreviousForSnapshot() windowStoppedV8Baseline {
+	p := windowStoppedV8Baseline{base: expectedStoppedV8WindowBaseline(), originalRoot: "/synthetic/old46", evidencePath: "/synthetic/old46/descriptor.json", evidenceSHA256: windowV9BaselineSHA}
+	// Every ancestor owns a separate map. The synthetic strings below carry no
+	// genuine proof; they exercise the typed value's complete mutable surface.
+	p.previous.base = fullWindowBaseline{ClaimSHA256: map[string]string{"v7": "7"}}
+	p.previous.previous.base = fullWindowBaseline{ClaimSHA256: map[string]string{"v6": "6"}}
+	p.previous.previous.previous.base = fullWindowBaseline{ClaimSHA256: map[string]string{"v5": "5"}}
+	p.previous.previous.previous.previous.base = fullWindowBaseline{ClaimSHA256: map[string]string{"v4": "4"}}
+	p.previous.previous.previous.previous.previous.base = fullWindowBaseline{ClaimSHA256: map[string]string{"v3": "3"}}
+	p.previous.previous.previous.previous.previous.previous.base = fullWindowBaseline{ClaimSHA256: map[string]string{"v2": "2"}}
+	p.previous.previous.previous.previous.previous.previous.first.base = fullWindowBaseline{ClaimSHA256: map[string]string{"v1": "1"}}
+	return p
+}
+func stoppedV9PreviousMaps(p *windowStoppedV8Baseline) []*fullWindowBaseline {
+	return []*fullWindowBaseline{&p.base, &p.previous.base, &p.previous.previous.base, &p.previous.previous.previous.base, &p.previous.previous.previous.previous.base, &p.previous.previous.previous.previous.previous.base, &p.previous.previous.previous.previous.previous.previous.base, &p.previous.previous.previous.previous.previous.previous.first.base}
+}
+func TestWindowStoppedV9FrozenPredecessorDetectsEveryAncestorMutation(t *testing.T) {
+	for i := 0; i < 8; i++ {
+		t.Run(fmt.Sprintf("ancestor%d", i+1), func(t *testing.T) {
+			previous := stoppedV9PreviousForSnapshot()
+			frozen := freezeWindowStoppedV9Predecessor(previous)
+			maps := stoppedV9PreviousMaps(&previous)
+			maps[i].ClaimSHA256["forged"] = "changed"
+			p, _ := newHistoryReadPass(context.Background())
+			defer p.Abort()
+			if err := checkWindowStoppedV9Predecessor(p, frozen, previous, nil); err == nil {
+				t.Fatal("mutation aliased frozen predecessor")
+			}
+		})
+	}
+	for _, mut := range []func(*windowStoppedV8Baseline){func(p *windowStoppedV8Baseline) { p.base.ActualModelCalls++ }, func(p *windowStoppedV8Baseline) { p.evidencePath += ".copy" }, func(p *windowStoppedV8Baseline) { p.previous.previous.originalRoot += "changed" }} {
+		previous := stoppedV9PreviousForSnapshot()
+		frozen := freezeWindowStoppedV9Predecessor(previous)
+		mut(&previous)
+		p, _ := newHistoryReadPass(context.Background())
+		if checkWindowStoppedV9Predecessor(p, frozen, previous, nil) == nil {
+			t.Fatal("scalar identity changed")
+		}
+		_ = p.Abort()
+	}
+}
+func TestWindowStoppedV9NoSecondRecursiveReplayAtLogicalLimit(t *testing.T) {
+	for _, mode := range []string{"unchanged", "body", "namespace", "lock", "canceled"} {
+		t.Run(mode, func(t *testing.T) {
+			root := stoppedEvidenceRoot(t)
+			raw := []byte("original ancestor bytes\n")
+			leaf := filepath.Join(root, "raw.json")
+			lock := filepath.Join(root, ".lock")
+			if err := os.WriteFile(leaf, raw, 0600); err != nil {
+				t.Fatal(err)
+			}
+			if err := os.WriteFile(lock, nil, 0600); err != nil {
+				t.Fatal(err)
+			}
+			ctx, cancel := context.WithCancel(context.Background())
+			defer cancel()
+			p, _ := newHistoryReadPass(ctx)
+			defer p.Abort()
+			if err := p.MarkImmutableRoot(root); err != nil {
+				t.Fatal(err)
+			}
+			if _, err := historyStoppedV7File(p, leaf, conversationHash(raw), 65536); err != nil {
+				t.Fatal(err)
+			}
+			if err := historyStoppedDir(p, root, map[string]bool{"raw.json": false, ".lock": false}); err != nil {
+				t.Fatal(err)
+			}
+			if err := p.WithStoppedLock(8, lock, func() error { return nil }); err != nil {
+				t.Fatal(err)
+			}
+			previous := stoppedV9PreviousForSnapshot()
+			frozen := freezeWindowStoppedV9Predecessor(previous)
+			p.mu.Lock()
+			p.stats.Logical = historyPassLogicalLimit
+			p.mu.Unlock()
+			switch mode {
+			case "body":
+				if err := os.WriteFile(leaf, []byte("changed ancestor bytes!\n"), 0600); err != nil {
+					t.Fatal(err)
+				}
+			case "namespace":
+				if err := os.WriteFile(filepath.Join(root, "claim-000057.json"), nil, 0600); err != nil {
+					t.Fatal(err)
+				}
+			case "lock":
+				if err := os.Rename(lock, lock+".old"); err != nil {
+					t.Fatal(err)
+				}
+				if err := os.WriteFile(lock, nil, 0600); err != nil {
+					t.Fatal(err)
+				}
+			case "canceled":
+				cancel()
+			}
+			err := recheckWindowStoppedV9Predecessor(p, frozen, previous)
+			if mode == "canceled" {
+				if !errors.Is(err, context.Canceled) {
+					t.Fatal("cancellation was not preserved", err)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatal("second pure recursive load consumed logical admission", err)
+			}
+			if got := p.Stats().Logical; got != 1048576 {
+				t.Fatal("final semantic check changed fixed admission counter", got)
+			}
+			err = p.Finish()
+			if mode == "unchanged" {
+				if err != nil {
+					t.Fatal("fresh End failed", err)
+				}
+				if p.Stats().EndPhysical != 1 {
+					t.Fatal("ancestor was not physically re-read", p.Stats())
+				}
+			} else if err == nil {
+				t.Fatal("fresh End missed original mutation", mode)
+			}
+		})
+	}
+}
