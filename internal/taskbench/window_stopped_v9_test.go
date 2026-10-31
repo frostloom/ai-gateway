@@ -3,6 +3,7 @@ package taskbench
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -545,5 +546,47 @@ func TestWindowStoppedV9SourceJSONCannotGrantAuthority(t *testing.T) {
 	names, _ := os.ReadDir(root)
 	if len(names) != 0 {
 		t.Fatal("untrusted source JSON had effects")
+	}
+}
+
+func TestWindowStoppedV9PredecessorErrorPreservesExactCause(t *testing.T) {
+	previous := windowStoppedV8Baseline{base: expectedStoppedV8WindowBaseline(), originalRoot: "/synthetic/old46"}
+	childCause := fmt.Errorf("synthetic nested reader failure")
+	passCause := fmt.Errorf("synthetic history logical admission limit")
+	for _, mode := range []string{"same", "changed", "child", "retained_pass", "both"} {
+		t.Run(mode, func(t *testing.T) {
+			p, _ := newHistoryReadPass(context.Background())
+			defer p.Abort()
+			fresh := previous
+			var nested error
+			switch mode {
+			case "changed":
+				fresh.originalRoot = "/synthetic/other46"
+			case "child":
+				nested = childCause
+			case "retained_pass":
+				_ = p.fail(passCause)
+				nested = fmt.Errorf("generic old loader rejection")
+			case "both":
+				_ = p.fail(passCause)
+				nested = childCause
+			}
+			err := checkWindowStoppedV9Predecessor(p, previous, fresh, nested)
+			if mode == "same" {
+				if err != nil {
+					t.Fatal(err)
+				}
+				return
+			}
+			if err == nil {
+				t.Fatal("failed/changed predecessor accepted")
+			}
+			if (mode == "child" || mode == "both") && !errors.Is(err, childCause) {
+				t.Fatal("nested cause erased", err)
+			}
+			if (mode == "retained_pass" || mode == "both") && !errors.Is(err, passCause) {
+				t.Fatal("owned pass cause erased", err)
+			}
+		})
 	}
 }

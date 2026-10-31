@@ -3,6 +3,7 @@ package taskbench
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -163,8 +164,8 @@ func loadWindowStoppedV9BaselineWithPass(p *historyReadPass, path, expectedSHA s
 		return reject(err.Error())
 	}
 	fresh, err := loadWindowStoppedV8BaselineWithPass(p, e.PreviousBaseline.Path, e.PreviousBaseline.SHA256)
-	if err != nil || !reflect.DeepEqual(previous, fresh) {
-		return reject("predecessor changed")
+	if err = checkWindowStoppedV9Predecessor(p, previous, fresh, err); err != nil {
+		return windowStoppedV9Baseline{}, err
 	}
 	for _, ref := range []windowActualFile{{Path: path, SHA256: expectedSHA}, e.BudgetApproval, e.Manifest, e.StoppedAudit, e.Inventory, e.SourceConfirmation, e.OwnerExit} {
 		if _, err := historyStoppedV7File(p, ref.Path, ref.SHA256, 8<<20); err != nil {
@@ -268,6 +269,25 @@ func readWindowStoppedV9SourcesWithPass(p *historyReadPass, root string, sources
 		if _, err := p.Stream(historyReadInventoryStream, filepath.Join(root, filepath.FromSlash(name)), sources[name], windowActualSourceMaxBytes); err != nil {
 			return fmt.Errorf("stopped v9 source changed %s: %w", name, err)
 		}
+	}
+	return nil
+}
+
+// Preserve a failed nested read separately from an actual value mismatch. Old
+// loaders may replace an underlying pass failure with a generic rejection; the
+// owned pass retains its first cause, which must remain inspectable by callers.
+func checkWindowStoppedV9Predecessor(p *historyReadPass, previous, fresh windowStoppedV8Baseline, loadErr error) error {
+	if p == nil {
+		return fmt.Errorf("stopped v9 predecessor revalidation requires owned pass")
+	}
+	p.mu.Lock()
+	passErr, stats := p.failure, p.stats
+	p.mu.Unlock()
+	if cause := errors.Join(loadErr, passErr); cause != nil {
+		return fmt.Errorf("stopped v9 predecessor revalidation failed (logical=%d records=%d transcript_bytes=%d cache_bytes=%d): %w", stats.Logical, stats.Records, stats.TranscriptBytes, stats.CacheBytes, cause)
+	}
+	if !reflect.DeepEqual(previous, fresh) {
+		return fmt.Errorf("stopped v9 evidence rejected: predecessor changed")
 	}
 	return nil
 }
