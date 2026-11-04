@@ -1,0 +1,97 @@
+package taskbench
+
+import (
+	"context"
+	"encoding/json"
+	"maps"
+	"os"
+	"path/filepath"
+	"reflect"
+	"strings"
+	"testing"
+	"time"
+)
+
+// Pure replay of pinned DATA originals. No recursive production constructor,
+// keys, clients, settings, provider, DB, or Langfuse operation is invoked.
+func stoppedV11OriginalBundle(t *testing.T) (windowActualManifest, map[string][]byte) {
+	t.Helper()
+	raw, e := os.ReadFile(windowStoppedV11InventoryPath)
+	if e != nil {
+		t.Fatal(e)
+	}
+	if conversationHash(raw) != windowStoppedV11InventorySHA {
+		t.Fatal("descriptor changed")
+	}
+	var inv windowStoppedV11Inventory
+	if e = json.Unmarshal(raw, &inv); e != nil {
+		t.Fatal(e)
+	}
+	files := map[string][]byte{}
+	for _, f := range inv.Files {
+		if strings.HasPrefix(f.Path, "campaign/") || strings.HasPrefix(f.Path, "records/") || f.Path == "actual-manifest.json" || strings.HasPrefix(f.Path, "actual-owner-") {
+			raw, e = os.ReadFile(filepath.Join(inv.Root, f.Path))
+			if e != nil || conversationHash(raw) != f.SHA256 || int64(len(raw)) != f.Bytes {
+				t.Fatalf("original %s: %v", f.Path, e)
+			}
+			files[f.Path] = raw
+		} else {
+			files[f.Path] = nil
+		}
+	}
+	var m windowActualManifest
+	if e = decodeWindowActualJSON(files["actual-manifest.json"], &m); e != nil {
+		t.Fatal(e)
+	}
+	return m, files
+}
+func TestRootStopped154Original50Bundle(t *testing.T) {
+	m, files := stoppedV11OriginalBundle(t)
+	b, e := readWindowStoppedV11Bundle(windowStoppedV11Root, m, expectedStoppedV10WindowBaseline(), files)
+	if e != nil {
+		t.Fatal(e)
+	}
+	if !reflect.DeepEqual(b, expectedStoppedV11WindowBaseline()) {
+		t.Fatal("derived154 differs")
+	}
+}
+func TestRootStopped154RejectChangedOriginals(t *testing.T) {
+	m, original := stoppedV11OriginalBundle(t)
+	for _, name := range []string{"campaign/claim-000001.json", "campaign/claim-000050.json", "campaign/ledger-000050/accounting.jsonl", "records/window-000001/native-payloads/request-000001.body", "records/window-000050/native-payloads/request-000018.body", "records/window-000050/native-payloads/response-000018.json", "records/terminal.json", "actual-owner-exit.json", "actual-owner-group-cleanup.json"} {
+		t.Run(name, func(t *testing.T) {
+			files := maps.Clone(original)
+			files[name] = []byte("{}")
+			if _, e := readWindowStoppedV11Bundle(windowStoppedV11Root, m, expectedStoppedV10WindowBaseline(), files); e == nil {
+				t.Fatal("changed original accepted")
+			}
+		})
+	}
+	for _, name := range []string{"campaign/claim-000051.json", "campaign/checkpoint-000050.json", "records/window-000050/native-payloads/response-000018.body"} {
+		t.Run(name, func(t *testing.T) {
+			files := maps.Clone(original)
+			files[name] = []byte("{}")
+			if _, e := readWindowStoppedV11Bundle(windowStoppedV11Root, m, expectedStoppedV10WindowBaseline(), files); e == nil {
+				t.Fatal("invented later evidence accepted")
+			}
+		})
+	}
+}
+
+// Root alone explicitly selects this entry after review. This is the genuine
+// recursive physical constructor plus complete End; no synthetic predecessor.
+func TestRootStopped154GenuineConstructor(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 240*time.Second)
+	defer cancel()
+	started := time.Now()
+	b, e := loadWindowStoppedV11BaselineContext(ctx, windowStoppedV11InventoryPath, windowStoppedV11InventorySHA)
+	if e != nil {
+		t.Fatalf("genuine154 rejected after %s: %v", time.Since(started), e)
+	}
+	if !reflect.DeepEqual(b.base, expectedStoppedV11WindowBaseline()) || len(b.base.ClaimSHA256) != 154 || b.base.PermanentModel != 79620965 || b.base.PermanentJEV != 838363 || b.base.ActualModelCalls != 6659 || b.base.ActualJEVCalls != 1677 || b.originalRoot != windowStoppedV11Root || b.evidencePath != windowStoppedV11InventoryPath || b.evidenceSHA256 != windowStoppedV11InventorySHA || !reflect.DeepEqual(b.previous.base, expectedStoppedV10WindowBaseline()) {
+		t.Fatal("genuine154 exact DATA mismatch")
+	}
+	if _, ok := any(b).(windowStoppedHistory); ok {
+		t.Fatal("DATA minted reentry authority")
+	}
+	t.Logf("genuine154 constructor duration=%s claims=154 permanent=79620965/838363 attempts=6659/1677 DATA_only=true normal_authority=false", time.Since(started))
+}
