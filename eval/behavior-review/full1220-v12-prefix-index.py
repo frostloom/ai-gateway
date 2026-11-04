@@ -52,9 +52,19 @@ def discover(repo):
                 else:obs[trace]=triple
         if set(obs)!=traces:raise ValueError(f'missing actual original observation refs window{i}: {traces-set(obs)}')
         if not scores:raise ValueError(f'missing actual score GET bodies window{i}')
+        batch=w._json(raw(Path(w.ORIGINAL_REGISTRY)/f'window-{i:06d}.batch.json'))
+        plans={p for p in paths if p.name=='plan.json'}
+        for domain in (base/'runs',base/'capture-input-v1/runs'):
+            if domain.exists():plans.update(p/'plan.json' for p in domain.glob(f'window-{i:06d}-*') if (p/'plan.json').is_file())
+        chosen=[]
+        for plan in sorted(plans):
+            data=raw(plan,paths.get(plan));value=w._json(data)
+            canonical=json.dumps(value,sort_keys=True,ensure_ascii=False,separators=(',',':'),allow_nan=False).encode()
+            if hashlib.sha256(canonical).hexdigest()==batch['plan_sha256']:chosen.append(ref(plan,paths.get(plan)))
+        if not chosen:raise ValueError(f'missing exact original once-bound plan window{i}')
         review=Path(w.ORIGINAL_ROOT)/f'semantic-review/window-{i:06d}-review.json'
-        windows.append({'index':i,'review':ref(review,paths.get(review)),'gets':[obs[t] for t in sorted(obs)]+scores})
+        windows.append({'index':i,'review':ref(review,paths.get(review)),'plan':chosen[0],'gets':[obs[t] for t in sorted(obs)]+scores})
         diagnostic.append({'index':i,'audit':ref(base/audit_name),'observation_bodies':len(obs),'score_bodies':len(scores)})
     audit_reader.recheck()
     for reader in readers.values():reader.recheck()
-    return {'schema':'full1220-v12-prefix-original-index.v1','windows':windows},{'data_only':True,'windows':diagnostic,'observations':sum(x['observation_bodies'] for x in diagnostic),'no_factory_or_helper_executed':True,'new_GETs':0,'new_POSTs':0}
+    return {'schema':'full1220-v12-prefix-original-index.v2','windows':windows},{'data_only':True,'windows':diagnostic,'observations':sum(x['observation_bodies'] for x in diagnostic),'no_factory_or_helper_executed':True,'new_GETs':0,'new_POSTs':0}

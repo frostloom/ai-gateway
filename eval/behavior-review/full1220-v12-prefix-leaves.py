@@ -635,3 +635,30 @@ def _batch_source_identity(plan):
     return {trace: {key: binding[key] for key in ('ordinal', 'pass', 'case_key', 'arm', 'recording_sha256',
                                                   'expected_defined_turns', 'expected_observed_turns')}
             for trace, binding in plan['trace_bindings'].items()}
+
+_REGISTERED_TOOLS=frozenset(('get_balance','get_consumption','get_recent_bills','list_plans','get_my_subscription',
+                           'list_models','recharge','refund_recharge','subscribe_plan','change_plan','cancel_subscription'))
+
+def turn_observer_metadata(observation,index):
+    """Exact current End/observabilitySummary metadata from original telemetry.
+
+    No route is inferred or changed. Scalars use numeric comparisons at readback
+    to avoid pretending Python float formatting is Go strconv.FormatFloat.
+    """
+    turn=observation['turn'];response=turn['response'];tm=response['telemetry']
+    result={'turn_index':index,'http_status':turn['status'],'stage':tm.get('turn_stage',''),
+            'pending_confirm':response.get('pending_confirm',False)}
+    for key in ('llm_calls','jev_calls','jev_errors','llm_usage_missing','jev_usage_missing'):
+        result[key]=_integer(tm.get(key,0),0,'Original telemetry integer: '+key)
+    result.update(jev_fast_path=tm.get('jev_fast_path',False),jev_fast_path_reason=tm.get('jev_fast_path_reason',''),
+                  jev_intent=tm.get('jev_intent',''),jev_intent_confidence=tm.get('jev_intent_confidence',0))
+    if result['jev_calls']>0:
+        for key in ('jev_enabled','jev_blocked','jev_short_circuit','jev_fast_path_eligible'):
+            result[key]=tm.get(key,False);_require(type(result[key]) is bool,'Original routing boolean')
+        shape=tm.get('jev_route_shape','');result['jev_route_shape']=shape if shape in ('','single_read','complex') else 'invalid'
+        for key,maximum in [('jev_shape_confidence',1),('jev_legit_probability',1),('jev_risk_score',2),('jev_risk_confidence',1)]:
+            value=tm.get(key,0)
+            result[key]=value if type(value) in (int,float) and math.isfinite(value) and 0<=value<=maximum else 'invalid'
+        tool=tm.get('jev_fast_path_tool','')
+        result['jev_fast_path_tool']=tool if tool=='' or tool in _REGISTERED_TOOLS else 'invalid'
+    return result

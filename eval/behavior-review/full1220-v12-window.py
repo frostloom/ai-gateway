@@ -20,7 +20,7 @@ import types
 DEPENDENCIES = {
     'native': ('full1220-v8-native.py', '97a0c330b018f72b8aaf0370b3e5ec0a348eca980927b483ba387f12f6781383'),
     'codec': ('full1220-v12-contracts.py', '5bdb734d169fa1a4554a5b23c989b574d07fd83f62f269328c9ed30e7967bf5d'),
-    'prefix_scores': ('full1220-v12-prefix-leaves.py', 'bd18eb1eb5a6d34970a2193a1eb4fd60437baaa66b733e44e1137238c6a5fc2d'),
+    'prefix_scores': ('full1220-v12-prefix-leaves.py', 'f983c4a8a066d54ba535e865067432cb825ca402141d1919c3563375feb4c244'),
     'source': ('full1220-v8-source.py', '9ec4994cee9b9a845487b53dd5bc6bcc8ce91fb05e2536cdba78ffb2978fa9da'),
     'runner': ('full1220-v12-helper-runtime.py', 'c6e19868e045dc508f8b00279b7ba556a7824eb229fe0b884bab140e1f678ad3'),
 }
@@ -1035,7 +1035,7 @@ def execution_window_at(scope,index):
     w=scope['windows'][index-1]
     need(w['id']==f'window-{index+55:03d}' and 386<=w['first_ordinal']<=w['last_ordinal']<=3660,
          'local suffix declaration mapping')
-    return w
+    return copy.deepcopy(w)
 
 
 def execution_totals(scope):
@@ -1373,8 +1373,9 @@ def verify_prefix_source(manifest_raw, receipt_raw, records, sidecars, expected_
     binding=source_binding(manifest_raw,receipt_raw,records,sidecars)
     need(n.same(expected_hashes,binding),'source original input pins')
     manifest=source._Document(manifest_raw).value;receipt=source._Document(receipt_raw).value
-    need(manifest['schema']=='full-window-actual-ready.v9' and receipt['schema']=='full-window-acquisition-receipt.v9' and
+    need(manifest['schema']=='full-window-actual-ready.v9' and receipt['schema']=='full-window-acquisition-receipt.v8' and
          manifest['scope_sha256']==receipt['scope_sha256'] and manifest['execution_sha256']==receipt['execution_sha256'],'source V12 binding')
+    validate_original_prefix_wire(manifest,receipt)
     need(manifest['scope_sha256']==ORIGINAL_SCOPE_SHA256==sha(n.wire(manifest['scope'])) and source_root==manifest['source_root'] and n.same(source_hashes,manifest['sources']),'exact original prefix scope/source')
     need(1<=receipt['window_index']<=55 and receipt['window_id']==f"window-{receipt['window_index']:03d}",'delivered original prefix only')
     rows=receipt['rows'];need(0<len(rows)<=24 and set(records)=={r['recording_file'] for r in rows},'source current rows/record set')
@@ -1503,10 +1504,10 @@ _COMPLETION_SEAL=object()
 
 
 class VerifiedDeliveredPrefix:
-    __slots__=('_seal','_readers','_sources','_report','_rows','_context')
-    def __init__(self,seal,readers,sources,report,rows,context):
+    __slots__=('_seal','_readers','_sources','_report','_rows','_context','_score_module','_captures')
+    def __init__(self,seal,readers,sources,report,rows,context,score_module,captures):
         need(seal is _PREFIX_SEAL,'prefix factory only')
-        for key,value in zip(self.__slots__,(seal,tuple(readers),tuple((p,json.dumps(b,sort_keys=True).encode()) for p,b in sources),json.dumps(report,sort_keys=True).encode(),tuple(json.dumps(row,sort_keys=True).encode() for row in rows),context)):object.__setattr__(self,key,value)
+        for key,value in zip(self.__slots__,(seal,tuple(readers),tuple((p,json.dumps(b,sort_keys=True).encode()) for p,b in sources),json.dumps(report,sort_keys=True).encode(),tuple(json.dumps(row,sort_keys=True).encode() for row in rows),context,score_module,tuple((p,json.dumps(plan,sort_keys=True).encode()) for p,plan in captures))):object.__setattr__(self,key,value)
     def __setattr__(self,k,v):raise AttributeError('immutable original-prefix proof')
     def __reduce__(self):raise TypeError('prefix proof is same-process only')
 
@@ -1581,10 +1582,10 @@ def _prefix_once(plan,registry,score_rows,s):
 
 def _check_delivered_prefix(proof):
     need(type(proof) is VerifiedDeliveredPrefix and proof._seal is _PREFIX_SEAL,'genuine same-module delivered prefix required')
-    for reader in proof._readers:
-        if getattr(reader,'prefix_closed_namespace',False):reader.inventory(reader.markers)
-        reader.recheck()
-        if getattr(reader,'prefix_closed_namespace',False):reader.inventory(reader.markers)
+    s=_require_selected_score_module(proof._score_module,proof._context)
+    need(len(proof._captures)==55,'complete original55 genuine capture proof set')
+    for projection,plan_raw in proof._captures:s._validate_projection_plan_binding(json.loads(plan_raw),projection)
+    for reader in proof._readers:_recheck_prefix_reader(reader)
     for identifier in json.loads(proof._report)['positive_holes']:
         for name in ('logical-'+identifier+'.intent.json','score-'+identifier+'.intent.json',identifier+'.sent.json',identifier+'.accepted.json'):need(not (Path(ORIGINAL_REGISTRY)/name).exists(),'original positive hole filled after proof')
     for p,b in proof._sources:_check_source_proof(p,json.loads(b))
@@ -1614,11 +1615,12 @@ def verify_delivered_prefix(context,*,index_path,helper_output_dir,score_module)
     verdicts. All helpers/supervision outputs go to the NEW freeze root.
     No original body, score, once event or evidence file is written or fetched.
     """
+    _require_selected_score_module(score_module,context)
     _selected();need(type(context) is _ActualContext and context.seal is _ACTUAL_SEAL,'selected new prefix replay context')
     need(type(PREFIX_INDEX_SHA256) is str and re.fullmatch('[0-9a-f]{64}',PREFIX_INDEX_SHA256),'UNFROZEN original55 raw index')
     need(Path(index_path)==context.root/'prefix-evidence-index.json','fixed reviewed prefix index path')
     idx=_json(context.reader.read('prefix-evidence-index.json',PREFIX_INDEX_SHA256))
-    need(set(idx)=={'schema','windows'} and idx['schema']=='full1220-v12-prefix-original-index.v1' and type(idx['windows']) is list and [x['index'] for x in idx['windows']]==list(range(1,56)),'all55 actual original window refs required')
+    need(set(idx)=={'schema','windows'} and idx['schema']=='full1220-v12-prefix-original-index.v2' and type(idx['windows']) is list and [x['index'] for x in idx['windows']]==list(range(1,56)),'all55 actual original window refs required')
     old=Evidence(Path(ORIGINAL_ROOT));registry=Evidence(Path(ORIGINAL_REGISTRY));external={};n=dependency('native');s=score_module
     def ref(value):
         need(type(value) is dict and set(value)=={'path','sha256'},'exact original ref')
@@ -1627,20 +1629,21 @@ def verify_delivered_prefix(context,*,index_path,helper_output_dir,score_module)
         reader=external.setdefault(path.parent,Evidence(path.parent));return reader.read(path.name,value['sha256'])
     mr=old.read('actual-manifest.json',ORIGINAL_MANIFEST_SHA256);m=_json(mr);scope=m['scope']
     need(m['scope_sha256']==ORIGINAL_SCOPE_SHA256==sha(n.wire(scope)) and sha(n.wire(dict(sorted(m['sources'].items()))))==ORIGINAL_SOURCES_SHA256,'exact original manifest/scope/source')
-    originalsource=Evidence(Path(m['source_root']))
+    originalsource=Evidence(Path(m['source_root']));originalsource.prefix_closed_namespace=True
     for name,pin in m['sources'].items():originalsource.read(name,pin)
     if (originalsource.root/'.git').exists():originalsource.read('.git',bound=4096)
     originalsource.inventory(originalsource.markers)
     # Immutable leaf semantic builder is selected by raw module SHA; never old owner/publisher.
     leaf=dependency('prefix_scores')
-    rows=[];sources=[];counts=holes=observations=0;allholes=[];summaries=[];receipts=[];closed_windows=[]
+    ref({'path':'/Users/a1/项目/ai-gateway/.tmp/v9-live-score-horizon-20261031/historical-window.py','sha256':_ORIGINAL_HISTORICAL_ISSUER_SHA256})
+    rows=[];sources=[];captures=[];counts=holes=observations=0;allholes=[];summaries=[];receipts=[];closed_windows=[]
     out=Path(helper_output_dir);need(out.is_absolute() and out.resolve()==out and out.parent.is_dir() and context.root in out.parents,'new prefix helper output domain');out.mkdir(mode=0o700)
     for entry in idx['windows']:
-        need(set(entry)=={'index','review','gets'},'prefix index row contains only raw selections')
+        need(set(entry)=={'index','review','plan','gets'},'prefix index row contains only raw selections')
         i=entry['index'];prefix=f'records/window-{i:06d}/';sr=old.read(f'records/window-{i:06d}-summary.json');summary=_json(sr)
         need(summary['last_receipt_sha256']==(sha(summaries[-1]) if summaries else ''),'original55 raw summary chain')
         rr=old.read(prefix+'receipt.json',summary['report_sha256']);r=_json(rr)
-        need(r['schema']=='full-window-acquisition-receipt.v9' and r['window_index']==i and r['window_id']==f'window-{i:03d}' and r['evidence_kind']=='recorded_run' and r['status']=='collected_window' and all(r[k] is True for k in ('advanced','cleanup','environment_cleanup','observer','payload_verified')),'original normally collected delivered prefix')
+        need(r['schema']=='full-window-acquisition-receipt.v8' and r['window_index']==i and r['window_id']==f'window-{i:03d}' and r['evidence_kind']=='recorded_run' and r['status']=='collected_window' and all(r[k] is True for k in ('advanced','cleanup','environment_cleanup','observer','payload_verified')),'original normally collected delivered prefix')
         need(r['scope_sha256']==ORIGINAL_SCOPE_SHA256 and r['execution_sha256']==m['execution_sha256'],'original receipt binding')
         records={row['recording_file']:old.read(prefix+row['recording_file'],row['recording_sha256']) for row in r['rows']}
         sidecars={q[k]:old.read(prefix+q[k],q[k.replace('_file','_sha256')]) for row in r['rows'] if (q:=row.get('quality_end')) is not None for k in ('candidate_file','cleanup_file')}
@@ -1654,7 +1657,7 @@ def verify_delivered_prefix(context,*,index_path,helper_output_dir,score_module)
         need(i==1 or _json(receipts[-1])['next_claim_sha256']==sha(cr),'original next claim hash chain')
         contract=_contract(scope,m,claim,sha(cr),n);replay=n.replay_ledger(lr,contract)
         need(replay['closed'] and replay['native_resolved'] and not replay['envelope_violation'] and r['ledger_sha256']==sha(lr) and n.same(r['accounting'],_accounting_state(replay,n)),'original settled native ledger')
-        cp=_json(old.read(f'campaign/checkpoint-{i:06d}.json'));need(cp['schema']=='full-window-campaign-owned-checkpoint.v9' and cp['index']==i and cp['scope_sha256']==ORIGINAL_SCOPE_SHA256 and cp['execution_sha256']==m['execution_sha256'] and cp['policy_sha256']==scope['bindings']['policy_sha256'] and cp['claim_sha256']==sha(cr) and cp['ledger_sha256']==sha(lr) and n.same(cp['evidence'],evidence),'original checkpoint/source/native chain')
+        cp=_json(old.read(f'campaign/checkpoint-{i:06d}.json'));validate_original_prefix_wire(m,r,cp);need(cp['schema']=='full-window-campaign-owned-checkpoint.v8' and cp['index']==i and cp['scope_sha256']==ORIGINAL_SCOPE_SHA256 and cp['execution_sha256']==m['execution_sha256'] and cp['policy_sha256']==scope['bindings']['policy_sha256'] and cp['claim_sha256']==sha(cr) and cp['ledger_sha256']==sha(lr) and n.same(cp['evidence'],evidence),'original checkpoint/source/native chain')
         need(payload['schema']=='full-window-payload.v2' and payload['evidence_kind']=='recorded_run' and n.same(payload['contract'],contract),'original payload contract')
         names={'store.json'}
         for packet in payload['packets']:
@@ -1668,7 +1671,10 @@ def verify_delivered_prefix(context,*,index_path,helper_output_dir,score_module)
         need(sum(x['model'] for x in telemetry.values())==r['v8']['logical_model_calls'] and sum(x['jev'] for x in telemetry.values())==r['v8']['logical_jev_calls'],'original logical/native telemetry coverage')
         need(entry['review']['path']==str(Path(ORIGINAL_ROOT)/f'semantic-review/window-{i:06d}-review.json'),'original independent review path only')
         review=ref(entry['review']);anchors={'manifest_sha256':sha(mr),'summary_sha256':sha(sr),'receipt_sha256':sha(rr),'review_sha256':sha(review),'records':{k:sha(v) for k,v in records.items()}}
-        plan=leaf._build(mr,sr,rr,records,review,anchors,ORIGINAL_BINDING_SHA256)
+        original_plan_raw=ref(entry['plan']);original_plan=_json(original_plan_raw);original_batch=_json(registry.read(f'window-{i:06d}.batch.json'))
+        need(sha(leaf._json_bytes(original_plan))==original_batch['plan_sha256'],'once-bound original publication plan before historical replay')
+        verify_original_horizon_data(old,original_plan,receipts)
+        plan=rebuild_original_prefix_plan(leaf,(mr,sr,rr,records,review,anchors,ORIGINAL_BINDING_SHA256),original_plan_raw,original_batch)
         captured={};score_rows=[]
         need(type(entry['gets']) is list and 0<len(entry['gets'])<=128,'bounded original GET refs')
         for get in entry['gets']:
@@ -1681,20 +1687,23 @@ def verify_delivered_prefix(context,*,index_path,helper_output_dir,score_module)
         projection=s.project_prefix_content(mr,rr,records,pr,plan,source_proof=sp,verifier=sys.modules.get(__name__) or None,context=context,output_dir=out/f'capture-{i:06d}',private_settings_path=Path(ORIGINAL_ROOT)/'final-private-settings.json')
         class StoredOnly:
             def observations(self,trace):return captured[trace]
+        s._validate_projection_plan_binding(plan,projection)
         validation=s.validate_window_traces(plan,projection,StoredOnly());need(validation['all_pass'] is True,'strict original stored parent/content/native/tool/turn validation')
+        captures.append((projection,plan))
         count,suppressed=_prefix_once(plan,registry,score_rows,leaf);counts+=count;allholes+=suppressed
         observations+=sum(len(v) for v in captured.values());rows.extend(r['rows']);summaries.append(sr);receipts.append(rr)
     need(counts==2300 and len(allholes)==len(set(allholes))==10 and observations==6849,'original2300 scores6849 observations10 unchanged holes')
     need(sha(summaries[-1])=='42be06b9399b999bb83e939c0722e0e2d0c952608af529ed923c29046f00206d','original55 summary pin')
     need(len(rows)==770 and sum(x['defined_turns'] for x in rows)==1268,'original385 delivered prefix complete')
-    for reader in (old,registry,originalsource,*closed_windows,*external.values()):reader.recheck()
+    for reader in (old,registry,originalsource,*closed_windows,*external.values()):_recheck_prefix_reader(reader)
     report={'schema':'full1220-v12-delivered-original-prefix.v1','Pairs':385,'Arms':770,'DefinedUserTurns':1268,'scores':2300,'observations':6849,'positive_holes':allholes,'original_manifest_sha256':ORIGINAL_MANIFEST_SHA256,'original_scope_sha256':ORIGINAL_SCOPE_SHA256,'prefix_index_sha256':PREFIX_INDEX_SHA256,'new_POSTs':0,'new_GETs':0,'source_native_semantic_once_ACK_GET_verified':True}
-    return VerifiedDeliveredPrefix(_PREFIX_SEAL,(old,registry,originalsource,*closed_windows,*external.values()),sources,report,rows,context)
+    return VerifiedDeliveredPrefix(_PREFIX_SEAL,(old,registry,originalsource,*closed_windows,*external.values()),sources,report,rows,context,s,captures)
 
 
 def verify_actual_completion(root=None,*,binding_sha256=None,summary_sha256=None,completion_pins=None,helper_output_dir=None,score_module=None):
     """One selected same-process delivered385 + normally completed3275 proof."""
-    _selected();need(score_module is not None and score_module._cohort_verifier_module is sys.modules.get(__name__),'score-selected same verifier identity')
+    _require_selected_score_module(score_module)
+    _selected()
     suffix=verify_actual_cohort(root,binding_sha256=binding_sha256,summary_sha256=summary_sha256,completion_pins=completion_pins,helper_output_dir=helper_output_dir)
     context=suffix._context;prefix=verify_delivered_prefix(context,index_path=context.root/'prefix-evidence-index.json',helper_output_dir=Path(helper_output_dir)/'original-prefix',score_module=score_module)
     suffixrows=[]
@@ -1723,6 +1732,132 @@ def original_score_payload(row):
     trace=row['subject'].get('id');need(type(trace) is str and re.fullmatch('[0-9a-f]{32}',trace),'original score trace ID')
     need('traceId' not in row or row['traceId']==trace,'conflicting score subject')
     return {**row,'traceId':trace}
+
+
+
+
+
+_score_module=None
+
+def score_selection_signing_bytes(payload):
+    """Root signs AFTER verifier/score rendering. No mutual embedded SHA cycle."""
+    keys=('schema','root','manifest_sha256','verifier_sha256','score_sha256')
+    need(type(payload) is dict and set(payload)==set(keys),'exact score selection payload')
+    return b'full1220-v12-score-module-selection.v1\n'+dependency('codec')._go_bytes({k:payload[k] for k in keys})
+
+
+def load_score_module(*,context=None):
+    """Canonical root-signed score loader; technical preparation is sufficient.
+
+    No execution authorization, owner or suffix records are required. The
+    already pinned manifest's build key authenticates the external selection
+    envelope AFTER both rendered files exist, avoiding circular source hashes.
+    """
+    global _score_module
+    _selected()
+    if context is None:
+        need(_score_module is not None,'load score module first with genuine technical preparation context')
+        context=_score_module._v12_selection_context
+    need(type(context) is _ActualContext and context.seal is _ACTUAL_SEAL and context.root==Path(FROZEN_ROOT),'genuine selected technical context')
+    reader=context.reader;root=context.root
+    envelope=_json(reader.read('score-preparation/selection.json',bound=65536))
+    need(type(envelope) is dict and set(envelope)=={'payload','signature'},'signed score selection envelope')
+    payload=envelope['payload'];message=score_selection_signing_bytes(payload)
+    verifier_sha=sha(reader.read('verifier-preparation/verify-window.py',context.binding['verifier_sha256'],4<<20))
+    need(payload['schema']=='full1220-v12-score-module-selection.v1' and payload['root']==str(root) and payload['manifest_sha256']==FROZEN_MANIFEST_SHA256 and payload['verifier_sha256']==verifier_sha,'score selection exact root/manifest/verifier')
+    need(type(payload['score_sha256']) is str and re.fullmatch('[0-9a-f]{64}',payload['score_sha256']),'selected score SHA')
+    _signature(context.manifest['build_attestation_public_key'],message,envelope['signature'])
+    raw=reader.read('score-preparation/scores.py',payload['score_sha256'],4<<20)
+    current=sys.modules.get(__name__);need(current is not None and getattr(current,'__file__',None)==__file__,'registered owning verifier required')
+    if _score_module is None:
+        module=types.ModuleType('full1220_v12_selected_scores_'+verifier_sha[:16]);module.__file__=str(root/'score-preparation/scores.py')
+        sys.modules[module.__name__]=module
+        try:exec(compile(raw,module.__file__,'exec'),module.__dict__)
+        except BaseException:
+            sys.modules.pop(module.__name__,None);raise
+        need(module.FROZEN_ROOT==str(root) and module.FROZEN_VERIFIER_SHA256==verifier_sha and module.FROZEN_BINDING_SHA256==sha(reader.read('runtime-binding.json')),'score selected verifier/root/binding')
+        module._cohort_verifier_module=current;module._v12_selection_context=context
+        _score_module=module
+    need(type(_score_module) is types.ModuleType and sys.modules.get(_score_module.__name__) is _score_module and _score_module.__file__==str(root/'score-preparation/scores.py') and _score_module._cohort_verifier_module is current,'selected owning score module identity')
+    reader.recheck()
+    return _score_module
+
+
+def _require_selected_score_module(module,context=None):
+    # Reject attacker-supplied objects/modules BEFORE any helper or original IO.
+    need(type(module) is types.ModuleType and module is _score_module and sys.modules.get(module.__name__) is module,'selected owning score module required')
+    need(load_score_module(context=context) is module,'fresh authenticated selected score module required')
+    return module
+
+
+def validate_original_prefix_wire(manifest,receipt,checkpoint=None):
+    need(manifest['schema']=='full-window-actual-ready.v9' and manifest['scope']['schema']=='full-window-scope.v9' and manifest['scope_sha256']==ORIGINAL_SCOPE_SHA256,'exact original V9 manifest/scope')
+    i=receipt['window_index']
+    need(receipt['schema']=='full-window-acquisition-receipt.v8' and type(i) is int and 1<=i<=55 and receipt['window_id']==f'window-{i:03d}' and receipt['scope_sha256']==manifest['scope_sha256'] and receipt['execution_sha256']==manifest['execution_sha256'],'exact original V8 receipt in V9 prefix')
+    if checkpoint is not None:need(checkpoint['schema']=='full-window-campaign-owned-checkpoint.v8' and checkpoint['index']==i and checkpoint['scope_sha256']==manifest['scope_sha256'] and checkpoint['execution_sha256']==manifest['execution_sha256'],'exact original V8 checkpoint in V9 prefix')
+
+
+def _recheck_prefix_reader(reader):
+    if getattr(reader,'prefix_closed_namespace',False):reader.inventory(reader.markers)
+    reader.recheck()
+    if getattr(reader,'prefix_closed_namespace',False):reader.inventory(reader.markers)
+
+
+
+
+
+_ORIGINAL_HISTORICAL_ISSUER_SHA256='4d1af5e1b8c8f4e0814774dca3b0e554468b5ca67eb324490609604bd34d8b76'
+
+def rebuild_original_prefix_plan(leaf,args,published_raw,batch):
+    """Reconcile original publication DATA; never reconstitute its opaque proof.
+
+    The old wrapper added historical provenance AFTER constructing all row/score
+    metadata. Preserve those original bytes/IDs while checking the entire pure
+    semantic core and independently checking the referenced raw horizon below.
+    """
+    core=leaf._build(*args);published=_json(published_raw);n=dependency('native')
+    need(sha(leaf._json_bytes(published))==batch['plan_sha256'],'original once-bound complete published plan')
+    normalized=copy.deepcopy(published);provenance=normalized['provenance'];original=published['provenance']
+    need(original['actual_source_and_native_replay']=='verified_by_historical_score_issuer_and_original_v9_horizon_proof' and original['historical_issuer_sha256']==_ORIGINAL_HISTORICAL_ISSUER_SHA256,'original historical provenance DATA identity')
+    horizon=original['historical_horizon_index'];need(type(horizon) is int and published['window_index']<=horizon<=55,'original completed historical horizon only')
+    for key in ('historical_horizon_summary_sha256','historical_horizon_files_sha256'):need(type(original[key]) is str and re.fullmatch('[0-9a-f]{64}',original[key]),'original historical raw reference')
+    for key in ('historical_horizon_index','historical_horizon_summary_sha256','historical_horizon_files_sha256','historical_issuer_sha256'):provenance.pop(key)
+    provenance['actual_source_and_native_replay']=core['provenance']['actual_source_and_native_replay']
+    need(n.same(normalized,core),'complete original semantic plan/source/metadata/IDs mismatch')
+    return published
+
+
+def verify_original_horizon_data(reader,plan,receipts):
+    """Exact old records/campaign raw map hash, without old scope/factory IO."""
+    p=plan['provenance'];h=p['historical_horizon_index'];source=dependency('prefix_scores');expected={};horizon_receipts=[]
+    need(type(h) is int and plan['window_index']<=h<=55 and p['historical_issuer_sha256']==_ORIGINAL_HISTORICAL_ISSUER_SHA256,'original bounded historical provenance')
+    for key in ('historical_horizon_summary_sha256','historical_horizon_files_sha256'):need(type(p[key]) is str and re.fullmatch('[0-9a-f]{64}',p[key]),'original historical digest')
+    def take(name,expected_sha=None):
+        raw=reader.read(name,expected_sha);expected[name]=sha(raw);return raw
+    take('records/startup.json')
+    for j in range(1,h+1):
+        summary=_json(take(f'records/window-{j:06d}-summary.json',p['historical_horizon_summary_sha256'] if j==h else None))
+        prefix=f'records/window-{j:06d}/'
+        rr=take(prefix+'receipt.json',summary['report_sha256']);r=_json(rr);horizon_receipts.append(rr)
+        if j<=len(receipts):need(rr==receipts[j-1],'same selected original horizon receipt')
+        payload=_json(take(prefix+'payload-manifest.json',r['payload_manifest_sha256']))
+        need(type(r['rows']) is list and 0<len(r['rows'])<=24 and type(payload['packets']) is list and len(payload['packets'])<=172,'bounded original horizon declared records')
+        for row in r['rows']:
+            take(prefix+row['recording_file'],row['recording_sha256'])
+            if (q:=row.get('quality_end')) is not None:
+                for fk,hk in [('candidate_file','candidate_sha256'),('cleanup_file','cleanup_sha256')]:take(prefix+q[fk],q[hk])
+        take(prefix+'native-payloads/store.json')
+        for sequence,packet in enumerate(payload['packets'],1):
+            need(packet['sequence']==sequence,'original horizon ordered native sequence')
+            for name in (f'request-{sequence:06d}.json',f'request-{sequence:06d}.body',f'response-{sequence:06d}.json'):take(prefix+'native-payloads/'+name)
+            if 'body' in packet['response']:take(prefix+f'native-payloads/response-{sequence:06d}.body')
+        take(f'campaign/checkpoint-{j:06d}.json');take(f'campaign/ledger-{j:06d}/accounting.jsonl')
+    need(take('campaign/.lock')==b'','original lock bytes, not ownership')
+    for j in range(1,h+2):
+        pin=_json(horizon_receipts[j-2])['next_claim_sha256'] if j>1 else None
+        take(f'campaign/claim-{j:06d}.json',pin)
+    need(sha(source._json_bytes(dict(sorted(expected.items()))))==p['historical_horizon_files_sha256'],'exact original historical horizon raw map DATA')
+    return expected
 
 
 if __name__=='__main__':raise SystemExit(main())

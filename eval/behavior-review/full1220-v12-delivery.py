@@ -101,6 +101,7 @@ def _selected(verifier,cohort,score_module):
     root=_canonical(FROZEN_ROOT)
     need(score_module is not None and sys.modules.get(getattr(score_module,'__name__',None)) is score_module,'selected registered score module required')
     need(verifier is not None and verifier is score_module._cohort_verifier_module,'score-selected verifier required')
+    need(verifier._require_selected_score_module(score_module) is score_module,'canonical selected score owner required')
     need(Path(verifier.__file__)==root/'verifier-preparation/verify-window.py' and verifier.FROZEN_ROOT==FROZEN_ROOT and score_module.FROZEN_ROOT==FROZEN_ROOT,'fixed selected V12 paths')
     need(sha(_raw(verifier.__file__))==score_module.FROZEN_VERIFIER_SHA256,'selected verifier bytes changed')
     report=verifier.check_verified_completion(cohort,{})
@@ -279,7 +280,7 @@ def ship_range(*,verifier,cohort,first_batch,last_batch,score_module=None):
     def validate(outdir):
         raw=_raw(output/'result.json',1<<20);value=_range_result(document(raw),batches)
         stdout=_raw(Path(outdir)/'stdout',8<<20)
-        need(re.findall(rb'(?m)^\s+full1220_spool_delivery_test.go:[0-9]+: FULL1220_DELIVERY_OUTPUT_SHA256=([0-9a-f]{64})\r?$',stdout)==[sha(raw).encode()],'selected real helper output receipt')
+        _verify_shipper_receipt(stdout,raw)
         result.update(value)
     process=p.run_owned(state_root=root/'delivery-supervision',attempt_name=name,argv=[str(binary),'-test.run=^TestFull1220SpoolDeliveryV12$','-test.v','-test.count=1'],cwd=Path(manifest['source_root'])/'internal/observability',env=env,executable_pin=pin,inputs=[p.pin_file(output/'input.json',immutable=False),p.pin_file(root/'delivery-preparation/catalog.json'),p.pin_file(template)],timeout=240,stdin_factory=stdin,validate_output=validate,phase='helper-run')
     need(process['accepted'] is True and process['cleanup']['confirmed'] is True and process['output_validation_supplied'] is True,'shipment helper did not complete; no repeat')
@@ -287,3 +288,7 @@ def ship_range(*,verifier,cohort,first_batch,last_batch,score_module=None):
     return {**result,'remote_verified':False,'process':process}
 
 if __name__=='__main__':print('inactive: requires selected final V12 cohort and independently frozen delivery catalog')
+
+
+def _verify_shipper_receipt(stdout,raw):
+    need(re.findall(rb'(?m)^\s+full1220_spool_delivery_v12_test\.go:[0-9]+: FULL1220_DELIVERY_OUTPUT_SHA256=([0-9a-f]{64})\r?$',stdout)==[sha(raw).encode()],'selected real V12 helper output receipt')

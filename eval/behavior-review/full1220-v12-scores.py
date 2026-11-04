@@ -1370,6 +1370,7 @@ def verify_actual_score_inputs(root=None, *, window_index=None, cohort=None, ver
     _require(module is not None and module is _cohort_verifier_module,'Only score-selected frozen verifier module may issue cohort projections')
     _require(module is not None and getattr(module,'__file__',None)==str(Path(FROZEN_ROOT)/'verifier-preparation/verify-window.py'),'same frozen verifier module required')
     _equal(_sha(_regular_bytes(Path(module.__file__),4<<20)),FROZEN_VERIFIER_SHA256,'Frozen verifier bytes')
+    module._require_selected_score_module(sys.modules.get(__name__))
     module.check_verified_completion(cohort,{})
     proof=module.completion_window_proof(cohort,window_index)
     summary_sha256=json.loads(proof._inputs)['summary_sha256']
@@ -1705,7 +1706,7 @@ def verify_remote_score_inputs(plan,projection,*,actual_proof=None,readback_root
     _check_actual(actual_proof)
     _validate_projection_plan_binding(plan,projection)
     issuer=remote_verifier()
-    proof=issuer.verify_remote_window(score_module=sys.modules[__name__],verifier=actual_proof._module,cohort=actual_proof._proof._cohort,window_index=plan['window_index'],binding=remote_binding(plan,projection),plan=plan,projection=projection,readback_root=readback_root)
+    proof=issuer.verify_remote_window(score_module=sys.modules[__name__],verifier=actual_proof._module,cohort=actual_proof._completion,window_index=plan['window_index'],binding=remote_binding(plan,projection),plan=plan,projection=projection,readback_root=readback_root)
     _check_remote(proof,plan,projection)
     return proof
 
@@ -1727,6 +1728,7 @@ def project_prefix_content(manifest_raw,receipt_raw,records,payload_raw,plan,*,s
     callback after selected source/catalog/tool/input pins have been rechecked.
     """
     _require(verifier is _cohort_verifier_module and verifier is not None,'selected verifier prefix capture')
+    verifier._require_selected_score_module(sys.modules.get(__name__),context)
     verifier._check_source_proof(source_proof,verifier.source_binding(manifest_raw,receipt_raw,records,{}))
     _require(type(context) is verifier._ActualContext and context.seal is verifier._ACTUAL_SEAL,'genuine prefix helper context')
     _require(_sha(manifest_raw)==verifier.ORIGINAL_MANIFEST_SHA256,'fixed original prefix capture')
