@@ -134,6 +134,9 @@ func loadWindowStoppedV11BaselineWithPass(p *historyReadPass, path, sha string) 
 	if err != nil || !reflect.DeepEqual(previous.base, expectedStoppedV10WindowBaseline()) {
 		return reject(fmt.Sprintf("concrete104: %v", err))
 	}
+	if err = p.enableStoppedV11Metadata(previous); err != nil {
+		return reject(err)
+	}
 	frozen := freezeWindowStoppedV11Predecessor(previous)
 	for _, root := range previous.predecessorRoots() {
 		if !windowPayloadDisjoint(root, inv.Root) || !windowPayloadDisjoint(root, windowStoppedV11SourceRoot) {
@@ -248,4 +251,35 @@ func readWindowStoppedV11Inventory(p *historyReadPass, root string, inv windowSt
 		return nil, e
 	}
 	return files, nil
+}
+
+// This private stage transition has no caller-selectable limit or roots. The
+// only production caller follows the genuine concrete104 constructor in this
+// same pass. Pre-activation metadata remains entirely charged to legacy32MiB.
+func (p *historyReadPass) enableStoppedV11Metadata(previous windowStoppedV10Baseline) error {
+	if p == nil {
+		return fmt.Errorf("stopped154 metadata stage rejected")
+	}
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	oldPath := windowStoppedV10Root + "/stopped-v10-original-inventory.json"
+	oldEvidence, newEvidence := p.paths[oldPath], p.paths[windowStoppedV11InventoryPath]
+	oldLock, hasLock := p.locks[windowStoppedV10Root+"/campaign/.lock"]
+	if p.ctx == nil || p.ctx.Err() != nil || p.state != historyPassOpen || p.stoppedV11Metadata || p.stats.TranscriptBytes > historyPassTranscriptLimit || oldEvidence == nil || oldEvidence.digest != windowV11BaselineSHA || newEvidence == nil || newEvidence.digest != windowStoppedV11InventorySHA || !hasLock || oldLock.epoch != 10 || previous.evidencePath != oldPath || previous.evidenceSHA256 != windowV11BaselineSHA || previous.originalRoot != windowStoppedV10Root || !reflect.DeepEqual(previous.base, expectedStoppedV10WindowBaseline()) {
+		return p.failLocked(fmt.Errorf("stopped154 metadata stage rejected"))
+	}
+	p.stoppedV11LegacyTranscript = p.stats.TranscriptBytes
+	p.stoppedV11Metadata = true
+	return nil
+}
+
+func stoppedV11MetadataPath(path string) bool {
+	return filepath.IsAbs(path) && filepath.Clean(path) == path && !strings.Contains(path, "\\") && (path == windowStoppedV11InventoryPath || historyInside(path, windowStoppedV11Root) || historyInside(path, windowStoppedV11SourceRoot))
+}
+
+// Only the newly pinned R3 DATA pool avoids duplicate pass byte retention.
+// Old references retain the unchanged128MiB admission limit. Uncached references
+// still use the same supplying-FD reader and fresh End metadata/hash sweep.
+func (p *historyReadPass) retainHistoryBytesLocked(s historyReadSpec, size int64) bool {
+	return !s.isStream() && size <= historyPassEntryLimit && !(p.stoppedV11Metadata && filepath.IsAbs(s.path) && filepath.Clean(s.path) == s.path && !strings.Contains(s.path, "\\") && historyInside(s.path, windowStoppedV11Root))
 }

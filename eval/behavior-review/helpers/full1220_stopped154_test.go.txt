@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"sort"
 	"strings"
 	"testing"
 	"time"
@@ -94,4 +95,159 @@ func TestRootStopped154GenuineConstructor(t *testing.T) {
 		t.Fatal("DATA minted reentry authority")
 	}
 	t.Logf("genuine154 constructor duration=%s claims=154 permanent=79620965/838363 attempts=6659/1677 DATA_only=true normal_authority=false", time.Since(started))
+}
+
+// Snapshot the existing admitted pass metadata without changing admission,
+// poisoning, fresh reads or End. This helper is outside production builds.
+func stopped154DiagnosticSnapshot(p *historyReadPass) map[string]any {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	classes := map[string]map[string]uint64{}
+	class := func(path string) string {
+		if historyInside(path, windowStoppedV11Root) {
+			return "r3_original"
+		}
+		if historyInside(path, windowStoppedV11SourceRoot) {
+			return "r2_source"
+		}
+		if path == windowStoppedV11InventoryPath {
+			return "descriptor154"
+		}
+		return "predecessor_or_ancestor"
+	}
+	add := func(path, kind string, charge uint64) {
+		name := class(path)
+		if classes[name] == nil {
+			classes[name] = map[string]uint64{}
+		}
+		classes[name][kind+"_records"]++
+		classes[name][kind+"_charge"] += charge
+	}
+	charge := func(key, path, sha string, extra uint64) uint64 {
+		return uint64(512+len(key)+len(path)+len(sha)) + extra
+	}
+	specsPerPath := map[string]int{}
+	perPathCharge := map[string]uint64{}
+	kinds := map[historyReadKind]uint64{}
+	total := uint64(0)
+	for key, e := range p.entries {
+		c := charge(key, e.spec.path, e.spec.sha, 0)
+		total += c
+		add(e.spec.path, "entry", c)
+		specsPerPath[e.spec.path]++
+		perPathCharge[e.spec.path] += c
+		kinds[e.spec.kind]++
+	}
+	for path := range p.dirs {
+		c := charge("dir\x00"+path, path, "", 0)
+		total += c
+		add(path, "directory", c)
+	}
+	for path, ns := range p.namespaces {
+		extra := uint64(0)
+		for name := range ns.names {
+			extra += uint64(24 + len(name))
+		}
+		c := charge("namespace\x00"+path, path, "", extra)
+		total += c
+		add(path, "namespace", c)
+	}
+	for path := range p.locks {
+		c := charge("lock\x00"+path, path, "", 0)
+		total += c
+		add(path, "lock", c)
+	}
+	duplicates := []map[string]any{}
+	for path, n := range specsPerPath {
+		if n > 1 {
+			duplicates = append(duplicates, map[string]any{"path_sha256": conversationHash([]byte(path)), "class": class(path), "specs": n, "charge": perPathCharge[path]})
+		}
+	}
+	sort.Slice(duplicates, func(i, j int) bool {
+		return duplicates[i]["path_sha256"].(string) < duplicates[j]["path_sha256"].(string)
+	})
+	return map[string]any{"schema": "stopped154-pass-diagnostic.v1", "stats": p.stats, "state": p.state, "active": p.active, "new154_metadata_active": p.stoppedV11Metadata, "legacy_transcript_bytes": p.stoppedV11LegacyTranscript, "limits": map[string]uint64{"transcript_total": map[bool]uint64{false: historyPassTranscriptLimit, true: 64 << 20}[p.stoppedV11Metadata], "transcript": historyPassTranscriptLimit, "records": historyPassRecordsLimit, "logical": historyPassLogicalLimit, "cache": historyPassCacheLimit}, "entries": len(p.entries), "unique_paths": len(p.paths), "directories": len(p.dirs), "namespaces": len(p.namespaces), "locks": len(p.locks), "entry_kind_counts": kinds, "charge_reconstructed": total, "charge_matches_stats": total == p.stats.TranscriptBytes, "classes": classes, "duplicate_spec_paths": duplicates}
+}
+
+func TestRootStopped154DiagnosticSnapshotPortable(t *testing.T) {
+	root := stoppedEvidenceRoot(t)
+	path := filepath.Join(root, "data")
+	raw := []byte("data")
+	if e := os.WriteFile(path, raw, 0600); e != nil {
+		t.Fatal(e)
+	}
+	p, e := newHistoryReadPass(context.Background())
+	if e != nil {
+		t.Fatal(e)
+	}
+	defer p.Abort()
+	for _, limit := range []int64{4, 8} {
+		if _, e = historyStoppedV7File(p, path, conversationHash(raw), limit); e != nil {
+			t.Fatal(e)
+		}
+	}
+	s := stopped154DiagnosticSnapshot(p)
+	if s["charge_matches_stats"] != true || s["entries"] != 2 || s["unique_paths"] != 1 || len(s["duplicate_spec_paths"].([]map[string]any)) != 1 {
+		t.Fatalf("diagnostic metadata mismatch: %v", s)
+	}
+	if e = p.Finish(); e != nil {
+		t.Fatal(e)
+	}
+}
+
+// Root diagnostic only: exactly one genuine WithPass traversal. Failure is
+// retained as a failing test after its exact existing counters are printed.
+// It neither raises limits nor performs a second ancestor load for measurement.
+func TestRootStopped154DiagnosticConstructor(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 240*time.Second)
+	defer cancel()
+	p, e := newHistoryReadPass(ctx)
+	if e != nil {
+		t.Fatal(e)
+	}
+	defer p.Abort()
+	started := time.Now()
+	b, loadErr := loadWindowStoppedV11BaselineWithPass(p, windowStoppedV11InventoryPath, windowStoppedV11InventorySHA)
+	snapshot := stopped154DiagnosticSnapshot(p)
+	raw, e := json.Marshal(snapshot)
+	if e != nil {
+		t.Fatal(e)
+	}
+	t.Logf("DIAGNOSTIC_BEFORE_END duration=%s %s", time.Since(started), raw)
+	if loadErr != nil {
+		t.Fatalf("genuine154 diagnostic original rejection after %s: %v", time.Since(started), loadErr)
+	}
+	if !reflect.DeepEqual(b.base, expectedStoppedV11WindowBaseline()) {
+		t.Fatal("diagnostic typed154 mismatch")
+	}
+	if e = p.Finish(); e != nil {
+		t.Fatalf("genuine154 diagnostic End rejection after %s stats=%+v: %v", time.Since(started), p.Stats(), e)
+	}
+	t.Logf("DIAGNOSTIC_END duration=%s stats=%+v DATA_only=true", time.Since(started), p.Stats())
+}
+
+// Root-only small original-leaf integration; no historical constructor or live
+// authority. Confirms the fixed-path suppression predicate reaches fresh IO.
+func TestRootStopped154UncachedOriginalLeaf(t *testing.T) {
+	p, e := newHistoryReadPass(context.Background())
+	if e != nil {
+		t.Fatal(e)
+	}
+	defer p.Abort()
+	p.stoppedV11Metadata = true
+	path := windowStoppedV11Root + "/actual-owner-exit.json"
+	for i := 0; i < 2; i++ {
+		if _, e = historyStoppedV7File(p, path, "ce3804adab82fa2e54f797f638a709f6f1e06684d41bf1657e53eebbba117168", 171); e != nil {
+			t.Fatal(e)
+		}
+	}
+	if s := p.Stats(); s.CacheBytes != 0 || s.CacheHits != 0 || s.FirstPhysical != 2 {
+		t.Fatal(s)
+	}
+	if e = p.Finish(); e != nil {
+		t.Fatal(e)
+	}
+	if s := p.Stats(); s.EndPhysical != 1 {
+		t.Fatal(s)
+	}
 }

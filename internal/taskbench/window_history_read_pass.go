@@ -95,6 +95,9 @@ type historyReadPass struct {
 	namespaces map[string]historyNamespace
 	locks      map[string]historyLockEntry
 	stats      historyReadStats
+	// Activated only by the fixed154 loader after its concrete104 predecessor.
+	stoppedV11Metadata         bool
+	stoppedV11LegacyTranscript uint64
 }
 
 func newHistoryReadPass(ctx context.Context) (*historyReadPass, error) {
@@ -186,8 +189,17 @@ func (p *historyReadPass) physical(s historyReadSpec, retain, end bool) (history
 }
 func (p *historyReadPass) chargeLocked(key, path, sha string, extra uint64) error {
 	charge := uint64(512 + len(key) + len(path) + len(sha))
-	if !historyBudgetFits(charge, extra, historyPassTranscriptLimit) || !historyBudgetFits(p.stats.TranscriptBytes, charge+extra, historyPassTranscriptLimit) || p.stats.Records >= historyPassRecordsLimit {
+	limit := historyPassTranscriptLimit
+	legacy := true
+	if p.stoppedV11Metadata {
+		limit = 64 << 20
+		legacy = !stoppedV11MetadataPath(path)
+	}
+	if !historyBudgetFits(charge, extra, limit) || !historyBudgetFits(p.stats.TranscriptBytes, charge+extra, limit) || p.stats.Records >= historyPassRecordsLimit || p.stoppedV11Metadata && legacy && !historyBudgetFits(p.stoppedV11LegacyTranscript, charge+extra, historyPassTranscriptLimit) {
 		return p.failLocked(fmt.Errorf("history transcript limit"))
+	}
+	if p.stoppedV11Metadata && legacy {
+		p.stoppedV11LegacyTranscript += charge + extra
 	}
 	p.stats.TranscriptBytes += charge + extra
 	p.stats.Records++
@@ -343,7 +355,7 @@ func (p *historyReadPass) readLeaf(s historyReadSpec) (raw []byte, digest string
 	if p.state == historyPassFailed {
 		err = fmt.Errorf("history pass failed")
 	}
-	cache := !s.isStream() && observed.identity.Size <= historyPassEntryLimit
+	cache := p.retainHistoryBytesLocked(s, observed.identity.Size)
 	if !found && err == nil {
 		if cache && !historyBudgetFits(p.stats.CacheBytes, uint64(len(observed.raw)), historyPassCacheLimit) {
 			err = p.failLocked(fmt.Errorf("history retained byte limit"))
