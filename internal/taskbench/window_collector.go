@@ -139,7 +139,7 @@ func runWindowAcquisition(ctx context.Context, auth *windowAcquisitionAuthorizat
 	runErr = err
 	run.started = started
 	defer func() {
-		if run.scope.Schema == "full-window-scope.v11" {
+		if run.scope.Schema == "full-window-scope.v11" || run.scope.Schema == "full-window-scope.v12" {
 			receipt, re := windowV11Receipt(run.auth.observer, false)
 			run.receipt.Observation = receipt
 			if re != nil && runErr == nil {
@@ -263,8 +263,11 @@ func openWindowAcquisition(ctx context.Context, auth *windowAcquisitionAuthoriza
 	if windowScopeUsesNativeV8(scope.Schema) {
 		run.receipt.Schema = "full-window-acquisition-receipt.v8"
 	}
-	if scope.Schema == "full-window-scope.v11" {
+	if scope.Schema == "full-window-scope.v11" || scope.Schema == "full-window-scope.v12" {
 		run.receipt.Schema = "full-window-acquisition-receipt.v11"
+		if scope.Schema == "full-window-scope.v12" {
+			run.receipt.Schema = "full-window-acquisition-receipt.v12"
+		}
 	}
 	if scope.Schema == "full-window-scope.v10" {
 		run.receipt.Completion = scope.Completion

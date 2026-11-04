@@ -75,5 +75,5 @@ func validateWindowV12ExecutorEquivalencePinnedData(current map[string]string, e
 }
 
 func windowV12CanonicalSourcePath(name string) bool {
-	return name != "" && name != "." && path.Clean(name) == name && !strings.HasPrefix(name, "/") && !strings.HasPrefix(name, "../") && !strings.Contains(name, "\\")
+	return name != "" && name != "." && name != ".." && path.Clean(name) == name && !strings.HasPrefix(name, "/") && !strings.HasPrefix(name, "../") && !strings.Contains(name, "\\")
 }

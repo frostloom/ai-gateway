@@ -179,9 +179,15 @@ func (a *windowV9Authority) nativeView() *windowV8Authority {
 	return &windowV8Authority{manifest: a.manifest, manifestSHA: a.manifestSHA, binarySHA: a.binarySHA, authorizationPath: a.authorizationPath, authorizationSHA: a.authorizationSHA, raw: append([]byte(nil), a.raw...), binding: a.binding.windowV8ExecutionBinding, v9: a}
 }
 func windowScopeUsesNativeV8(schema string) bool {
-	return schema == "full-window-scope.v8" || schema == "full-window-scope.v9" || schema == "full-window-scope.v10" || schema == "full-window-scope.v11"
+	return schema == "full-window-scope.v12" || schema == "full-window-scope.v8" || schema == "full-window-scope.v9" || schema == "full-window-scope.v10" || schema == "full-window-scope.v11"
 }
 func validateWindowNativeDeclarations(scope fullWindowScope) error {
+	if scope.Schema != "full-window-scope.v12" && scope.CompletionV12 != nil {
+		return fmt.Errorf("old epoch carries v12 completion")
+	}
+	if scope.Schema == "full-window-scope.v12" {
+		return validateWindowV12Declarations(scope)
+	}
 	if scope.Schema == "full-window-scope.v11" {
 		return validateWindowV11Declarations(scope)
 	}
@@ -194,6 +200,9 @@ func validateWindowNativeDeclarations(scope fullWindowScope) error {
 	return validateWindowV8Declarations(scope)
 }
 func windowNativeParent(scope fullWindowScope) windowV8Amounts {
+	if scope.Schema == "full-window-scope.v12" {
+		return expectedWindowV12BudgetDeclaration().Parent
+	}
 	if scope.Schema == "full-window-scope.v11" {
 		return expectedWindowV11BudgetDeclaration().Parent
 	}
@@ -207,7 +216,7 @@ func windowNativeParent(scope fullWindowScope) windowV8Amounts {
 }
 
 func validateWindowActualHelperCatalog(m windowActualManifest, manifestPath string) error {
-	if m.Schema != "full-window-actual-ready.v9" && m.Schema != "full-window-actual-ready.v10" && m.Schema != "full-window-actual-ready.v11" {
+	if m.Schema != "full-window-actual-ready.v9" && m.Schema != "full-window-actual-ready.v10" && m.Schema != "full-window-actual-ready.v11" && m.Schema != "full-window-actual-ready.v12" {
 		if m.HelperCatalog != nil {
 			return fmt.Errorf("historical epoch cannot carry a new helper catalog")
 		}

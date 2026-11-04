@@ -173,6 +173,12 @@ func validateFullWindowScope(scope fullWindowScope, s ConversationSuite, p Paire
 			return "", totals, err
 		}
 		expected, e = prepareFullWindowScopeV9(s, p, caps, b, scope.BaselineEvidenceSHA256)
+	case "full-window-scope.v12":
+		expected, e = prepareFullWindowScopeV12(s, p, caps, b, scope.BaselineEvidenceSHA256)
+		if e == nil {
+			expected.Observation = scope.Observation
+			e = validateWindowV12ExecutionShape(expected)
+		}
 	case "full-window-scope.v11":
 		expected, e = prepareFullWindowScopeV11(s, p, caps, b, scope.BaselineEvidenceSHA256, scope.Observation)
 	case "full-window-scope.v10":
@@ -189,7 +195,7 @@ func validateFullWindowScope(scope fullWindowScope, s ConversationSuite, p Paire
 	if !reflect.DeepEqual(expected, scope) {
 		return "", totals, fmt.Errorf("scope differs from rederived frozen schedule")
 	}
-	if scope.Schema == "full-window-scope.v10" {
+	if scope.Schema == "full-window-scope.v10" || scope.Schema == "full-window-scope.v12" {
 		totals, e = executionTotals(scope)
 		if e != nil {
 			return "", fullWindowTotals{}, e
