@@ -487,7 +487,7 @@ func (p *historyReadPass) CheckNamespace(path string, names map[string]bool, che
 		return p.fail(err)
 	}
 	err = p.leaf(func() error {
-		if e := validateWindowStoppedV2Dir(path, names); e != nil {
+		if e := p.validateHistoryNamespace(path, names); e != nil {
 			return e
 		}
 		if e := p.observeDirs(path); e != nil {
@@ -735,7 +735,7 @@ func (p *historyReadPass) Finish() (err error) {
 		sort.Strings(namespacePaths)
 		for _, path := range namespacePaths {
 			n := p.namespaces[path]
-			if e := validateWindowStoppedV2Dir(path, n.names); e != nil {
+			if e := p.validateHistoryNamespace(path, n.names); e != nil {
 				return e
 			}
 		}

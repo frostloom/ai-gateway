@@ -3,10 +3,12 @@ package taskbench
 import (
 	"context"
 	"fmt"
+	"os"
 	"path/filepath"
 	"reflect"
 	"sort"
 	"strings"
+	"sync"
 )
 
 const windowStoppedV11Root = "/Users/a1/项目/ai-gateway/.tmp/paired-live-private/full1220-actual-v11-freeze-r3-20261101"
@@ -167,8 +169,13 @@ func loadWindowStoppedV11BaselineWithPass(p *historyReadPass, path, sha string) 
 			names = append(names, name)
 		}
 		sort.Strings(names)
-		for _, name := range names {
-			if _, e = p.Stream(historyReadInventoryStream, filepath.Join(m.SourceRoot, filepath.FromSlash(name)), m.Sources[name], windowActualSourceMaxBytes); e != nil {
+		for offset := 0; offset < len(names); offset += 4 {
+			batch := names[offset:min(offset+4, len(names))]
+			if e = runWindowStoppedV11Four(len(batch), func(i int) error {
+				name := batch[i]
+				_, err := p.Stream(historyReadInventoryStream, filepath.Join(m.SourceRoot, filepath.FromSlash(name)), m.Sources[name], windowActualSourceMaxBytes)
+				return err
+			}); e != nil {
 				return e
 			}
 		}
@@ -198,40 +205,55 @@ func readWindowStoppedV11Inventory(p *historyReadPass, root string, inv windowSt
 	owned := windowStoppedV8Inventory{Root: root, Files: map[string]windowStoppedV8InventoryEntry{}}
 	var total int64
 	spoolDirs := map[string]map[string]bool{}
-	for _, f := range inv.Files {
-		if !filepath.IsLocal(f.Path) || filepath.ToSlash(filepath.Clean(f.Path)) != f.Path || strings.Contains(f.Path, "\\") || files[f.Path] != nil || f.Bytes < 0 || f.Bytes > 8<<20 || !comparisonDigest(f.SHA256) {
-			return nil, fmt.Errorf("inventory identity")
-		}
-		path := filepath.Join(root, filepath.FromSlash(f.Path))
-		raw, e := historyStoppedV7File(p, path, f.SHA256, max(1, f.Bytes))
-		if e != nil || int64(len(raw)) != f.Bytes {
-			return nil, fmt.Errorf("inventory original %s: %v", f.Path, e)
-		}
-		p.mu.Lock()
-		entry := p.paths[path]
-		valid := entry != nil && stoppedV11IdentityMatches(entry.identity, f.Identity)
-		p.mu.Unlock()
-		if !valid {
-			return nil, fmt.Errorf("inventory original identity %s", f.Path)
-		}
-		if strings.HasPrefix(f.Path, "spool/") {
-			parts := strings.Split(f.Path, "/")
-			for i := 1; i < len(parts); i++ {
-				dir := strings.Join(parts[:i], "/")
-				if spoolDirs[dir] == nil {
-					spoolDirs[dir] = map[string]bool{}
-				}
-				isDir := i < len(parts)-1
-				if old, ok := spoolDirs[dir][parts[i]]; ok && old != isDir {
-					return nil, fmt.Errorf("spool namespace conflict")
-				}
-				spoolDirs[dir][parts[i]] = isDir
+	seen := map[string]bool{}
+	for offset := 0; offset < len(inv.Files); offset += 4 {
+		batch := inv.Files[offset:min(offset+4, len(inv.Files))]
+		specs := make([]historyReadSpec, len(batch))
+		for i, f := range batch {
+			if !filepath.IsLocal(f.Path) || filepath.ToSlash(filepath.Clean(f.Path)) != f.Path || strings.Contains(f.Path, "\\") || seen[f.Path] || f.Bytes < 0 || f.Bytes > 8<<20 || !comparisonDigest(f.SHA256) {
+				return nil, fmt.Errorf("inventory identity")
 			}
+			seen[f.Path] = true
+			specs[i] = historyReadSpec{kind: historyReadV7File, path: filepath.Join(root, filepath.FromSlash(f.Path)), sha: f.SHA256, max: max(1, f.Bytes)}
 		}
-		files[f.Path] = raw
-		total += f.Bytes
-		if strings.HasPrefix(f.Path, "campaign/") || strings.HasPrefix(f.Path, "records/") {
-			owned.Files[f.Path] = windowStoppedV8InventoryEntry{SHA256: f.SHA256, Bytes: f.Bytes}
+		// Batch owns no outer physical slot. It joins every independent leaf
+		// before selecting an error in descriptor input order.
+		raws, e := p.Batch(specs)
+		if e != nil {
+			return nil, fmt.Errorf("inventory original batch: %w", e)
+		}
+		for i, f := range batch {
+			raw := raws[i]
+			path := specs[i].path
+			if int64(len(raw)) != f.Bytes {
+				return nil, fmt.Errorf("inventory original length %s", f.Path)
+			}
+			p.mu.Lock()
+			entry := p.paths[path]
+			valid := entry != nil && stoppedV11IdentityMatches(entry.identity, f.Identity)
+			p.mu.Unlock()
+			if !valid {
+				return nil, fmt.Errorf("inventory original identity %s", f.Path)
+			}
+			if strings.HasPrefix(f.Path, "spool/") {
+				parts := strings.Split(f.Path, "/")
+				for i := 1; i < len(parts); i++ {
+					dir := strings.Join(parts[:i], "/")
+					if spoolDirs[dir] == nil {
+						spoolDirs[dir] = map[string]bool{}
+					}
+					isDir := i < len(parts)-1
+					if old, ok := spoolDirs[dir][parts[i]]; ok && old != isDir {
+						return nil, fmt.Errorf("spool namespace conflict")
+					}
+					spoolDirs[dir][parts[i]] = isDir
+				}
+			}
+			files[f.Path] = raw
+			total += f.Bytes
+			if strings.HasPrefix(f.Path, "campaign/") || strings.HasPrefix(f.Path, "records/") {
+				owned.Files[f.Path] = windowStoppedV8InventoryEntry{SHA256: f.SHA256, Bytes: f.Bytes}
+			}
 		}
 	}
 	if total != inv.Bytes || len(files) != inv.Count {
@@ -243,7 +265,8 @@ func readWindowStoppedV11Inventory(p *historyReadPass, root string, inv windowSt
 	}
 	sort.Strings(dirNames)
 	for _, dir := range dirNames {
-		if e := historyStoppedDir(p, filepath.Join(root, filepath.FromSlash(dir)), spoolDirs[dir]); e != nil {
+		path := filepath.Join(root, filepath.FromSlash(dir))
+		if e := p.CheckNamespace(path, spoolDirs[dir], func() error { return p.validateHistoryNamespace(path, spoolDirs[dir]) }); e != nil {
 			return nil, e
 		}
 	}
@@ -282,4 +305,92 @@ func stoppedV11MetadataPath(path string) bool {
 // still use the same supplying-FD reader and fresh End metadata/hash sweep.
 func (p *historyReadPass) retainHistoryBytesLocked(s historyReadSpec, size int64) bool {
 	return !s.isStream() && size <= historyPassEntryLimit && !(p.stoppedV11Metadata && filepath.IsAbs(s.path) && filepath.Clean(s.path) == s.path && !strings.Contains(s.path, "\\") && historyInside(s.path, windowStoppedV11Root))
+}
+
+// Exact original spool vocabulary:2256 batches, two regular leaves each,
+// plus the immutable header/closed marker/lock. No directory subset is accepted.
+func stoppedV11SpoolNamesExact(names map[string]bool) bool {
+	if len(names) != 4515 {
+		return false
+	}
+	for _, name := range []string{"header.json", "closed.json", "lock"} {
+		if dir, ok := names[name]; !ok || dir {
+			return false
+		}
+	}
+	for i := 1; i <= 2256; i++ {
+		for _, suffix := range []string{"pb", "commit"} {
+			name := fmt.Sprintf("%020d.%s", i, suffix)
+			if dir, ok := names[name]; !ok || dir {
+				return false
+			}
+		}
+	}
+	return true
+}
+func stoppedV11SpoolNamespaceAllowed(active bool, path string, names map[string]bool) bool {
+	return active && path == windowStoppedV11Root+"/spool" && stoppedV11SpoolNamesExact(names)
+}
+
+// The pass selects the new validator only for the activated fixed spool. All
+// other paths retain the original4096 limit and original comparator unchanged.
+func (p *historyReadPass) validateHistoryNamespace(path string, names map[string]bool) error {
+	p.mu.Lock()
+	active := p.stoppedV11Metadata
+	p.mu.Unlock()
+	if !stoppedV11SpoolNamespaceAllowed(active, path, names) {
+		return validateWindowStoppedV2Dir(path, names)
+	}
+	return validateWindowStoppedV11SpoolDirectory(path, names)
+}
+
+// Same canonical/name/type comparator as the unchanged legacy helper, with the
+// exact new4515 vocabulary replacing only its per-directory4096 admission bound.
+func validateWindowStoppedV11SpoolDirectory(path string, names map[string]bool) error {
+	canonical, err := filepath.EvalSymlinks(path)
+	if err != nil || canonical != path || !filepath.IsAbs(path) || filepath.Clean(path) != path || !stoppedV11SpoolNamesExact(names) {
+		return fmt.Errorf("stopped v2 inventory root rejected")
+	}
+	entries, err := os.ReadDir(path)
+	if err != nil || len(entries) != len(names) {
+		return fmt.Errorf("stopped v2 inventory changed")
+	}
+	for _, entry := range entries {
+		isDir, ok := names[entry.Name()]
+		if !ok || entry.Type()&os.ModeSymlink != 0 || entry.IsDir() != isDir || !isDir && !entry.Type().IsRegular() {
+			return fmt.Errorf("stopped v2 inventory changed")
+		}
+	}
+	return nil
+}
+
+// New independent source reads share the existing process-wide four physical
+// slots through p.Stream itself; never acquire an outer slot around callbacks.
+func runWindowStoppedV11Four(n int, read func(int) error) error {
+	if n < 1 || n > 4 || read == nil {
+		return fmt.Errorf("stopped v11 read batch rejected")
+	}
+	errs := make([]error, n)
+	var wg sync.WaitGroup
+	for i := 0; i < n; i++ {
+		wg.Add(1)
+		go func(i int) {
+			defer wg.Done()
+			returned := false
+			defer func() {
+				if !returned {
+					errs[i] = fmt.Errorf("stopped v11 read callback incomplete")
+				}
+			}()
+			errs[i] = read(i)
+			returned = true
+		}(i)
+	}
+	wg.Wait()
+	for _, err := range errs {
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }

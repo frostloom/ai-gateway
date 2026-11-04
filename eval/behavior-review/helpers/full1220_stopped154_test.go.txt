@@ -251,3 +251,49 @@ func TestRootStopped154UncachedOriginalLeaf(t *testing.T) {
 		t.Fatal(s)
 	}
 }
+
+// Root-only namespace integration over unchanged originals. This checks the
+// activated exact4515 policy at both initial registration and normal fresh End.
+func TestRootStopped154OriginalSpoolNamespace(t *testing.T) {
+	p, e := newHistoryReadPass(context.Background())
+	if e != nil {
+		t.Fatal(e)
+	}
+	defer p.Abort()
+	p.stoppedV11Metadata = true
+	raw, e := os.ReadFile(windowStoppedV11InventoryPath)
+	if e != nil {
+		t.Fatal(e)
+	}
+	if conversationHash(raw) != windowStoppedV11InventorySHA {
+		t.Fatal("descriptor changed")
+	}
+	var inv windowStoppedV11Inventory
+	if e = decodeWindowActualJSON(raw, &inv); e != nil {
+		t.Fatal(e)
+	}
+	names := map[string]bool{}
+	for _, f := range inv.Files {
+		if strings.HasPrefix(f.Path, "spool/") {
+			name := strings.TrimPrefix(f.Path, "spool/")
+			if strings.Contains(name, "/") {
+				t.Fatal("unexpected nested spool")
+			}
+			names[name] = false
+		}
+	}
+	path := windowStoppedV11Root + "/spool"
+	if len(names) != 4515 {
+		t.Fatal("original spool names changed")
+	}
+	if e = validateWindowStoppedV2Dir(path, names); e == nil {
+		t.Fatal("old4096 unexpectedly admitted4515")
+	}
+	if e = p.CheckNamespace(path, names, func() error { return p.validateHistoryNamespace(path, names) }); e != nil {
+		t.Fatal(e)
+	}
+	if e = p.Finish(); e != nil {
+		t.Fatal(e)
+	}
+	t.Log("original4515 namespace initial+End verified DATA_only=true; originals not modified")
+}
