@@ -563,7 +563,7 @@ def verify_controlled_export(root, inventory_sha256):
     reader.inventory(set(files)|{'export-inventory.json'})
     result=_json(files['export-result.json'])
     need(result['evidence_kind']=='genuine_local_stub_owned_window_not_actual_ready' and result['test_failed'] is False and
-         result['advanced'] is True and result['original181_source2369_unchanged'] is True and result['candidate_go_sources_unchanged'] is True,
+         result['advanced'] is True and result['original_v10_and_r3_evidence_sources_unchanged'] is True and result['candidate_go_sources_unchanged'] is True,
          'terminal controlled export required')
     need(result['actual_session_summary']=='not_created_or_claimed','no manufactured actual summary')
     auth=dependency('codec').parse_execution_authorization(files['synthetic-authorization.json'])
@@ -578,7 +578,7 @@ def verify_controlled_export(root, inventory_sha256):
 CAPTURE_HELPER_SHA256 = '98a26427ab04797c26c88356e88800d417362e215b5fbf9c39531b2de36c41d9'
 
 SOURCE_HELPER = 'helpers/full1220_source_v12_test.go.txt'
-SOURCE_HELPER_SHA256 = 'b067b3edc9b944311b1dee9b760301c5900dc91356bf990bc06a1d5e08ad3d32'
+SOURCE_HELPER_SHA256 = '08a2b602bf79ccebadf8f2cd6f4a4bb43cda17129eed7deccf79283a236f0170'
 GO_EXECUTABLE = '/Users/a1/开发工具/go/bin/go'
 GO_SHA256 = '8612de418d551a418517845c05cebdcfed49095cd08ef0a4d682bb2a5cf4896c'
 SDK_ROOT = '/Library/Developer/CommandLineTools/SDKs/MacOSX26.5.sdk'
