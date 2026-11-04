@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 )
@@ -230,13 +231,36 @@ func TestFull1220SpoolV12(t *testing.T) {
 }
 
 func TestFull1220V12CodecVector(t *testing.T) {
-	a, _, _ := fixtureWindowV12Authority(t)
-	canonical, err := json.Marshal(a.binding)
+	// Read only synthetic DATA: no private key, signing or actual constructor.
+	raw, err := os.ReadFile("../../eval/behavior-review/fixtures/v12-contracts/go-authority-data.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var vector struct {
+		DataOnly      bool                            `json:"data_only"`
+		Authorization windowV12ExecutionAuthorization `json:"authorization"`
+		SigningBytes  string                          `json:"signing_bytes"`
+	}
+	if err = json.Unmarshal(raw, &vector); err != nil {
+		t.Fatal(err)
+	}
+	if !vector.DataOnly || vector.Authorization.Signature != strings.Repeat("0", 128) {
+		t.Fatal("synthetic DATA required")
+	}
+	canonical, err := json.Marshal(vector.Authorization.windowV12ExecutionBinding)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(canonical) != vector.SigningBytes {
+		t.Fatal("canonical DATA vector mismatch")
+	}
+	scope := full1220V12HelperTestScope(t)
+	authority, err := json.Marshal(vector.Authorization)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if os.Getenv("FULL1220_V12_VECTOR_OUTPUT") != "" {
-		raw, err := json.Marshal(map[string]any{"evidence_kind": "synthetic_go_codec_data_not_authority", "authorization": json.RawMessage(a.raw), "canonical_utf8": string(canonical), "budget": expectedWindowV12BudgetDeclaration(), "budget_sha256": windowV8DeclarationSHA(expectedWindowV12BudgetDeclaration()), "scope": a.manifest.Scope})
+		raw, err := json.Marshal(map[string]any{"evidence_kind": "synthetic_go_codec_data_not_authority", "authorization": json.RawMessage(authority), "canonical_utf8": string(canonical), "budget": expectedWindowV12BudgetDeclaration(), "budget_sha256": windowV8DeclarationSHA(expectedWindowV12BudgetDeclaration()), "scope": scope})
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -255,7 +279,7 @@ func TestFull1220V12CodecVector(t *testing.T) {
 }
 
 func TestFull1220V12SourceRejectsIncompleteAndOldBoundary(t *testing.T) {
-	scope, _, _, _ := windowV12FixtureScope(t)
+	scope := full1220V12HelperTestScope(t)
 	scope.Bindings.PolicySHA256 = windowOwnedQualityPolicySHA()
 	for _, job := range []full1220SourceV12Job{
 		{Schema: "full1220-source-v12-job.v1", Boundary: "durable_local", Scope: scope},
@@ -269,7 +293,7 @@ func TestFull1220V12SourceRejectsIncompleteAndOldBoundary(t *testing.T) {
 }
 
 func TestFull1220V12ClosedSpoolHelperRoundTrip(t *testing.T) {
-	o, dc := v12TestObserver(t)
+	o, dc := full1220V12HelperTestObserver(t)
 	ctx := context.Background()
 	_, turn := o.StartTurn(ctx, "model")
 	turn.End(200, observability.Summary{})
@@ -303,4 +327,28 @@ func TestFull1220V12ClosedSpoolHelperRoundTrip(t *testing.T) {
 	if !data.Summary.Closed || !data.Summary.DataOnly || !data.Summary.DurabilityReturnUnproven || !data.Summary.OwnerCompletionUnproven || data.Summary.Spans != 1 || len(data.Spans) != 1 || data.InputSHA256 != conversationHash(raw) {
 		t.Fatal("DATA boundary changed")
 	}
+}
+
+// Portable test setup only; neither helper grants execution authority.
+func full1220V12HelperTestScope(t *testing.T) fullWindowScope {
+	t.Helper()
+	s, p, b := windowScopeInputs(t)
+	scope, err := prepareFullWindowScopeV12(s, p, windowV9TestCaps(t)[55:], b, windowV12BaselineSHA)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return scope
+}
+
+func full1220V12HelperTestObserver(t *testing.T) (*observability.Observer, observability.DurableSpoolConfig) {
+	t.Helper()
+	dc := observability.DurableSpoolConfig{Root: filepath.Join(stoppedEvidenceRoot(t), "spool"), RunID: strings.Repeat("b", 64), MaxBytes: 4 << 30}
+	// Durable local mode writes a local spool; no HTTP exporter transport is created.
+	c := observability.Config{Enabled: true, CaptureContent: true, SampleRate: 1, Environment: "evaluation", Release: strings.Repeat("a", 40), Endpoint: "http://127.0.0.1:1/api/public/otel/v1/traces", PublicKey: "test", SecretKey: "test", HashKey: strings.Repeat("x", 32), QueueSize: 256, ExportTimeout: 10 * time.Second, DurableSpool: &dc}
+	o, err := observability.New(context.Background(), c)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { o.Shutdown(context.Background()) })
+	return o, dc
 }
