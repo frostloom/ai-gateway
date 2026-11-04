@@ -38,8 +38,9 @@ type fullWindowDeclaration struct {
 	fullWindowCaps
 }
 type fullWindowScope struct {
-	Observation *windowObservationDeclarationV11 `json:"observation,omitempty"`
-	Completion  *windowCompletionDeclarationV10  `json:"completion,omitempty"`
+	CompletionV12 *windowCompletionDeclarationV12  `json:"completion_v12,omitempty"`
+	Observation   *windowObservationDeclarationV11 `json:"observation,omitempty"`
+	Completion    *windowCompletionDeclarationV10  `json:"completion,omitempty"`
 
 	BudgetDeclaration        *windowV8BudgetDeclaration `json:"budget_declaration,omitempty"`
 	RetryDeclaration         *windowV8RetryDeclaration  `json:"retry_declaration,omitempty"`
