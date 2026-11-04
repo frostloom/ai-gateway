@@ -132,6 +132,14 @@ func checkFullWindowActualReady(o FullWindowActualReadyOptions, v8 bool) (FullWi
 	}
 	return checkFullWindowActualReadyEpoch(o, epoch)
 }
+
+// Readiness diagnostics preserve the public rejection text while identifying
+// how far a read-only preparation progressed. They grant no capability.
+type windowActualReadinessRejection struct{ stage string }
+
+func (e *windowActualReadinessRejection) Error() string          { return "actual readiness rejected" }
+func (e *windowActualReadinessRejection) ReadinessStage() string { return e.stage }
+
 func checkFullWindowActualReadyEpoch(o FullWindowActualReadyOptions, epoch int) (FullWindowActualReadySummary, *FullWindowActualReady, error) {
 	v8 := epoch == 8
 	v9 := epoch == 9
@@ -156,8 +164,9 @@ func checkFullWindowActualReadyEpoch(o FullWindowActualReadyOptions, epoch int) 
 		manifestSHA, archiveCommit, archiveTree = fullWindowV10ManifestSHA, fullWindowV10ArchiveCommit, fullWindowV10ArchiveTree
 	}
 	var summary FullWindowActualReadySummary
+	stage := "build_anchors"
 	reject := func() (FullWindowActualReadySummary, *FullWindowActualReady, error) {
-		return summary, nil, fmt.Errorf("actual readiness rejected")
+		return summary, nil, &windowActualReadinessRejection{stage: stage}
 	}
 	if epoch != 0 && epoch != 8 && epoch != 9 && epoch != 10 && epoch != 11 && epoch != 12 {
 		return reject()
@@ -165,6 +174,7 @@ func checkFullWindowActualReadyEpoch(o FullWindowActualReadyOptions, epoch int) 
 	if !comparisonDigest(manifestSHA) || !windowActualRevision(archiveCommit) || !windowActualRevision(archiveTree) {
 		return reject()
 	}
+	stage = "manifest"
 	raw, err := readWindowActualFile(o.ManifestPath, manifestSHA, 8<<20)
 	if err != nil {
 		return reject()
@@ -173,6 +183,7 @@ func checkFullWindowActualReadyEpoch(o FullWindowActualReadyOptions, epoch int) 
 	if decodeWindowActualJSON(raw, &m) != nil || validateWindowActualPrivateSettingsBinding(&m) != nil || !(windowActualSupportedEpoch(m) && epoch == 0 || v8 && m.Schema == "full-window-actual-ready.v8" && m.Scope.Schema == "full-window-scope.v8" || v9 && m.Schema == "full-window-actual-ready.v9" && m.Scope.Schema == "full-window-scope.v9" || v10 && m.Schema == "full-window-actual-ready.v10" && m.Scope.Schema == "full-window-scope.v10" || v12 && m.Schema == "full-window-actual-ready.v12" && m.Scope.Schema == "full-window-scope.v12" || v11 && m.Schema == "full-window-actual-ready.v11" && m.Scope.Schema == "full-window-scope.v11") || m.EvidenceKind != "actual" || m.ArchiveCommit != archiveCommit || m.ArchiveTree != archiveTree {
 		return reject()
 	}
+	stage = "frozen_evidence"
 	attestationRaw, err := readWindowActualBytes(o.ManifestPath+".binary-attestation.json", "", 65536)
 	if err != nil {
 		return reject()

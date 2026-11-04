@@ -96,8 +96,14 @@ func (a *windowV12Authority) revalidate() error {
 // Preparation is opaque and cannot be passed to OpenFullWindowActual.
 type FullWindowV12Preparation struct{ ready *FullWindowActualReady }
 
+// Retain the readiness cause without changing the established public message.
+type windowV12PreparationChanged struct{ cause error }
+
+func (e *windowV12PreparationChanged) Error() string { return "v12 preparation changed" }
+func (e *windowV12PreparationChanged) Unwrap() error { return e.cause }
+
 func CheckFullWindowV12Preparation(o FullWindowActualReadyOptions) (FullWindowActualReadySummary, *FullWindowV12Preparation, error) {
-	summary, r, err := checkFullWindowActualReadyEpoch(o, 11)
+	summary, r, err := checkFullWindowActualReadyEpoch(o, 12)
 	if err != nil {
 		return summary, nil, err
 	}
@@ -107,8 +113,11 @@ func AuthorizeFullWindowV12Preparation(p *FullWindowV12Preparation, authorizatio
 	if p == nil || p.ready == nil {
 		return nil, fmt.Errorf("v12 preparation absent")
 	}
-	_, fresh, err := checkFullWindowActualReadyEpoch(FullWindowActualReadyOptions{p.ready.manifestPath}, 11)
-	if err != nil || !bytes.Equal(p.ready.manifestRaw, fresh.manifestRaw) {
+	_, fresh, err := checkFullWindowActualReadyEpoch(FullWindowActualReadyOptions{p.ready.manifestPath}, 12)
+	if err != nil {
+		return nil, &windowV12PreparationChanged{cause: err}
+	}
+	if !bytes.Equal(p.ready.manifestRaw, fresh.manifestRaw) {
 		return nil, fmt.Errorf("v12 preparation changed")
 	}
 	raw, err := readWindowV8SignedBytes(authorizationPath, 65536)
