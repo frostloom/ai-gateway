@@ -1,0 +1,248 @@
+package observability
+
+// Selected prebuilt helper only. No model/JEV/fixture/claim entry point. LF-only
+// settings arrive via supervised memory stdin, never environment/args/files.
+import (
+	"bytes"
+	"context"
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
+	"net/http/httptest"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"sync/atomic"
+	"testing"
+	"time"
+)
+
+func full1220DeliveryJSON(raw []byte, out any) error {
+	d := json.NewDecoder(bytes.NewReader(raw))
+	token, e := d.Token()
+	if e != nil || token != json.Delim('{') {
+		return fmt.Errorf("JSON object required")
+	}
+	seen := map[string]bool{}
+	for d.More() {
+		token, e = d.Token()
+		if e != nil {
+			return e
+		}
+		key, ok := token.(string)
+		if !ok || seen[key] {
+			return fmt.Errorf("duplicate JSON field")
+		}
+		seen[key] = true
+		var value json.RawMessage
+		if e = d.Decode(&value); e != nil {
+			return e
+		}
+	}
+	if _, e = d.Token(); e != nil {
+		return e
+	}
+	if e = d.Decode(new(any)); e != io.EOF {
+		return fmt.Errorf("trailing JSON")
+	}
+	d = json.NewDecoder(bytes.NewReader(raw))
+	d.DisallowUnknownFields()
+	return d.Decode(out)
+}
+
+func TestFull1220SpoolDeliveryV12(t *testing.T) {
+	input := os.Getenv("FULL1220_V12_DELIVERY_INPUT")
+	if input == "" {
+		t.Skip("explicit selected delivery job only")
+	}
+	raw, e := os.ReadFile(input)
+	if e != nil || len(raw) > 16384 || spoolDigest(raw) != os.Getenv("FULL1220_V12_DELIVERY_INPUT_SHA256") {
+		t.Fatal("fixed delivery input required")
+	}
+	var job struct {
+		Schema   string               `json:"schema"`
+		Root     string               `json:"root"`
+		RunID    string               `json:"run_id"`
+		MaxBytes int64                `json:"max_bytes"`
+		Batch    uint64               `json:"batch"`
+		SHA      string               `json:"body_sha256"`
+		Journal  string               `json:"journal_root"`
+		Batches  []SpoolDeliveryBatch `json:"batches"`
+	}
+	if full1220DeliveryJSON(raw, &job) != nil || (job.Schema != "full1220-v12-delivery-job.v1" && job.Schema != "full1220-v12-delivery-range-job.v1") || job.MaxBytes != 4<<30 {
+		t.Fatal("delivery job schema")
+	}
+	secret, e := io.ReadAll(io.LimitReader(os.Stdin, 16385))
+	if e != nil || len(secret) > 16384 {
+		t.Fatal("bounded protected stdin required")
+	}
+	var settings map[string]string
+	if full1220DeliveryJSON(secret, &settings) != nil || len(settings) != 4 || settings["AGENT_LANGFUSE_ENVIRONMENT"] != "evaluation" {
+		t.Fatal("LF-only stdin settings required")
+	}
+	for _, key := range []string{"OTEL_EXPORTER_OTLP_TRACES_ENDPOINT", "LANGFUSE_PUBLIC_KEY", "LANGFUSE_SECRET_KEY", "AGENT_LANGFUSE_ENVIRONMENT"} {
+		if settings[key] == "" {
+			t.Fatal("LF-only stdin fields")
+		}
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 210*time.Second)
+	defer cancel()
+	proof, e := VerifyClosedDurableSpool(ctx, DurableSpoolConfig{Root: job.Root, RunID: job.RunID, MaxBytes: job.MaxBytes})
+	if e != nil {
+		t.Fatal("closed original spool rejected")
+	}
+	cfg := SpoolDeliveryConfig{Endpoint: settings["OTEL_EXPORTER_OTLP_TRACES_ENDPOINT"], PublicKey: settings["LANGFUSE_PUBLIC_KEY"], SecretKey: settings["LANGFUSE_SECRET_KEY"], JournalRoot: job.Journal}
+	var result any
+	if job.Schema == "full1220-v12-delivery-range-job.v1" {
+		if job.Batch != 0 || job.SHA != "" || len(job.Batches) == 0 || len(job.Batches) > 128 {
+			t.Fatal("bounded range job")
+		}
+		// One full VerifyClosedDurableSpool above, then fresh selected ReadBatch
+		// through the same process-local proof for every original body.
+		result, _ = DeliverSpoolRange(ctx, proof, job.Batches, cfg)
+	} else {
+		if len(job.Batches) != 0 {
+			t.Fatal("single job contains range")
+		}
+		cfg.BatchSHA256 = job.SHA
+		one, sendErr := DeliverSpoolBatch(ctx, proof, job.Batch, cfg)
+		final, e := os.ReadFile(fmt.Sprintf("%s/batch-%020d/result.json", job.Journal, job.Batch))
+		var stored SpoolDeliveryResult
+		if e != nil || full1220DeliveryJSON(final, &stored) != nil || stored != one || (sendErr != nil && one.Outcome == "acknowledged") {
+			t.Fatal("delivery incomplete; retain pending")
+		}
+		result = one
+	}
+	out, e := json.Marshal(result)
+	if e != nil {
+		t.Fatal("delivery result encode")
+	}
+	out = append(out, '\n')
+	f, e := os.OpenFile(os.Getenv("FULL1220_V12_DELIVERY_OUTPUT"), os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0600)
+	if e != nil {
+		t.Fatal("new result output required")
+	}
+	if n, e := f.Write(out); e != nil || n != len(out) {
+		f.Close()
+		t.Fatal("result write")
+	}
+	if e = f.Sync(); e != nil {
+		f.Close()
+		t.Fatal("result sync")
+	}
+	if f.Close() != nil {
+		t.Fatal("result close")
+	}
+	t.Log("FULL1220_DELIVERY_OUTPUT_SHA256=" + spoolDigest(out))
+}
+
+// Controlled helper ABI integration; run only from a source overlay. This uses
+// a new synthetic spool and loopback receiver, never old/actual observations.
+func TestFull1220SpoolDeliveryV12Controlled(t *testing.T) {
+	v, c, body := deliveryFixture(t)
+	var calls atomic.Int64
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		calls.Add(1)
+		b, _ := io.ReadAll(r.Body)
+		if !bytes.Equal(b, body) {
+			t.Error("helper changed protobuf bytes")
+		}
+	}))
+	defer server.Close()
+	dir := filepath.Dir(c.JournalRoot)
+	job := map[string]any{"schema": "full1220-v12-delivery-job.v1", "root": v.cfg.Root, "run_id": v.cfg.RunID, "max_bytes": int64(4 << 30), "batch": 1, "body_sha256": c.BatchSHA256, "journal_root": c.JournalRoot}
+	// The writer header must bind the actual 4GiB cap used by the helper.
+	// deliveryFixture uses the production maximum.
+	raw, _ := json.Marshal(job)
+	input := filepath.Join(dir, "delivery-input.json")
+	output := filepath.Join(dir, "delivery-output.json")
+	if e := os.WriteFile(input, raw, 0600); e != nil {
+		t.Fatal(e)
+	}
+	settings, _ := json.Marshal(map[string]string{"OTEL_EXPORTER_OTLP_TRACES_ENDPOINT": server.URL + "/api/public/otel/v1/traces", "AGENT_LANGFUSE_ENVIRONMENT": "evaluation", "LANGFUSE_PUBLIC_KEY": "synthetic-public", "LANGFUSE_SECRET_KEY": "synthetic-private"})
+	cmd := exec.Command(os.Args[0], "-test.run=^TestFull1220SpoolDeliveryV12$", "-test.v", "-test.count=1")
+	cmd.Env = []string{"PATH=/usr/bin:/bin", "FULL1220_V12_DELIVERY_INPUT=" + input, "FULL1220_V12_DELIVERY_INPUT_SHA256=" + spoolDigest(raw), "FULL1220_V12_DELIVERY_OUTPUT=" + output}
+	cmd.Stdin = bytes.NewReader(settings)
+	out, e := cmd.CombinedOutput()
+	if e != nil {
+		t.Fatalf("helper failed: %v %s", e, out)
+	}
+	result, e := os.ReadFile(output)
+	if e != nil {
+		t.Fatal(e)
+	}
+	if calls.Load() != 1 || !bytes.Contains(out, []byte("FULL1220_DELIVERY_OUTPUT_SHA256="+spoolDigest(result))) || bytes.Contains(out, []byte("synthetic-private")) {
+		t.Fatalf("helper ABI/output mismatch: calls %d %s", calls.Load(), out)
+	}
+	var data SpoolDeliveryResult
+	if json.Unmarshal(result, &data) != nil || data.Outcome != "acknowledged" {
+		t.Fatal("helper missing ACK data")
+	}
+	// The same job cannot make a second body send, even from a new child process.
+	cmd = exec.Command(os.Args[0], "-test.run=^TestFull1220SpoolDeliveryV12$", "-test.v", "-test.count=1")
+	cmd.Env = []string{"PATH=/usr/bin:/bin", "FULL1220_V12_DELIVERY_INPUT=" + input, "FULL1220_V12_DELIVERY_INPUT_SHA256=" + spoolDigest(raw), "FULL1220_V12_DELIVERY_OUTPUT=" + output + "-second"}
+	cmd.Stdin = bytes.NewReader(settings)
+	if err := cmd.Run(); err == nil || calls.Load() != 1 {
+		t.Fatal("helper replayed attempted batch")
+	}
+}
+
+func TestFull1220SpoolDeliveryV12ControlledRange(t *testing.T) {
+	s, c := startSpool(t)
+	ctx := context.Background()
+	for id := byte(6); id < 9; id++ {
+		if e := s.UploadTraces(ctx, spoolSpans(id)); e != nil {
+			t.Fatal(e)
+		}
+	}
+	if e := s.Stop(ctx); e != nil {
+		t.Fatal(e)
+	}
+	proof, e := VerifyClosedDurableSpool(ctx, c)
+	if e != nil {
+		t.Fatal(e)
+	}
+	batches := []SpoolDeliveryBatch{}
+	for i := uint64(1); i <= 3; i++ {
+		raw, e := proof.ReadBatch(ctx, i)
+		if e != nil {
+			t.Fatal(e)
+		}
+		batches = append(batches, SpoolDeliveryBatch{i, spoolDigest(raw)})
+	}
+	var calls atomic.Int64
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		index := calls.Add(1)
+		raw, _ := io.ReadAll(r.Body)
+		if index > 3 || spoolDigest(raw) != batches[index-1].BodySHA256 {
+			t.Error("range bytes/order")
+		}
+		if index == 2 {
+			w.WriteHeader(500)
+		}
+	}))
+	defer server.Close()
+	dir := filepath.Dir(c.Root)
+	job := map[string]any{"schema": "full1220-v12-delivery-range-job.v1", "root": c.Root, "run_id": c.RunID, "max_bytes": int64(4 << 30), "batches": batches, "journal_root": filepath.Join(dir, "delivery")}
+	raw, _ := json.Marshal(job)
+	input := filepath.Join(dir, "range-input.json")
+	output := filepath.Join(dir, "range-output.json")
+	os.WriteFile(input, raw, 0600)
+	settings, _ := json.Marshal(map[string]string{"OTEL_EXPORTER_OTLP_TRACES_ENDPOINT": server.URL + "/api/public/otel/v1/traces", "AGENT_LANGFUSE_ENVIRONMENT": "evaluation", "LANGFUSE_PUBLIC_KEY": "range-public", "LANGFUSE_SECRET_KEY": "range-private"})
+	cmd := exec.Command(os.Args[0], "-test.run=^TestFull1220SpoolDeliveryV12$", "-test.v", "-test.count=1")
+	cmd.Env = []string{"PATH=/usr/bin:/bin", "FULL1220_V12_DELIVERY_INPUT=" + input, "FULL1220_V12_DELIVERY_INPUT_SHA256=" + spoolDigest(raw), "FULL1220_V12_DELIVERY_OUTPUT=" + output}
+	cmd.Stdin = bytes.NewReader(settings)
+	out, e := cmd.CombinedOutput()
+	if e != nil {
+		t.Fatalf("range helper failed %v %s", e, out)
+	}
+	raw, e = os.ReadFile(output)
+	if e != nil {
+		t.Fatal(e)
+	}
+	var result SpoolDeliveryRangeResult
+	if json.Unmarshal(raw, &result) != nil || len(result.Results) != 3 || result.Results[1].Outcome != "unknown" || len(result.Unattempted) != 0 || len(result.Pending) != 0 || calls.Load() != 3 {
+		t.Fatalf("range result %s calls %d", raw, calls.Load())
+	}
+}
