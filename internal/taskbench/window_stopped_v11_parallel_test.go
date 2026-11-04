@@ -176,3 +176,102 @@ func TestWindowStoppedV11FourReadTailAndGoexit(t *testing.T) {
 		t.Fatal("Goexit escaped fulljoin failure")
 	}
 }
+
+func TestWindowStoppedV11PanicJoinsBlockedSiblingAndCallerCleanup(t *testing.T) {
+	root := stoppedEvidenceRoot(t)
+	lock := filepath.Join(root, "lock")
+	if e := os.WriteFile(lock, nil, 0600); e != nil {
+		t.Fatal(e)
+	}
+	p, e := newHistoryReadPass(context.Background())
+	if e != nil {
+		t.Fatal(e)
+	}
+	defer p.Abort()
+	started := make(chan struct{})
+	panicked := make(chan struct{})
+	release := make(chan struct{})
+	done := make(chan error, 1)
+	cleaned := make(chan struct{})
+	ordinary := errors.New("lower input ordinary")
+	var finished atomic.Int32
+	go func() {
+		defer close(cleaned)
+		defer p.Abort()
+		done <- historyStoppedLock(p, 11, lock, func() error {
+			return runWindowStoppedV11Four(3, func(i int) error {
+				defer finished.Add(1)
+				switch i {
+				case 0:
+					return ordinary
+				case 1:
+					<-started
+					defer close(panicked)
+					panic("private worker panic must not escape before join")
+				default:
+					close(started)
+					<-release
+					return nil
+				}
+			})
+		})
+	}()
+	select {
+	case <-panicked:
+	case <-time.After(time.Second):
+		close(release)
+		t.Fatal("panic worker did not start")
+	}
+	select {
+	case <-done:
+		close(release)
+		t.Fatal("panic returned before blocked sibling joined")
+	case <-time.After(20 * time.Millisecond):
+	}
+	close(release)
+	e = <-done
+	if e == nil || errors.Is(e, ordinary) || finished.Load() != 3 {
+		t.Fatalf("abnormal completion hidden by ordinary error: %v finished=%d", e, finished.Load())
+	}
+	select {
+	case <-cleaned:
+	case <-time.After(time.Second):
+		t.Fatal("caller cleanup did not finish")
+	}
+	lease, e := openHistoryLock(lock)
+	if e != nil {
+		t.Fatal("caller historical lock leaked", e)
+	}
+	if e = lease.close(); e != nil {
+		t.Fatal(e)
+	}
+	p.mu.Lock()
+	active := p.active
+	state := p.state
+	p.mu.Unlock()
+	if active != 0 || len(p.leaves) != 0 || len(windowStoppedReadSlots) != 0 || state != historyPassFailed {
+		t.Fatalf("abnormal worker leaked resources active=%d state=%d", active, state)
+	}
+}
+func TestWindowStoppedV11ByteBatchNilVersusLegitimateZero(t *testing.T) {
+	for _, mode := range []string{"nil", "zero", "goexit"} {
+		t.Run(mode, func(t *testing.T) {
+			raws, e := readWindowStoppedV11Four(1, func(int) ([]byte, error) {
+				switch mode {
+				case "nil":
+					return nil, nil
+				case "goexit":
+					runtime.Goexit()
+				}
+				return []byte{}, nil
+			})
+			if mode == "zero" {
+				if e != nil || len(raws) != 1 || raws[0] == nil || len(raws[0]) != 0 {
+					t.Fatalf("legitimate zero rejected %v", e)
+				}
+			} else if e == nil || raws != nil {
+				t.Fatal("incomplete nil/Goexit bytes accepted")
+			}
+		})
+	}
+}

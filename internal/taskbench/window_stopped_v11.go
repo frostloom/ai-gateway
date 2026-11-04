@@ -216,16 +216,16 @@ func readWindowStoppedV11Inventory(p *historyReadPass, root string, inv windowSt
 			seen[f.Path] = true
 			specs[i] = historyReadSpec{kind: historyReadV7File, path: filepath.Join(root, filepath.FromSlash(f.Path)), sha: f.SHA256, max: max(1, f.Bytes)}
 		}
-		// Batch owns no outer physical slot. It joins every independent leaf
+		// This new-only batch owns no outer physical slot. It joins every leaf
 		// before selecting an error in descriptor input order.
-		raws, e := p.Batch(specs)
+		raws, e := readWindowStoppedV11Four(len(specs), func(i int) ([]byte, error) { return p.Read(specs[i]) })
 		if e != nil {
 			return nil, fmt.Errorf("inventory original batch: %w", e)
 		}
 		for i, f := range batch {
 			raw := raws[i]
 			path := specs[i].path
-			if int64(len(raw)) != f.Bytes {
+			if raw == nil || int64(len(raw)) != f.Bytes {
 				return nil, fmt.Errorf("inventory original length %s", f.Path)
 			}
 			p.mu.Lock()
@@ -371,6 +371,7 @@ func runWindowStoppedV11Four(n int, read func(int) error) error {
 		return fmt.Errorf("stopped v11 read batch rejected")
 	}
 	errs := make([]error, n)
+	abnormal := make([]bool, n)
 	var wg sync.WaitGroup
 	for i := 0; i < n; i++ {
 		wg.Add(1)
@@ -379,7 +380,11 @@ func runWindowStoppedV11Four(n int, read func(int) error) error {
 			returned := false
 			defer func() {
 				if !returned {
-					errs[i] = fmt.Errorf("stopped v11 read callback incomplete")
+					// Recover only here so every sibling joins before the
+					// caller receives a fail-closed result and unwinds locks.
+					// Panic values are deliberately not printed or retained.
+					_ = recover()
+					abnormal[i] = true
 				}
 			}()
 			errs[i] = read(i)
@@ -387,10 +392,40 @@ func runWindowStoppedV11Four(n int, read func(int) error) error {
 		}(i)
 	}
 	wg.Wait()
+	// Abnormal completion takes precedence over every ordinary read error.
+	for _, bad := range abnormal {
+		if bad {
+			return fmt.Errorf("stopped v11 read callback incomplete")
+		}
+	}
 	for _, err := range errs {
 		if err != nil {
 			return err
 		}
 	}
 	return nil
+}
+
+// Inventory adapter uses the same new-only join policy as source streams.
+// Nil bytes without an error are incomplete even for a zero-length original.
+func readWindowStoppedV11Four(n int, read func(int) ([]byte, error)) ([][]byte, error) {
+	if n < 1 || n > 4 || read == nil {
+		return nil, fmt.Errorf("stopped v11 byte batch rejected")
+	}
+	raws := make([][]byte, n)
+	err := runWindowStoppedV11Four(n, func(i int) error {
+		raw, e := read(i)
+		if e != nil {
+			return e
+		}
+		if raw == nil {
+			return fmt.Errorf("stopped v11 read returned nil bytes")
+		}
+		raws[i] = raw
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return raws, nil
 }
