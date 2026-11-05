@@ -98,6 +98,9 @@ type historyReadPass struct {
 	// Activated only by the fixed154 loader after its concrete104 predecessor.
 	stoppedV11Metadata         bool
 	stoppedV11LegacyTranscript uint64
+	// Activated only inside the fixed Root4 lock after its concrete154 loader.
+	stoppedV12Metadata     bool
+	stoppedV12MetadataLock *historyLockLease
 }
 
 func newHistoryReadPass(ctx context.Context) (*historyReadPass, error) {
@@ -194,6 +197,9 @@ func (p *historyReadPass) chargeLocked(key, path, sha string, extra uint64) erro
 	if p.stoppedV11Metadata {
 		limit = 64 << 20
 		legacy = !stoppedV11MetadataPath(path)
+		if legacy && p.stoppedV12Metadata && stoppedV12MetadataPath(path) {
+			legacy = false
+		}
 	}
 	if !historyBudgetFits(charge, extra, limit) || !historyBudgetFits(p.stats.TranscriptBytes, charge+extra, limit) || p.stats.Records >= historyPassRecordsLimit || p.stoppedV11Metadata && legacy && !historyBudgetFits(p.stoppedV11LegacyTranscript, charge+extra, historyPassTranscriptLimit) {
 		return p.failLocked(fmt.Errorf("history transcript limit"))
@@ -588,6 +594,12 @@ func (p *historyReadPass) WithStoppedLock(epoch int, path string, check func() e
 	}
 	if err != nil {
 		return p.fail(err)
+	}
+	if epoch == 12 {
+		p.mu.Lock()
+		p.stoppedV12MetadataLock = lease
+		p.mu.Unlock()
+		defer func() { p.mu.Lock(); p.stoppedV12MetadataLock = nil; p.mu.Unlock() }()
 	}
 	if err = p.semanticCheck(check); err != nil {
 		return p.fail(err)

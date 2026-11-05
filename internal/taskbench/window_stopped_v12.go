@@ -79,6 +79,9 @@ func loadWindowStoppedV12BaselineWithPass(p *historyReadPass, path, sha string) 
 		return reject(err)
 	}
 	err = historyStoppedLock(p, 12, inv.Root+"/campaign/.lock", func() error {
+		if e := p.enableStoppedV12Metadata(previous); e != nil {
+			return e
+		}
 		files, e := readWindowStoppedV11Inventory(p, inv.Root, inv)
 		if e != nil {
 			return e
