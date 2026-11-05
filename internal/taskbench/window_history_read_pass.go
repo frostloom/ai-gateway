@@ -525,7 +525,7 @@ func (p *historyReadPass) CheckNamespace(path string, names map[string]bool, che
 	return nil
 }
 func (p *historyReadPass) WithStoppedLock(epoch int, path string, check func() error) (err error) {
-	if check == nil || epoch < 1 || epoch > 11 {
+	if check == nil || epoch < 1 || epoch > 11 && !p.stoppedV12LockAllowed(epoch, path) {
 		return p.fail(fmt.Errorf("history lock specification"))
 	}
 	if err = p.begin(true); err != nil {
