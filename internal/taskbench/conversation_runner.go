@@ -116,8 +116,17 @@ func runConversation(ctx context.Context, c ConversationCase, d ConversationDriv
 			r.NecessaryClarifications++
 		}
 		writes, previews, reads := 0, 0, 0
+		admittedFailedPreview := false
+		if recording != nil && recording.previewFailure != nil {
+			for _, tr := range obs.Turn.Response.Trace {
+				if isConversationWrite(tr.Tool) && tr.Phase == "preview" && tr.Outcome == "failure" {
+					admittedFailedPreview = recording.previewFailure.admit(ctx, c, f, i+1, previous, bound, obs)
+					break
+				}
+			}
+		}
 		for _, tr := range obs.Turn.Response.Trace {
-			if recording != nil && !collectionKnownTrace(tr) {
+			if recording != nil && !collectionKnownTrace(tr) && !(admittedFailedPreview && isConversationWrite(tr.Tool) && tr.Phase == "preview" && tr.Outcome == "failure") {
 				issue("unknown_trace", fmt.Errorf("unknown tool phase or outcome"))
 			}
 			for _, rawArgs := range []string{tr.Args, tr.ResolvedArgs} {
