@@ -1,0 +1,15 @@
+head=63b9d1ed4d64bb583d15fa884c37468e5c53044c
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestReconcilerDoesNotCountSettledAsReversed
+    reconciler_settled_stats_test.go:83: stats={Scanned:1 Reversed:1 Settled:0 Rebuilt:0} bill={ID:1 ReserveFingerprint:0xc0005a2240 RequestID:scan-settled-race-1793728293275879000 Phase:reserve Status:settled TenantID:1 APIKeyID:1 ProviderID:<nil> Model:scan-settled-race-1793728293275879000 Funding:balance PreQuota:100 ActualQuota:<nil> DeltaQuota:<nil> PromptTokens:0xc000538ec8 CompletionTokens:0xc000538ed8 InPriceCent:0xc000538ee8 OutPriceCent:0xc000538ef8 UsageReportedAt:2026-11-04 01:51:33.436 +0800 CST ErrorCode: CreatedAt:2026-11-04 01:40:33.429 +0800 CST} events=3 balance=960 ledger=960
+--- FAIL: TestReconcilerDoesNotCountSettledAsReversed (0.59s)
+=== RUN   TestReconcilerDoesNotCountSettledAsReversed
+    reconciler_settled_stats_test.go:83: stats={Scanned:1 Reversed:1 Settled:0 Rebuilt:0} bill={ID:3 ReserveFingerprint:0xc000462670 RequestID:scan-settled-race-1793728293873183000 Phase:reserve Status:settled TenantID:2 APIKeyID:1 ProviderID:<nil> Model:scan-settled-race-1793728293873183000 Funding:balance PreQuota:100 ActualQuota:<nil> DeltaQuota:<nil> PromptTokens:0xc0003b0488 CompletionTokens:0xc0003b0498 InPriceCent:0xc0003b04a8 OutPriceCent:0xc0003b04b8 UsageReportedAt:2026-11-04 01:51:33.91 +0800 CST ErrorCode: CreatedAt:2026-11-04 01:40:33.904 +0800 CST} events=3 balance=960 ledger=960
+--- FAIL: TestReconcilerDoesNotCountSettledAsReversed (0.47s)
+=== RUN   TestReconcilerDoesNotCountSettledAsReversed
+    reconciler_settled_stats_test.go:83: stats={Scanned:1 Reversed:1 Settled:0 Rebuilt:0} bill={ID:5 ReserveFingerprint:0xc0005a3d40 RequestID:scan-settled-race-1793728294435775000 Phase:reserve Status:settled TenantID:3 APIKeyID:1 ProviderID:<nil> Model:scan-settled-race-1793728294435775000 Funding:balance PreQuota:100 ActualQuota:<nil> DeltaQuota:<nil> PromptTokens:0xc00011c688 CompletionTokens:0xc00011c698 InPriceCent:0xc00011c6a8 OutPriceCent:0xc00011c6b8 UsageReportedAt:2026-11-04 01:51:34.469 +0800 CST ErrorCode: CreatedAt:2026-11-04 01:40:34.462 +0800 CST} events=3 balance=960 ledger=960
+--- FAIL: TestReconcilerDoesNotCountSettledAsReversed (0.56s)
+FAIL
+FAIL	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	3.054s
+FAIL

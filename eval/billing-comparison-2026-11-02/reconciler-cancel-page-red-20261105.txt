@@ -1,0 +1,23 @@
+head=457dbfc3fee2e7b1575a29eab033439833985ce6
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+# github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02.test
+ld: warning: '/private/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-2939440277/000013.o' has malformed LC_DYSYMTAB, expected 98 undefined symbols to start at index 1626, found 95 undefined symbols starting at index 1626
+=== RUN   TestReconcilerCancellationStopsPageAndReportsError
+
+2026/11/05 13:55:14 [32m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/reconciler_stalled_rpc_test.go:20 [33mSLOW SQL >= 200ms
+[0m[31;1m[419.134ms] [33m[rows:1][35m SELECT SCHEMA_NAME from Information_schema.SCHEMATA where SCHEMA_NAME LIKE 'billing_compare%' ORDER BY SCHEMA_NAME='billing_compare' DESC,SCHEMA_NAME limit 1[0m
+
+2026/11/05 13:55:15 [32m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/reconciler_stalled_rpc_test.go:23 [33mSLOW SQL >= 200ms
+[0m[31;1m[309.288ms] [33m[rows:1][35m INSERT INTO `tenants` (`name`,`initial_quota`,`status`,`created_at`,`updated_at`) VALUES ('cancel-page-1793858115010921000',0,0,'2026-11-05 13:55:15.016','2026-11-05 13:55:15.016')[0m
+    reconciler_stalled_rpc_test.go:40: err=<nil> calls=2
+--- FAIL: TestReconcilerCancellationStopsPageAndReportsError (1.65s)
+=== RUN   TestReconcilerCancellationStopsPageAndReportsError
+    reconciler_stalled_rpc_test.go:40: err=<nil> calls=2
+--- FAIL: TestReconcilerCancellationStopsPageAndReportsError (0.44s)
+=== RUN   TestReconcilerCancellationStopsPageAndReportsError
+    reconciler_stalled_rpc_test.go:40: err=<nil> calls=2
+--- FAIL: TestReconcilerCancellationStopsPageAndReportsError (0.42s)
+FAIL
+FAIL	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	4.769s
+FAIL

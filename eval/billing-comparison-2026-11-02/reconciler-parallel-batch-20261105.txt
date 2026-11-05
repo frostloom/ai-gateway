@@ -1,0 +1,43 @@
+head=c84cbf64ae8982272ae5bcb2aff06a6f44d2c31d
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+# github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02.test
+ld: warning: '/private/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-460752701/000013.o' has malformed LC_DYSYMTAB, expected 98 undefined symbols to start at index 1626, found 95 undefined symbols starting at index 1626
+=== RUN   TestParallelReconcileBatchRealLedger
+    reconciler_parallel_batch_test.go:171: accounts=1 workers=1 n=32 elapsed_ms=2827.7 ops_s=11.3 mean_ms=88.35 p95_ms=348.30 p99_ms=365.48 errors=0 timeouts=0 pool_waits=0
+    reconciler_parallel_batch_test.go:171: accounts=1 workers=4 n=32 elapsed_ms=1185.6 ops_s=27.0 mean_ms=138.40 p95_ms=236.00 p99_ms=265.14 errors=0 timeouts=0 pool_waits=0
+
+2026/11/05 12:22:19 [32m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/reconciler_parallel_batch_test.go:87 [33mSLOW SQL >= 200ms
+[0m[31;1m[236.595ms] [33m[rows:1][35m INSERT INTO `tenants` (`name`,`initial_quota`,`status`,`created_at`,`updated_at`) VALUES ('par-8-1-1793852539084458000-3',10000,0,'2026-11-05 12:22:19.71','2026-11-05 12:22:19.71')[0m
+    reconciler_parallel_batch_test.go:171: accounts=8 workers=1 n=32 elapsed_ms=1891.1 ops_s=16.9 mean_ms=59.07 p95_ms=183.36 p99_ms=184.72 errors=0 timeouts=0 pool_waits=0
+    reconciler_parallel_batch_test.go:171: accounts=8 workers=4 n=32 elapsed_ms=350.1 ops_s=91.4 mean_ms=43.11 p95_ms=61.20 p99_ms=62.48 errors=0 timeouts=0 pool_waits=0
+--- PASS: TestParallelReconcileBatchRealLedger (30.45s)
+=== RUN   TestParallelReconcileBatchRealLedger
+
+2026/11/05 12:22:42 [32m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:478 [33mSLOW SQL >= 200ms
+[0m[31;1m[215.352ms] [33m[rows:1][35m INSERT INTO `bills` (`reserve_fingerprint`,`request_id`,`phase`,`status`,`tenant_id`,`api_key_id`,`provider_id`,`model`,`funding`,`pre_quota`,`reserved_tokens`,`reserved_tier`,`actual_quota`,`delta_quota`,`prompt_tokens`,`completion_tokens`,`in_price_cent`,`out_price_cent`,`usage_reported_at`,`error_code`,`created_at`) VALUES ('34f6defc9d08bba4a269852985977e88ade345455edd1cf42cab48e59796ee34','par-1-1-1793852555481715000-15','reserve','pending',19,1,NULL,'par-1-1-1793852555481715000','balance',100,NULL,NULL,NULL,NULL,NULL,NULL,1000000,1000000,NULL,'','2026-11-05 12:22:42.667')[0m
+
+2026/11/05 12:22:50 [32m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:669 [33mSLOW SQL >= 200ms
+[0m[31;1m[299.142ms] [33m[rows:1][35m UPDATE `bills` SET `completion_tokens`=0,`prompt_tokens`=40,`usage_reported_at`='2026-11-05 12:22:49.838' WHERE `id` = 279[0m
+
+2026/11/05 12:22:53 [32m/Users/a1/项目/ai-gateway/internal/billing/store/outbox.go:81 [33mSLOW SQL >= 200ms
+[0m[31;1m[235.954ms] [33m[rows:1][35m INSERT INTO `outbox_events` (`topic`,`event_key`,`payload`,`created_at`,`sent_at`,`attempts`,`last_error`) VALUES ('billing.events','par-1-1-1793852555481715000-25:reserve','{"event_id":"par-1-1-1793852555481715000-25:reserve","tenant_id":19,"request_id":"par-1-1-1793852555481715000-25","phase":"reserve","amount_cents":100,"model":"par-1-1-1793852555481715000","funding":"balance","bill_id":282,"created_at":"2026-11-05T12:22:53.115996+08:00"}','2026-11-05 12:22:53.117',NULL,0,'')[0m
+    reconciler_parallel_batch_test.go:171: accounts=1 workers=1 n=32 elapsed_ms=9853.6 ops_s=3.2 mean_ms=307.91 p95_ms=658.15 p99_ms=679.91 errors=0 timeouts=0 pool_waits=0
+    reconciler_parallel_batch_test.go:171: accounts=1 workers=4 n=32 elapsed_ms=743.0 ops_s=43.1 mean_ms=87.86 p95_ms=131.99 p99_ms=138.39 errors=0 timeouts=0 pool_waits=0
+
+2026/11/05 12:23:20 [32m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/reconciler_parallel_batch_test.go:145 [33mSLOW SQL >= 200ms
+[0m[31;1m[205.372ms] [33m[rows:1][35m SELECT count(*) FROM `outbox_events` WHERE event_key='par-8-1-1793852594653845000-24:settle'[0m
+    reconciler_parallel_batch_test.go:171: accounts=8 workers=1 n=32 elapsed_ms=1070.0 ops_s=29.9 mean_ms=33.43 p95_ms=51.13 p99_ms=54.31 errors=0 timeouts=0 pool_waits=0
+    reconciler_parallel_batch_test.go:171: accounts=8 workers=4 n=32 elapsed_ms=481.6 ops_s=66.4 mean_ms=58.74 p95_ms=83.86 p99_ms=90.94 errors=0 timeouts=0 pool_waits=0
+--- PASS: TestParallelReconcileBatchRealLedger (51.37s)
+=== RUN   TestParallelReconcileBatchRealLedger
+
+2026/11/05 12:23:32 [32m/Users/a1/项目/ai-gateway/internal/billing/store/plan.go:181 [33mSLOW SQL >= 200ms
+[0m[31;1m[227.221ms] [33m[rows:1][35m SELECT `initial_quota` FROM `tenants` WHERE id = 37[0m
+    reconciler_parallel_batch_test.go:171: accounts=1 workers=1 n=32 elapsed_ms=4165.3 ops_s=7.7 mean_ms=130.15 p95_ms=510.38 p99_ms=654.51 errors=0 timeouts=0 pool_waits=0
+    reconciler_parallel_batch_test.go:171: accounts=1 workers=4 n=32 elapsed_ms=1204.8 ops_s=26.6 mean_ms=141.51 p95_ms=261.96 p99_ms=282.02 errors=0 timeouts=0 pool_waits=0
+    reconciler_parallel_batch_test.go:171: accounts=8 workers=1 n=32 elapsed_ms=895.9 ops_s=35.7 mean_ms=27.99 p95_ms=52.20 p99_ms=66.53 errors=0 timeouts=0 pool_waits=0
+    reconciler_parallel_batch_test.go:171: accounts=8 workers=4 n=32 elapsed_ms=428.9 ops_s=74.6 mean_ms=50.78 p95_ms=81.22 p99_ms=81.30 errors=0 timeouts=0 pool_waits=0
+--- PASS: TestParallelReconcileBatchRealLedger (20.56s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	104.629s

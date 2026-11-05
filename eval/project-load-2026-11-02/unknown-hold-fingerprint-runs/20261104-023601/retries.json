@@ -1,0 +1,19 @@
+{
+  "immediate": {
+    "status": 409,
+    "body": "{\"error\":{\"message\":\"duplicate Idempotency-Key\",\"type\":\"authentication_error\"}}"
+  },
+  "after_redis_delete": {
+    "status": 409,
+    "body": "{\"error\":{\"message\":\"billing request already reserved\"}}"
+  },
+  "different_payload_same_estimate": {
+    "status": 409,
+    "body": "{\"error\":{\"message\":\"billing request id conflict\"}}"
+  },
+  "different_payload_after_redis_delete": {
+    "status": 409,
+    "body": "{\"error\":{\"message\":\"billing request id conflict\"}}"
+  },
+  "mock_calls": 1
+}

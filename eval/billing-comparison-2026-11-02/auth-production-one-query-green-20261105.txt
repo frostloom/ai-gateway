@@ -1,0 +1,53 @@
+head=42d8ef8e5ca2471b18800e50f8e7a57fbcfdd47f
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+# github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02.test
+ld: warning: '/private/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-1824026962/000013.o' has malformed LC_DYSYMTAB, expected 98 undefined symbols to start at index 1626, found 95 undefined symbols starting at index 1626
+=== RUN   TestProductionBrowserAuthUsesOneStatement
+    auth_production_single_query_test.go:49: browser auth issued 0 SQL statements, expected 1
+--- FAIL: TestProductionBrowserAuthUsesOneStatement (0.49s)
+=== RUN   TestAuthSingleQueryNameMatchesGoBytes
+--- PASS: TestAuthSingleQueryNameMatchesGoBytes (0.64s)
+=== RUN   TestAuthSingleQueryConcurrentMixed
+    auth_single_query_concurrency_test.go:146: variant=baseline n=1280 workers=32 rps=2160.8 mean_ms=13.836 p95_ms=29.368 p99_ms=43.975 errors=0 timeouts=0 pool_wait_count=1232 pool_wait_ms=8196.775 sampled_max_open=16 sampled_max_inuse=16
+    auth_single_query_concurrency_test.go:146: variant=candidate n=1280 workers=32 rps=2185.3 mean_ms=13.879 p95_ms=29.561 p99_ms=41.088 errors=0 timeouts=0 pool_wait_count=1224 pool_wait_ms=8372.294 sampled_max_open=16 sampled_max_inuse=16
+    auth_single_query_concurrency_test.go:146: variant=candidate n=1280 workers=32 rps=1910.1 mean_ms=15.734 p95_ms=40.037 p99_ms=85.800 errors=0 timeouts=0 pool_wait_count=1222 pool_wait_ms=9556.458 sampled_max_open=16 sampled_max_inuse=16
+    auth_single_query_concurrency_test.go:146: variant=baseline n=1280 workers=32 rps=2727.2 mean_ms=10.823 p95_ms=25.188 p99_ms=35.120 errors=0 timeouts=0 pool_wait_count=1222 pool_wait_ms=6399.703 sampled_max_open=16 sampled_max_inuse=16
+    auth_single_query_concurrency_test.go:184: after commits: 64 concurrent calls rejected disabled normal key or browser user
+--- PASS: TestAuthSingleQueryConcurrentMixed (3.30s)
+=== RUN   TestAuthSingleQueryMatchesAuthority
+    auth_single_query_test.go:109: regular and browser key states matched real Store over 9 cases
+--- PASS: TestAuthSingleQueryMatchesAuthority (0.54s)
+=== RUN   TestProductionBrowserAuthUsesOneStatement
+    auth_production_single_query_test.go:49: browser auth issued 0 SQL statements, expected 1
+--- FAIL: TestProductionBrowserAuthUsesOneStatement (0.48s)
+=== RUN   TestAuthSingleQueryNameMatchesGoBytes
+--- PASS: TestAuthSingleQueryNameMatchesGoBytes (0.67s)
+=== RUN   TestAuthSingleQueryConcurrentMixed
+    auth_single_query_concurrency_test.go:146: variant=baseline n=1280 workers=32 rps=2383.2 mean_ms=12.419 p95_ms=29.660 p99_ms=62.439 errors=0 timeouts=0 pool_wait_count=1238 pool_wait_ms=7302.202 sampled_max_open=16 sampled_max_inuse=16
+    auth_single_query_concurrency_test.go:146: variant=candidate n=1280 workers=32 rps=2473.8 mean_ms=12.354 p95_ms=30.982 p99_ms=49.994 errors=0 timeouts=0 pool_wait_count=1228 pool_wait_ms=7514.675 sampled_max_open=16 sampled_max_inuse=16
+    auth_single_query_concurrency_test.go:146: variant=candidate n=1280 workers=32 rps=2326.1 mean_ms=12.742 p95_ms=28.085 p99_ms=39.578 errors=0 timeouts=0 pool_wait_count=1240 pool_wait_ms=7556.318 sampled_max_open=16 sampled_max_inuse=16
+    auth_single_query_concurrency_test.go:146: variant=baseline n=1280 workers=32 rps=2007.9 mean_ms=14.318 p95_ms=30.846 p99_ms=49.503 errors=0 timeouts=0 pool_wait_count=1226 pool_wait_ms=8244.406 sampled_max_open=16 sampled_max_inuse=16
+    auth_single_query_concurrency_test.go:184: after commits: 64 concurrent calls rejected disabled normal key or browser user
+--- PASS: TestAuthSingleQueryConcurrentMixed (3.54s)
+=== RUN   TestAuthSingleQueryMatchesAuthority
+    auth_single_query_test.go:109: regular and browser key states matched real Store over 9 cases
+--- PASS: TestAuthSingleQueryMatchesAuthority (0.77s)
+=== RUN   TestProductionBrowserAuthUsesOneStatement
+    auth_production_single_query_test.go:49: browser auth issued 0 SQL statements, expected 1
+--- FAIL: TestProductionBrowserAuthUsesOneStatement (0.62s)
+=== RUN   TestAuthSingleQueryNameMatchesGoBytes
+--- PASS: TestAuthSingleQueryNameMatchesGoBytes (0.61s)
+=== RUN   TestAuthSingleQueryConcurrentMixed
+    auth_single_query_concurrency_test.go:146: variant=baseline n=1280 workers=32 rps=1599.6 mean_ms=18.462 p95_ms=53.563 p99_ms=77.980 errors=0 timeouts=0 pool_wait_count=1231 pool_wait_ms=10817.118 sampled_max_open=16 sampled_max_inuse=16
+    auth_single_query_concurrency_test.go:146: variant=candidate n=1280 workers=32 rps=2833.0 mean_ms=10.831 p95_ms=25.230 p99_ms=35.784 errors=0 timeouts=0 pool_wait_count=1240 pool_wait_ms=6521.552 sampled_max_open=16 sampled_max_inuse=16
+    auth_single_query_concurrency_test.go:146: variant=candidate n=1280 workers=32 rps=3444.5 mean_ms=8.856 p95_ms=18.547 p99_ms=24.707 errors=0 timeouts=0 pool_wait_count=1239 pool_wait_ms=5161.756 sampled_max_open=16 sampled_max_inuse=16
+    auth_single_query_concurrency_test.go:146: variant=baseline n=1280 workers=32 rps=871.8 mean_ms=29.281 p95_ms=97.542 p99_ms=188.340 errors=0 timeouts=0 pool_wait_count=1228 pool_wait_ms=16489.028 sampled_max_open=16 sampled_max_inuse=16
+    auth_single_query_concurrency_test.go:184: after commits: 64 concurrent calls rejected disabled normal key or browser user
+--- PASS: TestAuthSingleQueryConcurrentMixed (4.13s)
+=== RUN   TestAuthSingleQueryMatchesAuthority
+    auth_single_query_test.go:109: regular and browser key states matched real Store over 9 cases
+--- PASS: TestAuthSingleQueryMatchesAuthority (0.73s)
+FAIL
+FAIL	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	17.859s
+FAIL

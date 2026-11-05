@@ -1,0 +1,46 @@
+head=42d8ef8e5ca2471b18800e50f8e7a57fbcfdd47f
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+# github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02.test
+ld: warning: '/private/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-1715618617/000013.o' has malformed LC_DYSYMTAB, expected 98 undefined symbols to start at index 1626, found 95 undefined symbols starting at index 1626
+=== RUN   TestAuthSingleQueryMatchesAuthority
+    auth_single_query_test.go:109: regular and browser key states matched real Store over 9 cases
+--- PASS: TestAuthSingleQueryMatchesAuthority (0.54s)
+=== RUN   TestAuthSingleQueryLatency
+    auth_single_query_test.go:162: key=normal variant=baseline n=200 mean_us=1595 p95_us=3731 p99_us=8116
+    auth_single_query_test.go:162: key=normal variant=candidate n=200 mean_us=1576 p95_us=2604 p99_us=3852
+    auth_single_query_test.go:162: key=normal variant=candidate n=200 mean_us=1670 p95_us=2198 p99_us=6332
+    auth_single_query_test.go:162: key=normal variant=baseline n=200 mean_us=1408 p95_us=1848 p99_us=5552
+    auth_single_query_test.go:162: key=__browser_session variant=baseline n=200 mean_us=2587 p95_us=4239 p99_us=8497
+    auth_single_query_test.go:162: key=__browser_session variant=candidate n=200 mean_us=1698 p95_us=3369 p99_us=6397
+    auth_single_query_test.go:162: key=__browser_session variant=candidate n=200 mean_us=1582 p95_us=2592 p99_us=4881
+    auth_single_query_test.go:162: key=__browser_session variant=baseline n=200 mean_us=2881 p95_us=5280 p99_us=7399
+--- PASS: TestAuthSingleQueryLatency (3.47s)
+=== RUN   TestAuthSingleQueryMatchesAuthority
+    auth_single_query_test.go:109: regular and browser key states matched real Store over 9 cases
+--- PASS: TestAuthSingleQueryMatchesAuthority (0.53s)
+=== RUN   TestAuthSingleQueryLatency
+    auth_single_query_test.go:162: key=normal variant=baseline n=200 mean_us=1290 p95_us=1877 p99_us=2570
+    auth_single_query_test.go:162: key=normal variant=candidate n=200 mean_us=1446 p95_us=1888 p99_us=3280
+    auth_single_query_test.go:162: key=normal variant=candidate n=200 mean_us=1663 p95_us=3500 p99_us=5457
+    auth_single_query_test.go:162: key=normal variant=baseline n=200 mean_us=1678 p95_us=3278 p99_us=6874
+    auth_single_query_test.go:162: key=__browser_session variant=baseline n=200 mean_us=2408 p95_us=3559 p99_us=5394
+    auth_single_query_test.go:162: key=__browser_session variant=candidate n=200 mean_us=1754 p95_us=2637 p99_us=5586
+    auth_single_query_test.go:162: key=__browser_session variant=candidate n=200 mean_us=1391 p95_us=1913 p99_us=4232
+    auth_single_query_test.go:162: key=__browser_session variant=baseline n=200 mean_us=2673 p95_us=3587 p99_us=4786
+--- PASS: TestAuthSingleQueryLatency (3.32s)
+=== RUN   TestAuthSingleQueryMatchesAuthority
+    auth_single_query_test.go:109: regular and browser key states matched real Store over 9 cases
+--- PASS: TestAuthSingleQueryMatchesAuthority (0.57s)
+=== RUN   TestAuthSingleQueryLatency
+    auth_single_query_test.go:162: key=normal variant=baseline n=200 mean_us=1346 p95_us=1787 p99_us=2176
+    auth_single_query_test.go:162: key=normal variant=candidate n=200 mean_us=1493 p95_us=2130 p99_us=3555
+    auth_single_query_test.go:162: key=normal variant=candidate n=200 mean_us=1507 p95_us=2028 p99_us=2559
+    auth_single_query_test.go:162: key=normal variant=baseline n=200 mean_us=983 p95_us=1285 p99_us=1404
+    auth_single_query_test.go:162: key=__browser_session variant=baseline n=200 mean_us=2497 p95_us=3377 p99_us=5226
+    auth_single_query_test.go:162: key=__browser_session variant=candidate n=200 mean_us=2010 p95_us=3870 p99_us=5036
+    auth_single_query_test.go:162: key=__browser_session variant=candidate n=200 mean_us=1556 p95_us=2133 p99_us=2995
+    auth_single_query_test.go:162: key=__browser_session variant=baseline n=200 mean_us=3466 p95_us=9916 p99_us=16683
+--- PASS: TestAuthSingleQueryLatency (3.34s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	13.699s

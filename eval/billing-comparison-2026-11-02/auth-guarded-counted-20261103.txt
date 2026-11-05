@@ -1,0 +1,41 @@
+head=63b9d1ed4d64bb583d15fa884c37468e5c53044c
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestAuthCacheRealStoreLoad
+    auth_cache_load_test.go:56: actual MySQL status change: stale until TTL, then rejected
+    auth_cache_load_test.go:138: AUTH_LOAD rep=1 mode=mysql workers=32 keys=64 requests=1697 failures=0 elapsed=2.128 rps=797.6 mean_ms=39.396 p95_ms=119.143 p99_ms=494.954
+    auth_cache_load_test.go:139: AUTH_AUTHORITY_QUERIES rep=1 mode=mysql queries=0
+    auth_cache_load_test.go:138: AUTH_LOAD rep=1 mode=cache workers=32 keys=64 requests=2120 failures=0 elapsed=2.024 rps=1047.4 mean_ms=30.379 p95_ms=86.646 p99_ms=164.616
+    auth_cache_load_test.go:139: AUTH_AUTHORITY_QUERIES rep=1 mode=cache queries=0
+    auth_cache_load_test.go:138: AUTH_LOAD rep=1 mode=fenced workers=32 keys=64 requests=2712 failures=0 elapsed=2.013 rps=1347.1 mean_ms=23.702 p95_ms=79.715 p99_ms=220.124
+    auth_cache_load_test.go:139: AUTH_AUTHORITY_QUERIES rep=1 mode=fenced queries=0
+    auth_cache_load_test.go:138: AUTH_LOAD rep=1 mode=guarded workers=32 keys=64 requests=1710 failures=0 elapsed=2.859 rps=598.1 mean_ms=53.194 p95_ms=157.761 p99_ms=1039.573
+    auth_cache_load_test.go:139: AUTH_AUTHORITY_QUERIES rep=1 mode=guarded queries=0
+    auth_cache_load_test.go:138: AUTH_LOAD rep=2 mode=mysql workers=32 keys=64 requests=1063 failures=0 elapsed=2.310 rps=460.2 mean_ms=63.238 p95_ms=337.782 p99_ms=719.458
+    auth_cache_load_test.go:139: AUTH_AUTHORITY_QUERIES rep=2 mode=mysql queries=0
+    auth_cache_load_test.go:138: AUTH_LOAD rep=2 mode=cache workers=32 keys=64 requests=2132 failures=0 elapsed=2.431 rps=877.1 mean_ms=36.171 p95_ms=117.076 p99_ms=570.017
+    auth_cache_load_test.go:139: AUTH_AUTHORITY_QUERIES rep=2 mode=cache queries=0
+    auth_cache_load_test.go:138: AUTH_LOAD rep=2 mode=fenced workers=32 keys=64 requests=847 failures=0 elapsed=2.033 rps=416.5 mean_ms=76.788 p95_ms=172.304 p99_ms=334.549
+    auth_cache_load_test.go:139: AUTH_AUTHORITY_QUERIES rep=2 mode=fenced queries=0
+    auth_cache_load_test.go:138: AUTH_LOAD rep=2 mode=guarded workers=32 keys=64 requests=1628 failures=0 elapsed=2.063 rps=789.0 mean_ms=40.226 p95_ms=107.838 p99_ms=124.497
+    auth_cache_load_test.go:139: AUTH_AUTHORITY_QUERIES rep=2 mode=guarded queries=0
+    auth_cache_load_test.go:138: AUTH_LOAD rep=3 mode=mysql workers=32 keys=64 requests=490 failures=0 elapsed=2.243 rps=218.5 mean_ms=139.791 p95_ms=381.512 p99_ms=565.029
+    auth_cache_load_test.go:139: AUTH_AUTHORITY_QUERIES rep=3 mode=mysql queries=0
+    auth_cache_load_test.go:138: AUTH_LOAD rep=3 mode=cache workers=32 keys=64 requests=33 failures=0 elapsed=4.074 rps=8.1 mean_ms=3855.145 p95_ms=4015.961 p99_ms=4016.266
+    auth_cache_load_test.go:139: AUTH_AUTHORITY_QUERIES rep=3 mode=cache queries=0
+    auth_cache_load_test.go:138: AUTH_LOAD rep=3 mode=fenced workers=32 keys=64 requests=3644 failures=0 elapsed=2.051 rps=1777.1 mean_ms=17.864 p95_ms=58.626 p99_ms=100.138
+    auth_cache_load_test.go:139: AUTH_AUTHORITY_QUERIES rep=3 mode=fenced queries=0
+    auth_cache_load_test.go:138: AUTH_LOAD rep=3 mode=guarded workers=32 keys=64 requests=4624 failures=0 elapsed=2.026 rps=2282.3 mean_ms=14.018 p95_ms=30.723 p99_ms=70.532
+    auth_cache_load_test.go:139: AUTH_AUTHORITY_QUERIES rep=3 mode=guarded queries=0
+--- PASS: TestAuthCacheRealStoreLoad (38.93s)
+=== RUN   TestAuthCacheBoundaries
+--- PASS: TestAuthCacheBoundaries (0.36s)
+=== RUN   TestFenceActualStoreMultiInstance
+redis: 2026/11/03 16:11:03 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:55902: connect: connection refused
+redis: 2026/11/03 16:11:03 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:55902: connect: connection refused
+redis: 2026/11/03 16:11:03 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:55902: connect: connection refused
+--- PASS: TestFenceActualStoreMultiInstance (0.57s)
+=== RUN   TestGuardedActualStoreMultiInstance
+--- PASS: TestGuardedActualStoreMultiInstance (0.64s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	41.583s

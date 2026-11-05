@@ -1,0 +1,17 @@
+func TestUnknownHoldNormalAnd4xx(t *testing.T) {
+ for _,stream:=range []bool{false,true}{for _,reject:=range []bool{false,true}{t.Run(fmt.Sprintf("stream=%v/reject=%v",stream,reject),func(t *testing.T){
+  upstream:=httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter,r *http.Request){_,_=io.Copy(io.Discard,r.Body);if reject{w.WriteHeader(http.StatusBadRequest);_,_=io.WriteString(w,`{"error":"bad"}`);return};if stream{_,_=io.WriteString(w,"data: {\"choices\":[],\"usage\":{\"prompt_tokens\":4,\"completion_tokens\":2}}\n\ndata: [DONE]\n\n")}else{_,_=io.WriteString(w,`{"usage":{"prompt_tokens":4,"completion_tokens":2}}`)}}));defer upstream.Close()
+  bill:=&fakeBilling{};route:=&fakeRouter{next:[]*client.RouteResult{{ProviderID:1,BaseURL:upstream.URL}}};c,w:=newGinCtx();c.Request=httptest.NewRequest(http.MethodPost,"/v1/chat/completions",strings.NewReader(fmt.Sprintf(`{"model":"m","messages":[{"role":"user","content":"synthetic"}],"stream":%v}`,stream)));c.Set("request_id","hold-test")
+  Chat(bill,route,slog.New(slog.DiscardHandler),time.Second,true)(c)
+  if reject {if w.Code!=http.StatusBadGateway||len(bill.reports)!=0||len(bill.settles)!=0||len(bill.reverses)!=0{t.Fatalf("status=%d usage=%d settles=%d reverses=%d",w.Code,len(bill.reports),len(bill.settles),len(bill.reverses))}} else if w.Code!=http.StatusOK||len(bill.reports)!=1||len(bill.settles)!=1||len(bill.reverses)!=0{t.Fatalf("status=%d usage=%d settles=%d reverses=%d",w.Code,len(bill.reports),len(bill.settles),len(bill.reverses))}
+ })}}
+}
+
+func TestUnknownHoldMissingUsageStaysPending(t *testing.T) {
+ for _,stream:=range []bool{false,true}{t.Run(fmt.Sprintf("stream=%v",stream),func(t *testing.T){
+  upstream:=httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter,r *http.Request){_,_=io.Copy(io.Discard,r.Body);if stream{_,_=io.WriteString(w,"data: {\"choices\":[{\"delta\":{\"content\":\"hello\"}}]}\n\ndata: [DONE]\n\n")}else{_,_=io.WriteString(w,`{"choices":[{"message":{"content":"hello"}}]}`)}}));defer upstream.Close()
+  bill:=&fakeBilling{};route:=&fakeRouter{next:[]*client.RouteResult{{ProviderID:1,BaseURL:upstream.URL}}};c,w:=newGinCtx();c.Request=httptest.NewRequest(http.MethodPost,"/v1/chat/completions",strings.NewReader(fmt.Sprintf(`{"model":"m","messages":[{"role":"user","content":"synthetic"}],"stream":%v}`,stream)));c.Set("request_id","missing-usage-hold")
+  Chat(bill,route,slog.New(slog.DiscardHandler),time.Second,true)(c)
+  if w.Code!=http.StatusOK||len(bill.reports)!=0||len(bill.settles)!=0||len(bill.reverses)!=0 {t.Fatalf("status=%d reports=%d settles=%d reverses=%d",w.Code,len(bill.reports),len(bill.settles),len(bill.reverses))}
+ })}
+}

@@ -1,0 +1,27 @@
+head=42d8ef8e5ca2471b18800e50f8e7a57fbcfdd47f
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+# github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02.test
+ld: warning: '/private/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-4160396462/000013.o' has malformed LC_DYSYMTAB, expected 98 undefined symbols to start at index 1626, found 95 undefined symbols starting at index 1626
+=== RUN   TestReconcilerNilResponsesCountAsErrors
+--- FAIL: TestReconcilerNilResponsesCountAsErrors (0.09s)
+panic: runtime error: invalid memory address or nil pointer dereference [recovered, repanicked]
+[signal SIGSEGV: segmentation violation code=0x2 addr=0x0 pc=0x103f22b64]
+
+goroutine 13 [running]:
+testing.tRunner.func1.2({0x1049033e0, 0x105949340})
+	/Users/a1/开发工具/go/src/testing/testing.go:1872 +0x2b4
+testing.tRunner.func1()
+	/Users/a1/开发工具/go/src/testing/testing.go:1875 +0x460
+panic({0x1049033e0?, 0x105949340?})
+	/Users/a1/开发工具/go/src/runtime/panic.go:783 +0x120
+github.com/frostloom/ai-gateway/internal/billing/reconciler.(*Reconciler).SweepOnce(0xc0003977a0, {0x104b563b8, 0x1068f8240})
+	/Users/a1/项目/ai-gateway/internal/billing/reconciler/reconciler.go:176 +0x984
+github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02.TestReconcilerNilResponsesCountAsErrors(0xc000582700)
+	/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/reconciler_nil_responses_test.go:69 +0x9f4
+testing.tRunner(0xc000582700, 0x104b32d18)
+	/Users/a1/开发工具/go/src/testing/testing.go:1934 +0x168
+created by testing.(*T).Run in goroutine 1
+	/Users/a1/开发工具/go/src/testing/testing.go:1997 +0x6e4
+FAIL	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	1.282s
+FAIL

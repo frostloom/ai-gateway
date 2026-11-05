@@ -1,0 +1,14 @@
+head=63b9d1ed4d64bb583d15fa884c37468e5c53044c
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestDurableEventRetryCannotRecoverLostMemoryTransition
+    router_event_memory_gap_test.go:65: committed=1 retry_applied=0 durable_events=1 db_failures=1 memory_state=closed routed=true control_state=open
+--- PASS: TestDurableEventRetryCannotRecoverLostMemoryTransition (0.12s)
+=== RUN   TestDurableEventRetryCannotRecoverLostMemoryTransition
+    router_event_memory_gap_test.go:65: committed=1 retry_applied=0 durable_events=1 db_failures=1 memory_state=closed routed=true control_state=open
+--- PASS: TestDurableEventRetryCannotRecoverLostMemoryTransition (0.05s)
+=== RUN   TestDurableEventRetryCannotRecoverLostMemoryTransition
+    router_event_memory_gap_test.go:65: committed=1 retry_applied=0 durable_events=1 db_failures=1 memory_state=closed routed=true control_state=open
+--- PASS: TestDurableEventRetryCannotRecoverLostMemoryTransition (0.04s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	2.117s

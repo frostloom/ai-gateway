@@ -1,0 +1,84 @@
+# github.com/frostloom/ai-gateway/internal/gateway/handler.test
+ld: warning: '/private/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-2775460204/000013.o' has malformed LC_DYSYMTAB, expected 98 undefined symbols to start at index 1626, found 95 undefined symbols starting at index 1626
+=== RUN   TestAuthProxyHTTPSConfiguration
+=== RUN   TestAuthProxyHTTPSConfiguration/secure=
+=== RUN   TestAuthProxyHTTPSConfiguration/secure=1
+--- PASS: TestAuthProxyHTTPSConfiguration (0.00s)
+    --- PASS: TestAuthProxyHTTPSConfiguration/secure= (0.00s)
+    --- PASS: TestAuthProxyHTTPSConfiguration/secure=1 (0.00s)
+=== RUN   TestRelayStreamReportsUsageReadBeforeClientWriteFails
+=== RUN   TestRelayStreamReportsUsageReadBeforeClientWriteFails/legacy
+=== RUN   TestRelayStreamReportsUsageReadBeforeClientWriteFails/conservative
+--- PASS: TestRelayStreamReportsUsageReadBeforeClientWriteFails (0.00s)
+    --- PASS: TestRelayStreamReportsUsageReadBeforeClientWriteFails/legacy (0.00s)
+    --- PASS: TestRelayStreamReportsUsageReadBeforeClientWriteFails/conservative (0.00s)
+=== RUN   TestRelayStreamReportsFirstUsageFrameWhenClientWriteFails
+--- PASS: TestRelayStreamReportsFirstUsageFrameWhenClientWriteFails (0.00s)
+=== RUN   TestChatLeavesPendingWhenActualUsageCannotBeRecorded
+--- PASS: TestChatLeavesPendingWhenActualUsageCannotBeRecorded (0.00s)
+=== RUN   TestRelayStreamSettlesForwardedContentWithoutUsage
+--- PASS: TestRelayStreamSettlesForwardedContentWithoutUsage (0.00s)
+=== RUN   TestRelayStreamFailoverThen502Reverses
+--- PASS: TestRelayStreamFailoverThen502Reverses (0.00s)
+=== RUN   TestChatReportsSuccessfulFallbackProvider
+=== RUN   TestChatReportsSuccessfulFallbackProvider/nonstream
+=== RUN   TestChatReportsSuccessfulFallbackProvider/stream_usage
+=== RUN   TestChatReportsSuccessfulFallbackProvider/stream_estimate
+--- PASS: TestChatReportsSuccessfulFallbackProvider (0.01s)
+    --- PASS: TestChatReportsSuccessfulFallbackProvider/nonstream (0.00s)
+    --- PASS: TestChatReportsSuccessfulFallbackProvider/stream_usage (0.00s)
+    --- PASS: TestChatReportsSuccessfulFallbackProvider/stream_estimate (0.00s)
+=== RUN   TestRelayStreamDoesNotWaitForFailedResponseBody
+=== RUN   TestRelayStreamDoesNotWaitForFailedResponseBody/refund
+=== RUN   TestRelayStreamDoesNotWaitForFailedResponseBody/failover
+--- PASS: TestRelayStreamDoesNotWaitForFailedResponseBody (0.00s)
+    --- PASS: TestRelayStreamDoesNotWaitForFailedResponseBody/refund (0.00s)
+    --- PASS: TestRelayStreamDoesNotWaitForFailedResponseBody/failover (0.00s)
+=== RUN   TestChatReserveConflictReturns409
+--- PASS: TestChatReserveConflictReturns409 (0.00s)
+=== RUN   TestChatRejectsNonAuthorizingReserveCodes
+=== RUN   TestChatRejectsNonAuthorizingReserveCodes/duplicate
+=== RUN   TestChatRejectsNonAuthorizingReserveCodes/unknown
+--- PASS: TestChatRejectsNonAuthorizingReserveCodes (0.00s)
+    --- PASS: TestChatRejectsNonAuthorizingReserveCodes/duplicate (0.00s)
+    --- PASS: TestChatRejectsNonAuthorizingReserveCodes/unknown (0.00s)
+=== RUN   TestChatRejectsNilReserveResponse
+--- PASS: TestChatRejectsNilReserveResponse (0.00s)
+=== RUN   TestChatRejectsReserveSuccessWithoutBillID
+--- PASS: TestChatRejectsReserveSuccessWithoutBillID (0.00s)
+=== RUN   TestGatewayDoesNotResendUnknownUpstreamOutcome
+=== RUN   TestGatewayDoesNotResendUnknownUpstreamOutcome/stream=false/disconnect
+=== RUN   TestGatewayDoesNotResendUnknownUpstreamOutcome/stream=false/server_503
+=== RUN   TestGatewayDoesNotResendUnknownUpstreamOutcome/stream=true/disconnect
+=== RUN   TestGatewayDoesNotResendUnknownUpstreamOutcome/stream=true/server_503
+--- PASS: TestGatewayDoesNotResendUnknownUpstreamOutcome (0.00s)
+    --- PASS: TestGatewayDoesNotResendUnknownUpstreamOutcome/stream=false/disconnect (0.00s)
+    --- PASS: TestGatewayDoesNotResendUnknownUpstreamOutcome/stream=false/server_503 (0.00s)
+    --- PASS: TestGatewayDoesNotResendUnknownUpstreamOutcome/stream=true/disconnect (0.00s)
+    --- PASS: TestGatewayDoesNotResendUnknownUpstreamOutcome/stream=true/server_503 (0.00s)
+=== RUN   TestParseUsageFrame
+=== RUN   TestParseUsageFrame/终帧带_usage（choices_空）
+=== RUN   TestParseUsageFrame/内容增量帧（带_choices，无_usage）
+=== RUN   TestParseUsageFrame/role_帧
+=== RUN   TestParseUsageFrame/DONE_哨兵
+=== RUN   TestParseUsageFrame/非_data_行（空行分隔）
+=== RUN   TestParseUsageFrame/坏_JSON
+=== RUN   TestParseUsageFrame/带_choices_但空_usage_指针
+--- PASS: TestParseUsageFrame (0.00s)
+    --- PASS: TestParseUsageFrame/终帧带_usage（choices_空） (0.00s)
+    --- PASS: TestParseUsageFrame/内容增量帧（带_choices，无_usage） (0.00s)
+    --- PASS: TestParseUsageFrame/role_帧 (0.00s)
+    --- PASS: TestParseUsageFrame/DONE_哨兵 (0.00s)
+    --- PASS: TestParseUsageFrame/非_data_行（空行分隔） (0.00s)
+    --- PASS: TestParseUsageFrame/坏_JSON (0.00s)
+    --- PASS: TestParseUsageFrame/带_choices_但空_usage_指针 (0.00s)
+=== RUN   TestUsageMustBeAcknowledgedBeforeSettle
+=== RUN   TestUsageMustBeAcknowledgedBeforeSettle/accepted
+=== RUN   TestUsageMustBeAcknowledgedBeforeSettle/rejected
+=== RUN   TestUsageMustBeAcknowledgedBeforeSettle/missing
+--- PASS: TestUsageMustBeAcknowledgedBeforeSettle (0.00s)
+    --- PASS: TestUsageMustBeAcknowledgedBeforeSettle/accepted (0.00s)
+    --- PASS: TestUsageMustBeAcknowledgedBeforeSettle/rejected (0.00s)
+    --- PASS: TestUsageMustBeAcknowledgedBeforeSettle/missing (0.00s)
+PASS
+ok  	github.com/frostloom/ai-gateway/internal/gateway/handler	3.060s

@@ -1,0 +1,67 @@
+head=d66ebc53c37470dcfae00b463e58d3f52ca3f914
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+# github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02.test
+ld: warning: '/private/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-2772334096/000013.o' has malformed LC_DYSYMTAB, expected 98 undefined symbols to start at index 1626, found 95 undefined symbols starting at index 1626
+=== RUN   TestProductionBrowserAuthUsesOneStatement
+--- PASS: TestProductionBrowserAuthUsesOneStatement (0.42s)
+=== RUN   TestAuthSingleQueryNameMatchesGoBytes
+--- PASS: TestAuthSingleQueryNameMatchesGoBytes (0.44s)
+=== RUN   TestAuthSingleQueryMatchesAuthority
+    auth_single_query_test.go:109: regular and browser key states matched real Store over 9 cases
+--- PASS: TestAuthSingleQueryMatchesAuthority (0.45s)
+=== RUN   TestStoreOptInAuthCache
+--- PASS: TestStoreOptInAuthCache (1.76s)
+=== RUN   TestStoreAuthCacheFallbackAndExpiry
+
+2026/11/05 15:30:04 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:1019 [35;1mcontext canceled
+[0m[33m[0.079ms] [34;1m[rows:-][0m SELECT api_keys.*, CASE WHEN BINARY api_keys.name = BINARY '__browser_session' THEN (SELECT COUNT(*) FROM portal_sessions JOIN portal_users ON portal_users.id = portal_sessions.user_id JOIN tenants session_tenant ON session_tenant.id = portal_users.tenant_id WHERE portal_sessions.api_key_id = api_keys.id AND portal_users.status = 0 AND session_tenant.status = 0 AND session_tenant.id = api_keys.tenant_id) ELSE 1 END AS session_count FROM `api_keys` JOIN tenants ON tenants.id = api_keys.tenant_id WHERE api_keys.key_hash = 'cache-expiry-1793863803485921000-fallback' AND tenants.status = 0 LIMIT 1
+
+2026/11/05 15:30:04 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:1019 [35;1msql: database is closed
+[0m[33m[0.085ms] [34;1m[rows:-][0m SELECT api_keys.*, CASE WHEN BINARY api_keys.name = BINARY '__browser_session' THEN (SELECT COUNT(*) FROM portal_sessions JOIN portal_users ON portal_users.id = portal_sessions.user_id JOIN tenants session_tenant ON session_tenant.id = portal_users.tenant_id WHERE portal_sessions.api_key_id = api_keys.id AND portal_users.status = 0 AND session_tenant.status = 0 AND session_tenant.id = api_keys.tenant_id) ELSE 1 END AS session_count FROM `api_keys` JOIN tenants ON tenants.id = api_keys.tenant_id WHERE api_keys.key_hash = 'cache-expiry-1793863803485921000-fallback' AND tenants.status = 0 LIMIT 1
+--- PASS: TestStoreAuthCacheFallbackAndExpiry (1.03s)
+=== RUN   TestProductionBrowserAuthUsesOneStatement
+redis: 2026/11/05 15:30:04 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:1: connect: connection refused
+redis: 2026/11/05 15:30:04 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:1: connect: connection refused
+--- PASS: TestProductionBrowserAuthUsesOneStatement (0.34s)
+=== RUN   TestAuthSingleQueryNameMatchesGoBytes
+redis: 2026/11/05 15:30:04 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:1: connect: connection refused
+--- PASS: TestAuthSingleQueryNameMatchesGoBytes (0.38s)
+=== RUN   TestAuthSingleQueryMatchesAuthority
+    auth_single_query_test.go:109: regular and browser key states matched real Store over 9 cases
+--- PASS: TestAuthSingleQueryMatchesAuthority (0.56s)
+=== RUN   TestStoreOptInAuthCache
+--- PASS: TestStoreOptInAuthCache (1.71s)
+=== RUN   TestStoreAuthCacheFallbackAndExpiry
+
+2026/11/05 15:30:08 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:1019 [35;1mcontext canceled
+[0m[33m[0.078ms] [34;1m[rows:-][0m SELECT api_keys.*, CASE WHEN BINARY api_keys.name = BINARY '__browser_session' THEN (SELECT COUNT(*) FROM portal_sessions JOIN portal_users ON portal_users.id = portal_sessions.user_id JOIN tenants session_tenant ON session_tenant.id = portal_users.tenant_id WHERE portal_sessions.api_key_id = api_keys.id AND portal_users.status = 0 AND session_tenant.status = 0 AND session_tenant.id = api_keys.tenant_id) ELSE 1 END AS session_count FROM `api_keys` JOIN tenants ON tenants.id = api_keys.tenant_id WHERE api_keys.key_hash = 'cache-expiry-1793863807560106000-fallback' AND tenants.status = 0 LIMIT 1
+
+2026/11/05 15:30:08 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:1019 [35;1msql: database is closed
+[0m[33m[0.083ms] [34;1m[rows:-][0m SELECT api_keys.*, CASE WHEN BINARY api_keys.name = BINARY '__browser_session' THEN (SELECT COUNT(*) FROM portal_sessions JOIN portal_users ON portal_users.id = portal_sessions.user_id JOIN tenants session_tenant ON session_tenant.id = portal_users.tenant_id WHERE portal_sessions.api_key_id = api_keys.id AND portal_users.status = 0 AND session_tenant.status = 0 AND session_tenant.id = api_keys.tenant_id) ELSE 1 END AS session_count FROM `api_keys` JOIN tenants ON tenants.id = api_keys.tenant_id WHERE api_keys.key_hash = 'cache-expiry-1793863807560106000-fallback' AND tenants.status = 0 LIMIT 1
+--- PASS: TestStoreAuthCacheFallbackAndExpiry (1.08s)
+=== RUN   TestProductionBrowserAuthUsesOneStatement
+redis: 2026/11/05 15:30:08 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:1: connect: connection refused
+redis: 2026/11/05 15:30:08 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:1: connect: connection refused
+--- PASS: TestProductionBrowserAuthUsesOneStatement (0.35s)
+=== RUN   TestAuthSingleQueryNameMatchesGoBytes
+redis: 2026/11/05 15:30:08 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:1: connect: connection refused
+--- PASS: TestAuthSingleQueryNameMatchesGoBytes (0.37s)
+=== RUN   TestAuthSingleQueryMatchesAuthority
+    auth_single_query_test.go:109: regular and browser key states matched real Store over 9 cases
+--- PASS: TestAuthSingleQueryMatchesAuthority (0.41s)
+=== RUN   TestStoreOptInAuthCache
+--- PASS: TestStoreOptInAuthCache (1.77s)
+=== RUN   TestStoreAuthCacheFallbackAndExpiry
+
+2026/11/05 15:30:12 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:1019 [35;1mcontext canceled
+[0m[33m[0.171ms] [34;1m[rows:-][0m SELECT api_keys.*, CASE WHEN BINARY api_keys.name = BINARY '__browser_session' THEN (SELECT COUNT(*) FROM portal_sessions JOIN portal_users ON portal_users.id = portal_sessions.user_id JOIN tenants session_tenant ON session_tenant.id = portal_users.tenant_id WHERE portal_sessions.api_key_id = api_keys.id AND portal_users.status = 0 AND session_tenant.status = 0 AND session_tenant.id = api_keys.tenant_id) ELSE 1 END AS session_count FROM `api_keys` JOIN tenants ON tenants.id = api_keys.tenant_id WHERE api_keys.key_hash = 'cache-expiry-1793863811574984000-fallback' AND tenants.status = 0 LIMIT 1
+
+2026/11/05 15:30:12 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:1019 [35;1msql: database is closed
+[0m[33m[0.086ms] [34;1m[rows:-][0m SELECT api_keys.*, CASE WHEN BINARY api_keys.name = BINARY '__browser_session' THEN (SELECT COUNT(*) FROM portal_sessions JOIN portal_users ON portal_users.id = portal_sessions.user_id JOIN tenants session_tenant ON session_tenant.id = portal_users.tenant_id WHERE portal_sessions.api_key_id = api_keys.id AND portal_users.status = 0 AND session_tenant.status = 0 AND session_tenant.id = api_keys.tenant_id) ELSE 1 END AS session_count FROM `api_keys` JOIN tenants ON tenants.id = api_keys.tenant_id WHERE api_keys.key_hash = 'cache-expiry-1793863811574984000-fallback' AND tenants.status = 0 LIMIT 1
+--- PASS: TestStoreAuthCacheFallbackAndExpiry (1.12s)
+PASS
+redis: 2026/11/05 15:30:12 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:1: connect: connection refused
+redis: 2026/11/05 15:30:12 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:1: connect: connection refused
+redis: 2026/11/05 15:30:12 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:1: connect: connection refused
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	14.360s

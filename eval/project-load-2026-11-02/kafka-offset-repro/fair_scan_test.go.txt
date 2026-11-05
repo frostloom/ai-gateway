@@ -1,0 +1,107 @@
+package outbox
+
+import (
+ "context"
+ "encoding/json"
+ "errors"
+ "fmt"
+ "os"
+ "sync/atomic"
+ "testing"
+ "time"
+ "github.com/frostloom/ai-gateway/internal/billing/consumer"
+ "github.com/frostloom/ai-gateway/internal/billing/store"
+ appkafka "github.com/frostloom/ai-gateway/internal/pkg/kafka"
+ "github.com/frostloom/ai-gateway/internal/pkg/logger"
+ "gorm.io/driver/mysql"
+ "gorm.io/gorm"
+)
+
+type fairFixedRows struct { Store; rows []store.OutboxEvent }
+func (s fairFixedRows) PollOutbox(context.Context,int,int)([]store.OutboxEvent,error){return s.rows,nil}
+
+// Test-only prototype. Cursor and ceiling are in-memory and a restart begins
+// at zero. This is a bounded traversal, not an MVCC snapshot or a claim lock.
+type fairSweep struct { db *gorm.DB; store Store; main,dlq Producer; cursor,ceiling uint64 }
+func (s *fairSweep) step(ctx context.Context) error {
+ if err:=ctx.Err();err!=nil{return err}
+ if s.ceiling==0 {if err:=s.db.WithContext(ctx).Model(&store.OutboxEvent{}).Select("COALESCE(MAX(id),0)").Where("sent_at IS NULL").Scan(&s.ceiling).Error;err!=nil{return err};if s.ceiling==0{return nil}}
+ var rows []store.OutboxEvent
+ if err:=s.db.WithContext(ctx).Where("sent_at IS NULL AND id > ? AND id <= ?",s.cursor,s.ceiling).Order("id ASC").Limit(1).Find(&rows).Error;err!=nil{return err}
+ if len(rows)==0 {s.cursor=0;s.ceiling=0;return nil}
+ relay:=NewRelay(fairFixedRows{Store:s.store,rows:rows},s.main,s.dlq,Config{BatchSize:1,MaxAttempts:5},logger.New("error"))
+ if _,err:=relay.FlushOnce(ctx);err!=nil{return err};if err:=ctx.Err();err!=nil{return err}
+ s.cursor=rows[len(rows)-1].ID
+ return nil
+}
+
+type fairGate struct { producer Producer; open atomic.Bool }
+func (g *fairGate) Publish(ctx context.Context,key string,value []byte) error {
+ if key=="fair-kafka-blocked"&&!g.open.Load(){return errors.New("injected blocked event")};return g.producer.Publish(ctx,key,value)
+}
+
+func TestIsolatedFairSweepKafka(t *testing.T){
+ dsn,addr:=os.Getenv("ISOLATED_MYSQL_DSN"),os.Getenv("ISOLATED_KAFKA_ADDR");if dsn==""||addr==""{t.Fatal("isolated addresses required")}
+ db,err:=gorm.Open(mysql.Open(dsn),&gorm.Config{});if err!=nil{t.Fatal(err)}
+ if err=db.AutoMigrate(&store.OutboxEvent{},&store.AuditEvent{});err!=nil{t.Fatal(err)}
+ keys:=[]string{"fair-kafka-blocked","fair-kafka-later-1","fair-kafka-later-2"}
+ for i,key:=range keys {payload,_:=json.Marshal(store.BillingEvent{EventID:key,RequestID:key,Phase:"reserve",TenantID:1,Funding:"balance"});row:=evRow(uint64(i+1),key,0);row.Payload=string(payload);if i==0{row.Attempts=4};if err=db.Create(&row).Error;err!=nil{t.Fatal(err)}}
+ ctx,cancel:=context.WithCancel(context.Background());log:=logger.New("error");st:=store.NewStore(db,nil)
+ producer:=appkafka.NewProducer([]string{addr},"offset-repro",log);defer producer.Close();gate:=&fairGate{producer:producer}
+ kc:=appkafka.NewConsumer([]string{addr},"fair-kafka-group",[]string{"offset-repro"});c:=consumer.New(st,kc,consumer.Config{},log)
+ done:=make(chan struct{});go func(){defer close(done);_=c.Run(ctx)}();defer func(){cancel();<-done;_=kc.Close()}()
+ s:=&fairSweep{db:db,store:st,main:gate,dlq:gate}
+ for i:=0;i<3;i++{if err=s.step(ctx);err!=nil{t.Fatal(err)}}
+ var blocked,later int64
+ if err=db.Model(&store.OutboxEvent{}).Where("event_key = ? AND sent_at IS NULL",keys[0]).Count(&blocked).Error;err!=nil{t.Fatal(err)}
+ if err=db.Model(&store.OutboxEvent{}).Where("event_key IN ? AND sent_at IS NOT NULL",keys[1:]).Count(&later).Error;err!=nil{t.Fatal(err)}
+ if blocked!=1||later!=2 {t.Fatalf("before recovery: blocked=%d later sent=%d",blocked,later)}
+ gate.open.Store(true)
+ for i:=0;i<3;i++{if err=s.step(ctx);err!=nil{t.Fatal(err)}}
+ deadline:=time.Now().Add(30*time.Second);var count int64
+ for time.Now().Before(deadline){if err=db.Model(&store.AuditEvent{}).Where("event_id IN ?",keys).Count(&count).Error;err!=nil{t.Fatal(err)};if count==3{break};time.Sleep(100*time.Millisecond)}
+ var missing,unsent int64
+ if err=db.Raw("SELECT COUNT(*) FROM outbox_events o LEFT JOIN audit_events a ON a.event_id=o.event_key WHERE a.id IS NULL").Scan(&missing).Error;err!=nil{t.Fatal(err)}
+ if err=db.Model(&store.OutboxEvent{}).Where("sent_at IS NULL").Count(&unsent).Error;err!=nil{t.Fatal(err)}
+ fmt.Printf("FAIR_KAFKA before_recovery blocked=%d later_sent=%d after_recovery audits=%d missing=%d unsent=%d\n",blocked,later,count,missing,unsent)
+ if count!=3||missing!=0||unsent!=0{t.Fatal("event reconciliation failed")}
+}
+
+func TestIsolatedFairSweepRecovery(t *testing.T){
+ dsn:=os.Getenv("ISOLATED_MYSQL_DSN");if dsn=="" {t.Fatal("isolated MySQL required")}
+ db,err:=gorm.Open(mysql.Open(dsn),&gorm.Config{});if err!=nil{t.Fatal(err)}
+ if err=db.AutoMigrate(&store.OutboxEvent{});err!=nil{t.Fatal(err)}
+ if err=db.Exec("DELETE FROM outbox_events").Error;err!=nil{t.Fatal(err)}
+ first:=evRow(100,"fair-blocked",4);second:=evRow(101,"fair-later",0)
+ if err=db.Create(&first).Error;err!=nil{t.Fatal(err)};if err=db.Create(&second).Error;err!=nil{t.Fatal(err)}
+ main:=&stubProducer{fail:map[string]error{first.EventKey:errBoom}};dlq:=&stubProducer{fail:map[string]error{first.EventKey:errBoom}}
+ s:=&fairSweep{db:db,store:store.NewStore(db,nil),main:main,dlq:dlq};ctx:=context.Background()
+ if err=s.step(ctx);err!=nil{t.Fatal(err)};if s.cursor!=100||s.ceiling!=101{t.Fatalf("unexpected first scan cursor=%d ceiling=%d",s.cursor,s.ceiling)}
+ third:=evRow(102,"fair-new",0);if err=db.Create(&third).Error;err!=nil{t.Fatal(err)}
+ canceled,cancel:=context.WithCancel(ctx);cancel();if err=s.step(canceled);err==nil{t.Fatal("cancellation ignored")};if s.cursor!=100{t.Fatal("cancellation advanced cursor")}
+ if err=s.step(ctx);err!=nil{t.Fatal(err)}
+ var later store.OutboxEvent;if err=db.First(&later,second.ID).Error;err!=nil{t.Fatal(err)};if later.SentAt==nil{t.Fatal("later eligible row blocked")}
+ if err=s.step(ctx);err!=nil{t.Fatal(err)};if s.ceiling!=0||s.cursor!=0{t.Fatal("new event incorrectly extended prior sweep")}
+ if err=s.step(ctx);err!=nil{t.Fatal(err)};if err=s.step(ctx);err!=nil{t.Fatal(err)}
+ var newrow store.OutboxEvent;if err=db.First(&newrow,third.ID).Error;err!=nil{t.Fatal(err)};if newrow.SentAt==nil{t.Fatal("new row not processed next sweep")}
+ delete(main.fail,first.EventKey);delete(dlq.fail,first.EventKey)
+ restarted:=&fairSweep{db:db,store:store.NewStore(db,nil),main:main,dlq:dlq};if err=restarted.step(ctx);err!=nil{t.Fatal(err)}
+ var recovered store.OutboxEvent;if err=db.First(&recovered,first.ID).Error;err!=nil{t.Fatal(err)};if recovered.SentAt==nil{t.Fatal("failed row not recovered after restart")}
+ t.Log("blocked row retained; later and new rows delivered; canceled cursor unchanged; restart recovered blocked row")
+}
+
+func TestIsolatedFairSweepLateCommit(t *testing.T){
+ dsn:=os.Getenv("ISOLATED_MYSQL_DSN");if dsn==""{t.Fatal("isolated MySQL required")}
+ db,err:=gorm.Open(mysql.Open(dsn),&gorm.Config{});if err!=nil{t.Fatal(err)}
+ if err=db.AutoMigrate(&store.OutboxEvent{});err!=nil{t.Fatal(err)};if err=db.Exec("DELETE FROM outbox_events").Error;err!=nil{t.Fatal(err)}
+ tx:=db.Begin();if tx.Error!=nil{t.Fatal(tx.Error)};defer tx.Rollback()
+ low:=evRow(1000,"late-low",0);high:=evRow(1001,"visible-high",0)
+ if err=tx.Create(&low).Error;err!=nil{t.Fatal(err)};if err=db.Create(&high).Error;err!=nil{t.Fatal(err)}
+ main:=&stubProducer{};s:=&fairSweep{db:db,store:store.NewStore(db,nil),main:main,dlq:&stubProducer{}}
+ if err=s.step(context.Background());err!=nil{t.Fatal(err)};if s.cursor!=1001{t.Fatalf("expected visible high first, cursor=%d",s.cursor)}
+ if err=tx.Commit().Error;err!=nil{t.Fatal(err)}
+ if err=s.step(context.Background());err!=nil{t.Fatal(err)};if s.cursor!=0||s.ceiling!=0{t.Fatal("sweep did not finish")}
+ if err=s.step(context.Background());err!=nil{t.Fatal(err)}
+ var got store.OutboxEvent;if err=db.First(&got,low.ID).Error;err!=nil{t.Fatal(err)};if got.SentAt==nil{t.Fatal("late committed lower ID was not recovered in next sweep")}
+ t.Log("lower ID committed after cursor advancement delivered on next sweep")
+}

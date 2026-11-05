@@ -1,0 +1,65 @@
+=== RUN   TestAuthProxyHTTPSConfiguration
+=== RUN   TestAuthProxyHTTPSConfiguration/secure=
+=== RUN   TestAuthProxyHTTPSConfiguration/secure=1
+--- PASS: TestAuthProxyHTTPSConfiguration (0.00s)
+    --- PASS: TestAuthProxyHTTPSConfiguration/secure= (0.00s)
+    --- PASS: TestAuthProxyHTTPSConfiguration/secure=1 (0.00s)
+=== RUN   TestChatLeavesPendingWhenActualUsageCannotBeRecorded
+--- PASS: TestChatLeavesPendingWhenActualUsageCannotBeRecorded (0.00s)
+=== RUN   TestRelayStreamSettlesForwardedContentWithoutUsage
+--- PASS: TestRelayStreamSettlesForwardedContentWithoutUsage (0.00s)
+=== RUN   TestRelayStreamFailoverThen502Reverses
+    chat_stream_test.go:169: body = {"error":{"message":"upstream outcome unknown"}}
+--- FAIL: TestRelayStreamFailoverThen502Reverses (0.00s)
+=== RUN   TestChatReportsSuccessfulFallbackProvider
+=== RUN   TestChatReportsSuccessfulFallbackProvider/nonstream
+    chat_stream_test.go:215: status = 502, body="{\"error\":{\"message\":\"upstream outcome unknown\"}}"
+=== RUN   TestChatReportsSuccessfulFallbackProvider/stream_usage
+    chat_stream_test.go:215: status = 502, body="{\"error\":{\"message\":\"upstream outcome unknown\"}}"
+=== RUN   TestChatReportsSuccessfulFallbackProvider/stream_estimate
+    chat_stream_test.go:215: status = 502, body="{\"error\":{\"message\":\"upstream outcome unknown\"}}"
+--- FAIL: TestChatReportsSuccessfulFallbackProvider (0.00s)
+    --- FAIL: TestChatReportsSuccessfulFallbackProvider/nonstream (0.00s)
+    --- FAIL: TestChatReportsSuccessfulFallbackProvider/stream_usage (0.00s)
+    --- FAIL: TestChatReportsSuccessfulFallbackProvider/stream_estimate (0.00s)
+=== RUN   TestRelayStreamDoesNotWaitForFailedResponseBody
+=== RUN   TestRelayStreamDoesNotWaitForFailedResponseBody/refund
+    chat_stream_test.go:274: refund result: status=502 reverses=0 reports=0
+=== RUN   TestRelayStreamDoesNotWaitForFailedResponseBody/failover
+    chat_stream_test.go:271: fallback result: status=502 body="{\"error\":{\"message\":\"upstream outcome unknown\"}}" settles=0 reverses=0
+--- FAIL: TestRelayStreamDoesNotWaitForFailedResponseBody (0.00s)
+    --- FAIL: TestRelayStreamDoesNotWaitForFailedResponseBody/refund (0.00s)
+    --- FAIL: TestRelayStreamDoesNotWaitForFailedResponseBody/failover (0.00s)
+=== RUN   TestChatReserveConflictReturns409
+--- PASS: TestChatReserveConflictReturns409 (0.00s)
+=== RUN   TestChatRejectsNonAuthorizingReserveCodes
+=== RUN   TestChatRejectsNonAuthorizingReserveCodes/duplicate
+=== RUN   TestChatRejectsNonAuthorizingReserveCodes/unknown
+--- PASS: TestChatRejectsNonAuthorizingReserveCodes (0.00s)
+    --- PASS: TestChatRejectsNonAuthorizingReserveCodes/duplicate (0.00s)
+    --- PASS: TestChatRejectsNonAuthorizingReserveCodes/unknown (0.00s)
+=== RUN   TestChatRejectsNilReserveResponse
+--- PASS: TestChatRejectsNilReserveResponse (0.00s)
+=== RUN   TestChatRejectsReserveSuccessWithoutBillID
+--- PASS: TestChatRejectsReserveSuccessWithoutBillID (0.00s)
+=== RUN   TestParseUsageFrame
+=== RUN   TestParseUsageFrame/终帧带_usage（choices_空）
+=== RUN   TestParseUsageFrame/内容增量帧（带_choices，无_usage）
+=== RUN   TestParseUsageFrame/role_帧
+=== RUN   TestParseUsageFrame/DONE_哨兵
+=== RUN   TestParseUsageFrame/非_data_行（空行分隔）
+=== RUN   TestParseUsageFrame/坏_JSON
+=== RUN   TestParseUsageFrame/带_choices_但空_usage_指针
+--- PASS: TestParseUsageFrame (0.00s)
+    --- PASS: TestParseUsageFrame/终帧带_usage（choices_空） (0.00s)
+    --- PASS: TestParseUsageFrame/内容增量帧（带_choices，无_usage） (0.00s)
+    --- PASS: TestParseUsageFrame/role_帧 (0.00s)
+    --- PASS: TestParseUsageFrame/DONE_哨兵 (0.00s)
+    --- PASS: TestParseUsageFrame/非_data_行（空行分隔） (0.00s)
+    --- PASS: TestParseUsageFrame/坏_JSON (0.00s)
+    --- PASS: TestParseUsageFrame/带_choices_但空_usage_指针 (0.00s)
+FAIL
+FAIL	github.com/frostloom/ai-gateway/internal/gateway/handler	1.050s
+FAIL
+
+exit_code=1

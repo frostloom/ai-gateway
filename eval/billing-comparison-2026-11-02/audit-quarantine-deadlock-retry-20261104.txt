@@ -1,0 +1,23 @@
+head=4e4c7fdd6b3a97f0f2503e1e0dd73a95707af541
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestAuditQuarantineRaceAndCommitAck
+    audit_quarantine_race_ack_test.go:117: initial_race=map[accepted:1 duplicate:5 quarantined:6] deadlock_retries=21 original=90 held=6 deliveries=12 commit_ack_errors=2 retries_single_evidence=true
+--- PASS: TestAuditQuarantineRaceAndCommitAck (0.54s)
+=== RUN   TestAuditQuarantineTransaction
+    audit_quarantine_test.go:181: initial=accepted replay=duplicate injected_write=error conflict=quarantined repeat=one coordinate_mutation=error original_unchanged=true
+--- PASS: TestAuditQuarantineTransaction (0.09s)
+=== RUN   TestAuditQuarantineRaceAndCommitAck
+    audit_quarantine_race_ack_test.go:117: initial_race=map[accepted:1 duplicate:5 quarantined:6] deadlock_retries=22 original=40 held=6 deliveries=12 commit_ack_errors=2 retries_single_evidence=true
+--- PASS: TestAuditQuarantineRaceAndCommitAck (0.21s)
+=== RUN   TestAuditQuarantineTransaction
+    audit_quarantine_test.go:181: initial=accepted replay=duplicate injected_write=error conflict=quarantined repeat=one coordinate_mutation=error original_unchanged=true
+--- PASS: TestAuditQuarantineTransaction (0.10s)
+=== RUN   TestAuditQuarantineRaceAndCommitAck
+    audit_quarantine_race_ack_test.go:117: initial_race=map[accepted:1 duplicate:5 quarantined:6] deadlock_retries=26 original=40 held=6 deliveries=12 commit_ack_errors=2 retries_single_evidence=true
+--- PASS: TestAuditQuarantineRaceAndCommitAck (0.31s)
+=== RUN   TestAuditQuarantineTransaction
+    audit_quarantine_test.go:181: initial=accepted replay=duplicate injected_write=error conflict=quarantined repeat=one coordinate_mutation=error original_unchanged=true
+--- PASS: TestAuditQuarantineTransaction (0.09s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	3.658s

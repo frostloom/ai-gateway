@@ -1,0 +1,5 @@
+=== RUN   TestGatewayTruncatedNonStreamResponseCharacterization
+    chat_stream_test.go:363: status=200 response="{\"choices\":[{\"message\":{\"content\":\"partial" prompt=1 completion=0 settles=1
+--- PASS: TestGatewayTruncatedNonStreamResponseCharacterization (0.00s)
+PASS
+ok  	github.com/frostloom/ai-gateway/internal/gateway/handler	2.248s

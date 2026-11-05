@@ -1,0 +1,116 @@
+package outbox
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"net"
+	"os"
+	"os/exec"
+	"regexp"
+	"strings"
+	"sync/atomic"
+	"testing"
+	"time"
+
+	"github.com/frostloom/ai-gateway/internal/billing/consumer"
+	"github.com/frostloom/ai-gateway/internal/billing/store"
+	appkafka "github.com/frostloom/ai-gateway/internal/pkg/kafka"
+	"github.com/frostloom/ai-gateway/internal/pkg/logger"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
+)
+
+type partialGate struct {
+	Producer
+	claimed atomic.Bool
+	confirmed chan struct{}
+	release chan struct{}
+}
+
+func (g *partialGate) Publish(ctx context.Context, key string, value []byte) error {
+	if g.claimed.CompareAndSwap(false, true) {
+		if err := g.Producer.Publish(ctx, key, value); err != nil { return err }
+		close(g.confirmed)
+		select { case <-g.release: return nil; case <-ctx.Done(): return ctx.Err() }
+	}
+	select { case <-g.release: return g.Producer.Publish(ctx, key, value); case <-ctx.Done(): return ctx.Err() }
+}
+
+func TestIsolatedRelayBrokerOutageRecovery(t *testing.T) {
+	dsn, addr, name := os.Getenv("ISOLATED_MYSQL_DSN"), os.Getenv("ISOLATED_KAFKA_ADDR"), os.Getenv("ISOLATED_KAFKA_CONTAINER")
+	if dsn == "" || !regexp.MustCompile(`^relay-experiment-[0-9a-f]{12}-kafka$`).MatchString(name) { t.Fatal("refusing non-test container") }
+	host, _, err := net.SplitHostPort(addr)
+	if err != nil || host != "127.0.0.1" { t.Fatalf("invalid broker address %q", addr) }
+	port, err := exec.Command("docker", "port", name, "9092/tcp").CombinedOutput()
+	if err != nil || strings.TrimSpace(string(port)) != addr { t.Fatalf("broker port mismatch %q err=%v", port, err) }
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	if err != nil { t.Fatal(err) }
+	if err := db.AutoMigrate(&store.OutboxEvent{}, &store.AuditEvent{}); err != nil { t.Fatal(err) }
+	const count = 16
+	prefix := fmt.Sprintf("broker-outage-%d-", time.Now().UnixNano())
+	for i:=0; i<count; i++ {
+		id:=fmt.Sprintf("%s%d",prefix,i)
+		payload,_:=json.Marshal(store.BillingEvent{EventID:id,RequestID:id,Phase:"reserve",TenantID:1,Funding:"balance"})
+		if err:=db.Create(&store.OutboxEvent{Topic:store.TopicBillingEvents,EventKey:id,Payload:string(payload),CreatedAt:time.Now()}).Error; err!=nil { t.Fatal(err) }
+	}
+	docker := func(args ...string) { t.Helper(); ctx,cancel:=context.WithTimeout(context.Background(),30*time.Second); defer cancel(); out,err:=exec.CommandContext(ctx,"docker",args...).CombinedOutput(); if err!=nil { t.Fatalf("docker %v: %v %s",args,err,out) } }
+	restarted:=false
+	t.Cleanup(func(){ if !restarted { _=exec.Command("docker","start",name).Run() } })
+	log:=logger.New("error")
+	st:=store.NewStore(db,nil)
+	prod:=appkafka.NewProducer([]string{addr},"offset-repro",log)
+	defer prod.Close()
+	var pub Producer = prod
+	partial := os.Getenv("ISOLATED_PARTIAL_BROKER_OUTAGE") == "1"
+	var gate *partialGate
+	if partial { gate=&partialGate{Producer:prod,confirmed:make(chan struct{}),release:make(chan struct{})}; pub=gate }
+	relay:=NewRelay(st,pub,prod,Config{BatchSize:count,MaxAttempts:5},log)
+	ctx,cancel:=context.WithTimeout(context.Background(),8*time.Second)
+	if partial {
+		finished:=make(chan error,1)
+		go func(){ _,e:=relay.FlushOnce(ctx); finished<-e }()
+		select { case <-gate.confirmed: case <-ctx.Done(): cancel(); t.Fatal("no first publish confirmation") }
+		docker("kill",name)
+		close(gate.release)
+		if e:=<-finished; e!=nil { cancel(); t.Fatalf("partial flush: %v",e) }
+	} else {
+		docker("kill",name)
+		_,err=relay.FlushOnce(ctx)
+		if err!=nil { cancel(); t.Fatalf("outage poll err=%v",err) }
+	}
+	cancel()
+	var unsent int64
+	wantUnsent:=int64(count)
+	if partial { wantUnsent-- }
+	if err:=db.Model(&store.OutboxEvent{}).Where("event_key LIKE ? AND sent_at IS NULL",prefix+"%").Count(&unsent).Error; err!=nil || unsent!=wantUnsent { t.Fatalf("outage unsent=%d want=%d err=%v",unsent,wantUnsent,err) }
+	docker("start",name); restarted=true
+	deadline:=time.Now().Add(90*time.Second)
+	for {
+		ctx,cancel:=context.WithTimeout(context.Background(),5*time.Second)
+		err:=exec.CommandContext(ctx,"docker","exec",name,"/opt/kafka/bin/kafka-topics.sh","--bootstrap-server","127.0.0.1:9094","--list").Run()
+		cancel()
+		if err==nil { break }
+		if time.Now().After(deadline) { t.Fatal("broker restart readiness timeout") }
+		time.Sleep(time.Second)
+	}
+	consumerCtx,stop:=context.WithCancel(context.Background())
+	kc:=appkafka.NewConsumer([]string{addr},"outage-recovery",[]string{"offset-repro"})
+	c:=consumer.New(st,kc,consumer.Config{},log)
+	done:=make(chan struct{})
+	go func(){ defer close(done); _=c.Run(consumerCtx) }()
+	defer func(){ stop(); <-done; _=kc.Close() }()
+	deadline=time.Now().Add(60*time.Second)
+	var audited int64
+	for time.Now().Before(deadline) {
+		flushCtx,finish:=context.WithTimeout(context.Background(),5*time.Second)
+		_,err:=relay.FlushOnce(flushCtx); finish()
+		if err!=nil { t.Fatal(err) }
+		if err:=db.Model(&store.OutboxEvent{}).Where("event_key LIKE ? AND sent_at IS NULL",prefix+"%").Count(&unsent).Error; err!=nil { t.Fatal(err) }
+		if err:=db.Model(&store.AuditEvent{}).Where("event_id LIKE ?",prefix+"%").Count(&audited).Error; err!=nil { t.Fatal(err) }
+		if unsent==0 && audited==count { break }
+		time.Sleep(300*time.Millisecond)
+	}
+	if unsent!=0 || audited!=count { t.Fatalf("recovery unsent=%d audit=%d",unsent,audited) }
+	t.Logf("partial=%v broker outage unsent=%d; restarted: unsent=%d audit=%d",partial,wantUnsent,unsent,audited)
+}

@@ -1,0 +1,46 @@
+{
+  "run": "/Users/a1/项目/ai-gateway/eval/project-load-2026-11-02/gateway-open-load-runs/20261105-110831",
+  "mock_log_entries": 10033,
+  "mock_unique_ids": 10033,
+  "duplicate_mock_receptions": 0,
+  "traces": [
+    {
+      "trace": "trace-64-120-1.csv",
+      "requests": 7200,
+      "by_http_valid_mock_receptions": [
+        {
+          "status": "200",
+          "valid": "true",
+          "mock_receptions": 1,
+          "count": 4979
+        },
+        {
+          "status": "503",
+          "valid": "false",
+          "mock_receptions": 0,
+          "count": 2221
+        }
+      ],
+      "anomalies": []
+    },
+    {
+      "trace": "trace-64-120-2.csv",
+      "requests": 7200,
+      "by_http_valid_mock_receptions": [
+        {
+          "status": "200",
+          "valid": "true",
+          "mock_receptions": 1,
+          "count": 5049
+        },
+        {
+          "status": "503",
+          "valid": "false",
+          "mock_receptions": 0,
+          "count": 2151
+        }
+      ],
+      "anomalies": []
+    }
+  ]
+}

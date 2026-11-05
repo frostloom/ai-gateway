@@ -1,0 +1,29 @@
+head=63b9d1ed4d64bb583d15fa884c37468e5c53044c
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestSettledUsageCannotIdentifyCompletedStream
+    execution_attempt_ambiguity_test.go:382: recovery outbox failure rolled back state and event; retry follows
+[mysql] 2026/11/03 23:54:39 packets.go:58 unexpected EOF
+    execution_attempt_ambiguity_test.go:417: MySQL connection killed after update before outbox: rollback verified; retry follows
+    execution_attempt_ambiguity_test.go:438: driver returned injected error after actual commit; state and event persisted
+    execution_attempt_ambiguity_test.go:499: complete=1 cross_request_partial=untouched repeat=0
+    execution_attempt_ambiguity_test.go:509: completed_done=true partial_done=false both_settled=true both_usage=1+2 before_recovery_both_attempt=sending before_recovery_attempt_events=0 balance=994 ledger=994
+--- PASS: TestSettledUsageCannotIdentifyCompletedStream (0.61s)
+=== RUN   TestSettledUsageCannotIdentifyCompletedStream
+    execution_attempt_ambiguity_test.go:382: recovery outbox failure rolled back state and event; retry follows
+[mysql] 2026/11/03 23:54:40 packets.go:58 unexpected EOF
+    execution_attempt_ambiguity_test.go:417: MySQL connection killed after update before outbox: rollback verified; retry follows
+    execution_attempt_ambiguity_test.go:438: driver returned injected error after actual commit; state and event persisted
+    execution_attempt_ambiguity_test.go:499: complete=1 cross_request_partial=untouched repeat=0
+    execution_attempt_ambiguity_test.go:509: completed_done=true partial_done=false both_settled=true both_usage=1+2 before_recovery_both_attempt=sending before_recovery_attempt_events=0 balance=994 ledger=994
+--- PASS: TestSettledUsageCannotIdentifyCompletedStream (0.64s)
+=== RUN   TestSettledUsageCannotIdentifyCompletedStream
+    execution_attempt_ambiguity_test.go:382: recovery outbox failure rolled back state and event; retry follows
+[mysql] 2026/11/03 23:54:41 packets.go:58 unexpected EOF
+    execution_attempt_ambiguity_test.go:417: MySQL connection killed after update before outbox: rollback verified; retry follows
+    execution_attempt_ambiguity_test.go:438: driver returned injected error after actual commit; state and event persisted
+    execution_attempt_ambiguity_test.go:499: complete=1 cross_request_partial=untouched repeat=0
+    execution_attempt_ambiguity_test.go:509: completed_done=true partial_done=false both_settled=true both_usage=1+2 before_recovery_both_attempt=sending before_recovery_attempt_events=0 balance=994 ledger=994
+--- PASS: TestSettledUsageCannotIdentifyCompletedStream (0.60s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	3.738s

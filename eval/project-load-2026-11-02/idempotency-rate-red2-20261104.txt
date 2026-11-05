@@ -1,0 +1,18 @@
+=== RUN   TestRateRejectedKeyCanRetry
+    idempotency_rate_limit_test.go:39: retry after limiter expiry=409 want 204 (calls=1)
+--- FAIL: TestRateRejectedKeyCanRetry (0.01s)
+=== RUN   TestHandler429DoesNotReleaseKey
+--- PASS: TestHandler429DoesNotReleaseKey (0.00s)
+=== RUN   TestRateRejectedKeyCanRetry
+    idempotency_rate_limit_test.go:39: retry after limiter expiry=409 want 204 (calls=1)
+--- FAIL: TestRateRejectedKeyCanRetry (0.00s)
+=== RUN   TestHandler429DoesNotReleaseKey
+--- PASS: TestHandler429DoesNotReleaseKey (0.00s)
+=== RUN   TestRateRejectedKeyCanRetry
+    idempotency_rate_limit_test.go:39: retry after limiter expiry=409 want 204 (calls=1)
+--- FAIL: TestRateRejectedKeyCanRetry (0.00s)
+=== RUN   TestHandler429DoesNotReleaseKey
+--- PASS: TestHandler429DoesNotReleaseKey (0.00s)
+FAIL
+FAIL	github.com/frostloom/ai-gateway/eval/project-load-2026-11-02	1.430s
+FAIL

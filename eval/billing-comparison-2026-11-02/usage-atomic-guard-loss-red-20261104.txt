@@ -1,0 +1,16 @@
+head=8b3347aea3abe3e2131d67e9e48a77dd61e2bc86
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+7240aeef116649d25c360816c807c7ad54e1fb7ddc26a9fcd24ceb6ec345fa0d  /var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T//usage-atomic-overlay.WTXhjU/mysql.go
+=== RUN   TestUsageCommitDuringReverseDelta
+    usage_during_reverse_delta_test.go:87: during=1000 balance=1000 ledger=900 bill={ID:1 ReserveFingerprint:0xc00024e6a0 RequestID:delta-usage-race-1793781258905549000 Phase:reserve Status:pending TenantID:1 APIKeyID:1 ProviderID:<nil> Model:delta-usage-race-1793781258905549000 Funding:balance PreQuota:100 ReservedTokens:<nil> ReservedTier:<nil> ActualQuota:<nil> DeltaQuota:<nil> PromptTokens:0xc0000f1dd8 CompletionTokens:0xc0000f1de8 InPriceCent:0xc0000f1df8 OutPriceCent:0xc0000f1e08 UsageReportedAt:2026-11-04 16:34:18.986 +0800 CST ErrorCode: CreatedAt:2026-11-04 16:34:18.946 +0800 CST} reverse_events=0
+--- FAIL: TestUsageCommitDuringReverseDelta (0.71s)
+=== RUN   TestUsageCommitDuringReverseDelta
+    usage_during_reverse_delta_test.go:87: during=1000 balance=1000 ledger=900 bill={ID:2 ReserveFingerprint:0xc00024f240 RequestID:delta-usage-race-1793781259376821000 Phase:reserve Status:pending TenantID:2 APIKeyID:1 ProviderID:<nil> Model:delta-usage-race-1793781259376821000 Funding:balance PreQuota:100 ReservedTokens:<nil> ReservedTier:<nil> ActualQuota:<nil> DeltaQuota:<nil> PromptTokens:0xc0000105b8 CompletionTokens:0xc0000105c8 InPriceCent:0xc0000105d8 OutPriceCent:0xc0000105e8 UsageReportedAt:2026-11-04 16:34:19.425 +0800 CST ErrorCode: CreatedAt:2026-11-04 16:34:19.402 +0800 CST} reverse_events=0
+--- FAIL: TestUsageCommitDuringReverseDelta (0.43s)
+=== RUN   TestUsageCommitDuringReverseDelta
+    usage_during_reverse_delta_test.go:87: during=1000 balance=1000 ledger=900 bill={ID:3 ReserveFingerprint:0xc0000501c0 RequestID:delta-usage-race-1793781259796931000 Phase:reserve Status:pending TenantID:3 APIKeyID:1 ProviderID:<nil> Model:delta-usage-race-1793781259796931000 Funding:balance PreQuota:100 ReservedTokens:<nil> ReservedTier:<nil> ActualQuota:<nil> DeltaQuota:<nil> PromptTokens:0xc000425c88 CompletionTokens:0xc000425c98 InPriceCent:0xc000425cd8 OutPriceCent:0xc000425ce8 UsageReportedAt:2026-11-04 16:34:19.836 +0800 CST ErrorCode: CreatedAt:2026-11-04 16:34:19.818 +0800 CST} reverse_events=0
+--- FAIL: TestUsageCommitDuringReverseDelta (0.41s)
+FAIL
+FAIL	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	2.462s
+FAIL

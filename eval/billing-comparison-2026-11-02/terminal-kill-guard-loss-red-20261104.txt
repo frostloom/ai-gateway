@@ -1,0 +1,36 @@
+head=8b3347aea3abe3e2131d67e9e48a77dd61e2bc86
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestTerminalConnectionKilledAfterRedisDelta
+=== RUN   TestTerminalConnectionKilledAfterRedisDelta/settle
+[mysql] 2026/11/04 16:51:49 packets.go:58 unexpected EOF
+    terminal_connection_kill_test.go:89: fresh recovery failed: live=460 ledger=400
+=== RUN   TestTerminalConnectionKilledAfterRedisDelta/reverse
+[mysql] 2026/11/04 16:51:49 packets.go:58 unexpected EOF
+    terminal_connection_kill_test.go:89: fresh recovery failed: live=500 ledger=400
+--- FAIL: TestTerminalConnectionKilledAfterRedisDelta (0.80s)
+    --- FAIL: TestTerminalConnectionKilledAfterRedisDelta/settle (0.10s)
+    --- FAIL: TestTerminalConnectionKilledAfterRedisDelta/reverse (0.06s)
+=== RUN   TestTerminalConnectionKilledAfterRedisDelta
+=== RUN   TestTerminalConnectionKilledAfterRedisDelta/settle
+[mysql] 2026/11/04 16:51:50 packets.go:58 unexpected EOF
+    terminal_connection_kill_test.go:89: fresh recovery failed: live=460 ledger=400
+=== RUN   TestTerminalConnectionKilledAfterRedisDelta/reverse
+[mysql] 2026/11/04 16:51:50 packets.go:58 unexpected EOF
+    terminal_connection_kill_test.go:89: fresh recovery failed: live=500 ledger=400
+--- FAIL: TestTerminalConnectionKilledAfterRedisDelta (0.89s)
+    --- FAIL: TestTerminalConnectionKilledAfterRedisDelta/settle (0.27s)
+    --- FAIL: TestTerminalConnectionKilledAfterRedisDelta/reverse (0.12s)
+=== RUN   TestTerminalConnectionKilledAfterRedisDelta
+=== RUN   TestTerminalConnectionKilledAfterRedisDelta/settle
+[mysql] 2026/11/04 16:51:51 packets.go:58 unexpected EOF
+    terminal_connection_kill_test.go:89: fresh recovery failed: live=460 ledger=400
+=== RUN   TestTerminalConnectionKilledAfterRedisDelta/reverse
+[mysql] 2026/11/04 16:51:51 packets.go:58 unexpected EOF
+    terminal_connection_kill_test.go:89: fresh recovery failed: live=500 ledger=400
+--- FAIL: TestTerminalConnectionKilledAfterRedisDelta (0.57s)
+    --- FAIL: TestTerminalConnectionKilledAfterRedisDelta/settle (0.09s)
+    --- FAIL: TestTerminalConnectionKilledAfterRedisDelta/reverse (0.06s)
+FAIL
+FAIL	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	3.542s
+FAIL

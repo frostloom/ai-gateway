@@ -11,7 +11,7 @@ import (
 )
 
 // NewHTTPHandler 暴露选路、熔断回报和观测端点。
-// /route 与 /report 需要控制面令牌：前者会返回上游 key，后者能拨动熔断。
+// 选路、回报和内部状态端点需要控制面令牌。
 func NewHTTPHandler(reg *Registry, token string, log *slog.Logger) *http.ServeMux {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/route", func(w http.ResponseWriter, r *http.Request) {
@@ -33,7 +33,7 @@ func NewHTTPHandler(reg *Registry, token string, log *slog.Logger) *http.ServeMu
 				}
 			}
 		}
-		prov, err := reg.RouteExclude(model, exclude)
+		prov, err := reg.RouteExcludeContext(r.Context(), model, exclude)
 		if err != nil {
 			log.Error("route", "model", model, "err", err)
 			http.Error(w, `{"error":"route failed"}`, http.StatusInternalServerError)
@@ -65,7 +65,11 @@ func NewHTTPHandler(reg *Registry, token string, log *slog.Logger) *http.ServeMu
 			http.Error(w, `{"error":"bad report"}`, http.StatusBadRequest)
 			return
 		}
-		reg.Report(body.ProviderID, body.OK)
+		if err := reg.Report(body.ProviderID, body.OK); err != nil {
+			log.Error("report persistence failed", "provider_id", body.ProviderID, "err", err)
+			http.Error(w, `{"error":"report persistence unavailable"}`, http.StatusServiceUnavailable)
+			return
+		}
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte(`{"ok":true}`))
 		log.Info("report", "provider_id", body.ProviderID, "ok", body.OK)
@@ -75,10 +79,18 @@ func NewHTTPHandler(reg *Registry, token string, log *slog.Logger) *http.ServeMu
 		_, _ = w.Write([]byte(`{"ok":true,"svc":"router"}`))
 	})
 	mux.HandleFunc("/breakers", func(w http.ResponseWriter, r *http.Request) {
+		if !controlplane.Valid(r.Header.Get(controlplane.Header), token) {
+			http.Error(w, `{"error":"control plane token required"}`, http.StatusUnauthorized)
+			return
+		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(reg.States())
 	})
 	mux.HandleFunc("/providers", func(w http.ResponseWriter, r *http.Request) {
+		if !controlplane.Valid(r.Header.Get(controlplane.Header), token) {
+			http.Error(w, `{"error":"control plane token required"}`, http.StatusUnauthorized)
+			return
+		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(reg.Providers())
 	})

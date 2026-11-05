@@ -1,0 +1,16 @@
+head=42d8ef8e5ca2471b18800e50f8e7a57fbcfdd47f
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+# github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02.test
+ld: warning: '/private/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-3242799965/000013.o' has malformed LC_DYSYMTAB, expected 98 undefined symbols to start at index 1626, found 95 undefined symbols starting at index 1626
+=== RUN   TestAdmissionMultiAccountRetryWithRealMiddleware
+    admission_multiaccount_real_test.go:220: 4 admitted, 12 rejected before key/bill; duplicate while full=503; 12 retried successfully, 16 duplicates=409 after release; 4 account balances and event sets match
+--- PASS: TestAdmissionMultiAccountRetryWithRealMiddleware (1.39s)
+=== RUN   TestAdmissionMultiAccountRetryWithRealMiddleware
+    admission_multiaccount_real_test.go:220: 4 admitted, 12 rejected before key/bill; duplicate while full=503; 12 retried successfully, 16 duplicates=409 after release; 4 account balances and event sets match
+--- PASS: TestAdmissionMultiAccountRetryWithRealMiddleware (1.45s)
+=== RUN   TestAdmissionMultiAccountRetryWithRealMiddleware
+    admission_multiaccount_real_test.go:220: 4 admitted, 12 rejected before key/bill; duplicate while full=503; 12 retried successfully, 16 duplicates=409 after release; 4 account balances and event sets match
+--- PASS: TestAdmissionMultiAccountRetryWithRealMiddleware (1.52s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	6.296s

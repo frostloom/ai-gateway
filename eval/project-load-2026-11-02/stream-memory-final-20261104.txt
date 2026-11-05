@@ -1,0 +1,23 @@
+=== RUN   TestConservativeStreamDoesNotRetainForwardedText
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+    chat_stream_test.go:364: streamed_bytes=25307136 retained_heap_delta=59592
+--- PASS: TestConservativeStreamDoesNotRetainForwardedText (4.11s)
+=== RUN   TestConservativeStreamDoesNotRetainForwardedText
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+    chat_stream_test.go:364: streamed_bytes=25307136 retained_heap_delta=22384
+--- PASS: TestConservativeStreamDoesNotRetainForwardedText (4.16s)
+=== RUN   TestConservativeStreamDoesNotRetainForwardedText
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+    chat_stream_test.go:364: streamed_bytes=25307136 retained_heap_delta=18640
+--- PASS: TestConservativeStreamDoesNotRetainForwardedText (4.11s)
+PASS
+ok  	github.com/frostloom/ai-gateway/internal/gateway/handler	14.176s

@@ -1,0 +1,21 @@
+
+func TestRouteWhileSuccessPersistenceBlocked(t *testing.T) {
+ dsn:=os.Getenv("COMPARISON_MYSQL_DSN");if dsn==""{t.Fatal("isolated MySQL DSN required")}
+ db,e:=gorm.Open(mysql.Open(dsn),&gorm.Config{Logger:logger.Default.LogMode(logger.Silent)});if e!=nil{t.Fatal(e)}
+ if e=db.Exec("CREATE TABLE IF NOT EXISTS providers (id BIGINT PRIMARY KEY,status TINYINT NOT NULL,consecutive_fail INT NOT NULL)").Error;e!=nil{t.Fatal(e)}
+ if e=db.Exec("DELETE FROM providers").Error;e!=nil{t.Fatal(e)}
+ if e=db.Exec("INSERT INTO providers(id,status,consecutive_fail) VALUES(1,0,0)").Error;e!=nil{t.Fatal(e)}
+ r:=New(db,slog.New(slog.DiscardHandler));r.cache["m"]=&cachedRoute{providers:oneProvider(),expireAt:time.Now().Add(time.Hour)}
+ entered,resume:=make(chan struct{}),make(chan struct{});var once atomic.Bool
+ if e=db.Callback().Update().Before("gorm:update").Register("test:block-reset",func(tx *gorm.DB){if tx.Statement.Table=="providers"&&once.CompareAndSwap(false,true){close(entered);<-resume}});e!=nil{t.Fatal(e)}
+ defer db.Callback().Update().Remove("test:block-reset")
+ reportDone:=make(chan struct{});go func(){r.Report(1,true);close(reportDone)}()
+ select{case <-entered:case <-time.After(5*time.Second):close(resume);t.Fatal("report never entered DB callback")}
+ routeDone:=make(chan error,1);go func(){p,e:=r.Route("m");if e==nil&&p==nil{e=fmt.Errorf("no route")};routeDone<-e}()
+ select{case e:=<-routeDone:if e!=nil{close(resume);t.Fatal(e)};case <-time.After(500*time.Millisecond):close(resume);<-reportDone;t.Fatal("cached route blocked by unrelated successful-report persistence")}
+ // A following failure may not overtake the blocked success write.
+ failDone:=make(chan struct{});go func(){r.Report(1,false);close(failDone)}()
+ select{case <-failDone:close(resume);t.Fatal("failure overtook success persistence");case <-time.After(100*time.Millisecond):}
+ close(resume);select{case <-reportDone:case <-time.After(5*time.Second):t.Fatal("report did not finish")};select{case <-failDone:case <-time.After(5*time.Second):t.Fatal("failure did not finish")}
+ var count int;if e=db.Table("providers").Select("consecutive_fail").Where("id=?",1).Scan(&count).Error;e!=nil||count!=1{t.Fatalf("persisted failures=%d err=%v",count,e)}
+}

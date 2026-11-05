@@ -1,0 +1,61 @@
+head=63b9d1ed4d64bb583d15fa884c37468e5c53044c
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+current_source_sha256=be5ced15d64432b55979cf62b24e005c89ca340c509a01020d94f63147eaa6c9
+current_candidate_sha256=ce0ee7bbd2b77d13470e23cbce6e02aeabd715a1f713a173fd99c2e0ba139471
+=== RUN   TestAtomicCommitOwnerDiesBeforeSend
+    execution_atomic_commit_kill_test.go:157: child_killed_after_commit=true replay=RESERVE_DUPLICATE new_permit=0 early_refund=0 after_expiry_refund=1 old_permit=0 balance=500 ledger=500 bills=1 events=2
+--- PASS: TestAtomicCommitOwnerDiesBeforeSend (1.16s)
+=== RUN   TestAtomicReserveKilledConnectionAndReplay
+[mysql] 2026/11/04 09:54:04 packets.go:58 unexpected EOF
+    execution_atomic_kill_test.go:138: connection_killed=1 replacement_ok=true old_permit=0 new_permit=1 balance=400 ledger=400 bills=1 events=1
+--- PASS: TestAtomicReserveKilledConnectionAndReplay (0.50s)
+=== RUN   TestSentRequestOwnerKilledCannotRefundOnExpiry
+    execution_forward_kill_test.go:150: upstream_calls=1 killed_after_receive=true state=forwarding retry=0 refund_permit=0 balance=400 ledger=400 events=1
+--- PASS: TestSentRequestOwnerKilledCannotRefundOnExpiry (0.64s)
+=== RUN   TestStrictReserveCommitAckLoss
+=== RUN   TestStrictReserveCommitAckLoss/injected_commit_acknowledgement_loss
+    execution_reserve_ack_test.go:77: injected=injected commit acknowledgement loss commit_visible=true retry=duplicate balance=400 ledger=400 events=1
+=== RUN   TestStrictReserveCommitAckLoss/driver:_bad_connection
+    execution_reserve_ack_test.go:77: injected=driver: bad connection commit_visible=true retry=duplicate balance=400 ledger=400 events=1
+--- PASS: TestStrictReserveCommitAckLoss (1.65s)
+    --- PASS: TestStrictReserveCommitAckLoss/injected_commit_acknowledgement_loss (1.13s)
+    --- PASS: TestStrictReserveCommitAckLoss/driver:_bad_connection (0.52s)
+=== RUN   TestAtomicCommitOwnerDiesBeforeSend
+    execution_atomic_commit_kill_test.go:157: child_killed_after_commit=true replay=RESERVE_DUPLICATE new_permit=0 early_refund=0 after_expiry_refund=1 old_permit=0 balance=500 ledger=500 bills=1 events=2
+--- PASS: TestAtomicCommitOwnerDiesBeforeSend (0.54s)
+=== RUN   TestAtomicReserveKilledConnectionAndReplay
+[mysql] 2026/11/04 09:54:08 packets.go:58 unexpected EOF
+    execution_atomic_kill_test.go:138: connection_killed=1 replacement_ok=true old_permit=0 new_permit=1 balance=400 ledger=400 bills=1 events=1
+--- PASS: TestAtomicReserveKilledConnectionAndReplay (0.53s)
+=== RUN   TestSentRequestOwnerKilledCannotRefundOnExpiry
+    execution_forward_kill_test.go:150: upstream_calls=1 killed_after_receive=true state=forwarding retry=0 refund_permit=0 balance=400 ledger=400 events=1
+--- PASS: TestSentRequestOwnerKilledCannotRefundOnExpiry (0.44s)
+=== RUN   TestStrictReserveCommitAckLoss
+=== RUN   TestStrictReserveCommitAckLoss/injected_commit_acknowledgement_loss
+    execution_reserve_ack_test.go:77: injected=injected commit acknowledgement loss commit_visible=true retry=duplicate balance=400 ledger=400 events=1
+=== RUN   TestStrictReserveCommitAckLoss/driver:_bad_connection
+    execution_reserve_ack_test.go:77: injected=driver: bad connection commit_visible=true retry=duplicate balance=400 ledger=400 events=1
+--- PASS: TestStrictReserveCommitAckLoss (0.96s)
+    --- PASS: TestStrictReserveCommitAckLoss/injected_commit_acknowledgement_loss (0.51s)
+    --- PASS: TestStrictReserveCommitAckLoss/driver:_bad_connection (0.45s)
+=== RUN   TestAtomicCommitOwnerDiesBeforeSend
+    execution_atomic_commit_kill_test.go:157: child_killed_after_commit=true replay=RESERVE_DUPLICATE new_permit=0 early_refund=0 after_expiry_refund=1 old_permit=0 balance=500 ledger=500 bills=1 events=2
+--- PASS: TestAtomicCommitOwnerDiesBeforeSend (0.52s)
+=== RUN   TestAtomicReserveKilledConnectionAndReplay
+[mysql] 2026/11/04 09:54:10 packets.go:58 unexpected EOF
+    execution_atomic_kill_test.go:138: connection_killed=1 replacement_ok=true old_permit=0 new_permit=1 balance=400 ledger=400 bills=1 events=1
+--- PASS: TestAtomicReserveKilledConnectionAndReplay (0.46s)
+=== RUN   TestSentRequestOwnerKilledCannotRefundOnExpiry
+    execution_forward_kill_test.go:150: upstream_calls=1 killed_after_receive=true state=forwarding retry=0 refund_permit=0 balance=400 ledger=400 events=1
+--- PASS: TestSentRequestOwnerKilledCannotRefundOnExpiry (0.43s)
+=== RUN   TestStrictReserveCommitAckLoss
+=== RUN   TestStrictReserveCommitAckLoss/injected_commit_acknowledgement_loss
+    execution_reserve_ack_test.go:77: injected=injected commit acknowledgement loss commit_visible=true retry=duplicate balance=400 ledger=400 events=1
+=== RUN   TestStrictReserveCommitAckLoss/driver:_bad_connection
+    execution_reserve_ack_test.go:77: injected=driver: bad connection commit_visible=true retry=duplicate balance=400 ledger=400 events=1
+--- PASS: TestStrictReserveCommitAckLoss (0.84s)
+    --- PASS: TestStrictReserveCommitAckLoss/injected_commit_acknowledgement_loss (0.39s)
+    --- PASS: TestStrictReserveCommitAckLoss/driver:_bad_connection (0.46s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	11.266s

@@ -6,12 +6,14 @@
 package router
 
 import (
+	"context"
 	"encoding/json"
 	"log/slog"
 	"math/rand"
 	"sync"
 	"time"
 
+	"github.com/frostloom/ai-gateway/internal/pkg/metrics"
 	"gorm.io/gorm"
 )
 
@@ -40,6 +42,7 @@ const (
 
 // breaker 单 provider 的熔断状态机。
 type breaker struct {
+	reportMu        sync.Mutex // serialize persistence for the same provider
 	state           breakerState
 	consecutiveFail int
 	probeInFlight   bool      // HALF-OPEN 下真正发出、等回报的探测（0/1）
@@ -49,16 +52,18 @@ type breaker struct {
 
 // FailThreshold / Cooldown / AutobanAfter 可配（生产默认值见 default* 常量）。
 type Registry struct {
-	db            *gorm.DB
-	log           *slog.Logger
-	ttl           time.Duration
-	Cooldown      time.Duration // OPEN 持续多久后进 HALF-OPEN
-	FailThreshold int           // 连续失败 N 次 → OPEN
-	AutobanAfter  int           // 跨周期累计失败 N 次 → banned
-	probeTimeout  time.Duration // 探测发出后多久无回报即释放探测位（网关可能崩了）
-	mu            sync.Mutex
-	cache         map[string]*cachedRoute
-	bk            map[uint64]*breaker
+	db              *gorm.DB
+	log             *slog.Logger
+	ttl             time.Duration
+	Cooldown        time.Duration // OPEN 持续多久后进 HALF-OPEN
+	FailThreshold   int           // 连续失败 N 次 → OPEN
+	AutobanAfter    int           // 跨周期累计失败 N 次 → banned
+	probeTimeout    time.Duration // 探测发出后多久无回报即释放探测位（网关可能崩了）
+	mu              sync.Mutex
+	refreshPermit   chan struct{}
+	cacheGeneration uint64
+	cache           map[string]*cachedRoute
+	bk              map[uint64]*breaker
 }
 
 type cachedRoute struct {
@@ -71,6 +76,7 @@ const defaultProbeTimeout = 30 * time.Second
 func New(db *gorm.DB, log *slog.Logger) *Registry {
 	return &Registry{
 		db:            db,
+		refreshPermit: make(chan struct{}, 1),
 		log:           log,
 		ttl:           30 * time.Second,
 		Cooldown:      defaultCooldown,
@@ -91,7 +97,16 @@ func (r *Registry) Route(model string) (*Provider, error) {
 // 重试必须换一个节点，否则加权随机可能再次选中同一个坏节点（request 白费）。
 // exclude 为空 map/nil 时与 Route 等价。无候选返回 (nil, nil)。
 func (r *Registry) RouteExclude(model string, exclude map[uint64]bool) (*Provider, error) {
-	ps, err := r.snapshot(model)
+	return r.RouteExcludeContext(context.Background(), model, exclude)
+}
+
+// RouteExcludeContext avoids reserving a probe for a request that was canceled
+// while waiting for the shared router lock or a cache refresh.
+func (r *Registry) RouteExcludeContext(ctx context.Context, model string, exclude map[uint64]bool) (*Provider, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	ps, err := r.snapshot(ctx, model)
 	if err != nil {
 		return nil, err
 	}
@@ -99,10 +114,13 @@ func (r *Registry) RouteExclude(model string, exclude map[uint64]bool) (*Provide
 	// probeInFlight=false，HALF-OPEN 会放出多个探测。
 	r.mu.Lock()
 	defer r.mu.Unlock()
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
 	avail := r.availableLocked(ps)
 	filtered := make([]Provider, 0, len(avail))
 	for _, p := range avail {
-		if !exclude[p.ID] {
+		if !exclude[p.ID] && p.Weight > 0 {
 			filtered = append(filtered, p)
 		}
 	}
@@ -110,6 +128,9 @@ func (r *Registry) RouteExclude(model string, exclude map[uint64]bool) (*Provide
 		return nil, nil
 	}
 	pick := pickWeighted(filtered)
+	if pick == nil {
+		return nil, nil
+	}
 	r.markProbeLocked(pick)
 	return pick, nil
 }
@@ -133,11 +154,13 @@ func (r *Registry) markProbeLocked(pick *Provider) {
 // Report 上报一次调用结果（gateway 在「首个字节前失败/成功」时调用）。
 //   - 成功：HALF-OPEN 探测成功 → 回 CLOSED；CLOSED 清零连续失败；重置 DB 计数。
 //   - 失败：CLOSED 连续失败达标 → OPEN；HALF-OPEN 探测失败 → 回 OPEN；持久化 AutoBan。
-func (r *Registry) Report(providerID uint64, ok bool) {
+func (r *Registry) Report(providerID uint64, ok bool) error {
 	r.mu.Lock()
-	defer r.mu.Unlock()
-
 	b := r.breaker(providerID)
+	r.mu.Unlock()
+	b.reportMu.Lock()
+	defer b.reportMu.Unlock()
+	r.mu.Lock()
 	now := time.Now()
 	if ok {
 		b.consecutiveFail = 0
@@ -146,8 +169,8 @@ func (r *Registry) Report(providerID uint64, ok bool) {
 			b.probeInFlight = false
 			r.logState(providerID, b, "recover")
 		}
-		r.resetDBFails(providerID)
-		return
+		r.mu.Unlock()
+		return r.resetDBFails(providerID)
 	}
 
 	b.consecutiveFail++
@@ -155,16 +178,26 @@ func (r *Registry) Report(providerID uint64, ok bool) {
 		b.probeInFlight = false
 	}
 	if b.consecutiveFail >= r.AutobanAfter {
-		r.ban(providerID, b)
-		return
+		b.state = breakerOpen
+		b.nextClosedAt = now.Add(24 * time.Hour)
+		failures := b.consecutiveFail
+		r.clearCache()
+		r.logState(providerID, b, "autoban")
+		r.mu.Unlock()
+		err := r.persistBan(providerID, failures)
+		// Discard any snapshot fetched before the persistence attempt ended.
+		r.mu.Lock()
+		r.clearCache()
+		r.mu.Unlock()
+		return err
 	}
 	if b.consecutiveFail >= r.FailThreshold && b.state != breakerOpen {
 		b.state = breakerOpen
 		b.nextClosedAt = now.Add(r.Cooldown)
 		r.logState(providerID, b, "open")
-		return
 	}
-	r.persistFail(providerID)
+	r.mu.Unlock()
+	return r.persistFail(providerID)
 }
 
 // available 按熔断状态过滤候选集。这里只判断「放不放行」，真正的探测占位在 Route 选中后
@@ -219,46 +252,52 @@ func (r *Registry) breaker(id uint64) *breaker {
 
 // persistFail 累计 DB 连续失败计数（AutoBan 的数据来源；写失败只记日志，不影响内存状态）。
 // db 为 nil（单测）时跳过持久化，只演进内存状态机。
-func (r *Registry) persistFail(providerID uint64) {
+func (r *Registry) persistFail(providerID uint64) error {
 	if r.db == nil {
-		return
+		return nil
 	}
 	if err := r.db.Table("providers").
 		Where("id = ? AND status = ?", providerID, 0).
 		UpdateColumn("consecutive_fail", gorm.Expr("consecutive_fail + 1")).Error; err != nil {
+		metrics.RouterPersistenceError("increment")
 		r.log.Error("persist fail", "provider_id", providerID, "err", err)
+		return err
 	}
+	return nil
 }
 
 // resetDBFails 成功后清零 DB 连续失败计数。
-func (r *Registry) resetDBFails(providerID uint64) {
+func (r *Registry) resetDBFails(providerID uint64) error {
 	if r.db == nil {
-		return
+		return nil
 	}
 	if err := r.db.Table("providers").
 		Where("id = ? AND status = ?", providerID, 0).
 		UpdateColumn("consecutive_fail", 0).Error; err != nil {
+		metrics.RouterPersistenceError("reset")
 		r.log.Error("reset fails", "provider_id", providerID, "err", err)
+		return err
 	}
+	return nil
 }
 
-// ban AutoBan：连续失败达到阈值 → 永久(人工解除)ban，并从候选集移除。
-func (r *Registry) ban(providerID uint64, b *breaker) {
-	b.state = breakerOpen
-	b.nextClosedAt = time.Now().Add(24 * time.Hour) // 兜底：即便人工忘了解除，也要 24h 后自动恢复探测
+// persistBan writes the in-memory AutoBan without holding the state mutex.
+func (r *Registry) persistBan(providerID uint64, failures int) error {
 	if r.db != nil {
 		if err := r.db.Table("providers").
 			Where("id = ? AND status = ?", providerID, 0).
-			Updates(map[string]any{"status": 2, "consecutive_fail": b.consecutiveFail}).Error; err != nil {
+			Updates(map[string]any{"status": 2, "consecutive_fail": failures}).Error; err != nil {
+			metrics.RouterPersistenceError("ban")
 			r.log.Error("autoban persist", "provider_id", providerID, "err", err)
+			return err
 		}
-		r.clearCache()
 	}
-	r.logState(providerID, b, "autoban")
+	return nil
 }
 
 // clearCache 让 DB 状态变化（ban）立即生效，不等 30s 缓存过期。
 func (r *Registry) clearCache() {
+	r.cacheGeneration++
 	r.cache = make(map[string]*cachedRoute)
 }
 
@@ -357,38 +396,74 @@ func (r *Registry) Providers() []ProviderState {
 
 // ---------- snapshot（M2 原逻辑） ----------
 
-func (r *Registry) snapshot(model string) ([]Provider, error) {
+func (r *Registry) snapshot(ctx context.Context, model string) ([]Provider, error) {
 	r.mu.Lock()
-	defer r.mu.Unlock()
-	if c, ok := r.cache[model]; ok && time.Now().Before(c.expireAt) {
-		return c.providers, nil
-	}
-
-	type row struct {
-		ID          uint64
-		Name        string
-		BaseURL     string
-		UpstreamKey string
-		Weight      int
-		Models      string // JSON 数组
-	}
-	var rows []row
-	// 注意：本地 struct 名不是表名，必须显式 Table("providers")，否则 gorm 推断成 `rows`。
-	if err := r.db.Table("providers").Where("status = ?", 0).Find(&rows).Error; err != nil {
+	if err := ctx.Err(); err != nil {
+		r.mu.Unlock()
 		return nil, err
 	}
-
-	ps := make([]Provider, 0, len(rows))
-	for _, rr := range rows {
-		var models []string
-		_ = json.Unmarshal([]byte(rr.Models), &models)
-		// "*" 通配 = 服务全部模型：目录与路由解耦（seed providers 用 ["*"]）。
-		if contains(models, "*") || contains(models, model) {
-			ps = append(ps, Provider{ID: rr.ID, Name: rr.Name, BaseURL: rr.BaseURL, UpstreamKey: rr.UpstreamKey, Weight: rr.Weight})
-		}
+	if c, ok := r.cache[model]; ok && time.Now().Before(c.expireAt) {
+		ps := c.providers
+		r.mu.Unlock()
+		return ps, nil
 	}
-	r.cache[model] = &cachedRoute{providers: ps, expireAt: time.Now().Add(r.ttl)}
-	return ps, nil
+	r.mu.Unlock()
+	// Only one cache miss refreshes at a time; waiting callers can cancel.
+	select {
+	case r.refreshPermit <- struct{}{}:
+		defer func() { <-r.refreshPermit }()
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	}
+	for {
+		r.mu.Lock()
+		if err := ctx.Err(); err != nil {
+			r.mu.Unlock()
+			return nil, err
+		}
+		if c, ok := r.cache[model]; ok && time.Now().Before(c.expireAt) {
+			ps := c.providers
+			r.mu.Unlock()
+			return ps, nil
+		}
+		generation := r.cacheGeneration
+		r.mu.Unlock()
+		type row struct {
+			ID          uint64
+			Name        string
+			BaseURL     string
+			UpstreamKey string
+			Weight      int
+			Models      string // JSON 数组
+		}
+		var rows []row
+		// 注意：本地 struct 名不是表名，必须显式 Table("providers")，否则 gorm 推断成 `rows`。
+		if err := r.db.WithContext(ctx).Table("providers").Where("status = ?", 0).Find(&rows).Error; err != nil {
+			return nil, err
+		}
+
+		ps := make([]Provider, 0, len(rows))
+		for _, rr := range rows {
+			var models []string
+			_ = json.Unmarshal([]byte(rr.Models), &models)
+			// "*" 通配 = 服务全部模型：目录与路由解耦（seed providers 用 ["*"]）。
+			if contains(models, "*") || contains(models, model) {
+				ps = append(ps, Provider{ID: rr.ID, Name: rr.Name, BaseURL: rr.BaseURL, UpstreamKey: rr.UpstreamKey, Weight: rr.Weight})
+			}
+		}
+		r.mu.Lock()
+		if err := ctx.Err(); err != nil {
+			r.mu.Unlock()
+			return nil, err
+		}
+		if generation != r.cacheGeneration {
+			r.mu.Unlock()
+			continue
+		}
+		r.cache[model] = &cachedRoute{providers: ps, expireAt: time.Now().Add(r.ttl)}
+		r.mu.Unlock()
+		return ps, nil
+	}
 }
 
 func contains(ss []string, s string) bool {
@@ -403,7 +478,13 @@ func contains(ss []string, s string) bool {
 func pickWeighted(ps []Provider) *Provider {
 	total := 0
 	for _, p := range ps {
+		if p.Weight <= 0 || p.Weight > int(^uint(0)>>1)-total {
+			return nil
+		}
 		total += p.Weight
+	}
+	if total == 0 {
+		return nil
 	}
 	n := rand.Intn(total)
 	for i := range ps {

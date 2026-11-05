@@ -11,12 +11,16 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/frostloom/ai-gateway/internal/gateway/client"
+	billingv1 "github.com/frostloom/ai-gateway/internal/proto/billing/v1"
 )
+
+type apiKeyValidator interface {
+	ValidateAPIKey(context.Context, string) (*billingv1.ValidateAPIKeyResponse, error)
+}
 
 // APIKey 校验请求的 API Key。支持 Authorization: Bearer sk-xxx 与 api-key 头。
 // 明文 key 只在内存算 SHA-256 后传给 billing 校验，永远不落日志/存储。
-func APIKey(b *client.Billing) gin.HandlerFunc {
+func APIKey(b apiKeyValidator) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		key := extractAPIKey(c)
 		if key == "" {
@@ -27,7 +31,11 @@ func APIKey(b *client.Billing) gin.HandlerFunc {
 		ctx, cancel := context.WithTimeout(c.Request.Context(), 2*time.Second)
 		defer cancel()
 		resp, err := b.ValidateAPIKey(ctx, hash)
-		if err != nil || resp == nil || !resp.Valid {
+		if err != nil || resp == nil {
+			c.AbortWithStatusJSON(http.StatusServiceUnavailable, gin.H{"error": gin.H{"message": "authentication unavailable", "type": "api_error"}})
+			return
+		}
+		if !resp.Valid {
 			abort(c, http.StatusUnauthorized, "invalid api key")
 			return
 		}

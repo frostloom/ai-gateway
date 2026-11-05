@@ -1,0 +1,33 @@
+
+func TestRealRouterBoundedLifecycle(t *testing.T) {
+ dsn:=os.Getenv("COMPARISON_MYSQL_DSN");if dsn==""{t.Fatal("isolated MySQL required")};db,e:=gorm.Open(mysql.Open(dsn),&gorm.Config{Logger:logger.Default.LogMode(logger.Silent)});if e!=nil{t.Fatal(e)}
+ if e=db.Exec("CREATE TABLE IF NOT EXISTS providers (id BIGINT PRIMARY KEY,status TINYINT NOT NULL,consecutive_fail INT NOT NULL)").Error;e!=nil{t.Fatal(e)};if e=db.Exec("DELETE FROM providers").Error;e!=nil{t.Fatal(e)};if e=db.Exec("INSERT INTO providers(id,status,consecutive_fail) VALUES(1,0,1)").Error;e!=nil{t.Fatal(e)}
+ r:=New(db,slog.New(slog.DiscardHandler));api,ok:=any(r).(interface{testTryReport(uint64,bool)(<-chan struct{},error);ReportContext(context.Context,uint64,bool)error;CloseReportWorker(context.Context)error});if !ok{t.Fatal("bounded lifecycle unavailable")}
+ entered,resume:=make(chan struct{}),make(chan struct{});var once atomic.Bool
+ if e=db.Callback().Update().Before("gorm:update").Register("test:block-bounded",func(tx *gorm.DB){if tx.Statement.Table=="providers"&&once.CompareAndSwap(false,true){close(entered);<-resume}});e!=nil{t.Fatal(e)};defer db.Callback().Update().Remove("test:block-bounded")
+ first,e:=api.testTryReport(1,true);if e!=nil{t.Fatal(e)};select{case <-entered:case <-time.After(5*time.Second):close(resume);t.Fatal("DB callback not reached")}
+ ctx,cancel:=context.WithTimeout(context.Background(),30*time.Millisecond);defer cancel();if e:=api.ReportContext(ctx,1,true);!errors.Is(e,context.DeadlineExceeded){close(resume);t.Fatalf("accepted timeout=%v",e)}
+ var accepted []<-chan struct{};for i:=0;i<1023;i++{ch,e:=api.testTryReport(1,true);if e!=nil{close(resume);t.Fatalf("admit %d: %v",i,e)};accepted=append(accepted,ch)}
+ if _,e:=api.testTryReport(1,true);e==nil{close(resume);t.Fatal("full queue accepted")}
+ closeCtx,closeCancel:=context.WithTimeout(context.Background(),30*time.Millisecond);defer closeCancel();if e:=api.CloseReportWorker(closeCtx);!errors.Is(e,context.DeadlineExceeded){close(resume);t.Fatalf("close while DB blocked=%v",e)}
+ if _,e:=api.testTryReport(1,true);e==nil{close(resume);t.Fatal("closed queue accepted")}
+ close(resume);for _,ch:=range append(accepted,first){select{case <-ch:case <-time.After(5*time.Second):t.Fatal("accepted report did not drain")}}
+ doneCtx,doneCancel:=context.WithTimeout(context.Background(),5*time.Second);defer doneCancel();if e:=api.CloseReportWorker(doneCtx);e!=nil{t.Fatal(e)}
+ var n int;if e:=db.Table("providers").Select("consecutive_fail").Where("id=?",1).Scan(&n).Error;e!=nil||n!=0{t.Fatalf("DB count=%d err=%v",n,e)}
+}
+
+// Characterization: old HTTP handler cannot observe the legacy void Report error.
+func TestRealRouterFullQueueCanAcknowledgeLostFailure(t *testing.T) {
+ dsn:=os.Getenv("COMPARISON_MYSQL_DSN");if dsn==""{t.Fatal("isolated MySQL required")};db,e:=gorm.Open(mysql.Open(dsn),&gorm.Config{Logger:logger.Default.LogMode(logger.Silent)});if e!=nil{t.Fatal(e)}
+ if e=db.Exec("CREATE TABLE IF NOT EXISTS providers (id BIGINT PRIMARY KEY,status TINYINT NOT NULL,consecutive_fail INT NOT NULL)").Error;e!=nil{t.Fatal(e)};if e=db.Exec("DELETE FROM providers").Error;e!=nil{t.Fatal(e)};if e=db.Exec("INSERT INTO providers(id,status,consecutive_fail) VALUES(1,0,0)").Error;e!=nil{t.Fatal(e)}
+ r:=New(db,slog.New(slog.DiscardHandler));api,ok:=any(r).(interface{testTryReport(uint64,bool)(<-chan struct{},error);CloseReportWorker(context.Context)error});if !ok{t.Fatal("bounded lifecycle unavailable")}
+ entered,resume:=make(chan struct{}),make(chan struct{});var once atomic.Bool
+ if e=db.Callback().Update().Before("gorm:update").Register("test:full-http",func(tx *gorm.DB){if tx.Statement.Table=="providers"&&once.CompareAndSwap(false,true){close(entered);<-resume}});e!=nil{t.Fatal(e)};defer db.Callback().Update().Remove("test:full-http")
+ first,e:=api.testTryReport(1,true);if e!=nil{t.Fatal(e)};select{case <-entered:case <-time.After(5*time.Second):close(resume);t.Fatal("DB callback not reached")}
+ accepted:=make([]<-chan struct{},0,1024);for i:=0;i<1024;i++{ch,e:=api.testTryReport(1,true);if e!=nil{close(resume);t.Fatalf("fill %d: %v",i,e)};accepted=append(accepted,ch)}
+ req:=httptest.NewRequest(http.MethodPost,"/report",strings.NewReader(`{"provider_id":1,"ok":false}`));req.Header.Set("X-Control-Token","isolated-token");w:=httptest.NewRecorder();NewHTTPHandler(r,"isolated-token",slog.New(slog.DiscardHandler)).ServeHTTP(w,req)
+ if w.Code!=http.StatusOK{close(resume);t.Fatalf("characterization expected legacy 200, got %d",w.Code)}
+ close(resume);for _,ch:=range append(accepted,first){select{case <-ch:case <-time.After(5*time.Second):t.Fatal("queue did not drain")}}
+ ctx,cancel:=context.WithTimeout(context.Background(),5*time.Second);defer cancel();if e:=api.CloseReportWorker(ctx);e!=nil{t.Fatal(e)}
+ states:=r.States();if len(states)!=1||states[0].ConsecutiveFail!=0{t.Fatalf("expected dropped failure, states=%+v",states)}
+}

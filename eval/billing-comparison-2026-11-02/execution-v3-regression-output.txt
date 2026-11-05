@@ -1,0 +1,65 @@
+head=63b9d1ed4d64bb583d15fa884c37468e5c53044c
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestBillExecutionPermissionRace
+    bill_execution_race_test.go:134: forwarding=6 reversing=6 per_request_checks=12
+--- PASS: TestBillExecutionPermissionRace (1.27s)
+=== RUN   TestReversingIntentRejectsLateUsage
+    bill_execution_usage_race_test.go:68: late_usage=FailedPrecondition reverse=true balance=500 ledger=500
+--- PASS: TestReversingIntentRejectsLateUsage (0.48s)
+=== RUN   TestExecutionRPCCapabilityAndLease
+=== RUN   TestExecutionRPCCapabilityAndLease/live
+    execution_capability_rpc_test.go:196: scenario=live winner=forwarding wrong_owner=denied wrong_recovery=denied balance=460 ledger=460
+=== RUN   TestExecutionRPCCapabilityAndLease/expired
+    execution_capability_rpc_test.go:196: scenario=expired winner=reversing wrong_owner=denied wrong_recovery=denied balance=500 ledger=500
+--- PASS: TestExecutionRPCCapabilityAndLease (0.61s)
+    --- PASS: TestExecutionRPCCapabilityAndLease/live (0.12s)
+    --- PASS: TestExecutionRPCCapabilityAndLease/expired (0.07s)
+=== RUN   TestExecutionRPCCommitThenLostResponse
+    execution_rpc_lost_reply_test.go:106: first=Unavailable stored=forwarding retry=0 refund_permit=0 bill=pending balance=400 ledger=400 events=1
+--- PASS: TestExecutionRPCCommitThenLostResponse (0.53s)
+=== RUN   TestExecutionRPCCompetingPermissions
+    execution_rpc_test.go:180: forwarding=4 reversing=8 unauthenticated=rejected replay=no_new_permission
+--- PASS: TestExecutionRPCCompetingPermissions (1.25s)
+=== RUN   TestBillExecutionPermissionRace
+    bill_execution_race_test.go:134: forwarding=8 reversing=4 per_request_checks=12
+--- PASS: TestBillExecutionPermissionRace (1.00s)
+=== RUN   TestReversingIntentRejectsLateUsage
+    bill_execution_usage_race_test.go:68: late_usage=FailedPrecondition reverse=true balance=500 ledger=500
+--- PASS: TestReversingIntentRejectsLateUsage (0.42s)
+=== RUN   TestExecutionRPCCapabilityAndLease
+=== RUN   TestExecutionRPCCapabilityAndLease/live
+    execution_capability_rpc_test.go:196: scenario=live winner=forwarding wrong_owner=denied wrong_recovery=denied balance=460 ledger=460
+=== RUN   TestExecutionRPCCapabilityAndLease/expired
+    execution_capability_rpc_test.go:196: scenario=expired winner=reversing wrong_owner=denied wrong_recovery=denied balance=500 ledger=500
+--- PASS: TestExecutionRPCCapabilityAndLease (0.59s)
+    --- PASS: TestExecutionRPCCapabilityAndLease/live (0.08s)
+    --- PASS: TestExecutionRPCCapabilityAndLease/expired (0.06s)
+=== RUN   TestExecutionRPCCommitThenLostResponse
+    execution_rpc_lost_reply_test.go:106: first=Unavailable stored=forwarding retry=0 refund_permit=0 bill=pending balance=400 ledger=400 events=1
+--- PASS: TestExecutionRPCCommitThenLostResponse (0.37s)
+=== RUN   TestExecutionRPCCompetingPermissions
+    execution_rpc_test.go:180: forwarding=5 reversing=7 unauthenticated=rejected replay=no_new_permission
+--- PASS: TestExecutionRPCCompetingPermissions (1.09s)
+=== RUN   TestBillExecutionPermissionRace
+    bill_execution_race_test.go:134: forwarding=7 reversing=5 per_request_checks=12
+--- PASS: TestBillExecutionPermissionRace (1.16s)
+=== RUN   TestReversingIntentRejectsLateUsage
+    bill_execution_usage_race_test.go:68: late_usage=FailedPrecondition reverse=true balance=500 ledger=500
+--- PASS: TestReversingIntentRejectsLateUsage (0.46s)
+=== RUN   TestExecutionRPCCapabilityAndLease
+=== RUN   TestExecutionRPCCapabilityAndLease/live
+    execution_capability_rpc_test.go:196: scenario=live winner=forwarding wrong_owner=denied wrong_recovery=denied balance=460 ledger=460
+=== RUN   TestExecutionRPCCapabilityAndLease/expired
+    execution_capability_rpc_test.go:196: scenario=expired winner=reversing wrong_owner=denied wrong_recovery=denied balance=500 ledger=500
+--- PASS: TestExecutionRPCCapabilityAndLease (0.49s)
+    --- PASS: TestExecutionRPCCapabilityAndLease/live (0.06s)
+    --- PASS: TestExecutionRPCCapabilityAndLease/expired (0.04s)
+=== RUN   TestExecutionRPCCommitThenLostResponse
+    execution_rpc_lost_reply_test.go:106: first=Unavailable stored=forwarding retry=0 refund_permit=0 bill=pending balance=400 ledger=400 events=1
+--- PASS: TestExecutionRPCCommitThenLostResponse (0.45s)
+=== RUN   TestExecutionRPCCompetingPermissions
+    execution_rpc_test.go:180: forwarding=6 reversing=6 unauthenticated=rejected replay=no_new_permission
+--- PASS: TestExecutionRPCCompetingPermissions (1.42s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	13.203s

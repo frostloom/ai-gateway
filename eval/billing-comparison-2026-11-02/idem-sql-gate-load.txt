@@ -1,0 +1,19 @@
+head=63b9d1ed4d64bb583d15fa884c37468e5c53044c
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestSQLGateLoad
+    idem_sql_gate_load_test.go:109: SQL_GATE_LOAD rep=1 workers=16 mode=redis requests=30483 errors=0 elapsed=2.001 success_per_sec=15232.83 mean_ms=1.05 p95_ms=2.11 p99_ms=3.47 pool_waits=0 pool_wait_ms=0.00
+    idem_sql_gate_load_test.go:109: SQL_GATE_LOAD rep=1 workers=16 mode=sql requests=2231 errors=0 elapsed=2.006 success_per_sec=1112.01 mean_ms=14.36 p95_ms=30.32 p99_ms=52.54 pool_waits=0 pool_wait_ms=0.00
+    idem_sql_gate_load_test.go:109: SQL_GATE_LOAD rep=1 workers=64 mode=redis requests=50066 errors=0 elapsed=2.003 success_per_sec=24998.94 mean_ms=2.55 p95_ms=5.82 p99_ms=11.96 pool_waits=0 pool_wait_ms=0.00
+    idem_sql_gate_load_test.go:109: SQL_GATE_LOAD rep=1 workers=64 mode=sql requests=2850 errors=0 elapsed=2.020 success_per_sec=1410.91 mean_ms=45.17 p95_ms=113.32 p99_ms=183.34 pool_waits=5651 pool_wait_ms=48062.53
+    idem_sql_gate_load_test.go:109: SQL_GATE_LOAD rep=2 workers=16 mode=sql requests=2552 errors=0 elapsed=2.015 success_per_sec=1266.44 mean_ms=12.59 p95_ms=18.67 p99_ms=29.85 pool_waits=0 pool_wait_ms=0.00
+    idem_sql_gate_load_test.go:109: SQL_GATE_LOAD rep=2 workers=16 mode=redis requests=31620 errors=0 elapsed=2.001 success_per_sec=15803.27 mean_ms=1.01 p95_ms=2.01 p99_ms=3.88 pool_waits=0 pool_wait_ms=0.00
+    idem_sql_gate_load_test.go:109: SQL_GATE_LOAD rep=2 workers=64 mode=sql requests=3743 errors=0 elapsed=2.019 success_per_sec=1853.62 mean_ms=34.34 p95_ms=74.00 p99_ms=116.69 pool_waits=7434 pool_wait_ms=47983.96
+    idem_sql_gate_load_test.go:109: SQL_GATE_LOAD rep=2 workers=64 mode=redis requests=55010 errors=0 elapsed=2.001 success_per_sec=27492.32 mean_ms=2.32 p95_ms=4.50 p99_ms=7.11 pool_waits=0 pool_wait_ms=0.00
+    idem_sql_gate_load_test.go:109: SQL_GATE_LOAD rep=3 workers=16 mode=redis requests=10898 errors=0 elapsed=2.001 success_per_sec=5446.50 mean_ms=2.93 p95_ms=7.60 p99_ms=23.40 pool_waits=0 pool_wait_ms=0.00
+    idem_sql_gate_load_test.go:109: SQL_GATE_LOAD rep=3 workers=16 mode=sql requests=2353 errors=0 elapsed=2.013 success_per_sec=1169.13 mean_ms=13.64 p95_ms=24.40 p99_ms=31.55 pool_waits=0 pool_wait_ms=0.00
+    idem_sql_gate_load_test.go:109: SQL_GATE_LOAD rep=3 workers=64 mode=redis requests=40967 errors=0 elapsed=2.001 success_per_sec=20473.96 mean_ms=3.12 p95_ms=7.07 p99_ms=11.03 pool_waits=0 pool_wait_ms=0.00
+    idem_sql_gate_load_test.go:109: SQL_GATE_LOAD rep=3 workers=64 mode=sql requests=2771 errors=0 elapsed=2.035 success_per_sec=1361.91 mean_ms=46.58 p95_ms=92.83 p99_ms=139.90 pool_waits=5492 pool_wait_ms=48019.03
+--- PASS: TestSQLGateLoad (24.40s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	25.072s

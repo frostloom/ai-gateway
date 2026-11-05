@@ -1,0 +1,32 @@
+head=63b9d1ed4d64bb583d15fa884c37468e5c53044c
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestIsolatedSummaryRefundAmount
+    summary_refund_amount_test.go:25: 16 concurrent retries returned total refund 200; rollback, conflict, ledger and summary verified
+--- PASS: TestIsolatedSummaryRefundAmount (0.65s)
+=== RUN   TestIsolatedSummaryRefundAmountPartialAndConflict
+    summary_refund_amount_test.go:36: partial refund 150/200, retry zero, cross-tenant and changed-amount conflicts rejected
+--- PASS: TestIsolatedSummaryRefundAmountPartialAndConflict (0.73s)
+=== RUN   TestIsolatedSummaryRefundAmountCrossTenantRace
+    summary_refund_amount_test.go:46: cross-tenant same key: one refund; balances=500,300; errors=[refund idempotency conflict <nil>]
+--- PASS: TestIsolatedSummaryRefundAmountCrossTenantRace (0.68s)
+=== RUN   TestIsolatedSummaryRefundAmount
+    summary_refund_amount_test.go:25: 16 concurrent retries returned total refund 200; rollback, conflict, ledger and summary verified
+--- PASS: TestIsolatedSummaryRefundAmount (0.60s)
+=== RUN   TestIsolatedSummaryRefundAmountPartialAndConflict
+    summary_refund_amount_test.go:36: partial refund 150/200, retry zero, cross-tenant and changed-amount conflicts rejected
+--- PASS: TestIsolatedSummaryRefundAmountPartialAndConflict (0.61s)
+=== RUN   TestIsolatedSummaryRefundAmountCrossTenantRace
+    summary_refund_amount_test.go:46: cross-tenant same key: one refund; balances=500,300; errors=[refund idempotency conflict <nil>]
+--- PASS: TestIsolatedSummaryRefundAmountCrossTenantRace (0.64s)
+=== RUN   TestIsolatedSummaryRefundAmount
+    summary_refund_amount_test.go:25: 16 concurrent retries returned total refund 200; rollback, conflict, ledger and summary verified
+--- PASS: TestIsolatedSummaryRefundAmount (0.63s)
+=== RUN   TestIsolatedSummaryRefundAmountPartialAndConflict
+    summary_refund_amount_test.go:36: partial refund 150/200, retry zero, cross-tenant and changed-amount conflicts rejected
+--- PASS: TestIsolatedSummaryRefundAmountPartialAndConflict (0.53s)
+=== RUN   TestIsolatedSummaryRefundAmountCrossTenantRace
+    summary_refund_amount_test.go:46: cross-tenant same key: one refund; balances=300,500; errors=[<nil> refund idempotency conflict]
+--- PASS: TestIsolatedSummaryRefundAmountCrossTenantRace (0.65s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	8.472s

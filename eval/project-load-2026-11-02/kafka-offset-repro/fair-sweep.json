@@ -1,0 +1,18 @@
+{
+  "head": "63b9d1ed4d64bb583d15fa884c37468e5c53044c",
+  "mysql_image_id": "sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff",
+  "source_sha256": {
+    "internal/billing/outbox/relay.go": "f9b4e2e60e4e832c57cf8c1c6ccdfa6a69f84c406d9a3664eadf25259718bb9e",
+    "internal/billing/store/outbox.go": "1c805d5785714bf18b94ae70e5579d10788e8df0463c076909cec23bfb451316"
+  },
+  "test_sha256": "7c3a8a575b57b01b0528df52e1647117fc310605d0bd66e9af6883741166d2ff",
+  "returncode": 0,
+  "stdout": "=== RUN   TestIsolatedFairSweepRecovery\ntime=2026-11-04T06:03:52.803+08:00 level=ERROR msg=\"publish dlq\" event_key=fair-blocked err=\"broker unreachable\"\ntime=2026-11-04T06:03:52.814+08:00 level=ERROR msg=\"publish dlq\" event_key=fair-blocked err=\"broker unreachable\"\n    isolated_fair_test.go:51: blocked row retained; later and new rows delivered; canceled cursor unchanged; restart recovered blocked row\n--- PASS: TestIsolatedFairSweepRecovery (0.09s)\nPASS\nok  \tgithub.com/frostloom/ai-gateway/internal/billing/outbox\t2.382s\n",
+  "stderr": "# github.com/frostloom/ai-gateway/internal/billing/outbox.test\nld: warning: '/private/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-3694103510/000013.o' has malformed LC_DYSYMTAB, expected 98 undefined symbols to start at index 1626, found 95 undefined symbols starting at index 1626\n",
+  "lifecycle": {
+    "returncode": 0,
+    "stdout": "=== RUN   TestOutboxLifecycle\n--- PASS: TestOutboxLifecycle (0.47s)\nPASS\nok  \tgithub.com/frostloom/ai-gateway/internal/billing/store\t1.093s\n",
+    "stderr": "",
+    "test_sha256": "a5c88fe51f03a0a1b526a8d642148e6c0394de6b415940006967600114dfff5d"
+  }
+}

@@ -1,0 +1,11 @@
+=== RUN   TestIdemRealRedisConcurrent
+    idem_real_redis_test.go:18: requires explicit fresh isolated Redis
+--- SKIP: TestIdemRealRedisConcurrent (0.00s)
+=== RUN   TestIdemCanceledAttemptCannotArriveLate
+--- PASS: TestIdemCanceledAttemptCannotArriveLate (0.01s)
+=== RUN   TestIdemExpiredCancellationCanArriveLate
+--- PASS: TestIdemExpiredCancellationCanArriveLate (0.00s)
+=== RUN   TestIdemCancelAfterForwardAllowsDuplicate
+--- PASS: TestIdemCancelAfterForwardAllowsDuplicate (0.00s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/project-load-2026-11-02	2.177s

@@ -1,0 +1,41 @@
+head=63b9d1ed4d64bb583d15fa884c37468e5c53044c
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestRouterCachedRouteProgressDuringBlockedReport
+    router_report_lock_scope_test.go:81: cached Route completed while a report was held before MySQL write; report completed after release
+--- PASS: TestRouterCachedRouteProgressDuringBlockedReport (0.07s)
+=== RUN   TestRouterReportSequencePersistsInOrder
+    router_report_lock_scope_test.go:139: first successful report then failure persisted in order; final failures=1
+--- PASS: TestRouterReportSequencePersistsInOrder (0.16s)
+=== RUN   TestRouterDifferentProvidersReportIndependently
+    router_report_lock_scope_test.go:204: second provider failure persisted while first provider report paused; both failure counters=1
+--- PASS: TestRouterDifferentProvidersReportIndependently (0.04s)
+=== RUN   TestRouterReportWriteFailureStillAcknowledged
+    router_report_lock_scope_test.go:241: synthetic DB failure: HTTP 200 despite DB failures=0 and in-memory failures=1
+--- PASS: TestRouterReportWriteFailureStillAcknowledged (0.03s)
+=== RUN   TestRouterCachedRouteProgressDuringBlockedReport
+    router_report_lock_scope_test.go:81: cached Route completed while a report was held before MySQL write; report completed after release
+--- PASS: TestRouterCachedRouteProgressDuringBlockedReport (0.03s)
+=== RUN   TestRouterReportSequencePersistsInOrder
+    router_report_lock_scope_test.go:139: first successful report then failure persisted in order; final failures=1
+--- PASS: TestRouterReportSequencePersistsInOrder (0.14s)
+=== RUN   TestRouterDifferentProvidersReportIndependently
+    router_report_lock_scope_test.go:204: second provider failure persisted while first provider report paused; both failure counters=1
+--- PASS: TestRouterDifferentProvidersReportIndependently (0.05s)
+=== RUN   TestRouterReportWriteFailureStillAcknowledged
+    router_report_lock_scope_test.go:241: synthetic DB failure: HTTP 200 despite DB failures=0 and in-memory failures=1
+--- PASS: TestRouterReportWriteFailureStillAcknowledged (0.03s)
+=== RUN   TestRouterCachedRouteProgressDuringBlockedReport
+    router_report_lock_scope_test.go:81: cached Route completed while a report was held before MySQL write; report completed after release
+--- PASS: TestRouterCachedRouteProgressDuringBlockedReport (0.03s)
+=== RUN   TestRouterReportSequencePersistsInOrder
+    router_report_lock_scope_test.go:139: first successful report then failure persisted in order; final failures=1
+--- PASS: TestRouterReportSequencePersistsInOrder (0.14s)
+=== RUN   TestRouterDifferentProvidersReportIndependently
+    router_report_lock_scope_test.go:204: second provider failure persisted while first provider report paused; both failure counters=1
+--- PASS: TestRouterDifferentProvidersReportIndependently (0.04s)
+=== RUN   TestRouterReportWriteFailureStillAcknowledged
+    router_report_lock_scope_test.go:241: synthetic DB failure: HTTP 200 despite DB failures=0 and in-memory failures=1
+--- PASS: TestRouterReportWriteFailureStillAcknowledged (0.03s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	2.650s

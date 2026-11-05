@@ -1,0 +1,12 @@
+=== RUN   TestGatewayDoesNotResendUnknownUpstreamOutcome
+=== RUN   TestGatewayDoesNotResendUnknownUpstreamOutcome/stream=false/disconnect
+=== RUN   TestGatewayDoesNotResendUnknownUpstreamOutcome/stream=false/server_503
+=== RUN   TestGatewayDoesNotResendUnknownUpstreamOutcome/stream=true/disconnect
+=== RUN   TestGatewayDoesNotResendUnknownUpstreamOutcome/stream=true/server_503
+--- PASS: TestGatewayDoesNotResendUnknownUpstreamOutcome (0.01s)
+    --- PASS: TestGatewayDoesNotResendUnknownUpstreamOutcome/stream=false/disconnect (0.00s)
+    --- PASS: TestGatewayDoesNotResendUnknownUpstreamOutcome/stream=false/server_503 (0.00s)
+    --- PASS: TestGatewayDoesNotResendUnknownUpstreamOutcome/stream=true/disconnect (0.00s)
+    --- PASS: TestGatewayDoesNotResendUnknownUpstreamOutcome/stream=true/server_503 (0.00s)
+PASS
+ok  	github.com/frostloom/ai-gateway/internal/gateway/handler	1.737s

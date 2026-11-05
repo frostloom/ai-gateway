@@ -1,0 +1,23 @@
+head=63b9d1ed4d64bb583d15fa884c37468e5c53044c
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestReversingKilledWorker
+=== RUN   TestReversingKilledWorker/marked
+=== RUN   TestReversingKilledWorker/refund_committed
+--- PASS: TestReversingKilledWorker (0.63s)
+    --- PASS: TestReversingKilledWorker/marked (0.13s)
+    --- PASS: TestReversingKilledWorker/refund_committed (0.14s)
+=== RUN   TestReversingKilledWorker
+=== RUN   TestReversingKilledWorker/marked
+=== RUN   TestReversingKilledWorker/refund_committed
+--- PASS: TestReversingKilledWorker (0.66s)
+    --- PASS: TestReversingKilledWorker/marked (0.13s)
+    --- PASS: TestReversingKilledWorker/refund_committed (0.12s)
+=== RUN   TestReversingKilledWorker
+=== RUN   TestReversingKilledWorker/marked
+=== RUN   TestReversingKilledWorker/refund_committed
+--- PASS: TestReversingKilledWorker (0.61s)
+    --- PASS: TestReversingKilledWorker/marked (0.11s)
+    --- PASS: TestReversingKilledWorker/refund_committed (0.11s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	3.630s

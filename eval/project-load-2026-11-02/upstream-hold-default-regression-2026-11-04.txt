@@ -1,0 +1,132 @@
+=== RUN   TestAuthProxyHTTPSConfiguration
+=== RUN   TestAuthProxyHTTPSConfiguration/secure=
+=== RUN   TestAuthProxyHTTPSConfiguration/secure=1
+--- PASS: TestAuthProxyHTTPSConfiguration (0.01s)
+    --- PASS: TestAuthProxyHTTPSConfiguration/secure= (0.00s)
+    --- PASS: TestAuthProxyHTTPSConfiguration/secure=1 (0.00s)
+=== RUN   TestChatLeavesPendingWhenActualUsageCannotBeRecorded
+--- PASS: TestChatLeavesPendingWhenActualUsageCannotBeRecorded (0.00s)
+=== RUN   TestRelayStreamSettlesForwardedContentWithoutUsage
+--- PASS: TestRelayStreamSettlesForwardedContentWithoutUsage (0.00s)
+=== RUN   TestRelayStreamFailoverThen502Reverses
+--- PASS: TestRelayStreamFailoverThen502Reverses (0.00s)
+=== RUN   TestChatReportsSuccessfulFallbackProvider
+=== RUN   TestChatReportsSuccessfulFallbackProvider/nonstream
+=== RUN   TestChatReportsSuccessfulFallbackProvider/stream_usage
+=== RUN   TestChatReportsSuccessfulFallbackProvider/stream_estimate
+--- PASS: TestChatReportsSuccessfulFallbackProvider (0.01s)
+    --- PASS: TestChatReportsSuccessfulFallbackProvider/nonstream (0.00s)
+    --- PASS: TestChatReportsSuccessfulFallbackProvider/stream_usage (0.00s)
+    --- PASS: TestChatReportsSuccessfulFallbackProvider/stream_estimate (0.00s)
+=== RUN   TestRelayStreamDoesNotWaitForFailedResponseBody
+=== RUN   TestRelayStreamDoesNotWaitForFailedResponseBody/refund
+=== RUN   TestRelayStreamDoesNotWaitForFailedResponseBody/failover
+--- PASS: TestRelayStreamDoesNotWaitForFailedResponseBody (0.00s)
+    --- PASS: TestRelayStreamDoesNotWaitForFailedResponseBody/refund (0.00s)
+    --- PASS: TestRelayStreamDoesNotWaitForFailedResponseBody/failover (0.00s)
+=== RUN   TestChatReserveConflictReturns409
+--- PASS: TestChatReserveConflictReturns409 (0.00s)
+=== RUN   TestChatRejectsNonAuthorizingReserveCodes
+=== RUN   TestChatRejectsNonAuthorizingReserveCodes/duplicate
+=== RUN   TestChatRejectsNonAuthorizingReserveCodes/unknown
+--- PASS: TestChatRejectsNonAuthorizingReserveCodes (0.00s)
+    --- PASS: TestChatRejectsNonAuthorizingReserveCodes/duplicate (0.00s)
+    --- PASS: TestChatRejectsNonAuthorizingReserveCodes/unknown (0.00s)
+=== RUN   TestChatRejectsNilReserveResponse
+--- PASS: TestChatRejectsNilReserveResponse (0.00s)
+=== RUN   TestChatRejectsReserveSuccessWithoutBillID
+--- PASS: TestChatRejectsReserveSuccessWithoutBillID (0.00s)
+=== RUN   TestTruncatedNonStreamMustNotSettleOrReverse
+--- PASS: TestTruncatedNonStreamMustNotSettleOrReverse (0.00s)
+=== RUN   TestCompleteNonStreamWithoutUsageStillSucceeds
+--- PASS: TestCompleteNonStreamWithoutUsageStillSucceeds (0.00s)
+=== RUN   TestMalformedNonStreamMustNotSettleOrReverse
+=== RUN   TestMalformedNonStreamMustNotSettleOrReverse/{"choices":[
+=== RUN   TestMalformedNonStreamMustNotSettleOrReverse/null
+=== RUN   TestMalformedNonStreamMustNotSettleOrReverse/[]
+=== RUN   TestMalformedNonStreamMustNotSettleOrReverse/{"usage":{"prompt_tokens":-1,"completion_tokens":0}}
+=== RUN   TestMalformedNonStreamMustNotSettleOrReverse/{"usage":{"prompt_tokens":1,"completion_tokens":-1}}
+=== RUN   TestMalformedNonStreamMustNotSettleOrReverse/{"usage":{}}
+=== RUN   TestMalformedNonStreamMustNotSettleOrReverse/{"usage":{"prompt_tokens":1}}
+=== RUN   TestMalformedNonStreamMustNotSettleOrReverse/{"usage":{"completion_tokens":1}}
+=== RUN   TestMalformedNonStreamMustNotSettleOrReverse/{"usage":{"prompt_tokens":null,"completion_tokens":1}}
+=== RUN   TestMalformedNonStreamMustNotSettleOrReverse/{"usage":{"prompt_tokens":1,"completion_tokens":null}}
+--- PASS: TestMalformedNonStreamMustNotSettleOrReverse (0.01s)
+    --- PASS: TestMalformedNonStreamMustNotSettleOrReverse/{"choices":[ (0.00s)
+    --- PASS: TestMalformedNonStreamMustNotSettleOrReverse/null (0.00s)
+    --- PASS: TestMalformedNonStreamMustNotSettleOrReverse/[] (0.00s)
+    --- PASS: TestMalformedNonStreamMustNotSettleOrReverse/{"usage":{"prompt_tokens":-1,"completion_tokens":0}} (0.00s)
+    --- PASS: TestMalformedNonStreamMustNotSettleOrReverse/{"usage":{"prompt_tokens":1,"completion_tokens":-1}} (0.00s)
+    --- PASS: TestMalformedNonStreamMustNotSettleOrReverse/{"usage":{}} (0.00s)
+    --- PASS: TestMalformedNonStreamMustNotSettleOrReverse/{"usage":{"prompt_tokens":1}} (0.00s)
+    --- PASS: TestMalformedNonStreamMustNotSettleOrReverse/{"usage":{"completion_tokens":1}} (0.00s)
+    --- PASS: TestMalformedNonStreamMustNotSettleOrReverse/{"usage":{"prompt_tokens":null,"completion_tokens":1}} (0.00s)
+    --- PASS: TestMalformedNonStreamMustNotSettleOrReverse/{"usage":{"prompt_tokens":1,"completion_tokens":null}} (0.00s)
+=== RUN   TestNonStreamErrorResponseCompleteness
+=== RUN   TestNonStreamErrorResponseCompleteness/truncated_400
+=== RUN   TestNonStreamErrorResponseCompleteness/complete_400
+--- PASS: TestNonStreamErrorResponseCompleteness (0.00s)
+    --- PASS: TestNonStreamErrorResponseCompleteness/truncated_400 (0.00s)
+    --- PASS: TestNonStreamErrorResponseCompleteness/complete_400 (0.00s)
+=== RUN   TestStreamContentContainingDoneDoesNotEndStream
+--- PASS: TestStreamContentContainingDoneDoesNotEndStream (0.00s)
+=== RUN   TestStreamDoneTextInCommentDoesNotEndStream
+--- PASS: TestStreamDoneTextInCommentDoesNotEndStream (0.00s)
+=== RUN   TestStreamFinalLineWithoutNewline
+=== RUN   TestStreamFinalLineWithoutNewline/usage
+=== RUN   TestStreamFinalLineWithoutNewline/done
+--- PASS: TestStreamFinalLineWithoutNewline (0.00s)
+    --- PASS: TestStreamFinalLineWithoutNewline/usage (0.00s)
+    --- PASS: TestStreamFinalLineWithoutNewline/done (0.00s)
+=== RUN   TestCompleteNonStreamExplicitZeroUsage
+--- PASS: TestCompleteNonStreamExplicitZeroUsage (0.00s)
+=== RUN   TestStreamIncompleteUsageStaysPending
+=== RUN   TestStreamIncompleteUsageStaysPending/{}
+=== RUN   TestStreamIncompleteUsageStaysPending/{"prompt_tokens":1}
+=== RUN   TestStreamIncompleteUsageStaysPending/{"completion_tokens":1}
+=== RUN   TestStreamIncompleteUsageStaysPending/{"prompt_tokens":null,"completion_tokens":1}
+=== RUN   TestStreamIncompleteUsageStaysPending/{"prompt_tokens":1,"completion_tokens":null}
+=== RUN   TestStreamIncompleteUsageStaysPending/{"prompt_tokens":-1,"completion_tokens":1}
+=== RUN   TestStreamIncompleteUsageStaysPending/{"prompt_tokens":1,"completion_tokens":-1}
+=== RUN   TestStreamIncompleteUsageStaysPending/{"prompt_tokens":"bad","completion_tokens":1}
+--- PASS: TestStreamIncompleteUsageStaysPending (0.01s)
+    --- PASS: TestStreamIncompleteUsageStaysPending/{} (0.00s)
+    --- PASS: TestStreamIncompleteUsageStaysPending/{"prompt_tokens":1} (0.00s)
+    --- PASS: TestStreamIncompleteUsageStaysPending/{"completion_tokens":1} (0.00s)
+    --- PASS: TestStreamIncompleteUsageStaysPending/{"prompt_tokens":null,"completion_tokens":1} (0.00s)
+    --- PASS: TestStreamIncompleteUsageStaysPending/{"prompt_tokens":1,"completion_tokens":null} (0.00s)
+    --- PASS: TestStreamIncompleteUsageStaysPending/{"prompt_tokens":-1,"completion_tokens":1} (0.00s)
+    --- PASS: TestStreamIncompleteUsageStaysPending/{"prompt_tokens":1,"completion_tokens":-1} (0.00s)
+    --- PASS: TestStreamIncompleteUsageStaysPending/{"prompt_tokens":"bad","completion_tokens":1} (0.00s)
+=== RUN   TestStreamUsageZeroAndConflict
+=== RUN   TestStreamUsageZeroAndConflict/explicit_zero
+=== RUN   TestStreamUsageZeroAndConflict/valid_then_invalid
+--- PASS: TestStreamUsageZeroAndConflict (0.00s)
+    --- PASS: TestStreamUsageZeroAndConflict/explicit_zero (0.00s)
+    --- PASS: TestStreamUsageZeroAndConflict/valid_then_invalid (0.00s)
+=== RUN   TestStreamUsageWithUnfinishedChoicesStaysPending
+=== RUN   TestStreamUsageWithUnfinishedChoicesStaysPending/{"choices":[{"delta":{"content":"text"}}],"usage":{"prompt_tokens":7,"completion_tokens":9}}
+=== RUN   TestStreamUsageWithUnfinishedChoicesStaysPending/{"choices":[{"finish_reason":"stop"},{"finish_reason":null}],"usage":{"prompt_tokens":7,"completion_tokens":9}}
+=== RUN   TestStreamUsageWithUnfinishedChoicesStaysPending/{"choices":[{"finish_reason":"stop"}],"usage":{"prompt_tokens":7}}
+--- PASS: TestStreamUsageWithUnfinishedChoicesStaysPending (0.00s)
+    --- PASS: TestStreamUsageWithUnfinishedChoicesStaysPending/{"choices":[{"delta":{"content":"text"}}],"usage":{"prompt_tokens":7,"completion_tokens":9}} (0.00s)
+    --- PASS: TestStreamUsageWithUnfinishedChoicesStaysPending/{"choices":[{"finish_reason":"stop"},{"finish_reason":null}],"usage":{"prompt_tokens":7,"completion_tokens":9}} (0.00s)
+    --- PASS: TestStreamUsageWithUnfinishedChoicesStaysPending/{"choices":[{"finish_reason":"stop"}],"usage":{"prompt_tokens":7}} (0.00s)
+=== RUN   TestParseUsageFrame
+=== RUN   TestParseUsageFrame/终帧带_usage（choices_空）
+=== RUN   TestParseUsageFrame/内容增量帧（带_choices，无_usage）
+=== RUN   TestParseUsageFrame/role_帧
+=== RUN   TestParseUsageFrame/DONE_哨兵
+=== RUN   TestParseUsageFrame/非_data_行（空行分隔）
+=== RUN   TestParseUsageFrame/坏_JSON
+=== RUN   TestParseUsageFrame/带_choices_但空_usage_指针
+--- PASS: TestParseUsageFrame (0.00s)
+    --- PASS: TestParseUsageFrame/终帧带_usage（choices_空） (0.00s)
+    --- PASS: TestParseUsageFrame/内容增量帧（带_choices，无_usage） (0.00s)
+    --- PASS: TestParseUsageFrame/role_帧 (0.00s)
+    --- PASS: TestParseUsageFrame/DONE_哨兵 (0.00s)
+    --- PASS: TestParseUsageFrame/非_data_行（空行分隔） (0.00s)
+    --- PASS: TestParseUsageFrame/坏_JSON (0.00s)
+    --- PASS: TestParseUsageFrame/带_choices_但空_usage_指针 (0.00s)
+PASS
+ok  	github.com/frostloom/ai-gateway/internal/gateway/handler	1.768s

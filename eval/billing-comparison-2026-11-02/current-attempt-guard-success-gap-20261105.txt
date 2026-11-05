@@ -1,0 +1,36 @@
+head=42d8ef8e5ca2471b18800e50f8e7a57fbcfdd47f
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+current_source_sha256=a8395407d8805a45c08cf8a7e216e2fafa833d79134711ba898ff1604c263e12
+current_candidate_sha256=7442563a4f1f18d649e92a91b316ad20e9febeb11c7a2e6445d433bf0e100fea
+gateway_source_sha256=0c953aaea8ba449c5592f796ae49343fa1935f5215534336470b19919f64fd61
+gateway_candidate_sha256=7b74a2851497dfe61085f5bc7277d228faaf651ddadcf431b9b26168306c6f4f
+# github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02.test
+ld: warning: '/private/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-3614980968/000013.o' has malformed LC_DYSYMTAB, expected 98 undefined symbols to start at index 1626, found 95 undefined symbols starting at index 1626
+=== RUN   TestAttemptGuardBlocksUnknownFailover
+=== RUN   TestAttemptGuardBlocksUnknownFailover/stream=false
+    execution_gateway_attempt_guard_test.go:270: {6eb2cc0cd33b0fc4dff7c4ce9fa98cdf 1 gw-failover-false-1793824506050118000-request 0 1 sending <nil> <nil>}
+=== RUN   TestAttemptGuardBlocksUnknownFailover/stream=true
+    execution_gateway_attempt_guard_test.go:270: {018e49275fd89b272971a3242075137a 2 gw-failover-true-1793824506195800000-request 0 3 sending <nil> <nil>}
+--- FAIL: TestAttemptGuardBlocksUnknownFailover (0.59s)
+    --- FAIL: TestAttemptGuardBlocksUnknownFailover/stream=false (0.15s)
+    --- FAIL: TestAttemptGuardBlocksUnknownFailover/stream=true (0.07s)
+=== RUN   TestAttemptGuardBlocksUnknownFailover
+=== RUN   TestAttemptGuardBlocksUnknownFailover/stream=false
+    execution_gateway_attempt_guard_test.go:270: {ae81f3fabf68cb2aaba801d2ad8fd794 3 gw-failover-false-1793824506653166000-request 0 5 sending <nil> <nil>}
+=== RUN   TestAttemptGuardBlocksUnknownFailover/stream=true
+    execution_gateway_attempt_guard_test.go:270: {fa8199a3a65942a0938c94cd05868218 4 gw-failover-true-1793824506754567000-request 0 7 sending <nil> <nil>}
+--- FAIL: TestAttemptGuardBlocksUnknownFailover (0.61s)
+    --- FAIL: TestAttemptGuardBlocksUnknownFailover/stream=false (0.10s)
+    --- FAIL: TestAttemptGuardBlocksUnknownFailover/stream=true (0.11s)
+=== RUN   TestAttemptGuardBlocksUnknownFailover
+=== RUN   TestAttemptGuardBlocksUnknownFailover/stream=false
+    execution_gateway_attempt_guard_test.go:270: {bd5775fce01f45a8aa62e166423f2795 5 gw-failover-false-1793824507219247000-request 0 9 sending <nil> <nil>}
+=== RUN   TestAttemptGuardBlocksUnknownFailover/stream=true
+    execution_gateway_attempt_guard_test.go:270: {4a95e630381fe490145c710a3c8b9af5 6 gw-failover-true-1793824507316771000-request 0 11 sending <nil> <nil>}
+--- FAIL: TestAttemptGuardBlocksUnknownFailover (0.54s)
+    --- FAIL: TestAttemptGuardBlocksUnknownFailover/stream=false (0.10s)
+    --- FAIL: TestAttemptGuardBlocksUnknownFailover/stream=true (0.10s)
+FAIL
+FAIL	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	2.483s
+FAIL

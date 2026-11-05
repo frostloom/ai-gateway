@@ -1,0 +1,41 @@
+head=63b9d1ed4d64bb583d15fa884c37468e5c53044c
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestRealGatewayWithExecutionBridge
+=== RUN   TestRealGatewayWithExecutionBridge/usage_failed
+[mysql] 2026/11/03 23:49:05 packets.go:58 unexpected EOF
+    execution_gateway_integration_test.go:433: mode=usage_failed mysql_crashed=true local_journal=true replay_settled=true
+    execution_gateway_integration_test.go:507: mode=usage_failed status=200 calls=1 bill=settled balance=960 ledger=960 expected_events=3
+=== RUN   TestRealGatewayWithExecutionBridge/stream_usage_failed
+[mysql] 2026/11/03 23:49:08 packets.go:58 unexpected EOF
+    execution_gateway_integration_test.go:433: mode=stream_usage_failed mysql_crashed=true local_journal=true replay_settled=true
+    execution_gateway_integration_test.go:507: mode=stream_usage_failed status=200 calls=1 bill=settled balance=958 ledger=958 expected_events=3
+--- PASS: TestRealGatewayWithExecutionBridge (6.32s)
+    --- PASS: TestRealGatewayWithExecutionBridge/usage_failed (2.98s)
+    --- PASS: TestRealGatewayWithExecutionBridge/stream_usage_failed (2.96s)
+=== RUN   TestRealGatewayWithExecutionBridge
+=== RUN   TestRealGatewayWithExecutionBridge/usage_failed
+[mysql] 2026/11/03 23:49:12 packets.go:58 unexpected EOF
+    execution_gateway_integration_test.go:433: mode=usage_failed mysql_crashed=true local_journal=true replay_settled=true
+    execution_gateway_integration_test.go:507: mode=usage_failed status=200 calls=1 bill=settled balance=960 ledger=960 expected_events=3
+=== RUN   TestRealGatewayWithExecutionBridge/stream_usage_failed
+[mysql] 2026/11/03 23:49:14 packets.go:58 unexpected EOF
+    execution_gateway_integration_test.go:433: mode=stream_usage_failed mysql_crashed=true local_journal=true replay_settled=true
+    execution_gateway_integration_test.go:507: mode=stream_usage_failed status=200 calls=1 bill=settled balance=958 ledger=958 expected_events=3
+--- PASS: TestRealGatewayWithExecutionBridge (6.01s)
+    --- PASS: TestRealGatewayWithExecutionBridge/usage_failed (2.79s)
+    --- PASS: TestRealGatewayWithExecutionBridge/stream_usage_failed (2.88s)
+=== RUN   TestRealGatewayWithExecutionBridge
+=== RUN   TestRealGatewayWithExecutionBridge/usage_failed
+[mysql] 2026/11/03 23:49:17 packets.go:58 unexpected EOF
+    execution_gateway_integration_test.go:433: mode=usage_failed mysql_crashed=true local_journal=true replay_settled=true
+    execution_gateway_integration_test.go:507: mode=usage_failed status=200 calls=1 bill=settled balance=960 ledger=960 expected_events=3
+=== RUN   TestRealGatewayWithExecutionBridge/stream_usage_failed
+[mysql] 2026/11/03 23:49:20 packets.go:58 read tcp 127.0.0.1:57326->127.0.0.1:57252: read: connection reset by peer
+    execution_gateway_integration_test.go:433: mode=stream_usage_failed mysql_crashed=true local_journal=true replay_settled=true
+    execution_gateway_integration_test.go:507: mode=stream_usage_failed status=200 calls=1 bill=settled balance=958 ledger=958 expected_events=3
+--- PASS: TestRealGatewayWithExecutionBridge (5.91s)
+    --- PASS: TestRealGatewayWithExecutionBridge/usage_failed (2.73s)
+    --- PASS: TestRealGatewayWithExecutionBridge/stream_usage_failed (2.84s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	20.149s

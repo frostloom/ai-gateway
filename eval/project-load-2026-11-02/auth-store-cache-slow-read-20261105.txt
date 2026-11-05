@@ -1,0 +1,31 @@
+head=d66ebc53c37470dcfae00b463e58d3f52ca3f914
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+# github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02.test
+ld: warning: '/private/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-3160567630/000013.o' has malformed LC_DYSYMTAB, expected 98 undefined symbols to start at index 1626, found 95 undefined symbols starting at index 1626
+=== RUN   TestStoreAuthCacheSlowReadDoesNotRefill
+
+2026/11/05 15:35:53 [32m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:1019 [33mSLOW SQL >= 200ms
+[0m[31;1m[259.548ms] [33m[rows:1][35m SELECT api_keys.*, CASE WHEN BINARY api_keys.name = BINARY '__browser_session' THEN (SELECT COUNT(*) FROM portal_sessions JOIN portal_users ON portal_users.id = portal_sessions.user_id JOIN tenants session_tenant ON session_tenant.id = portal_users.tenant_id WHERE portal_sessions.api_key_id = api_keys.id AND portal_users.status = 0 AND session_tenant.status = 0 AND session_tenant.id = api_keys.tenant_id) ELSE 1 END AS session_count FROM `api_keys` JOIN tenants ON tenants.id = api_keys.tenant_id WHERE api_keys.key_hash = 'cache-slow-1793864153249026000' AND tenants.status = 0 LIMIT 1[0m
+
+2026/11/05 15:35:53 [34;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/auth_store_cache_test.go:126
+[0m[35m[warn] [0mremoving callback `test:cache-slow-cache-slow-1793864153249026000` from /Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/auth_store_cache_test.go:126
+--- PASS: TestStoreAuthCacheSlowReadDoesNotRefill (0.76s)
+=== RUN   TestStoreAuthCacheSlowReadDoesNotRefill
+
+2026/11/05 15:35:54 [32m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:1019 [33mSLOW SQL >= 200ms
+[0m[31;1m[260.740ms] [33m[rows:1][35m SELECT api_keys.*, CASE WHEN BINARY api_keys.name = BINARY '__browser_session' THEN (SELECT COUNT(*) FROM portal_sessions JOIN portal_users ON portal_users.id = portal_sessions.user_id JOIN tenants session_tenant ON session_tenant.id = portal_users.tenant_id WHERE portal_sessions.api_key_id = api_keys.id AND portal_users.status = 0 AND session_tenant.status = 0 AND session_tenant.id = api_keys.tenant_id) ELSE 1 END AS session_count FROM `api_keys` JOIN tenants ON tenants.id = api_keys.tenant_id WHERE api_keys.key_hash = 'cache-slow-1793864153930364000' AND tenants.status = 0 LIMIT 1[0m
+
+2026/11/05 15:35:54 [34;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/auth_store_cache_test.go:126
+[0m[35m[warn] [0mremoving callback `test:cache-slow-cache-slow-1793864153930364000` from /Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/auth_store_cache_test.go:126
+--- PASS: TestStoreAuthCacheSlowReadDoesNotRefill (0.68s)
+=== RUN   TestStoreAuthCacheSlowReadDoesNotRefill
+
+2026/11/05 15:35:54 [32m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:1019 [33mSLOW SQL >= 200ms
+[0m[31;1m[264.049ms] [33m[rows:1][35m SELECT api_keys.*, CASE WHEN BINARY api_keys.name = BINARY '__browser_session' THEN (SELECT COUNT(*) FROM portal_sessions JOIN portal_users ON portal_users.id = portal_sessions.user_id JOIN tenants session_tenant ON session_tenant.id = portal_users.tenant_id WHERE portal_sessions.api_key_id = api_keys.id AND portal_users.status = 0 AND session_tenant.status = 0 AND session_tenant.id = api_keys.tenant_id) ELSE 1 END AS session_count FROM `api_keys` JOIN tenants ON tenants.id = api_keys.tenant_id WHERE api_keys.key_hash = 'cache-slow-1793864154558820000' AND tenants.status = 0 LIMIT 1[0m
+
+2026/11/05 15:35:54 [34;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/auth_store_cache_test.go:126
+[0m[35m[warn] [0mremoving callback `test:cache-slow-cache-slow-1793864154558820000` from /Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/auth_store_cache_test.go:126
+--- PASS: TestStoreAuthCacheSlowReadDoesNotRefill (0.64s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	4.311s

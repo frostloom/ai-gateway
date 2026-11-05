@@ -1,0 +1,29 @@
+head=d607e1465094269e8dc8e2f07cf5b3ac28560abf
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestContentFingerprintConcurrentStore
+    content_fingerprint_store_test.go:89: equal_duplicates=10 different_conflicts=10 v1_rejected=true reserve=1 balance=900 ledger=900
+--- PASS: TestContentFingerprintConcurrentStore (2.09s)
+=== RUN   TestContentFingerprintSubscriptionConcurrentQuota
+    content_fingerprint_subscription_concurrency_test.go:119: quota=300 concurrent=8 reserve=3 rejected=5 settled=3 balance=100000 ledger=100000
+--- PASS: TestContentFingerprintSubscriptionConcurrentQuota (1.02s)
+=== RUN   TestDisabledTenantOrdinaryKeyAndSubscriptionReserve
+--- PASS: TestDisabledTenantOrdinaryKeyAndSubscriptionReserve (1.14s)
+=== RUN   TestContentFingerprintConcurrentStore
+    content_fingerprint_store_test.go:89: equal_duplicates=10 different_conflicts=10 v1_rejected=true reserve=1 balance=900 ledger=900
+--- PASS: TestContentFingerprintConcurrentStore (0.82s)
+=== RUN   TestContentFingerprintSubscriptionConcurrentQuota
+    content_fingerprint_subscription_concurrency_test.go:119: quota=300 concurrent=8 reserve=3 rejected=5 settled=3 balance=100000 ledger=100000
+--- PASS: TestContentFingerprintSubscriptionConcurrentQuota (1.17s)
+=== RUN   TestDisabledTenantOrdinaryKeyAndSubscriptionReserve
+--- PASS: TestDisabledTenantOrdinaryKeyAndSubscriptionReserve (1.07s)
+=== RUN   TestContentFingerprintConcurrentStore
+    content_fingerprint_store_test.go:89: equal_duplicates=10 different_conflicts=10 v1_rejected=true reserve=1 balance=900 ledger=900
+--- PASS: TestContentFingerprintConcurrentStore (0.95s)
+=== RUN   TestContentFingerprintSubscriptionConcurrentQuota
+    content_fingerprint_subscription_concurrency_test.go:119: quota=300 concurrent=8 reserve=3 rejected=5 settled=3 balance=100000 ledger=100000
+--- PASS: TestContentFingerprintSubscriptionConcurrentQuota (0.72s)
+=== RUN   TestDisabledTenantOrdinaryKeyAndSubscriptionReserve
+--- PASS: TestDisabledTenantOrdinaryKeyAndSubscriptionReserve (0.91s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	12.132s

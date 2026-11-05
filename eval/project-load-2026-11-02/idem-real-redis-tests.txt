@@ -1,0 +1,12 @@
+head=63b9d1ed4d64bb583d15fa884c37468e5c53044c
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestIdemRealRedisConcurrent
+--- PASS: TestIdemRealRedisConcurrent (1.08s)
+=== RUN   TestIdemCanceledAttemptCannotArriveLate
+--- PASS: TestIdemCanceledAttemptCannotArriveLate (0.02s)
+=== RUN   TestIdemExpiredCancellationCanArriveLate
+--- PASS: TestIdemExpiredCancellationCanArriveLate (0.01s)
+=== RUN   TestIdemCancelAfterForwardAllowsDuplicate
+--- PASS: TestIdemCancelAfterForwardAllowsDuplicate (0.01s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/project-load-2026-11-02	2.715s

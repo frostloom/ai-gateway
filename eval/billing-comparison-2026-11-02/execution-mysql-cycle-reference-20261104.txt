@@ -1,0 +1,67 @@
+head=63b9d1ed4d64bb583d15fa884c37468e5c53044c
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+current_source_sha256=be5ced15d64432b55979cf62b24e005c89ca340c509a01020d94f63147eaa6c9
+current_candidate_sha256=2f581227d3197e212504ea25e204dab3da7b08645877a2766d22706f8eba621b
+=== RUN   TestStrictBillingCycleDistribution
+    execution_cycle_load_test.go:74: round=1 order=same_account,multiple_accounts
+    execution_cycle_load_test.go:219: mode=same_account cycles=32 workers=8 errors=0 settled=32 outbox=96 balance_mismatch=0 wall_ms=639.40 cycles_s=50.05 avg_ms=152.31 p95_ms=188.00 p99_ms=196.39
+    execution_cycle_load_test.go:226: mode=same_account phase=reserve avg_ms=74.89 p95_ms=121.87
+    execution_cycle_load_test.go:226: mode=same_account phase=permit avg_ms=0.00 p95_ms=0.00
+    execution_cycle_load_test.go:226: mode=same_account phase=usage avg_ms=9.11 p95_ms=15.73
+    execution_cycle_load_test.go:226: mode=same_account phase=settle avg_ms=68.31 p95_ms=89.28
+    execution_cycle_load_test.go:228: mode=same_account sql_pool_wait_count=0 sql_pool_wait_ms=0.00 open=8 in_use=0
+    execution_cycle_load_test.go:219: mode=multiple_accounts cycles=32 workers=8 errors=0 settled=32 outbox=96 balance_mismatch=0 wall_ms=310.29 cycles_s=103.13 avg_ms=77.12 p95_ms=110.40 p99_ms=111.57
+    execution_cycle_load_test.go:226: mode=multiple_accounts phase=reserve avg_ms=27.37 p95_ms=34.03
+    execution_cycle_load_test.go:226: mode=multiple_accounts phase=permit avg_ms=0.00 p95_ms=0.00
+    execution_cycle_load_test.go:226: mode=multiple_accounts phase=usage avg_ms=16.79 p95_ms=23.23
+    execution_cycle_load_test.go:226: mode=multiple_accounts phase=settle avg_ms=32.97 p95_ms=66.43
+    execution_cycle_load_test.go:228: mode=multiple_accounts sql_pool_wait_count=0 sql_pool_wait_ms=0.00 open=8 in_use=0
+--- PASS: TestStrictBillingCycleDistribution (2.26s)
+=== RUN   TestStrictBillingCycleDistribution
+    execution_cycle_load_test.go:74: round=2 order=multiple_accounts,same_account
+    execution_cycle_load_test.go:219: mode=multiple_accounts cycles=32 workers=8 errors=0 settled=32 outbox=96 balance_mismatch=0 wall_ms=378.41 cycles_s=84.57 avg_ms=93.45 p95_ms=124.57 p99_ms=126.21
+    execution_cycle_load_test.go:226: mode=multiple_accounts phase=reserve avg_ms=32.13 p95_ms=39.90
+    execution_cycle_load_test.go:226: mode=multiple_accounts phase=permit avg_ms=0.00 p95_ms=0.00
+    execution_cycle_load_test.go:226: mode=multiple_accounts phase=usage avg_ms=25.90 p95_ms=50.95
+    execution_cycle_load_test.go:226: mode=multiple_accounts phase=settle avg_ms=35.42 p95_ms=70.41
+    execution_cycle_load_test.go:228: mode=multiple_accounts sql_pool_wait_count=0 sql_pool_wait_ms=0.00 open=8 in_use=0
+    execution_cycle_load_test.go:219: mode=same_account cycles=32 workers=8 errors=0 settled=32 outbox=96 balance_mismatch=0 wall_ms=791.36 cycles_s=40.44 avg_ms=189.83 p95_ms=231.96 p99_ms=233.84
+    execution_cycle_load_test.go:226: mode=same_account phase=reserve avg_ms=97.66 p95_ms=146.63
+    execution_cycle_load_test.go:226: mode=same_account phase=permit avg_ms=0.00 p95_ms=0.00
+    execution_cycle_load_test.go:226: mode=same_account phase=usage avg_ms=11.93 p95_ms=30.84
+    execution_cycle_load_test.go:226: mode=same_account phase=settle avg_ms=80.24 p95_ms=102.60
+    execution_cycle_load_test.go:228: mode=same_account sql_pool_wait_count=0 sql_pool_wait_ms=0.00 open=8 in_use=0
+--- PASS: TestStrictBillingCycleDistribution (2.33s)
+=== RUN   TestStrictBillingCycleDistribution
+    execution_cycle_load_test.go:74: round=3 order=same_account,multiple_accounts
+    execution_cycle_load_test.go:219: mode=same_account cycles=32 workers=8 errors=0 settled=32 outbox=96 balance_mismatch=0 wall_ms=819.23 cycles_s=39.06 avg_ms=198.75 p95_ms=326.65 p99_ms=359.09
+    execution_cycle_load_test.go:226: mode=same_account phase=reserve avg_ms=97.06 p95_ms=199.08
+    execution_cycle_load_test.go:226: mode=same_account phase=permit avg_ms=0.00 p95_ms=0.00
+    execution_cycle_load_test.go:226: mode=same_account phase=usage avg_ms=11.41 p95_ms=31.54
+    execution_cycle_load_test.go:226: mode=same_account phase=settle avg_ms=90.28 p95_ms=185.44
+    execution_cycle_load_test.go:228: mode=same_account sql_pool_wait_count=0 sql_pool_wait_ms=0.00 open=8 in_use=0
+    execution_cycle_load_test.go:219: mode=multiple_accounts cycles=32 workers=8 errors=0 settled=32 outbox=96 balance_mismatch=0 wall_ms=198.53 cycles_s=161.18 avg_ms=48.85 p95_ms=53.52 p99_ms=55.88
+    execution_cycle_load_test.go:226: mode=multiple_accounts phase=reserve avg_ms=17.14 p95_ms=20.01
+    execution_cycle_load_test.go:226: mode=multiple_accounts phase=permit avg_ms=0.00 p95_ms=0.00
+    execution_cycle_load_test.go:226: mode=multiple_accounts phase=usage avg_ms=12.70 p95_ms=15.47
+    execution_cycle_load_test.go:226: mode=multiple_accounts phase=settle avg_ms=19.00 p95_ms=23.28
+    execution_cycle_load_test.go:228: mode=multiple_accounts sql_pool_wait_count=0 sql_pool_wait_ms=0.00 open=8 in_use=0
+--- PASS: TestStrictBillingCycleDistribution (2.06s)
+=== RUN   TestStrictBillingCycleDistribution
+    execution_cycle_load_test.go:74: round=4 order=multiple_accounts,same_account
+    execution_cycle_load_test.go:219: mode=multiple_accounts cycles=32 workers=8 errors=0 settled=32 outbox=96 balance_mismatch=0 wall_ms=274.13 cycles_s=116.73 avg_ms=66.76 p95_ms=75.97 p99_ms=76.05
+    execution_cycle_load_test.go:226: mode=multiple_accounts phase=reserve avg_ms=26.04 p95_ms=41.59
+    execution_cycle_load_test.go:226: mode=multiple_accounts phase=permit avg_ms=0.00 p95_ms=0.00
+    execution_cycle_load_test.go:226: mode=multiple_accounts phase=usage avg_ms=15.93 p95_ms=20.14
+    execution_cycle_load_test.go:226: mode=multiple_accounts phase=settle avg_ms=24.79 p95_ms=33.67
+    execution_cycle_load_test.go:228: mode=multiple_accounts sql_pool_wait_count=0 sql_pool_wait_ms=0.00 open=8 in_use=0
+    execution_cycle_load_test.go:219: mode=same_account cycles=32 workers=8 errors=0 settled=32 outbox=96 balance_mismatch=0 wall_ms=577.31 cycles_s=55.43 avg_ms=136.11 p95_ms=167.22 p99_ms=167.29
+    execution_cycle_load_test.go:226: mode=same_account phase=reserve avg_ms=66.02 p95_ms=95.89
+    execution_cycle_load_test.go:226: mode=same_account phase=permit avg_ms=0.00 p95_ms=0.00
+    execution_cycle_load_test.go:226: mode=same_account phase=usage avg_ms=6.89 p95_ms=8.87
+    execution_cycle_load_test.go:226: mode=same_account phase=settle avg_ms=63.20 p95_ms=79.70
+    execution_cycle_load_test.go:228: mode=same_account sql_pool_wait_count=0 sql_pool_wait_ms=0.00 open=8 in_use=0
+--- PASS: TestStrictBillingCycleDistribution (2.21s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	11.670s

@@ -1,0 +1,34 @@
+head=c84cbf64ae8982272ae5bcb2aff06a6f44d2c31d
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+# github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02.test
+ld: warning: '/private/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-3228890119/000013.o' has malformed LC_DYSYMTAB, expected 98 undefined symbols to start at index 1626, found 95 undefined symbols starting at index 1626
+=== RUN   TestReconcilerOnceRealRecoveryAfterUnavailable
+
+2026/11/05 12:17:28 [32m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:155 [33mSLOW SQL >= 200ms
+[0m[31;1m[1327.114ms] [33m[rows:0][35m CREATE TABLE `tenants` (`id` bigint unsigned AUTO_INCREMENT,`name` varchar(64) NOT NULL,`initial_quota` bigint NOT NULL DEFAULT 0,`status` tinyint NOT NULL DEFAULT 0,`created_at` datetime(3) NULL,`updated_at` datetime(3) NULL,PRIMARY KEY (`id`),UNIQUE INDEX `uk_name` (`name`))[0m
+
+2026/11/05 12:17:29 [32m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:155 [33mSLOW SQL >= 200ms
+[0m[31;1m[621.798ms] [33m[rows:0][35m CREATE TABLE `api_keys` (`id` bigint unsigned AUTO_INCREMENT,`tenant_id` bigint unsigned NOT NULL,`key_hash` varchar(64) NOT NULL,`key_prefix` varchar(16) NOT NULL,`name` varchar(64),`status` tinyint NOT NULL DEFAULT 0,`expires_at` datetime(3) NULL,`created_at` datetime(3) NULL,`updated_at` datetime(3) NULL,PRIMARY KEY (`id`),INDEX `idx_tenant_status` (`tenant_id`),UNIQUE INDEX `uk_key_hash` (`key_hash`))[0m
+
+2026/11/05 12:17:33 [32m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:155 [33mSLOW SQL >= 200ms
+[0m[31;1m[4588.133ms] [33m[rows:0][35m CREATE TABLE `providers` (`id` bigint unsigned AUTO_INCREMENT,`name` varchar(64) NOT NULL,`base_url` varchar(255) NOT NULL,`upstream_key` varchar(255),`cost_in_cent` bigint NOT NULL DEFAULT 0,`cost_out_cent` bigint NOT NULL DEFAULT 0,`models` json,`weight` bigint NOT NULL DEFAULT 1,`status` tinyint NOT NULL DEFAULT 0,`fail_count` bigint NOT NULL DEFAULT 0,`consecutive_fail` bigint NOT NULL DEFAULT 0,`cooldown_until` datetime(3) NULL,`created_at` datetime(3) NULL,`updated_at` datetime(3) NULL,PRIMARY KEY (`id`),UNIQUE INDEX `uk_name` (`name`))[0m
+
+2026/11/05 12:17:34 [32m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:155 [33mSLOW SQL >= 200ms
+[0m[31;1m[976.644ms] [33m[rows:0][35m CREATE TABLE `models` (`id` bigint unsigned AUTO_INCREMENT,`vendor` varchar(32) NOT NULL,`model_id` varchar(64) NOT NULL,`name` varchar(128) NOT NULL,`input_price_cent` bigint NOT NULL DEFAULT 0,`output_price_cent` bigint NOT NULL DEFAULT 0,`context_len` bigint NOT NULL DEFAULT 0,`tags` json,`status` tinyint NOT NULL DEFAULT 0,`created_at` datetime(3) NULL,`updated_at` datetime(3) NULL,PRIMARY KEY (`id`),INDEX `idx_vendor_status` (`vendor`),UNIQUE INDEX `uk_model_id` (`model_id`))[0m
+
+2026/11/05 12:17:35 [32m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:155 [33mSLOW SQL >= 200ms
+[0m[31;1m[329.535ms] [33m[rows:0][35m CREATE TABLE `bills` (`id` bigint unsigned AUTO_INCREMENT,`reserve_fingerprint` varchar(64),`request_id` varchar(64) NOT NULL,`phase` varchar(16) NOT NULL,`status` varchar(16) NOT NULL,`tenant_id` bigint unsigned NOT NULL,`api_key_id` bigint unsigned NOT NULL,`provider_id` bigint unsigned,`model` varchar(64),`funding` varchar(16) NOT NULL DEFAULT 'balance',`pre_quota` bigint NOT NULL,`reserved_tokens` bigint,`reserved_tier` varchar(64),`actual_quota` bigint,`delta_quota` bigint,`prompt_tokens` bigint,`completion_tokens` bigint,`in_price_cent` bigint,`out_price_cent` bigint,`usage_reported_at` datetime(3) NULL,`error_code` varchar(64),`created_at` datetime(3) NULL,PRIMARY KEY (`id`),UNIQUE INDEX `uk_request_phase` (`request_id`,`phase`),INDEX `idx_recon` (`status`,`usage_reported_at`,`created_at`),INDEX `idx_tenant_status_created` (`tenant_id`,`created_at`),INDEX `idx_provider_created` (`provider_id`,`created_at`))[0m
+
+2026/11/05 12:17:36 [32m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:155 [33mSLOW SQL >= 200ms
+[0m[31;1m[251.770ms] [33m[rows:0][35m CREATE TABLE `portal_users` (`id` bigint unsigned AUTO_INCREMENT,`username` varchar(64) NOT NULL,`password_hash` varchar(255) NOT NULL,`tenant_id` bigint unsigned NOT NULL,`status` tinyint NOT NULL DEFAULT 0,`created_at` datetime(3) NULL,PRIMARY KEY (`id`),UNIQUE INDEX `idx_portal_users_username` (`username`),UNIQUE INDEX `idx_portal_users_tenant_id` (`tenant_id`))[0m
+    reconciler_once_recovery_test.go:125: unavailable -> nonzero and pending; recovered -> settled once; repeat -> no-op; balance=960
+--- PASS: TestReconcilerOnceRealRecoveryAfterUnavailable (12.88s)
+=== RUN   TestReconcilerOnceRealRecoveryAfterUnavailable
+    reconciler_once_recovery_test.go:125: unavailable -> nonzero and pending; recovered -> settled once; repeat -> no-op; balance=960
+--- PASS: TestReconcilerOnceRealRecoveryAfterUnavailable (2.29s)
+=== RUN   TestReconcilerOnceRealRecoveryAfterUnavailable
+    reconciler_once_recovery_test.go:125: unavailable -> nonzero and pending; recovered -> settled once; repeat -> no-op; balance=960
+--- PASS: TestReconcilerOnceRealRecoveryAfterUnavailable (2.69s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	20.792s

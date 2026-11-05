@@ -1,0 +1,22 @@
+=== RUN   TestGatewayDoesNotResendUnknownUpstreamOutcome
+=== RUN   TestGatewayDoesNotResendUnknownUpstreamOutcome/stream=false/disconnect
+=== RUN   TestGatewayDoesNotResendUnknownUpstreamOutcome/stream=false/server_503
+=== RUN   TestGatewayDoesNotResendUnknownUpstreamOutcome/stream=true/disconnect
+=== RUN   TestGatewayDoesNotResendUnknownUpstreamOutcome/stream=true/server_503
+--- PASS: TestGatewayDoesNotResendUnknownUpstreamOutcome (0.01s)
+    --- PASS: TestGatewayDoesNotResendUnknownUpstreamOutcome/stream=false/disconnect (0.00s)
+    --- PASS: TestGatewayDoesNotResendUnknownUpstreamOutcome/stream=false/server_503 (0.00s)
+    --- PASS: TestGatewayDoesNotResendUnknownUpstreamOutcome/stream=true/disconnect (0.00s)
+    --- PASS: TestGatewayDoesNotResendUnknownUpstreamOutcome/stream=true/server_503 (0.00s)
+=== RUN   TestUnknownHoldNormalAnd4xx
+=== RUN   TestUnknownHoldNormalAnd4xx/stream=false/reject=false
+=== RUN   TestUnknownHoldNormalAnd4xx/stream=false/reject=true
+=== RUN   TestUnknownHoldNormalAnd4xx/stream=true/reject=false
+=== RUN   TestUnknownHoldNormalAnd4xx/stream=true/reject=true
+--- PASS: TestUnknownHoldNormalAnd4xx (0.00s)
+    --- PASS: TestUnknownHoldNormalAnd4xx/stream=false/reject=false (0.00s)
+    --- PASS: TestUnknownHoldNormalAnd4xx/stream=false/reject=true (0.00s)
+    --- PASS: TestUnknownHoldNormalAnd4xx/stream=true/reject=false (0.00s)
+    --- PASS: TestUnknownHoldNormalAnd4xx/stream=true/reject=true (0.00s)
+PASS
+ok  	github.com/frostloom/ai-gateway/internal/gateway/handler	1.758s

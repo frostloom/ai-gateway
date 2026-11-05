@@ -1,0 +1,11 @@
+=== RUN   TestConservativeLongUnterminatedLineCharacterization
+    chat_stream_test.go:379: unfinished_line_bytes=16777216 forwarded_before_newline=0 retained_heap_delta=16943312
+--- PASS: TestConservativeLongUnterminatedLineCharacterization (0.41s)
+=== RUN   TestConservativeLongUnterminatedLineCharacterization
+    chat_stream_test.go:379: unfinished_line_bytes=16777216 forwarded_before_newline=0 retained_heap_delta=16918160
+--- PASS: TestConservativeLongUnterminatedLineCharacterization (0.33s)
+=== RUN   TestConservativeLongUnterminatedLineCharacterization
+    chat_stream_test.go:379: unfinished_line_bytes=16777216 forwarded_before_newline=0 retained_heap_delta=16918784
+--- PASS: TestConservativeLongUnterminatedLineCharacterization (0.34s)
+PASS
+ok  	github.com/frostloom/ai-gateway/internal/gateway/handler	3.287s

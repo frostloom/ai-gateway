@@ -1,0 +1,110 @@
+head=63b9d1ed4d64bb583d15fa884c37468e5c53044c
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestSQLGateBillingRecovery
+--- PASS: TestSQLGateBillingRecovery (0.75s)
+=== RUN   TestSQLGateBillingReversedReserveGap
+    idem_sql_billing_test.go:162: OBSERVED: replay returned RESERVE_OK; candidate admitted forward despite reserve=reversed and usage rejected (rpc error: code = FailedPrecondition desc = reserve is no longer pending)
+--- PASS: TestSQLGateBillingReversedReserveGap (0.65s)
+=== RUN   TestSQLGateLoad
+    idem_sql_gate_load_test.go:20: explicit isolated load opt-in required
+--- SKIP: TestSQLGateLoad (0.00s)
+=== RUN   TestSQLGateClaimRecoveryAndForwardFence
+
+2026/11/03 16:59:26 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/idem_sql_gate_impl_test.go:38 [35;1mError 1062 (23000): Duplicate entry 'gate-1793696366883333000' for key 'eval_idem_gate.PRIMARY'
+[0m[33m[1.057ms] [34;1m[rows:0][0m INSERT INTO eval_idem_gate (request_id,fingerprint,state,owner,lease_until) VALUES ('gate-1793696366883333000','different','claimed','other',DATE_ADD(CURRENT_TIMESTAMP(6), INTERVAL 1000000 MICROSECOND))
+
+2026/11/03 16:59:26 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/idem_sql_gate_impl_test.go:38 [35;1mError 1062 (23000): Duplicate entry 'gate-1793696366883333000' for key 'eval_idem_gate.PRIMARY'
+[0m[33m[0.958ms] [34;1m[rows:0][0m INSERT INTO eval_idem_gate (request_id,fingerprint,state,owner,lease_until) VALUES ('gate-1793696366883333000','tenant1-body1','claimed','other',DATE_ADD(CURRENT_TIMESTAMP(6), INTERVAL 1000000 MICROSECOND))
+
+2026/11/03 16:59:26 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/idem_sql_gate_impl_test.go:38 [35;1mError 1062 (23000): Duplicate entry 'gate-1793696366883333000' for key 'eval_idem_gate.PRIMARY'
+[0m[33m[11.143ms] [34;1m[rows:0][0m INSERT INTO eval_idem_gate (request_id,fingerprint,state,owner,lease_until) VALUES ('gate-1793696366883333000','tenant1-body1','claimed','new-3',DATE_ADD(CURRENT_TIMESTAMP(6), INTERVAL 10000000 MICROSECOND))
+
+2026/11/03 16:59:26 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/idem_sql_gate_impl_test.go:38 [35;1mError 1062 (23000): Duplicate entry 'gate-1793696366883333000' for key 'eval_idem_gate.PRIMARY'
+[0m[33m[26.978ms] [34;1m[rows:0][0m INSERT INTO eval_idem_gate (request_id,fingerprint,state,owner,lease_until) VALUES ('gate-1793696366883333000','tenant1-body1','claimed','new-11',DATE_ADD(CURRENT_TIMESTAMP(6), INTERVAL 10000000 MICROSECOND))
+
+2026/11/03 16:59:26 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/idem_sql_gate_impl_test.go:38 [35;1mError 1062 (23000): Duplicate entry 'gate-1793696366883333000' for key 'eval_idem_gate.PRIMARY'
+[0m[33m[27.075ms] [34;1m[rows:0][0m INSERT INTO eval_idem_gate (request_id,fingerprint,state,owner,lease_until) VALUES ('gate-1793696366883333000','tenant1-body1','claimed','new-5',DATE_ADD(CURRENT_TIMESTAMP(6), INTERVAL 10000000 MICROSECOND))
+
+2026/11/03 16:59:26 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/idem_sql_gate_impl_test.go:38 [35;1mError 1062 (23000): Duplicate entry 'gate-1793696366883333000' for key 'eval_idem_gate.PRIMARY'
+[0m[33m[26.844ms] [34;1m[rows:0][0m INSERT INTO eval_idem_gate (request_id,fingerprint,state,owner,lease_until) VALUES ('gate-1793696366883333000','tenant1-body1','claimed','new-22',DATE_ADD(CURRENT_TIMESTAMP(6), INTERVAL 10000000 MICROSECOND))
+
+2026/11/03 16:59:26 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/idem_sql_gate_impl_test.go:38 [35;1mError 1062 (23000): Duplicate entry 'gate-1793696366883333000' for key 'eval_idem_gate.PRIMARY'
+[0m[33m[26.835ms] [34;1m[rows:0][0m INSERT INTO eval_idem_gate (request_id,fingerprint,state,owner,lease_until) VALUES ('gate-1793696366883333000','tenant1-body1','claimed','new-20',DATE_ADD(CURRENT_TIMESTAMP(6), INTERVAL 10000000 MICROSECOND))
+
+2026/11/03 16:59:26 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/idem_sql_gate_impl_test.go:38 [35;1mError 1062 (23000): Duplicate entry 'gate-1793696366883333000' for key 'eval_idem_gate.PRIMARY'
+[0m[33m[27.165ms] [34;1m[rows:0][0m INSERT INTO eval_idem_gate (request_id,fingerprint,state,owner,lease_until) VALUES ('gate-1793696366883333000','tenant1-body1','claimed','new-1',DATE_ADD(CURRENT_TIMESTAMP(6), INTERVAL 10000000 MICROSECOND))
+
+2026/11/03 16:59:26 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/idem_sql_gate_impl_test.go:38 [35;1mError 1062 (23000): Duplicate entry 'gate-1793696366883333000' for key 'eval_idem_gate.PRIMARY'
+[0m[33m[26.897ms] [34;1m[rows:0][0m INSERT INTO eval_idem_gate (request_id,fingerprint,state,owner,lease_until) VALUES ('gate-1793696366883333000','tenant1-body1','claimed','new-9',DATE_ADD(CURRENT_TIMESTAMP(6), INTERVAL 10000000 MICROSECOND))
+
+2026/11/03 16:59:26 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/idem_sql_gate_impl_test.go:38 [35;1mError 1062 (23000): Duplicate entry 'gate-1793696366883333000' for key 'eval_idem_gate.PRIMARY'
+[0m[33m[27.565ms] [34;1m[rows:0][0m INSERT INTO eval_idem_gate (request_id,fingerprint,state,owner,lease_until) VALUES ('gate-1793696366883333000','tenant1-body1','claimed','new-23',DATE_ADD(CURRENT_TIMESTAMP(6), INTERVAL 10000000 MICROSECOND))
+
+2026/11/03 16:59:26 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/idem_sql_gate_impl_test.go:38 [35;1mError 1062 (23000): Duplicate entry 'gate-1793696366883333000' for key 'eval_idem_gate.PRIMARY'
+[0m[33m[27.382ms] [34;1m[rows:0][0m INSERT INTO eval_idem_gate (request_id,fingerprint,state,owner,lease_until) VALUES ('gate-1793696366883333000','tenant1-body1','claimed','new-6',DATE_ADD(CURRENT_TIMESTAMP(6), INTERVAL 10000000 MICROSECOND))
+
+2026/11/03 16:59:26 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/idem_sql_gate_impl_test.go:38 [35;1mError 1062 (23000): Duplicate entry 'gate-1793696366883333000' for key 'eval_idem_gate.PRIMARY'
+[0m[33m[28.988ms] [34;1m[rows:0][0m INSERT INTO eval_idem_gate (request_id,fingerprint,state,owner,lease_until) VALUES ('gate-1793696366883333000','tenant1-body1','claimed','new-17',DATE_ADD(CURRENT_TIMESTAMP(6), INTERVAL 10000000 MICROSECOND))
+
+2026/11/03 16:59:26 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/idem_sql_gate_impl_test.go:38 [35;1mError 1062 (23000): Duplicate entry 'gate-1793696366883333000' for key 'eval_idem_gate.PRIMARY'
+[0m[33m[30.242ms] [34;1m[rows:0][0m INSERT INTO eval_idem_gate (request_id,fingerprint,state,owner,lease_until) VALUES ('gate-1793696366883333000','tenant1-body1','claimed','new-2',DATE_ADD(CURRENT_TIMESTAMP(6), INTERVAL 10000000 MICROSECOND))
+
+2026/11/03 16:59:26 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/idem_sql_gate_impl_test.go:38 [35;1mError 1062 (23000): Duplicate entry 'gate-1793696366883333000' for key 'eval_idem_gate.PRIMARY'
+[0m[33m[30.358ms] [34;1m[rows:0][0m INSERT INTO eval_idem_gate (request_id,fingerprint,state,owner,lease_until) VALUES ('gate-1793696366883333000','tenant1-body1','claimed','new-10',DATE_ADD(CURRENT_TIMESTAMP(6), INTERVAL 10000000 MICROSECOND))
+
+2026/11/03 16:59:26 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/idem_sql_gate_impl_test.go:38 [35;1mError 1062 (23000): Duplicate entry 'gate-1793696366883333000' for key 'eval_idem_gate.PRIMARY'
+[0m[33m[72.710ms] [34;1m[rows:0][0m INSERT INTO eval_idem_gate (request_id,fingerprint,state,owner,lease_until) VALUES ('gate-1793696366883333000','tenant1-body1','claimed','new-12',DATE_ADD(CURRENT_TIMESTAMP(6), INTERVAL 10000000 MICROSECOND))
+
+2026/11/03 16:59:26 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/idem_sql_gate_impl_test.go:38 [35;1mError 1062 (23000): Duplicate entry 'gate-1793696366883333000' for key 'eval_idem_gate.PRIMARY'
+[0m[33m[72.954ms] [34;1m[rows:0][0m INSERT INTO eval_idem_gate (request_id,fingerprint,state,owner,lease_until) VALUES ('gate-1793696366883333000','tenant1-body1','claimed','new-21',DATE_ADD(CURRENT_TIMESTAMP(6), INTERVAL 10000000 MICROSECOND))
+
+2026/11/03 16:59:26 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/idem_sql_gate_impl_test.go:38 [35;1mError 1062 (23000): Duplicate entry 'gate-1793696366883333000' for key 'eval_idem_gate.PRIMARY'
+[0m[33m[73.494ms] [34;1m[rows:0][0m INSERT INTO eval_idem_gate (request_id,fingerprint,state,owner,lease_until) VALUES ('gate-1793696366883333000','tenant1-body1','claimed','new-15',DATE_ADD(CURRENT_TIMESTAMP(6), INTERVAL 10000000 MICROSECOND))
+
+2026/11/03 16:59:26 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/idem_sql_gate_impl_test.go:38 [35;1mError 1062 (23000): Duplicate entry 'gate-1793696366883333000' for key 'eval_idem_gate.PRIMARY'
+[0m[33m[73.288ms] [34;1m[rows:0][0m INSERT INTO eval_idem_gate (request_id,fingerprint,state,owner,lease_until) VALUES ('gate-1793696366883333000','tenant1-body1','claimed','new-18',DATE_ADD(CURRENT_TIMESTAMP(6), INTERVAL 10000000 MICROSECOND))
+
+2026/11/03 16:59:26 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/idem_sql_gate_impl_test.go:38 [35;1mError 1062 (23000): Duplicate entry 'gate-1793696366883333000' for key 'eval_idem_gate.PRIMARY'
+[0m[33m[73.234ms] [34;1m[rows:0][0m INSERT INTO eval_idem_gate (request_id,fingerprint,state,owner,lease_until) VALUES ('gate-1793696366883333000','tenant1-body1','claimed','new-14',DATE_ADD(CURRENT_TIMESTAMP(6), INTERVAL 10000000 MICROSECOND))
+
+2026/11/03 16:59:26 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/idem_sql_gate_impl_test.go:38 [35;1mError 1062 (23000): Duplicate entry 'gate-1793696366883333000' for key 'eval_idem_gate.PRIMARY'
+[0m[33m[74.004ms] [34;1m[rows:0][0m INSERT INTO eval_idem_gate (request_id,fingerprint,state,owner,lease_until) VALUES ('gate-1793696366883333000','tenant1-body1','claimed','new-4',DATE_ADD(CURRENT_TIMESTAMP(6), INTERVAL 10000000 MICROSECOND))
+
+2026/11/03 16:59:26 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/idem_sql_gate_impl_test.go:38 [35;1mError 1062 (23000): Duplicate entry 'gate-1793696366883333000' for key 'eval_idem_gate.PRIMARY'
+[0m[33m[73.632ms] [34;1m[rows:0][0m INSERT INTO eval_idem_gate (request_id,fingerprint,state,owner,lease_until) VALUES ('gate-1793696366883333000','tenant1-body1','claimed','new-16',DATE_ADD(CURRENT_TIMESTAMP(6), INTERVAL 10000000 MICROSECOND))
+
+2026/11/03 16:59:26 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/idem_sql_gate_impl_test.go:38 [35;1mError 1062 (23000): Duplicate entry 'gate-1793696366883333000' for key 'eval_idem_gate.PRIMARY'
+[0m[33m[73.751ms] [34;1m[rows:0][0m INSERT INTO eval_idem_gate (request_id,fingerprint,state,owner,lease_until) VALUES ('gate-1793696366883333000','tenant1-body1','claimed','new-8',DATE_ADD(CURRENT_TIMESTAMP(6), INTERVAL 10000000 MICROSECOND))
+
+2026/11/03 16:59:26 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/idem_sql_gate_impl_test.go:38 [35;1mError 1062 (23000): Duplicate entry 'gate-1793696366883333000' for key 'eval_idem_gate.PRIMARY'
+[0m[33m[74.022ms] [34;1m[rows:0][0m INSERT INTO eval_idem_gate (request_id,fingerprint,state,owner,lease_until) VALUES ('gate-1793696366883333000','tenant1-body1','claimed','new-7',DATE_ADD(CURRENT_TIMESTAMP(6), INTERVAL 10000000 MICROSECOND))
+
+2026/11/03 16:59:26 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/idem_sql_gate_impl_test.go:38 [35;1mError 1062 (23000): Duplicate entry 'gate-1793696366883333000' for key 'eval_idem_gate.PRIMARY'
+[0m[33m[74.282ms] [34;1m[rows:0][0m INSERT INTO eval_idem_gate (request_id,fingerprint,state,owner,lease_until) VALUES ('gate-1793696366883333000','tenant1-body1','claimed','new-19',DATE_ADD(CURRENT_TIMESTAMP(6), INTERVAL 10000000 MICROSECOND))
+
+2026/11/03 16:59:26 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/idem_sql_gate_impl_test.go:38 [35;1mError 1062 (23000): Duplicate entry 'gate-1793696366883333000' for key 'eval_idem_gate.PRIMARY'
+[0m[33m[74.608ms] [34;1m[rows:0][0m INSERT INTO eval_idem_gate (request_id,fingerprint,state,owner,lease_until) VALUES ('gate-1793696366883333000','tenant1-body1','claimed','new-13',DATE_ADD(CURRENT_TIMESTAMP(6), INTERVAL 10000000 MICROSECOND))
+
+2026/11/03 16:59:26 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/idem_sql_gate_impl_test.go:38 [35;1mError 1062 (23000): Duplicate entry 'gate-1793696366883333000' for key 'eval_idem_gate.PRIMARY'
+[0m[33m[75.101ms] [34;1m[rows:0][0m INSERT INTO eval_idem_gate (request_id,fingerprint,state,owner,lease_until) VALUES ('gate-1793696366883333000','tenant1-body1','claimed','new-0',DATE_ADD(CURRENT_TIMESTAMP(6), INTERVAL 10000000 MICROSECOND))
+
+2026/11/03 16:59:26 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/idem_sql_gate_impl_test.go:38 [35;1mError 1062 (23000): Duplicate entry 'gate-1793696366883333000' for key 'eval_idem_gate.PRIMARY'
+[0m[33m[1.290ms] [34;1m[rows:0][0m INSERT INTO eval_idem_gate (request_id,fingerprint,state,owner,lease_until) VALUES ('gate-1793696366883333000','tenant1-body1','claimed','later',DATE_ADD(CURRENT_TIMESTAMP(6), INTERVAL 1000000 MICROSECOND))
+--- PASS: TestSQLGateClaimRecoveryAndForwardFence (0.12s)
+=== RUN   TestSQLGateConcurrentForwardAndCanceledContext
+
+2026/11/03 16:59:27 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/idem_sql_gate_impl_test.go:82 [35;1mcontext canceled
+[0m[33m[0.015ms] [34;1m[rows:0][0m UPDATE eval_idem_gate SET state='forwarding' WHERE request_id='gate-forward-1793696367011211000' AND owner='owner' AND state='claimed' AND lease_until > CURRENT_TIMESTAMP(6)
+--- PASS: TestSQLGateConcurrentForwardAndCanceledContext (0.07s)
+=== RUN   TestSQLGateChildProcess
+    idem_sql_process_test.go:20: helper only
+--- SKIP: TestSQLGateChildProcess (0.00s)
+=== RUN   TestSQLGateKilledOwner
+=== RUN   TestSQLGateKilledOwner/claimed
+=== RUN   TestSQLGateKilledOwner/forwarding
+--- PASS: TestSQLGateKilledOwner (2.52s)
+    --- PASS: TestSQLGateKilledOwner/claimed (1.24s)
+    --- PASS: TestSQLGateKilledOwner/forwarding (1.26s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	6.591s

@@ -1,0 +1,26 @@
+head=42d8ef8e5ca2471b18800e50f8e7a57fbcfdd47f
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestUsageRetryPulseTiming
+    usage_retry_jitter_test.go:126: PULSE total=128 span_ms=98.778 peak_10ms=24
+--- PASS: TestUsageRetryPulseTiming (0.18s)
+=== RUN   TestUsageRetryRealJitterBurst
+    usage_retry_real_jitter_test.go:145: RETRY_TIMING attempts=128 span_ms=1437.959 peak_10ms=5
+    usage_retry_real_jitter_test.go:204: REAL_JITTER mode=1 workers=128 tenants=16 elapsed_ms=1946 p95_ms=1904 p99_ms=1927 http=map[200:128] report_calls=map[2:128] settled=128 pending=0 missing=0 usage_events=128
+--- PASS: TestUsageRetryRealJitterBurst (3.13s)
+=== RUN   TestUsageRetryPulseTiming
+    usage_retry_jitter_test.go:126: PULSE total=128 span_ms=98.882 peak_10ms=19
+--- PASS: TestUsageRetryPulseTiming (0.18s)
+=== RUN   TestUsageRetryRealJitterBurst
+    usage_retry_real_jitter_test.go:145: RETRY_TIMING attempts=128 span_ms=1649.610 peak_10ms=6
+    usage_retry_real_jitter_test.go:204: REAL_JITTER mode=1 workers=128 tenants=16 elapsed_ms=2079 p95_ms=2043 p99_ms=2061 http=map[200:128] report_calls=map[2:128] settled=128 pending=0 missing=0 usage_events=128
+--- PASS: TestUsageRetryRealJitterBurst (3.62s)
+=== RUN   TestUsageRetryPulseTiming
+    usage_retry_jitter_test.go:126: PULSE total=128 span_ms=99.362 peak_10ms=20
+--- PASS: TestUsageRetryPulseTiming (0.17s)
+=== RUN   TestUsageRetryRealJitterBurst
+    usage_retry_real_jitter_test.go:145: RETRY_TIMING attempts=128 span_ms=1046.265 peak_10ms=7
+    usage_retry_real_jitter_test.go:204: REAL_JITTER mode=1 workers=128 tenants=16 elapsed_ms=1397 p95_ms=1357 p99_ms=1380 http=map[200:128] report_calls=map[2:128] settled=128 pending=0 missing=0 usage_events=128
+--- PASS: TestUsageRetryRealJitterBurst (2.52s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	11.941s

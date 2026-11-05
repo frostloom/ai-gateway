@@ -1,0 +1,71 @@
+=== RUN   TestReserveConflictingTenant
+
+2026/11/02 17:24:24 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:1033 [35;1mrecord not found
+[0m[33m[3.718ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id = 'comparison-conflict' AND phase = 'reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/02 17:24:24 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:1033 [35;1mrecord not found
+[0m[33m[2.852ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id = 'comparison-conflict' AND phase = 'reserve' ORDER BY `bills`.`id` LIMIT 1
+    conflict_test.go:85: first code=RESERVE_OK bill=1; conflicting second status=FailedPrecondition; stored tenant=1 pre=100; balances=900,1000
+
+2026/11/02 17:24:24 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:1033 [35;1mrecord not found
+[0m[33m[1.388ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id = 'comparison-race' AND phase = 'reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/02 17:24:24 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:1033 [35;1mrecord not found
+[0m[33m[1.474ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id = 'comparison-race' AND phase = 'reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/02 17:24:24 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:1033 [35;1mrecord not found
+[0m[33m[2.847ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id = 'comparison-race' AND phase = 'reserve' ORDER BY `bills`.`id` LIMIT 1
+--- PASS: TestReserveConflictingTenant (0.44s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	1.332s
+=== RUN   TestTerminalSQLFailureRebuildAndRetry
+=== RUN   TestTerminalSQLFailureRebuildAndRetry/settle
+=== RUN   TestTerminalSQLFailureRebuildAndRetry/reverse
+--- PASS: TestTerminalSQLFailureRebuildAndRetry (1.60s)
+    --- PASS: TestTerminalSQLFailureRebuildAndRetry/settle (0.81s)
+    --- PASS: TestTerminalSQLFailureRebuildAndRetry/reverse (0.79s)
+=== RUN   TestReserveOutboxIdempotent
+--- PASS: TestReserveOutboxIdempotent (0.59s)
+=== RUN   TestFullFlowOutboxEvents
+--- PASS: TestFullFlowOutboxEvents (0.59s)
+=== RUN   TestReserveConcurrentNoOversell
+--- PASS: TestReserveConcurrentNoOversell (2.22s)
+=== RUN   TestReserveIdempotentSameRequest
+--- PASS: TestReserveIdempotentSameRequest (0.52s)
+=== RUN   TestReserveConcurrentSameRequest
+--- PASS: TestReserveConcurrentSameRequest (0.60s)
+=== RUN   TestReserveInsufficient
+--- PASS: TestReserveInsufficient (0.56s)
+=== RUN   TestSettleFullFlow
+--- PASS: TestSettleFullFlow (0.68s)
+=== RUN   TestSettleIdempotent
+--- PASS: TestSettleIdempotent (0.70s)
+=== RUN   TestReverseIdempotent
+--- PASS: TestReverseIdempotent (0.47s)
+=== RUN   TestReverseAfterSettled
+--- PASS: TestReverseAfterSettled (0.50s)
+=== RUN   TestRebuildBalance
+--- PASS: TestRebuildBalance (0.57s)
+=== RUN   TestRebuildBalanceIdempotent
+--- PASS: TestRebuildBalanceIdempotent (0.88s)
+=== RUN   TestReserveSubscriptionAllowance
+--- PASS: TestReserveSubscriptionAllowance (0.60s)
+PASS
+ok  	github.com/frostloom/ai-gateway/internal/billing/store	11.743s
+=== RUN   TestHybridCacheBoundaries
+
+2026/11/02 17:24:39 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/mysql_candidate_test_impl_test.go:92 [35;1mrecord not found
+[0m[33m[0.778ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id='hybrid-r1' AND phase='reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/02 17:24:40 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/mysql_candidate_test_impl_test.go:92 [35;1mrecord not found
+[0m[33m[0.808ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id='hybrid-crash' AND phase='reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/02 17:24:40 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/mysql_candidate_test_impl_test.go:92 [35;1mrecord not found
+[0m[33m[0.747ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id='hybrid-ttl' AND phase='reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/02 17:24:41 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/mysql_candidate_test_impl_test.go:92 [35;1mrecord not found
+[0m[33m[1.059ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id='hybrid-invalidation-error' AND phase='reserve' ORDER BY `bills`.`id` LIMIT 1
+    hybrid_test.go:136: committed MySQL=850, cache served stale=950 before TTL; recovered=750
+--- PASS: TestHybridCacheBoundaries (1.47s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	1.962s

@@ -1,0 +1,9 @@
+{"result": {"elapsed_seconds": 65.645816583, "failure_classes": {"authentication unavailable": 1437, "billing unavailable": 816, "routing unavailable": 3359}, "failure_latency_ms": {"count": 5675, "mean_ms": 3595.1117125016804, "p95_ms": 5411.812334, "p99_ms": 15000.613125}, "generator_dropped": 0, "mean_ms": 4521.6498575928035, "mode": "open_loop", "offered_rate": 120, "p95_ms": 10912.288959, "p99_ms": 14869.15475, "peak_inflight": 781, "requested_seconds": 60, "requests": 7200, "schedule_lag_p99_ms": 15.693084, "scheduled": 7200, "scheduled_p95_ms": 10914.788417, "started": 7200, "statuses": {"200": 1525, "503": 5612, "timeout": 63}, "success_latency_ms": {"count": 1525, "mean_ms": 7969.586889325257, "p95_ms": 13779.076833, "p99_ms": 14823.595583}, "success_per_second_drain": 23.23072633382281, "tenants": 64, "valid_success": 1525, "rep": 1}, "audit": {"agent_sessions": 0, "audit_events": 0, "balance_mismatches": [], "missing_balance_keys": [], "outbox": 4852, "outbox_attempted_error": 0, "outbox_unsent": 4852, "pending": 110, "reversed": 0, "settled": 1575, "cumulative_valid_http": 1530, "settled_minus_valid_http": 45, "workers": 120, "tenants": 64, "stream": false, "rep": 1}}
+Traceback (most recent call last):
+  File "/Users/a1/项目/ai-gateway/eval/project-load-2026-11-02/run_gateway_v2_open_load.py", line 384, in <module>
+    try: main()
+         ^^^^^^
+  File "/Users/a1/项目/ai-gateway/eval/project-load-2026-11-02/run_gateway_v2_open_load.py", line 282, in main
+    if p.poll() is None:time.sleep(1)
+                        ^^^^^^^^^^^^^
+KeyboardInterrupt

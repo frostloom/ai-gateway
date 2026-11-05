@@ -1,0 +1,66 @@
+head=d5b417eaa22950f673af407015513a19d078fe5c
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+fc93bd6f62c0ea5aa7343c6e255e06c5853a6219693649d4fedcdc65f6a0bf57  /var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T//usage-atomic-overlay.fueZ3B/reconciler.go
+# github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02.test
+ld: warning: '/private/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-753750345/000013.o' has malformed LC_DYSYMTAB, expected 98 undefined symbols to start at index 1626, found 95 undefined symbols starting at index 1626
+=== RUN   TestParallelSweepMySQLOutageRecovery
+[mysql] 2026/11/05 12:47:04 connection.go:801 closing bad idle connection: EOF
+[mysql] 2026/11/05 12:47:04 packets.go:58 unexpected EOF
+
+2026/11/05 12:47:04 [31;1m/Users/a1/项目/ai-gateway/internal/billing/reconciler/reconciler.go:142 [35;1minvalid connection
+[0m[33m[3.730ms] [34;1m[rows:-][0m SELECT COALESCE(MAX(id), 0) FROM `bills` WHERE phase = 'reserve' AND status = 'pending' AND created_at < '2026-11-05 12:46:04.989'
+[mysql] 2026/11/05 12:47:05 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 12:47:05 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 12:47:06 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 12:47:06 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 12:47:06 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 12:47:06 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 12:47:06 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 12:47:07 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 12:47:07 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 12:47:07 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 12:47:07 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 12:47:07 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 12:47:08 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 12:47:08 packets.go:58 unexpected EOF
+    reconciler_parallel_mysql_failure_test.go:171: MySQL killed: scan failed and six remained pending; restarted: settled=6; three balances/ledgers=920
+--- PASS: TestParallelSweepMySQLOutageRecovery (5.82s)
+=== RUN   TestParallelSweepMySQLOutageRecovery
+[mysql] 2026/11/05 12:47:09 connection.go:801 closing bad idle connection: EOF
+[mysql] 2026/11/05 12:47:09 packets.go:58 unexpected EOF
+
+2026/11/05 12:47:09 [31;1m/Users/a1/项目/ai-gateway/internal/billing/reconciler/reconciler.go:142 [35;1minvalid connection
+[0m[33m[16.133ms] [34;1m[rows:-][0m SELECT COALESCE(MAX(id), 0) FROM `bills` WHERE phase = 'reserve' AND status = 'pending' AND created_at < '2026-11-05 12:46:09.697'
+[mysql] 2026/11/05 12:47:10 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 12:47:10 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 12:47:10 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 12:47:10 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 12:47:11 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 12:47:11 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 12:47:11 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 12:47:11 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 12:47:12 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 12:47:12 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 12:47:12 packets.go:58 unexpected EOF
+    reconciler_parallel_mysql_failure_test.go:171: MySQL killed: scan failed and six remained pending; restarted: settled=6; three balances/ledgers=920
+--- PASS: TestParallelSweepMySQLOutageRecovery (4.18s)
+=== RUN   TestParallelSweepMySQLOutageRecovery
+[mysql] 2026/11/05 12:47:13 connection.go:801 closing bad idle connection: EOF
+
+2026/11/05 12:47:13 [31;1m/Users/a1/项目/ai-gateway/internal/billing/reconciler/reconciler.go:142 [35;1mdial tcp 127.0.0.1:53493: connect: connection refused
+[0m[33m[0.554ms] [34;1m[rows:-][0m SELECT COALESCE(MAX(id), 0) FROM `bills` WHERE phase = 'reserve' AND status = 'pending' AND created_at < '2026-11-05 12:46:13.827'
+[mysql] 2026/11/05 12:47:14 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 12:47:14 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 12:47:14 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 12:47:14 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 12:47:15 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 12:47:15 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 12:47:15 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 12:47:15 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 12:47:15 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 12:47:16 packets.go:58 unexpected EOF
+    reconciler_parallel_mysql_failure_test.go:171: MySQL killed: scan failed and six remained pending; restarted: settled=6; three balances/ledgers=920
+--- PASS: TestParallelSweepMySQLOutageRecovery (3.75s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	15.778s

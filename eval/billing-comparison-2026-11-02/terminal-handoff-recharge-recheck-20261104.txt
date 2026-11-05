@@ -1,0 +1,35 @@
+head=42d8ef8e5ca2471b18800e50f8e7a57fbcfdd47f
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestTerminalLockHandoffWithRecharge
+=== RUN   TestTerminalLockHandoffWithRecharge/settle
+[mysql] 2026/11/04 18:57:49 packets.go:58 unexpected EOF
+    terminal_handoff_recharge_test.go:144: mode=settle killed=true refund_mode=false cash_operation_before_recovery=true recovery_balance=500 retry_balance=560 ledger=560 topups=1 terminal_events=1
+=== RUN   TestTerminalLockHandoffWithRecharge/reverse
+[mysql] 2026/11/04 18:57:49 packets.go:58 unexpected EOF
+    terminal_handoff_recharge_test.go:144: mode=reverse killed=true refund_mode=false cash_operation_before_recovery=true recovery_balance=500 retry_balance=600 ledger=600 topups=1 terminal_events=1
+--- PASS: TestTerminalLockHandoffWithRecharge (1.10s)
+    --- PASS: TestTerminalLockHandoffWithRecharge/settle (0.37s)
+    --- PASS: TestTerminalLockHandoffWithRecharge/reverse (0.28s)
+=== RUN   TestTerminalLockHandoffWithRecharge
+=== RUN   TestTerminalLockHandoffWithRecharge/settle
+[mysql] 2026/11/04 18:57:50 packets.go:58 unexpected EOF
+    terminal_handoff_recharge_test.go:144: mode=settle killed=true refund_mode=false cash_operation_before_recovery=true recovery_balance=500 retry_balance=560 ledger=560 topups=1 terminal_events=1
+=== RUN   TestTerminalLockHandoffWithRecharge/reverse
+[mysql] 2026/11/04 18:57:50 packets.go:58 unexpected EOF
+    terminal_handoff_recharge_test.go:144: mode=reverse killed=true refund_mode=false cash_operation_before_recovery=true recovery_balance=500 retry_balance=600 ledger=600 topups=1 terminal_events=1
+--- PASS: TestTerminalLockHandoffWithRecharge (0.91s)
+    --- PASS: TestTerminalLockHandoffWithRecharge/settle (0.18s)
+    --- PASS: TestTerminalLockHandoffWithRecharge/reverse (0.15s)
+=== RUN   TestTerminalLockHandoffWithRecharge
+=== RUN   TestTerminalLockHandoffWithRecharge/settle
+[mysql] 2026/11/04 18:57:51 packets.go:58 unexpected EOF
+    terminal_handoff_recharge_test.go:144: mode=settle killed=true refund_mode=false cash_operation_before_recovery=true recovery_balance=500 retry_balance=560 ledger=560 topups=1 terminal_events=1
+=== RUN   TestTerminalLockHandoffWithRecharge/reverse
+[mysql] 2026/11/04 18:57:51 packets.go:58 unexpected EOF
+    terminal_handoff_recharge_test.go:144: mode=reverse killed=true refund_mode=false cash_operation_before_recovery=true recovery_balance=500 retry_balance=600 ledger=600 topups=1 terminal_events=1
+--- PASS: TestTerminalLockHandoffWithRecharge (0.79s)
+    --- PASS: TestTerminalLockHandoffWithRecharge/settle (0.15s)
+    --- PASS: TestTerminalLockHandoffWithRecharge/reverse (0.20s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	4.963s

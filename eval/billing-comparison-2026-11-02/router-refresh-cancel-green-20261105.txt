@@ -1,0 +1,47 @@
+head=42d8ef8e5ca2471b18800e50f8e7a57fbcfdd47f
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+8d17e5b996f20533f1d443bb2e947de0a4eee699250b5c4eeb5f3a2cc98623cd  /var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T//usage-atomic-overlay.Bihmxs/registry.go
+# github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02.test
+ld: warning: '/private/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-2971155455/000013.o' has malformed LC_DYSYMTAB, expected 98 undefined symbols to start at index 1626, found 95 undefined symbols starting at index 1626
+=== RUN   TestCanceledRouteDoesNotConsumeHalfOpenProbe
+--- PASS: TestCanceledRouteDoesNotConsumeHalfOpenProbe (0.08s)
+=== RUN   TestCanceledRouteSkipsCacheRefresh
+--- PASS: TestCanceledRouteSkipsCacheRefresh (0.04s)
+=== RUN   TestRouterCachedRouteDuringBlockedRefresh
+--- PASS: TestRouterCachedRouteDuringBlockedRefresh (0.03s)
+=== RUN   TestRouterRefreshDoesNotRestoreBannedProvider
+--- PASS: TestRouterRefreshDoesNotRestoreBannedProvider (0.05s)
+=== RUN   TestRouterRefreshWaiterHonorsCancellation
+--- PASS: TestRouterRefreshWaiterHonorsCancellation (0.13s)
+=== RUN   TestRouterOpenThresholdPersistsFailure
+    router_threshold_persistence_test.go:69: four reports including threshold persisted exactly once; success reset database count
+--- PASS: TestRouterOpenThresholdPersistsFailure (0.07s)
+=== RUN   TestCanceledRouteDoesNotConsumeHalfOpenProbe
+--- PASS: TestCanceledRouteDoesNotConsumeHalfOpenProbe (0.05s)
+=== RUN   TestCanceledRouteSkipsCacheRefresh
+--- PASS: TestCanceledRouteSkipsCacheRefresh (0.04s)
+=== RUN   TestRouterCachedRouteDuringBlockedRefresh
+--- PASS: TestRouterCachedRouteDuringBlockedRefresh (0.03s)
+=== RUN   TestRouterRefreshDoesNotRestoreBannedProvider
+--- PASS: TestRouterRefreshDoesNotRestoreBannedProvider (0.05s)
+=== RUN   TestRouterRefreshWaiterHonorsCancellation
+--- PASS: TestRouterRefreshWaiterHonorsCancellation (0.14s)
+=== RUN   TestRouterOpenThresholdPersistsFailure
+    router_threshold_persistence_test.go:69: four reports including threshold persisted exactly once; success reset database count
+--- PASS: TestRouterOpenThresholdPersistsFailure (0.08s)
+=== RUN   TestCanceledRouteDoesNotConsumeHalfOpenProbe
+--- PASS: TestCanceledRouteDoesNotConsumeHalfOpenProbe (0.05s)
+=== RUN   TestCanceledRouteSkipsCacheRefresh
+--- PASS: TestCanceledRouteSkipsCacheRefresh (0.05s)
+=== RUN   TestRouterCachedRouteDuringBlockedRefresh
+--- PASS: TestRouterCachedRouteDuringBlockedRefresh (0.05s)
+=== RUN   TestRouterRefreshDoesNotRestoreBannedProvider
+--- PASS: TestRouterRefreshDoesNotRestoreBannedProvider (0.07s)
+=== RUN   TestRouterRefreshWaiterHonorsCancellation
+--- PASS: TestRouterRefreshWaiterHonorsCancellation (0.15s)
+=== RUN   TestRouterOpenThresholdPersistsFailure
+    router_threshold_persistence_test.go:69: four reports including threshold persisted exactly once; success reset database count
+--- PASS: TestRouterOpenThresholdPersistsFailure (0.07s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	3.257s

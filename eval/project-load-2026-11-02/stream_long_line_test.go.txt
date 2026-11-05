@@ -1,0 +1,14 @@
+func TestConservativeLongUnterminatedLineCharacterization(t *testing.T){
+ const chunks=2048
+ chunk:=strings.Repeat("x",8192);release:=make(chan struct{});sent:=make(chan struct{});done:=make(chan struct{})
+ server:=httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter,r *http.Request){_,_=io.Copy(io.Discard,r.Body);w.Header().Set("Content-Type","text/event-stream");_,_=io.WriteString(w,"data: ");for i:=0;i<chunks;i++{if _,err:=io.WriteString(w,chunk);err!=nil{return}};w.(http.Flusher).Flush();close(sent);<-release;_,_=io.WriteString(w,"\n\ndata: [DONE]\n\n")}));defer server.Close()
+ writer:=&streamDiscardWriter{header:make(http.Header),target:1<<60,reached:make(chan struct{})};c,_:=gin.CreateTestContext(writer);c.Request=httptest.NewRequest(http.MethodPost,"/v1/chat/completions",nil);bill:=&fakeBilling{}
+ runtime.GC();var before runtime.MemStats;runtime.ReadMemStats(&before)
+ go func(){relayStream(c,bill,&fakeRouter{},slog.New(slog.DiscardHandler),&client.RouteResult{ProviderID:1,BaseURL:server.URL},&chatRequest{Model:"m",Messages:[]chatMessage{{Role:"user",Content:"hi"}},Stream:true},"line-memory",1,1,true);close(done)}()
+ select{case <-sent:case <-time.After(30*time.Second):close(release);<-done;t.Fatal("upstream did not send data")}
+ time.Sleep(200*time.Millisecond);runtime.GC();var during runtime.MemStats;runtime.ReadMemStats(&during);written:=writer.bytes.Load();retained:=int64(during.HeapAlloc)-int64(before.HeapAlloc)
+ close(release);<-done
+ if written!=0||retained<8<<20{t.Fatalf("unexpected behavior: forwarded=%d retained_delta=%d",written,retained)}
+ if len(bill.reports)!=0||len(bill.settles)!=0||len(bill.reverses)!=0{t.Fatal("unexpected billing mutation")}
+ t.Logf("unfinished_line_bytes=%d forwarded_before_newline=%d retained_heap_delta=%d",chunks*len(chunk),written,retained)
+}

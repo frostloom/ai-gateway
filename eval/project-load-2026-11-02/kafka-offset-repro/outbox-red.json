@@ -1,0 +1,12 @@
+{
+  "head": "63b9d1ed4d64bb583d15fa884c37468e5c53044c",
+  "mysql_image_id": "sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff",
+  "source_sha256": {
+    "internal/billing/outbox/relay.go": "3c7fa1ec5d545bce816ce13dc610408fa7df59641b5b1812cf3a4c47d051244f",
+    "internal/billing/store/outbox.go": "224db5272afb84ea26a9c348de158d197cbf6b6dc49fa557eee0824c2cbbed21"
+  },
+  "test_sha256": "fd93114252241ff38cf59558d27980bc4adad4dd5a2008cfd3e493c3c4faf740",
+  "returncode": 1,
+  "stdout": "=== RUN   TestIsolatedDLQMarkFailureRemainsRetryable\ntime=2026-11-04T05:40:35.484+08:00 level=ERROR msg=\"mark dlq\" id=1 err=\"injected dlq mark failure\"\n    isolated_dlq_test.go:30: failed DLQ mark must remain pollable, got 0; sent=<nil> attempts=5\n--- FAIL: TestIsolatedDLQMarkFailureRemainsRetryable (0.06s)\nFAIL\nFAIL\tgithub.com/frostloom/ai-gateway/internal/billing/outbox\t0.963s\nFAIL\n",
+  "stderr": ""
+}

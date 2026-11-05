@@ -1,0 +1,65 @@
+head=42d8ef8e5ca2471b18800e50f8e7a57fbcfdd47f
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestUsageRetryRealGatewayStore
+=== RUN   TestUsageRetryRealGatewayStore/before
+=== RUN   TestUsageRetryRealGatewayStore/after
+=== RUN   TestUsageRetryRealGatewayStore/timeout
+=== RUN   TestUsageRetryRealGatewayStore/permanent
+=== RUN   TestUsageRetryRealGatewayStore/always
+=== RUN   TestUsageRetryRealGatewayStore/reject
+--- PASS: TestUsageRetryRealGatewayStore (6.75s)
+    --- PASS: TestUsageRetryRealGatewayStore/before (0.62s)
+    --- PASS: TestUsageRetryRealGatewayStore/after (0.68s)
+    --- PASS: TestUsageRetryRealGatewayStore/timeout (3.81s)
+    --- PASS: TestUsageRetryRealGatewayStore/permanent (0.49s)
+    --- PASS: TestUsageRetryRealGatewayStore/always (0.68s)
+    --- PASS: TestUsageRetryRealGatewayStore/reject (0.46s)
+=== RUN   TestUsageRetryConcurrentRealGatewayStore
+    usage_retry_gateway_test.go:260: concurrent=32 tenants=8 reports=64 settled=32 balance=976
+--- PASS: TestUsageRetryConcurrentRealGatewayStore (1.30s)
+=== RUN   TestUsageRetryWhileFirstTransactionInFlight
+    usage_retry_inflight_transaction_test.go:169: first_update_held=true first_context_canceled=true first_rpc_status=Unavailable usage_calls=2 settled=true balance=994
+--- PASS: TestUsageRetryWhileFirstTransactionInFlight (3.63s)
+=== RUN   TestUsageRetryRealGatewayStore
+=== RUN   TestUsageRetryRealGatewayStore/before
+=== RUN   TestUsageRetryRealGatewayStore/after
+=== RUN   TestUsageRetryRealGatewayStore/timeout
+=== RUN   TestUsageRetryRealGatewayStore/permanent
+=== RUN   TestUsageRetryRealGatewayStore/always
+=== RUN   TestUsageRetryRealGatewayStore/reject
+--- PASS: TestUsageRetryRealGatewayStore (6.66s)
+    --- PASS: TestUsageRetryRealGatewayStore/before (0.71s)
+    --- PASS: TestUsageRetryRealGatewayStore/after (0.91s)
+    --- PASS: TestUsageRetryRealGatewayStore/timeout (3.53s)
+    --- PASS: TestUsageRetryRealGatewayStore/permanent (0.48s)
+    --- PASS: TestUsageRetryRealGatewayStore/always (0.59s)
+    --- PASS: TestUsageRetryRealGatewayStore/reject (0.44s)
+=== RUN   TestUsageRetryConcurrentRealGatewayStore
+    usage_retry_gateway_test.go:260: concurrent=32 tenants=8 reports=64 settled=32 balance=976
+--- PASS: TestUsageRetryConcurrentRealGatewayStore (1.18s)
+=== RUN   TestUsageRetryWhileFirstTransactionInFlight
+    usage_retry_inflight_transaction_test.go:169: first_update_held=true first_context_canceled=true first_rpc_status=Unavailable usage_calls=2 settled=true balance=994
+--- PASS: TestUsageRetryWhileFirstTransactionInFlight (3.63s)
+=== RUN   TestUsageRetryRealGatewayStore
+=== RUN   TestUsageRetryRealGatewayStore/before
+=== RUN   TestUsageRetryRealGatewayStore/after
+=== RUN   TestUsageRetryRealGatewayStore/timeout
+=== RUN   TestUsageRetryRealGatewayStore/permanent
+=== RUN   TestUsageRetryRealGatewayStore/always
+=== RUN   TestUsageRetryRealGatewayStore/reject
+--- PASS: TestUsageRetryRealGatewayStore (6.40s)
+    --- PASS: TestUsageRetryRealGatewayStore/before (0.64s)
+    --- PASS: TestUsageRetryRealGatewayStore/after (0.66s)
+    --- PASS: TestUsageRetryRealGatewayStore/timeout (3.57s)
+    --- PASS: TestUsageRetryRealGatewayStore/permanent (0.48s)
+    --- PASS: TestUsageRetryRealGatewayStore/always (0.56s)
+    --- PASS: TestUsageRetryRealGatewayStore/reject (0.50s)
+=== RUN   TestUsageRetryConcurrentRealGatewayStore
+    usage_retry_gateway_test.go:260: concurrent=32 tenants=8 reports=64 settled=32 balance=976
+--- PASS: TestUsageRetryConcurrentRealGatewayStore (1.01s)
+=== RUN   TestUsageRetryWhileFirstTransactionInFlight
+    usage_retry_inflight_transaction_test.go:169: first_update_held=true first_context_canceled=true first_rpc_status=Unavailable usage_calls=2 settled=true balance=994
+--- PASS: TestUsageRetryWhileFirstTransactionInFlight (3.63s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	36.298s

@@ -1,0 +1,54 @@
+=== RUN   TestReserveConflictingTenant
+
+2026/11/03 17:02:17 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:1039 [35;1mrecord not found
+[0m[33m[2.098ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id = 'comparison-conflict' AND phase = 'reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/03 17:02:17 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:1039 [35;1mrecord not found
+[0m[33m[1.264ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id = 'comparison-conflict' AND phase = 'reserve' ORDER BY `bills`.`id` LIMIT 1
+    conflict_test.go:85: first code=RESERVE_OK bill=1; conflicting second status=FailedPrecondition; stored tenant=1 pre=100; balances=900,1000
+
+2026/11/03 17:02:17 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:1039 [35;1mrecord not found
+[0m[33m[0.771ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id = 'comparison-race' AND phase = 'reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/03 17:02:17 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:1039 [35;1mrecord not found
+[0m[33m[0.842ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id = 'comparison-race' AND phase = 'reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/03 17:02:17 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:1039 [35;1mrecord not found
+[0m[33m[0.980ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id = 'comparison-race' AND phase = 'reserve' ORDER BY `bills`.`id` LIMIT 1
+--- PASS: TestReserveConflictingTenant (0.42s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	1.085s
+=== RUN   TestTerminalSQLFailureRebuildAndRetry
+=== RUN   TestTerminalSQLFailureRebuildAndRetry/settle
+=== RUN   TestTerminalSQLFailureRebuildAndRetry/reverse
+--- PASS: TestTerminalSQLFailureRebuildAndRetry (1.29s)
+    --- PASS: TestTerminalSQLFailureRebuildAndRetry/settle (0.70s)
+    --- PASS: TestTerminalSQLFailureRebuildAndRetry/reverse (0.59s)
+=== RUN   TestReserveOutboxIdempotent
+--- PASS: TestReserveOutboxIdempotent (0.50s)
+=== RUN   TestFullFlowOutboxEvents
+--- PASS: TestFullFlowOutboxEvents (0.68s)
+=== RUN   TestReserveConcurrentNoOversell
+--- PASS: TestReserveConcurrentNoOversell (2.49s)
+=== RUN   TestReserveIdempotentSameRequest
+--- PASS: TestReserveIdempotentSameRequest (0.62s)
+=== RUN   TestReserveConcurrentSameRequest
+--- PASS: TestReserveConcurrentSameRequest (0.69s)
+=== RUN   TestReserveInsufficient
+--- PASS: TestReserveInsufficient (0.47s)
+=== RUN   TestSettleFullFlow
+--- PASS: TestSettleFullFlow (0.72s)
+=== RUN   TestSettleIdempotent
+--- PASS: TestSettleIdempotent (1.43s)
+=== RUN   TestReverseIdempotent
+--- PASS: TestReverseIdempotent (0.93s)
+=== RUN   TestReverseAfterSettled
+--- PASS: TestReverseAfterSettled (0.98s)
+=== RUN   TestRebuildBalance
+--- PASS: TestRebuildBalance (0.82s)
+=== RUN   TestRebuildBalanceIdempotent
+--- PASS: TestRebuildBalanceIdempotent (0.79s)
+=== RUN   TestReserveSubscriptionAllowance
+--- PASS: TestReserveSubscriptionAllowance (1.33s)
+PASS
+ok  	github.com/frostloom/ai-gateway/internal/billing/store	14.381s

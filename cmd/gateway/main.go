@@ -35,9 +35,13 @@ func main() {
 	redisAddr := config.Getenv("REDIS_ADDR", "127.0.0.1:6381")
 	redisPwd := config.Getenv("REDIS_PASSWORD", "")
 	ratePerMin := config.GetenvInt("RATE_LIMIT_PER_MIN", 600)
+	// An absent or invalid setting keeps ambiguous upstream outcomes pending.
+	// Explicit zero retains the legacy retry/refund behavior for controlled use.
+	holdUnknown := config.GetenvInt("GATEWAY_HOLD_UNKNOWN", 1) != 0
 	adminToken := config.Getenv("ADMIN_TOKEN", "")
 	controlToken := controlplane.Require(log)
 	handler.SetControlToken(controlToken)
+	log.Info("gateway billing safety mode", "hold_unknown", holdUnknown)
 
 	rdb := redisx.New(redisAddr, redisPwd)
 	if err := redisx.Ping(context.Background(), rdb); err != nil {
@@ -63,7 +67,7 @@ func main() {
 	v1.Use(middleware.APIKey(bc))
 	v1.Use(middleware.Idempotency(rdb))
 	v1.Use(middleware.RateLimit(rdb, time.Minute, ratePerMin))
-	v1.POST("/chat/completions", handler.Chat(bc, rc, log, 2*time.Minute))
+	v1.POST("/chat/completions", handler.Chat(bc, rc, log, 2*time.Minute, holdUnknown))
 
 	// 面板：独立前端工程产物（web/ → dist），无 CDN 离线可用。
 	//   /            → dashboard.html（管理面板）
@@ -86,7 +90,7 @@ func main() {
 	portal := r.Group("/portal")
 	portal.Use(middleware.PortalSession(billingAdminAddr, bc, controlToken))
 	handler.RegisterPortal(portal, billingAdminAddr, agentAddr, log)
-	portal.POST("/completions", middleware.Idempotency(rdb), middleware.RateLimit(rdb, time.Minute, ratePerMin), handler.Chat(bc, rc, log, 2*time.Minute))
+	portal.POST("/completions", middleware.Idempotency(rdb), middleware.RateLimit(rdb, time.Minute, ratePerMin), handler.Chat(bc, rc, log, 2*time.Minute, holdUnknown))
 	userAuth := r.Group("/auth")
 	userAuth.Use(middleware.AuthRateLimit(rdb))
 	handler.RegisterUserAuth(userAuth, billingAdminAddr, log)

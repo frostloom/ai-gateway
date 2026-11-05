@@ -1,0 +1,29 @@
+head=63b9d1ed4d64bb583d15fa884c37468e5c53044c
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestReconcilerSettleOnlyRetainsUnknown
+=== RUN   TestReconcilerSettleOnlyRetainsUnknown/explicit
+    reconciler_settle_only_test.go:30: unknown=pending known=settled balance=860 ledger=860
+=== RUN   TestReconcilerSettleOnlyRetainsUnknown/default
+    reconciler_settle_only_test.go:31: unknown=pending known=settled balance=860 ledger=860
+--- PASS: TestReconcilerSettleOnlyRetainsUnknown (1.00s)
+    --- PASS: TestReconcilerSettleOnlyRetainsUnknown/explicit (0.46s)
+    --- PASS: TestReconcilerSettleOnlyRetainsUnknown/default (0.54s)
+=== RUN   TestReconcilerSettleOnlyRetainsUnknown
+=== RUN   TestReconcilerSettleOnlyRetainsUnknown/explicit
+    reconciler_settle_only_test.go:30: unknown=pending known=settled balance=860 ledger=860
+=== RUN   TestReconcilerSettleOnlyRetainsUnknown/default
+    reconciler_settle_only_test.go:31: unknown=pending known=settled balance=860 ledger=860
+--- PASS: TestReconcilerSettleOnlyRetainsUnknown (1.04s)
+    --- PASS: TestReconcilerSettleOnlyRetainsUnknown/explicit (0.52s)
+    --- PASS: TestReconcilerSettleOnlyRetainsUnknown/default (0.52s)
+=== RUN   TestReconcilerSettleOnlyRetainsUnknown
+=== RUN   TestReconcilerSettleOnlyRetainsUnknown/explicit
+    reconciler_settle_only_test.go:30: unknown=pending known=settled balance=860 ledger=860
+=== RUN   TestReconcilerSettleOnlyRetainsUnknown/default
+    reconciler_settle_only_test.go:31: unknown=pending known=settled balance=860 ledger=860
+--- PASS: TestReconcilerSettleOnlyRetainsUnknown (1.11s)
+    --- PASS: TestReconcilerSettleOnlyRetainsUnknown/explicit (0.58s)
+    --- PASS: TestReconcilerSettleOnlyRetainsUnknown/default (0.52s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	5.919s

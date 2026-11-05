@@ -1,0 +1,9 @@
+head=63b9d1ed4d64bb583d15fa884c37468e5c53044c
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestIsolatedBalanceReadLoad
+BALANCE_READ rep=1 count=1280 workers=32 tenants=64 seconds=0.072 ops_sec=17792.6 mean_ms=1.730 p95_ms=1.781 p99_ms=25.949 errors=0
+BALANCE_READ rep=2 count=1280 workers=32 tenants=64 seconds=0.057 ops_sec=22651.8 mean_ms=1.359 p95_ms=2.020 p99_ms=8.325 errors=0
+--- PASS: TestIsolatedBalanceReadLoad (1.00s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	2.044s

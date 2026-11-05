@@ -1,0 +1,24 @@
+head=63b9d1ed4d64bb583d15fa884c37468e5c53044c
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestDisabledTenantOrdinaryKeyAndSubscriptionReserve
+    disabled_tenant_subscription_test.go:59: disabled tenant key accepted: &{1 1 7f7ee86023d892384b8578f6a77560086daf8d9654b8f1708bb62182e2f83369 eval ordinary 0 <nil> 2026-11-04 01:12:44.775 +0800 CST 2026-11-04 01:12:44.775 +0800 CST} err=<nil>
+    disabled_tenant_subscription_test.go:64: disabled reserve result=bill_id:1 balance_after:100000 err=<nil>
+    disabled_tenant_subscription_test.go:68: bills=1 err=<nil>
+    disabled_tenant_subscription_test.go:71: outbox=1 err=<nil>
+--- FAIL: TestDisabledTenantOrdinaryKeyAndSubscriptionReserve (1.02s)
+=== RUN   TestDisabledTenantOrdinaryKeyAndSubscriptionReserve
+    disabled_tenant_subscription_test.go:59: disabled tenant key accepted: &{2 2 a84caee4cb880f93278c24f360e64190b0074299963a603181e0cb8424a289a5 eval ordinary 0 <nil> 2026-11-04 01:12:45.338 +0800 CST 2026-11-04 01:12:45.338 +0800 CST} err=<nil>
+    disabled_tenant_subscription_test.go:64: disabled reserve result=bill_id:2 balance_after:100000 err=<nil>
+    disabled_tenant_subscription_test.go:68: bills=1 err=<nil>
+    disabled_tenant_subscription_test.go:71: outbox=1 err=<nil>
+--- FAIL: TestDisabledTenantOrdinaryKeyAndSubscriptionReserve (0.54s)
+=== RUN   TestDisabledTenantOrdinaryKeyAndSubscriptionReserve
+    disabled_tenant_subscription_test.go:59: disabled tenant key accepted: &{3 3 e7e050d288c57f45ffb35252ca443aa029041cd857188a050f603560a3f36385 eval ordinary 0 <nil> 2026-11-04 01:12:45.813 +0800 CST 2026-11-04 01:12:45.813 +0800 CST} err=<nil>
+    disabled_tenant_subscription_test.go:64: disabled reserve result=bill_id:3 balance_after:100000 err=<nil>
+    disabled_tenant_subscription_test.go:68: bills=1 err=<nil>
+    disabled_tenant_subscription_test.go:71: outbox=1 err=<nil>
+--- FAIL: TestDisabledTenantOrdinaryKeyAndSubscriptionReserve (0.47s)
+FAIL
+FAIL	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	2.897s
+FAIL

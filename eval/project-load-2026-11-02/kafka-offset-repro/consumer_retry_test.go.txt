@@ -1,0 +1,69 @@
+package consumer
+
+import (
+ "context"
+ "encoding/json"
+ "errors"
+ "fmt"
+ "os"
+ "sync/atomic"
+ "testing"
+ "time"
+
+ "github.com/frostloom/ai-gateway/internal/billing/store"
+ appkafka "github.com/frostloom/ai-gateway/internal/pkg/kafka"
+ "github.com/frostloom/ai-gateway/internal/pkg/logger"
+ "gorm.io/driver/mysql"
+ "gorm.io/gorm"
+)
+
+func TestIsolatedAuditFailureDoesNotSkip(t *testing.T) {
+ dsn, addr := os.Getenv("ISOLATED_MYSQL_DSN"), os.Getenv("ISOLATED_KAFKA_ADDR")
+ if dsn == "" || addr == "" { t.Fatal("isolated addresses required") }
+ db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{}); if err != nil { t.Fatal(err) }
+ if err = db.AutoMigrate(&store.AuditEvent{}); err != nil { t.Fatal(err) }
+ var injected atomic.Bool
+ var failThird atomic.Bool
+ failThird.Store(true)
+ var thirdAttempted atomic.Bool
+ if err = db.Callback().Create().Before("gorm:create").Register("test:fail-first-audit",func(tx *gorm.DB) {
+  if ev, ok := tx.Statement.Dest.(*store.AuditEvent); ok && ev.EventID == "first" && injected.CompareAndSwap(false,true) { tx.AddError(errors.New("injected audit write failure")) }
+  if ev, ok := tx.Statement.Dest.(*store.AuditEvent); ok && ev.EventID == "third" && failThird.Load() { thirdAttempted.Store(true); tx.AddError(errors.New("persistent audit write failure")) }
+ }); err != nil { t.Fatal(err) }
+ ctx,cancel := context.WithCancel(context.Background())
+ prod := appkafka.NewProducer([]string{addr},"offset-repro",logger.New("error")); defer prod.Close()
+ for _, id := range []string{"first","second"} {
+  b,_ := json.Marshal(store.BillingEvent{EventID:id,RequestID:id,Phase:"reserve",TenantID:1,Funding:"balance"})
+  if err = prod.Publish(ctx,"same-key",b); err != nil { t.Fatal(err) }
+ }
+ kc := appkafka.NewConsumer([]string{addr},"real-consumer-test",[]string{"offset-repro"})
+ c := New(store.NewStore(db,nil),kc,Config{},logger.New("error"))
+ done := make(chan struct{}); go func(){ defer close(done); _ = c.Run(ctx) }()
+ defer func(){ cancel(); select {case <-done: case <-time.After(4*time.Second): t.Error("consumer did not stop")}; _ = kc.Close() }()
+ deadline:=time.Now().Add(8*time.Second)
+ for time.Now().Before(deadline) {
+  var ids []string
+  if err = db.Model(&store.AuditEvent{}).Order("event_id").Pluck("event_id",&ids).Error; err != nil { t.Fatal(err) }
+  if fmt.Sprint(ids)=="[first second]" { break }
+  time.Sleep(100*time.Millisecond)
+ }
+ var ids []string; db.Model(&store.AuditEvent{}).Order("event_id").Pluck("event_id",&ids)
+ if fmt.Sprint(ids)!="[first second]" || !injected.Load() { t.Fatalf("audit events after transient first failure = %v; want [first second]",ids) }
+ b,_ := json.Marshal(store.BillingEvent{EventID:"third",RequestID:"third",Phase:"reserve",TenantID:1,Funding:"balance"})
+ if err=prod.Publish(ctx,"same-key",b); err!=nil {t.Fatal(err)}
+ deadline=time.Now().Add(8*time.Second)
+ for !thirdAttempted.Load() && time.Now().Before(deadline) {time.Sleep(50*time.Millisecond)}
+ if !thirdAttempted.Load() {t.Fatal("persistent failure not exercised")}
+ cancel()
+ select {case <-done: case <-time.After(4*time.Second): t.Fatal("consumer failed to stop during retry")}
+ if err=kc.Close(); err!=nil {t.Fatal(err)}
+ failThird.Store(false)
+ ctx2,cancel2:=context.WithCancel(context.Background()); defer cancel2()
+ kc2:=appkafka.NewConsumer([]string{addr},"real-consumer-test",[]string{"offset-repro"}); defer kc2.Close()
+ c2:=New(store.NewStore(db,nil),kc2,Config{},logger.New("error")); stopped:=make(chan struct{})
+ go func(){defer close(stopped); _=c2.Run(ctx2)}()
+ defer func(){cancel2(); select {case <-stopped: case <-time.After(4*time.Second): t.Error("restarted consumer did not stop")}}()
+ deadline=time.Now().Add(20*time.Second)
+ for time.Now().Before(deadline) { var n int64; if err=db.Model(&store.AuditEvent{}).Where("event_id = ?","third").Count(&n).Error; err!=nil {t.Fatal(err)}; if n==1 {return}; time.Sleep(100*time.Millisecond) }
+ t.Fatal("third event not recovered after cancellation and restart")
+}

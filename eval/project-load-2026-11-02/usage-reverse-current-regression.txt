@@ -1,0 +1,36 @@
+=== RUN   TestUsageReverseCandidateRegression
+    settle_test.go:234: usage_first iteration 0: usage and reverse both succeeded
+--- FAIL: TestUsageReverseCandidateRegression (0.56s)
+FAIL
+FAIL	github.com/frostloom/ai-gateway/internal/billing/store	1.466s
+FAIL
+=== RUN   TestTerminalSQLFailureRebuildAndRetry
+=== RUN   TestTerminalSQLFailureRebuildAndRetry/settle
+=== RUN   TestTerminalSQLFailureRebuildAndRetry/reverse
+--- PASS: TestTerminalSQLFailureRebuildAndRetry (1.31s)
+    --- PASS: TestTerminalSQLFailureRebuildAndRetry/settle (0.66s)
+    --- PASS: TestTerminalSQLFailureRebuildAndRetry/reverse (0.66s)
+=== RUN   TestFullFlowOutboxEvents
+--- PASS: TestFullFlowOutboxEvents (0.60s)
+=== RUN   TestReserveConcurrentNoOversell
+--- PASS: TestReserveConcurrentNoOversell (2.60s)
+=== RUN   TestReserveIdempotentSameRequest
+--- PASS: TestReserveIdempotentSameRequest (0.54s)
+=== RUN   TestReserveConcurrentSameRequest
+--- PASS: TestReserveConcurrentSameRequest (0.68s)
+=== RUN   TestSettleFullFlow
+--- PASS: TestSettleFullFlow (0.61s)
+=== RUN   TestSettleIdempotent
+--- PASS: TestSettleIdempotent (0.67s)
+=== RUN   TestReverseIdempotent
+--- PASS: TestReverseIdempotent (0.66s)
+=== RUN   TestReverseAfterSettled
+--- PASS: TestReverseAfterSettled (0.68s)
+=== RUN   TestRebuildBalance
+--- PASS: TestRebuildBalance (0.66s)
+=== RUN   TestUsageReverseCandidateRegression
+--- PASS: TestUsageReverseCandidateRegression (2.89s)
+=== RUN   TestReserveSubscriptionAllowance
+--- PASS: TestReserveSubscriptionAllowance (0.78s)
+PASS
+ok  	github.com/frostloom/ai-gateway/internal/billing/store	14.459s

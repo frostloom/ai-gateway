@@ -1,0 +1,126 @@
+package outbox
+
+import (
+	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"net/http/httptest"
+	"os"
+	"strings"
+	"sync"
+	"sync/atomic"
+	"testing"
+	"time"
+
+	"github.com/frostloom/ai-gateway/internal/billing/consumer"
+	"github.com/frostloom/ai-gateway/internal/billing/store"
+	appkafka "github.com/frostloom/ai-gateway/internal/pkg/kafka"
+	"github.com/frostloom/ai-gateway/internal/pkg/logger"
+	"github.com/frostloom/ai-gateway/internal/pkg/metrics"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
+)
+
+type failFirstMarkPerRow struct { Store; mu sync.Mutex; seen map[uint64]bool }
+func (s *failFirstMarkPerRow) MarkOutboxSent(ctx context.Context, id uint64) error {
+	s.mu.Lock()
+	first:=!s.seen[id]
+	s.seen[id]=true
+	s.mu.Unlock()
+	if first { return errors.New("injected first mark failure") }
+	return s.Store.MarkOutboxSent(ctx,id)
+}
+
+type overlappingPollStore struct { Store; arrivals atomic.Int32; release chan struct{} }
+func (s *overlappingPollStore) PollOutbox(ctx context.Context, limit, max int) ([]store.OutboxEvent,error) {
+	rows,err:=s.Store.PollOutbox(ctx,limit,max)
+	if err!=nil { return nil,err }
+	if s.arrivals.Add(1)==2 { close(s.release) }
+	select { case <-s.release: return rows,nil; case <-ctx.Done(): return nil,ctx.Err() }
+}
+
+// PASS characterizes duplicate Kafka delivery; audit row idempotency is separate.
+func TestIsolatedOverlappingRelaysDuplicate(t *testing.T) {
+	dsn,addr:=os.Getenv("ISOLATED_MYSQL_DSN"),os.Getenv("ISOLATED_KAFKA_ADDR")
+	if dsn=="" || addr=="" { t.Fatal("isolated addresses required") }
+	db,err:=gorm.Open(mysql.Open(dsn),&gorm.Config{}); if err!=nil { t.Fatal(err) }
+	if err:=db.AutoMigrate(&store.OutboxEvent{},&store.AuditEvent{}); err!=nil { t.Fatal(err) }
+	const count=16
+	prefix:=fmt.Sprintf("overlap-%d-",time.Now().UnixNano())
+	for i:=0;i<count;i++ {
+		id:=fmt.Sprintf("%s%d",prefix,i)
+		payload,_:=json.Marshal(store.BillingEvent{EventID:id,RequestID:id,Phase:"reserve",TenantID:1,Funding:"balance",AmountCents:int64(i)})
+		if err:=db.Create(&store.OutboxEvent{Topic:store.TopicBillingEvents,EventKey:id,Payload:string(payload),CreatedAt:time.Now()}).Error; err!=nil { t.Fatal(err) }
+	}
+	base:=store.NewStore(db,nil); gate:=&overlappingPollStore{Store:base,release:make(chan struct{})}
+	log:=logger.New("error"); ctx,cancel:=context.WithTimeout(context.Background(),45*time.Second)
+	prod:=appkafka.NewProducer([]string{addr},"offset-repro",log); defer prod.Close()
+	kc:=appkafka.NewConsumer([]string{addr},"overlap-group",[]string{"offset-repro"})
+	c:=consumer.New(base,kc,consumer.Config{},log); done:=make(chan struct{})
+	go func(){defer close(done); _=c.Run(ctx)}()
+	defer func(){cancel(); <-done; _=kc.Close()}()
+	results:=make(chan error,2)
+	for i:=0;i<2;i++ { go func(){ relay:=NewRelay(gate,prod,prod,Config{BatchSize:count,MaxAttempts:5},log); stats,e:=relay.FlushOnce(ctx); if e==nil && (stats.Polled!=count || stats.Sent!=count) { e=fmt.Errorf("stats=%+v",stats) }; results<-e }() }
+	for i:=0;i<2;i++ { if e:=<-results; e!=nil { t.Fatal(e) } }
+	deadline:=time.Now().Add(30*time.Second)
+	for time.Now().Before(deadline) && c.Stats().Consumed < 2*count { time.Sleep(100*time.Millisecond) }
+	if got:=c.Stats().Consumed; got!=2*count { t.Fatalf("consumed=%d",got) }
+	var unsent,audited,mismatches int64
+	if err:=db.Model(&store.OutboxEvent{}).Where("event_key LIKE ? AND sent_at IS NULL",prefix+"%").Count(&unsent).Error; err!=nil { t.Fatal(err) }
+	if err:=db.Model(&store.AuditEvent{}).Where("event_id LIKE ?",prefix+"%").Count(&audited).Error; err!=nil { t.Fatal(err) }
+	if err:=db.Raw("SELECT COUNT(*) FROM outbox_events o LEFT JOIN audit_events a ON a.event_id=o.event_key WHERE o.event_key LIKE ? AND (a.id IS NULL OR NOT (o.payload <=> a.payload))",prefix+"%").Scan(&mismatches).Error; err!=nil { t.Fatal(err) }
+	if unsent!=0 || audited!=count || mismatches!=0 { t.Fatalf("unsent=%d audit=%d mismatches=%d",unsent,audited,mismatches) }
+	t.Logf("two overlapping relays polled %d each, consumed=%d audit=%d unsent=%d json_mismatch=%d",count,c.Stats().Consumed,audited,unsent,mismatches)
+}
+
+func TestIsolatedBatchReplayAfterMarkFailure(t *testing.T) {
+	dsn,addr:=os.Getenv("ISOLATED_MYSQL_DSN"),os.Getenv("ISOLATED_KAFKA_ADDR")
+	if dsn=="" || addr=="" { t.Fatal("isolated addresses required") }
+	db,err:=gorm.Open(mysql.Open(dsn),&gorm.Config{}); if err!=nil { t.Fatal(err) }
+	if err:=db.AutoMigrate(&store.OutboxEvent{},&store.AuditEvent{}); err!=nil { t.Fatal(err) }
+	const count=16
+	prefix:=fmt.Sprintf("batch-replay-%d-",time.Now().UnixNano())
+	for i:=0;i<count;i++ {
+		id:=fmt.Sprintf("%s%d",prefix,i)
+		payload,_:=json.Marshal(store.BillingEvent{EventID:id,RequestID:id,Phase:"reserve",TenantID:1,Funding:"balance",AmountCents:int64(i)})
+		if err:=db.Create(&store.OutboxEvent{Topic:store.TopicBillingEvents,EventKey:id,Payload:string(payload),CreatedAt:time.Now()}).Error; err!=nil { t.Fatal(err) }
+	}
+	base:=store.NewStore(db,nil); wrapped:=&failFirstMarkPerRow{Store:base,seen:map[uint64]bool{}}
+	log:=logger.New("error"); ctx,cancel:=context.WithCancel(context.Background())
+	prod:=appkafka.NewProducer([]string{addr},"offset-repro",log); defer prod.Close()
+	kc:=appkafka.NewConsumer([]string{addr},"batch-replay-group",[]string{"offset-repro"})
+	c:=consumer.New(base,kc,consumer.Config{},log); done:=make(chan struct{})
+	go func(){defer close(done); _=c.Run(ctx)}()
+	defer func(){cancel(); <-done; _=kc.Close()}()
+	relay:=NewRelay(wrapped,prod,prod,Config{BatchSize:count,MaxAttempts:5},log)
+	stats,err:=relay.FlushOnce(ctx); if err!=nil || stats.Sent!=count { t.Fatalf("first stats=%+v err=%v",stats,err) }
+	if os.Getenv("ISOLATED_EXPECT_MARK_ERRORS")=="1" {
+		data,e:=json.Marshal(stats); if e!=nil { t.Fatal(e) }
+		var fields map[string]any; if e:=json.Unmarshal(data,&fields); e!=nil { t.Fatal(e) }
+		if fields["mark_sent_errors"]!=float64(count) { t.Fatalf("marker stats=%s",data) }
+	}
+	checkCounter:=func() {
+		if os.Getenv("ISOLATED_EXPECT_MARK_COUNTER")!="1" { return }
+		w:=httptest.NewRecorder(); metrics.Handler().ServeHTTP(w,httptest.NewRequest("GET","/metrics",nil))
+		if w.Code!=200 || !strings.Contains(w.Body.String(),`billing_outbox_mark_errors_total{operation="sent"} 16`) { t.Fatalf("missing mark error counter: status=%d body=%s",w.Code,w.Body.String()) }
+	}
+	checkCounter()
+	var n int64
+	if err:=db.Model(&store.OutboxEvent{}).Where("event_key LIKE ? AND sent_at IS NULL",prefix+"%").Count(&n).Error; err!=nil || n!=count { t.Fatalf("first unsent=%d err=%v",n,err) }
+	stats,err=relay.FlushOnce(ctx); if err!=nil || stats.Sent!=count { t.Fatalf("second stats=%+v err=%v",stats,err) }
+	if os.Getenv("ISOLATED_EXPECT_MARK_ERRORS")=="1" {
+		data,e:=json.Marshal(stats); if e!=nil { t.Fatal(e) }
+		var fields map[string]any; if e:=json.Unmarshal(data,&fields); e!=nil { t.Fatal(e) }
+		if fields["mark_sent_errors"]!=float64(0) { t.Fatalf("retry marker stats=%s",data) }
+	}
+	checkCounter()
+	deadline:=time.Now().Add(45*time.Second)
+	for time.Now().Before(deadline) && c.Stats().Consumed < 2*count { time.Sleep(100*time.Millisecond) }
+	if got:=c.Stats().Consumed; got!=2*count { t.Fatalf("consumed=%d",got) }
+	if err:=db.Model(&store.OutboxEvent{}).Where("event_key LIKE ? AND sent_at IS NULL",prefix+"%").Count(&n).Error; err!=nil || n!=0 { t.Fatalf("final unsent=%d err=%v",n,err) }
+	if err:=db.Model(&store.AuditEvent{}).Where("event_id LIKE ?",prefix+"%").Count(&n).Error; err!=nil || n!=count { t.Fatalf("audit rows=%d err=%v",n,err) }
+	var mismatches int64
+	if err:=db.Raw("SELECT COUNT(*) FROM outbox_events o LEFT JOIN audit_events a ON a.event_id=o.event_key WHERE o.event_key LIKE ? AND (a.id IS NULL OR NOT (o.payload <=> a.payload))",prefix+"%").Scan(&mismatches).Error; err!=nil || mismatches!=0 { t.Fatalf("payload mismatches=%d err=%v",mismatches,err) }
+	t.Logf("published twice=%d consumed=%d audit=%d unsent=0 json_mismatch=0",count,c.Stats().Consumed,n)
+}

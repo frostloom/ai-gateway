@@ -1,0 +1,14 @@
+head=8b3347aea3abe3e2131d67e9e48a77dd61e2bc86
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestReverseRollbackMissingGuard
+    usage_during_reverse_delta_test.go:215: rollback_projection_consistent=true retry_reversed=true balance=1000 ledger=1000
+--- PASS: TestReverseRollbackMissingGuard (0.87s)
+=== RUN   TestReverseRollbackMissingGuard
+    usage_during_reverse_delta_test.go:215: rollback_projection_consistent=true retry_reversed=true balance=1000 ledger=1000
+--- PASS: TestReverseRollbackMissingGuard (0.82s)
+=== RUN   TestReverseRollbackMissingGuard
+    usage_during_reverse_delta_test.go:215: rollback_projection_consistent=true retry_reversed=true balance=1000 ledger=1000
+--- PASS: TestReverseRollbackMissingGuard (1.07s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	4.506s

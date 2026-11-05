@@ -1,0 +1,21 @@
+head=63b9d1ed4d64bb583d15fa884c37468e5c53044c
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestHandlerJournalSurvivesProcessKill
+[mysql] 2026/11/04 00:12:19 connection.go:801 closing bad idle connection: EOF
+    handler_journal_process_test.go:259: upstream replied once; handler killed before journal; no usage evidence; expired forwarding remains pending; no automatic refund
+    handler_journal_process_test.go:275: not implemented
+--- FAIL: TestHandlerJournalSurvivesProcessKill (3.46s)
+=== RUN   TestHandlerJournalSurvivesProcessKill
+[mysql] 2026/11/04 00:12:22 connection.go:801 closing bad idle connection: EOF
+    handler_journal_process_test.go:259: upstream replied once; handler killed before journal; no usage evidence; expired forwarding remains pending; no automatic refund
+    handler_journal_process_test.go:275: not implemented
+--- FAIL: TestHandlerJournalSurvivesProcessKill (3.45s)
+=== RUN   TestHandlerJournalSurvivesProcessKill
+[mysql] 2026/11/04 00:12:25 connection.go:801 closing bad idle connection: EOF
+    handler_journal_process_test.go:259: upstream replied once; handler killed before journal; no usage evidence; expired forwarding remains pending; no automatic refund
+    handler_journal_process_test.go:275: not implemented
+--- FAIL: TestHandlerJournalSurvivesProcessKill (3.45s)
+FAIL
+FAIL	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	11.493s
+FAIL

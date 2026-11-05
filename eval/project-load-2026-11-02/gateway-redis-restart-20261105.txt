@@ -1,0 +1,16 @@
+{"result": {"elapsed_seconds": 3.076403041, "failure_classes": {}, "generator_dropped": 0, "mean_ms": 80.34819720000002, "mode": "open_loop", "offered_rate": 20, "p95_ms": 126.218625, "p99_ms": 174.025708, "peak_inflight": 3, "requested_seconds": 3, "requests": 60, "schedule_lag_p99_ms": 3.929083, "scheduled": 60, "scheduled_p95_ms": 127.241791, "started": 60, "statuses": {"200": 60}, "success_per_second_drain": 19.50329628477311, "tenants": 64, "valid_success": 60, "rep": 1}, "audit": {"agent_sessions": 0, "audit_events": 0, "balance_mismatches": [], "outbox": 195, "outbox_attempted_error": 0, "outbox_unsent": 195, "pending": 0, "reversed": 0, "settled": 65, "cumulative_valid_http": 65, "settled_minus_valid_http": 0, "workers": 20, "tenants": 64, "stream": false, "rep": 1}}
+{"result": {"elapsed_seconds": 3.029838083, "failure_classes": {"idempotency unavailable": 60}, "generator_dropped": 0, "mean_ms": 363.39159938333336, "mode": "open_loop", "offered_rate": 20, "p95_ms": 1273.04025, "p99_ms": 1368.836166, "peak_inflight": 23, "requested_seconds": 3, "requests": 60, "schedule_lag_p99_ms": 3.052, "scheduled": 60, "scheduled_p95_ms": 1273.072042, "started": 60, "statuses": {"500": 60}, "success_per_second_drain": 0, "tenants": 64, "valid_success": 0, "rep": 2}, "audit": {"redis_outage": true, "audit_deferred_until_restart": true, "rep": 2}}
+run failed: Command '['/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/codex-project-load-idkwu9zi/seed']' returned non-zero exit status 1.; raw: /Users/a1/项目/ai-gateway/eval/project-load-2026-11-02/gateway-open-load-runs/20261105-012229
+Traceback (most recent call last):
+  File "/Users/a1/项目/ai-gateway/eval/project-load-2026-11-02/run_gateway_v2_open_load.py", line 247, in <module>
+    try: main()
+         ^^^^^^
+  File "/Users/a1/项目/ai-gateway/eval/project-load-2026-11-02/run_gateway_v2_open_load.py", line 220, in main
+    audit=run([binaries['seed']],cwd=ROOT,env=dict(seedenv,TEST_MODE='audit'),capture_output=True,timeout=90);ar=json.loads(audit.stdout);ar['cumulative_valid_http']=cumulative_success;ar['settled_minus_valid_http']=ar['settled']-cumulative_success;ar.update({'workers':workers,'tenants':tenants,'stream':stream,'rep':rep});audits.write(json.dumps(ar)+'\n');audits.flush()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/a1/项目/ai-gateway/eval/project-load-2026-11-02/run_gateway_v2_open_load.py", line 9, in run
+    def run(args,**kw): return subprocess.run(args,check=True,text=True,**kw)
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/a1/.local/share/uv/python/cpython-3.12.15-macos-aarch64-none/lib/python3.12/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/codex-project-load-idkwu9zi/seed']' returned non-zero exit status 1.

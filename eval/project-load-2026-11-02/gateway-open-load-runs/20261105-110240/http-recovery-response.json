@@ -1,0 +1,25 @@
+{
+  "request_id": "idem:recon-http-578457a63ff84d7685877acc679ae953",
+  "status": 200,
+  "body": {
+    "id": "chatcmpl-1793847801522897000",
+    "object": "chat.completion",
+    "created": 1793847801,
+    "model": "test-model",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "\u8fd9\u662f\u4e00\u6bb5\u7531 mock provider \u751f\u6210\u7684\u56de\u590d\u6587\u672c\u3002\u7528\u4e8e\u9a8c\u8bc1\u7f51\u5173\u6d41\u5f0f\u8f6c\u53d1\u4e0e\u8ba1\u8d39\u94fe\u8def\u3002\u8fd9\u662f\u4e00\u6bb5\u7531 mock provider \u751f\u6210\u7684\u56de\u590d\u6587\u672c\u3002\u7528\u4e8e\u9a8c\u8bc1\u7f51\u5173\u6d41\u5f0f\u8f6c\u53d1\u4e0e\u8ba1\u8d39\u94fe\u8def\u3002\u8fd9\u662f\u4e00\u6bb5\u7531 mock provider \u751f\u6210\u7684\u56de\u590d\u6587\u672c\u3002\u7528\u4e8e\u9a8c\u8bc1\u7f51\u5173\u6d41\u5f0f\u8f6c\u53d1\u4e0e\u8ba1\u8d39\u94fe\u8def\u3002"
+        },
+        "finish_reason": "stop"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 5,
+      "completion_tokens": 100,
+      "total_tokens": 105
+    }
+  }
+}

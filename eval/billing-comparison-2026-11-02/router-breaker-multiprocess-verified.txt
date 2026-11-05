@@ -1,0 +1,29 @@
+head=63b9d1ed4d64bb583d15fa884c37468e5c53044c
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestBreakerMultiprocessDuplicateAndConflict
+=== RUN   TestBreakerMultiprocessDuplicateAndConflict/duplicate
+    router_breaker_multiprocess_test.go:152: mode=duplicate processes=6 results=map[applied:1 duplicate:5] state=open version=1 events=1
+=== RUN   TestBreakerMultiprocessDuplicateAndConflict/conflict
+    router_breaker_multiprocess_test.go:152: mode=conflict processes=6 results=map[applied:1 conflict:3 duplicate:2] state=closed version=1 events=1
+--- PASS: TestBreakerMultiprocessDuplicateAndConflict (2.34s)
+    --- PASS: TestBreakerMultiprocessDuplicateAndConflict/duplicate (1.16s)
+    --- PASS: TestBreakerMultiprocessDuplicateAndConflict/conflict (1.12s)
+=== RUN   TestBreakerMultiprocessDuplicateAndConflict
+=== RUN   TestBreakerMultiprocessDuplicateAndConflict/duplicate
+    router_breaker_multiprocess_test.go:152: mode=duplicate processes=6 results=map[applied:1 duplicate:5] state=open version=1 events=1
+=== RUN   TestBreakerMultiprocessDuplicateAndConflict/conflict
+    router_breaker_multiprocess_test.go:152: mode=conflict processes=6 results=map[applied:1 conflict:3 duplicate:2] state=open version=1 events=1
+--- PASS: TestBreakerMultiprocessDuplicateAndConflict (2.21s)
+    --- PASS: TestBreakerMultiprocessDuplicateAndConflict/duplicate (1.10s)
+    --- PASS: TestBreakerMultiprocessDuplicateAndConflict/conflict (1.09s)
+=== RUN   TestBreakerMultiprocessDuplicateAndConflict
+=== RUN   TestBreakerMultiprocessDuplicateAndConflict/duplicate
+    router_breaker_multiprocess_test.go:152: mode=duplicate processes=6 results=map[applied:1 duplicate:5] state=open version=1 events=1
+=== RUN   TestBreakerMultiprocessDuplicateAndConflict/conflict
+    router_breaker_multiprocess_test.go:152: mode=conflict processes=6 results=map[applied:1 conflict:3 duplicate:2] state=closed version=1 events=1
+--- PASS: TestBreakerMultiprocessDuplicateAndConflict (2.19s)
+    --- PASS: TestBreakerMultiprocessDuplicateAndConflict/duplicate (1.09s)
+    --- PASS: TestBreakerMultiprocessDuplicateAndConflict/conflict (1.09s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	8.638s

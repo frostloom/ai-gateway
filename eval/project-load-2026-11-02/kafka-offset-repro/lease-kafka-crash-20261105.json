@@ -1,0 +1,14 @@
+{
+  "head": "42d8ef8e5ca2471b18800e50f8e7a57fbcfdd47f",
+  "source_sha256": {
+    "internal/billing/consumer/consumer.go": "2efcbb63fcfb49bfd890083a98a90c0f3cd691221d4b1b8f771671806061ed1a",
+    "internal/billing/outbox/relay.go": "e800665d6114a4074d40d8ada9c7748461de6c105a219a8f3875b9e5966bccea",
+    "internal/billing/store/outbox.go": "85aa0844f87a9059ae675336add8a42d8c70a434ef522d83f141bc69df201cbd",
+    "internal/pkg/kafka/consumer.go": "3054c3f076edcefc618674f1653aa59ace6e55408736af8cef23407b267e9438",
+    "internal/pkg/kafka/producer.go": "e9d654daba9c84a64235832217124422d820b0dce2d81953f6690a37c708e4f0"
+  },
+  "test_sha256": "cf4f8f64f42ed2e4d74025a729d79af3543018575b81066150cc5523fee9f81f",
+  "returncode": 0,
+  "stdout": "=== RUN   TestOutboxLeaseKafkaKilledAfterPublish\n    outbox_lease_kafka_process_test.go:177: SIGKILL after Kafka ack; manual expiry; generation 2 fenced generation 1; consumed=2 audit=1 mismatch=0\n--- PASS: TestOutboxLeaseKafkaKilledAfterPublish (14.51s)\nPASS\nok  \tgithub.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02\t16.700s\n",
+  "stderr": "# github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02.test\nld: warning: '/private/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-2573009170/000013.o' has malformed LC_DYSYMTAB, expected 98 undefined symbols to start at index 1626, found 95 undefined symbols starting at index 1626\n"
+}

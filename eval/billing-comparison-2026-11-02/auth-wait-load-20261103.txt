@@ -1,0 +1,39 @@
+head=63b9d1ed4d64bb583d15fa884c37468e5c53044c
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestAuthOutageLoad
+    auth_outage_load_test.go:145: AUTH_POOL rep=1 workers=16 mode=direct waits=0 wait_ms=0.00 open=10 in_use=0
+    auth_outage_load_test.go:146: AUTH_OUTAGE rep=1 workers=16 mode=direct requests=10123 errors=0 timeouts=0 overload=0 backend_queries=10123 elapsed=3.004 success_per_sec=3369.38 mean_ms=4.74 p95_ms=12.37 p99_ms=24.18
+    auth_outage_load_test.go:145: AUTH_POOL rep=1 workers=16 mode=redis_blackhole waits=0 wait_ms=0.00 open=10 in_use=0
+    auth_outage_load_test.go:146: AUTH_OUTAGE rep=1 workers=16 mode=redis_blackhole requests=1215 errors=0 timeouts=0 overload=0 backend_queries=1215 elapsed=3.065 success_per_sec=396.46 mean_ms=39.97 p95_ms=64.14 p99_ms=129.68
+    auth_outage_load_test.go:145: AUTH_POOL rep=1 workers=16 mode=blackhole_bulkhead waits=0 wait_ms=0.00 open=10 in_use=0
+    auth_outage_load_test.go:146: AUTH_OUTAGE rep=1 workers=16 mode=blackhole_bulkhead requests=1131 errors=0 timeouts=0 overload=0 backend_queries=1131 elapsed=3.028 success_per_sec=373.56 mean_ms=42.62 p95_ms=72.93 p99_ms=114.74
+    auth_outage_load_test.go:145: AUTH_POOL rep=1 workers=16 mode=blackhole_wait50 waits=0 wait_ms=0.00 open=10 in_use=0
+    auth_outage_load_test.go:146: AUTH_OUTAGE rep=1 workers=16 mode=blackhole_wait50 requests=1325 errors=0 timeouts=0 overload=0 backend_queries=1325 elapsed=3.024 success_per_sec=438.22 mean_ms=36.39 p95_ms=49.73 p99_ms=73.23
+    auth_outage_load_test.go:145: AUTH_POOL rep=1 workers=64 mode=direct waits=20047 wait_ms=72013.72 open=10 in_use=0
+    auth_outage_load_test.go:146: AUTH_OUTAGE rep=1 workers=64 mode=direct requests=20087 errors=0 timeouts=0 overload=0 backend_queries=20087 elapsed=3.012 success_per_sec=6669.88 mean_ms=9.57 p95_ms=24.00 p99_ms=47.42
+    auth_outage_load_test.go:145: AUTH_POOL rep=1 workers=64 mode=redis_blackhole waits=381 wait_ms=5062.95 open=10 in_use=0
+    auth_outage_load_test.go:146: AUTH_OUTAGE rep=1 workers=64 mode=redis_blackhole requests=4504 errors=0 timeouts=0 overload=0 backend_queries=4504 elapsed=3.037 success_per_sec=1482.90 mean_ms=42.81 p95_ms=71.36 p99_ms=115.55
+    auth_outage_load_test.go:145: AUTH_POOL rep=1 workers=64 mode=blackhole_bulkhead waits=0 wait_ms=0.00 open=10 in_use=0
+    auth_outage_load_test.go:146: AUTH_OUTAGE rep=1 workers=64 mode=blackhole_bulkhead requests=5355 errors=2423 timeouts=0 overload=2423 backend_queries=2932 elapsed=3.044 success_per_sec=963.21 mean_ms=36.06 p95_ms=52.24 p99_ms=79.81
+    auth_outage_load_test.go:145: AUTH_POOL rep=1 workers=64 mode=blackhole_wait50 waits=0 wait_ms=0.00 open=10 in_use=0
+    auth_outage_load_test.go:146: AUTH_OUTAGE rep=1 workers=64 mode=blackhole_wait50 requests=2774 errors=587 timeouts=0 overload=582 backend_queries=2192 elapsed=3.186 success_per_sec=686.34 mean_ms=70.43 p95_ms=141.40 p99_ms=219.24
+    auth_outage_load_test.go:145: AUTH_POOL rep=2 workers=16 mode=direct waits=0 wait_ms=0.00 open=10 in_use=0
+    auth_outage_load_test.go:146: AUTH_OUTAGE rep=2 workers=16 mode=direct requests=8771 errors=0 timeouts=0 overload=0 backend_queries=8771 elapsed=3.022 success_per_sec=2902.04 mean_ms=5.50 p95_ms=14.73 p99_ms=45.74
+    auth_outage_load_test.go:145: AUTH_POOL rep=2 workers=16 mode=redis_blackhole waits=0 wait_ms=0.00 open=10 in_use=0
+    auth_outage_load_test.go:146: AUTH_OUTAGE rep=2 workers=16 mode=redis_blackhole requests=1290 errors=0 timeouts=0 overload=0 backend_queries=1290 elapsed=3.039 success_per_sec=424.53 mean_ms=37.55 p95_ms=52.14 p99_ms=131.63
+    auth_outage_load_test.go:145: AUTH_POOL rep=2 workers=16 mode=blackhole_bulkhead waits=0 wait_ms=0.00 open=10 in_use=0
+    auth_outage_load_test.go:146: AUTH_OUTAGE rep=2 workers=16 mode=blackhole_bulkhead requests=1267 errors=0 timeouts=0 overload=0 backend_queries=1267 elapsed=3.033 success_per_sec=417.71 mean_ms=38.20 p95_ms=59.54 p99_ms=80.48
+    auth_outage_load_test.go:145: AUTH_POOL rep=2 workers=16 mode=blackhole_wait50 waits=0 wait_ms=0.00 open=10 in_use=0
+    auth_outage_load_test.go:146: AUTH_OUTAGE rep=2 workers=16 mode=blackhole_wait50 requests=1357 errors=0 timeouts=0 overload=0 backend_queries=1357 elapsed=3.037 success_per_sec=446.79 mean_ms=35.69 p95_ms=47.24 p99_ms=69.38
+    auth_outage_load_test.go:145: AUTH_POOL rep=2 workers=64 mode=direct waits=15419 wait_ms=72742.65 open=10 in_use=0
+    auth_outage_load_test.go:146: AUTH_OUTAGE rep=2 workers=64 mode=direct requests=15459 errors=0 timeouts=0 overload=0 backend_queries=15459 elapsed=3.184 success_per_sec=4854.89 mean_ms=12.70 p95_ms=32.50 p99_ms=71.90
+    auth_outage_load_test.go:145: AUTH_POOL rep=2 workers=64 mode=redis_blackhole waits=913 wait_ms=27838.15 open=10 in_use=0
+    auth_outage_load_test.go:146: AUTH_OUTAGE rep=2 workers=64 mode=redis_blackhole requests=1883 errors=0 timeouts=0 overload=0 backend_queries=1883 elapsed=3.231 success_per_sec=582.70 mean_ms=105.44 p95_ms=260.81 p99_ms=374.27
+    auth_outage_load_test.go:145: AUTH_POOL rep=2 workers=64 mode=blackhole_bulkhead waits=0 wait_ms=0.00 open=10 in_use=0
+    auth_outage_load_test.go:146: AUTH_OUTAGE rep=2 workers=64 mode=blackhole_bulkhead requests=4884 errors=2817 timeouts=0 overload=2817 backend_queries=2067 elapsed=3.123 success_per_sec=661.85 mean_ms=39.49 p95_ms=68.17 p99_ms=115.94
+    auth_outage_load_test.go:145: AUTH_POOL rep=2 workers=64 mode=blackhole_wait50 waits=0 wait_ms=0.00 open=10 in_use=0
+    auth_outage_load_test.go:146: AUTH_OUTAGE rep=2 workers=64 mode=blackhole_wait50 requests=4474 errors=77 timeouts=0 overload=77 backend_queries=4397 elapsed=3.085 success_per_sec=1425.22 mean_ms=43.54 p95_ms=79.84 p99_ms=100.64
+--- PASS: TestAuthOutageLoad (49.66s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	50.373s

@@ -1,0 +1,14 @@
+{
+  "head": "4e4c7fdd6b3a97f0f2503e1e0dd73a95707af541",
+  "source_sha256": {
+    "internal/billing/consumer/consumer.go": "2efcbb63fcfb49bfd890083a98a90c0f3cd691221d4b1b8f771671806061ed1a",
+    "internal/billing/outbox/relay.go": "f9b4e2e60e4e832c57cf8c1c6ccdfa6a69f84c406d9a3664eadf25259718bb9e",
+    "internal/billing/store/outbox.go": "85aa0844f87a9059ae675336add8a42d8c70a434ef522d83f141bc69df201cbd",
+    "internal/pkg/kafka/consumer.go": "3054c3f076edcefc618674f1653aa59ace6e55408736af8cef23407b267e9438",
+    "internal/pkg/kafka/producer.go": "e9d654daba9c84a64235832217124422d820b0dce2d81953f6690a37c708e4f0"
+  },
+  "test_sha256": "7db062402afca481f536112998125c4bdb70c29230044b2664481c2fa69887d0",
+  "returncode": 0,
+  "stdout": "=== RUN   TestAuditQuarantineKafkaReplay\n    audit_quarantine_kafka_test.go:129: offsets=0,1,2 replay_offset=1 audit=2 quarantined=1 deliveries=3 original_amount=40\n--- PASS: TestAuditQuarantineKafkaReplay (24.22s)\nPASS\nok  \tgithub.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02\t26.581s\n",
+  "stderr": ""
+}

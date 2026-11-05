@@ -14,12 +14,13 @@ import (
 // One pinned session owns both the tenant lock and any nested request lock.
 // Its Redis token fences delayed workers after MySQL releases a lost session.
 type cashSession struct {
-	tenant  uint64
-	conn    *sql.Conn
-	root    *gorm.DB
-	token   string
-	release func()
-	caller  context.Context
+	tenant                uint64
+	conn                  *sql.Conn
+	root                  *gorm.DB
+	token                 string
+	release               func()
+	caller                context.Context
+	allowDisabledTerminal bool // settle/reverse existing bills, never fresh spending
 }
 
 func cashFenceKey(tenant uint64) string { return fmt.Sprintf("billing:cash-owner:%d", tenant) }
@@ -85,7 +86,7 @@ func (s *Store) rebuildCash(ctx context.Context, tenant uint64, guard, owner str
 	if err := s.db.WithContext(ctx).First(&row, tenant).Error; err != nil {
 		return 0, err
 	}
-	if row.Status != 0 {
+	if row.Status != 0 && (s.cash == nil || !s.cash.allowDisabledTerminal) {
 		return 0, fmt.Errorf("tenant disabled: %d", tenant)
 	}
 	bal, err := LedgerBalance(ctx, s.db, tenant)

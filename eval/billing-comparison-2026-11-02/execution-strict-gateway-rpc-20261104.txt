@@ -1,0 +1,61 @@
+head=63b9d1ed4d64bb583d15fa884c37468e5c53044c
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+current_source_sha256=be5ced15d64432b55979cf62b24e005c89ca340c509a01020d94f63147eaa6c9
+current_candidate_sha256=ce0ee7bbd2b77d13470e23cbce6e02aeabd715a1f713a173fd99c2e0ba139471
+=== RUN   TestAtomicReserveOwnerAndRollback
+    execution_atomic_reserve_test.go:144: injected=1 rollback_bills=0 rollback_events=0 retry_state=reserved lease_live=true balance=460 ledger=460 events=3
+--- PASS: TestAtomicReserveOwnerAndRollback (0.70s)
+=== RUN   TestExecutionStrictCurrentGatewayRPCRejected
+    execution_legacy_candidate_test.go:125: gateway_v2_rpc=failed_precondition bills=0 events=0 balance=1000 ledger=1000
+--- PASS: TestExecutionStrictCurrentGatewayRPCRejected (0.45s)
+=== RUN   TestExecutionStrictRejectsLegacyBeforeReserve
+    execution_legacy_candidate_test.go:170: legacy_rejected=true bills=0 events=0 balance=1000 ledger=1000
+--- PASS: TestExecutionStrictRejectsLegacyBeforeReserve (0.42s)
+=== RUN   TestExecutionReconcilerWithLeaseAndForwarding
+    execution_reconciler_integration_test.go:153: first_scanned=2 first_reversed=1 second_scanned=1 second_reversed=0 late_usage_settled=true balance=460 ledger=460 events=5
+--- PASS: TestExecutionReconcilerWithLeaseAndForwarding (0.56s)
+=== RUN   TestExecutionUsageCommittedAfterScan
+    execution_usage_after_scan_test.go:127: first_scanned=1 reversed=0 next_settled=1 balance=960 ledger=960 events=3
+--- PASS: TestExecutionUsageCommittedAfterScan (0.46s)
+=== RUN   TestExperimentalSubscriptionIntentQuota
+    experimental_subscription_intent_test.go:197: quota=300 concurrent=8 reserve=3 rejected=5 settled=3 balance=100000 ledger=100000
+--- PASS: TestExperimentalSubscriptionIntentQuota (0.82s)
+=== RUN   TestAtomicReserveOwnerAndRollback
+    execution_atomic_reserve_test.go:144: injected=1 rollback_bills=0 rollback_events=0 retry_state=reserved lease_live=true balance=460 ledger=460 events=3
+--- PASS: TestAtomicReserveOwnerAndRollback (0.50s)
+=== RUN   TestExecutionStrictCurrentGatewayRPCRejected
+    execution_legacy_candidate_test.go:125: gateway_v2_rpc=failed_precondition bills=0 events=0 balance=1000 ledger=1000
+--- PASS: TestExecutionStrictCurrentGatewayRPCRejected (0.73s)
+=== RUN   TestExecutionStrictRejectsLegacyBeforeReserve
+    execution_legacy_candidate_test.go:170: legacy_rejected=true bills=0 events=0 balance=1000 ledger=1000
+--- PASS: TestExecutionStrictRejectsLegacyBeforeReserve (0.33s)
+=== RUN   TestExecutionReconcilerWithLeaseAndForwarding
+    execution_reconciler_integration_test.go:153: first_scanned=2 first_reversed=1 second_scanned=1 second_reversed=0 late_usage_settled=true balance=460 ledger=460 events=5
+--- PASS: TestExecutionReconcilerWithLeaseAndForwarding (0.51s)
+=== RUN   TestExecutionUsageCommittedAfterScan
+    execution_usage_after_scan_test.go:127: first_scanned=1 reversed=0 next_settled=1 balance=960 ledger=960 events=3
+--- PASS: TestExecutionUsageCommittedAfterScan (0.58s)
+=== RUN   TestExperimentalSubscriptionIntentQuota
+    experimental_subscription_intent_test.go:197: quota=300 concurrent=8 reserve=3 rejected=5 settled=3 balance=100000 ledger=100000
+--- PASS: TestExperimentalSubscriptionIntentQuota (0.75s)
+=== RUN   TestAtomicReserveOwnerAndRollback
+    execution_atomic_reserve_test.go:144: injected=1 rollback_bills=0 rollback_events=0 retry_state=reserved lease_live=true balance=460 ledger=460 events=3
+--- PASS: TestAtomicReserveOwnerAndRollback (0.48s)
+=== RUN   TestExecutionStrictCurrentGatewayRPCRejected
+    execution_legacy_candidate_test.go:125: gateway_v2_rpc=failed_precondition bills=0 events=0 balance=1000 ledger=1000
+--- PASS: TestExecutionStrictCurrentGatewayRPCRejected (0.32s)
+=== RUN   TestExecutionStrictRejectsLegacyBeforeReserve
+    execution_legacy_candidate_test.go:170: legacy_rejected=true bills=0 events=0 balance=1000 ledger=1000
+--- PASS: TestExecutionStrictRejectsLegacyBeforeReserve (0.40s)
+=== RUN   TestExecutionReconcilerWithLeaseAndForwarding
+    execution_reconciler_integration_test.go:153: first_scanned=2 first_reversed=1 second_scanned=1 second_reversed=0 late_usage_settled=true balance=460 ledger=460 events=5
+--- PASS: TestExecutionReconcilerWithLeaseAndForwarding (0.50s)
+=== RUN   TestExecutionUsageCommittedAfterScan
+    execution_usage_after_scan_test.go:127: first_scanned=1 reversed=0 next_settled=1 balance=960 ledger=960 events=3
+--- PASS: TestExecutionUsageCommittedAfterScan (0.46s)
+=== RUN   TestExperimentalSubscriptionIntentQuota
+    experimental_subscription_intent_test.go:197: quota=300 concurrent=8 reserve=3 rejected=5 settled=3 balance=100000 ledger=100000
+--- PASS: TestExperimentalSubscriptionIntentQuota (0.70s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	12.439s

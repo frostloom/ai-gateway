@@ -1,0 +1,9 @@
+# github.com/frostloom/ai-gateway/internal/billing/outbox.test
+ld: warning: '/private/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-3572113565/000013.o' has malformed LC_DYSYMTAB, expected 98 undefined symbols to start at index 1626, found 95 undefined symbols starting at index 1626
+time=2026-11-05T03:23:28.892+08:00 level=ERROR msg="mark dlq" id=2 err="dlq marker unavailable"
+time=2026-11-05T03:23:28.892+08:00 level=ERROR msg="mark sent" id=1 err="sent marker unavailable"
+--- FAIL: TestFlushOnceReportsMarkErrorsSeparately (0.00s)
+    relay_test.go:125: published counts and marker errors: {"polled":2,"sent":1,"failed":1,"dlqed":1,"last_run_at":"2026-11-05T03:23:28.89299+08:00"}
+FAIL
+FAIL	github.com/frostloom/ai-gateway/internal/billing/outbox	0.897s
+FAIL

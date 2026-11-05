@@ -1,0 +1,29 @@
+head=63b9d1ed4d64bb583d15fa884c37468e5c53044c
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestTerminalCommitAcknowledgementLoss
+=== RUN   TestTerminalCommitAcknowledgementLoss/settle
+    terminal_commit_ack_loss_test.go:111: mode=settle committed=true reported=unavailable balance=460 ledger=460 replay_events=1
+=== RUN   TestTerminalCommitAcknowledgementLoss/reverse
+    terminal_commit_ack_loss_test.go:111: mode=reverse committed=true reported=unavailable balance=500 ledger=500 replay_events=1
+--- PASS: TestTerminalCommitAcknowledgementLoss (0.69s)
+    --- PASS: TestTerminalCommitAcknowledgementLoss/settle (0.17s)
+    --- PASS: TestTerminalCommitAcknowledgementLoss/reverse (0.09s)
+=== RUN   TestTerminalCommitAcknowledgementLoss
+=== RUN   TestTerminalCommitAcknowledgementLoss/settle
+    terminal_commit_ack_loss_test.go:111: mode=settle committed=true reported=unavailable balance=460 ledger=460 replay_events=1
+=== RUN   TestTerminalCommitAcknowledgementLoss/reverse
+    terminal_commit_ack_loss_test.go:111: mode=reverse committed=true reported=unavailable balance=500 ledger=500 replay_events=1
+--- PASS: TestTerminalCommitAcknowledgementLoss (0.60s)
+    --- PASS: TestTerminalCommitAcknowledgementLoss/settle (0.09s)
+    --- PASS: TestTerminalCommitAcknowledgementLoss/reverse (0.08s)
+=== RUN   TestTerminalCommitAcknowledgementLoss
+=== RUN   TestTerminalCommitAcknowledgementLoss/settle
+    terminal_commit_ack_loss_test.go:111: mode=settle committed=true reported=unavailable balance=460 ledger=460 replay_events=1
+=== RUN   TestTerminalCommitAcknowledgementLoss/reverse
+    terminal_commit_ack_loss_test.go:111: mode=reverse committed=true reported=unavailable balance=500 ledger=500 replay_events=1
+--- PASS: TestTerminalCommitAcknowledgementLoss (0.74s)
+    --- PASS: TestTerminalCommitAcknowledgementLoss/settle (0.12s)
+    --- PASS: TestTerminalCommitAcknowledgementLoss/reverse (0.09s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	3.937s

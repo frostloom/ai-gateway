@@ -1,0 +1,16 @@
+head=63b9d1ed4d64bb583d15fa884c37468e5c53044c
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+current_source_sha256=be5ced15d64432b55979cf62b24e005c89ca340c509a01020d94f63147eaa6c9
+current_candidate_sha256=8117267a7d4ce933fe11959622d4159eca30ae8c637652d08cadd435a22dda14
+=== RUN   TestExecutionUsageCommittedAfterScan
+    execution_usage_after_scan_test.go:127: first_scanned=1 reversed=0 next_settled=1 balance=960 ledger=960 events=3
+--- PASS: TestExecutionUsageCommittedAfterScan (0.56s)
+=== RUN   TestExecutionUsageCommittedAfterScan
+    execution_usage_after_scan_test.go:127: first_scanned=1 reversed=0 next_settled=1 balance=960 ledger=960 events=3
+--- PASS: TestExecutionUsageCommittedAfterScan (0.48s)
+=== RUN   TestExecutionUsageCommittedAfterScan
+    execution_usage_after_scan_test.go:127: first_scanned=1 reversed=0 next_settled=1 balance=960 ledger=960 events=3
+--- PASS: TestExecutionUsageCommittedAfterScan (0.41s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	3.996s

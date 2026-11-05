@@ -1,0 +1,17 @@
+head=42d8ef8e5ca2471b18800e50f8e7a57fbcfdd47f
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestUsageLostReplyStormReconcilerRecovery
+    usage_retry_storm_recovery_test.go:159: STORM mode= workers=128 tenants=16 elapsed_ms=1317 p95_ms=1277 p99_ms=1287 http=map[200:128] report_calls=map[1:128] settled=0 pending=128 missing=0 usage_events=128
+    usage_retry_storm_recovery_test.go:212: RECOVERY first={Scanned:128 Reversed:0 Settled:128 Rebuilt:0 Held:0 SweepAttempted:false SweepError:false SettleErrors:0 ReverseErrors:0 RebuildAttempted:false RebuildError:false RebuildErrors:0} second={Scanned:0 Reversed:0 Settled:0 Rebuilt:0 Held:0 SweepAttempted:false SweepError:false SettleErrors:0 ReverseErrors:0 RebuildAttempted:false RebuildError:false RebuildErrors:0} elapsed_ms=2769 128 settled, 16 balances=952
+--- PASS: TestUsageLostReplyStormReconcilerRecovery (5.95s)
+=== RUN   TestUsageLostReplyStormReconcilerRecovery
+    usage_retry_storm_recovery_test.go:159: STORM mode= workers=128 tenants=16 elapsed_ms=623 p95_ms=596 p99_ms=600 http=map[200:128] report_calls=map[1:128] settled=0 pending=128 missing=0 usage_events=128
+    usage_retry_storm_recovery_test.go:212: RECOVERY first={Scanned:128 Reversed:0 Settled:128 Rebuilt:0 Held:0 SweepAttempted:false SweepError:false SettleErrors:0 ReverseErrors:0 RebuildAttempted:false RebuildError:false RebuildErrors:0} second={Scanned:0 Reversed:0 Settled:0 Rebuilt:0 Held:0 SweepAttempted:false SweepError:false SettleErrors:0 ReverseErrors:0 RebuildAttempted:false RebuildError:false RebuildErrors:0} elapsed_ms=2840 128 settled, 16 balances=952
+--- PASS: TestUsageLostReplyStormReconcilerRecovery (5.52s)
+=== RUN   TestUsageLostReplyStormReconcilerRecovery
+    usage_retry_storm_recovery_test.go:159: STORM mode= workers=128 tenants=16 elapsed_ms=812 p95_ms=735 p99_ms=790 http=map[200:128] report_calls=map[1:128] settled=0 pending=128 missing=0 usage_events=128
+    usage_retry_storm_recovery_test.go:212: RECOVERY first={Scanned:128 Reversed:0 Settled:128 Rebuilt:0 Held:0 SweepAttempted:false SweepError:false SettleErrors:0 ReverseErrors:0 RebuildAttempted:false RebuildError:false RebuildErrors:0} second={Scanned:0 Reversed:0 Settled:0 Rebuilt:0 Held:0 SweepAttempted:false SweepError:false SettleErrors:0 ReverseErrors:0 RebuildAttempted:false RebuildError:false RebuildErrors:0} elapsed_ms=2733 128 settled, 16 balances=952
+--- PASS: TestUsageLostReplyStormReconcilerRecovery (5.42s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	19.069s

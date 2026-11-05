@@ -1,0 +1,130 @@
+package store
+
+import (
+	"context"
+	"crypto/rand"
+	"database/sql"
+	"fmt"
+	"sync"
+	"time"
+
+	redis "github.com/redis/go-redis/v9"
+	"gorm.io/gorm"
+)
+
+// One pinned session owns both the tenant lock and any nested request lock.
+// Its Redis token fences delayed workers after MySQL releases a lost session.
+type cashSession struct {
+	tenant                uint64
+	conn                  *sql.Conn
+	root                  *gorm.DB
+	token                 string
+	release               func()
+	caller                context.Context
+	allowDisabledTerminal bool // settle/reverse existing bills, never fresh spending
+}
+
+func cashFenceKey(tenant uint64) string { return fmt.Sprintf("billing:cash-owner:%d", tenant) }
+func cashDirtyKey(tenant uint64) string { return fmt.Sprintf("billing:cash-dirty:%d", tenant) }
+
+func (s *Store) lockCash(ctx context.Context, tenant uint64) (*Store, func(), error) {
+	if s.cash != nil {
+		if s.cash.tenant != tenant {
+			return nil, nil, fmt.Errorf("cash lock tenant mismatch")
+		}
+		return s, func() {}, nil
+	}
+	if err := ctx.Err(); err != nil {
+		return nil, nil, err
+	}
+	name := fmt.Sprintf("billing:cash:%d", tenant)
+	conn, unlock, err := s.lockNamed(ctx, name)
+	if err != nil {
+		return nil, nil, err
+	}
+	sqlctx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 15*time.Second)
+	locked := *s
+	verified := false
+	var once sync.Once
+	release := func() { once.Do(func() {
+		if verified {
+			// A failed rebuild must leave dirty set; a stale owner must not clear it.
+			if _, err := locked.rebuildCash(sqlctx, tenant, "", ""); err == nil {
+				_ = s.rdb.Eval(sqlctx, `if redis.call('GET',KEYS[1]) == ARGV[1] and redis.call('GET',KEYS[2]) == ARGV[1] then return redis.call('DEL',KEYS[2]) end return 0`, []string{cashFenceKey(tenant), cashDirtyKey(tenant)}, locked.cash.token).Err()
+			}
+		}
+		unlock(); cancel()
+	}) }
+	locked.db = s.db.Session(&gorm.Session{NewDB: true}).WithContext(sqlctx)
+	locked.db.Statement.ConnPool = conn
+	locked.cash = &cashSession{tenant: tenant, conn: conn, root: s.db, token: rand.Text(), release: release, caller: ctx}
+	// Publish BEFORE verifying the SQL session. A delayed acquirer that lost
+	// its session may invalidate another worker, but can never write balances.
+	if err := s.rdb.Eval(ctx, `redis.call("SET",KEYS[1],ARGV[1]); redis.call("SET",KEYS[2],ARGV[1]); return 1`, []string{cashFenceKey(tenant), cashDirtyKey(tenant)}, locked.cash.token).Err(); err != nil {
+		release()
+		return nil, nil, err
+	}
+	var owns bool
+	if err := conn.QueryRowContext(sqlctx, "SELECT IS_USED_LOCK(?) = CONNECTION_ID()", name).Scan(&owns); err != nil || !owns {
+		release()
+		if err == nil {
+			err = fmt.Errorf("cash session no longer owns tenant lock")
+		}
+		return nil, nil, err
+	}
+	verified = true
+	return &locked, release, nil
+}
+
+func (s *Store) cashSQLContext() context.Context { return s.db.Statement.Context }
+
+// Cancellation may stop a new financial operation. Once Redis/SQL writes
+// begin, the bounded detached SQL context lets it finish or recover safely.
+func (s *Store) cashMutationAllowed() error { return s.cash.caller.Err() }
+
+func (s *Store) runCashLua(ctx context.Context, source string, keys []string, args ...any) (any, error) {
+	if s.cash != nil {
+		source = `if redis.call('GET', KEYS[#KEYS]) ~= ARGV[#ARGV] then return redis.error_reply('stale cash owner') end
+` + source
+		keys = append(keys, cashFenceKey(s.cash.tenant))
+		args = append(args, s.cash.token)
+	}
+	return redis.NewScript(source).Run(ctx, s.rdb, keys, args...).Result()
+}
+
+// Optional guard cleanup and absolute projection repair are one Redis action.
+// Never add a refund after a lock handoff: a rebuild may already have restored it.
+func (s *Store) rebuildCash(ctx context.Context, tenant uint64, guard, owner string) (int64, error) {
+	var row Tenant
+	if err := s.db.WithContext(ctx).First(&row, tenant).Error; err != nil {
+		return 0, err
+	}
+	if row.Status != 0 && (s.cash == nil || !s.cash.allowDisabledTerminal) {
+		return 0, fmt.Errorf("tenant disabled: %d", tenant)
+	}
+	bal, err := LedgerBalance(ctx, s.db, tenant)
+	if err != nil {
+		return 0, err
+	}
+	_, err = s.runCashLua(ctx, `
+if ARGV[2] ~= '' then
+  local current = redis.call('GET', KEYS[2])
+  if current and current ~= ARGV[2] then return redis.error_reply('cash guard owner changed') end
+  redis.call('DEL', KEYS[2])
+end
+redis.call('SET', KEYS[1], ARGV[1])
+return 1`, []string{BalanceKey(tenant), guard}, bal, owner)
+	return bal, err
+}
+
+func (s *Store) repairOrphanGuard(ctx context.Context, tenant uint64, key string) error {
+	owner, err := s.rdb.Get(ctx, key).Result()
+	if err == redis.Nil {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	_, err = s.rebuildCash(ctx, tenant, key, owner)
+	return err
+}

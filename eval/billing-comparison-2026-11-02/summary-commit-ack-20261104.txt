@@ -1,0 +1,74 @@
+head=63b9d1ed4d64bb583d15fa884c37468e5c53044c
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestIsolatedSummaryCommitAckLoss
+=== RUN   TestIsolatedSummaryCommitAckLoss/reserve
+    summary_commit_ack_test.go:47: mode=reserve commit succeeded then injected=injected commit acknowledgement loss; retry preserved summary=ledger=400 and one event or topup
+=== RUN   TestIsolatedSummaryCommitAckLoss/usage
+    summary_commit_ack_test.go:47: mode=usage commit succeeded then injected=injected commit acknowledgement loss; retry preserved summary=ledger=400 and one event or topup
+=== RUN   TestIsolatedSummaryCommitAckLoss/settle
+    summary_commit_ack_test.go:47: mode=settle commit succeeded then injected=injected commit acknowledgement loss; retry preserved summary=ledger=460 and one event or topup
+=== RUN   TestIsolatedSummaryCommitAckLoss/reverse
+    summary_commit_ack_test.go:47: mode=reverse commit succeeded then injected=injected commit acknowledgement loss; retry preserved summary=ledger=500 and one event or topup
+=== RUN   TestIsolatedSummaryCommitAckLoss/pay
+    summary_commit_ack_test.go:47: mode=pay commit succeeded then injected=injected commit acknowledgement loss; retry preserved summary=ledger=600 and one event or topup
+=== RUN   TestIsolatedSummaryCommitAckLoss/refund_order
+    summary_commit_ack_test.go:47: mode=refund_order commit succeeded then injected=injected commit acknowledgement loss; retry preserved summary=ledger=500 and one event or topup
+=== RUN   TestIsolatedSummaryCommitAckLoss/refund_amount
+    summary_commit_ack_test.go:47: mode=refund_amount commit succeeded then injected=injected commit acknowledgement loss; retry preserved summary=ledger=300 and one event or topup
+--- PASS: TestIsolatedSummaryCommitAckLoss (0.92s)
+    --- PASS: TestIsolatedSummaryCommitAckLoss/reserve (0.06s)
+    --- PASS: TestIsolatedSummaryCommitAckLoss/usage (0.05s)
+    --- PASS: TestIsolatedSummaryCommitAckLoss/settle (0.10s)
+    --- PASS: TestIsolatedSummaryCommitAckLoss/reverse (0.06s)
+    --- PASS: TestIsolatedSummaryCommitAckLoss/pay (0.05s)
+    --- PASS: TestIsolatedSummaryCommitAckLoss/refund_order (0.06s)
+    --- PASS: TestIsolatedSummaryCommitAckLoss/refund_amount (0.04s)
+=== RUN   TestIsolatedSummaryCommitAckLoss
+=== RUN   TestIsolatedSummaryCommitAckLoss/reserve
+    summary_commit_ack_test.go:47: mode=reserve commit succeeded then injected=injected commit acknowledgement loss; retry preserved summary=ledger=400 and one event or topup
+=== RUN   TestIsolatedSummaryCommitAckLoss/usage
+    summary_commit_ack_test.go:47: mode=usage commit succeeded then injected=injected commit acknowledgement loss; retry preserved summary=ledger=400 and one event or topup
+=== RUN   TestIsolatedSummaryCommitAckLoss/settle
+    summary_commit_ack_test.go:47: mode=settle commit succeeded then injected=injected commit acknowledgement loss; retry preserved summary=ledger=460 and one event or topup
+=== RUN   TestIsolatedSummaryCommitAckLoss/reverse
+    summary_commit_ack_test.go:47: mode=reverse commit succeeded then injected=injected commit acknowledgement loss; retry preserved summary=ledger=500 and one event or topup
+=== RUN   TestIsolatedSummaryCommitAckLoss/pay
+    summary_commit_ack_test.go:47: mode=pay commit succeeded then injected=injected commit acknowledgement loss; retry preserved summary=ledger=600 and one event or topup
+=== RUN   TestIsolatedSummaryCommitAckLoss/refund_order
+    summary_commit_ack_test.go:47: mode=refund_order commit succeeded then injected=injected commit acknowledgement loss; retry preserved summary=ledger=500 and one event or topup
+=== RUN   TestIsolatedSummaryCommitAckLoss/refund_amount
+    summary_commit_ack_test.go:47: mode=refund_amount commit succeeded then injected=injected commit acknowledgement loss; retry preserved summary=ledger=300 and one event or topup
+--- PASS: TestIsolatedSummaryCommitAckLoss (1.03s)
+    --- PASS: TestIsolatedSummaryCommitAckLoss/reserve (0.04s)
+    --- PASS: TestIsolatedSummaryCommitAckLoss/usage (0.05s)
+    --- PASS: TestIsolatedSummaryCommitAckLoss/settle (0.08s)
+    --- PASS: TestIsolatedSummaryCommitAckLoss/reverse (0.07s)
+    --- PASS: TestIsolatedSummaryCommitAckLoss/pay (0.09s)
+    --- PASS: TestIsolatedSummaryCommitAckLoss/refund_order (0.06s)
+    --- PASS: TestIsolatedSummaryCommitAckLoss/refund_amount (0.04s)
+=== RUN   TestIsolatedSummaryCommitAckLoss
+=== RUN   TestIsolatedSummaryCommitAckLoss/reserve
+    summary_commit_ack_test.go:47: mode=reserve commit succeeded then injected=injected commit acknowledgement loss; retry preserved summary=ledger=400 and one event or topup
+=== RUN   TestIsolatedSummaryCommitAckLoss/usage
+    summary_commit_ack_test.go:47: mode=usage commit succeeded then injected=injected commit acknowledgement loss; retry preserved summary=ledger=400 and one event or topup
+=== RUN   TestIsolatedSummaryCommitAckLoss/settle
+    summary_commit_ack_test.go:47: mode=settle commit succeeded then injected=injected commit acknowledgement loss; retry preserved summary=ledger=460 and one event or topup
+=== RUN   TestIsolatedSummaryCommitAckLoss/reverse
+    summary_commit_ack_test.go:47: mode=reverse commit succeeded then injected=injected commit acknowledgement loss; retry preserved summary=ledger=500 and one event or topup
+=== RUN   TestIsolatedSummaryCommitAckLoss/pay
+    summary_commit_ack_test.go:47: mode=pay commit succeeded then injected=injected commit acknowledgement loss; retry preserved summary=ledger=600 and one event or topup
+=== RUN   TestIsolatedSummaryCommitAckLoss/refund_order
+    summary_commit_ack_test.go:47: mode=refund_order commit succeeded then injected=injected commit acknowledgement loss; retry preserved summary=ledger=500 and one event or topup
+=== RUN   TestIsolatedSummaryCommitAckLoss/refund_amount
+    summary_commit_ack_test.go:47: mode=refund_amount commit succeeded then injected=injected commit acknowledgement loss; retry preserved summary=ledger=300 and one event or topup
+--- PASS: TestIsolatedSummaryCommitAckLoss (0.89s)
+    --- PASS: TestIsolatedSummaryCommitAckLoss/reserve (0.05s)
+    --- PASS: TestIsolatedSummaryCommitAckLoss/usage (0.05s)
+    --- PASS: TestIsolatedSummaryCommitAckLoss/settle (0.07s)
+    --- PASS: TestIsolatedSummaryCommitAckLoss/reverse (0.05s)
+    --- PASS: TestIsolatedSummaryCommitAckLoss/pay (0.05s)
+    --- PASS: TestIsolatedSummaryCommitAckLoss/refund_order (0.04s)
+    --- PASS: TestIsolatedSummaryCommitAckLoss/refund_amount (0.03s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	5.329s

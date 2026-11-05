@@ -13,6 +13,8 @@ import (
 	"bufio"
 	"bytes"
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"io"
 	"log/slog"
@@ -25,6 +27,8 @@ import (
 	"google.golang.org/grpc/status"
 
 	"github.com/frostloom/ai-gateway/internal/gateway/client"
+	"github.com/frostloom/ai-gateway/internal/pkg/controlplane"
+	"github.com/frostloom/ai-gateway/internal/pkg/metrics"
 	"github.com/frostloom/ai-gateway/internal/pkg/tokens"
 	billingv1 "github.com/frostloom/ai-gateway/internal/proto/billing/v1"
 )
@@ -80,7 +84,9 @@ var (
 )
 
 // Chat 编排入口：鉴权/限流/幂等已在中间件完成，这里只负责「路由→预占→转发→收尾」。
-func Chat(b billingAPI, r routingAPI, log *slog.Logger, upstreamTimeout time.Duration) gin.HandlerFunc {
+// Omitted holdUnknown defaults to retaining bills when the upstream outcome is unknown.
+func Chat(b billingAPI, r routingAPI, log *slog.Logger, upstreamTimeout time.Duration, holdUnknown ...bool) gin.HandlerFunc {
+	conservative := len(holdUnknown) == 0 || holdUnknown[0]
 	return func(c *gin.Context) {
 		var req chatRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
@@ -110,6 +116,14 @@ func Chat(b billingAPI, r routingAPI, log *slog.Logger, upstreamTimeout time.Dur
 
 		// 2) 预占：先扣后用，防超卖/防白嫖
 		rc, cancel := context.WithTimeout(c.Request.Context(), 3*time.Second)
+		canonicalRequest, err := json.Marshal(&req)
+		if err != nil {
+			cancel()
+			abort(c, http.StatusBadRequest, "invalid request body")
+			return
+		}
+		requestDigest := sha256.Sum256(canonicalRequest)
+		rc = controlplane.WithReserveContent(rc, hex.EncodeToString(requestDigest[:]))
 		rr, err := b.Reserve(rc, &billingv1.ReserveRequest{
 			RequestId:           requestID,
 			TenantId:            tenantID,
@@ -122,10 +136,18 @@ func Chat(b billingAPI, r routingAPI, log *slog.Logger, upstreamTimeout time.Dur
 		cancel()
 		if err != nil {
 			// 目录里没有/下架的模型 → billing 返回 InvalidArgument，映射为 400「模型未上架/已下架」
+			if status.Code(err) == codes.FailedPrecondition {
+				abort(c, http.StatusConflict, "billing request id conflict")
+				return
+			}
 			if status.Code(err) == codes.InvalidArgument {
 				abort(c, http.StatusBadRequest, "model not listed or disabled: "+req.Model)
 				return
 			}
+			abort(c, http.StatusServiceUnavailable, "billing unavailable")
+			return
+		}
+		if rr == nil {
 			abort(c, http.StatusServiceUnavailable, "billing unavailable")
 			return
 		}
@@ -137,15 +159,23 @@ func Chat(b billingAPI, r routingAPI, log *slog.Logger, upstreamTimeout time.Dur
 			abort(c, http.StatusPaymentRequired, "订阅额度不足，每 N 小时滚动刷新")
 			return
 		}
+		if rr.Code == billingv1.ReserveCode_RESERVE_DUPLICATE {
+			abort(c, http.StatusConflict, "billing request already reserved")
+			return
+		}
+		if rr.Code != billingv1.ReserveCode_RESERVE_OK || rr.BillId <= 0 {
+			abort(c, http.StatusServiceUnavailable, "billing unavailable")
+			return
+		}
 		billID := rr.BillId
 		log.Info("reserved", "request_id", requestID, "tenant_id", tenantID, "model", req.Model,
 			"provider", prov.Name, "stream", req.Stream, "est_prompt", estPrompt, "balance_after", rr.BalanceAfter)
 
 		if req.Stream {
-			relayStream(c, b, r, log, prov, &req, requestID, billID, estPrompt)
+			relayStream(c, b, r, log, prov, &req, requestID, billID, estPrompt, conservative)
 			return
 		}
-		forwardNonStream(c, b, r, log, prov, &req, requestID, billID, estPrompt, upstreamTimeout)
+		forwardNonStream(c, b, r, log, prov, &req, requestID, billID, estPrompt, upstreamTimeout, conservative)
 	}
 }
 
@@ -155,7 +185,14 @@ func Chat(b billingAPI, r routingAPI, log *slog.Logger, upstreamTimeout time.Dur
 // 只在「首个字节前失败」重试：建连失败 / 5xx。此时客户端还没收到任何响应，
 // 重试另一个 provider 不会双扣（Reserve 是 per-request 幂等的）。4xx 是业务拒绝
 // （provider 正常，只是拒绝请求），不重试，直接透传退款。流中途失败绝不重试（M3 规则）。
-func forwardNonStream(c *gin.Context, b billingAPI, r routingAPI, log *slog.Logger, prov *client.RouteResult, req *chatRequest, requestID string, billID int64, estPrompt int64, _ time.Duration) {
+func forwardNonStream(c *gin.Context, b billingAPI, r routingAPI, log *slog.Logger, prov *client.RouteResult, req *chatRequest, requestID string, billID int64, estPrompt int64, upstreamTimeout time.Duration, holdUnknown ...bool) {
+	conservative := len(holdUnknown) > 0 && holdUnknown[0]
+	requestCtx := c.Request.Context()
+	if upstreamTimeout > 0 {
+		var cancel context.CancelFunc
+		requestCtx, cancel = context.WithTimeout(requestCtx, upstreamTimeout)
+		defer cancel()
+	}
 	// tried：本请求已尝试失败的 provider。failover 必须换一个节点——排除后重路由，
 	// 避免加权随机再次选中同一个坏 provider（第一次试就失败，说明它此刻就是坏的）。
 	tried := map[uint64]bool{}
@@ -171,7 +208,7 @@ func forwardNonStream(c *gin.Context, b billingAPI, r routingAPI, log *slog.Logg
 
 	for attempt := 0; attempt < 3; attempt++ {
 		upstreamBody, _ := json.Marshal(req)
-		uReq, err := http.NewRequestWithContext(c.Request.Context(), http.MethodPost,
+		uReq, err := http.NewRequestWithContext(requestCtx, http.MethodPost,
 			prov.BaseURL+"/v1/chat/completions", bytes.NewReader(upstreamBody))
 		if err != nil {
 			reverseWithBackground(b, log, requestID, billID, "build upstream request failed")
@@ -182,6 +219,12 @@ func forwardNonStream(c *gin.Context, b billingAPI, r routingAPI, log *slog.Logg
 
 		upResp, err := upstreamClient.Do(uReq)
 		if err != nil {
+			if conservative {
+				r.Report(c.Request.Context(), prov.ProviderID, false)
+				log.Warn("upstream outcome unknown; bill left pending", "request_id", requestID, "err", err)
+				abort(c, http.StatusBadGateway, "upstream outcome unknown")
+				return
+			}
 			// 建连失败：provider 故障 → 上报 + 换下一个
 			log.Warn("upstream dial failed, failover", "provider", prov.Name, "attempt", attempt+1, "err", err)
 			if failover(prov.ProviderID) {
@@ -189,8 +232,24 @@ func forwardNonStream(c *gin.Context, b billingAPI, r routingAPI, log *slog.Logg
 			}
 			break
 		}
-		body, _ := io.ReadAll(upResp.Body)
+		// Conservative mode does not forward error bodies. Close immediately so
+		// an upstream that never finishes its error response cannot hold a request.
+		if conservative && upResp.StatusCode/100 != 2 {
+			upResp.Body.Close()
+			r.Report(c.Request.Context(), prov.ProviderID, upResp.StatusCode < 500)
+			log.Warn("upstream rejected request; bill left pending", "request_id", requestID, "status", upResp.StatusCode)
+			abort(c, http.StatusBadGateway, "upstream outcome unknown")
+			return
+		}
+		body, readErr := io.ReadAll(upResp.Body)
 		upResp.Body.Close()
+		if readErr != nil {
+			// The upstream may have executed the request. Do not treat an
+			// incomplete response as usage, retry it, or refund it here.
+			log.Error("upstream response incomplete", "request_id", requestID, "err", readErr)
+			abort(c, http.StatusBadGateway, "upstream response incomplete")
+			return
+		}
 		if upResp.StatusCode/100 != 2 {
 			if upResp.StatusCode >= 500 {
 				// provider 故障（5xx）→ 上报 + failover
@@ -207,11 +266,36 @@ func forwardNonStream(c *gin.Context, b billingAPI, r routingAPI, log *slog.Logg
 			return
 		}
 
+		// A complete transfer is not necessarily a valid provider response.
+		// Keep the bill pending when the response cannot supply reliable usage.
+		var pr *providerChatResponse
+		if err := json.Unmarshal(body, &pr); err != nil || pr == nil ||
+			(pr.Usage != nil && (pr.Usage.PromptTokens < 0 || pr.Usage.CompletionTokens < 0)) {
+			log.Error("upstream response invalid", "request_id", requestID)
+			abort(c, http.StatusBadGateway, "upstream response invalid")
+			return
+		}
+		if pr.Usage != nil {
+			var presence struct {
+				Usage *struct {
+					PromptTokens     *int `json:"prompt_tokens"`
+					CompletionTokens *int `json:"completion_tokens"`
+				} `json:"usage"`
+			}
+			if err := json.Unmarshal(body, &presence); err != nil || presence.Usage == nil || presence.Usage.PromptTokens == nil || presence.Usage.CompletionTokens == nil {
+				log.Error("upstream usage incomplete", "request_id", requestID)
+				abort(c, http.StatusBadGateway, "upstream response invalid")
+				return
+			}
+		}
 		// 成功：上报健康 + 按实际结算
 		r.Report(c.Request.Context(), prov.ProviderID, true)
+		if conservative && pr.Usage == nil {
+			log.Warn("upstream response lacks usage; bill left pending", "request_id", requestID)
+			c.Data(http.StatusOK, "application/json", body)
+			return
+		}
 		prompt, completion := estPrompt, int64(0)
-		var pr providerChatResponse
-		_ = json.Unmarshal(body, &pr)
 		if pr.Usage != nil {
 			prompt = int64(pr.Usage.PromptTokens)
 			completion = int64(pr.Usage.CompletionTokens)
@@ -239,7 +323,8 @@ func forwardNonStream(c *gin.Context, b billingAPI, r routingAPI, log *slog.Logg
 //   - 已经转发过正文但没有 usage（客户端断连或上游提前结束）→ 用已转发文本估算 token 并结算，
 //     避免对账把已经交付的内容全额退掉；
 //   - 一个正文都没转发 → 保持 pending，交给对账。
-func relayStream(c *gin.Context, b billingAPI, r routingAPI, log *slog.Logger, prov *client.RouteResult, req *chatRequest, requestID string, billID int64, estPrompt int64) {
+func relayStream(c *gin.Context, b billingAPI, r routingAPI, log *slog.Logger, prov *client.RouteResult, req *chatRequest, requestID string, billID int64, estPrompt int64, holdUnknown ...bool) {
+	conservative := len(holdUnknown) > 0 && holdUnknown[0]
 	tried := map[uint64]bool{}
 	failover := func(providerID uint64) bool {
 		tried[providerID] = true
@@ -265,11 +350,24 @@ func relayStream(c *gin.Context, b billingAPI, r routingAPI, log *slog.Logger, p
 
 		resp, err := streamClient.Do(uReq)
 		if err != nil {
+			if conservative {
+				r.Report(c.Request.Context(), prov.ProviderID, false)
+				log.Warn("upstream stream outcome unknown; bill left pending", "request_id", requestID, "err", err)
+				abort(c, http.StatusBadGateway, "upstream outcome unknown")
+				return
+			}
 			log.Warn("upstream dial failed, failover", "provider", prov.Name, "attempt", attempt+1, "err", err)
 			if failover(prov.ProviderID) {
 				continue
 			}
 			break
+		}
+		if conservative && resp.StatusCode/100 != 2 {
+			resp.Body.Close()
+			r.Report(c.Request.Context(), prov.ProviderID, resp.StatusCode < 500)
+			log.Warn("upstream stream rejected request; bill left pending", "request_id", requestID, "status", resp.StatusCode)
+			abort(c, http.StatusBadGateway, "upstream outcome unknown")
+			return
 		}
 		if resp.StatusCode >= 500 {
 			// An error body may never reach EOF. Close it immediately so failover
@@ -314,38 +412,74 @@ func relayStream(c *gin.Context, b billingAPI, r routingAPI, log *slog.Logger, p
 	}
 
 	var (
-		reader    = bufio.NewReader(upResp.Body)
-		usageSeen *usage
-		doneSeen  bool
-		forwarded strings.Builder
+		reader       = bufio.NewReader(upResp.Body)
+		usageSeen    *usage
+		invalidUsage bool
+		doneSeen     bool
+		wroteAny     bool
+		sawText      bool
+		forwarded    strings.Builder
 	)
 	for {
 		line, err := reader.ReadBytes('\n')
-		if err != nil {
-			if err != io.EOF && usageSeen == nil && forwarded.Len() == 0 {
+		if err != nil && (err != io.EOF || len(line) == 0) {
+			if err != io.EOF && usageSeen == nil && !sawText {
 				log.Warn("upstream stream interrupted before content", "request_id", requestID, "err", err)
 			}
 			break
 		}
-		if _, werr := w.Write(line); werr != nil {
+		// The provider's usage is authoritative even if the client disconnects
+		// while this already-received frame is being forwarded.
+		if u, invalid := parseUsageFrameChecked(string(line)); invalid {
+			invalidUsage = true
+		} else if u != nil {
+			usageSeen = u
+		}
+		n, werr := w.Write(line)
+		wroteAny = wroteAny || n > 0
+		if werr != nil {
 			log.Warn("client disconnected mid-stream", "request_id", requestID)
 			break
 		}
 		flusher.Flush()
 		if text := streamDeltaText(string(line)); text != "" {
-			forwarded.WriteString(text)
+			sawText = true
+			// Only legacy estimate-based settlement needs the complete text.
+			if !conservative {
+				forwarded.WriteString(text)
+			}
 		}
-		if u := parseUsageFrame(string(line)); u != nil {
-			usageSeen = u
-		}
-		if strings.Contains(string(line), "[DONE]") {
+		// Only the SSE data sentinel terminates the stream; model content may
+		// legitimately contain the literal text "[DONE]".
+		trimmed := strings.TrimSpace(string(line))
+		if strings.HasPrefix(trimmed, "data:") && strings.TrimSpace(strings.TrimPrefix(trimmed, "data:")) == "[DONE]" {
 			doneSeen = true
+			break
+		}
+		if err == io.EOF {
 			break
 		}
 	}
 
+	if !wroteAny {
+		c.Header("Content-Type", "application/json; charset=utf-8")
+		abort(c, http.StatusBadGateway, "upstream stream incomplete")
+		// A failed first write does not erase a complete usage frame already
+		// received from the provider. No usage still remains unresolved.
+		if usageSeen == nil || invalidUsage {
+			return
+		}
+	}
+	if invalidUsage {
+		log.Warn("stream contained invalid usage, bill left pending", "request_id", requestID)
+		return
+	}
 	if usageSeen != nil {
 		settleAndLog(c, b, log, requestID, billID, int64(usageSeen.PromptTokens), int64(usageSeen.CompletionTokens), int64(prov.ProviderID))
+		return
+	}
+	if conservative {
+		log.Warn("stream lacks usage; bill left pending", "request_id", requestID, "done", doneSeen)
 		return
 	}
 	if text := strings.TrimSpace(forwarded.String()); text != "" {
@@ -391,27 +525,46 @@ func streamDeltaText(line string) string {
 	return b.String()
 }
 
-// parseUsageFrame 从 SSE data 行解析 usage（仅当 choices 为空 + usage 非空才返回）。
+// parseUsageFrame 从 SSE data 行解析终态 usage。
 func parseUsageFrame(line string) *usage {
+	u, _ := parseUsageFrameChecked(line)
+	return u
+}
+
+func parseUsageFrameChecked(line string) (*usage, bool) {
 	trimmed := strings.TrimSpace(line)
 	if !strings.HasPrefix(trimmed, "data:") {
-		return nil
+		return nil, false
 	}
 	payload := strings.TrimSpace(strings.TrimPrefix(trimmed, "data:"))
 	if payload == "" || payload == "[DONE]" {
-		return nil
+		return nil, false
 	}
 	var frame struct {
-		Choices []json.RawMessage `json:"choices"`
-		Usage   *usage            `json:"usage"`
+		Choices []struct {
+			FinishReason *string `json:"finish_reason"`
+		} `json:"choices"`
+		Usage json.RawMessage `json:"usage"`
 	}
 	if err := json.Unmarshal([]byte(payload), &frame); err != nil {
-		return nil
+		return nil, false
 	}
-	if len(frame.Choices) == 0 && frame.Usage != nil {
-		return frame.Usage
+	if len(frame.Usage) > 0 && string(frame.Usage) != "null" {
+		for _, choice := range frame.Choices {
+			if choice.FinishReason == nil || *choice.FinishReason == "" {
+				return nil, true
+			}
+		}
+		var value struct {
+			PromptTokens     *int `json:"prompt_tokens"`
+			CompletionTokens *int `json:"completion_tokens"`
+		}
+		if err := json.Unmarshal(frame.Usage, &value); err != nil || value.PromptTokens == nil || value.CompletionTokens == nil || *value.PromptTokens < 0 || *value.CompletionTokens < 0 {
+			return nil, true
+		}
+		return &usage{PromptTokens: *value.PromptTokens, CompletionTokens: *value.CompletionTokens}, false
 	}
-	return nil
+	return nil, false
 }
 
 // ---------- 收尾与公共 helpers ----------
@@ -429,22 +582,29 @@ func triedSlice(tried map[uint64]bool) []uint64 {
 func settleAndLog(c *gin.Context, b billingAPI, log *slog.Logger, requestID string, billID, prompt, completion, providerID int64) {
 	settleCtx, settleCancel := client.BackgroundCtx(10 * time.Second)
 	defer settleCancel()
-	_, errU := b.ReportUsage(settleCtx, &billingv1.ReportUsageRequest{
+	stageStart := time.Now()
+	usageResp, errU := b.ReportUsage(settleCtx, &billingv1.ReportUsageRequest{
 		RequestId: requestID, BillId: billID, PromptTokens: prompt, CompletionTokens: completion,
 		ProviderId: providerID,
 	})
-	if errU != nil {
-		// Settle must only consume durably recorded usage and provider attribution.
-		log.Error("usage report failed, bill left pending for reconciliation", "request_id", requestID, "err_report", errU)
+	metrics.BillingCompletionStage("usage", time.Since(stageStart))
+	if errU != nil || usageResp == nil || !usageResp.Accepted {
+		// Settle must only consume acknowledged usage and provider attribution.
+		metrics.BillingCompletion("usage_unacknowledged")
+		log.Error("usage report not acknowledged, bill left pending for reconciliation", "request_id", requestID, "err_report", errU)
 		return
 	}
+	stageStart = time.Now()
 	sResp, errS := b.Settle(settleCtx, &billingv1.SettleRequest{RequestId: requestID, BillId: billID})
+	metrics.BillingCompletionStage("settle", time.Since(stageStart))
 	if errS != nil || sResp == nil || !sResp.Settled {
 		// 返回给客户端已成功，但结算没落 → 交给 M4 对账补结算
+		metrics.BillingCompletion("settlement_unacknowledged")
 		log.Error("settle failed, reconciliation will catch up",
 			"request_id", requestID, "err_report", errU, "err_settle", errS)
 		return
 	}
+	metrics.BillingCompletion("settlement_acknowledged")
 	log.Info("settled", "request_id", requestID, "delta_quota", sResp.DeltaQuota, "balance_after", sResp.BalanceAfter)
 }
 

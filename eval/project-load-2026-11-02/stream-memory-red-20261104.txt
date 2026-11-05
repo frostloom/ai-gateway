@@ -1,0 +1,11 @@
+=== RUN   TestConservativeStreamDoesNotRetainForwardedText
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+    chat_stream_test.go:364: streamed_bytes=25307136 retained_heap_delta=27832648
+    chat_stream_test.go:365: conservative mode retained excessive streamed data: 27832648 bytes
+--- FAIL: TestConservativeStreamDoesNotRetainForwardedText (4.01s)
+FAIL
+FAIL	github.com/frostloom/ai-gateway/internal/gateway/handler	5.236s
+FAIL

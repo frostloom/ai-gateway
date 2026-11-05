@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"context"
 	"net/http"
 	"time"
 
@@ -18,9 +19,13 @@ import (
 // 注意这是「提交去重」而非「响应重放」——重放需要缓存响应体，超出本 demo 范围，
 // 面试可讲这是取舍（409 vs 200-replay）。
 func Idempotency(rdb *goredis.Client) gin.HandlerFunc {
+	// The clone shares the connection pool but bounds cleanup socket I/O.
+	cleanupRedis := rdb.WithTimeout(time.Second)
 	return func(c *gin.Context) {
 		rid := xid.New()
-		if key := c.GetHeader("Idempotency-Key"); key != "" {
+		key := c.GetHeader("Idempotency-Key")
+		owner := rid
+		if key != "" {
 			ok, err := rdb.SetNX(c.Request.Context(), "idem:"+key, rid, 5*time.Minute).Result()
 			if err != nil {
 				abort(c, http.StatusInternalServerError, "idempotency unavailable")
@@ -34,5 +39,12 @@ func Idempotency(rdb *goredis.Client) gin.HandlerFunc {
 		}
 		c.Set("request_id", rid)
 		c.Next()
+		if key != "" && c.GetBool(rateLimitRejectedKey) {
+			// A rejected request did not reach billing. Delete only our own
+			// lease: it may have expired and been acquired by another request.
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+			defer cancel()
+			_ = cleanupRedis.Eval(ctx, `if redis.call('GET',KEYS[1]) == ARGV[1] then return redis.call('DEL',KEYS[1]) end return 0`, []string{"idem:" + key}, owner).Err()
+		}
 	}
 }

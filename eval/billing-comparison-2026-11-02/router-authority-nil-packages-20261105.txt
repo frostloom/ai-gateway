@@ -1,0 +1,32 @@
+# github.com/frostloom/ai-gateway/internal/router.test
+ld: warning: '/private/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-3365555578/000013.o' has malformed LC_DYSYMTAB, expected 98 undefined symbols to start at index 1626, found 95 undefined symbols starting at index 1626
+# github.com/frostloom/ai-gateway/internal/gateway/client.test
+ld: warning: '/private/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-1572897181/000013.o' has malformed LC_DYSYMTAB, expected 98 undefined symbols to start at index 1626, found 95 undefined symbols starting at index 1626
+--- FAIL: TestHalfOpenRouteAllowsOneProbe (0.04s)
+    circuit_test.go:138: route: router authority database unavailable
+    circuit_test.go:138: route: router authority database unavailable
+    circuit_test.go:138: route: router authority database unavailable
+    circuit_test.go:138: route: router authority database unavailable
+    circuit_test.go:138: route: router authority database unavailable
+    circuit_test.go:138: route: router authority database unavailable
+    circuit_test.go:138: route: router authority database unavailable
+    circuit_test.go:138: route: router authority database unavailable
+    circuit_test.go:138: route: router authority database unavailable
+    circuit_test.go:138: route: router authority database unavailable
+    circuit_test.go:138: route: router authority database unavailable
+    circuit_test.go:138: route: router authority database unavailable
+    circuit_test.go:138: route: router authority database unavailable
+    circuit_test.go:138: route: router authority database unavailable
+    circuit_test.go:138: route: router authority database unavailable
+    circuit_test.go:138: route: router authority database unavailable
+    circuit_test.go:138: route: router authority database unavailable
+    circuit_test.go:138: route: router authority database unavailable
+    circuit_test.go:138: route: router authority database unavailable
+    circuit_test.go:138: route: router authority database unavailable
+    circuit_test.go:150: half-open probes = 0, want 1
+--- FAIL: TestRouteHidesUpstreamKeyWithoutToken (0.00s)
+    http_test.go:38: authed route = 500 {"error":"route failed"}
+FAIL
+FAIL	github.com/frostloom/ai-gateway/internal/router	1.597s
+ok  	github.com/frostloom/ai-gateway/internal/gateway/client	1.653s
+FAIL

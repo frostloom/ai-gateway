@@ -1,0 +1,19 @@
+head=63b9d1ed4d64bb583d15fa884c37468e5c53044c
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestAtomicAdmissionV2Concurrency
+    atomic_admission_v2_test.go:27: different_keys=64 admitted=1 rejected=63 no_rejected_keys=true duplicate_first=true retry_after_reset=true same_key_admitted=1 duplicate=63
+--- PASS: TestAtomicAdmissionV2Concurrency (0.06s)
+=== RUN   TestAtomicAdmissionV2WrongSequence
+--- PASS: TestAtomicAdmissionV2WrongSequence (0.00s)
+=== RUN   TestAtomicAdmissionV2Concurrency
+    atomic_admission_v2_test.go:27: different_keys=64 admitted=1 rejected=63 no_rejected_keys=true duplicate_first=true retry_after_reset=true same_key_admitted=1 duplicate=63
+--- PASS: TestAtomicAdmissionV2Concurrency (0.05s)
+=== RUN   TestAtomicAdmissionV2WrongSequence
+--- PASS: TestAtomicAdmissionV2WrongSequence (0.00s)
+=== RUN   TestAtomicAdmissionV2Concurrency
+    atomic_admission_v2_test.go:27: different_keys=64 admitted=1 rejected=63 no_rejected_keys=true duplicate_first=true retry_after_reset=true same_key_admitted=1 duplicate=63
+--- PASS: TestAtomicAdmissionV2Concurrency (0.06s)
+=== RUN   TestAtomicAdmissionV2WrongSequence
+--- PASS: TestAtomicAdmissionV2WrongSequence (0.00s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/project-load-2026-11-02	2.340s

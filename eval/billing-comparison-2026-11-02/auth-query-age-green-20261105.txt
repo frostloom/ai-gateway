@@ -1,0 +1,34 @@
+# github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02.test
+ld: warning: '/private/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-1132665284/000013.o' has malformed LC_DYSYMTAB, expected 98 undefined symbols to start at index 1626, found 95 undefined symbols starting at index 1626
+=== RUN   TestGuardedSlowLookupDoesNotRefreshStaleTTL
+--- PASS: TestGuardedSlowLookupDoesNotRefreshStaleTTL (0.16s)
+=== RUN   TestGuardedCacheMutationFailureDoesNotCommit
+--- PASS: TestGuardedCacheMutationFailureDoesNotCommit (0.01s)
+=== RUN   TestGuardedCacheFenceRejectsExistingValue
+--- PASS: TestGuardedCacheFenceRejectsExistingValue (0.01s)
+=== RUN   TestGuardedSlowMutationCanRepublishStale
+--- PASS: TestGuardedSlowMutationCanRepublishStale (0.01s)
+=== RUN   TestGuardedUnavailableSkipsRefill
+--- PASS: TestGuardedUnavailableSkipsRefill (0.00s)
+=== RUN   TestGuardedSlowLookupDoesNotRefreshStaleTTL
+--- PASS: TestGuardedSlowLookupDoesNotRefreshStaleTTL (0.16s)
+=== RUN   TestGuardedCacheMutationFailureDoesNotCommit
+--- PASS: TestGuardedCacheMutationFailureDoesNotCommit (0.01s)
+=== RUN   TestGuardedCacheFenceRejectsExistingValue
+--- PASS: TestGuardedCacheFenceRejectsExistingValue (0.01s)
+=== RUN   TestGuardedSlowMutationCanRepublishStale
+--- PASS: TestGuardedSlowMutationCanRepublishStale (0.01s)
+=== RUN   TestGuardedUnavailableSkipsRefill
+--- PASS: TestGuardedUnavailableSkipsRefill (0.00s)
+=== RUN   TestGuardedSlowLookupDoesNotRefreshStaleTTL
+--- PASS: TestGuardedSlowLookupDoesNotRefreshStaleTTL (0.16s)
+=== RUN   TestGuardedCacheMutationFailureDoesNotCommit
+--- PASS: TestGuardedCacheMutationFailureDoesNotCommit (0.01s)
+=== RUN   TestGuardedCacheFenceRejectsExistingValue
+--- PASS: TestGuardedCacheFenceRejectsExistingValue (0.01s)
+=== RUN   TestGuardedSlowMutationCanRepublishStale
+--- PASS: TestGuardedSlowMutationCanRepublishStale (0.01s)
+=== RUN   TestGuardedUnavailableSkipsRefill
+--- PASS: TestGuardedUnavailableSkipsRefill (0.00s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	2.473s

@@ -1,0 +1,105 @@
+{
+  "run": "/Users/a1/项目/ai-gateway/eval/project-load-2026-11-02/gateway-open-load-runs/20261105-105032",
+  "trace_audit": "trace-audit-64-120-1.json",
+  "completed": false,
+  "requests": 7200,
+  "groups": {
+    "http=200 valid=true reserve=pending usage=none settle_rows=0": 1,
+    "http=200 valid=true reserve=pending usage=reported settle_rows=0": 10,
+    "http=200 valid=true reserve=settled usage=reported settle_rows=1": 1514,
+    "http=503 valid=false reserve=missing usage=none settle_rows=0": 5520,
+    "http=503 valid=false reserve=pending usage=none settle_rows=0": 92,
+    "http=timeout valid=false reserve=pending usage=reported settle_rows=0": 7,
+    "http=timeout valid=false reserve=settled usage=reported settle_rows=1": 56
+  },
+  "http_200_pending": [
+    {
+      "request_id": "idem:18e506793ac9c978-2574",
+      "usage": "reported",
+      "settle_rows": 0,
+      "diagnostics": [
+        "settle_error"
+      ]
+    },
+    {
+      "request_id": "idem:18e506793ac9c978-2505",
+      "usage": "reported",
+      "settle_rows": 0,
+      "diagnostics": [
+        "settle_error"
+      ]
+    },
+    {
+      "request_id": "idem:18e506793ac9c978-2605",
+      "usage": "reported",
+      "settle_rows": 0,
+      "diagnostics": [
+        "settle_error"
+      ]
+    },
+    {
+      "request_id": "idem:18e506793ac9c978-2762",
+      "usage": "reported",
+      "settle_rows": 0,
+      "diagnostics": [
+        "settle_error"
+      ]
+    },
+    {
+      "request_id": "idem:18e506793ac9c978-2525",
+      "usage": "none",
+      "settle_rows": 0,
+      "diagnostics": [
+        "usage_unacknowledged"
+      ]
+    },
+    {
+      "request_id": "idem:18e506793ac9c978-2449",
+      "usage": "reported",
+      "settle_rows": 0,
+      "diagnostics": [
+        "settle_error"
+      ]
+    },
+    {
+      "request_id": "idem:18e506793ac9c978-2531",
+      "usage": "reported",
+      "settle_rows": 0,
+      "diagnostics": [
+        "settle_error"
+      ]
+    },
+    {
+      "request_id": "idem:18e506793ac9c978-2713",
+      "usage": "reported",
+      "settle_rows": 0,
+      "diagnostics": [
+        "settle_error"
+      ]
+    },
+    {
+      "request_id": "idem:18e506793ac9c978-2820",
+      "usage": "reported",
+      "settle_rows": 0,
+      "diagnostics": [
+        "settle_error"
+      ]
+    },
+    {
+      "request_id": "idem:18e506793ac9c978-2639",
+      "usage": "reported",
+      "settle_rows": 0,
+      "diagnostics": [
+        "settle_error"
+      ]
+    },
+    {
+      "request_id": "idem:18e506793ac9c978-2812",
+      "usage": "reported",
+      "settle_rows": 0,
+      "diagnostics": [
+        "settle_error"
+      ]
+    }
+  ]
+}

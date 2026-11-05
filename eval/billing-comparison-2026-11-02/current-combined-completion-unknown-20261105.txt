@@ -1,0 +1,35 @@
+head=42d8ef8e5ca2471b18800e50f8e7a57fbcfdd47f
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+current_source_sha256=a8395407d8805a45c08cf8a7e216e2fafa833d79134711ba898ff1604c263e12
+current_candidate_sha256=5e549bbafc37864863923d2201082d73384741879de362d96f67163c24ed4949
+gateway_source_sha256=0c953aaea8ba449c5592f796ae49343fa1935f5215534336470b19919f64fd61
+gateway_candidate_sha256=b4e9f233efc82f857a5cdf22b1780f97d7d88b0247659c4e8d58a88f59113909
+# github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02.test
+ld: warning: '/private/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-229980422/000013.o' has malformed LC_DYSYMTAB, expected 98 undefined symbols to start at index 1626, found 95 undefined symbols starting at index 1626
+=== RUN   TestAttemptGuardBlocksUnknownFailover
+=== RUN   TestAttemptGuardBlocksUnknownFailover/stream=false
+    execution_gateway_attempt_guard_test.go:309: stream=false first=1 second=0 status=502 attempt_state=sending bill=pending balance=999 ledger=999
+=== RUN   TestAttemptGuardBlocksUnknownFailover/stream=true
+    execution_gateway_attempt_guard_test.go:309: stream=true first=1 second=0 status=502 attempt_state=sending bill=pending balance=999 ledger=999
+--- PASS: TestAttemptGuardBlocksUnknownFailover (0.51s)
+    --- PASS: TestAttemptGuardBlocksUnknownFailover/stream=false (0.08s)
+    --- PASS: TestAttemptGuardBlocksUnknownFailover/stream=true (0.07s)
+=== RUN   TestAttemptGuardBlocksUnknownFailover
+=== RUN   TestAttemptGuardBlocksUnknownFailover/stream=false
+    execution_gateway_attempt_guard_test.go:309: stream=false first=1 second=0 status=502 attempt_state=sending bill=pending balance=999 ledger=999
+=== RUN   TestAttemptGuardBlocksUnknownFailover/stream=true
+    execution_gateway_attempt_guard_test.go:309: stream=true first=1 second=0 status=502 attempt_state=sending bill=pending balance=999 ledger=999
+--- PASS: TestAttemptGuardBlocksUnknownFailover (0.47s)
+    --- PASS: TestAttemptGuardBlocksUnknownFailover/stream=false (0.07s)
+    --- PASS: TestAttemptGuardBlocksUnknownFailover/stream=true (0.06s)
+=== RUN   TestAttemptGuardBlocksUnknownFailover
+=== RUN   TestAttemptGuardBlocksUnknownFailover/stream=false
+    execution_gateway_attempt_guard_test.go:309: stream=false first=1 second=0 status=502 attempt_state=sending bill=pending balance=999 ledger=999
+=== RUN   TestAttemptGuardBlocksUnknownFailover/stream=true
+    execution_gateway_attempt_guard_test.go:309: stream=true first=1 second=0 status=502 attempt_state=sending bill=pending balance=999 ledger=999
+--- PASS: TestAttemptGuardBlocksUnknownFailover (0.70s)
+    --- PASS: TestAttemptGuardBlocksUnknownFailover/stream=false (0.09s)
+    --- PASS: TestAttemptGuardBlocksUnknownFailover/stream=true (0.08s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	3.448s

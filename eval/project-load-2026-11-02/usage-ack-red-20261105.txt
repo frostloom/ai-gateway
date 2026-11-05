@@ -1,0 +1,13 @@
+=== RUN   TestUsageMustBeAcknowledgedBeforeSettle
+=== RUN   TestUsageMustBeAcknowledgedBeforeSettle/accepted
+=== RUN   TestUsageMustBeAcknowledgedBeforeSettle/rejected
+    usage_ack_test.go:36: reports=1 settles=1 reverses=0
+=== RUN   TestUsageMustBeAcknowledgedBeforeSettle/missing
+    usage_ack_test.go:36: reports=1 settles=1 reverses=0
+--- FAIL: TestUsageMustBeAcknowledgedBeforeSettle (0.00s)
+    --- PASS: TestUsageMustBeAcknowledgedBeforeSettle/accepted (0.00s)
+    --- FAIL: TestUsageMustBeAcknowledgedBeforeSettle/rejected (0.00s)
+    --- FAIL: TestUsageMustBeAcknowledgedBeforeSettle/missing (0.00s)
+FAIL
+FAIL	github.com/frostloom/ai-gateway/internal/gateway/handler	0.839s
+FAIL

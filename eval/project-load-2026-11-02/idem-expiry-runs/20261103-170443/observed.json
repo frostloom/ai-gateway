@@ -1,0 +1,16 @@
+{
+  "synthetic_request_id": "idem:expiry-aa33fe67ea684e3681a29d2fe60b2054",
+  "ttl_accelerated_ms": 1,
+  "second_arrived_before_release": true,
+  "mock_upstream_calls": 2,
+  "responses": [
+    {
+      "status": 200,
+      "body": "{\"choices\":[],\"id\":\"synthetic-1\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":10,\"prompt_tokens\":50,\"total_tokens\":60}}\n"
+    },
+    {
+      "status": 200,
+      "body": "{\"choices\":[],\"id\":\"synthetic-2\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":10,\"prompt_tokens\":50,\"total_tokens\":60}}\n"
+    }
+  ]
+}

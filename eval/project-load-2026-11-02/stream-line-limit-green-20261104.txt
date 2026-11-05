@@ -1,0 +1,38 @@
+=== RUN   TestStreamLineLimitSafety
+=== RUN   TestStreamLineLimitSafety/first_line
+=== RUN   TestStreamLineLimitSafety/after_usage
+--- PASS: TestStreamLineLimitSafety (0.02s)
+    --- PASS: TestStreamLineLimitSafety/first_line (0.01s)
+    --- PASS: TestStreamLineLimitSafety/after_usage (0.01s)
+=== RUN   TestStreamLineLimitPreservesNormalBytes
+=== RUN   TestStreamLineLimitPreservesNormalBytes/bytes=38
+=== RUN   TestStreamLineLimitPreservesNormalBytes/bytes=34
+--- PASS: TestStreamLineLimitPreservesNormalBytes (0.00s)
+    --- PASS: TestStreamLineLimitPreservesNormalBytes/bytes=38 (0.00s)
+    --- PASS: TestStreamLineLimitPreservesNormalBytes/bytes=34 (0.00s)
+=== RUN   TestStreamLineLimitSafety
+=== RUN   TestStreamLineLimitSafety/first_line
+=== RUN   TestStreamLineLimitSafety/after_usage
+--- PASS: TestStreamLineLimitSafety (0.02s)
+    --- PASS: TestStreamLineLimitSafety/first_line (0.01s)
+    --- PASS: TestStreamLineLimitSafety/after_usage (0.01s)
+=== RUN   TestStreamLineLimitPreservesNormalBytes
+=== RUN   TestStreamLineLimitPreservesNormalBytes/bytes=38
+=== RUN   TestStreamLineLimitPreservesNormalBytes/bytes=34
+--- PASS: TestStreamLineLimitPreservesNormalBytes (0.00s)
+    --- PASS: TestStreamLineLimitPreservesNormalBytes/bytes=38 (0.00s)
+    --- PASS: TestStreamLineLimitPreservesNormalBytes/bytes=34 (0.00s)
+=== RUN   TestStreamLineLimitSafety
+=== RUN   TestStreamLineLimitSafety/first_line
+=== RUN   TestStreamLineLimitSafety/after_usage
+--- PASS: TestStreamLineLimitSafety (0.02s)
+    --- PASS: TestStreamLineLimitSafety/first_line (0.01s)
+    --- PASS: TestStreamLineLimitSafety/after_usage (0.01s)
+=== RUN   TestStreamLineLimitPreservesNormalBytes
+=== RUN   TestStreamLineLimitPreservesNormalBytes/bytes=38
+=== RUN   TestStreamLineLimitPreservesNormalBytes/bytes=34
+--- PASS: TestStreamLineLimitPreservesNormalBytes (0.00s)
+    --- PASS: TestStreamLineLimitPreservesNormalBytes/bytes=38 (0.00s)
+    --- PASS: TestStreamLineLimitPreservesNormalBytes/bytes=34 (0.00s)
+PASS
+ok  	github.com/frostloom/ai-gateway/internal/gateway/handler	2.075s

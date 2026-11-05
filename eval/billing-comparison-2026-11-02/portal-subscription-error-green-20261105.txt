@@ -1,0 +1,67 @@
+head=b0810a72ddda83cd8479c6921ec7faa7e66c2fca
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+# github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02.test
+ld: warning: '/private/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-3729530037/000013.o' has malformed LC_DYSYMTAB, expected 98 undefined symbols to start at index 1626, found 95 undefined symbols starting at index 1626
+=== RUN   TestPortalSnapshotRejectsSubscriptionQueryError
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /portal/me                --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func1 (2 handlers)
+[GIN-debug] GET    /portal/plans             --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func2 (2 handlers)
+[GIN-debug] GET    /portal/topups            --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func3 (2 handlers)
+[GIN-debug] GET    /portal/recharge-orders   --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func4 (2 handlers)
+[GIN-debug] GET    /portal/models            --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func5 (2 handlers)
+[GIN-debug] GET    /portal/consumption       --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func6 (2 handlers)
+[GIN-debug] POST   /portal/recharge          --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func7 (2 handlers)
+[GIN-debug] POST   /portal/recharge/pay      --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func8 (2 handlers)
+[GIN-debug] POST   /portal/recharge/refund   --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func9 (2 handlers)
+[GIN-debug] POST   /portal/subscribe         --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func10 (2 handlers)
+[GIN-debug] POST   /portal/change-plan       --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func11 (2 handlers)
+[GIN-debug] POST   /portal/cancel-subscription --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func12 (2 handlers)
+[GIN-debug] POST   /portal/chat              --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func13 (2 handlers)
+    portal_subscription_error_test.go:102: subscription query error propagated through authenticated portal as HTTP 500
+--- PASS: TestPortalSnapshotRejectsSubscriptionQueryError (1.27s)
+=== RUN   TestPortalSnapshotRejectsSubscriptionQueryError
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /portal/me                --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func1 (2 handlers)
+[GIN-debug] GET    /portal/plans             --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func2 (2 handlers)
+[GIN-debug] GET    /portal/topups            --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func3 (2 handlers)
+[GIN-debug] GET    /portal/recharge-orders   --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func4 (2 handlers)
+[GIN-debug] GET    /portal/models            --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func5 (2 handlers)
+[GIN-debug] GET    /portal/consumption       --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func6 (2 handlers)
+[GIN-debug] POST   /portal/recharge          --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func7 (2 handlers)
+[GIN-debug] POST   /portal/recharge/pay      --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func8 (2 handlers)
+[GIN-debug] POST   /portal/recharge/refund   --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func9 (2 handlers)
+[GIN-debug] POST   /portal/subscribe         --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func10 (2 handlers)
+[GIN-debug] POST   /portal/change-plan       --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func11 (2 handlers)
+[GIN-debug] POST   /portal/cancel-subscription --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func12 (2 handlers)
+[GIN-debug] POST   /portal/chat              --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func13 (2 handlers)
+    portal_subscription_error_test.go:102: subscription query error propagated through authenticated portal as HTTP 500
+--- PASS: TestPortalSnapshotRejectsSubscriptionQueryError (1.35s)
+=== RUN   TestPortalSnapshotRejectsSubscriptionQueryError
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /portal/me                --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func1 (2 handlers)
+[GIN-debug] GET    /portal/plans             --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func2 (2 handlers)
+[GIN-debug] GET    /portal/topups            --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func3 (2 handlers)
+[GIN-debug] GET    /portal/recharge-orders   --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func4 (2 handlers)
+[GIN-debug] GET    /portal/models            --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func5 (2 handlers)
+[GIN-debug] GET    /portal/consumption       --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func6 (2 handlers)
+[GIN-debug] POST   /portal/recharge          --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func7 (2 handlers)
+[GIN-debug] POST   /portal/recharge/pay      --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func8 (2 handlers)
+[GIN-debug] POST   /portal/recharge/refund   --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func9 (2 handlers)
+[GIN-debug] POST   /portal/subscribe         --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func10 (2 handlers)
+[GIN-debug] POST   /portal/change-plan       --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func11 (2 handlers)
+[GIN-debug] POST   /portal/cancel-subscription --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func12 (2 handlers)
+[GIN-debug] POST   /portal/chat              --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func13 (2 handlers)
+    portal_subscription_error_test.go:102: subscription query error propagated through authenticated portal as HTTP 500
+--- PASS: TestPortalSnapshotRejectsSubscriptionQueryError (1.43s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	6.314s

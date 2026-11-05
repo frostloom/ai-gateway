@@ -1,0 +1,44 @@
+head=b0810a72ddda83cd8479c6921ec7faa7e66c2fca
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+a3cb0074c318e4370327684017c68e094687c43fc0f17d520b4b7ab053c42b05  /var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T//usage-atomic-overlay.qoDGEo/plan.go
+# github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02.test
+ld: warning: '/private/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-1414434620/000013.o' has malformed LC_DYSYMTAB, expected 98 undefined symbols to start at index 1626, found 95 undefined symbols starting at index 1626
+=== RUN   TestPortalSnapshotSubscriptionRechargeFields
+
+2026/11/05 13:18:59 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/plan.go:249 [35;1mrecord not found
+[0m[33m[1.748ms] [34;1m[rows:0][0m SELECT * FROM `subscriptions` WHERE tenant_id = 1 AND status = 'active' AND plan_type = 'recurring' ORDER BY `subscriptions`.`id` LIMIT 1
+
+2026/11/05 13:18:59 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/subscription_entitlement.go:19 [35;1mrecord not found
+[0m[33m[1.254ms] [34;1m[rows:0][0m SELECT * FROM `subscriptions` WHERE tenant_id = 1 AND status = 'cancelled' AND plan_type = 'recurring' AND cycle_end IS NOT NULL AND cycle_end > '2026-11-05 13:18:59.828' ORDER BY cycle_end DESC, id DESC,`subscriptions`.`id` LIMIT 1
+
+2026/11/05 13:18:59 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/plan.go:249 [35;1mrecord not found
+[0m[33m[1.840ms] [34;1m[rows:0][0m SELECT * FROM `subscriptions` WHERE tenant_id = 1 AND status = 'active' AND plan_type = 'recurring' ORDER BY `subscriptions`.`id` LIMIT 1
+    portal_snapshot_business_test.go:94: recharge=100 balance=1100, active/cancelled subscription entitlement remains 300-40=260
+--- PASS: TestPortalSnapshotSubscriptionRechargeFields (0.71s)
+=== RUN   TestPortalSnapshotSubscriptionRechargeFields
+
+2026/11/05 13:19:00 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/plan.go:249 [35;1mrecord not found
+[0m[33m[1.112ms] [34;1m[rows:0][0m SELECT * FROM `subscriptions` WHERE tenant_id = 2 AND status = 'active' AND plan_type = 'recurring' ORDER BY `subscriptions`.`id` LIMIT 1
+
+2026/11/05 13:19:00 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/subscription_entitlement.go:19 [35;1mrecord not found
+[0m[33m[8.235ms] [34;1m[rows:0][0m SELECT * FROM `subscriptions` WHERE tenant_id = 2 AND status = 'cancelled' AND plan_type = 'recurring' AND cycle_end IS NOT NULL AND cycle_end > '2026-11-05 13:19:00.691' ORDER BY cycle_end DESC, id DESC,`subscriptions`.`id` LIMIT 1
+
+2026/11/05 13:19:00 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/plan.go:249 [35;1mrecord not found
+[0m[33m[1.053ms] [34;1m[rows:0][0m SELECT * FROM `subscriptions` WHERE tenant_id = 2 AND status = 'active' AND plan_type = 'recurring' ORDER BY `subscriptions`.`id` LIMIT 1
+    portal_snapshot_business_test.go:94: recharge=100 balance=1100, active/cancelled subscription entitlement remains 300-40=260
+--- PASS: TestPortalSnapshotSubscriptionRechargeFields (0.85s)
+=== RUN   TestPortalSnapshotSubscriptionRechargeFields
+
+2026/11/05 13:19:01 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/plan.go:249 [35;1mrecord not found
+[0m[33m[1.084ms] [34;1m[rows:0][0m SELECT * FROM `subscriptions` WHERE tenant_id = 3 AND status = 'active' AND plan_type = 'recurring' ORDER BY `subscriptions`.`id` LIMIT 1
+
+2026/11/05 13:19:01 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/subscription_entitlement.go:19 [35;1mrecord not found
+[0m[33m[1.031ms] [34;1m[rows:0][0m SELECT * FROM `subscriptions` WHERE tenant_id = 3 AND status = 'cancelled' AND plan_type = 'recurring' AND cycle_end IS NOT NULL AND cycle_end > '2026-11-05 13:19:01.61' ORDER BY cycle_end DESC, id DESC,`subscriptions`.`id` LIMIT 1
+
+2026/11/05 13:19:01 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/plan.go:249 [35;1mrecord not found
+[0m[33m[1.001ms] [34;1m[rows:0][0m SELECT * FROM `subscriptions` WHERE tenant_id = 3 AND status = 'active' AND plan_type = 'recurring' ORDER BY `subscriptions`.`id` LIMIT 1
+    portal_snapshot_business_test.go:94: recharge=100 balance=1100, active/cancelled subscription entitlement remains 300-40=260
+--- PASS: TestPortalSnapshotSubscriptionRechargeFields (0.89s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	4.519s

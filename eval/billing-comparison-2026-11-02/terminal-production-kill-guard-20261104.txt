@@ -1,0 +1,35 @@
+head=8b3347aea3abe3e2131d67e9e48a77dd61e2bc86
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestTerminalConnectionKilledAfterRedisDelta
+=== RUN   TestTerminalConnectionKilledAfterRedisDelta/settle
+[mysql] 2026/11/04 17:01:36 packets.go:58 unexpected EOF
+    terminal_connection_kill_test.go:131: kill=success mode=settle balance_before_retry=400 ledger_before_retry=400 balance_after=460 ledger_after=460 events=1
+=== RUN   TestTerminalConnectionKilledAfterRedisDelta/reverse
+[mysql] 2026/11/04 17:01:36 packets.go:58 unexpected EOF
+    terminal_connection_kill_test.go:131: kill=success mode=reverse balance_before_retry=400 ledger_before_retry=400 balance_after=500 ledger_after=500 events=1
+--- PASS: TestTerminalConnectionKilledAfterRedisDelta (3.09s)
+    --- PASS: TestTerminalConnectionKilledAfterRedisDelta/settle (0.46s)
+    --- PASS: TestTerminalConnectionKilledAfterRedisDelta/reverse (0.17s)
+=== RUN   TestTerminalConnectionKilledAfterRedisDelta
+=== RUN   TestTerminalConnectionKilledAfterRedisDelta/settle
+[mysql] 2026/11/04 17:01:37 packets.go:58 unexpected EOF
+    terminal_connection_kill_test.go:131: kill=success mode=settle balance_before_retry=400 ledger_before_retry=400 balance_after=460 ledger_after=460 events=1
+=== RUN   TestTerminalConnectionKilledAfterRedisDelta/reverse
+[mysql] 2026/11/04 17:01:37 packets.go:58 unexpected EOF
+    terminal_connection_kill_test.go:131: kill=success mode=reverse balance_before_retry=400 ledger_before_retry=400 balance_after=500 ledger_after=500 events=1
+--- PASS: TestTerminalConnectionKilledAfterRedisDelta (0.90s)
+    --- PASS: TestTerminalConnectionKilledAfterRedisDelta/settle (0.17s)
+    --- PASS: TestTerminalConnectionKilledAfterRedisDelta/reverse (0.12s)
+=== RUN   TestTerminalConnectionKilledAfterRedisDelta
+=== RUN   TestTerminalConnectionKilledAfterRedisDelta/settle
+[mysql] 2026/11/04 17:01:38 packets.go:58 unexpected EOF
+    terminal_connection_kill_test.go:131: kill=success mode=settle balance_before_retry=400 ledger_before_retry=400 balance_after=460 ledger_after=460 events=1
+=== RUN   TestTerminalConnectionKilledAfterRedisDelta/reverse
+[mysql] 2026/11/04 17:01:38 packets.go:58 unexpected EOF
+    terminal_connection_kill_test.go:131: kill=success mode=reverse balance_before_retry=400 ledger_before_retry=400 balance_after=500 ledger_after=500 events=1
+--- PASS: TestTerminalConnectionKilledAfterRedisDelta (0.73s)
+    --- PASS: TestTerminalConnectionKilledAfterRedisDelta/settle (0.11s)
+    --- PASS: TestTerminalConnectionKilledAfterRedisDelta/reverse (0.09s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	6.641s

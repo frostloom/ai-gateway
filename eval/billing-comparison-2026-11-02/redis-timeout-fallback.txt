@@ -1,0 +1,13 @@
+=== RUN   TestRedisContextTimeoutObservation
+=== RUN   TestRedisContextTimeoutObservation/default
+    redis_timeout_test.go:48: context_enabled=false requested_ms=30 elapsed_ms=301.5 err=i/o timeout
+=== RUN   TestRedisContextTimeoutObservation/enabled
+    redis_timeout_test.go:48: context_enabled=true requested_ms=30 elapsed_ms=31.2 err=i/o timeout
+--- PASS: TestRedisContextTimeoutObservation (0.34s)
+    --- PASS: TestRedisContextTimeoutObservation/default (0.31s)
+    --- PASS: TestRedisContextTimeoutObservation/enabled (0.03s)
+=== RUN   TestGuardedFallbackOnUnresponsiveRedis
+    redis_timeout_test.go:89: unresponsive Redis fallback calls=1 elapsed_ms=65.3; includes attempted cache fill
+--- PASS: TestGuardedFallbackOnUnresponsiveRedis (0.07s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	2.194s

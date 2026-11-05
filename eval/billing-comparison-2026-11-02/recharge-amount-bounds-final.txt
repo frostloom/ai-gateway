@@ -1,0 +1,38 @@
+head=63b9d1ed4d64bb583d15fa884c37468e5c53044c
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestRechargeAndRefundAmountBounds
+=== RUN   TestRechargeAndRefundAmountBounds/recharge_multiplication
+=== RUN   TestRechargeAndRefundAmountBounds/recharge_pushes_balance_over_safe_maximum
+=== RUN   TestRechargeAndRefundAmountBounds/refund_multiplication
+--- PASS: TestRechargeAndRefundAmountBounds (0.45s)
+    --- PASS: TestRechargeAndRefundAmountBounds/recharge_multiplication (0.00s)
+    --- PASS: TestRechargeAndRefundAmountBounds/recharge_pushes_balance_over_safe_maximum (0.03s)
+    --- PASS: TestRechargeAndRefundAmountBounds/refund_multiplication (0.01s)
+=== RUN   TestConcurrentRechargeRespectsCashLimit
+    recharge_amount_bounds_test.go:152: concurrent=2 paid=1 pending=1 topups=1 retry=noop balance=99999999999999 ledger=99999999999999
+--- PASS: TestConcurrentRechargeRespectsCashLimit (0.57s)
+=== RUN   TestRechargeAndRefundAmountBounds
+=== RUN   TestRechargeAndRefundAmountBounds/recharge_multiplication
+=== RUN   TestRechargeAndRefundAmountBounds/recharge_pushes_balance_over_safe_maximum
+=== RUN   TestRechargeAndRefundAmountBounds/refund_multiplication
+--- PASS: TestRechargeAndRefundAmountBounds (0.49s)
+    --- PASS: TestRechargeAndRefundAmountBounds/recharge_multiplication (0.00s)
+    --- PASS: TestRechargeAndRefundAmountBounds/recharge_pushes_balance_over_safe_maximum (0.02s)
+    --- PASS: TestRechargeAndRefundAmountBounds/refund_multiplication (0.00s)
+=== RUN   TestConcurrentRechargeRespectsCashLimit
+    recharge_amount_bounds_test.go:152: concurrent=2 paid=1 pending=1 topups=1 retry=noop balance=99999999999999 ledger=99999999999999
+--- PASS: TestConcurrentRechargeRespectsCashLimit (0.47s)
+=== RUN   TestRechargeAndRefundAmountBounds
+=== RUN   TestRechargeAndRefundAmountBounds/recharge_multiplication
+=== RUN   TestRechargeAndRefundAmountBounds/recharge_pushes_balance_over_safe_maximum
+=== RUN   TestRechargeAndRefundAmountBounds/refund_multiplication
+--- PASS: TestRechargeAndRefundAmountBounds (0.56s)
+    --- PASS: TestRechargeAndRefundAmountBounds/recharge_multiplication (0.00s)
+    --- PASS: TestRechargeAndRefundAmountBounds/recharge_pushes_balance_over_safe_maximum (0.02s)
+    --- PASS: TestRechargeAndRefundAmountBounds/refund_multiplication (0.00s)
+=== RUN   TestConcurrentRechargeRespectsCashLimit
+    recharge_amount_bounds_test.go:152: concurrent=2 paid=1 pending=1 topups=1 retry=noop balance=99999999999999 ledger=99999999999999
+--- PASS: TestConcurrentRechargeRespectsCashLimit (0.49s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	4.953s

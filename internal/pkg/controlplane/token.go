@@ -25,7 +25,26 @@ const (
 	MetadataKey = "x-control-token"
 	// Env 是各进程读取的环境变量名。
 	Env = "CONTROL_PLANE_TOKEN"
+	// Reserve replay negotiation: gateways must reject old billing servers that
+	// cannot distinguish a new reservation from an idempotent replay.
+	ReserveModeKey     = "x-agw-reserve-mode"
+	ReserveContractKey = "x-agw-reserve-contract"
+	ReserveReplayV1    = "replay-v1"
+	ReserveReplayV2    = "replay-v2"
+	ReserveContentKey  = "x-agw-reserve-content-sha256"
 )
+
+type reserveContentContextKey struct{}
+
+// WithReserveContent binds a normalized upstream request digest to Reserve.
+func WithReserveContent(ctx context.Context, digest string) context.Context {
+	return context.WithValue(ctx, reserveContentContextKey{}, digest)
+}
+
+func ReserveContent(ctx context.Context) string {
+	digest, _ := ctx.Value(reserveContentContextKey{}).(string)
+	return digest
+}
 
 // Require 读取令牌。未设置时退出，避免服务在无令牌时监听。
 func Require(log *slog.Logger) string {

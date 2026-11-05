@@ -1,0 +1,35 @@
+head=457dbfc3fee2e7b1575a29eab033439833985ce6
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+# github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02.test
+ld: warning: '/private/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-653354949/000013.o' has malformed LC_DYSYMTAB, expected 98 undefined symbols to start at index 1626, found 95 undefined symbols starting at index 1626
+=== RUN   TestRouterCachedRouteProgressDuringBlockedReport
+    router_report_lock_scope_test.go:79: cached Route stalled while report DB blocked: context deadline exceeded
+--- FAIL: TestRouterCachedRouteProgressDuringBlockedReport (3.95s)
+=== RUN   TestRouterReportSequencePersistsInOrder
+    router_report_lock_scope_test.go:139: first successful report then failure persisted in order; final failures=1
+--- PASS: TestRouterReportSequencePersistsInOrder (1.38s)
+=== RUN   TestRouterDifferentProvidersReportIndependently
+    router_report_lock_scope_test.go:193: unrelated provider report blocked by first provider
+--- FAIL: TestRouterDifferentProvidersReportIndependently (1.38s)
+=== RUN   TestRouterCachedRouteProgressDuringBlockedReport
+    router_report_lock_scope_test.go:79: cached Route stalled while report DB blocked: context deadline exceeded
+--- FAIL: TestRouterCachedRouteProgressDuringBlockedReport (0.89s)
+=== RUN   TestRouterReportSequencePersistsInOrder
+    router_report_lock_scope_test.go:139: first successful report then failure persisted in order; final failures=1
+--- PASS: TestRouterReportSequencePersistsInOrder (0.50s)
+=== RUN   TestRouterDifferentProvidersReportIndependently
+    router_report_lock_scope_test.go:193: unrelated provider report blocked by first provider
+--- FAIL: TestRouterDifferentProvidersReportIndependently (1.06s)
+=== RUN   TestRouterCachedRouteProgressDuringBlockedReport
+    router_report_lock_scope_test.go:79: cached Route stalled while report DB blocked: context deadline exceeded
+--- FAIL: TestRouterCachedRouteProgressDuringBlockedReport (1.05s)
+=== RUN   TestRouterReportSequencePersistsInOrder
+    router_report_lock_scope_test.go:139: first successful report then failure persisted in order; final failures=1
+--- PASS: TestRouterReportSequencePersistsInOrder (1.79s)
+=== RUN   TestRouterDifferentProvidersReportIndependently
+    router_report_lock_scope_test.go:193: unrelated provider report blocked by first provider
+--- FAIL: TestRouterDifferentProvidersReportIndependently (1.44s)
+FAIL
+FAIL	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	15.454s
+FAIL

@@ -1,0 +1,15 @@
+head=63b9d1ed4d64bb583d15fa884c37468e5c53044c
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+legacy_binary_sha256=07b7f0eb014c5e2a1d77069a40f59945b37d31556af768ed13bbabf51d04398b
+candidate_binary_sha256=d4a199d8bac9753de926780eb2c00c4f88a8b5034ad1087f856fe6484b066fe3
+=== RUN   TestMixedVersionLegacyCanReverseForwardingBill
+    mixed_version_forwarding_test.go:95: legacy_reverse=rejected bill=pending live=500 ledger=400
+--- PASS: TestMixedVersionLegacyCanReverseForwardingBill (2.48s)
+=== RUN   TestMixedVersionLegacyCanReverseForwardingBill
+    mixed_version_forwarding_test.go:95: legacy_reverse=rejected bill=pending live=500 ledger=400
+--- PASS: TestMixedVersionLegacyCanReverseForwardingBill (1.55s)
+=== RUN   TestMixedVersionLegacyCanReverseForwardingBill
+    mixed_version_forwarding_test.go:95: legacy_reverse=rejected bill=pending live=500 ledger=400
+--- PASS: TestMixedVersionLegacyCanReverseForwardingBill (1.46s)
+PASS

@@ -1,0 +1,77 @@
+head=8b3347aea3abe3e2131d67e9e48a77dd61e2bc86
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestTerminalRollbackRedisOutage
+=== RUN   TestTerminalRollbackRedisOutage/settle
+redis: 2026/11/04 17:08:21 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:50546: connect: connection refused
+redis: 2026/11/04 17:08:21 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:50546: connect: connection refused
+redis: 2026/11/04 17:08:22 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:50546: connect: connection refused
+redis: 2026/11/04 17:08:22 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:50546: connect: connection refused
+redis: 2026/11/04 17:08:23 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:50546: connect: connection refused
+redis: 2026/11/04 17:08:23 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:50546: connect: connection refused
+redis: 2026/11/04 17:08:24 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:50546: connect: connection refused
+redis: 2026/11/04 17:08:24 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:50546: connect: connection refused
+    terminal_redis_outage_test.go:131: mode=settle redis_killed=true sql_rollback=true retry_balance=460 ledger=460 events=1
+=== RUN   TestTerminalRollbackRedisOutage/reverse
+redis: 2026/11/04 17:08:25 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:50546: connect: connection refused
+redis: 2026/11/04 17:08:26 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:50546: connect: connection refused
+redis: 2026/11/04 17:08:26 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:50546: connect: connection refused
+redis: 2026/11/04 17:08:26 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:50546: connect: connection refused
+redis: 2026/11/04 17:08:27 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:50546: connect: connection refused
+redis: 2026/11/04 17:08:27 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:50546: connect: connection refused
+redis: 2026/11/04 17:08:28 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:50546: connect: connection refused
+redis: 2026/11/04 17:08:28 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:50546: connect: connection refused
+    terminal_redis_outage_test.go:131: mode=reverse redis_killed=true sql_rollback=true retry_balance=500 ledger=500 events=1
+--- PASS: TestTerminalRollbackRedisOutage (8.87s)
+    --- PASS: TestTerminalRollbackRedisOutage/settle (4.21s)
+    --- PASS: TestTerminalRollbackRedisOutage/reverse (4.05s)
+=== RUN   TestTerminalRollbackRedisOutage
+=== RUN   TestTerminalRollbackRedisOutage/settle
+redis: 2026/11/04 17:08:30 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:50546: connect: connection refused
+redis: 2026/11/04 17:08:30 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:50546: connect: connection refused
+redis: 2026/11/04 17:08:31 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:50546: connect: connection refused
+redis: 2026/11/04 17:08:31 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:50546: connect: connection refused
+redis: 2026/11/04 17:08:31 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:50546: connect: connection refused
+redis: 2026/11/04 17:08:32 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:50546: connect: connection refused
+redis: 2026/11/04 17:08:32 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:50546: connect: connection refused
+redis: 2026/11/04 17:08:33 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:50546: connect: connection refused
+    terminal_redis_outage_test.go:131: mode=settle redis_killed=true sql_rollback=true retry_balance=460 ledger=460 events=1
+=== RUN   TestTerminalRollbackRedisOutage/reverse
+redis: 2026/11/04 17:08:34 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:50546: connect: connection refused
+redis: 2026/11/04 17:08:34 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:50546: connect: connection refused
+redis: 2026/11/04 17:08:35 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:50546: connect: connection refused
+redis: 2026/11/04 17:08:35 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:50546: connect: connection refused
+redis: 2026/11/04 17:08:36 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:50546: connect: connection refused
+redis: 2026/11/04 17:08:36 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:50546: connect: connection refused
+redis: 2026/11/04 17:08:36 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:50546: connect: connection refused
+redis: 2026/11/04 17:08:37 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:50546: connect: connection refused
+    terminal_redis_outage_test.go:131: mode=reverse redis_killed=true sql_rollback=true retry_balance=500 ledger=500 events=1
+--- PASS: TestTerminalRollbackRedisOutage (9.12s)
+    --- PASS: TestTerminalRollbackRedisOutage/settle (4.03s)
+    --- PASS: TestTerminalRollbackRedisOutage/reverse (4.49s)
+=== RUN   TestTerminalRollbackRedisOutage
+=== RUN   TestTerminalRollbackRedisOutage/settle
+redis: 2026/11/04 17:08:39 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:50546: connect: connection refused
+redis: 2026/11/04 17:08:39 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:50546: connect: connection refused
+redis: 2026/11/04 17:08:40 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:50546: connect: connection refused
+redis: 2026/11/04 17:08:40 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:50546: connect: connection refused
+redis: 2026/11/04 17:08:41 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:50546: connect: connection refused
+redis: 2026/11/04 17:08:41 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:50546: connect: connection refused
+redis: 2026/11/04 17:08:42 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:50546: connect: connection refused
+redis: 2026/11/04 17:08:42 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:50546: connect: connection refused
+    terminal_redis_outage_test.go:131: mode=settle redis_killed=true sql_rollback=true retry_balance=460 ledger=460 events=1
+=== RUN   TestTerminalRollbackRedisOutage/reverse
+redis: 2026/11/04 17:08:43 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:50546: connect: connection refused
+redis: 2026/11/04 17:08:44 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:50546: connect: connection refused
+redis: 2026/11/04 17:08:44 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:50546: connect: connection refused
+redis: 2026/11/04 17:08:45 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:50546: connect: connection refused
+redis: 2026/11/04 17:08:45 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:50546: connect: connection refused
+redis: 2026/11/04 17:08:45 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:50546: connect: connection refused
+redis: 2026/11/04 17:08:46 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:50546: connect: connection refused
+redis: 2026/11/04 17:08:46 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:50546: connect: connection refused
+    terminal_redis_outage_test.go:131: mode=reverse redis_killed=true sql_rollback=true retry_balance=500 ledger=500 events=1
+--- PASS: TestTerminalRollbackRedisOutage (9.09s)
+    --- PASS: TestTerminalRollbackRedisOutage/settle (4.20s)
+    --- PASS: TestTerminalRollbackRedisOutage/reverse (4.22s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	29.286s

@@ -1,0 +1,110 @@
+head=42d8ef8e5ca2471b18800e50f8e7a57fbcfdd47f
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+d15f257866052421f09f0e4ab632e16b822b872b3a1bd653e81dab98798758ef  /var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T//usage-atomic-overlay.i9gbqF/registry.go
+# github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02.test
+ld: warning: '/private/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-970397208/000013.o' has malformed LC_DYSYMTAB, expected 98 undefined symbols to start at index 1626, found 95 undefined symbols starting at index 1626
+=== RUN   TestCanceledRouteDoesNotConsumeHalfOpenProbe
+--- PASS: TestCanceledRouteDoesNotConsumeHalfOpenProbe (0.37s)
+=== RUN   TestCanceledRouteSkipsCacheRefresh
+--- PASS: TestCanceledRouteSkipsCacheRefresh (0.15s)
+=== RUN   TestRouterFreshStatusAfterCrossRegistryBan
+--- PASS: TestRouterFreshStatusAfterCrossRegistryBan (0.09s)
+=== RUN   TestRouterBanAfterStatusReadCanStillRoute
+    router_refresh_cross_instance_test.go:136: query observed active before ban; blocked in-flight route still selected provider after ban; later query denied
+
+2026/11/05 10:40:48 [34;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/router_refresh_cross_instance_test.go:137
+[0m[35m[warn] [0mremoving callback `eval:authority-read-status-gap-1793846448548484000` from /Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/router_refresh_cross_instance_test.go:137
+--- PASS: TestRouterBanAfterStatusReadCanStillRoute (0.10s)
+=== RUN   TestRouterAuthorityDatabaseUnavailableFailsClosed
+
+2026/11/05 10:40:48 [31;1m/Users/a1/项目/ai-gateway/internal/router/registry.go:401 [35;1msql: database is closed
+[0m[33m[0.081ms] [34;1m[rows:0][0m SELECT `id` FROM `providers` WHERE id IN (6) AND status = 0
+--- PASS: TestRouterAuthorityDatabaseUnavailableFailsClosed (0.07s)
+=== RUN   TestRouterAuthorityStatusCheckDoesNotRefreshConfig
+    router_refresh_cross_instance_test.go:193: status-only query accepted active provider and retained cached old URL/key
+--- PASS: TestRouterAuthorityStatusCheckDoesNotRefreshConfig (0.10s)
+=== RUN   TestRouterAuthorityNilDBFailsClosed
+--- PASS: TestRouterAuthorityNilDBFailsClosed (0.00s)
+=== RUN   TestRouterCachedRouteDuringBlockedRefresh
+--- PASS: TestRouterCachedRouteDuringBlockedRefresh (0.06s)
+=== RUN   TestRouterRefreshDoesNotRestoreBannedProvider
+--- PASS: TestRouterRefreshDoesNotRestoreBannedProvider (0.08s)
+=== RUN   TestRouterRefreshWaiterHonorsCancellation
+--- PASS: TestRouterRefreshWaiterHonorsCancellation (0.40s)
+=== RUN   TestRouterThresholdDBLockRespectsRouteDeadline
+    router_threshold_deadline_test.go:104: threshold update remained blocked while other route returned context deadline before row release
+--- PASS: TestRouterThresholdDBLockRespectsRouteDeadline (0.19s)
+=== RUN   TestRouterOpenThresholdPersistsFailure
+    router_threshold_persistence_test.go:69: four reports including threshold persisted exactly once; success reset database count
+--- PASS: TestRouterOpenThresholdPersistsFailure (0.10s)
+=== RUN   TestCanceledRouteDoesNotConsumeHalfOpenProbe
+--- PASS: TestCanceledRouteDoesNotConsumeHalfOpenProbe (0.09s)
+=== RUN   TestCanceledRouteSkipsCacheRefresh
+--- PASS: TestCanceledRouteSkipsCacheRefresh (0.04s)
+=== RUN   TestRouterFreshStatusAfterCrossRegistryBan
+--- PASS: TestRouterFreshStatusAfterCrossRegistryBan (0.05s)
+=== RUN   TestRouterBanAfterStatusReadCanStillRoute
+    router_refresh_cross_instance_test.go:136: query observed active before ban; blocked in-flight route still selected provider after ban; later query denied
+
+2026/11/05 10:40:49 [34;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/router_refresh_cross_instance_test.go:137
+[0m[35m[warn] [0mremoving callback `eval:authority-read-status-gap-1793846449806884000` from /Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/router_refresh_cross_instance_test.go:137
+--- PASS: TestRouterBanAfterStatusReadCanStillRoute (0.07s)
+=== RUN   TestRouterAuthorityDatabaseUnavailableFailsClosed
+
+2026/11/05 10:40:49 [31;1m/Users/a1/项目/ai-gateway/internal/router/registry.go:401 [35;1msql: database is closed
+[0m[33m[0.033ms] [34;1m[rows:0][0m SELECT `id` FROM `providers` WHERE id IN (19) AND status = 0
+--- PASS: TestRouterAuthorityDatabaseUnavailableFailsClosed (0.06s)
+=== RUN   TestRouterAuthorityStatusCheckDoesNotRefreshConfig
+    router_refresh_cross_instance_test.go:193: status-only query accepted active provider and retained cached old URL/key
+--- PASS: TestRouterAuthorityStatusCheckDoesNotRefreshConfig (0.06s)
+=== RUN   TestRouterAuthorityNilDBFailsClosed
+--- PASS: TestRouterAuthorityNilDBFailsClosed (0.00s)
+=== RUN   TestRouterCachedRouteDuringBlockedRefresh
+--- PASS: TestRouterCachedRouteDuringBlockedRefresh (0.05s)
+=== RUN   TestRouterRefreshDoesNotRestoreBannedProvider
+--- PASS: TestRouterRefreshDoesNotRestoreBannedProvider (0.06s)
+=== RUN   TestRouterRefreshWaiterHonorsCancellation
+--- PASS: TestRouterRefreshWaiterHonorsCancellation (0.15s)
+=== RUN   TestRouterThresholdDBLockRespectsRouteDeadline
+    router_threshold_deadline_test.go:104: threshold update remained blocked while other route returned context deadline before row release
+--- PASS: TestRouterThresholdDBLockRespectsRouteDeadline (0.14s)
+=== RUN   TestRouterOpenThresholdPersistsFailure
+    router_threshold_persistence_test.go:69: four reports including threshold persisted exactly once; success reset database count
+--- PASS: TestRouterOpenThresholdPersistsFailure (0.27s)
+=== RUN   TestCanceledRouteDoesNotConsumeHalfOpenProbe
+--- PASS: TestCanceledRouteDoesNotConsumeHalfOpenProbe (0.10s)
+=== RUN   TestCanceledRouteSkipsCacheRefresh
+--- PASS: TestCanceledRouteSkipsCacheRefresh (0.07s)
+=== RUN   TestRouterFreshStatusAfterCrossRegistryBan
+--- PASS: TestRouterFreshStatusAfterCrossRegistryBan (0.09s)
+=== RUN   TestRouterBanAfterStatusReadCanStillRoute
+    router_refresh_cross_instance_test.go:136: query observed active before ban; blocked in-flight route still selected provider after ban; later query denied
+
+2026/11/05 10:40:51 [34;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/router_refresh_cross_instance_test.go:137
+[0m[35m[warn] [0mremoving callback `eval:authority-read-status-gap-1793846450941707000` from /Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/router_refresh_cross_instance_test.go:137
+--- PASS: TestRouterBanAfterStatusReadCanStillRoute (0.13s)
+=== RUN   TestRouterAuthorityDatabaseUnavailableFailsClosed
+
+2026/11/05 10:40:51 [31;1m/Users/a1/项目/ai-gateway/internal/router/registry.go:401 [35;1msql: database is closed
+[0m[33m[0.036ms] [34;1m[rows:0][0m SELECT `id` FROM `providers` WHERE id IN (32) AND status = 0
+--- PASS: TestRouterAuthorityDatabaseUnavailableFailsClosed (0.12s)
+=== RUN   TestRouterAuthorityStatusCheckDoesNotRefreshConfig
+    router_refresh_cross_instance_test.go:193: status-only query accepted active provider and retained cached old URL/key
+--- PASS: TestRouterAuthorityStatusCheckDoesNotRefreshConfig (0.09s)
+=== RUN   TestRouterAuthorityNilDBFailsClosed
+--- PASS: TestRouterAuthorityNilDBFailsClosed (0.00s)
+=== RUN   TestRouterCachedRouteDuringBlockedRefresh
+--- PASS: TestRouterCachedRouteDuringBlockedRefresh (0.09s)
+=== RUN   TestRouterRefreshDoesNotRestoreBannedProvider
+--- PASS: TestRouterRefreshDoesNotRestoreBannedProvider (0.09s)
+=== RUN   TestRouterRefreshWaiterHonorsCancellation
+--- PASS: TestRouterRefreshWaiterHonorsCancellation (0.22s)
+=== RUN   TestRouterThresholdDBLockRespectsRouteDeadline
+    router_threshold_deadline_test.go:104: threshold update remained blocked while other route returned context deadline before row release
+--- PASS: TestRouterThresholdDBLockRespectsRouteDeadline (0.15s)
+=== RUN   TestRouterOpenThresholdPersistsFailure
+    router_threshold_persistence_test.go:69: four reports including threshold persisted exactly once; success reset database count
+--- PASS: TestRouterOpenThresholdPersistsFailure (0.08s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	5.837s

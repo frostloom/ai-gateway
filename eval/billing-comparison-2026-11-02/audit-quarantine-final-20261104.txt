@@ -1,0 +1,14 @@
+head=9c1049404a91ab2121d26bbefa639577244aecaf
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestAuditQuarantineTransaction
+    audit_quarantine_test.go:181: initial=accepted replay=duplicate injected_write=error conflict=quarantined repeat=one coordinate_mutation=error original_unchanged=true
+--- PASS: TestAuditQuarantineTransaction (0.33s)
+=== RUN   TestAuditQuarantineTransaction
+    audit_quarantine_test.go:181: initial=accepted replay=duplicate injected_write=error conflict=quarantined repeat=one coordinate_mutation=error original_unchanged=true
+--- PASS: TestAuditQuarantineTransaction (0.17s)
+=== RUN   TestAuditQuarantineTransaction
+    audit_quarantine_test.go:181: initial=accepted replay=duplicate injected_write=error conflict=quarantined repeat=one coordinate_mutation=error original_unchanged=true
+--- PASS: TestAuditQuarantineTransaction (0.24s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	2.727s

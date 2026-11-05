@@ -1,0 +1,16 @@
+head=63b9d1ed4d64bb583d15fa884c37468e5c53044c
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestAuthCacheRealStoreLoad
+    auth_cache_load_test.go:55: actual MySQL status change: stale until TTL, then rejected
+    auth_cache_load_test.go:115: AUTH_LOAD rep=1 mode=mysql workers=32 keys=64 requests=526 failures=0 elapsed=2.243 rps=234.5 mean_ms=130.003 p95_ms=305.491 p99_ms=1907.429
+    auth_cache_load_test.go:115: AUTH_LOAD rep=1 mode=cache workers=32 keys=64 requests=2941 failures=0 elapsed=2.017 rps=1458.4 mean_ms=21.831 p95_ms=60.769 p99_ms=208.973
+    auth_cache_load_test.go:115: AUTH_LOAD rep=2 mode=mysql workers=32 keys=64 requests=880 failures=0 elapsed=2.269 rps=387.8 mean_ms=77.243 p95_ms=282.831 p99_ms=1172.598
+    auth_cache_load_test.go:115: AUTH_LOAD rep=2 mode=cache workers=32 keys=64 requests=4326 failures=0 elapsed=2.083 rps=2076.4 mean_ms=15.287 p95_ms=38.329 p99_ms=160.137
+    auth_cache_load_test.go:115: AUTH_LOAD rep=3 mode=mysql workers=32 keys=64 requests=145 failures=0 elapsed=2.583 rps=56.1 mean_ms=473.798 p95_ms=1639.173 p99_ms=2376.025
+    auth_cache_load_test.go:115: AUTH_LOAD rep=3 mode=cache workers=32 keys=64 requests=1673 failures=0 elapsed=2.167 rps=772.0 mean_ms=41.206 p95_ms=206.328 p99_ms=436.528
+--- PASS: TestAuthCacheRealStoreLoad (16.30s)
+=== RUN   TestAuthCacheBoundaries
+--- PASS: TestAuthCacheBoundaries (0.42s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	17.781s

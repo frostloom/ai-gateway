@@ -1,0 +1,26 @@
+head=c84cbf64ae8982272ae5bcb2aff06a6f44d2c31d
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+# github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02.test
+ld: warning: '/private/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-1292062483/000013.o' has malformed LC_DYSYMTAB, expected 98 undefined symbols to start at index 1626, found 95 undefined symbols starting at index 1626
+=== RUN   TestReconcilerNilResponsesCountAsErrors
+    reconciler_nil_responses_test.go:86: nil settle/reverse/rebuild recorded as errors; subsequent nonnil responses counted normally
+--- PASS: TestReconcilerNilResponsesCountAsErrors (0.14s)
+=== RUN   TestReconcilerOnceRealRecoveryAfterUnavailable
+    reconciler_once_recovery_test.go:125: unavailable -> nonzero and pending; recovered -> settled once; repeat -> no-op; balance=960
+--- PASS: TestReconcilerOnceRealRecoveryAfterUnavailable (3.71s)
+=== RUN   TestReconcilerNilResponsesCountAsErrors
+    reconciler_nil_responses_test.go:75: nil rebuild={Scanned:0 Reversed:0 Settled:0 Rebuilt:0 Held:0 HeldOldestCreatedAt:0001-01-01 00:00:00 +0000 UTC SweepAttempted:false SweepError:false SettleErrors:0 ReverseErrors:0 RebuildAttempted:false RebuildError:false RebuildErrors:2} err=<nil>
+--- FAIL: TestReconcilerNilResponsesCountAsErrors (0.13s)
+=== RUN   TestReconcilerOnceRealRecoveryAfterUnavailable
+    reconciler_once_recovery_test.go:125: unavailable -> nonzero and pending; recovered -> settled once; repeat -> no-op; balance=960
+--- PASS: TestReconcilerOnceRealRecoveryAfterUnavailable (3.21s)
+=== RUN   TestReconcilerNilResponsesCountAsErrors
+    reconciler_nil_responses_test.go:75: nil rebuild={Scanned:0 Reversed:0 Settled:0 Rebuilt:0 Held:0 HeldOldestCreatedAt:0001-01-01 00:00:00 +0000 UTC SweepAttempted:false SweepError:false SettleErrors:0 ReverseErrors:0 RebuildAttempted:false RebuildError:false RebuildErrors:3} err=<nil>
+--- FAIL: TestReconcilerNilResponsesCountAsErrors (0.21s)
+=== RUN   TestReconcilerOnceRealRecoveryAfterUnavailable
+    reconciler_once_recovery_test.go:125: unavailable -> nonzero and pending; recovered -> settled once; repeat -> no-op; balance=960
+--- PASS: TestReconcilerOnceRealRecoveryAfterUnavailable (2.18s)
+FAIL
+FAIL	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	10.425s
+FAIL

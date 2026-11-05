@@ -1,0 +1,23 @@
+head=63b9d1ed4d64bb583d15fa884c37468e5c53044c
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestAuthCacheRealStoreLoad
+    auth_cache_load_test.go:55: actual MySQL status change: stale until TTL, then rejected
+    auth_cache_load_test.go:123: AUTH_LOAD rep=1 mode=mysql workers=32 keys=64 requests=4039 failures=0 elapsed=2.010 rps=2009.2 mean_ms=15.856 p95_ms=44.539 p99_ms=89.896
+    auth_cache_load_test.go:123: AUTH_LOAD rep=1 mode=cache workers=32 keys=64 requests=28656 failures=0 elapsed=2.004 rps=14301.3 mean_ms=2.235 p95_ms=5.115 p99_ms=12.856
+    auth_cache_load_test.go:123: AUTH_LOAD rep=1 mode=fenced workers=32 keys=64 requests=22139 failures=0 elapsed=2.001 rps=11063.5 mean_ms=2.892 p95_ms=7.840 p99_ms=19.376
+    auth_cache_load_test.go:123: AUTH_LOAD rep=2 mode=mysql workers=32 keys=64 requests=2858 failures=0 elapsed=2.027 rps=1410.2 mean_ms=22.475 p95_ms=69.047 p99_ms=433.802
+    auth_cache_load_test.go:123: AUTH_LOAD rep=2 mode=cache workers=32 keys=64 requests=25757 failures=0 elapsed=2.002 rps=12868.7 mean_ms=2.485 p95_ms=6.715 p99_ms=14.987
+    auth_cache_load_test.go:123: AUTH_LOAD rep=2 mode=fenced workers=32 keys=64 requests=25901 failures=0 elapsed=2.035 rps=12726.2 mean_ms=2.504 p95_ms=6.235 p99_ms=16.446
+    auth_cache_load_test.go:123: AUTH_LOAD rep=3 mode=mysql workers=32 keys=64 requests=4672 failures=0 elapsed=2.012 rps=2321.8 mean_ms=13.719 p95_ms=40.696 p99_ms=96.987
+    auth_cache_load_test.go:123: AUTH_LOAD rep=3 mode=cache workers=32 keys=64 requests=20640 failures=0 elapsed=2.229 rps=9258.4 mean_ms=3.445 p95_ms=7.295 p99_ms=21.062
+    auth_cache_load_test.go:123: AUTH_LOAD rep=3 mode=fenced workers=32 keys=64 requests=3394 failures=0 elapsed=2.005 rps=1693.1 mean_ms=18.843 p95_ms=39.693 p99_ms=134.875
+--- PASS: TestAuthCacheRealStoreLoad (20.19s)
+=== RUN   TestAuthCacheBoundaries
+--- PASS: TestAuthCacheBoundaries (0.38s)
+=== RUN   TestFenceActualStoreMultiInstance
+redis: 2026/11/03 15:58:30 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:53103: connect: connection refused
+redis: 2026/11/03 15:58:30 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:53103: connect: connection refused
+--- PASS: TestFenceActualStoreMultiInstance (0.38s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	21.956s

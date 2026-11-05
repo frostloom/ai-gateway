@@ -1,0 +1,3 @@
+func TestBoundedSSELineBoundary(t *testing.T){
+ for _,tc:=range []struct{name,input string;want string;err error}{{"newline_at_limit","1234567\n","1234567\n",nil},{"newline_over_limit","12345678\n","",testSSELineTooLong},{"eof_at_limit","12345678","12345678",io.EOF},{"eof_over_limit","123456789","",testSSELineTooLong},{"crlf","123456\r\n","123456\r\n",nil}}{t.Run(tc.name,func(t *testing.T){got,err:=testReadLimitedSSELine(bufio.NewReaderSize(strings.NewReader(tc.input),2),8);if string(got)!=tc.want||!errors.Is(err,tc.err){t.Fatalf("got=%q err=%v",got,err)}})}
+}

@@ -1,0 +1,21 @@
+mysql: [Warning] Using a password on the command line interface can be insecure.
+Table	Op	Msg_type	Msg_text
+isolated.bills	analyze	status	OK
+rows_total	pending
+100000	20000
+scenario
+baseline max id
+EXPLAIN
+-> Aggregate: max(bills.id)  (cost=2054 rows=1) (actual time=20.4..20.4 rows=1 loops=1)\n    -> Filter: (bills.`phase` = 'reserve')  (cost=1953 rows=1013) (actual time=1.93..19.8 rows=10000 loops=1)\n        -> Index lookup on bills using idx_recon (status='pending'), with index condition: (bills.created_at < <cache>((now(3) - interval 600 second)))  (cost=1953 rows=30398) (actual time=1.93..18.8 rows=10000 loops=1)\n
+scenario
+candidate max id
+EXPLAIN
+-> Aggregate: max(bills.id)  (cost=2176 rows=1) (actual time=22.1..22.1 rows=1 loops=1)\n    -> Filter: (bills.`phase` = 'reserve')  (cost=2014 rows=1621) (actual time=0.75..21.4 rows=15000 loops=1)\n        -> Index lookup on bills using idx_recon (status='pending'), with index condition: ((bills.created_at < <cache>((now(3) - interval 600 second))) or ((bills.usage_reported_at is not null) and (bills.usage_reported_at < <cache>((now(3) - interval 30 second)))))  (cost=2014 rows=30398) (actual time=0.748..19.9 rows=15000 loops=1)\n
+scenario
+baseline page
+EXPLAIN
+-> Limit: 200 row(s)  (cost=1902 rows=200) (actual time=0.261..0.732 rows=200 loops=1)\n    -> Filter: ((bills.`status` = 'pending') and (bills.`phase` = 'reserve') and (bills.created_at < <cache>((now(3) - interval 600 second))) and (bills.id > 0) and (bills.id <= 100000))  (cost=1902 rows=507) (actual time=0.26..0.72 rows=200 loops=1)\n        -> Index range scan on bills using PRIMARY over (0 < id <= 100000)  (cost=1902 rows=62680) (actual time=0.158..0.527 rows=1992 loops=1)\n
+scenario
+candidate page
+EXPLAIN
+-> Limit: 200 row(s)  (cost=1933 rows=200) (actual time=0.122..0.469 rows=200 loops=1)\n    -> Filter: ((bills.`status` = 'pending') and (bills.`phase` = 'reserve') and ((bills.created_at < <cache>((now(3) - interval 600 second))) or ((bills.usage_reported_at is not null) and (bills.usage_reported_at < <cache>((now(3) - interval 30 second))))) and (bills.id > 0) and (bills.id <= 100000))  (cost=1933 rows=811) (actual time=0.122..0.459 rows=200 loops=1)\n        -> Index range scan on bills using PRIMARY over (0 < id <= 100000)  (cost=1933 rows=62680) (actual time=0.112..0.315 rows=1492 loops=1)\n

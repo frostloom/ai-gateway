@@ -1,0 +1,75 @@
+package handler
+
+import (
+	"context"
+ "errors"
+
+ "github.com/prometheus/client_golang/prometheus"
+	"log/slog"
+	"testing"
+
+	billingv1 "github.com/frostloom/ai-gateway/internal/proto/billing/v1"
+)
+
+type usageAckBilling struct {
+	*fakeBilling
+	reply *billingv1.ReportUsageResponse
+}
+
+func (b *usageAckBilling) ReportUsage(_ context.Context, req *billingv1.ReportUsageRequest) (*billingv1.ReportUsageResponse, error) {
+	b.reports = append(b.reports, req)
+	return b.reply, nil
+}
+
+func TestUsageMustBeAcknowledgedBeforeSettle(t *testing.T) {
+	for _, tc := range []struct {
+		name    string
+		reply   *billingv1.ReportUsageResponse
+		settles int
+	}{
+		{"accepted", &billingv1.ReportUsageResponse{Accepted: true}, 1},
+		{"rejected", &billingv1.ReportUsageResponse{Accepted: false}, 0},
+		{"missing", nil, 0},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			b := &usageAckBilling{fakeBilling: &fakeBilling{}, reply: tc.reply}
+			c, _ := newGinCtx()
+			settleAndLog(c, b, slog.New(slog.DiscardHandler), "request", 1, 4, 2, 3)
+			if len(b.reports) != 1 || len(b.settles) != tc.settles || len(b.reverses) != 0 {
+				t.Fatalf("reports=%d settles=%d reverses=%d", len(b.reports), len(b.settles), len(b.reverses))
+			}
+		})
+	}
+}
+
+func usageCompletionMetric(t *testing.T, outcome string) float64 {
+ t.Helper();fs,err:=prometheus.DefaultGatherer.Gather();if err!=nil {t.Fatal(err)}
+ for _,f:=range fs {if f.GetName()!="gateway_billing_completion_total" {continue};for _,m:=range f.Metric {for _,l:=range m.Label {if l.GetName()=="result" && l.GetValue()==outcome {return m.GetCounter().GetValue()}}}}
+ return 0
+}
+type completionMetricBilling struct {
+ *fakeBilling
+ usage *billingv1.ReportUsageResponse
+ usageErr error
+ settlement *billingv1.SettleResponse
+ settleErr error
+}
+func (b *completionMetricBilling) ReportUsage(_ context.Context, r *billingv1.ReportUsageRequest)(*billingv1.ReportUsageResponse,error) {b.reports=append(b.reports,r);return b.usage,b.usageErr}
+func (b *completionMetricBilling) Settle(_ context.Context, r *billingv1.SettleRequest)(*billingv1.SettleResponse,error) {b.settles=append(b.settles,r);return b.settlement,b.settleErr}
+func TestUsageCompletionMetricsObserveOutcomes(t *testing.T) {
+ for _,tc:=range []struct{name, outcome string; u *billingv1.ReportUsageResponse; ue error; s *billingv1.SettleResponse; se error; settleCalls int}{
+  {"usage error","usage_unacknowledged",nil,errors.New("offline"),nil,nil,0},
+  {"usage nil","usage_unacknowledged",nil,nil,nil,nil,0},
+  {"usage refused","usage_unacknowledged",&billingv1.ReportUsageResponse{},nil,nil,nil,0},
+  {"settle error","settlement_unacknowledged",&billingv1.ReportUsageResponse{Accepted:true},nil,nil,errors.New("offline"),1},
+  {"settle nil","settlement_unacknowledged",&billingv1.ReportUsageResponse{Accepted:true},nil,nil,nil,1},
+  {"settle refused","settlement_unacknowledged",&billingv1.ReportUsageResponse{Accepted:true},nil,&billingv1.SettleResponse{},nil,1},
+  {"settled","settlement_acknowledged",&billingv1.ReportUsageResponse{Accepted:true},nil,&billingv1.SettleResponse{Settled:true},nil,1},
+ } {t.Run(tc.name,func(t *testing.T){
+  outcomes:=[]string{"usage_unacknowledged","settlement_unacknowledged","settlement_acknowledged"};before:=map[string]float64{};for _,o:=range outcomes {before[o]=usageCompletionMetric(t,o)}
+  b:=&completionMetricBilling{fakeBilling:&fakeBilling{},usage:tc.u,usageErr:tc.ue,settlement:tc.s,settleErr:tc.se};c,_:=newGinCtx()
+  settleAndLog(c,b,slog.New(slog.DiscardHandler),"synthetic",1,4,2,3)
+  if len(b.reports)!=1 || len(b.settles)!=tc.settleCalls {t.Fatalf("reports=%d settles=%d",len(b.reports),len(b.settles))}
+  for _,o:=range outcomes {want:=float64(0);if o==tc.outcome {want=1};if got:=usageCompletionMetric(t,o)-before[o];got!=want {t.Fatalf("outcome %s delta=%v want=%v",o,got,want)}}
+ })}
+}

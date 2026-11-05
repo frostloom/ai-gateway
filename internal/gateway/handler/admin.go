@@ -64,6 +64,10 @@ func RegisterAdmin(g *gin.RouterGroup, billingAdminBase, routerBase, reconcilerB
 	g.GET("/overview", func(c *gin.Context) {
 		proxyJSON(c, billingAdminBase+"/admin/overview", log)
 	})
+	// Global pending reserve snapshot, available only through the admin group.
+	g.GET("/pending-summary", func(c *gin.Context) {
+		proxyJSON(c, billingAdminBase+"/admin/pending-summary", log)
+	})
 	// 账单列表：query 透传（tenant_id/status/limit/offset）
 	g.GET("/bills", func(c *gin.Context) {
 		proxyJSON(c, billingAdminBase+"/admin/bills?"+c.Request.URL.RawQuery, log)
@@ -199,7 +203,12 @@ func RegisterAdminChat(g *gin.RouterGroup, agentBase, internalToken string, defa
 			return
 		}
 		defer func() { io.Copy(io.Discard, resp.Body); resp.Body.Close() }()
-		b, _ := io.ReadAll(resp.Body)
+		b, err := io.ReadAll(resp.Body)
+		if err != nil {
+			log.Error("admin chat response", "err", err)
+			c.JSON(http.StatusBadGateway, gin.H{"error": "upstream response incomplete"})
+			return
+		}
 		c.Data(resp.StatusCode, "application/json", b)
 	})
 }
@@ -263,12 +272,17 @@ func proxy(c *gin.Context, method, target string, body []byte, log *slog.Logger)
 		return
 	}
 	defer resp.Body.Close()
+	b, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Error("admin proxy response", "target", target, "err", err)
+		c.JSON(http.StatusBadGateway, gin.H{"error": "upstream response incomplete"})
+		return
+	}
 	// 透传 Set-Cookie（billing 登录/退出签发的 HttpOnly 会话 cookie 要交给浏览器）。
 	for _, k := range []string{"Set-Cookie"} {
 		for _, v := range resp.Header.Values(k) {
 			c.Writer.Header().Add(k, v)
 		}
 	}
-	b, _ := io.ReadAll(resp.Body)
 	c.Data(resp.StatusCode, "application/json", b)
 }

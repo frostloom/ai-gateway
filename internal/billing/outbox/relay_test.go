@@ -2,6 +2,7 @@ package outbox
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"sync"
 	"testing"
@@ -9,6 +10,7 @@ import (
 
 	"github.com/frostloom/ai-gateway/internal/billing/store"
 	"github.com/frostloom/ai-gateway/internal/pkg/logger"
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 // errBoom 模拟投递失败的 broker 错误。
@@ -93,6 +95,77 @@ func evRow(id uint64, key string, attempts int) store.OutboxEvent {
 	return store.OutboxEvent{
 		ID: id, Topic: store.TopicBillingEvents, EventKey: key,
 		Payload: `{"event_id":"` + key + `"}`, Attempts: attempts,
+	}
+}
+
+type failedMarkStore struct{ *fakeStore }
+
+func (f *failedMarkStore) MarkOutboxSent(context.Context, uint64) error {
+	return errors.New("sent marker unavailable")
+}
+func (f *failedMarkStore) MarkOutboxDLQ(context.Context, uint64, string) error {
+	return errors.New("dlq marker unavailable")
+}
+
+func TestFlushOnceReportsMarkErrorsSeparately(t *testing.T) {
+	st := &failedMarkStore{newFakeStore(evRow(1, "sent", 0), evRow(2, "dlq", 4))}
+	r := newRelay(st, &stubProducer{fail: map[string]error{"dlq": errBoom}}, &stubProducer{}, 5)
+	stats, err := r.FlushOnce(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	encoded, err := json.Marshal(stats)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var fields map[string]any
+	if err := json.Unmarshal(encoded, &fields); err != nil {
+		t.Fatal(err)
+	}
+	if stats.Sent != 1 || stats.DLQed != 1 || fields["mark_sent_errors"] != float64(1) || fields["mark_dlq_errors"] != float64(1) {
+		t.Fatalf("published counts and marker errors: %s", encoded)
+	}
+	if len(st.rows) != 2 {
+		t.Fatalf("unmarked rows=%d", len(st.rows))
+	}
+}
+
+func markErrorCounter(t *testing.T, operation string) float64 {
+	t.Helper()
+	families, err := prometheus.DefaultGatherer.Gather()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, family := range families {
+		if family.GetName() != "billing_outbox_mark_errors_total" {
+			continue
+		}
+		for _, metric := range family.Metric {
+			for _, label := range metric.Label {
+				if label.GetName() == "operation" && label.GetValue() == operation {
+					return metric.GetCounter().GetValue()
+				}
+			}
+		}
+	}
+	return 0
+}
+
+func TestMarkErrorCountersSurviveSubsequentEmptyFlush(t *testing.T) {
+	beforeSent, beforeDLQ := markErrorCounter(t, "sent"), markErrorCounter(t, "dlq")
+	st := &failedMarkStore{newFakeStore(evRow(1, "sent", 0), evRow(2, "dlq", 4))}
+	r := newRelay(st, &stubProducer{fail: map[string]error{"dlq": errBoom}}, &stubProducer{}, 5)
+	if _, err := r.FlushOnce(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := newRelay(newFakeStore(), &stubProducer{}, &stubProducer{}, 5).FlushOnce(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	if got := markErrorCounter(t, "sent"); got != beforeSent+1 {
+		t.Fatalf("sent counter=%v want=%v", got, beforeSent+1)
+	}
+	if got := markErrorCounter(t, "dlq"); got != beforeDLQ+1 {
+		t.Fatalf("dlq counter=%v want=%v", got, beforeDLQ+1)
 	}
 }
 

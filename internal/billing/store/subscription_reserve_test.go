@@ -298,3 +298,29 @@ func TestCancelledEntitlementBoundaries(t *testing.T) {
 		})
 	}
 }
+
+func TestStrictSubscriptionReserveReplay(t *testing.T) {
+	s, done := newTestStore(t)
+	defer done()
+	ctx := context.Background()
+	seedTierModel(t, s, "strict-sub-text", `["文本"]`)
+	tid := seedTenant(t, s, 1000)
+	subscribeTestPlan(t, s, ctx, tid, `{"文本":300}`, 5)
+	req := reserveTierReq("strict-sub-id", tid, "strict-sub-text", 100)
+	first, e := s.ReserveWithReplaySignal(ctx, req)
+	if e != nil || first.Code != billingv1.ReserveCode_RESERVE_OK {
+		t.Fatalf("first=%+v err=%v", first, e)
+	}
+	replay, e := s.ReserveWithReplaySignal(ctx, req)
+	if e != nil || replay.Code != billingv1.ReserveCode_RESERVE_DUPLICATE || replay.BillId != first.BillId {
+		t.Fatalf("replay=%+v err=%v", replay, e)
+	}
+	legacy, e := s.Reserve(ctx, req)
+	if e != nil || legacy.Code != billingv1.ReserveCode_RESERVE_OK || legacy.BillId != first.BillId {
+		t.Fatalf("legacy=%+v err=%v", legacy, e)
+	}
+	var n int64
+	if e := s.db.Model(&Bill{}).Where("request_id=? AND phase=?", req.RequestId, PhaseReserve).Count(&n).Error; e != nil || n != 1 {
+		t.Fatalf("reserve rows=%d err=%v", n, e)
+	}
+}

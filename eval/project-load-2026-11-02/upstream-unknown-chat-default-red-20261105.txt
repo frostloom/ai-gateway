@@ -1,0 +1,19 @@
+# github.com/frostloom/ai-gateway/internal/gateway/handler.test
+ld: warning: '/private/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-2850957597/000013.o' has malformed LC_DYSYMTAB, expected 98 undefined symbols to start at index 1626, found 95 undefined symbols starting at index 1626
+=== RUN   TestGatewayDoesNotResendUnknownUpstreamOutcome
+=== RUN   TestGatewayDoesNotResendUnknownUpstreamOutcome/stream=false/disconnect
+    chat_stream_test.go:408: primary=1 secondary=1 HTTP=200 reverses=0 usage=1 settle=1
+=== RUN   TestGatewayDoesNotResendUnknownUpstreamOutcome/stream=false/server_503
+    chat_stream_test.go:408: primary=1 secondary=1 HTTP=200 reverses=0 usage=1 settle=1
+=== RUN   TestGatewayDoesNotResendUnknownUpstreamOutcome/stream=true/disconnect
+    chat_stream_test.go:408: primary=1 secondary=1 HTTP=200 reverses=0 usage=1 settle=1
+=== RUN   TestGatewayDoesNotResendUnknownUpstreamOutcome/stream=true/server_503
+    chat_stream_test.go:408: primary=1 secondary=1 HTTP=200 reverses=0 usage=1 settle=1
+--- FAIL: TestGatewayDoesNotResendUnknownUpstreamOutcome (0.01s)
+    --- FAIL: TestGatewayDoesNotResendUnknownUpstreamOutcome/stream=false/disconnect (0.00s)
+    --- FAIL: TestGatewayDoesNotResendUnknownUpstreamOutcome/stream=false/server_503 (0.00s)
+    --- FAIL: TestGatewayDoesNotResendUnknownUpstreamOutcome/stream=true/disconnect (0.00s)
+    --- FAIL: TestGatewayDoesNotResendUnknownUpstreamOutcome/stream=true/server_503 (0.00s)
+FAIL
+FAIL	github.com/frostloom/ai-gateway/internal/gateway/handler	0.983s
+FAIL

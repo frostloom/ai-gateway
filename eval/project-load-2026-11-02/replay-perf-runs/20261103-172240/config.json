@@ -1,0 +1,52 @@
+{
+  "head": "63b9d1ed4d64bb583d15fa884c37468e5c53044c",
+  "branch": "codex/billing-mysql-comparison",
+  "git_status": " M AGENTS.md\n M internal/billing/server/service.go\n M internal/billing/store/mysql.go\n M internal/billing/store/subscription_reserve_test.go\n M internal/gateway/client/billing.go\n M internal/gateway/handler/chat.go\n M internal/gateway/handler/chat_stream_test.go\n M internal/gateway/middleware/apikey.go\n D internal/gateway/web/dist/assets/Empty-B78rz8Qh.css\n D internal/gateway/web/dist/assets/Empty-Cq6uueat.js\n D internal/gateway/web/dist/assets/dashboard-H93iLNlz.js\n D internal/gateway/web/dist/assets/dashboard-jpnukakx.css\n D internal/gateway/web/dist/assets/portal-CI_uKi_F.js\n D internal/gateway/web/dist/assets/portal-fDtFA2oX.css\n M internal/gateway/web/dist/dashboard.html\n M internal/gateway/web/dist/portal.html\n M internal/pkg/controlplane/token.go\n M scripts/schema.sql\n?? .tmp/\n?? eval/billing-comparison-2026-11-02/\n?? eval/project-load-2026-11-02/\n?? integrations/\n?? internal/billing/store/reserve_fingerprint_test.go\n?? internal/gateway/client/billing_replay_test.go\n?? internal/gateway/middleware/apikey_status_test.go\n?? internal/gateway/web/dist/assets/Empty-D1TVEnQN.css\n?? internal/gateway/web/dist/assets/Empty-DFn-BFPp.js\n?? internal/gateway/web/dist/assets/dashboard-BGbdPy4C.js\n?? internal/gateway/web/dist/assets/dashboard-Bt40SYhT.css\n?? internal/gateway/web/dist/assets/portal-CX4r-21-.js\n?? internal/gateway/web/dist/assets/portal-DUpRuSip.css\n?? plate_sim.py\n?? scripts/migrations/\n",
+  "current_source_sha256": {
+    "internal/billing/store/mysql.go": "961238c36123b0ff54965f873b028c4adb5c66506ec032cb5c9316a962836a17",
+    "internal/billing/server/service.go": "5b4089901a1ec7e95fc241cdd7a1f615f019bff6b4e88f8c597f282acb13aa0b",
+    "internal/gateway/client/billing.go": "f5a35ffad3cf137787852e29e1caa5c3347fac2437c80ff7293c32258f3a813f"
+  },
+  "baseline_overlay_sha256": {
+    "internal/billing/store/mysql.go": "78c48b3f3156b6b618be18d944ffb5c7d0ae80c3a7dd7cfcd8f339757961ece7",
+    "internal/billing/server/service.go": "703be44ec61be32c3ac09fb6fb255a7e4659ee4dc5586b15bca6c189db2eb3fe",
+    "internal/gateway/client/billing.go": "6e90c894a62313f3fddceefe9b0bf5feded768df1fd6c11f20f5d57ec40e0783"
+  },
+  "binary_sha256": {
+    "billing_old": "44da18597cab2c9ff8d7272226f3bbd82b5e07730874a03971c12c348cb44e66",
+    "gateway_old": "0cf8085de578e147865d447581bf5561c4bae81e4018d4f00077cbaef2b3d926",
+    "billing_new": "d88a394708ca0812d0bf7a908b577eb95a1ab45c5976e23f50dca3a9e45ca7d6",
+    "gateway_new": "f9a40f49211c1295370f9bd7337b4b1f8659400389e6bb160c06564f180454b5",
+    "router": "c32a77098fc478813b952ad27f663a2997819a169f42c0cbaaf6c131f455e7a7",
+    "reconciler": "62962b7d79ec064eab1e8343148d632e2efb21f35bd04ca3823069c543e6037e",
+    "mock": "d3fda769609d803485d7bedc569062f9c4ca754ff8ca14de33d282ce0c7818b8",
+    "seed": "76930c853b06540d3178dea166578c48164af0b3bb69396e6adb00b06426dd6c",
+    "load": "17b23e36994a2de204ccfb467334761edfdc311d03486646272a56988948bda2"
+  },
+  "images": {
+    "docker.m.daocloud.io/library/mysql:8.0.40": "sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff",
+    "docker.m.daocloud.io/library/redis:7-alpine": "sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499"
+  },
+  "go_version": "go version go1.25.12 darwin/arm64",
+  "gomaxprocs": 8,
+  "mysql_pool_max_per_billing": 100,
+  "rate_per_tenant_per_min": 600,
+  "mock_latency_ms": 15,
+  "redis_port": "56656",
+  "ports": {
+    "gateway_old": 56733,
+    "gateway_new": 56734,
+    "billing_old": 56735,
+    "billing_new": 56736,
+    "admin_old": 56737,
+    "admin_new": 56738,
+    "router": 56739,
+    "mock": 56740,
+    "reconciler": 56741
+  },
+  "tenants": 769,
+  "kafka": "disabled",
+  "reconciler_grace_s": 600,
+  "note": "both billing and gateway instances remain running; separate tenant group per phase; legacy mode lacks duplicate safety",
+  "started": "2026-11-03T17:23:45.947414"
+}

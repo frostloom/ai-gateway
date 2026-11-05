@@ -1,0 +1,8 @@
+{
+  "head": "63b9d1ed4d64bb583d15fa884c37468e5c53044c",
+  "image_id": "sha256:41c20d65b0a2180b9deca056d47540771752e69fe9225d5748dd65a25a9675d7",
+  "go_program_sha256": "7c0d0371d824f7768e0197556364f07a331732bc8b2a81a6d850fade3fbddf75",
+  "returncode": 0,
+  "stdout": "first=audit-fails partition=0 offset=0 (simulated audit failure; no commit)\nsecond=audit-succeeds partition=0 offset=1 (simulated audit success)\nafter restart: no replay before deadline; first failed event skipped\n",
+  "stderr": ""
+}

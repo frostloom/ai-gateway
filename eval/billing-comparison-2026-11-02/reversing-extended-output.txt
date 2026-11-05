@@ -1,0 +1,20 @@
+head=63b9d1ed4d64bb583d15fa884c37468e5c53044c
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestStagedForwardAndReconcile
+    idem_billing_coordination_test.go:294: sent=14 reversed=10 mock_calls=14 live=9300 ledger=9300
+--- PASS: TestStagedForwardAndReconcile (1.99s)
+=== RUN   TestReversingIntentRecovery
+--- PASS: TestReversingIntentRecovery (0.52s)
+=== RUN   TestStagedForwardAndReconcile
+    idem_billing_coordination_test.go:294: sent=16 reversed=8 mock_calls=16 live=9200 ledger=9200
+--- PASS: TestStagedForwardAndReconcile (1.83s)
+=== RUN   TestReversingIntentRecovery
+--- PASS: TestReversingIntentRecovery (0.51s)
+=== RUN   TestStagedForwardAndReconcile
+    idem_billing_coordination_test.go:294: sent=12 reversed=12 mock_calls=12 live=9400 ledger=9400
+--- PASS: TestStagedForwardAndReconcile (1.83s)
+=== RUN   TestReversingIntentRecovery
+--- PASS: TestReversingIntentRecovery (0.50s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	8.929s

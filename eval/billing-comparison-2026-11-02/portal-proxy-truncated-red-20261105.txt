@@ -1,0 +1,110 @@
+head=457dbfc3fee2e7b1575a29eab033439833985ce6
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+# github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02.test
+ld: warning: '/private/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-3356718209/000013.o' has malformed LC_DYSYMTAB, expected 98 undefined symbols to start at index 1626, found 95 undefined symbols starting at index 1626
+=== RUN   TestPortalProxyRejectsTruncatedUpstreamResponse
+
+2026/11/05 13:46:57 [32m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:155 [33mSLOW SQL >= 200ms
+[0m[31;1m[206.377ms] [33m[rows:1][35m SELECT SCHEMA_NAME from Information_schema.SCHEMATA where SCHEMA_NAME LIKE 'billing_compare%' ORDER BY SCHEMA_NAME='billing_compare' DESC,SCHEMA_NAME limit 1[0m
+
+2026/11/05 13:46:57 [32m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:155 [33mSLOW SQL >= 200ms
+[0m[31;1m[705.790ms] [33m[rows:0][35m CREATE TABLE `tenants` (`id` bigint unsigned AUTO_INCREMENT,`name` varchar(64) NOT NULL,`initial_quota` bigint NOT NULL DEFAULT 0,`status` tinyint NOT NULL DEFAULT 0,`created_at` datetime(3) NULL,`updated_at` datetime(3) NULL,PRIMARY KEY (`id`),UNIQUE INDEX `uk_name` (`name`))[0m
+
+2026/11/05 13:46:58 [32m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:155 [33mSLOW SQL >= 200ms
+[0m[31;1m[655.808ms] [33m[rows:0][35m CREATE TABLE `api_keys` (`id` bigint unsigned AUTO_INCREMENT,`tenant_id` bigint unsigned NOT NULL,`key_hash` varchar(64) NOT NULL,`key_prefix` varchar(16) NOT NULL,`name` varchar(64),`status` tinyint NOT NULL DEFAULT 0,`expires_at` datetime(3) NULL,`created_at` datetime(3) NULL,`updated_at` datetime(3) NULL,PRIMARY KEY (`id`),INDEX `idx_tenant_status` (`tenant_id`),UNIQUE INDEX `uk_key_hash` (`key_hash`))[0m
+
+2026/11/05 13:46:59 [32m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:155 [33mSLOW SQL >= 200ms
+[0m[31;1m[493.203ms] [33m[rows:0][35m CREATE TABLE `providers` (`id` bigint unsigned AUTO_INCREMENT,`name` varchar(64) NOT NULL,`base_url` varchar(255) NOT NULL,`upstream_key` varchar(255),`cost_in_cent` bigint NOT NULL DEFAULT 0,`cost_out_cent` bigint NOT NULL DEFAULT 0,`models` json,`weight` bigint NOT NULL DEFAULT 1,`status` tinyint NOT NULL DEFAULT 0,`fail_count` bigint NOT NULL DEFAULT 0,`consecutive_fail` bigint NOT NULL DEFAULT 0,`cooldown_until` datetime(3) NULL,`created_at` datetime(3) NULL,`updated_at` datetime(3) NULL,PRIMARY KEY (`id`),UNIQUE INDEX `uk_name` (`name`))[0m
+
+2026/11/05 13:46:59 [32m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:155 [33mSLOW SQL >= 200ms
+[0m[31;1m[638.761ms] [33m[rows:0][35m CREATE TABLE `models` (`id` bigint unsigned AUTO_INCREMENT,`vendor` varchar(32) NOT NULL,`model_id` varchar(64) NOT NULL,`name` varchar(128) NOT NULL,`input_price_cent` bigint NOT NULL DEFAULT 0,`output_price_cent` bigint NOT NULL DEFAULT 0,`context_len` bigint NOT NULL DEFAULT 0,`tags` json,`status` tinyint NOT NULL DEFAULT 0,`created_at` datetime(3) NULL,`updated_at` datetime(3) NULL,PRIMARY KEY (`id`),INDEX `idx_vendor_status` (`vendor`),UNIQUE INDEX `uk_model_id` (`model_id`))[0m
+
+2026/11/05 13:47:00 [32m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:155 [33mSLOW SQL >= 200ms
+[0m[31;1m[483.108ms] [33m[rows:0][35m CREATE TABLE `bills` (`id` bigint unsigned AUTO_INCREMENT,`reserve_fingerprint` varchar(64),`request_id` varchar(64) NOT NULL,`phase` varchar(16) NOT NULL,`status` varchar(16) NOT NULL,`tenant_id` bigint unsigned NOT NULL,`api_key_id` bigint unsigned NOT NULL,`provider_id` bigint unsigned,`model` varchar(64),`funding` varchar(16) NOT NULL DEFAULT 'balance',`pre_quota` bigint NOT NULL,`reserved_tokens` bigint,`reserved_tier` varchar(64),`actual_quota` bigint,`delta_quota` bigint,`prompt_tokens` bigint,`completion_tokens` bigint,`in_price_cent` bigint,`out_price_cent` bigint,`usage_reported_at` datetime(3) NULL,`error_code` varchar(64),`created_at` datetime(3) NULL,PRIMARY KEY (`id`),UNIQUE INDEX `uk_request_phase` (`request_id`,`phase`),INDEX `idx_recon` (`status`,`usage_reported_at`,`created_at`),INDEX `idx_tenant_status_created` (`tenant_id`,`created_at`),INDEX `idx_provider_created` (`provider_id`,`created_at`))[0m
+
+2026/11/05 13:47:00 [32m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:155 [33mSLOW SQL >= 200ms
+[0m[31;1m[508.864ms] [33m[rows:0][35m CREATE TABLE `plans` (`id` bigint unsigned AUTO_INCREMENT,`name` varchar(64) NOT NULL,`plan_type` varchar(16) NOT NULL,`price_money` bigint NOT NULL,`validity_days` bigint NOT NULL,`refresh_hours` bigint NOT NULL DEFAULT 5,`tier_quota` json NOT NULL,`status` tinyint NOT NULL DEFAULT 0,`created_at` datetime(3) NULL,`updated_at` datetime(3) NULL,PRIMARY KEY (`id`),UNIQUE INDEX `uk_name` (`name`))[0m
+
+2026/11/05 13:47:01 [32m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:155 [33mSLOW SQL >= 200ms
+[0m[31;1m[322.573ms] [33m[rows:0][35m CREATE TABLE `agent_audit_log` (`id` bigint unsigned AUTO_INCREMENT,`session_id` varchar(64) NOT NULL,`tenant_id` bigint unsigned NOT NULL,`tool` varchar(32) NOT NULL,`args` text,`confirmed` boolean NOT NULL,`preview` varchar(255),`result` text,`guard` text,`created_at` datetime(3) NULL,PRIMARY KEY (`id`),INDEX `idx_audit_session` (`session_id`),INDEX `idx_audit_tenant_created` (`tenant_id`,`created_at`))[0m
+
+2026/11/05 13:47:02 [32m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:155 [33mSLOW SQL >= 200ms
+[0m[31;1m[488.645ms] [33m[rows:0][35m CREATE TABLE `outbox_events` (`id` bigint unsigned AUTO_INCREMENT,`topic` varchar(64) NOT NULL,`event_key` varchar(128) NOT NULL,`payload` json NOT NULL,`created_at` datetime(3) NOT NULL,`sent_at` datetime(3) NULL,`attempts` bigint NOT NULL DEFAULT 0,`last_error` varchar(512) NOT NULL DEFAULT '',PRIMARY KEY (`id`),INDEX `idx_unsent` (`sent_at`,`attempts`,`id`),UNIQUE INDEX `uk_event_key` (`event_key`))[0m
+
+2026/11/05 13:47:02 [32m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:155 [33mSLOW SQL >= 200ms
+[0m[31;1m[315.153ms] [33m[rows:0][35m CREATE TABLE `audit_events` (`id` bigint unsigned AUTO_INCREMENT,`event_id` varchar(128) NOT NULL,`tenant_id` bigint unsigned NOT NULL,`request_id` varchar(64) NOT NULL,`phase` varchar(16) NOT NULL,`amount_cents` bigint NOT NULL,`model` varchar(64) NOT NULL DEFAULT '',`funding` varchar(16) NOT NULL DEFAULT 'balance',`prompt_tokens` bigint DEFAULT null,`completion_tokens` bigint DEFAULT null,`payload` json,`source` varchar(16) NOT NULL DEFAULT 'kafka',`kafka_partition` int NOT NULL DEFAULT 0,`kafka_offset` bigint NOT NULL DEFAULT 0,`consumed_at` datetime(3) NOT NULL,PRIMARY KEY (`id`),UNIQUE INDEX `uk_event_id` (`event_id`))[0m
+
+2026/11/05 13:47:03 [32m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:155 [33mSLOW SQL >= 200ms
+[0m[31;1m[250.913ms] [33m[rows:0][35m CREATE TABLE `admin_sessions` (`id` bigint unsigned AUTO_INCREMENT,`token` varchar(64) NOT NULL,`username` varchar(64) NOT NULL,`expires_at` datetime(3) NOT NULL,`created_at` datetime(3) NULL,PRIMARY KEY (`id`),UNIQUE INDEX `uk_admin_token` (`token`))[0m
+
+2026/11/05 13:47:03 [32m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:155 [33mSLOW SQL >= 200ms
+[0m[31;1m[694.278ms] [33m[rows:0][35m CREATE TABLE `portal_users` (`id` bigint unsigned AUTO_INCREMENT,`username` varchar(64) NOT NULL,`password_hash` varchar(255) NOT NULL,`tenant_id` bigint unsigned NOT NULL,`status` tinyint NOT NULL DEFAULT 0,`created_at` datetime(3) NULL,PRIMARY KEY (`id`),UNIQUE INDEX `idx_portal_users_username` (`username`),UNIQUE INDEX `idx_portal_users_tenant_id` (`tenant_id`))[0m
+
+2026/11/05 13:47:04 [32m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/portal_proxy_truncated_response_test.go:37 [33mSLOW SQL >= 200ms
+[0m[31;1m[204.642ms] [33m[rows:1][35m INSERT INTO `tenants` (`name`,`initial_quota`,`status`,`created_at`,`updated_at`) VALUES ('portal-truncated-1793857624189409000',1000,0,'2026-11-05 13:47:04.199','2026-11-05 13:47:04.199')[0m
+
+2026/11/05 13:47:04 [32m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/portal_proxy_truncated_response_test.go:41 [33mSLOW SQL >= 200ms
+[0m[31;1m[234.986ms] [33m[rows:1][35m INSERT INTO `api_keys` (`tenant_id`,`key_hash`,`key_prefix`,`name`,`status`,`expires_at`,`created_at`,`updated_at`) VALUES (1,'bd876fd368b0178c995cfe4fa90183c751a511609f3fceac12c78b37b7fb58cc','synthetic','portal-truncated-1793857624189409000',0,NULL,'2026-11-05 13:47:04.404','2026-11-05 13:47:04.404')[0m
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /portal/me                --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func1 (2 handlers)
+[GIN-debug] GET    /portal/plans             --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func2 (2 handlers)
+[GIN-debug] GET    /portal/topups            --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func3 (2 handlers)
+[GIN-debug] GET    /portal/recharge-orders   --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func4 (2 handlers)
+[GIN-debug] GET    /portal/models            --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func5 (2 handlers)
+[GIN-debug] GET    /portal/consumption       --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func6 (2 handlers)
+[GIN-debug] POST   /portal/recharge          --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func7 (2 handlers)
+[GIN-debug] POST   /portal/recharge/pay      --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func8 (2 handlers)
+[GIN-debug] POST   /portal/recharge/refund   --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func9 (2 handlers)
+[GIN-debug] POST   /portal/subscribe         --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func10 (2 handlers)
+[GIN-debug] POST   /portal/change-plan       --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func11 (2 handlers)
+[GIN-debug] POST   /portal/cancel-subscription --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func12 (2 handlers)
+[GIN-debug] POST   /portal/chat              --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func13 (2 handlers)
+    portal_proxy_truncated_response_test.go:103: truncated response: status=200 body="{\"balance\":" cookie="test_cookie=synthetic; Path=/"
+--- FAIL: TestPortalProxyRejectsTruncatedUpstreamResponse (8.05s)
+=== RUN   TestPortalProxyRejectsTruncatedUpstreamResponse
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /portal/me                --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func1 (2 handlers)
+[GIN-debug] GET    /portal/plans             --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func2 (2 handlers)
+[GIN-debug] GET    /portal/topups            --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func3 (2 handlers)
+[GIN-debug] GET    /portal/recharge-orders   --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func4 (2 handlers)
+[GIN-debug] GET    /portal/models            --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func5 (2 handlers)
+[GIN-debug] GET    /portal/consumption       --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func6 (2 handlers)
+[GIN-debug] POST   /portal/recharge          --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func7 (2 handlers)
+[GIN-debug] POST   /portal/recharge/pay      --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func8 (2 handlers)
+[GIN-debug] POST   /portal/recharge/refund   --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func9 (2 handlers)
+[GIN-debug] POST   /portal/subscribe         --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func10 (2 handlers)
+[GIN-debug] POST   /portal/change-plan       --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func11 (2 handlers)
+[GIN-debug] POST   /portal/cancel-subscription --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func12 (2 handlers)
+[GIN-debug] POST   /portal/chat              --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func13 (2 handlers)
+    portal_proxy_truncated_response_test.go:103: truncated response: status=200 body="{\"balance\":" cookie="test_cookie=synthetic; Path=/"
+--- FAIL: TestPortalProxyRejectsTruncatedUpstreamResponse (4.84s)
+=== RUN   TestPortalProxyRejectsTruncatedUpstreamResponse
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /portal/me                --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func1 (2 handlers)
+[GIN-debug] GET    /portal/plans             --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func2 (2 handlers)
+[GIN-debug] GET    /portal/topups            --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func3 (2 handlers)
+[GIN-debug] GET    /portal/recharge-orders   --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func4 (2 handlers)
+[GIN-debug] GET    /portal/models            --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func5 (2 handlers)
+[GIN-debug] GET    /portal/consumption       --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func6 (2 handlers)
+[GIN-debug] POST   /portal/recharge          --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func7 (2 handlers)
+[GIN-debug] POST   /portal/recharge/pay      --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func8 (2 handlers)
+[GIN-debug] POST   /portal/recharge/refund   --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func9 (2 handlers)
+[GIN-debug] POST   /portal/subscribe         --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func10 (2 handlers)
+[GIN-debug] POST   /portal/change-plan       --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func11 (2 handlers)
+[GIN-debug] POST   /portal/cancel-subscription --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func12 (2 handlers)
+[GIN-debug] POST   /portal/chat              --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func13 (2 handlers)
+    portal_proxy_truncated_response_test.go:103: truncated response: status=200 body="{\"balance\":" cookie="test_cookie=synthetic; Path=/"
+--- FAIL: TestPortalProxyRejectsTruncatedUpstreamResponse (2.26s)
+FAIL
+FAIL	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	16.705s
+FAIL

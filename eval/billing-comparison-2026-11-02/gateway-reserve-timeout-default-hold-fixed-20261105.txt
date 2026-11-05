@@ -1,0 +1,19 @@
+head=42d8ef8e5ca2471b18800e50f8e7a57fbcfdd47f
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+# github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02.test
+ld: warning: '/private/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-2444739707/000013.o' has malformed LC_DYSYMTAB, expected 98 undefined symbols to start at index 1626, found 95 undefined symbols starting at index 1626
+=== RUN   TestGatewayReserveCommittedBeforeDeadline
+    gateway_reserve_timeout_test.go:167: default sweeps retained unknown twice: balance=998 ledger=998 outbox=1 mock_calls=0
+    gateway_reserve_timeout_test.go:199: reserve_committed=true delayed_response=true http=503 mock_calls=0 billing_replay=duplicate pending_before_sweep=true reversed=1 ledger=1000 balance=1000 outbox=2
+--- PASS: TestGatewayReserveCommittedBeforeDeadline (3.43s)
+=== RUN   TestGatewayReserveCommittedBeforeDeadline
+    gateway_reserve_timeout_test.go:167: default sweeps retained unknown twice: balance=998 ledger=998 outbox=1 mock_calls=0
+    gateway_reserve_timeout_test.go:199: reserve_committed=true delayed_response=true http=503 mock_calls=0 billing_replay=duplicate pending_before_sweep=true reversed=1 ledger=1000 balance=1000 outbox=2
+--- PASS: TestGatewayReserveCommittedBeforeDeadline (3.55s)
+=== RUN   TestGatewayReserveCommittedBeforeDeadline
+    gateway_reserve_timeout_test.go:167: default sweeps retained unknown twice: balance=998 ledger=998 outbox=1 mock_calls=0
+    gateway_reserve_timeout_test.go:199: reserve_committed=true delayed_response=true http=503 mock_calls=0 billing_replay=duplicate pending_before_sweep=true reversed=1 ledger=1000 balance=1000 outbox=2
+--- PASS: TestGatewayReserveCommittedBeforeDeadline (3.49s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	12.605s

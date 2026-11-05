@@ -1,0 +1,35 @@
+{
+  "pending_without_usage_count": 2,
+  "with_reserve_error": 2,
+  "mock_received": 0,
+  "error_codes": {
+    "DeadlineExceeded": 2
+  },
+  "reserve_error_ids": 6,
+  "mock_log_entries": 281,
+  "duplicate_mock_receptions": 0,
+  "rows": [
+    {
+      "request_id": "idem:18e511733503bf80-44",
+      "http": "503",
+      "mock_receptions": 0,
+      "reserve_errors": [
+        {
+          "code": "DeadlineExceeded",
+          "elapsed_ms": 3002
+        }
+      ]
+    },
+    {
+      "request_id": "idem:18e511733503bf80-45",
+      "http": "503",
+      "mock_receptions": 0,
+      "reserve_errors": [
+        {
+          "code": "DeadlineExceeded",
+          "elapsed_ms": 3000
+        }
+      ]
+    }
+  ]
+}

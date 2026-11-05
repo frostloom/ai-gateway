@@ -1,0 +1,77 @@
+package outbox
+
+import (
+ "context"
+ "encoding/json"
+ "errors"
+ "fmt"
+ "os"
+ "sync"
+ "sync/atomic"
+ "testing"
+ "time"
+
+ "github.com/frostloom/ai-gateway/internal/billing/consumer"
+ "github.com/frostloom/ai-gateway/internal/billing/store"
+ appkafka "github.com/frostloom/ai-gateway/internal/pkg/kafka"
+ "github.com/frostloom/ai-gateway/internal/pkg/logger"
+ "gorm.io/driver/mysql"
+ "gorm.io/gorm"
+)
+
+type fixedRows struct { Store; rows []store.OutboxEvent }
+func (s fixedRows) PollOutbox(context.Context,int,int)([]store.OutboxEvent,error) { return s.rows,nil }
+
+func TestIsolatedParallelRelayExperiment(t *testing.T) {
+ dsn,addr:=os.Getenv("ISOLATED_MYSQL_DSN"),os.Getenv("ISOLATED_KAFKA_ADDR");if dsn=="" || addr=="" {t.Fatal("isolated addresses required")}
+ db,err:=gorm.Open(mysql.Open(dsn),&gorm.Config{});if err!=nil {t.Fatal(err)}
+ if err=db.AutoMigrate(&store.OutboxEvent{},&store.AuditEvent{});err!=nil {t.Fatal(err)}
+ st:=store.NewStore(db,nil);log:=logger.New("error");ctx,cancel:=context.WithCancel(context.Background())
+ prod:=appkafka.NewProducer([]string{addr},"offset-repro",log);defer prod.Close()
+ kc:=appkafka.NewConsumer([]string{addr},"relay-experiment",[]string{"offset-repro"})
+ c:=consumer.New(st,kc,consumer.Config{},log);done:=make(chan struct{});go func(){defer close(done);_=c.Run(ctx)}()
+ defer func(){cancel();<-done;_=kc.Close()}()
+ const count=400
+ for _,mode:=range []string{"serial","parallel","parallel","serial"} {
+  prefix:=fmt.Sprintf("%s-%d-",mode,time.Now().UnixNano()); rows:=make([]store.OutboxEvent,0,count)
+  for i:=0;i<count;i++ {id:=fmt.Sprintf("%s%04d",prefix,i);data,_:=json.Marshal(store.BillingEvent{EventID:id,RequestID:id,Phase:"reserve",TenantID:1,Funding:"balance"});rows=append(rows,store.OutboxEvent{Topic:store.TopicBillingEvents,EventKey:id,Payload:string(data),CreatedAt:time.Now()})}
+  if err=db.CreateInBatches(rows,100).Error;err!=nil {t.Fatal(err)}
+  var loaded []store.OutboxEvent;if err=db.Where("event_key LIKE ?",prefix+"%").Order("id").Find(&loaded).Error;err!=nil || len(loaded)!=count {t.Fatalf("seed %d %v",len(loaded),err)}
+  workers:=1;if mode=="parallel" {workers=8}
+  started:=time.Now();var wg sync.WaitGroup;results:=make(chan error,workers)
+  for w:=0;w<workers;w++ {shard:=make([]store.OutboxEvent,0);for i:=w;i<len(loaded);i+=workers {shard=append(shard,loaded[i])};wg.Add(1);go func() {defer wg.Done();r:=NewRelay(fixedRows{Store:st,rows:shard},prod,prod,Config{BatchSize:count,MaxAttempts:5},log);stats,e:=r.FlushOnce(ctx);if e==nil && (stats.Sent!=int64(len(shard)) || stats.Failed!=0) {e=fmt.Errorf("unexpected stats %+v",stats)};results<-e}()}
+  wg.Wait();close(results);for e:=range results {if e!=nil {t.Fatal(e)}};elapsed:=time.Since(started)
+  deadline:=time.Now().Add(30*time.Second);var audited,unsent,missing int64
+  for time.Now().Before(deadline) {if err=db.Model(&store.AuditEvent{}).Where("event_id LIKE ?",prefix+"%").Count(&audited).Error;err!=nil {t.Fatal(err)};if audited==count {break};time.Sleep(100*time.Millisecond)}
+  if err=db.Model(&store.OutboxEvent{}).Where("event_key LIKE ? AND sent_at IS NULL",prefix+"%").Count(&unsent).Error;err!=nil {t.Fatal(err)}
+  if err=db.Raw("SELECT COUNT(*) FROM outbox_events o LEFT JOIN audit_events a ON a.event_id=o.event_key WHERE o.event_key LIKE ? AND a.id IS NULL",prefix+"%").Scan(&missing).Error;err!=nil {t.Fatal(err)}
+  fmt.Printf("EXPERIMENT mode=%s workers=%d events=%d flush_seconds=%.3f audit_count=%d missing=%d unsent=%d\n",mode,workers,count,elapsed.Seconds(),audited,missing,unsent)
+  if audited!=count || unsent!=0 || missing!=0 {t.Fatal("event reconciliation failed")}
+ }
+}
+
+func TestIsolatedRealKafkaMarkFailureReplay(t *testing.T) {
+ dsn,addr:=os.Getenv("ISOLATED_MYSQL_DSN"),os.Getenv("ISOLATED_KAFKA_ADDR");if dsn==""||addr=="" {t.Fatal("isolated addresses required")}
+ db,err:=gorm.Open(mysql.Open(dsn),&gorm.Config{});if err!=nil {t.Fatal(err)}
+ if err=db.AutoMigrate(&store.OutboxEvent{},&store.AuditEvent{});err!=nil {t.Fatal(err)}
+ var fail atomic.Bool
+ if err=db.Callback().Update().Before("gorm:update").Register("test:fail-mark-sent-once",func(tx *gorm.DB) {
+  if m,ok:=tx.Statement.Dest.(map[string]any);ok {if _,ok=m["sent_at"];ok && fail.CompareAndSwap(false,true) {tx.AddError(errors.New("injected mark sent failure"))}}
+ });err!=nil {t.Fatal(err)}
+ id:=fmt.Sprintf("replay-%d",time.Now().UnixNano()); payload,_:=json.Marshal(store.BillingEvent{EventID:id,RequestID:id,Phase:"reserve",TenantID:1,Funding:"balance"})
+ row:=store.OutboxEvent{Topic:store.TopicBillingEvents,EventKey:id,Payload:string(payload),CreatedAt:time.Now()};if err=db.Create(&row).Error;err!=nil {t.Fatal(err)}
+ st:=store.NewStore(db,nil);log:=logger.New("error");ctx,cancel:=context.WithCancel(context.Background())
+ prod:=appkafka.NewProducer([]string{addr},"offset-repro",log);defer prod.Close()
+ kc:=appkafka.NewConsumer([]string{addr},"replay-group",[]string{"offset-repro"});c:=consumer.New(st,kc,consumer.Config{},log)
+ done:=make(chan struct{});go func(){defer close(done);_=c.Run(ctx)}();defer func(){cancel();<-done;_=kc.Close()}()
+ r:=NewRelay(st,prod,prod,Config{BatchSize:1,MaxAttempts:5},log)
+ if _,err=r.FlushOnce(ctx);err!=nil {t.Fatal(err)}
+ var got store.OutboxEvent;if err=db.First(&got,row.ID).Error;err!=nil {t.Fatal(err)}
+ if !fail.Load() || got.SentAt!=nil {t.Fatal("expected injected failure and unsent row")}
+ if _,err=r.FlushOnce(ctx);err!=nil {t.Fatal(err)}
+ if err=db.First(&got,row.ID).Error;err!=nil || got.SentAt==nil {t.Fatalf("mark recovery err=%v row=%+v",err,got)}
+ deadline:=time.Now().Add(30*time.Second);for c.Stats().Consumed<2 && time.Now().Before(deadline) {time.Sleep(100*time.Millisecond)}
+ var n int64;if err=db.Model(&store.AuditEvent{}).Where("event_id = ?",id).Count(&n).Error;err!=nil {t.Fatal(err)}
+ fmt.Printf("REPLAY consumed=%d audit_rows=%d marked_sent=%t\n",c.Stats().Consumed,n,got.SentAt!=nil)
+ if c.Stats().Consumed<2||n!=1 {t.Fatal("expected duplicate delivery and one audit row")}
+}

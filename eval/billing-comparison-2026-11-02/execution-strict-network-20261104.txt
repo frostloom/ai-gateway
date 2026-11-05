@@ -1,0 +1,31 @@
+head=63b9d1ed4d64bb583d15fa884c37468e5c53044c
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+current_source_sha256=be5ced15d64432b55979cf62b24e005c89ca340c509a01020d94f63147eaa6c9
+current_candidate_sha256=ce0ee7bbd2b77d13470e23cbce6e02aeabd715a1f713a173fd99c2e0ba139471
+=== RUN   TestNetworkGatewayInterruptedStream
+=== RUN   TestNetworkGatewayInterruptedStream/empty
+    execution_gateway_http_stream_test.go:155: mode=empty http=502 bytes=50 done=false upstream_calls=1 bill=pending balance=999 ledger=999
+=== RUN   TestNetworkGatewayInterruptedStream/partial
+    execution_gateway_http_stream_test.go:155: mode=partial http=200 bytes=51 done=false upstream_calls=1 bill=pending balance=999 ledger=999
+--- PASS: TestNetworkGatewayInterruptedStream (0.74s)
+    --- PASS: TestNetworkGatewayInterruptedStream/empty (0.08s)
+    --- PASS: TestNetworkGatewayInterruptedStream/partial (0.06s)
+=== RUN   TestNetworkGatewayInterruptedStream
+=== RUN   TestNetworkGatewayInterruptedStream/empty
+    execution_gateway_http_stream_test.go:155: mode=empty http=502 bytes=50 done=false upstream_calls=1 bill=pending balance=999 ledger=999
+=== RUN   TestNetworkGatewayInterruptedStream/partial
+    execution_gateway_http_stream_test.go:155: mode=partial http=200 bytes=51 done=false upstream_calls=1 bill=pending balance=999 ledger=999
+--- PASS: TestNetworkGatewayInterruptedStream (0.46s)
+    --- PASS: TestNetworkGatewayInterruptedStream/empty (0.05s)
+    --- PASS: TestNetworkGatewayInterruptedStream/partial (0.04s)
+=== RUN   TestNetworkGatewayInterruptedStream
+=== RUN   TestNetworkGatewayInterruptedStream/empty
+    execution_gateway_http_stream_test.go:155: mode=empty http=502 bytes=50 done=false upstream_calls=1 bill=pending balance=999 ledger=999
+=== RUN   TestNetworkGatewayInterruptedStream/partial
+    execution_gateway_http_stream_test.go:155: mode=partial http=200 bytes=51 done=false upstream_calls=1 bill=pending balance=999 ledger=999
+--- PASS: TestNetworkGatewayInterruptedStream (0.39s)
+    --- PASS: TestNetworkGatewayInterruptedStream/empty (0.05s)
+    --- PASS: TestNetworkGatewayInterruptedStream/partial (0.04s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	4.132s

@@ -1,0 +1,20 @@
+type streamDiscardWriter struct { header http.Header; bytes atomic.Int64; target int64; reached chan struct{}; once sync.Once }
+func (w *streamDiscardWriter) Header() http.Header{return w.header}
+func (w *streamDiscardWriter) WriteHeader(int){}
+func (w *streamDiscardWriter) Write(p []byte)(int,error){if w.bytes.Add(int64(len(p)))>=w.target{w.once.Do(func(){close(w.reached)})};return len(p),nil}
+func (w *streamDiscardWriter) Flush(){}
+func TestConservativeStreamDoesNotRetainForwardedText(t *testing.T){
+ const chunks=3072
+ frame:=`data: {"choices":[{"delta":{"content":"`+strings.Repeat("x",8192)+`"}}]}`+"\n\n"
+ release:=make(chan struct{});server:=httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter,r *http.Request){_,_=io.Copy(io.Discard,r.Body);w.Header().Set("Content-Type","text/event-stream");for i:=0;i<chunks;i++{if _,err:=io.WriteString(w,frame);err!=nil{return}};w.(http.Flusher).Flush();<-release}));defer server.Close()
+ writer:=&streamDiscardWriter{header:make(http.Header),target:int64(len(frame)*chunks),reached:make(chan struct{})};c,_:=gin.CreateTestContext(writer);c.Request=httptest.NewRequest(http.MethodPost,"/v1/chat/completions",nil)
+ bill:=&fakeBilling{};router:=&fakeRouter{};done:=make(chan struct{});runtime.GC();var before runtime.MemStats;runtime.ReadMemStats(&before)
+ go func(){relayStream(c,bill,router,slog.New(slog.DiscardHandler),&client.RouteResult{ProviderID:1,BaseURL:server.URL},&chatRequest{Model:"m",Messages:[]chatMessage{{Role:"user",Content:"hi"}},Stream:true},"memory-check",1,1,true);close(done)}()
+ select{case <-writer.reached:case <-time.After(30*time.Second):close(release);<-done;t.Fatal("stream failed to reach target")}
+ time.Sleep(100*time.Millisecond);runtime.GC();var during runtime.MemStats;runtime.ReadMemStats(&during)
+ close(release);<-done
+ var retained int64=int64(during.HeapAlloc)-int64(before.HeapAlloc)
+ if len(bill.reports)!=0||len(bill.settles)!=0||len(bill.reverses)!=0{t.Fatalf("unexpected billing usage=%d settle=%d reverse=%d",len(bill.reports),len(bill.settles),len(bill.reverses))}
+ t.Logf("streamed_bytes=%d retained_heap_delta=%d",writer.bytes.Load(),retained)
+ if retained>14<<20{t.Fatalf("conservative mode retained excessive streamed data: %d bytes",retained)}
+}

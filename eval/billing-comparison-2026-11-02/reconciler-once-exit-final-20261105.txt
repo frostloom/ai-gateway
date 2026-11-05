@@ -1,0 +1,26 @@
+head=42d8ef8e5ca2471b18800e50f8e7a57fbcfdd47f
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestReconcilerOnceSignalsSettlementFailure
+    reconciler_once_exit_test.go:68: settlement failure returned nonzero and bill remained pending: exit status 1
+=== RUN   TestReconcilerOnceSignalsSettlementFailure/rebuild_failure
+=== RUN   TestReconcilerOnceSignalsSettlementFailure/no_operations
+--- PASS: TestReconcilerOnceSignalsSettlementFailure (2.48s)
+    --- PASS: TestReconcilerOnceSignalsSettlementFailure/rebuild_failure (0.02s)
+    --- PASS: TestReconcilerOnceSignalsSettlementFailure/no_operations (0.02s)
+=== RUN   TestReconcilerOnceSignalsSettlementFailure
+    reconciler_once_exit_test.go:68: settlement failure returned nonzero and bill remained pending: exit status 1
+=== RUN   TestReconcilerOnceSignalsSettlementFailure/rebuild_failure
+=== RUN   TestReconcilerOnceSignalsSettlementFailure/no_operations
+--- PASS: TestReconcilerOnceSignalsSettlementFailure (1.58s)
+    --- PASS: TestReconcilerOnceSignalsSettlementFailure/rebuild_failure (0.01s)
+    --- PASS: TestReconcilerOnceSignalsSettlementFailure/no_operations (0.01s)
+=== RUN   TestReconcilerOnceSignalsSettlementFailure
+    reconciler_once_exit_test.go:68: settlement failure returned nonzero and bill remained pending: exit status 1
+=== RUN   TestReconcilerOnceSignalsSettlementFailure/rebuild_failure
+=== RUN   TestReconcilerOnceSignalsSettlementFailure/no_operations
+--- PASS: TestReconcilerOnceSignalsSettlementFailure (1.42s)
+    --- PASS: TestReconcilerOnceSignalsSettlementFailure/rebuild_failure (0.01s)
+    --- PASS: TestReconcilerOnceSignalsSettlementFailure/no_operations (0.01s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	7.489s

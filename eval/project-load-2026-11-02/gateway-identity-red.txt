@@ -1,0 +1,11 @@
+=== RUN   TestGatewayReportIdentityAcrossFailover
+=== RUN   TestGatewayReportIdentityAcrossFailover/stream=false
+    chat_stream_test.go:362: events=[{ID: Provider:1 OK:false} {ID: Provider:2 OK:true}]
+=== RUN   TestGatewayReportIdentityAcrossFailover/stream=true
+    chat_stream_test.go:362: events=[{ID: Provider:1 OK:false} {ID: Provider:2 OK:true}]
+--- FAIL: TestGatewayReportIdentityAcrossFailover (0.02s)
+    --- FAIL: TestGatewayReportIdentityAcrossFailover/stream=false (0.01s)
+    --- FAIL: TestGatewayReportIdentityAcrossFailover/stream=true (0.01s)
+FAIL
+FAIL	github.com/frostloom/ai-gateway/internal/gateway/handler	1.063s
+FAIL

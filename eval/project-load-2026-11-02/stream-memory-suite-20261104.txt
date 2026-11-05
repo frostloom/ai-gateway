@@ -1,0 +1,103 @@
+head=63b9d1ed4d64bb583d15fa884c37468e5c53044c
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestBillingReserveRequiresReplayContract
+=== RUN   TestBillingReserveRequiresReplayContract/first
+=== RUN   TestBillingReserveRequiresReplayContract/duplicate
+=== RUN   TestBillingReserveRequiresReplayContract/old_server
+--- PASS: TestBillingReserveRequiresReplayContract (0.02s)
+    --- PASS: TestBillingReserveRequiresReplayContract/first (0.01s)
+    --- PASS: TestBillingReserveRequiresReplayContract/duplicate (0.00s)
+    --- PASS: TestBillingReserveRequiresReplayContract/old_server (0.00s)
+=== RUN   TestOldBillingMayMutateBeforeMissingAck
+--- PASS: TestOldBillingMayMutateBeforeMissingAck (0.00s)
+=== RUN   TestBillingV2RequiresExactAcknowledgement
+=== RUN   TestBillingV2RequiresExactAcknowledgement/ack=
+=== RUN   TestBillingV2RequiresExactAcknowledgement/ack=replay-v1
+=== RUN   TestBillingV2RequiresExactAcknowledgement/ack=replay-v2
+--- PASS: TestBillingV2RequiresExactAcknowledgement (0.01s)
+    --- PASS: TestBillingV2RequiresExactAcknowledgement/ack= (0.00s)
+    --- PASS: TestBillingV2RequiresExactAcknowledgement/ack=replay-v1 (0.00s)
+    --- PASS: TestBillingV2RequiresExactAcknowledgement/ack=replay-v2 (0.00s)
+PASS
+ok  	github.com/frostloom/ai-gateway/internal/gateway/client	1.801s
+=== RUN   TestAPIKeyDistinguishesAuthenticationOutage
+=== RUN   TestAPIKeyDistinguishesAuthenticationOutage/valid
+=== RUN   TestAPIKeyDistinguishesAuthenticationOutage/invalid
+=== RUN   TestAPIKeyDistinguishesAuthenticationOutage/upstream_failure
+=== RUN   TestAPIKeyDistinguishesAuthenticationOutage/nil_response
+--- PASS: TestAPIKeyDistinguishesAuthenticationOutage (0.00s)
+    --- PASS: TestAPIKeyDistinguishesAuthenticationOutage/valid (0.00s)
+    --- PASS: TestAPIKeyDistinguishesAuthenticationOutage/invalid (0.00s)
+    --- PASS: TestAPIKeyDistinguishesAuthenticationOutage/upstream_failure (0.00s)
+    --- PASS: TestAPIKeyDistinguishesAuthenticationOutage/nil_response (0.00s)
+=== RUN   TestAuthAttemptsCannotBypassLimitWithForwardedIP
+--- PASS: TestAuthAttemptsCannotBypassLimitWithForwardedIP (0.03s)
+=== RUN   TestPortalSessionBoundary
+--- PASS: TestPortalSessionBoundary (0.00s)
+=== RUN   TestRateLimitCountsSameMillisecond
+--- PASS: TestRateLimitCountsSameMillisecond (0.11s)
+PASS
+ok  	github.com/frostloom/ai-gateway/internal/gateway/middleware	2.822s
+=== RUN   TestAuthProxyHTTPSConfiguration
+=== RUN   TestAuthProxyHTTPSConfiguration/secure=
+=== RUN   TestAuthProxyHTTPSConfiguration/secure=1
+--- PASS: TestAuthProxyHTTPSConfiguration (0.00s)
+    --- PASS: TestAuthProxyHTTPSConfiguration/secure= (0.00s)
+    --- PASS: TestAuthProxyHTTPSConfiguration/secure=1 (0.00s)
+=== RUN   TestChatLeavesPendingWhenActualUsageCannotBeRecorded
+--- PASS: TestChatLeavesPendingWhenActualUsageCannotBeRecorded (0.00s)
+=== RUN   TestRelayStreamSettlesForwardedContentWithoutUsage
+--- PASS: TestRelayStreamSettlesForwardedContentWithoutUsage (0.00s)
+=== RUN   TestRelayStreamFailoverThen502Reverses
+--- PASS: TestRelayStreamFailoverThen502Reverses (0.00s)
+=== RUN   TestChatReportsSuccessfulFallbackProvider
+=== RUN   TestChatReportsSuccessfulFallbackProvider/nonstream
+=== RUN   TestChatReportsSuccessfulFallbackProvider/stream_usage
+=== RUN   TestChatReportsSuccessfulFallbackProvider/stream_estimate
+--- PASS: TestChatReportsSuccessfulFallbackProvider (0.00s)
+    --- PASS: TestChatReportsSuccessfulFallbackProvider/nonstream (0.00s)
+    --- PASS: TestChatReportsSuccessfulFallbackProvider/stream_usage (0.00s)
+    --- PASS: TestChatReportsSuccessfulFallbackProvider/stream_estimate (0.00s)
+=== RUN   TestRelayStreamDoesNotWaitForFailedResponseBody
+=== RUN   TestRelayStreamDoesNotWaitForFailedResponseBody/refund
+=== RUN   TestRelayStreamDoesNotWaitForFailedResponseBody/failover
+--- PASS: TestRelayStreamDoesNotWaitForFailedResponseBody (0.00s)
+    --- PASS: TestRelayStreamDoesNotWaitForFailedResponseBody/refund (0.00s)
+    --- PASS: TestRelayStreamDoesNotWaitForFailedResponseBody/failover (0.00s)
+=== RUN   TestChatReserveConflictReturns409
+--- PASS: TestChatReserveConflictReturns409 (0.00s)
+=== RUN   TestChatRejectsNonAuthorizingReserveCodes
+=== RUN   TestChatRejectsNonAuthorizingReserveCodes/duplicate
+=== RUN   TestChatRejectsNonAuthorizingReserveCodes/unknown
+--- PASS: TestChatRejectsNonAuthorizingReserveCodes (0.00s)
+    --- PASS: TestChatRejectsNonAuthorizingReserveCodes/duplicate (0.00s)
+    --- PASS: TestChatRejectsNonAuthorizingReserveCodes/unknown (0.00s)
+=== RUN   TestChatRejectsNilReserveResponse
+--- PASS: TestChatRejectsNilReserveResponse (0.00s)
+=== RUN   TestChatRejectsReserveSuccessWithoutBillID
+--- PASS: TestChatRejectsReserveSuccessWithoutBillID (0.00s)
+=== RUN   TestParseUsageFrame
+=== RUN   TestParseUsageFrame/终帧带_usage（choices_空）
+=== RUN   TestParseUsageFrame/内容增量帧（带_choices，无_usage）
+=== RUN   TestParseUsageFrame/role_帧
+=== RUN   TestParseUsageFrame/DONE_哨兵
+=== RUN   TestParseUsageFrame/非_data_行（空行分隔）
+=== RUN   TestParseUsageFrame/坏_JSON
+=== RUN   TestParseUsageFrame/带_choices_但空_usage_指针
+--- PASS: TestParseUsageFrame (0.00s)
+    --- PASS: TestParseUsageFrame/终帧带_usage（choices_空） (0.00s)
+    --- PASS: TestParseUsageFrame/内容增量帧（带_choices，无_usage） (0.00s)
+    --- PASS: TestParseUsageFrame/role_帧 (0.00s)
+    --- PASS: TestParseUsageFrame/DONE_哨兵 (0.00s)
+    --- PASS: TestParseUsageFrame/非_data_行（空行分隔） (0.00s)
+    --- PASS: TestParseUsageFrame/坏_JSON (0.00s)
+    --- PASS: TestParseUsageFrame/带_choices_但空_usage_指针 (0.00s)
+PASS
+ok  	github.com/frostloom/ai-gateway/internal/gateway/handler	3.289s
+=== RUN   TestValidRejectsEmptyAndMismatch
+--- PASS: TestValidRejectsEmptyAndMismatch (0.00s)
+=== RUN   TestWrapHTTP
+--- PASS: TestWrapHTTP (0.00s)
+PASS
+ok  	github.com/frostloom/ai-gateway/internal/pkg/controlplane	1.696s

@@ -1,0 +1,17 @@
+head=42d8ef8e5ca2471b18800e50f8e7a57fbcfdd47f
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestUsageRetryRealAdmissionBurst
+    usage_retry_real_admission_test.go:172: RETRY_TIMING attempts=128 span_ms=100.853 peak_10ms=21
+    usage_retry_real_admission_test.go:231: REAL_ADMISSION failure=before arrivals=128 mode=1 workers=128 tenants=16 elapsed_ms=1780 p95_ms=1754 p99_ms=1774 http=map[200:128] report_calls=map[2:128] settled=128 pending=0 missing=0 usage_events=128
+--- PASS: TestUsageRetryRealAdmissionBurst (3.01s)
+=== RUN   TestUsageRetryRealAdmissionBurst
+    usage_retry_real_admission_test.go:172: RETRY_TIMING attempts=128 span_ms=96.241 peak_10ms=22
+    usage_retry_real_admission_test.go:231: REAL_ADMISSION failure=before arrivals=128 mode=1 workers=128 tenants=16 elapsed_ms=1915 p95_ms=1889 p99_ms=1912 http=map[200:128] report_calls=map[2:128] settled=128 pending=0 missing=0 usage_events=128
+--- PASS: TestUsageRetryRealAdmissionBurst (3.20s)
+=== RUN   TestUsageRetryRealAdmissionBurst
+    usage_retry_real_admission_test.go:172: RETRY_TIMING attempts=128 span_ms=99.014 peak_10ms=23
+    usage_retry_real_admission_test.go:231: REAL_ADMISSION failure=before arrivals=128 mode=1 workers=128 tenants=16 elapsed_ms=2697 p95_ms=2650 p99_ms=2656 http=map[200:128] report_calls=map[2:128] settled=128 pending=0 missing=0 usage_events=128
+--- PASS: TestUsageRetryRealAdmissionBurst (4.23s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	12.582s

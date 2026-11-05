@@ -1,0 +1,7 @@
+# github.com/frostloom/ai-gateway/internal/gateway/handler.test
+ld: warning: '/private/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-342758953/000013.o' has malformed LC_DYSYMTAB, expected 98 undefined symbols to start at index 1626, found 95 undefined symbols starting at index 1626
+=== RUN   TestNonstreamConcurrentMemoryCharacterization
+    chat_stream_test.go:423: candidate=false requests=16 upstream_bytes=4194304 baseline_heap=5203872 sampled_peak_heap=179267176 peak_delta=174063304 p95_ms=2494.279 p99_ms=2494.279 statuses=map[200:16] reports=16 settles=16 reverses=0
+--- PASS: TestNonstreamConcurrentMemoryCharacterization (2.52s)
+PASS
+ok  	github.com/frostloom/ai-gateway/internal/gateway/handler	4.477s

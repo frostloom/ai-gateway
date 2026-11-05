@@ -1,0 +1,70 @@
+head=63b9d1ed4d64bb583d15fa884c37468e5c53044c
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+current_source_sha256=be5ced15d64432b55979cf62b24e005c89ca340c509a01020d94f63147eaa6c9
+current_candidate_sha256=8117267a7d4ce933fe11959622d4159eca30ae8c637652d08cadd435a22dda14
+=== RUN   TestAtomicReserveOwnerAndRollback
+    execution_atomic_reserve_test.go:144: injected=1 rollback_bills=0 rollback_events=0 retry_state=reserved lease_live=true balance=460 ledger=460 events=3
+--- PASS: TestAtomicReserveOwnerAndRollback (0.60s)
+=== RUN   TestExecutionCandidateLegacyCallsRejected
+
+2026/11/04 09:41:26 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:1189 [35;1mrecord not found
+[0m[33m[1.063ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id = 'legacy-candidate-1793756486044604000' AND phase = 'reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/04 09:41:26 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:1189 [35;1mrecord not found
+[0m[33m[1.047ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id = 'legacy-candidate-1793756486044604000' AND phase = 'reserve' ORDER BY `bills`.`id` LIMIT 1
+    execution_legacy_candidate_test.go:64: legacy_reserve=true usage=failed_precondition reverse=failed_precondition pending=true events=1 balance=880 ledger=880
+--- PASS: TestExecutionCandidateLegacyCallsRejected (0.39s)
+=== RUN   TestExecutionReconcilerWithLeaseAndForwarding
+    execution_reconciler_integration_test.go:153: first_scanned=2 first_reversed=1 second_scanned=1 second_reversed=0 late_usage_settled=true balance=460 ledger=460 events=5
+--- PASS: TestExecutionReconcilerWithLeaseAndForwarding (0.70s)
+=== RUN   TestExecutionUsageCommittedAfterScan
+    execution_usage_after_scan_test.go:127: first_scanned=1 reversed=0 next_settled=1 balance=960 ledger=960 events=3
+--- PASS: TestExecutionUsageCommittedAfterScan (0.46s)
+=== RUN   TestExperimentalSubscriptionIntentQuota
+    experimental_subscription_intent_test.go:197: quota=300 concurrent=8 reserve=3 rejected=5 settled=3 balance=100000 ledger=100000
+--- PASS: TestExperimentalSubscriptionIntentQuota (0.63s)
+=== RUN   TestAtomicReserveOwnerAndRollback
+    execution_atomic_reserve_test.go:144: injected=1 rollback_bills=0 rollback_events=0 retry_state=reserved lease_live=true balance=460 ledger=460 events=3
+--- PASS: TestAtomicReserveOwnerAndRollback (0.70s)
+=== RUN   TestExecutionCandidateLegacyCallsRejected
+
+2026/11/04 09:41:29 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:1189 [35;1mrecord not found
+[0m[33m[0.924ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id = 'legacy-candidate-1793756489080484000' AND phase = 'reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/04 09:41:29 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:1189 [35;1mrecord not found
+[0m[33m[1.123ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id = 'legacy-candidate-1793756489080484000' AND phase = 'reserve' ORDER BY `bills`.`id` LIMIT 1
+    execution_legacy_candidate_test.go:64: legacy_reserve=true usage=failed_precondition reverse=failed_precondition pending=true events=1 balance=880 ledger=880
+--- PASS: TestExecutionCandidateLegacyCallsRejected (0.55s)
+=== RUN   TestExecutionReconcilerWithLeaseAndForwarding
+    execution_reconciler_integration_test.go:153: first_scanned=2 first_reversed=1 second_scanned=1 second_reversed=0 late_usage_settled=true balance=460 ledger=460 events=5
+--- PASS: TestExecutionReconcilerWithLeaseAndForwarding (0.79s)
+=== RUN   TestExecutionUsageCommittedAfterScan
+    execution_usage_after_scan_test.go:127: first_scanned=1 reversed=0 next_settled=1 balance=960 ledger=960 events=3
+--- PASS: TestExecutionUsageCommittedAfterScan (0.57s)
+=== RUN   TestExperimentalSubscriptionIntentQuota
+    experimental_subscription_intent_test.go:197: quota=300 concurrent=8 reserve=3 rejected=5 settled=3 balance=100000 ledger=100000
+--- PASS: TestExperimentalSubscriptionIntentQuota (1.35s)
+=== RUN   TestAtomicReserveOwnerAndRollback
+    execution_atomic_reserve_test.go:144: injected=1 rollback_bills=0 rollback_events=0 retry_state=reserved lease_live=true balance=460 ledger=460 events=3
+--- PASS: TestAtomicReserveOwnerAndRollback (0.70s)
+=== RUN   TestExecutionCandidateLegacyCallsRejected
+
+2026/11/04 09:41:32 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:1189 [35;1mrecord not found
+[0m[33m[1.323ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id = 'legacy-candidate-1793756492948494000' AND phase = 'reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/04 09:41:32 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:1189 [35;1mrecord not found
+[0m[33m[1.773ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id = 'legacy-candidate-1793756492948494000' AND phase = 'reserve' ORDER BY `bills`.`id` LIMIT 1
+    execution_legacy_candidate_test.go:64: legacy_reserve=true usage=failed_precondition reverse=failed_precondition pending=true events=1 balance=880 ledger=880
+--- PASS: TestExecutionCandidateLegacyCallsRejected (0.47s)
+=== RUN   TestExecutionReconcilerWithLeaseAndForwarding
+    execution_reconciler_integration_test.go:153: first_scanned=2 first_reversed=1 second_scanned=1 second_reversed=0 late_usage_settled=true balance=460 ledger=460 events=5
+--- PASS: TestExecutionReconcilerWithLeaseAndForwarding (1.03s)
+=== RUN   TestExecutionUsageCommittedAfterScan
+    execution_usage_after_scan_test.go:127: first_scanned=1 reversed=0 next_settled=1 balance=960 ledger=960 events=3
+--- PASS: TestExecutionUsageCommittedAfterScan (0.59s)
+=== RUN   TestExperimentalSubscriptionIntentQuota
+    experimental_subscription_intent_test.go:197: quota=300 concurrent=8 reserve=3 rejected=5 settled=3 balance=100000 ledger=100000
+--- PASS: TestExperimentalSubscriptionIntentQuota (0.75s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	12.948s

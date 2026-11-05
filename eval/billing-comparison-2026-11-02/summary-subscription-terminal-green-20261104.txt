@@ -1,0 +1,32 @@
+head=63b9d1ed4d64bb583d15fa884c37468e5c53044c
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestIsolatedSummarySubscriptionMismatch
+    summary_subscription_test.go:28: current subscription accepted with zero cash and pre=0; candidate returned RESERVE_INSUFFICIENT
+--- PASS: TestIsolatedSummarySubscriptionMismatch (0.98s)
+=== RUN   TestIsolatedSummarySubscriptionReserve
+    summary_subscription_test.go:45: 8 concurrent subscriptions accepted=3 quota=5; reserve bills=3 outbox=3 cash=0; replay and rollback checked
+--- PASS: TestIsolatedSummarySubscriptionReserve (0.95s)
+=== RUN   TestIsolatedSummarySubscriptionSettle
+    summary_subscription_test.go:61: subscription settle and reverse: cash unchanged, zero settle, unique events, replay and rollback checked
+--- PASS: TestIsolatedSummarySubscriptionSettle (0.55s)
+=== RUN   TestIsolatedSummarySubscriptionMismatch
+    summary_subscription_test.go:28: current subscription accepted with zero cash and pre=0; candidate returned RESERVE_INSUFFICIENT
+--- PASS: TestIsolatedSummarySubscriptionMismatch (0.65s)
+=== RUN   TestIsolatedSummarySubscriptionReserve
+    summary_subscription_test.go:45: 8 concurrent subscriptions accepted=3 quota=5; reserve bills=3 outbox=3 cash=0; replay and rollback checked
+--- PASS: TestIsolatedSummarySubscriptionReserve (0.73s)
+=== RUN   TestIsolatedSummarySubscriptionSettle
+    summary_subscription_test.go:61: subscription settle and reverse: cash unchanged, zero settle, unique events, replay and rollback checked
+--- PASS: TestIsolatedSummarySubscriptionSettle (0.68s)
+=== RUN   TestIsolatedSummarySubscriptionMismatch
+    summary_subscription_test.go:28: current subscription accepted with zero cash and pre=0; candidate returned RESERVE_INSUFFICIENT
+--- PASS: TestIsolatedSummarySubscriptionMismatch (0.61s)
+=== RUN   TestIsolatedSummarySubscriptionReserve
+    summary_subscription_test.go:45: 8 concurrent subscriptions accepted=3 quota=5; reserve bills=3 outbox=3 cash=0; replay and rollback checked
+--- PASS: TestIsolatedSummarySubscriptionReserve (0.58s)
+=== RUN   TestIsolatedSummarySubscriptionSettle
+    summary_subscription_test.go:61: subscription settle and reverse: cash unchanged, zero settle, unique events, replay and rollback checked
+--- PASS: TestIsolatedSummarySubscriptionSettle (0.61s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	8.910s

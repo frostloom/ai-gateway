@@ -1,0 +1,16 @@
+{
+  "synthetic_request_id": "idem:expiry-55def0ba1f934059872a7a599c85c00c",
+  "ttl_accelerated_ms": 1,
+  "second_arrived_before_release": false,
+  "mock_upstream_calls": 1,
+  "responses": [
+    {
+      "status": 200,
+      "body": "{\"choices\":[],\"id\":\"synthetic-1\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":10,\"prompt_tokens\":50,\"total_tokens\":60}}\n"
+    },
+    {
+      "status": 409,
+      "body": "{\"error\":{\"message\":\"billing request already reserved\"}}"
+    }
+  ]
+}

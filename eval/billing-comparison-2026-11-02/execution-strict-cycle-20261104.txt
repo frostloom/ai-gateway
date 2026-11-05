@@ -1,0 +1,19 @@
+head=63b9d1ed4d64bb583d15fa884c37468e5c53044c
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+current_source_sha256=be5ced15d64432b55979cf62b24e005c89ca340c509a01020d94f63147eaa6c9
+current_candidate_sha256=ce0ee7bbd2b77d13470e23cbce6e02aeabd715a1f713a173fd99c2e0ba139471
+=== RUN   TestStrictBillingCycleDistribution
+    execution_cycle_load_test.go:140: mode=same_account cycles=32 workers=8 errors=0 settled=32 outbox=96 balance_mismatch=0 wall_ms=2119.77 cycles_s=15.10 avg_ms=485.93 p95_ms=810.16 p99_ms=822.18
+    execution_cycle_load_test.go:140: mode=multiple_accounts cycles=32 workers=8 errors=0 settled=32 outbox=96 balance_mismatch=0 wall_ms=472.02 cycles_s=67.79 avg_ms=116.02 p95_ms=145.46 p99_ms=150.86
+--- PASS: TestStrictBillingCycleDistribution (3.53s)
+=== RUN   TestStrictBillingCycleDistribution
+    execution_cycle_load_test.go:140: mode=same_account cycles=32 workers=8 errors=0 settled=32 outbox=96 balance_mismatch=0 wall_ms=5777.56 cycles_s=5.54 avg_ms=1422.40 p95_ms=3528.92 p99_ms=3578.15
+    execution_cycle_load_test.go:140: mode=multiple_accounts cycles=32 workers=8 errors=0 settled=32 outbox=96 balance_mismatch=0 wall_ms=638.16 cycles_s=50.14 avg_ms=157.85 p95_ms=200.44 p99_ms=201.17
+--- PASS: TestStrictBillingCycleDistribution (7.13s)
+=== RUN   TestStrictBillingCycleDistribution
+    execution_cycle_load_test.go:140: mode=same_account cycles=32 workers=8 errors=0 settled=32 outbox=96 balance_mismatch=0 wall_ms=1753.52 cycles_s=18.25 avg_ms=415.20 p95_ms=583.11 p99_ms=584.51
+    execution_cycle_load_test.go:140: mode=multiple_accounts cycles=32 workers=8 errors=0 settled=32 outbox=96 balance_mismatch=0 wall_ms=514.52 cycles_s=62.19 avg_ms=125.94 p95_ms=164.28 p99_ms=165.38
+--- PASS: TestStrictBillingCycleDistribution (3.58s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	16.808s

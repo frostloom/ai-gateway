@@ -1,0 +1,14 @@
+head=63b9d1ed4d64bb583d15fa884c37468e5c53044c
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestReplayProtocolRealGRPCAndStore
+    replay_protocol_real_integration_test.go:111: first=1 duplicate=15 errors=0 conflict=FailedPrecondition bill=1 balance=900 ledger=900 reserve_events=1
+--- PASS: TestReplayProtocolRealGRPCAndStore (0.45s)
+=== RUN   TestReplayProtocolRealGRPCAndStore
+    replay_protocol_real_integration_test.go:111: first=1 duplicate=15 errors=0 conflict=FailedPrecondition bill=2 balance=900 ledger=900 reserve_events=1
+--- PASS: TestReplayProtocolRealGRPCAndStore (0.61s)
+=== RUN   TestReplayProtocolRealGRPCAndStore
+    replay_protocol_real_integration_test.go:111: first=1 duplicate=15 errors=0 conflict=FailedPrecondition bill=3 balance=900 ledger=900 reserve_events=1
+--- PASS: TestReplayProtocolRealGRPCAndStore (0.59s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	3.437s

@@ -6,6 +6,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -50,6 +51,16 @@ func main() {
 	dsn := config.Getenv("MYSQL_DSN", "root:root@tcp(127.0.0.1:3307)/ai_gateway?charset=utf8mb4&parseTime=True&loc=Local")
 	redisAddr := config.Getenv("REDIS_ADDR", "127.0.0.1:6381")
 	redisPwd := config.Getenv("REDIS_PASSWORD", "")
+	requireReserveV2 := config.Getenv("BILLING_REQUIRE_RESERVE_V2", "0")
+	authCacheSeconds, err := strconv.Atoi(config.Getenv("BILLING_AUTH_CACHE_TTL_SECONDS", "0"))
+	if err != nil || authCacheSeconds < 0 || authCacheSeconds > 60 {
+		log.Error("BILLING_AUTH_CACHE_TTL_SECONDS must be between 0 and 60")
+		os.Exit(1)
+	}
+	if requireReserveV2 != "0" && requireReserveV2 != "1" {
+		log.Error("BILLING_REQUIRE_RESERVE_V2 must be 0 or 1")
+		os.Exit(1)
+	}
 
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{Logger: gormlogger.Default.LogMode(gormlogger.Error)})
 	if err != nil {
@@ -74,6 +85,10 @@ func main() {
 	}
 
 	st := store.NewStore(db, rdb)
+	if authCacheSeconds > 0 {
+		st.EnableAuthCache(time.Duration(authCacheSeconds) * time.Second)
+		log.Warn("ordinary API key auth cache enabled; revocation may be delayed", "ttl_seconds", authCacheSeconds)
+	}
 	if err := st.AutoMigrate(); err != nil {
 		log.Error("migrate", "err", err)
 		os.Exit(1)
@@ -95,7 +110,12 @@ func main() {
 		os.Exit(1)
 	}
 	gs := grpc.NewServer(grpc.UnaryInterceptor(controlplane.UnaryServer(controlToken)))
-	billingv1.RegisterBillingServiceServer(gs, server.NewService(st, log))
+	var serviceOptions []server.Option
+	if requireReserveV2 == "1" {
+		serviceOptions = append(serviceOptions, server.RequireReserveV2())
+	}
+	log.Info("billing reserve contract", "require_v2", requireReserveV2 == "1")
+	billingv1.RegisterBillingServiceServer(gs, server.NewService(st, log, serviceOptions...))
 
 	// 观测 HTTP 端点（面板数据源，只读）。独立端口，不干扰 gRPC 控制面。
 	adminPort := config.Getenv("BILLING_ADMIN_PORT", "9103")

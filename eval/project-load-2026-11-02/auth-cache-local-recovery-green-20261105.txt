@@ -1,0 +1,19 @@
+head=c20606b7ea4ed04fd7523e869b4258405fa1def6
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+# github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02.test
+ld: warning: '/private/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-3661560660/000013.o' has malformed LC_DYSYMTAB, expected 98 undefined symbols to start at index 1626, found 95 undefined symbols starting at index 1626
+=== RUN   TestStoreAuthCacheRedisOldSnapshot
+
+2026/11/05 15:50:07 [32m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:157 [33mSLOW SQL >= 200ms
+[0m[31;1m[276.434ms] [33m[rows:0][35m CREATE TABLE `admin_users` (`id` bigint unsigned AUTO_INCREMENT,`username` varchar(64) NOT NULL,`password_hash` varchar(255) NOT NULL,`status` tinyint NOT NULL DEFAULT 0,`created_at` datetime(3) NULL,`updated_at` datetime(3) NULL,PRIMARY KEY (`id`),UNIQUE INDEX `uk_admin_username` (`username`))[0m
+    auth_store_cache_restart_test.go:104: same instance rejected restored stale key; fresh instance still accepted it
+--- PASS: TestStoreAuthCacheRedisOldSnapshot (1.84s)
+=== RUN   TestStoreAuthCacheRedisOldSnapshot
+    auth_store_cache_restart_test.go:104: same instance rejected restored stale key; fresh instance still accepted it
+--- PASS: TestStoreAuthCacheRedisOldSnapshot (0.66s)
+=== RUN   TestStoreAuthCacheRedisOldSnapshot
+    auth_store_cache_restart_test.go:104: same instance rejected restored stale key; fresh instance still accepted it
+--- PASS: TestStoreAuthCacheRedisOldSnapshot (0.88s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	5.358s

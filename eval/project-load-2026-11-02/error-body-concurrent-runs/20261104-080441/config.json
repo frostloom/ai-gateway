@@ -1,0 +1,56 @@
+{
+  "head": "63b9d1ed4d64bb583d15fa884c37468e5c53044c",
+  "branch": "codex/billing-mysql-comparison",
+  "git_status": " M AGENTS.md\n M cmd/billing/main.go\n M cmd/gateway/main.go\n M cmd/reconciler/main.go\n M internal/billing/consumer/consumer.go\n M internal/billing/outbox/relay.go\n M internal/billing/reconciler/reconciler.go\n M internal/billing/server/service.go\n M internal/billing/store/cash.go\n M internal/billing/store/lua/compensate.lua\n M internal/billing/store/lua/reserve.lua\n M internal/billing/store/lua/settle.lua\n M internal/billing/store/mysql.go\n M internal/billing/store/outbox.go\n M internal/billing/store/outbox_test.go\n M internal/billing/store/plan.go\n M internal/billing/store/subscription_reserve_test.go\n M internal/gateway/client/billing.go\n M internal/gateway/handler/chat.go\n M internal/gateway/handler/chat_stream_test.go\n M internal/gateway/middleware/apikey.go\n D internal/gateway/web/dist/assets/Empty-B78rz8Qh.css\n D internal/gateway/web/dist/assets/Empty-Cq6uueat.js\n D internal/gateway/web/dist/assets/dashboard-H93iLNlz.js\n D internal/gateway/web/dist/assets/dashboard-jpnukakx.css\n D internal/gateway/web/dist/assets/portal-CI_uKi_F.js\n D internal/gateway/web/dist/assets/portal-fDtFA2oX.css\n M internal/gateway/web/dist/dashboard.html\n M internal/gateway/web/dist/portal.html\n M internal/pkg/controlplane/token.go\n M internal/pkg/quota/quota.go\n M scripts/schema.sql\n?? .tmp/\n?? eval/billing-comparison-2026-11-02/\n?? eval/project-load-2026-11-02/\n?? integrations/\n?? internal/billing/store/reserve_fingerprint_test.go\n?? internal/gateway/client/billing_replay_test.go\n?? internal/gateway/middleware/apikey_status_test.go\n?? internal/gateway/web/dist/assets/Empty-D1TVEnQN.css\n?? internal/gateway/web/dist/assets/Empty-DFn-BFPp.js\n?? internal/gateway/web/dist/assets/dashboard-BGbdPy4C.js\n?? internal/gateway/web/dist/assets/dashboard-Bt40SYhT.css\n?? internal/gateway/web/dist/assets/portal-CX4r-21-.js\n?? internal/gateway/web/dist/assets/portal-DUpRuSip.css\n?? plate_sim.py\n?? scripts/migrations/\n",
+  "source_sha256": {
+    "internal/billing/store/mysql.go": "e4a53b0eaca810e385a7336c0ace3b05723313b362342b6094b822bee0d8f98c",
+    "internal/billing/server/service.go": "228d8984318b06c78b3bc746995a4ba616058d688b4bc6762aa6cabc33477a75",
+    "internal/billing/reconciler/reconciler.go": "1c4dd1a858ba8490b5ede1ea865a76ad3fb923381d227001f0af4cc6726b4e2a",
+    "internal/gateway/client/billing.go": "49adfbab9754725321be631be9e53c6493eb13b80babc6866307cfa9cd0c408a",
+    "internal/gateway/handler/chat.go": "c8174a35387658ef644d6a099b50e4844e4e3a546217d1dbcc0d39ef0e2378e1",
+    "internal/gateway/middleware/idempotency.go": "d8c02c0d688e51c0c10b52f00775a2b31bbffb29049b9b4099fb87df2782a2fd",
+    "eval/project-load-2026-11-02/error-body-mock/main.go": "52756253e1d67e19b7114da2bc48a59e4dfe1e6f4b17f2c32cfc0331b2fb8ac2",
+    "cmd/gateway/main.go": "1fdd2632e4bf4a089c9fd5b5821294584bb1462241e14532782b69b280b054b6",
+    "cmd/router/main.go": "eb54d320360e452ac16be25d9cdf6804aedbde91da5c77b0e18adcd2d841021c",
+    "cmd/billing/main.go": "eb2f4f6cf8b84b14efdd21421888a3348da301103cdf9749f708542ef9e2e3d4",
+    "cmd/reconciler/main.go": "2754d55661d77179c7ec1754fcfafd037a026a92d6c08a1431edc76f23ac09a0",
+    "cmd/mock-provider/main.go": "3a42cc4753dbf60f5482fc81eb65ffbb2103b626d0ea60981d1ddd48d78e2d8e"
+  },
+  "images": {
+    "docker.m.daocloud.io/library/mysql:8.0.40": "sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff",
+    "docker.m.daocloud.io/library/redis:7-alpine": "sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499"
+  },
+  "gomaxprocs": 8,
+  "mysql_pool_max": 100,
+  "rate_per_min": 100000,
+  "mock_latency_ms": 15,
+  "mock_completion_tokens": 100,
+  "kafka": "disabled",
+  "isolated_agents": "disabled",
+  "reconciler": "sweep every 1s, grace 5s (test only); rebuild disabled; no-auto-reverse enabled",
+  "ports": {
+    "gateway": 63352,
+    "billing": 63353,
+    "admin": 63354,
+    "router": 63355,
+    "mock": 63356,
+    "reconciler": 63357
+  },
+  "mysql_port": "63334",
+  "redis_port": "63335",
+  "quick": false,
+  "started": "2026-11-04T08:05:16.720307",
+  "go_version": "go version go1.25.12 darwin/arm64",
+  "gateway_variant": "current_worktree",
+  "candidate_sha256": null,
+  "sdkroot": "/Library/Developer/CommandLineTools/SDKs/MacOSX26.5.sdk",
+  "binary_sha256": {
+    "billing": "c1f6135f220473eaae8575f06b0651d481fe567d68d50fc5905890d34132b2a0",
+    "router": "6aab7ff0420a9e52a7fce4097255f2a55741054773133fb0d7207c02809d08d5",
+    "reconciler": "c51e614d6b49c11cba6e3f8e8973c63a070ab69a14d456200a62d3302b954faa",
+    "gateway": "dc63282192fdb562dd237224d72264068a5382df71d103235624e4be1fdd8aab",
+    "mock": "21f0e32e1c475197f7b8220f0643c8373fdb0e6f5c35ae9d9abdf061b6887957",
+    "seed": "d395faa2053f46cb2474838999ce1363dc7a6a7158ca8bbce1871bc079ba76c4",
+    "load": "ea357c06f7b303e3069d0fcbfef060f57f5a11c4ce7c5c9e3119fa42bd076856"
+  }
+}

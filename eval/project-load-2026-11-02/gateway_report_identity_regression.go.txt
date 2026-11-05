@@ -1,0 +1,20 @@
+
+func TestGatewayReportIdentityAcrossFailover(t *testing.T) {
+ for _,stream:=range []bool{false,true}{t.Run(fmt.Sprintf("stream=%v",stream),func(t *testing.T){
+  bad:=httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter,r *http.Request){w.WriteHeader(http.StatusServiceUnavailable)}));defer bad.Close()
+  good:=httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter,r *http.Request){if stream {_,_=io.WriteString(w,"data: {\"choices\":[],\"usage\":{\"prompt_tokens\":4,\"completion_tokens\":2}}\n\ndata: [DONE]\n\n")}else{_,_=io.WriteString(w,`{"choices":[],"usage":{"prompt_tokens":4,"completion_tokens":2}}`)}}));defer good.Close()
+  type event struct{ ID string `json:"event_id"`;Provider uint64 `json:"provider_id"`;OK bool `json:"ok"` }
+  var mu sync.Mutex;var events []event
+  server:=httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter,r *http.Request){switch r.URL.Path {
+   case "/route":id,url:=uint64(1),bad.URL;if r.URL.Query().Get("exclude")!="" {id,url=2,good.URL};_ = json.NewEncoder(w).Encode(map[string]any{"provider_id":id,"name":"test","base_url":url})
+   case "/report":var v event;if e:=json.NewDecoder(r.Body).Decode(&v);e!=nil{http.Error(w,"bad",400);return};mu.Lock();events=append(events,v);mu.Unlock();_,_=io.WriteString(w,`{"ok":true}`)
+   default:http.NotFound(w,r)
+  }}));defer server.Close()
+  router:=client.NewRouter(server.URL,"test-token")
+  run:=func(tenant int64)[]event {bill:=&fakeBilling{};c,w:=newGinCtx();c.Request=httptest.NewRequest(http.MethodPost,"/v1/chat/completions",strings.NewReader(fmt.Sprintf(`{"model":"m","messages":[{"role":"user","content":"hi"}],"stream":%v}`,stream)));c.Set("tenant_id",tenant);c.Set("request_id","same-synthetic-request");mu.Lock();events=nil;mu.Unlock();Chat(bill,router,slog.New(slog.DiscardHandler),time.Second)(c);if w.Code!=http.StatusOK{t.Fatalf("status=%d body=%s",w.Code,w.Body.String())};mu.Lock();defer mu.Unlock();return append([]event(nil),events...)}
+  a,b,c:=run(17),run(17),run(18)
+  for _,es:=range [][]event{a,b,c}{if len(es)!=2||es[0].Provider!=1||es[0].OK||es[1].Provider!=2||!es[1].OK||len(es[0].ID)!=64||len(es[1].ID)!=64||es[0].ID==es[1].ID{t.Fatalf("events=%+v",es)}}
+  if a[0].ID!=b[0].ID||a[1].ID!=b[1].ID{t.Fatalf("same attempt identity changed: %+v %+v",a,b)}
+  if a[0].ID==c[0].ID||a[1].ID==c[1].ID{t.Fatalf("tenant collision: %+v %+v",a,c)}
+ })}
+}

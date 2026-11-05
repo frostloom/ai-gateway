@@ -1,0 +1,14 @@
+{
+  "head": "63b9d1ed4d64bb583d15fa884c37468e5c53044c",
+  "source_sha256": {
+    "internal/billing/consumer/consumer.go": "2efcbb63fcfb49bfd890083a98a90c0f3cd691221d4b1b8f771671806061ed1a",
+    "internal/billing/outbox/relay.go": "f9b4e2e60e4e832c57cf8c1c6ccdfa6a69f84c406d9a3664eadf25259718bb9e",
+    "internal/billing/store/outbox.go": "1c805d5785714bf18b94ae70e5579d10788e8df0463c076909cec23bfb451316",
+    "internal/pkg/kafka/consumer.go": "3054c3f076edcefc618674f1653aa59ace6e55408736af8cef23407b267e9438",
+    "internal/pkg/kafka/producer.go": "e9d654daba9c84a64235832217124422d820b0dce2d81953f6690a37c708e4f0"
+  },
+  "test_sha256": "6538a683dea083c4743f4ee000436ef2c76a8e521383baa27116a8fb511cd549",
+  "returncode": 0,
+  "stdout": "=== RUN   TestIsolatedParallelRelayExperiment\nEXPERIMENT mode=serial workers=1 events=400 flush_seconds=7.048 audit_count=400 missing=0 unsent=0\nEXPERIMENT mode=parallel workers=8 events=400 flush_seconds=1.013 audit_count=400 missing=0 unsent=0\nEXPERIMENT mode=parallel workers=8 events=400 flush_seconds=0.930 audit_count=400 missing=0 unsent=0\nEXPERIMENT mode=serial workers=1 events=400 flush_seconds=7.033 audit_count=400 missing=0 unsent=0\n--- PASS: TestIsolatedParallelRelayExperiment (26.74s)\nPASS\nok  \tgithub.com/frostloom/ai-gateway/internal/billing/outbox\t27.705s\n",
+  "stderr": ""
+}

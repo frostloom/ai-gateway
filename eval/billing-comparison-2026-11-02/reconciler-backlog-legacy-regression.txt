@@ -1,0 +1,14 @@
+head=63b9d1ed4d64bb583d15fa884c37468e5c53044c
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestConcurrentCanceledStreamsRemainPending
+    concurrent_stream_client_cancel_test.go:219: tenants=8 requests=16 upstream_calls=16 upstream_canceled=16 default_sweep=true missing_usage=16 balances_match=true
+--- PASS: TestConcurrentCanceledStreamsRemainPending (1.11s)
+=== RUN   TestConcurrentCanceledStreamsRemainPending
+    concurrent_stream_client_cancel_test.go:219: tenants=8 requests=16 upstream_calls=16 upstream_canceled=16 default_sweep=true missing_usage=16 balances_match=true
+--- PASS: TestConcurrentCanceledStreamsRemainPending (1.12s)
+=== RUN   TestConcurrentCanceledStreamsRemainPending
+    concurrent_stream_client_cancel_test.go:219: tenants=8 requests=16 upstream_calls=16 upstream_canceled=16 default_sweep=true missing_usage=16 balances_match=true
+--- PASS: TestConcurrentCanceledStreamsRemainPending (0.88s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	5.213s

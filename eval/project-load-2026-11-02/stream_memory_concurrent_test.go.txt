@@ -1,0 +1,15 @@
+func TestConcurrentConservativeStreamMemory(t *testing.T){
+ const streams=8;const chunks=512
+ frame:=`data: {"choices":[{"delta":{"content":"`+strings.Repeat("x",8192)+`"}}]}`+"\n\n"
+ release:=make(chan struct{});server:=httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter,r *http.Request){_,_=io.Copy(io.Discard,r.Body);w.Header().Set("Content-Type","text/event-stream");for i:=0;i<chunks;i++{if _,err:=io.WriteString(w,frame);err!=nil{return}};w.(http.Flusher).Flush();<-release}));defer server.Close()
+ var writers [streams]*streamDiscardWriter;var bills [streams]*fakeBilling;done:=make(chan struct{},streams)
+ runtime.GC();var before runtime.MemStats;runtime.ReadMemStats(&before)
+ for i:=0;i<streams;i++ {writers[i]=&streamDiscardWriter{header:make(http.Header),target:int64(len(frame)*chunks),reached:make(chan struct{})};bills[i]=&fakeBilling{};c,_:=gin.CreateTestContext(writers[i]);c.Request=httptest.NewRequest(http.MethodPost,"/v1/chat/completions",nil);bill:=bills[i]
+  go func(){relayStream(c,bill,&fakeRouter{},slog.New(slog.DiscardHandler),&client.RouteResult{ProviderID:1,BaseURL:server.URL},&chatRequest{Model:"m",Messages:[]chatMessage{{Role:"user",Content:"hi"}},Stream:true},"memory-check",1,1,true);done<-struct{}{}}()
+ }
+ for _,w:=range writers {select{case <-w.reached:case <-time.After(45*time.Second):close(release);for i:=0;i<streams;i++{<-done};t.Fatal("streams did not reach target")}}
+ time.Sleep(100*time.Millisecond);runtime.GC();var during runtime.MemStats;runtime.ReadMemStats(&during);close(release);for i:=0;i<streams;i++{<-done}
+ for _,b:=range bills {if len(b.reports)!=0||len(b.settles)!=0||len(b.reverses)!=0{t.Fatal("unexpected billing mutation")}}
+ retained:=int64(during.HeapAlloc)-int64(before.HeapAlloc);t.Logf("streams=%d bytes_each=%d retained_heap_delta=%d baseline=%t",streams,len(frame)*chunks,retained,os.Getenv("TEST_STREAM_BASELINE")=="1")
+ if os.Getenv("TEST_STREAM_BASELINE")=="1" {if retained<24<<20{t.Fatalf("baseline did not retain expected data: %d",retained)}}else if retained>16<<20{t.Fatalf("candidate retained excessive data: %d",retained)}
+}

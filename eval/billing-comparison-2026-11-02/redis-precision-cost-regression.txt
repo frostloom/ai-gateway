@@ -1,0 +1,32 @@
+head=63b9d1ed4d64bb583d15fa884c37468e5c53044c
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestLargeUsageMustNotOverflowIntoRefund
+    cost_overflow_test.go:60: large_usage=1000000000 price=10000000000 expected_cost=10000000000000 collected=100000000 balance=0 ledger=0
+--- PASS: TestLargeUsageMustNotOverflowIntoRefund (0.40s)
+=== RUN   TestUnrepresentableReserveCostFailsBeforeCharge
+    cost_overflow_test.go:98: unrepresentable cost rejected, no bill/outbox, balance=1000000
+--- PASS: TestUnrepresentableReserveCostFailsBeforeCharge (0.41s)
+=== RUN   TestUnrepresentableSettlementCostStaysPending
+    cost_overflow_test.go:151: unrepresentable settlement held pending with usage, no settle, balance=988000000000 ledger=988000000000
+--- PASS: TestUnrepresentableSettlementCostStaysPending (0.55s)
+=== RUN   TestLargeUsageMustNotOverflowIntoRefund
+    cost_overflow_test.go:60: large_usage=1000000000 price=10000000000 expected_cost=10000000000000 collected=100000000 balance=0 ledger=0
+--- PASS: TestLargeUsageMustNotOverflowIntoRefund (0.46s)
+=== RUN   TestUnrepresentableReserveCostFailsBeforeCharge
+    cost_overflow_test.go:98: unrepresentable cost rejected, no bill/outbox, balance=1000000
+--- PASS: TestUnrepresentableReserveCostFailsBeforeCharge (0.43s)
+=== RUN   TestUnrepresentableSettlementCostStaysPending
+    cost_overflow_test.go:151: unrepresentable settlement held pending with usage, no settle, balance=988000000000 ledger=988000000000
+--- PASS: TestUnrepresentableSettlementCostStaysPending (0.43s)
+=== RUN   TestLargeUsageMustNotOverflowIntoRefund
+    cost_overflow_test.go:60: large_usage=1000000000 price=10000000000 expected_cost=10000000000000 collected=100000000 balance=0 ledger=0
+--- PASS: TestLargeUsageMustNotOverflowIntoRefund (0.41s)
+=== RUN   TestUnrepresentableReserveCostFailsBeforeCharge
+    cost_overflow_test.go:98: unrepresentable cost rejected, no bill/outbox, balance=1000000
+--- PASS: TestUnrepresentableReserveCostFailsBeforeCharge (0.38s)
+=== RUN   TestUnrepresentableSettlementCostStaysPending
+    cost_overflow_test.go:151: unrepresentable settlement held pending with usage, no settle, balance=988000000000 ledger=988000000000
+--- PASS: TestUnrepresentableSettlementCostStaysPending (0.43s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	5.771s

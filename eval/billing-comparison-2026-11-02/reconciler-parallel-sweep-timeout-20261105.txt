@@ -1,0 +1,29 @@
+head=2237f6be387ce3ac51624efbdbf9b6dc0b6f2f15
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+fc93bd6f62c0ea5aa7343c6e255e06c5853a6219693649d4fedcdc65f6a0bf57  /var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T//usage-atomic-overlay.osfiur/reconciler.go
+# github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02.test
+ld: warning: '/private/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-3441694952/000013.o' has malformed LC_DYSYMTAB, expected 98 undefined symbols to start at index 1626, found 95 undefined symbols starting at index 1626
+=== RUN   TestReconcilerGRPCTimeoutBeforeCommitRecovers
+    reconciler_timeout_grpc_before_test.go:109: loopback gRPC: pre-handler stall left first pending; next sweep settled once balance=920
+--- PASS: TestReconcilerGRPCTimeoutBeforeCommitRecovers (11.29s)
+=== RUN   TestReconcilerGRPCTimeoutAfterCommitDoesNotDoubleCharge
+    reconciler_timeout_grpc_test.go:100: loopback gRPC: first commit succeeded before artificial delayed response; two bills settled once balance=920
+--- PASS: TestReconcilerGRPCTimeoutAfterCommitDoesNotDoubleCharge (10.63s)
+=== RUN   TestReconcilerGRPCTimeoutBeforeCommitRecovers
+    reconciler_timeout_grpc_before_test.go:109: loopback gRPC: pre-handler stall left first pending; next sweep settled once balance=920
+--- PASS: TestReconcilerGRPCTimeoutBeforeCommitRecovers (10.58s)
+=== RUN   TestReconcilerGRPCTimeoutAfterCommitDoesNotDoubleCharge
+    reconciler_timeout_grpc_test.go:100: loopback gRPC: first commit succeeded before artificial delayed response; two bills settled once balance=920
+--- PASS: TestReconcilerGRPCTimeoutAfterCommitDoesNotDoubleCharge (10.59s)
+=== RUN   TestReconcilerGRPCTimeoutBeforeCommitRecovers
+
+2026/11/05 12:37:43 [32m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/reconciler_timeout_grpc_before_test.go:49 [33mSLOW SQL >= 200ms
+[0m[31;1m[209.048ms] [33m[rows:1][35m UPDATE `bills` SET `created_at`='2026-11-05 11:37:43.042' WHERE id=17[0m
+    reconciler_timeout_grpc_before_test.go:109: loopback gRPC: pre-handler stall left first pending; next sweep settled once balance=920
+--- PASS: TestReconcilerGRPCTimeoutBeforeCommitRecovers (14.16s)
+=== RUN   TestReconcilerGRPCTimeoutAfterCommitDoesNotDoubleCharge
+    reconciler_timeout_grpc_test.go:100: loopback gRPC: first commit succeeded before artificial delayed response; two bills settled once balance=920
+--- PASS: TestReconcilerGRPCTimeoutAfterCommitDoesNotDoubleCharge (10.58s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	70.397s

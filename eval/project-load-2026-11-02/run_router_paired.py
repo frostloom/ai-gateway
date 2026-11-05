@@ -1,0 +1,150 @@
+#!/usr/bin/env python3
+"""Isolated local end-to-end load harness. Never touches existing services."""
+import datetime, hashlib, json, os, pathlib, signal, socket, subprocess, sys, tempfile, time, urllib.request, uuid
+ROOT=pathlib.Path(__file__).resolve().parents[2]
+OUT=ROOT/'eval/project-load-2026-11-02/router-paired-runs'/datetime.datetime.now().strftime('%Y%m%d-%H%M%S')
+OUT.mkdir(parents=True,exist_ok=False)
+IDENT='project-router-paired-'+uuid.uuid4().hex[:12]
+MYSQL=IDENT+'-mysql'; REDIS=IDENT+'-redis'; processes=[]; opened=[]
+def run(args,**kw): return subprocess.run(args,check=True,text=True,**kw)
+def free_port():
+ with socket.socket() as s: s.bind(('127.0.0.1',0)); return s.getsockname()[1]
+def port(name,inside): return run(['docker','port',name,inside],capture_output=True).stdout.strip().split(':')[-1]
+def wait_http(url,proc):
+ for _ in range(720):
+  if proc.poll() is not None: raise RuntimeError(f'process exited: {url} code={proc.returncode}')
+  try:
+   with urllib.request.urlopen(url,timeout=.5) as r:
+    if r.status==200:return
+  except Exception: time.sleep(.25)
+ raise RuntimeError('readiness timeout '+url)
+def wait_tcp(n,proc):
+ for _ in range(720):
+  if proc.poll() is not None: raise RuntimeError(f'process exited for port {n}: {proc.returncode}')
+  try:
+   with socket.create_connection(('127.0.0.1',n),timeout=.3):return
+  except OSError:time.sleep(.25)
+ raise RuntimeError('tcp readiness timeout')
+def start(name,argv,env):
+ f=open(OUT/(name+'.log'),'w');opened.append(f);p=subprocess.Popen(argv,cwd=ROOT,env=env,stdout=f,stderr=subprocess.STDOUT,start_new_session=True);processes.append((name,p));return p
+def cleanup():
+ for _,p in reversed(processes):
+  if p.poll() is None:
+   try:os.killpg(p.pid,signal.SIGTERM)
+   except ProcessLookupError:pass
+ for _,p in reversed(processes):
+  try:p.wait(timeout=5)
+  except subprocess.TimeoutExpired:
+   try:os.killpg(p.pid,signal.SIGKILL)
+   except ProcessLookupError:pass
+   p.wait()
+ for f in opened:f.close()
+ subprocess.run(['docker','rm','-f',MYSQL,REDIS],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
+def docker_image(name):
+ return run(['docker','image','inspect',name,'--format','{{.Id}}'],capture_output=True).stdout.strip()
+def main():
+ bindir=pathlib.Path(tempfile.mkdtemp(prefix='codex-replay-perf-'))
+ try:
+  source_paths=['internal/billing/store/mysql.go','internal/billing/server/service.go','internal/gateway/client/billing.go','internal/gateway/handler/chat.go','internal/gateway/middleware/apikey.go','internal/gateway/middleware/idempotency.go','internal/gateway/middleware/ratelimit.go','internal/pkg/controlplane/token.go','internal/pkg/redisx/redisx.go','cmd/billing/main.go','cmd/gateway/main.go','cmd/router/main.go','cmd/reconciler/main.go','cmd/mock-provider/main.go','eval/project-load-2026-11-02/seed/main.go','eval/project-load-2026-11-02/perf-load/main.go']
+  source_before={f:hashlib.sha256((ROOT/f).read_bytes()).hexdigest() for f in source_paths}
+  script_hash=hashlib.sha256(pathlib.Path(__file__).read_bytes()).hexdigest()
+  # Baseline removes only replay negotiation; all other current fixes stay.
+  original={}
+  for f in ['internal/billing/store/mysql.go','internal/billing/server/service.go','internal/gateway/client/billing.go']:
+   original[f]=(ROOT/f).read_text()
+  baseline=dict(original)
+  source=baseline['internal/billing/store/mysql.go']
+  start_idx=source.index('// ReserveWithReplaySignal preserves');end=source.index('func (s *Store) Reserve(ctx',start_idx)
+  source=source[:start_idx]+source[end:];source=source.replace('reserveReplayCode(ctx)','billingv1.ReserveCode_RESERVE_OK')
+  baseline['internal/billing/store/mysql.go']=source
+  source=baseline['internal/billing/server/service.go']
+  source=source.replace('\t"google.golang.org/grpc"\n','').replace('\t"google.golang.org/grpc/metadata"\n','').replace('\t"github.com/frostloom/ai-gateway/internal/pkg/controlplane"\n','')
+  start_idx=source.index('\tmd, _ := metadata.FromIncomingContext(ctx)',source.index('func (s *Service) Reserve('));end=source.index('\n\tif err != nil {\n\t\treturn nil, err\n\t}\n\ts.log.Info',start_idx)
+  source=source[:start_idx]+'\tresp, err := s.store.Reserve(ctx, req)'+source[end:]
+  baseline['internal/billing/server/service.go']=source
+  source=baseline['internal/gateway/client/billing.go']
+  for imp in ('\t"google.golang.org/grpc/codes"\n','\t"google.golang.org/grpc/metadata"\n','\t"google.golang.org/grpc/status"\n'):source=source.replace(imp,'')
+  start_idx=source.index('func (b *Billing) Reserve(');end=source.index('func (b *Billing) ReportUsage(',start_idx)
+  source=source[:start_idx]+'''func (b *Billing) Reserve(ctx context.Context, req *billingv1.ReserveRequest) (*billingv1.ReserveResponse, error) {
+ return b.cli.Reserve(ctx, req)
+}
+
+'''+source[end:];baseline['internal/gateway/client/billing.go']=source
+  replace={}
+  for idx,(name,content) in enumerate(baseline.items()):
+   path=bindir/f'baseline-{idx}.go';path.write_text(content);replace[str(ROOT/name)]=str(path)
+  overlay=bindir/'overlay.json';overlay.write_text(json.dumps({'Replace':replace}))
+  router_candidate=ROOT/'eval/project-load-2026-11-02/router_registry_candidate.go.txt'
+  routeroverlay=bindir/'router-overlay.json';routeroverlay.write_text(json.dumps({'Replace':{str(ROOT/'internal/router/registry.go'):str(router_candidate)}}))
+  (OUT/'router-candidate-sha256.txt').write_text(hashlib.sha256(router_candidate.read_bytes()).hexdigest()+'\n')
+  env_build=os.environ.copy();env_build.update({'GOPROXY':'off','GOTOOLCHAIN':'local','SDKROOT':'/Library/Developer/CommandLineTools/SDKs/MacOSX26.5.sdk'})
+  binaries={}
+  jobs={'billing_old':('./cmd/billing',False),'gateway_old':('./cmd/gateway',False),'billing_new':('./cmd/billing',False),'gateway_new':('./cmd/gateway',False),'router_old':('./cmd/router',False),'router_new':('./cmd/router',False),'reconciler':('./cmd/reconciler',False),'mock':('./cmd/mock-provider',False),'seed':('./eval/project-load-2026-11-02/seed',False),'load':('./eval/project-load-2026-11-02/perf-load',False)}
+  for name,(pkg,use_overlay) in jobs.items():
+   dest=bindir/name;args=['go','build'];
+   if name=='router_new':args+=['-overlay',str(routeroverlay)]
+   args+=['-o',str(dest),pkg]
+   with (OUT/(name+'-build.log')).open('w') as log:run(args,cwd=ROOT,env=env_build,timeout=240,stdout=subprocess.DEVNULL,stderr=log)
+   binaries[name]=str(dest)
+  myimage='docker.m.daocloud.io/library/mysql:8.0.40';reimage='docker.m.daocloud.io/library/redis:7-alpine'
+  run(['docker','run','-d','--name',MYSQL,'-e','MYSQL_ROOT_PASSWORD=isolated','-e','MYSQL_DATABASE=project_load','-p','127.0.0.1::3306',myimage,'--max_connections=500'],stdout=subprocess.DEVNULL)
+  run(['docker','run','-d','--name',REDIS,'-p','127.0.0.1::6379',reimage],stdout=subprocess.DEVNULL)
+  for _ in range(300):
+   if subprocess.run(['docker','exec',MYSQL,'mysqladmin','ping','-h','127.0.0.1','-uroot','-pisolated','--silent'],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL).returncode==0:break
+   time.sleep(.5)
+  else:raise RuntimeError('MySQL readiness timeout')
+  mp,rp=port(MYSQL,'3306/tcp'),port(REDIS,'6379/tcp');ports={k:free_port() for k in ['gateway_old','gateway_new','billing_old','billing_new','admin_old','admin_new','router_old','router_new','mock','reconciler']}
+  if len(set(ports.values()))!=len(ports):raise RuntimeError('port collision')
+  base={'PATH':os.environ.get('PATH','/usr/bin:/bin'),'HOME':os.environ.get('HOME','/tmp'),'TMPDIR':os.environ.get('TMPDIR','/tmp'),'CONTROL_PLANE_TOKEN':'isolated-test-token','MYSQL_DSN':f'root:isolated@tcp(127.0.0.1:{mp})/project_load?charset=utf8mb4&parseTime=true&loc=Local','REDIS_ADDR':f'127.0.0.1:{rp}','LISTEN_HOST':'127.0.0.1','LOG_LEVEL':'error','KAFKA_BROKERS':'','GOMAXPROCS':'8'}
+  def env(**kw):return dict(base,**{k:str(v) for k,v in kw.items()})
+  mock=start('mock',[binaries['mock']],env(MOCK_PROVIDER_PORT=ports['mock'],MOCK_PROVIDER_NAME='isolated',MOCK_FAIL_RATE=0,MOCK_LATENCY_MS=15,MOCK_COMPLETION_TOKENS=100));wait_http(f'http://127.0.0.1:{ports["mock"]}/healthz',mock)
+  for mode in ('old','new'):
+   p=start('billing_'+mode,[binaries['billing_'+mode]],env(BILLING_PORT=ports['billing_'+mode],BILLING_ADMIN_PORT=ports['admin_'+mode],SUB_RENEW_INTERVAL_SEC=60));wait_tcp(ports['billing_'+mode],p)
+  seedenv=env(TEST_MYSQL_DSN=base['MYSQL_DSN'],TEST_REDIS_ADDR=base['REDIS_ADDR'],TEST_MOCK_PORT=ports['mock'],TEST_TENANTS=769)
+  seed=run([binaries['seed']],cwd=ROOT,env=seedenv,capture_output=True,timeout=600);(OUT/'seed.log').write_text(seed.stdout+seed.stderr)
+  for mode in ('old','new'):
+   router=start('router_'+mode,[binaries['router_'+mode]],env(ROUTER_PORT=ports['router_'+mode]));wait_http(f'http://127.0.0.1:{ports["router_"+mode]}/healthz',router)
+  recon=start('reconciler',[binaries['reconciler'],'-interval','5','-grace','600','-no-rebuild'],env(RECONCILER_PORT=ports['reconciler'],BILLING_ADDR=f'127.0.0.1:{ports["billing_new"]}'));wait_http(f'http://127.0.0.1:{ports["reconciler"]}/healthz',recon)
+  for mode in ('old','new'):
+   p=start('gateway_'+mode,[binaries['gateway_'+mode]],env(GATEWAY_PORT=ports['gateway_'+mode],BILLING_ADDR=f'127.0.0.1:{ports["billing_"+mode]}',BILLING_ADMIN_ADDR=f'http://127.0.0.1:{ports["admin_"+mode]}',ROUTER_ADDR=f'http://127.0.0.1:{ports["router_"+mode]}',AGENT_ADDR='http://127.0.0.1:1',RECONCILER_ADDR=f'http://127.0.0.1:{ports["reconciler"]}',RATE_LIMIT_PER_MIN=600));wait_http(f'http://127.0.0.1:{ports["gateway_"+mode]}/metrics',p)
+  config={'head':run(['git','rev-parse','HEAD'],cwd=ROOT,capture_output=True).stdout.strip(),'branch':run(['git','branch','--show-current'],cwd=ROOT,capture_output=True).stdout.strip(),'git_status':run(['git','status','--short'],cwd=ROOT,capture_output=True).stdout,'current_source_sha256':source_before,'script_sha256':script_hash,'baseline_overlay_sha256':{f:hashlib.sha256(content.encode()).hexdigest() for f,content in baseline.items()},'binary_sha256':{k:hashlib.sha256(pathlib.Path(v).read_bytes()).hexdigest() for k,v in binaries.items()},'images':{myimage:docker_image(myimage),reimage:docker_image(reimage)},'go_version':run(['go','version'],cwd=ROOT,capture_output=True).stdout.strip(),'gomaxprocs':8,'mysql_pool_max_per_billing':100,'mysql_max_connections':500,'rate_per_tenant_per_min':600,'mock_latency_ms':15,'redis_port':rp,'ports':ports,'tenants':769,'kafka':'disabled','reconciler_grace_s':600,'note':'old=baseline router; new=candidate router; identical current billing and gateways; both stacks run concurrently; separate tenant group per phase','started':datetime.datetime.now().isoformat()}
+  (OUT/'config.json').write_text(json.dumps(config,ensure_ascii=False,indent=2))
+  for mode in ('old','new'):
+   args=[binaries['load'],'-url',f'http://127.0.0.1:{ports["gateway_"+mode]}','-workers','1','-tenants','1','-seconds','1','-tenant-offset','768']
+   smoke=run(args,cwd=ROOT,env=base,capture_output=True,timeout=30);(OUT/f'smoke-{mode}.json').write_text(smoke.stdout)
+   row=json.loads(smoke.stdout)
+   if row['valid_success']==0 or row['valid_success']!=row['requests']:raise RuntimeError(f'{mode} smoke failed')
+  offset=0
+  with (OUT/'results.jsonl').open('w') as results,(OUT/'resources.jsonl').open('w') as resources:
+   for rep in (1,2):
+    for workers in (256,512):
+     modes=('old','new') if rep==1 else ('new','old')
+     for mode in modes:
+      args=[binaries['load'],'-url',f'http://127.0.0.1:{ports["gateway_"+mode]}','-workers',str(workers),'-tenants','64','-tenant-offset',str(offset),'-seconds','3']
+      p=subprocess.Popen(args,cwd=ROOT,env=base,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True)
+      while p.poll() is None:
+       sample={'time':datetime.datetime.now().isoformat(),'mode':mode,'workers':workers,'rep':rep}
+       ids=','.join([str(proc.pid) for _,proc in processes if proc.poll() is None]+[str(p.pid)])
+       sample['ps']=subprocess.run(['ps','-p',ids,'-o','pid=,%cpu=,rss='],capture_output=True,text=True).stdout
+       sample['docker']=subprocess.run(['docker','stats','--no-stream','--format','{{json .}}',MYSQL,REDIS],capture_output=True,text=True).stdout
+       resources.write(json.dumps(sample)+'\n');resources.flush()
+       if p.poll() is None:time.sleep(1)
+      stdout,stderr=p.communicate(timeout=20)
+      if p.returncode!=0:raise RuntimeError(f'{mode} load exit {p.returncode}: {stderr}')
+      row=json.loads(stdout);row.update({'mode':mode,'rep':rep,'tenant_offset':offset});results.write(json.dumps(row)+'\n');results.flush();print(json.dumps(row),flush=True);offset+=64
+  sql=run(['docker','exec',MYSQL,'mysql','-uroot','-pisolated','-N','-e',"SHOW GLOBAL STATUS WHERE Variable_name IN ('Max_used_connections','Threads_connected','Threads_running','Connection_errors_max_connections','Innodb_row_lock_waits','Innodb_row_lock_time'); SHOW VARIABLES LIKE 'max_connections'"],capture_output=True,timeout=30)
+  (OUT/'mysql-final-status.txt').write_text(sql.stdout+sql.stderr)
+  audit=subprocess.run([binaries['seed']],cwd=ROOT,env=dict(seedenv,TEST_MODE='audit'),capture_output=True,text=True,timeout=300)
+  (OUT/'audit.json').write_text(audit.stdout);(OUT/'audit-stderr.txt').write_text(audit.stderr)
+  if audit.returncode!=0:raise RuntimeError(f'audit exit {audit.returncode}')
+  source_after={f:hashlib.sha256((ROOT/f).read_bytes()).hexdigest() for f in source_paths}
+  (OUT/'source-after.json').write_text(json.dumps(source_after,indent=2))
+  if source_after!=source_before:raise RuntimeError('source changed during run; results are not a fixed-source comparison')
+  (OUT/'completed').write_text('completed\n')
+ finally:
+  cleanup()
+  import shutil;shutil.rmtree(bindir,ignore_errors=True)
+if __name__=='__main__':
+ try:main()
+ except Exception as e:
+  (OUT/'error.txt').write_text(repr(e)+'\n');print(f'run failed: {e}; raw: {OUT}',file=sys.stderr);raise

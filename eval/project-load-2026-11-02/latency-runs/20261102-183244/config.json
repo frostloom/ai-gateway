@@ -1,0 +1,48 @@
+{
+  "head": "63b9d1ed4d64bb583d15fa884c37468e5c53044c",
+  "branch": "codex/billing-mysql-comparison",
+  "git_status": " M internal/billing/store/mysql.go\n M internal/gateway/handler/chat.go\n M internal/gateway/handler/chat_stream_test.go\n D internal/gateway/web/dist/assets/Empty-B78rz8Qh.css\n D internal/gateway/web/dist/assets/Empty-Cq6uueat.js\n D internal/gateway/web/dist/assets/dashboard-H93iLNlz.js\n D internal/gateway/web/dist/assets/dashboard-jpnukakx.css\n D internal/gateway/web/dist/assets/portal-CI_uKi_F.js\n D internal/gateway/web/dist/assets/portal-fDtFA2oX.css\n M internal/gateway/web/dist/dashboard.html\n M internal/gateway/web/dist/portal.html\n M scripts/schema.sql\n?? .tmp/\n?? eval/billing-comparison-2026-11-02/\n?? eval/project-load-2026-11-02/\n?? integrations/\n?? internal/billing/store/reserve_fingerprint_test.go\n?? internal/gateway/web/dist/assets/Empty-D1TVEnQN.css\n?? internal/gateway/web/dist/assets/Empty-DFn-BFPp.js\n?? internal/gateway/web/dist/assets/dashboard-BGbdPy4C.js\n?? internal/gateway/web/dist/assets/dashboard-Bt40SYhT.css\n?? internal/gateway/web/dist/assets/portal-CX4r-21-.js\n?? internal/gateway/web/dist/assets/portal-DUpRuSip.css\n?? plate_sim.py\n?? scripts/migrations/\n",
+  "source_sha256": {
+    "internal/billing/store/mysql.go": "71d5925e6d5824babac842559bdc6a0872c453f90904db261622bd2efe540299",
+    "internal/gateway/handler/chat.go": "65fa4b051b41cd0a2e936843c0407a61bdaa91f6c68a3ef097964a8c36655066",
+    "cmd/gateway/main.go": "91d5d30ed17c5ecb42b8a5ac810de8a3d072a332bdb5fdfdab4e0814d9dd85cb",
+    "cmd/router/main.go": "eb54d320360e452ac16be25d9cdf6804aedbde91da5c77b0e18adcd2d841021c",
+    "cmd/billing/main.go": "3056db14e70ca305c182f56cc44eb132b3d65b8c194352d500ac56d5107ffa91",
+    "cmd/mock-provider/main.go": "3a42cc4753dbf60f5482fc81eb65ffbb2103b626d0ea60981d1ddd48d78e2d8e"
+  },
+  "images": {
+    "docker.m.daocloud.io/library/mysql:8.0.40": "sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff",
+    "docker.m.daocloud.io/library/redis:7-alpine": "sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499"
+  },
+  "gomaxprocs": 8,
+  "mysql_pool_max": 100,
+  "rate_per_min": 600,
+  "mock_latency_ms": 500,
+  "mock_completion_tokens": 100,
+  "kafka": "disabled",
+  "isolated_agents": "disabled",
+  "reconciler": "sweep every 5s, grace 600s; rebuild disabled",
+  "ports": {
+    "gateway": 50122,
+    "billing": 50123,
+    "admin": 50124,
+    "router": 50125,
+    "mock": 50126,
+    "reconciler": 50127
+  },
+  "mysql_port": "49573",
+  "redis_port": "49574",
+  "quick": false,
+  "started": "2026-11-02T18:33:38.553890",
+  "go_version": "go version go1.25.12 darwin/arm64",
+  "sdkroot": "/Library/Developer/CommandLineTools/SDKs/MacOSX26.5.sdk",
+  "binary_sha256": {
+    "billing": "2d540f582c8a8ed6b503f2fcd5d0c9cfc4d8bb51763dc58b6e3c9bff6068bfcb",
+    "router": "cb94258761fd493d502e9141cabbea01bc77cd57b4cc9438dbdd9fbdfb98f9db",
+    "reconciler": "ade1482d90ed966f2b89776af71f468702b0fb40e988ce0a229682f765516ffb",
+    "gateway": "afc03439732a1b383c2ea02418874fdf93e4f5413b5de17458d43a63631d0b77",
+    "mock": "d3fda769609d803485d7bedc569062f9c4ca754ff8ca14de33d282ce0c7818b8",
+    "seed": "ac0468ef83e9dade7e2b595de98c63d8b5527d5508bc1a355bec26913f9a8714",
+    "load": "441490fa4d033754c05a82952a3b218b5d0a4255242af17990169c313b05a471"
+  }
+}

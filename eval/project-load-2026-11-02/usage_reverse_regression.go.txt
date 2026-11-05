@@ -1,0 +1,26 @@
+
+// Test-only overlay: usage and refund must not both succeed for one pending bill.
+func TestUsageReverseCandidateRegression(t *testing.T) {
+ s, done := newTestStore(t); defer done()
+ ctx := context.Background(); seedMockModel(t,s); tenant:=seedTenant(t,s,100000)
+ for _, mode := range []string{"usage_first","reverse_first","concurrent"} {
+  for i:=0;i<15;i++ {
+   id:=fmt.Sprintf("usage-reverse-%s-%d",mode,i); req:=reserveReq(id,tenant,84)
+   if _,err:=s.Reserve(ctx,req);err!=nil {t.Fatal(err)}
+   var ue,re error
+   usage:=func(){ue=s.ReportUsage(ctx,&billingv1.ReportUsageRequest{RequestId:id,PromptTokens:50,CompletionTokens:10})}
+   reverse:=func(){_,re=s.Reverse(ctx,&billingv1.ReverseRequest{RequestId:id,Reason:"recon:no_usage"})}
+   switch mode {case "usage_first": usage();reverse();case "reverse_first":reverse();usage();default:
+    var wg sync.WaitGroup; wg.Add(2); gate:=make(chan struct{});go func(){defer wg.Done();<-gate;usage()}();go func(){defer wg.Done();<-gate;reverse()}();close(gate);wg.Wait()
+   }
+   if ue==nil && re==nil {t.Fatalf("%s iteration %d: usage and reverse both succeeded",mode,i)}
+   if ue!=nil && re!=nil {t.Fatalf("%s iteration %d: both failed: usage=%v reverse=%v",mode,i,ue,re)}
+   var row Bill; if err:=s.db.Where("request_id = ? AND phase = ?",id,PhaseReserve).First(&row).Error;err!=nil{t.Fatal(err)}
+   if ue==nil {
+    if row.Status!=StatusPending || row.UsageReportedAt==nil {t.Fatalf("usage winner inconsistent: %+v",row)}
+    if _,err:=s.Settle(ctx,&billingv1.SettleRequest{RequestId:id});err!=nil {t.Fatalf("settle: %v",err)}
+   } else if row.Status!=StatusReversed || row.UsageReportedAt!=nil {t.Fatalf("reverse winner inconsistent: %+v",row)}
+  }
+ }
+ live,e:=s.getBalance(ctx,tenant);if e!=nil{t.Fatal(e)}; ledger,e:=LedgerBalance(ctx,s.db,tenant);if e!=nil||live!=ledger {t.Fatalf("live=%d ledger=%d err=%v",live,ledger,e)}
+}

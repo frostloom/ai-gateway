@@ -1,0 +1,16 @@
+func TestStreamLineLimitSafety(t *testing.T){
+ for _,tc:=range []struct{name string;prefix string;wantStatus int}{{"first_line","",502},{"after_usage","data: {\"choices\":[],\"usage\":{\"prompt_tokens\":4,\"completion_tokens\":2}}\n\n",200}} {t.Run(tc.name,func(t *testing.T){
+  upstream:=httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter,r *http.Request){_,_=io.Copy(io.Discard,r.Body);w.Header().Set("Content-Type","text/event-stream");_,_=io.WriteString(w,tc.prefix+"data: "+strings.Repeat("x",1<<20)+"\n\n")}));defer upstream.Close()
+  bill:=&fakeBilling{};c,w:=newGinCtx();c.Request=httptest.NewRequest(http.MethodPost,"/v1/chat/completions",nil)
+  relayStream(c,bill,&fakeRouter{},slog.New(slog.DiscardHandler),&client.RouteResult{ProviderID:1,BaseURL:upstream.URL},&chatRequest{Model:"m",Messages:[]chatMessage{{Role:"user",Content:"hi"}},Stream:true},"limit",1,1,true)
+  if w.Code!=tc.wantStatus||w.Body.Len()>1024||len(bill.reports)!=0||len(bill.settles)!=0||len(bill.reverses)!=0{t.Fatalf("status=%d bytes=%d usage=%d settles=%d reverses=%d",w.Code,w.Body.Len(),len(bill.reports),len(bill.settles),len(bill.reverses))}
+ })}
+}
+func TestStreamLineLimitPreservesNormalBytes(t *testing.T){
+ for _,data:=range []string{"data: {\"choices\":[]}\r\n\r\ndata: [DONE]\r\n", "data: {\"choices\":[]}\n\ndata: [DONE]"} {t.Run(fmt.Sprintf("bytes=%d",len(data)),func(t *testing.T){
+  upstream:=httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter,r *http.Request){_,_=io.Copy(io.Discard,r.Body);_,_=io.WriteString(w,data)}));defer upstream.Close()
+  bill:=&fakeBilling{};c,w:=newGinCtx();c.Request=httptest.NewRequest(http.MethodPost,"/v1/chat/completions",nil)
+  relayStream(c,bill,&fakeRouter{},slog.New(slog.DiscardHandler),&client.RouteResult{ProviderID:1,BaseURL:upstream.URL},&chatRequest{Model:"m",Messages:[]chatMessage{{Role:"user",Content:"hi"}},Stream:true},"normal",1,1,true)
+  if w.Code!=200||w.Body.String()!=data||len(bill.reports)!=0||len(bill.settles)!=0||len(bill.reverses)!=0{t.Fatalf("status=%d body=%q",w.Code,w.Body.String())}
+ })}
+}

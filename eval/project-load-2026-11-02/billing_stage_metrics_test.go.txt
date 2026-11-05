@@ -1,0 +1,39 @@
+package handler
+
+import (
+ "log/slog"
+ "testing"
+
+ "github.com/prometheus/client_golang/prometheus"
+)
+
+func completionStageCount(t *testing.T, stage string) uint64 {
+ t.Helper()
+ families, err := prometheus.DefaultGatherer.Gather()
+ if err != nil { t.Fatal(err) }
+ for _, family := range families {
+  if family.GetName() != "gateway_billing_completion_stage_seconds" { continue }
+  for _, metric := range family.GetMetric() {
+   for _, label := range metric.GetLabel() {
+    if label.GetName() == "stage" && label.GetValue() == stage { return metric.GetHistogram().GetSampleCount() }
+   }
+  }
+ }
+ return 0
+}
+
+func TestBillingCompletionStageMetrics(t *testing.T) {
+ beforeUsage, beforeSettle := completionStageCount(t, "usage"), completionStageCount(t, "settle")
+ b := &fakeBilling{}
+ c, _ := newGinCtx()
+ settleAndLog(c, b, slog.New(slog.DiscardHandler), "r", 1, 4, 2, 3)
+ if got := completionStageCount(t, "usage"); got != beforeUsage+1 { t.Fatalf("usage samples=%d, want %d", got, beforeUsage+1) }
+ if got := completionStageCount(t, "settle"); got != beforeSettle+1 { t.Fatalf("settle samples=%d, want %d", got, beforeSettle+1) }
+ b = &fakeBilling{reportErr: contextDeadlineForMetricsTest{}}
+ settleAndLog(c, b, slog.New(slog.DiscardHandler), "r2", 2, 4, 2, 3)
+ if got := completionStageCount(t, "usage"); got != beforeUsage+2 { t.Fatalf("failed usage samples=%d", got) }
+ if got := completionStageCount(t, "settle"); got != beforeSettle+1 { t.Fatalf("settle recorded after failed usage: %d", got) }
+ if len(b.settles) != 0 { t.Fatal("settlement attempted without acknowledged usage") }
+}
+type contextDeadlineForMetricsTest struct{}
+func (contextDeadlineForMetricsTest) Error() string { return "failure" }

@@ -1,0 +1,28 @@
+head=c84cbf64ae8982272ae5bcb2aff06a6f44d2c31d
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+# github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02.test
+ld: warning: '/private/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-3890943509/000013.o' has malformed LC_DYSYMTAB, expected 98 undefined symbols to start at index 1626, found 95 undefined symbols starting at index 1626
+=== RUN   TestReconcilerGRPCTimeoutAfterCommitDoesNotDoubleCharge
+
+2026/11/05 12:14:03 [32m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:155 [33mSLOW SQL >= 200ms
+[0m[31;1m[419.309ms] [33m[rows:0][35m CREATE TABLE `plans` (`id` bigint unsigned AUTO_INCREMENT,`name` varchar(64) NOT NULL,`plan_type` varchar(16) NOT NULL,`price_money` bigint NOT NULL,`validity_days` bigint NOT NULL,`refresh_hours` bigint NOT NULL DEFAULT 5,`tier_quota` json NOT NULL,`status` tinyint NOT NULL DEFAULT 0,`created_at` datetime(3) NULL,`updated_at` datetime(3) NULL,PRIMARY KEY (`id`),UNIQUE INDEX `uk_name` (`name`))[0m
+    reconciler_timeout_grpc_test.go:100: loopback gRPC: first commit succeeded before artificial delayed response; two bills settled once balance=920
+--- PASS: TestReconcilerGRPCTimeoutAfterCommitDoesNotDoubleCharge (12.50s)
+=== RUN   TestReconcilerGRPCTimeoutAfterCommitDoesNotDoubleCharge
+
+2026/11/05 12:14:16 [32m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:155 [33mSLOW SQL >= 200ms
+[0m[31;1m[784.071ms] [33m[rows:-][35m SELECT column_name, column_default, is_nullable = 'YES', data_type, character_maximum_length, column_type, column_key, extra, column_comment, numeric_precision, numeric_scale , datetime_precision FROM information_schema.columns WHERE table_schema = 'billing_compare' AND table_name = 'tenants' ORDER BY ORDINAL_POSITION[0m
+
+2026/11/05 12:14:16 [32m [33mSLOW SQL >= 200ms
+[0m[31;1m[295.085ms] [33m[rows:-][35m SELECT DATABASE()[0m
+
+2026/11/05 12:14:18 [32m [33mSLOW SQL >= 200ms
+[0m[31;1m[1266.435ms] [33m[rows:-][35m SELECT count(*) FROM INFORMATION_SCHEMA.table_constraints WHERE constraint_schema = 'billing_compare' AND table_name = 'tenants' AND constraint_name = 'uni_tenants_name'[0m
+    reconciler_timeout_grpc_test.go:100: loopback gRPC: first commit succeeded before artificial delayed response; two bills settled once balance=920
+--- PASS: TestReconcilerGRPCTimeoutAfterCommitDoesNotDoubleCharge (14.91s)
+=== RUN   TestReconcilerGRPCTimeoutAfterCommitDoesNotDoubleCharge
+    reconciler_timeout_grpc_test.go:100: loopback gRPC: first commit succeeded before artificial delayed response; two bills settled once balance=920
+--- PASS: TestReconcilerGRPCTimeoutAfterCommitDoesNotDoubleCharge (11.83s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	41.177s

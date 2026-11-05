@@ -1,0 +1,35 @@
+head=63b9d1ed4d64bb583d15fa884c37468e5c53044c
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestAttemptGuardBlocksUnknownFailover
+=== RUN   TestAttemptGuardBlocksUnknownFailover/stream=false
+    execution_gateway_attempt_guard_test.go:243: sweep_while_upstream_inflight=true reversed=0
+    execution_gateway_attempt_guard_test.go:303: stream=false first=1 second=0 status=502 attempt_state=sending bill=pending balance=999 ledger=999
+=== RUN   TestAttemptGuardBlocksUnknownFailover/stream=true
+    execution_gateway_attempt_guard_test.go:243: sweep_while_upstream_inflight=true reversed=0
+    execution_gateway_attempt_guard_test.go:303: stream=true first=1 second=0 status=502 attempt_state=sending bill=pending balance=999 ledger=999
+--- PASS: TestAttemptGuardBlocksUnknownFailover (0.58s)
+    --- PASS: TestAttemptGuardBlocksUnknownFailover/stream=false (0.09s)
+    --- PASS: TestAttemptGuardBlocksUnknownFailover/stream=true (0.08s)
+=== RUN   TestAttemptGuardBlocksUnknownFailover
+=== RUN   TestAttemptGuardBlocksUnknownFailover/stream=false
+    execution_gateway_attempt_guard_test.go:243: sweep_while_upstream_inflight=true reversed=0
+    execution_gateway_attempt_guard_test.go:303: stream=false first=1 second=0 status=502 attempt_state=sending bill=pending balance=999 ledger=999
+=== RUN   TestAttemptGuardBlocksUnknownFailover/stream=true
+    execution_gateway_attempt_guard_test.go:243: sweep_while_upstream_inflight=true reversed=0
+    execution_gateway_attempt_guard_test.go:303: stream=true first=1 second=0 status=502 attempt_state=sending bill=pending balance=999 ledger=999
+--- PASS: TestAttemptGuardBlocksUnknownFailover (0.77s)
+    --- PASS: TestAttemptGuardBlocksUnknownFailover/stream=false (0.10s)
+    --- PASS: TestAttemptGuardBlocksUnknownFailover/stream=true (0.13s)
+=== RUN   TestAttemptGuardBlocksUnknownFailover
+=== RUN   TestAttemptGuardBlocksUnknownFailover/stream=false
+    execution_gateway_attempt_guard_test.go:243: sweep_while_upstream_inflight=true reversed=0
+    execution_gateway_attempt_guard_test.go:303: stream=false first=1 second=0 status=502 attempt_state=sending bill=pending balance=999 ledger=999
+=== RUN   TestAttemptGuardBlocksUnknownFailover/stream=true
+    execution_gateway_attempt_guard_test.go:243: sweep_while_upstream_inflight=true reversed=0
+    execution_gateway_attempt_guard_test.go:303: stream=true first=1 second=0 status=502 attempt_state=sending bill=pending balance=999 ledger=999
+--- PASS: TestAttemptGuardBlocksUnknownFailover (0.64s)
+    --- PASS: TestAttemptGuardBlocksUnknownFailover/stream=false (0.08s)
+    --- PASS: TestAttemptGuardBlocksUnknownFailover/stream=true (0.09s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	3.702s

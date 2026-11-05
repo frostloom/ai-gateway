@@ -1,0 +1,8 @@
+=== RUN   TestTruncatedNonStreamMustNotSettleOrReverse
+    chat_stream_test.go:349: status=200 reports=1 settles=1 reverses=0 body="{\"choices\":[{\"message\":{\"content\":\"partial"
+--- FAIL: TestTruncatedNonStreamMustNotSettleOrReverse (0.00s)
+=== RUN   TestCompleteNonStreamWithoutUsageStillSucceeds
+--- PASS: TestCompleteNonStreamWithoutUsageStillSucceeds (0.00s)
+FAIL
+FAIL	github.com/frostloom/ai-gateway/internal/gateway/handler	0.975s
+FAIL

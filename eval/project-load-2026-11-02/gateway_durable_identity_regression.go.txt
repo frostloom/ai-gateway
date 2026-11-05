@@ -1,0 +1,18 @@
+
+func TestGatewayReportIdentityDurableRetry(t *testing.T) {
+ db:=setupReportEventDB(t);type observation struct{id string;status int;applied int};obs:=make(chan observation,4);var calls atomic.Int32
+ server:=httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter,r *http.Request){
+  var v struct{ID string `json:"event_id"`;Provider uint64 `json:"provider_id"`;OK bool `json:"ok"`};if e:=json.NewDecoder(r.Body).Decode(&v);e!=nil{http.Error(w,"bad",400);return}
+  n,e:=applyReportEventsBulk(r.Context(),db,[]reportEvent{{ID:v.ID,Provider:v.Provider,Success:v.OK}});code:=http.StatusOK
+  if errors.Is(e,errReportConflict){code=http.StatusConflict}else if e!=nil{code=http.StatusInternalServerError}else if calls.Add(1)==1{code=http.StatusServiceUnavailable} // test: commit succeeded, response reports failure
+  obs<-observation{id:v.ID,status:code,applied:n};w.WriteHeader(code)
+ }));defer server.Close()
+ router:=client.NewRouter(server.URL,"test-token");scope:=client.TestReportContext(context.Background(),17,"synthetic-request",0)
+ router.Report(scope,1,false);a:=<-obs
+ router.Report(scope,1,false);b:=<-obs
+ router.Report(scope,1,true);c:=<-obs
+ router.Report(client.TestReportContext(context.Background(),17,"synthetic-request",1),1,false);d:=<-obs
+ if len(a.id)!=64||a.id!=b.id||a.id!=c.id||a.id==d.id||a.status!=503||a.applied!=1||b.status!=200||b.applied!=0||c.status!=409||d.status!=200||d.applied!=1{t.Fatalf("observed a=%+v b=%+v c=%+v d=%+v",a,b,c,d)}
+ var count int;if e:=db.Raw("SELECT consecutive_fail FROM eval_route_provider WHERE id=1").Scan(&count).Error;e!=nil||count!=2{t.Fatalf("failure count=%d err=%v",count,e)}
+ var events int64;if e:=db.Table("eval_route_event").Count(&events).Error;e!=nil||events!=2{t.Fatalf("event count=%d err=%v",events,e)}
+}

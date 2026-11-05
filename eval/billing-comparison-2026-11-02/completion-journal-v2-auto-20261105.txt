@@ -1,0 +1,47 @@
+head=42d8ef8e5ca2471b18800e50f8e7a57fbcfdd47f
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+current_source_sha256=a8395407d8805a45c08cf8a7e216e2fafa833d79134711ba898ff1604c263e12
+current_candidate_sha256=5e549bbafc37864863923d2201082d73384741879de362d96f67163c24ed4949
+gateway_source_sha256=0c953aaea8ba449c5592f796ae49343fa1935f5215534336470b19919f64fd61
+gateway_candidate_sha256=dea1c7e1ce736cc63bd9a1552a128c2cfeb15c16513ba4fda7bc5a955563e271
+# github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02.test
+ld: warning: '/private/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-1926478473/000013.o' has malformed LC_DYSYMTAB, expected 98 undefined symbols to start at index 1626, found 95 undefined symbols starting at index 1626
+=== RUN   TestAttemptOutboxFailureAfterUpstreamResponse
+=== RUN   TestAttemptOutboxFailureAfterUpstreamResponse/stream=false
+    execution_attempt_finish_failure_test.go:197: both writes failed: usage and completion evidence absent; recovery cannot infer completion
+    execution_attempt_finish_failure_test.go:280: evidence journal replay: settled once, completion identity retained, one attempt event
+    execution_attempt_finish_failure_test.go:344: stream=false status=200 done_seen=false attempt=completed attempt_events=1 bill=settled usage=true balance=960 ledger=960
+=== RUN   TestAttemptOutboxFailureAfterUpstreamResponse/stream=true
+    execution_attempt_finish_failure_test.go:197: both writes failed: usage and completion evidence absent; recovery cannot infer completion
+    execution_attempt_finish_failure_test.go:280: evidence journal replay: settled once, completion identity retained, one attempt event
+    execution_attempt_finish_failure_test.go:344: stream=true status=200 done_seen=true attempt=completed attempt_events=1 bill=settled usage=true balance=960 ledger=960
+--- PASS: TestAttemptOutboxFailureAfterUpstreamResponse (1.08s)
+    --- PASS: TestAttemptOutboxFailureAfterUpstreamResponse/stream=false (0.25s)
+    --- PASS: TestAttemptOutboxFailureAfterUpstreamResponse/stream=true (0.44s)
+=== RUN   TestAttemptOutboxFailureAfterUpstreamResponse
+=== RUN   TestAttemptOutboxFailureAfterUpstreamResponse/stream=false
+    execution_attempt_finish_failure_test.go:197: both writes failed: usage and completion evidence absent; recovery cannot infer completion
+    execution_attempt_finish_failure_test.go:280: evidence journal replay: settled once, completion identity retained, one attempt event
+    execution_attempt_finish_failure_test.go:344: stream=false status=200 done_seen=false attempt=completed attempt_events=1 bill=settled usage=true balance=960 ledger=960
+=== RUN   TestAttemptOutboxFailureAfterUpstreamResponse/stream=true
+    execution_attempt_finish_failure_test.go:197: both writes failed: usage and completion evidence absent; recovery cannot infer completion
+    execution_attempt_finish_failure_test.go:280: evidence journal replay: settled once, completion identity retained, one attempt event
+    execution_attempt_finish_failure_test.go:344: stream=true status=200 done_seen=true attempt=completed attempt_events=1 bill=settled usage=true balance=960 ledger=960
+--- PASS: TestAttemptOutboxFailureAfterUpstreamResponse (0.83s)
+    --- PASS: TestAttemptOutboxFailureAfterUpstreamResponse/stream=false (0.19s)
+    --- PASS: TestAttemptOutboxFailureAfterUpstreamResponse/stream=true (0.19s)
+=== RUN   TestAttemptOutboxFailureAfterUpstreamResponse
+=== RUN   TestAttemptOutboxFailureAfterUpstreamResponse/stream=false
+    execution_attempt_finish_failure_test.go:197: both writes failed: usage and completion evidence absent; recovery cannot infer completion
+    execution_attempt_finish_failure_test.go:280: evidence journal replay: settled once, completion identity retained, one attempt event
+    execution_attempt_finish_failure_test.go:344: stream=false status=200 done_seen=false attempt=completed attempt_events=1 bill=settled usage=true balance=960 ledger=960
+=== RUN   TestAttemptOutboxFailureAfterUpstreamResponse/stream=true
+    execution_attempt_finish_failure_test.go:197: both writes failed: usage and completion evidence absent; recovery cannot infer completion
+    execution_attempt_finish_failure_test.go:280: evidence journal replay: settled once, completion identity retained, one attempt event
+    execution_attempt_finish_failure_test.go:344: stream=true status=200 done_seen=true attempt=completed attempt_events=1 bill=settled usage=true balance=960 ledger=960
+--- PASS: TestAttemptOutboxFailureAfterUpstreamResponse (0.89s)
+    --- PASS: TestAttemptOutboxFailureAfterUpstreamResponse/stream=false (0.21s)
+    --- PASS: TestAttemptOutboxFailureAfterUpstreamResponse/stream=true (0.28s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	4.941s

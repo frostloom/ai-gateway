@@ -1,0 +1,43 @@
+head=42d8ef8e5ca2471b18800e50f8e7a57fbcfdd47f
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+# github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02.test
+ld: warning: '/private/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-3422014420/000013.o' has malformed LC_DYSYMTAB, expected 98 undefined symbols to start at index 1626, found 95 undefined symbols starting at index 1626
+=== RUN   TestBoundProbeOutboxPreservesGeneration
+
+2026/11/05 02:34:17 [34;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/router_probe_bound_outbox_test.go:94
+[0m[35m[warn] [0mremoving callback `eval:bound-outbox-fail` from /Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/router_probe_bound_outbox_test.go:94
+
+2026/11/05 02:34:17 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/router_probe_generation_test.go:76 [35;1mrecord not found
+[0m[33m[3.456ms] [34;1m[rows:0][0m SELECT * FROM `eval_probe_generation_event` WHERE event_id='old' LIMIT 1
+
+2026/11/05 02:34:17 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/router_probe_generation_test.go:76 [35;1mrecord not found
+[0m[33m[4.653ms] [34;1m[rows:0][0m SELECT * FROM `eval_probe_generation_event` WHERE event_id='new' LIMIT 1
+    router_probe_bound_outbox_test.go:137: old generation rejected; new generation applied once; conflicting outcome rejected; two outbox records
+--- PASS: TestBoundProbeOutboxPreservesGeneration (0.19s)
+=== RUN   TestBoundProbeOutboxPreservesGeneration
+
+2026/11/05 02:34:17 [34;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/router_probe_bound_outbox_test.go:94
+[0m[35m[warn] [0mremoving callback `eval:bound-outbox-fail` from /Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/router_probe_bound_outbox_test.go:94
+
+2026/11/05 02:34:17 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/router_probe_generation_test.go:76 [35;1mrecord not found
+[0m[33m[2.046ms] [34;1m[rows:0][0m SELECT * FROM `eval_probe_generation_event` WHERE event_id='old' LIMIT 1
+
+2026/11/05 02:34:17 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/router_probe_generation_test.go:76 [35;1mrecord not found
+[0m[33m[0.801ms] [34;1m[rows:0][0m SELECT * FROM `eval_probe_generation_event` WHERE event_id='new' LIMIT 1
+    router_probe_bound_outbox_test.go:137: old generation rejected; new generation applied once; conflicting outcome rejected; two outbox records
+--- PASS: TestBoundProbeOutboxPreservesGeneration (0.12s)
+=== RUN   TestBoundProbeOutboxPreservesGeneration
+
+2026/11/05 02:34:17 [34;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/router_probe_bound_outbox_test.go:94
+[0m[35m[warn] [0mremoving callback `eval:bound-outbox-fail` from /Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/router_probe_bound_outbox_test.go:94
+
+2026/11/05 02:34:17 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/router_probe_generation_test.go:76 [35;1mrecord not found
+[0m[33m[6.533ms] [34;1m[rows:0][0m SELECT * FROM `eval_probe_generation_event` WHERE event_id='old' LIMIT 1
+
+2026/11/05 02:34:17 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/router_probe_generation_test.go:76 [35;1mrecord not found
+[0m[33m[0.980ms] [34;1m[rows:0][0m SELECT * FROM `eval_probe_generation_event` WHERE event_id='new' LIMIT 1
+    router_probe_bound_outbox_test.go:137: old generation rejected; new generation applied once; conflicting outcome rejected; two outbox records
+--- PASS: TestBoundProbeOutboxPreservesGeneration (0.07s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	2.341s

@@ -1,0 +1,41 @@
+head=63b9d1ed4d64bb583d15fa884c37468e5c53044c
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestDurableBreakerRestartDuplicateAndProbe
+
+2026/11/04 00:56:58 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/router_durable_breaker_impl_test.go:38 [35;1mrecord not found
+[0m[33m[3.251ms] [34;1m[rows:0][0m SELECT * FROM `eval_durable_breaker_event` WHERE event_id='fail-1793725018662501000' LIMIT 1
+
+2026/11/04 00:56:58 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/router_durable_breaker_impl_test.go:38 [35;1mrecord not found
+[0m[33m[0.941ms] [34;1m[rows:0][0m SELECT * FROM `eval_durable_breaker_event` WHERE event_id='wrong-probe' LIMIT 1
+
+2026/11/04 00:56:58 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/router_durable_breaker_impl_test.go:38 [35;1mrecord not found
+[0m[33m[1.263ms] [34;1m[rows:0][0m SELECT * FROM `eval_durable_breaker_event` WHERE event_id='probe-ok' LIMIT 1
+    router_durable_breaker_test.go:94: duplicate_noop=true conflicting_id_rejected=true probe_winners=1 final=closed version=3 events=2
+--- PASS: TestDurableBreakerRestartDuplicateAndProbe (0.15s)
+=== RUN   TestDurableBreakerRestartDuplicateAndProbe
+
+2026/11/04 00:56:58 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/router_durable_breaker_impl_test.go:38 [35;1mrecord not found
+[0m[33m[1.863ms] [34;1m[rows:0][0m SELECT * FROM `eval_durable_breaker_event` WHERE event_id='fail-1793725018772160000' LIMIT 1
+
+2026/11/04 00:56:58 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/router_durable_breaker_impl_test.go:38 [35;1mrecord not found
+[0m[33m[0.915ms] [34;1m[rows:0][0m SELECT * FROM `eval_durable_breaker_event` WHERE event_id='wrong-probe' LIMIT 1
+
+2026/11/04 00:56:58 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/router_durable_breaker_impl_test.go:38 [35;1mrecord not found
+[0m[33m[0.781ms] [34;1m[rows:0][0m SELECT * FROM `eval_durable_breaker_event` WHERE event_id='probe-ok' LIMIT 1
+    router_durable_breaker_test.go:94: duplicate_noop=true conflicting_id_rejected=true probe_winners=1 final=closed version=3 events=2
+--- PASS: TestDurableBreakerRestartDuplicateAndProbe (0.09s)
+=== RUN   TestDurableBreakerRestartDuplicateAndProbe
+
+2026/11/04 00:56:58 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/router_durable_breaker_impl_test.go:38 [35;1mrecord not found
+[0m[33m[1.754ms] [34;1m[rows:0][0m SELECT * FROM `eval_durable_breaker_event` WHERE event_id='fail-1793725018861788000' LIMIT 1
+
+2026/11/04 00:56:58 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/router_durable_breaker_impl_test.go:38 [35;1mrecord not found
+[0m[33m[0.956ms] [34;1m[rows:0][0m SELECT * FROM `eval_durable_breaker_event` WHERE event_id='wrong-probe' LIMIT 1
+
+2026/11/04 00:56:58 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/router_durable_breaker_impl_test.go:38 [35;1mrecord not found
+[0m[33m[0.866ms] [34;1m[rows:0][0m SELECT * FROM `eval_durable_breaker_event` WHERE event_id='probe-ok' LIMIT 1
+    router_durable_breaker_test.go:94: duplicate_noop=true conflicting_id_rejected=true probe_winners=1 final=closed version=3 events=2
+--- PASS: TestDurableBreakerRestartDuplicateAndProbe (0.07s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	2.197s

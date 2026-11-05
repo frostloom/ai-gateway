@@ -1,0 +1,38 @@
+# github.com/frostloom/ai-gateway/internal/gateway/handler.test
+ld: warning: '/private/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-4078222946/000013.o' has malformed LC_DYSYMTAB, expected 98 undefined symbols to start at index 1626, found 95 undefined symbols starting at index 1626
+=== RUN   TestChatLeavesPendingWhenActualUsageCannotBeRecorded
+--- PASS: TestChatLeavesPendingWhenActualUsageCannotBeRecorded (0.00s)
+=== RUN   TestUsageMustBeAcknowledgedBeforeSettle
+=== RUN   TestUsageMustBeAcknowledgedBeforeSettle/accepted
+=== RUN   TestUsageMustBeAcknowledgedBeforeSettle/rejected
+=== RUN   TestUsageMustBeAcknowledgedBeforeSettle/missing
+--- PASS: TestUsageMustBeAcknowledgedBeforeSettle (0.00s)
+    --- PASS: TestUsageMustBeAcknowledgedBeforeSettle/accepted (0.00s)
+    --- PASS: TestUsageMustBeAcknowledgedBeforeSettle/rejected (0.00s)
+    --- PASS: TestUsageMustBeAcknowledgedBeforeSettle/missing (0.00s)
+=== RUN   TestUsageCompletionMetricsObserveOutcomes
+=== RUN   TestUsageCompletionMetricsObserveOutcomes/usage_error
+    usage_ack_test.go:73: outcome usage_unacknowledged delta=0 want=1
+=== RUN   TestUsageCompletionMetricsObserveOutcomes/usage_nil
+    usage_ack_test.go:73: outcome usage_unacknowledged delta=0 want=1
+=== RUN   TestUsageCompletionMetricsObserveOutcomes/usage_refused
+    usage_ack_test.go:73: outcome usage_unacknowledged delta=0 want=1
+=== RUN   TestUsageCompletionMetricsObserveOutcomes/settle_error
+    usage_ack_test.go:73: outcome settlement_unacknowledged delta=0 want=1
+=== RUN   TestUsageCompletionMetricsObserveOutcomes/settle_nil
+    usage_ack_test.go:73: outcome settlement_unacknowledged delta=0 want=1
+=== RUN   TestUsageCompletionMetricsObserveOutcomes/settle_refused
+    usage_ack_test.go:73: outcome settlement_unacknowledged delta=0 want=1
+=== RUN   TestUsageCompletionMetricsObserveOutcomes/settled
+    usage_ack_test.go:73: outcome settled delta=0 want=1
+--- FAIL: TestUsageCompletionMetricsObserveOutcomes (0.01s)
+    --- FAIL: TestUsageCompletionMetricsObserveOutcomes/usage_error (0.00s)
+    --- FAIL: TestUsageCompletionMetricsObserveOutcomes/usage_nil (0.00s)
+    --- FAIL: TestUsageCompletionMetricsObserveOutcomes/usage_refused (0.00s)
+    --- FAIL: TestUsageCompletionMetricsObserveOutcomes/settle_error (0.00s)
+    --- FAIL: TestUsageCompletionMetricsObserveOutcomes/settle_nil (0.00s)
+    --- FAIL: TestUsageCompletionMetricsObserveOutcomes/settle_refused (0.00s)
+    --- FAIL: TestUsageCompletionMetricsObserveOutcomes/settled (0.00s)
+FAIL
+FAIL	github.com/frostloom/ai-gateway/internal/gateway/handler	1.284s
+FAIL

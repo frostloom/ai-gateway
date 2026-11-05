@@ -1,0 +1,12 @@
+=== RUN   TestReserveConflictingTenant
+
+2026/11/02 13:10:11 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:996 [35;1mrecord not found
+[0m[33m[1.593ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id = 'comparison-conflict' AND phase = 'reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/02 13:10:11 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:996 [35;1mrecord not found
+[0m[33m[0.649ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id = 'comparison-conflict' AND phase = 'reserve' ORDER BY `bills`.`id` LIMIT 1
+    conflict_test.go:69: conflict should fail: response=bill_id:1 balance_after:1000 error=<nil>
+--- FAIL: TestReserveConflictingTenant (0.63s)
+FAIL
+FAIL	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	1.529s
+FAIL

@@ -14,16 +14,30 @@
 -- return {code, balance}
 --   code: 1=扣减成功, 2=已扣过（幂等重放）, -1=余额不足
 --   balance: 操作后的余额
-local bal = tonumber(redis.call('GET', KEYS[1]) or '0')
+-- Lua 5.1 numbers are doubles, and tostring only retains limited digits.
+-- Restrict all arithmetic and persisted delta markers to exact 14-digit integers.
+local function safe_int(raw, signed)
+  if not raw or not string.match(raw, '^%-?%d+$') then return nil end
+  local negative = string.sub(raw, 1, 1) == '-'
+  if negative and not signed then return nil end
+  local digits = negative and string.sub(raw, 2) or raw
+  digits = string.gsub(digits, '^0+', '')
+  if digits == '' then digits = '0' end
+  if #digits > 14 then return nil end
+  return tonumber(raw)
+end
+local bal = safe_int(redis.call('GET', KEYS[1]) or '0', false)
+local pre = safe_int(ARGV[1], false)
+if not bal or not pre then return redis.error_reply('cash amount outside safe range') end
 if redis.call('EXISTS', KEYS[2]) == 1 then
   -- Transfer compensation ownership atomically without charging again. This
   -- also adopts legacy guards whose value was the shared request_id.
   redis.call('SET', KEYS[2], ARGV[2], 'EX', 86400)
   return {2, bal}
 end
-if bal < tonumber(ARGV[1]) then
+if bal < pre then
   return {-1, bal}
 end
 redis.call('SET', KEYS[2], ARGV[2], 'EX', 86400)
 redis.call('DECRBY', KEYS[1], ARGV[1])
-return {1, bal - tonumber(ARGV[1])}
+return {1, bal - pre}

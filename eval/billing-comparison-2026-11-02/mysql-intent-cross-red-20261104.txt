@@ -1,0 +1,128 @@
+head=b92d72d87b311f9af7631ef754fac9d0f2a79e2c
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+current_source_sha256=be5ced15d64432b55979cf62b24e005c89ca340c509a01020d94f63147eaa6c9
+current_candidate_sha256=ce0ee7bbd2b77d13470e23cbce6e02aeabd715a1f713a173fd99c2e0ba139471
+=== RUN   TestAtomicReserveOwnerAndRollback
+    execution_atomic_reserve_test.go:144: injected=1 rollback_bills=0 rollback_events=0 retry_state=reserved lease_live=true balance=460 ledger=460 events=3
+--- PASS: TestAtomicReserveOwnerAndRollback (0.53s)
+=== RUN   TestExecutionStrictCurrentGatewayRPCRejected
+    execution_legacy_candidate_test.go:125: gateway_v2_rpc=failed_precondition bills=0 events=0 balance=1000 ledger=1000
+--- PASS: TestExecutionStrictCurrentGatewayRPCRejected (0.68s)
+=== RUN   TestExecutionStrictRejectsLegacyBeforeReserve
+    execution_legacy_candidate_test.go:170: legacy_rejected=true bills=0 events=0 balance=1000 ledger=1000
+--- PASS: TestExecutionStrictRejectsLegacyBeforeReserve (0.40s)
+=== RUN   TestExecutionReconcilerWithLeaseAndForwarding
+    execution_reconciler_integration_test.go:153: first_scanned=2 first_reversed=1 second_scanned=1 second_reversed=0 late_usage_settled=true balance=460 ledger=460 events=5
+--- PASS: TestExecutionReconcilerWithLeaseAndForwarding (0.71s)
+=== RUN   TestExecutionUsageCommittedAfterScan
+    execution_usage_after_scan_test.go:127: first_scanned=1 reversed=0 next_settled=1 balance=960 ledger=960 events=3
+--- PASS: TestExecutionUsageCommittedAfterScan (0.57s)
+=== RUN   TestExperimentalSubscriptionIntentQuota
+    experimental_subscription_intent_test.go:197: quota=300 concurrent=8 reserve=3 rejected=5 settled=3 balance=100000 ledger=100000
+--- PASS: TestExperimentalSubscriptionIntentQuota (1.11s)
+=== RUN   TestMySQLCandidateReserveIntentAtomic
+    mysql_intent_test.go:194: rollback=true replay=duplicate conflict=rejected wrong_owner=0 owner=1 forwarding_reverse=rejected late_usage=settled balance=420 ledger=420 reverse_events=1
+--- PASS: TestMySQLCandidateReserveIntentAtomic (0.80s)
+=== RUN   TestMySQLIntentCrossTenantConflict
+    mysql_intent_test.go:267: unexpected result: <nil> err=Error 1062 (23000): Duplicate entry 'cross-intent-1793760638459622000-reserve' for key 'bills.uk_request_phase'
+    mysql_intent_test.go:271: success=1 conflict=0
+    mysql_intent_test.go:292: success=1 conflict=0 bills=1 events=1 balance_sum=900
+--- FAIL: TestMySQLIntentCrossTenantConflict (0.40s)
+=== RUN   TestMySQLIntentCommitAckLoss
+=== RUN   TestMySQLIntentCommitAckLoss/injected_commit_acknowledgement_loss
+    mysql_intent_test.go:352: injected=injected commit acknowledgement loss commit_visible=true retry=duplicate state=reserved owner_preserved=true bills=1 events=1 balance=400 ledger=400
+=== RUN   TestMySQLIntentCommitAckLoss/driver:_bad_connection
+    mysql_intent_test.go:352: injected=driver: bad connection commit_visible=true retry=duplicate state=reserved owner_preserved=true bills=1 events=1 balance=400 ledger=400
+--- PASS: TestMySQLIntentCommitAckLoss (0.41s)
+    --- PASS: TestMySQLIntentCommitAckLoss/injected_commit_acknowledgement_loss (0.24s)
+    --- PASS: TestMySQLIntentCommitAckLoss/driver:_bad_connection (0.17s)
+=== RUN   TestMySQLIntentInvalidRejectedBeforeReserve
+    mysql_intent_test.go:402: invalid_intents=3 bills=0 events=0 balance=ledger=500
+--- PASS: TestMySQLIntentInvalidRejectedBeforeReserve (0.19s)
+=== RUN   TestMySQLCandidateForwardReverseRace
+    mysql_intent_test.go:522: contests=12 forwarding=5 reversing=7 balance_and_events=consistent
+--- PASS: TestMySQLCandidateForwardReverseRace (0.87s)
+=== RUN   TestAtomicReserveOwnerAndRollback
+    execution_atomic_reserve_test.go:144: injected=1 rollback_bills=0 rollback_events=0 retry_state=reserved lease_live=true balance=460 ledger=460 events=3
+--- PASS: TestAtomicReserveOwnerAndRollback (0.73s)
+=== RUN   TestExecutionStrictCurrentGatewayRPCRejected
+    execution_legacy_candidate_test.go:125: gateway_v2_rpc=failed_precondition bills=0 events=0 balance=1000 ledger=1000
+--- PASS: TestExecutionStrictCurrentGatewayRPCRejected (0.37s)
+=== RUN   TestExecutionStrictRejectsLegacyBeforeReserve
+    execution_legacy_candidate_test.go:170: legacy_rejected=true bills=0 events=0 balance=1000 ledger=1000
+--- PASS: TestExecutionStrictRejectsLegacyBeforeReserve (0.38s)
+=== RUN   TestExecutionReconcilerWithLeaseAndForwarding
+    execution_reconciler_integration_test.go:153: first_scanned=2 first_reversed=1 second_scanned=1 second_reversed=0 late_usage_settled=true balance=460 ledger=460 events=5
+--- PASS: TestExecutionReconcilerWithLeaseAndForwarding (0.51s)
+=== RUN   TestExecutionUsageCommittedAfterScan
+    execution_usage_after_scan_test.go:127: first_scanned=1 reversed=0 next_settled=1 balance=960 ledger=960 events=3
+--- PASS: TestExecutionUsageCommittedAfterScan (0.63s)
+=== RUN   TestExperimentalSubscriptionIntentQuota
+    experimental_subscription_intent_test.go:197: quota=300 concurrent=8 reserve=3 rejected=5 settled=3 balance=100000 ledger=100000
+--- PASS: TestExperimentalSubscriptionIntentQuota (0.78s)
+=== RUN   TestMySQLCandidateReserveIntentAtomic
+    mysql_intent_test.go:194: rollback=true replay=duplicate conflict=rejected wrong_owner=0 owner=1 forwarding_reverse=rejected late_usage=settled balance=420 ledger=420 reverse_events=1
+--- PASS: TestMySQLCandidateReserveIntentAtomic (0.61s)
+=== RUN   TestMySQLIntentCrossTenantConflict
+    mysql_intent_test.go:267: unexpected result: <nil> err=Error 1062 (23000): Duplicate entry 'cross-intent-1793760644261546000-reserve' for key 'bills.uk_request_phase'
+    mysql_intent_test.go:271: success=1 conflict=0
+    mysql_intent_test.go:292: success=1 conflict=0 bills=1 events=1 balance_sum=900
+--- FAIL: TestMySQLIntentCrossTenantConflict (0.24s)
+=== RUN   TestMySQLIntentCommitAckLoss
+=== RUN   TestMySQLIntentCommitAckLoss/injected_commit_acknowledgement_loss
+    mysql_intent_test.go:352: injected=injected commit acknowledgement loss commit_visible=true retry=duplicate state=reserved owner_preserved=true bills=1 events=1 balance=400 ledger=400
+=== RUN   TestMySQLIntentCommitAckLoss/driver:_bad_connection
+    mysql_intent_test.go:352: injected=driver: bad connection commit_visible=true retry=duplicate state=reserved owner_preserved=true bills=1 events=1 balance=400 ledger=400
+--- PASS: TestMySQLIntentCommitAckLoss (0.45s)
+    --- PASS: TestMySQLIntentCommitAckLoss/injected_commit_acknowledgement_loss (0.23s)
+    --- PASS: TestMySQLIntentCommitAckLoss/driver:_bad_connection (0.22s)
+=== RUN   TestMySQLIntentInvalidRejectedBeforeReserve
+    mysql_intent_test.go:402: invalid_intents=3 bills=0 events=0 balance=ledger=500
+--- PASS: TestMySQLIntentInvalidRejectedBeforeReserve (0.22s)
+=== RUN   TestMySQLCandidateForwardReverseRace
+    mysql_intent_test.go:522: contests=12 forwarding=4 reversing=8 balance_and_events=consistent
+--- PASS: TestMySQLCandidateForwardReverseRace (0.67s)
+=== RUN   TestAtomicReserveOwnerAndRollback
+    execution_atomic_reserve_test.go:144: injected=1 rollback_bills=0 rollback_events=0 retry_state=reserved lease_live=true balance=460 ledger=460 events=3
+--- PASS: TestAtomicReserveOwnerAndRollback (0.47s)
+=== RUN   TestExecutionStrictCurrentGatewayRPCRejected
+    execution_legacy_candidate_test.go:125: gateway_v2_rpc=failed_precondition bills=0 events=0 balance=1000 ledger=1000
+--- PASS: TestExecutionStrictCurrentGatewayRPCRejected (0.36s)
+=== RUN   TestExecutionStrictRejectsLegacyBeforeReserve
+    execution_legacy_candidate_test.go:170: legacy_rejected=true bills=0 events=0 balance=1000 ledger=1000
+--- PASS: TestExecutionStrictRejectsLegacyBeforeReserve (0.53s)
+=== RUN   TestExecutionReconcilerWithLeaseAndForwarding
+    execution_reconciler_integration_test.go:153: first_scanned=2 first_reversed=1 second_scanned=1 second_reversed=0 late_usage_settled=true balance=460 ledger=460 events=5
+--- PASS: TestExecutionReconcilerWithLeaseAndForwarding (0.62s)
+=== RUN   TestExecutionUsageCommittedAfterScan
+    execution_usage_after_scan_test.go:127: first_scanned=1 reversed=0 next_settled=1 balance=960 ledger=960 events=3
+--- PASS: TestExecutionUsageCommittedAfterScan (0.86s)
+=== RUN   TestExperimentalSubscriptionIntentQuota
+    experimental_subscription_intent_test.go:197: quota=300 concurrent=8 reserve=3 rejected=5 settled=3 balance=100000 ledger=100000
+--- PASS: TestExperimentalSubscriptionIntentQuota (0.79s)
+=== RUN   TestMySQLCandidateReserveIntentAtomic
+    mysql_intent_test.go:194: rollback=true replay=duplicate conflict=rejected wrong_owner=0 owner=1 forwarding_reverse=rejected late_usage=settled balance=420 ledger=420 reverse_events=1
+--- PASS: TestMySQLCandidateReserveIntentAtomic (0.30s)
+=== RUN   TestMySQLIntentCrossTenantConflict
+    mysql_intent_test.go:267: unexpected result: <nil> err=Error 1062 (23000): Duplicate entry 'cross-intent-1793760649741353000-reserve' for key 'bills.uk_request_phase'
+    mysql_intent_test.go:271: success=1 conflict=0
+    mysql_intent_test.go:292: success=1 conflict=0 bills=1 events=1 balance_sum=900
+--- FAIL: TestMySQLIntentCrossTenantConflict (0.19s)
+=== RUN   TestMySQLIntentCommitAckLoss
+=== RUN   TestMySQLIntentCommitAckLoss/injected_commit_acknowledgement_loss
+    mysql_intent_test.go:352: injected=injected commit acknowledgement loss commit_visible=true retry=duplicate state=reserved owner_preserved=true bills=1 events=1 balance=400 ledger=400
+=== RUN   TestMySQLIntentCommitAckLoss/driver:_bad_connection
+    mysql_intent_test.go:352: injected=driver: bad connection commit_visible=true retry=duplicate state=reserved owner_preserved=true bills=1 events=1 balance=400 ledger=400
+--- PASS: TestMySQLIntentCommitAckLoss (0.86s)
+    --- PASS: TestMySQLIntentCommitAckLoss/injected_commit_acknowledgement_loss (0.19s)
+    --- PASS: TestMySQLIntentCommitAckLoss/driver:_bad_connection (0.67s)
+=== RUN   TestMySQLIntentInvalidRejectedBeforeReserve
+    mysql_intent_test.go:402: invalid_intents=3 bills=0 events=0 balance=ledger=500
+--- PASS: TestMySQLIntentInvalidRejectedBeforeReserve (0.15s)
+=== RUN   TestMySQLCandidateForwardReverseRace
+    mysql_intent_test.go:522: contests=12 forwarding=9 reversing=3 balance_and_events=consistent
+--- PASS: TestMySQLCandidateForwardReverseRace (1.22s)
+FAIL
+FAIL	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	19.968s
+FAIL

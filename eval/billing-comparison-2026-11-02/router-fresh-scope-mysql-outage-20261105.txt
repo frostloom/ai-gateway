@@ -1,0 +1,47 @@
+head=42d8ef8e5ca2471b18800e50f8e7a57fbcfdd47f
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+50587c967766aa5a0c1d85604ede741fcf1af76ec55542db0e4298b6df373ef6  /var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T//usage-atomic-overlay.VwbMNo/registry.go
+# github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02.test
+ld: warning: '/private/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-3804902638/000013.o' has malformed LC_DYSYMTAB, expected 98 undefined symbols to start at index 1626, found 95 undefined symbols starting at index 1626
+=== RUN   TestRouterReportMySQLCrashAndRecovery
+[mysql] 2026/11/05 06:47:04 connection.go:801 closing bad idle connection: EOF
+[mysql] 2026/11/05 06:47:04 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 06:47:05 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 06:47:05 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 06:47:05 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 06:47:05 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 06:47:05 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 06:47:06 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 06:47:06 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 06:47:06 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 06:47:06 packets.go:58 unexpected EOF
+    router_mysql_outage_report_test.go:123: mysql killed: first status=200, persistence error metric delta=1; restart then second status=200, memory failures=2 db failures=1
+--- PASS: TestRouterReportMySQLCrashAndRecovery (2.56s)
+=== RUN   TestRouterReportMySQLCrashAndRecovery
+[mysql] 2026/11/05 06:47:07 connection.go:801 closing bad idle connection: EOF
+[mysql] 2026/11/05 06:47:07 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 06:47:07 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 06:47:07 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 06:47:07 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 06:47:08 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 06:47:08 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 06:47:08 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 06:47:08 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 06:47:09 packets.go:58 unexpected EOF
+    router_mysql_outage_report_test.go:123: mysql killed: first status=200, persistence error metric delta=1; restart then second status=200, memory failures=2 db failures=1
+--- PASS: TestRouterReportMySQLCrashAndRecovery (2.21s)
+=== RUN   TestRouterReportMySQLCrashAndRecovery
+[mysql] 2026/11/05 06:47:09 connection.go:801 closing bad idle connection: EOF
+[mysql] 2026/11/05 06:47:09 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 06:47:09 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 06:47:10 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 06:47:10 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 06:47:10 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 06:47:10 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 06:47:10 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 06:47:11 packets.go:58 unexpected EOF
+    router_mysql_outage_report_test.go:123: mysql killed: first status=200, persistence error metric delta=1; restart then second status=200, memory failures=2 db failures=1
+--- PASS: TestRouterReportMySQLCrashAndRecovery (2.05s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	9.442s

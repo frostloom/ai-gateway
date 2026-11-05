@@ -1,0 +1,45 @@
+=== RUN   TestReserveConflictingTenant
+
+2026/11/02 13:11:40 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:1033 [35;1mrecord not found
+[0m[33m[2.616ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id = 'comparison-conflict' AND phase = 'reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/02 13:11:40 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:1033 [35;1mrecord not found
+[0m[33m[1.002ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id = 'comparison-conflict' AND phase = 'reserve' ORDER BY `bills`.`id` LIMIT 1
+    conflict_test.go:83: first code=RESERVE_OK bill=1; conflicting second code=conflict bill=1; stored tenant=1 pre=100; balances=900,1000
+--- PASS: TestReserveConflictingTenant (0.39s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	1.098s
+=== RUN   TestTerminalSQLFailureRebuildAndRetry
+=== RUN   TestTerminalSQLFailureRebuildAndRetry/settle
+=== RUN   TestTerminalSQLFailureRebuildAndRetry/reverse
+--- PASS: TestTerminalSQLFailureRebuildAndRetry (1.29s)
+    --- PASS: TestTerminalSQLFailureRebuildAndRetry/settle (0.62s)
+    --- PASS: TestTerminalSQLFailureRebuildAndRetry/reverse (0.67s)
+=== RUN   TestReserveOutboxIdempotent
+--- PASS: TestReserveOutboxIdempotent (0.96s)
+=== RUN   TestFullFlowOutboxEvents
+--- PASS: TestFullFlowOutboxEvents (0.59s)
+=== RUN   TestReserveConcurrentNoOversell
+--- PASS: TestReserveConcurrentNoOversell (1.98s)
+=== RUN   TestReserveIdempotentSameRequest
+--- PASS: TestReserveIdempotentSameRequest (0.51s)
+=== RUN   TestReserveConcurrentSameRequest
+--- PASS: TestReserveConcurrentSameRequest (0.67s)
+=== RUN   TestReserveInsufficient
+--- PASS: TestReserveInsufficient (0.59s)
+=== RUN   TestSettleFullFlow
+--- PASS: TestSettleFullFlow (0.87s)
+=== RUN   TestSettleIdempotent
+--- PASS: TestSettleIdempotent (0.68s)
+=== RUN   TestReverseIdempotent
+--- PASS: TestReverseIdempotent (0.60s)
+=== RUN   TestReverseAfterSettled
+--- PASS: TestReverseAfterSettled (0.52s)
+=== RUN   TestRebuildBalance
+--- PASS: TestRebuildBalance (0.69s)
+=== RUN   TestRebuildBalanceIdempotent
+--- PASS: TestRebuildBalanceIdempotent (0.66s)
+=== RUN   TestReserveSubscriptionAllowance
+--- PASS: TestReserveSubscriptionAllowance (0.59s)
+PASS
+ok  	github.com/frostloom/ai-gateway/internal/billing/store	11.835s

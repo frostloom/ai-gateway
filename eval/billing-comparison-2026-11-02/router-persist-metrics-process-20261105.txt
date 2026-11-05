@@ -1,0 +1,46 @@
+head=42d8ef8e5ca2471b18800e50f8e7a57fbcfdd47f
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+# github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02.test
+ld: warning: '/private/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-2593830617/000013.o' has malformed LC_DYSYMTAB, expected 98 undefined symbols to start at index 1626, found 95 undefined symbols starting at index 1626
+=== RUN   TestRouterProcessPersistenceMetricOnMySQLOutage
+[mysql] 2026/11/05 04:18:24 connection.go:801 closing bad idle connection: EOF
+time=2026-11-05T04:18:24.247+08:00 level=ERROR msg="persist fail" provider_id=1 err="dial tcp 127.0.0.1:54990: connect: connection refused"
+[mysql] 2026/11/05 04:18:24 connection.go:801 closing bad idle connection: EOF
+[mysql] 2026/11/05 04:18:24 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 04:18:24 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 04:18:24 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 04:18:25 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 04:18:25 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 04:18:25 packets.go:58 unexpected EOF
+    router_metric_process_test.go:186: actual router process: outage report HTTP 200, exposed increment error=1; recovery report HTTP 200, DB count=1, memory count=2
+--- PASS: TestRouterProcessPersistenceMetricOnMySQLOutage (7.53s)
+=== RUN   TestRouterProcessPersistenceMetricOnMySQLOutage
+[mysql] 2026/11/05 04:18:30 connection.go:801 closing bad idle connection: EOF
+time=2026-11-05T04:18:30.126+08:00 level=ERROR msg="persist fail" provider_id=2 err="dial tcp 127.0.0.1:54990: connect: connection refused"
+[mysql] 2026/11/05 04:18:30 connection.go:801 closing bad idle connection: EOF
+[mysql] 2026/11/05 04:18:30 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 04:18:30 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 04:18:30 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 04:18:30 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 04:18:31 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 04:18:31 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 04:18:31 packets.go:58 unexpected EOF
+    router_metric_process_test.go:186: actual router process: outage report HTTP 200, exposed increment error=1; recovery report HTTP 200, DB count=1, memory count=2
+--- PASS: TestRouterProcessPersistenceMetricOnMySQLOutage (5.93s)
+=== RUN   TestRouterProcessPersistenceMetricOnMySQLOutage
+[mysql] 2026/11/05 04:18:35 connection.go:801 closing bad idle connection: EOF
+time=2026-11-05T04:18:35.822+08:00 level=ERROR msg="persist fail" provider_id=3 err="dial tcp 127.0.0.1:54990: connect: connection refused"
+[mysql] 2026/11/05 04:18:36 connection.go:801 closing bad idle connection: EOF
+[mysql] 2026/11/05 04:18:36 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 04:18:36 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 04:18:36 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 04:18:36 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 04:18:36 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 04:18:37 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 04:18:37 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 04:18:37 packets.go:58 unexpected EOF
+    router_metric_process_test.go:186: actual router process: outage report HTTP 200, exposed increment error=1; recovery report HTTP 200, DB count=1, memory count=2
+--- PASS: TestRouterProcessPersistenceMetricOnMySQLOutage (6.06s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	21.659s

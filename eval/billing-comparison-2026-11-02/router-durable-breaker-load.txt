@@ -1,0 +1,15 @@
+head=63b9d1ed4d64bb583d15fa884c37468e5c53044c
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestDurableBreakerPermitLoad
+    router_durable_breaker_load_test.go:122: {"completed_per_second":1468003.5944666383,"elapsed_seconds":1.000061584,"errors":0,"mean_ms":0.010337479752657487,"mode":"memory_route","operations":1468094,"rep":1,"sample_count":45884,"sampled_p95_ms":0.052,"sampled_p99_ms":0.185,"timeouts":0,"workers":16}
+    router_durable_breaker_load_test.go:122: {"completed_per_second":1437.7009087731274,"elapsed_seconds":1.007163584,"errors":0,"mean_ms":11.087660911602208,"mode":"db_permit","operations":1448,"rep":1,"sample_count":48,"sampled_p95_ms":57.435,"sampled_p99_ms":60.218,"timeouts":0,"workers":16}
+    router_durable_breaker_load_test.go:122: {"completed_per_second":1569303.3873831392,"elapsed_seconds":1.000347041,"errors":0,"mean_ms":0.040236463657626426,"mode":"memory_route","operations":1569848,"rep":1,"sample_count":49088,"sampled_p95_ms":0.256,"sampled_p99_ms":0.88,"timeouts":0,"workers":64}
+    router_durable_breaker_load_test.go:122: {"completed_per_second":1663.3390762359434,"elapsed_seconds":1.035868167,"errors":0,"mean_ms":37.74583517121302,"mode":"db_permit","operations":1723,"rep":1,"sample_count":64,"sampled_p95_ms":59.708,"sampled_p99_ms":80.739,"timeouts":0,"workers":64}
+    router_durable_breaker_load_test.go:122: {"completed_per_second":1366.0986461895948,"elapsed_seconds":1.007979917,"errors":0,"mean_ms":11.659391430646332,"mode":"db_permit","operations":1377,"rep":2,"sample_count":48,"sampled_p95_ms":12.108,"sampled_p99_ms":14.453,"timeouts":0,"workers":16}
+    router_durable_breaker_load_test.go:122: {"completed_per_second":1545431.2904245283,"elapsed_seconds":1.000065166,"errors":0,"mean_ms":0.009802554071994034,"mode":"memory_route","operations":1545532,"rep":2,"sample_count":48306,"sampled_p95_ms":0.061,"sampled_p99_ms":0.173,"timeouts":0,"workers":16}
+    router_durable_breaker_load_test.go:122: {"completed_per_second":1665.2928595552507,"elapsed_seconds":1.036454333,"errors":0,"mean_ms":37.783122247972194,"mode":"db_permit","operations":1726,"rep":2,"sample_count":64,"sampled_p95_ms":74.513,"sampled_p99_ms":91.721,"timeouts":0,"workers":64}
+    router_durable_breaker_load_test.go:122: {"completed_per_second":1569218.997108665,"elapsed_seconds":1.000125542,"errors":0,"mean_ms":0.040230455150194196,"mode":"memory_route","operations":1569416,"rep":2,"sample_count":49076,"sampled_p95_ms":0.271,"sampled_p99_ms":0.828,"timeouts":0,"workers":64}
+--- PASS: TestDurableBreakerPermitLoad (8.16s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	8.926s

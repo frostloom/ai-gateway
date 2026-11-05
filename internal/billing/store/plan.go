@@ -15,7 +15,9 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"math/big"
 	"sort"
 	"time"
 
@@ -112,13 +114,14 @@ type RechargeOrder struct {
 
 // Topup 入账流水（正余额权威账本）。(ref_type, ref_id) 唯一 = 只入账一次。
 type Topup struct {
-	ID        uint64    `gorm:"primaryKey"`
-	TenantID  uint64    `gorm:"not null;index:idx_tp_tenant_created,priority:1"`
-	Source    string    `gorm:"size:16;not null"` // recharge/subscription/refund
-	Amount    int64     `gorm:"not null"`         // 正=入账，负=退款
-	RefType   string    `gorm:"size:32;not null;uniqueIndex:uk_topup_ref,priority:1"`
-	RefID     string    `gorm:"size:64;not null;uniqueIndex:uk_topup_ref,priority:2"`
-	CreatedAt time.Time `gorm:"index:idx_tp_tenant_created,priority:2"`
+	ID            uint64    `gorm:"primaryKey"`
+	TenantID      uint64    `gorm:"not null;index:idx_tp_tenant_created,priority:1"`
+	Source        string    `gorm:"size:16;not null"` // recharge/subscription/refund
+	Amount        int64     `gorm:"not null"`         // 正=入账，负=退款
+	RequestedCent *int64    // 按金额退款的原始请求；旧记录为 nil
+	RefType       string    `gorm:"size:32;not null;uniqueIndex:uk_topup_ref,priority:1"`
+	RefID         string    `gorm:"size:64;not null;uniqueIndex:uk_topup_ref,priority:2"`
+	CreatedAt     time.Time `gorm:"index:idx_tp_tenant_created,priority:2"`
 }
 
 // AgentSession AI 客服会话（持久记录；热态 history 在 Redis）。
@@ -178,7 +181,20 @@ func LedgerBalance(ctx context.Context, db *gorm.DB, tenantID uint64) (int64, er
 		Select("initial_quota").Scan(&initial).Error; err != nil {
 		return 0, err
 	}
-	return initial + topups - pendingPre - settledActual, nil
+	return checkedLedgerBalance(initial, topups, pendingPre, settledActual)
+}
+
+// Intermediate sums may exceed int64 even when the final balance fits.
+func checkedLedgerBalance(initial, topups, pending, settled int64) (int64, error) {
+	var result, value big.Int
+	result.SetInt64(initial)
+	result.Add(&result, value.SetInt64(topups))
+	result.Sub(&result, value.SetInt64(pending))
+	result.Sub(&result, value.SetInt64(settled))
+	if !result.IsInt64() {
+		return 0, fmt.Errorf("ledger balance exceeds integer range")
+	}
+	return result.Int64(), nil
 }
 
 // ListPlans 套餐目录（全部，含下架，供 admin 管理）。
@@ -327,7 +343,10 @@ func (s *Store) meOverviewCash(ctx context.Context, tenantID uint64) (*MeView, e
 			return nil, fmt.Errorf("账单不一致，已暂停查询：可用 %d，账本 %d", bal, ledger)
 		}
 	}
-	sub, _ := s.GetActiveSubscription(ctx, tenantID)
+	sub, err := s.GetActiveSubscription(ctx, tenantID)
+	if err != nil {
+		return nil, fmt.Errorf("subscription lookup: %w", err)
+	}
 	plans, err := s.ListPlans(ctx)
 	if err != nil {
 		return nil, err
@@ -405,25 +424,26 @@ func (s *Store) SubscriptionAllowance(ctx context.Context, sub *Subscription) ([
 
 // subscriptionConsumed 滚动窗口内（最近 refreshHours 小时）按档次的订阅额度消费（token）。
 // 只统计 funding=subscription 的 reserve 行（status pending/settled；reversed 不占额度）。
-// reserve 行 token 由 ReportUsage 写入（幂等），settle 不再产生第二份消费。
+// 未上报的 pending 消耗预占估算；上报后使用实际 token，reversed 不占额度。
 func (s *Store) subscriptionConsumed(ctx context.Context, tenantID uint64, refreshHours int) (map[string]int64, error) {
 	if refreshHours <= 0 {
 		refreshHours = 5
 	}
 	since := time.Now().Add(-time.Duration(refreshHours) * time.Hour)
 	type row struct {
-		Model    string
-		Prompt   int64
-		Complete int64
+		Model        string
+		ReservedTier *string
+		Consumed     int64
+		Unknown      int64
 	}
 	// 只统计 reserve 行（token 由 ReportUsage 写入）：settle 镜像行也带 token，
 	// 若不加 phase 过滤会把同一次用量算两遍。
 	var rows []row
 	err := s.db.WithContext(ctx).Model(&Bill{}).
-		Where("tenant_id = ? AND phase = ? AND funding = ? AND status IN (?, ?) AND created_at >= ?",
-			tenantID, PhaseReserve, FundingSubscription, StatusPending, StatusSettled, since).
-		Select("model, COALESCE(SUM(prompt_tokens),0) AS prompt, COALESCE(SUM(completion_tokens),0) AS complete").
-		Group("model").Scan(&rows).Error
+		Where("tenant_id = ? AND phase = ? AND funding = ? AND status IN (?, ?) AND (created_at >= ? OR (status = ? AND usage_reported_at IS NULL))",
+			tenantID, PhaseReserve, FundingSubscription, StatusPending, StatusSettled, since, StatusPending).
+		Select("model, reserved_tier, COALESCE(SUM(CASE WHEN usage_reported_at IS NULL THEN COALESCE(reserved_tokens,0) ELSE COALESCE(prompt_tokens,0)+COALESCE(completion_tokens,0) END),0) AS consumed, SUM(CASE WHEN (usage_reported_at IS NULL AND reserved_tokens IS NULL) OR (usage_reported_at IS NOT NULL AND (prompt_tokens IS NULL OR completion_tokens IS NULL)) THEN 1 ELSE 0 END) AS unknown").
+		Group("model, reserved_tier").Scan(&rows).Error
 	if err != nil {
 		return nil, err
 	}
@@ -431,14 +451,29 @@ func (s *Store) subscriptionConsumed(ctx context.Context, tenantID uint64, refre
 	consumed := map[string]int64{}
 	// Materialize before model lookups: cash operations share one pinned session.
 	for _, r := range rows {
-		tier, ok := tierOf[r.Model]
-		if !ok {
-			if m, e := s.GetModelByModelID(ctx, r.Model); e == nil && m != nil {
-				tier = TierFromTags(m.TagsList())
+		if r.Unknown > 0 {
+			return nil, fmt.Errorf("subscription has unresolved legacy reservation")
+		}
+		tier := ""
+		if r.ReservedTier != nil {
+			tier = *r.ReservedTier
+		} else if cached, ok := tierOf[r.Model]; ok {
+			tier = cached
+		} else {
+			m, err := s.GetModelByModelID(ctx, r.Model)
+			if err != nil {
+				return nil, err
 			}
+			if m == nil {
+				return nil, fmt.Errorf("subscription reservation model unavailable")
+			}
+			tier = TierFromTags(m.TagsList())
 			tierOf[r.Model] = tier
 		}
-		consumed[tier] += r.Prompt + r.Complete
+		if tier == "" {
+			return nil, fmt.Errorf("subscription reservation tier unavailable")
+		}
+		consumed[tier] += r.Consumed
 	}
 	return consumed, nil
 }
@@ -543,6 +578,9 @@ func (s *Store) CreateRechargeOrder(ctx context.Context, tenantID uint64, amount
 	if amountMoney <= 0 {
 		return nil, fmt.Errorf("充值金额必须 > 0")
 	}
+	if amountMoney > quota.MaxCashLua/quota.CentPerYuan {
+		return nil, fmt.Errorf("充值金额超出安全范围")
+	}
 	orderNo := idemKey
 	if orderNo == "" {
 		orderNo = newOrderNo()
@@ -554,7 +592,14 @@ func (s *Store) CreateRechargeOrder(ctx context.Context, tenantID uint64, amount
 	}
 	if err := s.db.WithContext(ctx).Create(o).Error; err != nil {
 		if isDupKey(err) {
-			return s.rechargeByOrderNo(ctx, orderNo) // 幂等重放
+			existing, lookupErr := s.rechargeByOrderNo(ctx, orderNo)
+			if lookupErr != nil {
+				return nil, lookupErr
+			}
+			if existing == nil || existing.TenantID != tenantID || existing.AmountMoney != amountMoney || existing.AmountCent != o.AmountCent {
+				return nil, fmt.Errorf("充值幂等键冲突")
+			}
+			return existing, nil
 		}
 		return nil, err
 	}
@@ -595,13 +640,27 @@ func (s *Store) payRechargeCash(ctx context.Context, orderNo string) (*RechargeO
 	if o.Status != RechargePending {
 		return nil, fmt.Errorf("订单 %s 状态 %s，不可支付", orderNo, o.Status)
 	}
+	if o.AmountMoney <= 0 || o.AmountMoney > quota.MaxCashLua/quota.CentPerYuan || o.AmountCent != o.AmountMoney*quota.CentPerYuan {
+		return nil, fmt.Errorf("订单金额超出安全范围")
+	}
+	bal, err := LedgerBalance(ctx, s.db, o.TenantID)
+	if err != nil {
+		return nil, err
+	}
+	if bal < 0 || bal > quota.MaxCashLua-o.AmountCent {
+		return nil, fmt.Errorf("充值后余额超出安全范围")
+	}
 	if err := s.cashMutationAllowed(); err != nil {
 		return nil, err
 	}
 	paidAt := time.Now()
 	if err := s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		if _, err := insertTopup(tx, &Topup{TenantID: o.TenantID, Source: TopupRecharge, Amount: o.AmountCent, RefType: TopupRecharge, RefID: o.OrderNo, CreatedAt: paidAt}); err != nil {
+		inserted, err := insertTopup(tx, &Topup{TenantID: o.TenantID, Source: TopupRecharge, Amount: o.AmountCent, RefType: TopupRecharge, RefID: o.OrderNo, CreatedAt: paidAt})
+		if err != nil {
 			return err
+		}
+		if !inserted {
+			return fmt.Errorf("充值流水幂等键冲突")
 		}
 		res := tx.Model(&RechargeOrder{}).Where("id = ? AND status = ?", o.ID, RechargePending).
 			Updates(map[string]any{"status": RechargePaid, "paid_at": paidAt})
@@ -674,8 +733,12 @@ func (s *Store) refundRechargeCash(ctx context.Context, tenantID uint64, orderNo
 		return nil, err
 	}
 	if err := s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		if _, err := insertTopup(tx, &Topup{TenantID: tenantID, Source: TopupRefund, Amount: -refund, RefType: TopupRefund, RefID: o.OrderNo, CreatedAt: time.Now()}); err != nil {
+		inserted, err := insertTopup(tx, &Topup{TenantID: tenantID, Source: TopupRefund, Amount: -refund, RefType: TopupRefund, RefID: o.OrderNo, CreatedAt: time.Now()})
+		if err != nil {
 			return err
+		}
+		if !inserted {
+			return fmt.Errorf("退款流水幂等键冲突")
 		}
 		res := tx.Model(&RechargeOrder{}).Where("id = ? AND status = ?", o.ID, RechargePaid).
 			Update("status", RechargeRefunded)
@@ -710,18 +773,23 @@ func (s *Store) refundAmountCash(ctx context.Context, tenantID uint64, amountMon
 	if amountMoney <= 0 {
 		return nil, fmt.Errorf("退款金额必须 > 0")
 	}
+	if amountMoney > quota.MaxCashLua/quota.CentPerYuan {
+		return nil, fmt.Errorf("退款金额超出安全范围")
+	}
 	if idemKey == "" {
 		idemKey = newOrderNo() // 直接打 admin 未带锚点时自生成；agent/portal 会显式传
 	}
 	// 幂等：同锚点已退过 → 直接返回已退结果
-	var existed int64
-	if err := s.db.WithContext(ctx).Model(&Topup{}).
-		Where("tenant_id = ? AND ref_type = ? AND ref_id = ?", tenantID, TopupRefund, idemKey).
-		Count(&existed).Error; err != nil {
+	target := amountMoney * quota.CentPerYuan
+	var existing Topup
+	err := s.db.WithContext(ctx).Where("ref_type = ? AND ref_id = ?", TopupRefund, idemKey).First(&existing).Error
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, err
 	}
-	target := amountMoney * quota.CentPerYuan
-	if existed > 0 {
+	if err == nil {
+		if existing.TenantID != tenantID || existing.Source != TopupRefund || existing.RequestedCent == nil || *existing.RequestedCent != target || existing.Amount >= 0 || existing.Amount < -target {
+			return nil, fmt.Errorf("退款幂等键冲突或历史请求不可验证")
+		}
 		if err := s.requireCashMatch(ctx, tenantID); err != nil {
 			return nil, fmt.Errorf("退款已入账，余额投影待恢复：%w", err)
 		}
@@ -739,8 +807,14 @@ func (s *Store) refundAmountCash(ctx context.Context, tenantID uint64, amountMon
 		return nil, err
 	}
 	if err := s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		_, err := insertTopup(tx, &Topup{TenantID: tenantID, Source: TopupRefund, Amount: -refund, RefType: TopupRefund, RefID: idemKey, CreatedAt: time.Now()})
-		return err
+		inserted, err := insertTopup(tx, &Topup{TenantID: tenantID, Source: TopupRefund, Amount: -refund, RequestedCent: &target, RefType: TopupRefund, RefID: idemKey, CreatedAt: time.Now()})
+		if err != nil {
+			return err
+		}
+		if !inserted {
+			return fmt.Errorf("退款流水幂等键冲突")
+		}
+		return nil
 	}); err != nil {
 		return nil, err
 	}

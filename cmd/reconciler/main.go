@@ -27,11 +27,12 @@ import (
 )
 
 func main() {
-	var once, noSweep, noRebuild bool
+	var once, noSweep, noRebuild, noAutoReverse bool
 	var intervalSec, graceSec int
 	flag.BoolVar(&once, "once", false, "只跑一轮就退出（场景脚本用）")
 	flag.BoolVar(&noSweep, "no-sweep", false, "跳过 sweep（只跑 rebuild）")
 	flag.BoolVar(&noRebuild, "no-rebuild", false, "跳过 rebuild（只跑 sweep，压测期间用）")
+	flag.BoolVar(&noAutoReverse, "no-auto-reverse", true, "保留无用量的 pending 账单，仍补结算已上报用量（显式设为 false 可恢复旧行为）")
 	flag.IntVar(&intervalSec, "interval", 30, "对账周期（秒）")
 	flag.IntVar(&graceSec, "grace", 600, "宽限期（秒）：created_at 早于 now-grace 才处理")
 	flag.Parse()
@@ -58,7 +59,13 @@ func main() {
 	}
 	defer conn.Close()
 
-	r := reconciler.New(db, billingv1.NewBillingServiceClient(conn), log, time.Duration(graceSec)*time.Second)
+	var options []reconciler.Option
+	if noAutoReverse {
+		options = append(options, reconciler.WithoutAutoReverse())
+	} else {
+		options = append(options, reconciler.WithAutoReverse())
+	}
+	r := reconciler.New(db, billingv1.NewBillingServiceClient(conn), log, time.Duration(graceSec)*time.Second, options...)
 
 	// 观测 HTTP：/healthz + /status（端口 9106，供网关 /admin/health 聚合与运维探活）。
 	httpPort := config.Getenv("RECONCILER_PORT", "9106")
@@ -69,30 +76,39 @@ func main() {
 		}
 	}()
 
-	log.Info("reconciler starting", "once", once, "interval", intervalSec, "grace", graceSec)
+	log.Info("reconciler starting", "once", once, "interval", intervalSec, "grace", graceSec, "no_sweep", noSweep, "no_rebuild", noRebuild, "no_auto_reverse", noAutoReverse)
 
 	if once {
 		var s reconciler.Stats
 		var err error
+		failed := false
 		if !noSweep {
 			s, err = r.SweepOnce(context.Background())
 			if err != nil {
+				failed = true
 				log.Error("sweep", "err", err)
 			}
+			failed = failed || s.SettleErrors > 0 || s.ReverseErrors > 0
 		}
 		var rb reconciler.Stats
 		if !noRebuild {
 			rb, err = r.RebuildAll(context.Background())
 			if err != nil {
+				failed = true
 				log.Error("rebuild", "err", err)
 			}
+			failed = failed || rb.RebuildErrors > 0
 		}
 		log.Info("one-shot done", "scanned", s.Scanned, "reversed", s.Reversed,
-			"settled", s.Settled, "rebuilt", rb.Rebuilt)
+			"settled", s.Settled, "held", s.Held, "rebuilt", rb.Rebuilt,
+			"settle_errors", s.SettleErrors, "reverse_errors", s.ReverseErrors, "rebuild_errors", rb.RebuildErrors)
+		if failed {
+			os.Exit(1)
+		}
 		return
 	}
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
-	r.Run(ctx, time.Duration(intervalSec)*time.Second, noRebuild)
+	r.Run(ctx, time.Duration(intervalSec)*time.Second, noSweep, noRebuild)
 }

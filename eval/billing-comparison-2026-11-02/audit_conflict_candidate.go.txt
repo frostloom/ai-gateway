@@ -1,0 +1,63 @@
+// 计费审计明细表（M10）：event-consumer 写，Kafka billing.events 流的下游物化视图。
+//
+// 幂等设计：uk_event_id 唯一索引 = 幂等锚。Kafka 是 at-least-once，同一事件可能被
+// 重投/多副本消费；UpsertAudit 撞键时 UPDATE 只把 id 赋回自己（no-op），落库恰一行，
+// 等价 exactly-once。schema.sql 与 gorm AutoMigrate 双写保持。
+package store
+
+import (
+	"bytes"
+	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"io"
+	"reflect"
+	"time"
+
+	mysqldriver "github.com/go-sql-driver/mysql"
+)
+
+// AuditEvent 审计明细行（一事件一行；字段取自 BillingEvent 载荷，自包含）。
+type AuditEvent struct {
+	ID               uint64    `gorm:"primaryKey"`
+	EventID          string    `gorm:"size:128;uniqueIndex:uk_event_id;not null"` // = outbox.event_key
+	TenantID         uint64    `gorm:"not null"`
+	RequestID        string    `gorm:"size:64;not null"`
+	Phase            string    `gorm:"size:16;not null"`
+	AmountCents      int64     `gorm:"not null"`
+	Model            string    `gorm:"size:64;not null;default:''"`
+	Funding          string    `gorm:"size:16;not null;default:balance"`
+	PromptTokens     *int64    `gorm:"default:null"`
+	CompletionTokens *int64    `gorm:"default:null"`
+	Payload          string    `gorm:"type:json"`
+	Source           string    `gorm:"size:16;not null;default:kafka"` // kafka|dlq
+	KafkaPartition   int32     `gorm:"not null;default:0"`
+	KafkaOffset      int64     `gorm:"not null;default:0"`
+	ConsumedAt       time.Time `gorm:"not null"`
+}
+
+// UpsertAudit 幂等写审计明细：撞 uk_event_id（重投/多副本）→ UPDATE id=id（MySQL no-op）。
+func auditPayloadValue(payload string) (any, error) {
+ decoder := json.NewDecoder(bytes.NewBufferString(payload))
+ decoder.UseNumber()
+ var v any
+ if err := decoder.Decode(&v); err != nil { return nil, err }
+ var extra any
+ if err := decoder.Decode(&extra); !errors.Is(err, io.EOF) { return nil, fmt.Errorf("invalid trailing JSON") }
+ return v, nil
+}
+
+func (s *Store) UpsertAudit(ctx context.Context, ev *AuditEvent) error {
+ err := s.db.WithContext(ctx).Create(ev).Error
+ if err == nil { return nil }
+ var duplicate *mysqldriver.MySQLError
+ if !errors.As(err, &duplicate) || duplicate.Number != 1062 { return err }
+ var prior AuditEvent
+ if lookup := s.db.WithContext(ctx).Where("event_id=?",ev.EventID).First(&prior).Error; lookup != nil { return err }
+ a, ea := auditPayloadValue(prior.Payload); b, eb := auditPayloadValue(ev.Payload)
+ if prior.EventID != ev.EventID || prior.TenantID != ev.TenantID || prior.RequestID != ev.RequestID || prior.Phase != ev.Phase || prior.AmountCents != ev.AmountCents || prior.Model != ev.Model || prior.Funding != ev.Funding || !reflect.DeepEqual(prior.PromptTokens, ev.PromptTokens) || !reflect.DeepEqual(prior.CompletionTokens, ev.CompletionTokens) || ea != nil || eb != nil || !reflect.DeepEqual(a,b) {
+  return fmt.Errorf("audit event conflict: %s",ev.EventID)
+ }
+ return nil
+}

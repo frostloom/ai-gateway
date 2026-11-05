@@ -1,0 +1,221 @@
+=== RUN   TestReserveConflictingTenant
+
+2026/11/02 17:32:36 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:1033 [35;1mrecord not found
+[0m[33m[1.534ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id = 'comparison-conflict' AND phase = 'reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/02 17:32:36 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:1033 [35;1mrecord not found
+[0m[33m[0.804ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id = 'comparison-conflict' AND phase = 'reserve' ORDER BY `bills`.`id` LIMIT 1
+    conflict_test.go:85: first code=RESERVE_OK bill=1; conflicting second status=FailedPrecondition; stored tenant=1 pre=100; balances=900,1000
+
+2026/11/02 17:32:36 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:1033 [35;1mrecord not found
+[0m[33m[0.783ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id = 'comparison-race' AND phase = 'reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/02 17:32:36 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:1033 [35;1mrecord not found
+[0m[33m[0.928ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id = 'comparison-race' AND phase = 'reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/02 17:32:36 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:1033 [35;1mrecord not found
+[0m[33m[1.216ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id = 'comparison-race' AND phase = 'reserve' ORDER BY `bills`.`id` LIMIT 1
+--- PASS: TestReserveConflictingTenant (0.82s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	1.708s
+=== RUN   TestTerminalSQLFailureRebuildAndRetry
+=== RUN   TestTerminalSQLFailureRebuildAndRetry/settle
+=== RUN   TestTerminalSQLFailureRebuildAndRetry/reverse
+--- PASS: TestTerminalSQLFailureRebuildAndRetry (1.39s)
+    --- PASS: TestTerminalSQLFailureRebuildAndRetry/settle (0.62s)
+    --- PASS: TestTerminalSQLFailureRebuildAndRetry/reverse (0.78s)
+=== RUN   TestReserveOutboxIdempotent
+--- PASS: TestReserveOutboxIdempotent (0.70s)
+=== RUN   TestFullFlowOutboxEvents
+--- PASS: TestFullFlowOutboxEvents (1.07s)
+=== RUN   TestReserveConcurrentNoOversell
+--- PASS: TestReserveConcurrentNoOversell (2.25s)
+=== RUN   TestReserveIdempotentSameRequest
+--- PASS: TestReserveIdempotentSameRequest (0.56s)
+=== RUN   TestReserveConcurrentSameRequest
+--- PASS: TestReserveConcurrentSameRequest (0.56s)
+=== RUN   TestReserveInsufficient
+--- PASS: TestReserveInsufficient (0.88s)
+=== RUN   TestSettleFullFlow
+--- PASS: TestSettleFullFlow (0.61s)
+=== RUN   TestSettleIdempotent
+--- PASS: TestSettleIdempotent (0.74s)
+=== RUN   TestReverseIdempotent
+--- PASS: TestReverseIdempotent (0.54s)
+=== RUN   TestReverseAfterSettled
+--- PASS: TestReverseAfterSettled (0.82s)
+=== RUN   TestRebuildBalance
+--- PASS: TestRebuildBalance (0.69s)
+=== RUN   TestRebuildBalanceIdempotent
+--- PASS: TestRebuildBalanceIdempotent (0.51s)
+=== RUN   TestReserveSubscriptionAllowance
+--- PASS: TestReserveSubscriptionAllowance (0.59s)
+PASS
+ok  	github.com/frostloom/ai-gateway/internal/billing/store	12.551s
+=== RUN   TestCandidateCorrectness
+
+2026/11/02 17:32:54 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/mysql_candidate_test_impl_test.go:92 [35;1mrecord not found
+[0m[33m[7.672ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id='cand-20' AND phase='reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/02 17:32:54 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/mysql_candidate_test_impl_test.go:92 [35;1mrecord not found
+[0m[33m[16.442ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id='cand-39' AND phase='reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/02 17:32:54 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/mysql_candidate_test_impl_test.go:92 [35;1mrecord not found
+[0m[33m[2.937ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id='cand-0' AND phase='reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/02 17:32:54 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/mysql_candidate_test_impl_test.go:92 [35;1mrecord not found
+[0m[33m[4.043ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id='cand-5' AND phase='reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/02 17:32:54 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/mysql_candidate_test_impl_test.go:92 [35;1mrecord not found
+[0m[33m[3.037ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id='cand-4' AND phase='reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/02 17:32:54 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/mysql_candidate_test_impl_test.go:92 [35;1mrecord not found
+[0m[33m[1.395ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id='cand-1' AND phase='reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/02 17:32:54 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/mysql_candidate_test_impl_test.go:92 [35;1mrecord not found
+[0m[33m[1.554ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id='cand-8' AND phase='reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/02 17:32:54 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/mysql_candidate_test_impl_test.go:92 [35;1mrecord not found
+[0m[33m[4.511ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id='cand-31' AND phase='reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/02 17:32:54 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/mysql_candidate_test_impl_test.go:92 [35;1mrecord not found
+[0m[33m[1.706ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id='cand-30' AND phase='reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/02 17:32:54 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/mysql_candidate_test_impl_test.go:92 [35;1mrecord not found
+[0m[33m[2.117ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id='cand-33' AND phase='reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/02 17:32:54 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/mysql_candidate_test_impl_test.go:92 [35;1mrecord not found
+[0m[33m[1.456ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id='cand-2' AND phase='reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/02 17:32:54 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/mysql_candidate_test_impl_test.go:92 [35;1mrecord not found
+[0m[33m[1.526ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id='cand-3' AND phase='reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/02 17:32:54 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/mysql_candidate_test_impl_test.go:92 [35;1mrecord not found
+[0m[33m[1.206ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id='cand-16' AND phase='reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/02 17:32:54 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/mysql_candidate_test_impl_test.go:92 [35;1mrecord not found
+[0m[33m[1.497ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id='cand-29' AND phase='reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/02 17:32:54 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/mysql_candidate_test_impl_test.go:92 [35;1mrecord not found
+[0m[33m[1.518ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id='cand-38' AND phase='reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/02 17:32:54 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/mysql_candidate_test_impl_test.go:92 [35;1mrecord not found
+[0m[33m[1.889ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id='cand-7' AND phase='reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/02 17:32:54 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/mysql_candidate_test_impl_test.go:92 [35;1mrecord not found
+[0m[33m[1.351ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id='cand-6' AND phase='reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/02 17:32:54 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/mysql_candidate_test_impl_test.go:92 [35;1mrecord not found
+[0m[33m[1.370ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id='cand-21' AND phase='reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/02 17:32:54 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/mysql_candidate_test_impl_test.go:92 [35;1mrecord not found
+[0m[33m[3.550ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id='cand-26' AND phase='reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/02 17:32:54 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/mysql_candidate_test_impl_test.go:92 [35;1mrecord not found
+[0m[33m[1.127ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id='cand-9' AND phase='reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/02 17:32:54 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/mysql_candidate_test_impl_test.go:92 [35;1mrecord not found
+[0m[33m[1.721ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id='cand-28' AND phase='reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/02 17:32:54 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/mysql_candidate_test_impl_test.go:92 [35;1mrecord not found
+[0m[33m[1.531ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id='cand-11' AND phase='reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/02 17:32:54 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/mysql_candidate_test_impl_test.go:92 [35;1mrecord not found
+[0m[33m[1.515ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id='cand-18' AND phase='reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/02 17:32:54 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/mysql_candidate_test_impl_test.go:92 [35;1mrecord not found
+[0m[33m[1.611ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id='cand-23' AND phase='reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/02 17:32:54 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/mysql_candidate_test_impl_test.go:92 [35;1mrecord not found
+[0m[33m[2.034ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id='cand-24' AND phase='reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/02 17:32:54 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/mysql_candidate_test_impl_test.go:92 [35;1mrecord not found
+[0m[33m[2.320ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id='cand-17' AND phase='reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/02 17:32:54 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/mysql_candidate_test_impl_test.go:92 [35;1mrecord not found
+[0m[33m[1.755ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id='cand-37' AND phase='reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/02 17:32:54 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/mysql_candidate_test_impl_test.go:92 [35;1mrecord not found
+[0m[33m[1.805ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id='cand-14' AND phase='reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/02 17:32:54 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/mysql_candidate_test_impl_test.go:92 [35;1mrecord not found
+[0m[33m[2.028ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id='cand-27' AND phase='reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/02 17:32:54 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/mysql_candidate_test_impl_test.go:92 [35;1mrecord not found
+[0m[33m[1.451ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id='cand-10' AND phase='reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/02 17:32:54 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/mysql_candidate_test_impl_test.go:92 [35;1mrecord not found
+[0m[33m[8.241ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id='cand-25' AND phase='reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/02 17:32:54 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/mysql_candidate_test_impl_test.go:92 [35;1mrecord not found
+[0m[33m[2.751ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id='cand-12' AND phase='reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/02 17:32:54 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/mysql_candidate_test_impl_test.go:92 [35;1mrecord not found
+[0m[33m[3.261ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id='cand-15' AND phase='reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/02 17:32:54 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/mysql_candidate_test_impl_test.go:92 [35;1mrecord not found
+[0m[33m[2.073ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id='cand-22' AND phase='reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/02 17:32:54 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/mysql_candidate_test_impl_test.go:92 [35;1mrecord not found
+[0m[33m[1.722ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id='cand-35' AND phase='reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/02 17:32:54 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/mysql_candidate_test_impl_test.go:92 [35;1mrecord not found
+[0m[33m[1.854ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id='cand-32' AND phase='reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/02 17:32:54 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/mysql_candidate_test_impl_test.go:92 [35;1mrecord not found
+[0m[33m[1.175ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id='cand-13' AND phase='reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/02 17:32:54 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/mysql_candidate_test_impl_test.go:92 [35;1mrecord not found
+[0m[33m[1.567ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id='cand-36' AND phase='reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/02 17:32:54 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/mysql_candidate_test_impl_test.go:92 [35;1mrecord not found
+[0m[33m[2.270ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id='cand-19' AND phase='reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/02 17:32:54 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/mysql_candidate_test_impl_test.go:92 [35;1mrecord not found
+[0m[33m[2.607ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id='cand-34' AND phase='reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/02 17:32:54 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/mysql_candidate_test_impl_test.go:92 [35;1mrecord not found
+[0m[33m[2.772ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id='dup' AND phase='reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/02 17:32:54 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/mysql_candidate_test_impl_test.go:92 [35;1mrecord not found
+[0m[33m[0.866ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id='reverse' AND phase='reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/02 17:32:54 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/mysql_candidate_test_impl_test.go:92 [35;1mrecord not found
+[0m[33m[0.823ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id='rollback-reserve' AND phase='reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/02 17:32:54 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/mysql_candidate_test_impl_test.go:92 [35;1mrecord not found
+[0m[33m[0.839ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id='terminal-race' AND phase='reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/02 17:32:54 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/mysql_candidate_test_impl_test.go:92 [35;1mrecord not found
+[0m[33m[1.030ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id='cross-tenant-race' AND phase='reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/02 17:32:54 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/mysql_candidate_test_impl_test.go:92 [35;1mrecord not found
+[0m[33m[0.974ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id='cross-tenant-race' AND phase='reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/02 17:32:54 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/mysql_candidate_test_impl_test.go:130 [35;1mError 1062 (23000): Duplicate entry 'cross-tenant-race-reserve' for key 'bills.uk_request_phase'
+[0m[33m[3.708ms] [34;1m[rows:0][0m INSERT INTO `bills` (`reserve_fingerprint`,`request_id`,`phase`,`status`,`tenant_id`,`api_key_id`,`provider_id`,`model`,`funding`,`pre_quota`,`actual_quota`,`delta_quota`,`prompt_tokens`,`completion_tokens`,`in_price_cent`,`out_price_cent`,`usage_reported_at`,`error_code`,`created_at`) VALUES ('c7af318c1d614a38afde0ab4ef9165139cbe01d106a9d69bf45cdd3a6cb985b0','cross-tenant-race','reserve','pending',104,1,NULL,'comparison-mock','balance',100,NULL,NULL,NULL,NULL,1000000,1000000,NULL,'','2026-11-02 17:32:54.414')
+    mysql_candidate_test.go:196: cross-tenant race error outcomes: [Error 1062 (23000): Duplicate entry 'cross-tenant-race-reserve' for key 'bills.uk_request_phase' <nil>]
+--- PASS: TestCandidateCorrectness (0.79s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	1.290s
+=== RUN   TestCandidateKilledTransaction
+[mysql] 2026/11/02 17:32:56 packets.go:58 unexpected EOF
+
+2026/11/02 17:32:56 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/mysql_candidate_test_impl_test.go:92 [35;1mrecord not found
+[0m[33m[1.690ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id='kill-before-commit' AND phase='reserve' ORDER BY `bills`.`id` LIMIT 1
+    disconnect_test.go:73: uncommitted balance, bill and outbox rolled back after MySQL connection kill; retry reserved once
+--- PASS: TestCandidateKilledTransaction (0.19s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	0.690s
+=== RUN   TestComparisonLoad
+    comparison_load_test.go:278: COMPARISON {"accounts":1,"audit_errors":null,"completed":544,"cycles_per_s":25.86628744531212,"error_samples":[],"errors":0,"mean_ms":1220.087274586398,"mode":"A","mysql_status_after":{"Innodb_data_reads":1054,"Innodb_data_writes":14729,"Innodb_row_lock_time":4054,"Innodb_row_lock_waits":40,"Threads_connected":10,"Threads_running":2},"mysql_status_before":{"Innodb_data_reads":1053,"Innodb_data_writes":5335,"Innodb_row_lock_time":4054,"Innodb_row_lock_waits":40,"Threads_connected":1,"Threads_running":2},"outbox":1632,"p95_ms":1586.27625,"p99_ms":1667.119041,"pending":0,"pool_open_end":10,"pool_wait_count":0,"query_count_per_cycle":"one per four","redis_commands":13197,"redis_memory_after_bytes":1590144,"redis_memory_before_bytes":1387936,"rep":1,"seconds":21.031236166,"settled":544,"timeouts":0,"workers":32}
+    comparison_load_test.go:278: COMPARISON {"accounts":1,"audit_errors":null,"completed":1122,"cycles_per_s":55.04469548325158,"error_samples":[],"errors":0,"mean_ms":575.101924033869,"mode":"B","mysql_status_after":{"Innodb_data_reads":1055,"Innodb_data_writes":37054,"Innodb_row_lock_time":613110,"Innodb_row_lock_waits":2283,"Threads_connected":10,"Threads_running":2},"mysql_status_before":{"Innodb_data_reads":1054,"Innodb_data_writes":14731,"Innodb_row_lock_time":4054,"Innodb_row_lock_waits":40,"Threads_connected":10,"Threads_running":2},"outbox":3366,"p95_ms":796.353208,"p99_ms":869.983542,"pending":0,"pool_open_end":10,"pool_wait_count":0,"query_count_per_cycle":"one per four","redis_commands":2,"redis_memory_after_bytes":1569672,"redis_memory_before_bytes":1590144,"rep":1,"seconds":20.3834355,"settled":1122,"timeouts":0,"workers":32}
+    comparison_load_test.go:278: COMPARISON {"accounts":8,"audit_errors":null,"completed":1866,"cycles_per_s":91.30806770757457,"error_samples":[],"errors":0,"mean_ms":695.2393661891745,"mode":"A","mysql_status_after":{"Innodb_data_reads":1057,"Innodb_data_writes":62169,"Innodb_row_lock_time":613113,"Innodb_row_lock_waits":2284,"Threads_connected":10,"Threads_running":2},"mysql_status_before":{"Innodb_data_reads":1055,"Innodb_data_writes":37081,"Innodb_row_lock_time":613110,"Innodb_row_lock_waits":2283,"Threads_connected":10,"Threads_running":2},"outbox":5598,"p95_ms":1040.531167,"p99_ms":1220.16875,"pending":0,"pool_open_end":10,"pool_wait_count":7413,"query_count_per_cycle":"one per four","redis_commands":45270,"redis_memory_after_bytes":2274432,"redis_memory_before_bytes":1571208,"rep":1,"seconds":20.43631025,"settled":1866,"timeouts":0,"workers":64}
+    comparison_load_test.go:278: COMPARISON {"accounts":8,"audit_errors":null,"completed":3231,"cycles_per_s":159.83697651035985,"error_samples":[],"errors":0,"mean_ms":398.58706674063797,"mode":"B","mysql_status_after":{"Innodb_data_reads":1058,"Innodb_data_writes":90162,"Innodb_row_lock_time":1146189,"Innodb_row_lock_waits":8693,"Threads_connected":10,"Threads_running":2},"mysql_status_before":{"Innodb_data_reads":1057,"Innodb_data_writes":62209,"Innodb_row_lock_time":613113,"Innodb_row_lock_waits":2284,"Threads_connected":10,"Threads_running":2},"outbox":9693,"p95_ms":833.22575,"p99_ms":1343.188041,"pending":0,"pool_open_end":10,"pool_wait_count":13657,"query_count_per_cycle":"one per four","redis_commands":2,"redis_memory_after_bytes":2172072,"redis_memory_before_bytes":2275456,"rep":1,"seconds":20.214346333,"settled":3231,"timeouts":0,"workers":64}
+    comparison_load_test.go:278: COMPARISON {"accounts":1,"audit_errors":null,"completed":512,"cycles_per_s":24.915097920584017,"error_samples":[],"errors":0,"mean_ms":1269.4263115664053,"mode":"A","mysql_status_after":{"Innodb_data_reads":1058,"Innodb_data_writes":99570,"Innodb_row_lock_time":1146189,"Innodb_row_lock_waits":8693,"Threads_connected":10,"Threads_running":2},"mysql_status_before":{"Innodb_data_reads":1058,"Innodb_data_writes":90194,"Innodb_row_lock_time":1146189,"Innodb_row_lock_waits":8693,"Threads_connected":10,"Threads_running":2},"outbox":1536,"p95_ms":1700.590875,"p99_ms":1769.244709,"pending":0,"pool_open_end":10,"pool_wait_count":0,"query_count_per_cycle":"one per four","redis_commands":12418,"redis_memory_after_bytes":2330712,"redis_memory_before_bytes":2172136,"rep":2,"seconds":20.549788792,"settled":512,"timeouts":0,"workers":32}
+    comparison_load_test.go:278: COMPARISON {"accounts":1,"audit_errors":null,"completed":1152,"cycles_per_s":56.94500713888709,"error_samples":[],"errors":0,"mean_ms":559.3967072126732,"mode":"B","mysql_status_after":{"Innodb_data_reads":1058,"Innodb_data_writes":122916,"Innodb_row_lock_time":1754878,"Innodb_row_lock_waits":10996,"Threads_connected":10,"Threads_running":2},"mysql_status_before":{"Innodb_data_reads":1058,"Innodb_data_writes":99574,"Innodb_row_lock_time":1146189,"Innodb_row_lock_waits":8693,"Threads_connected":10,"Threads_running":2},"outbox":3456,"p95_ms":810.049792,"p99_ms":918.674625,"pending":0,"pool_open_end":10,"pool_wait_count":0,"query_count_per_cycle":"one per four","redis_commands":2,"redis_memory_after_bytes":2310240,"redis_memory_before_bytes":2330712,"rep":2,"seconds":20.230044,"settled":1152,"timeouts":0,"workers":32}
+    comparison_load_test.go:278: COMPARISON {"accounts":8,"audit_errors":null,"completed":1798,"cycles_per_s":88.18212944761412,"error_samples":[],"errors":0,"mean_ms":720.0483376946604,"mode":"A","mysql_status_after":{"Innodb_data_reads":1058,"Innodb_data_writes":147563,"Innodb_row_lock_time":1754878,"Innodb_row_lock_waits":10996,"Threads_connected":10,"Threads_running":2},"mysql_status_before":{"Innodb_data_reads":1058,"Innodb_data_writes":122943,"Innodb_row_lock_time":1754878,"Innodb_row_lock_waits":10996,"Threads_connected":10,"Threads_running":2},"outbox":5394,"p95_ms":1144.958958,"p99_ms":1336.68725,"pending":0,"pool_open_end":10,"pool_wait_count":7133,"query_count_per_cycle":"one per four","redis_commands":43603,"redis_memory_after_bytes":3071512,"redis_memory_before_bytes":2310752,"rep":2,"seconds":20.38961875,"settled":1798,"timeouts":0,"workers":64}
+    comparison_load_test.go:278: COMPARISON {"accounts":8,"audit_errors":null,"completed":3858,"cycles_per_s":190.82248853728905,"error_samples":[],"errors":0,"mean_ms":333.52815992198026,"mode":"B","mysql_status_after":{"Innodb_data_reads":1058,"Innodb_data_writes":179359,"Innodb_row_lock_time":2286401,"Innodb_row_lock_waits":18627,"Threads_connected":10,"Threads_running":2},"mysql_status_before":{"Innodb_data_reads":1058,"Innodb_data_writes":147601,"Innodb_row_lock_time":1754878,"Innodb_row_lock_waits":10996,"Threads_connected":10,"Threads_running":2},"outbox":11574,"p95_ms":577.901792,"p99_ms":775.303209,"pending":0,"pool_open_end":10,"pool_wait_count":16324,"query_count_per_cycle":"one per four","redis_commands":2,"redis_memory_after_bytes":2928208,"redis_memory_before_bytes":3071512,"rep":2,"seconds":20.217742833,"settled":3858,"timeouts":0,"workers":64}
+--- PASS: TestComparisonLoad (164.14s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	164.624s

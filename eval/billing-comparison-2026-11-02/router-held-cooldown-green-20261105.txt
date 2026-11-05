@@ -1,0 +1,79 @@
+head=42d8ef8e5ca2471b18800e50f8e7a57fbcfdd47f
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+# github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02.test
+ld: warning: '/private/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-2959853476/000013.o' has malformed LC_DYSYMTAB, expected 98 undefined symbols to start at index 1626, found 95 undefined symbols starting at index 1626
+=== RUN   TestHeldFailureRespectsCooldown
+
+2026/11/05 02:50:58 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/router_held_probe_result_test.go:35 [35;1mrecord not found
+[0m[33m[1.403ms] [34;1m[rows:0][0m SELECT * FROM `eval_probe_generation_event` WHERE event_id='first' LIMIT 1
+    router_held_probe_cooldown_test.go:58: failure applied once; immediate probe held; expired cooldown permits next generation
+--- PASS: TestHeldFailureRespectsCooldown (0.12s)
+=== RUN   TestHeldProbeFailureAllowsImmediateReplacement
+
+2026/11/05 02:50:58 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/router_held_probe_result_test.go:35 [35;1mrecord not found
+[0m[33m[1.489ms] [34;1m[rows:0][0m SELECT * FROM `eval_probe_generation_event` WHERE event_id='failed' LIMIT 1
+    router_held_probe_failure_test.go:48: late failure applied once but next generation issued immediately; cooldown missing
+--- PASS: TestHeldProbeFailureAllowsImmediateReplacement (0.06s)
+=== RUN   TestHeldProbeLateResultCanResolveOnce
+
+2026/11/05 02:50:58 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/router_probe_generation_test.go:76 [35;1mrecord not found
+[0m[33m[1.577ms] [34;1m[rows:0][0m SELECT * FROM `eval_probe_generation_event` WHERE event_id='attempt' LIMIT 1
+
+2026/11/05 02:50:58 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/router_held_probe_result_test.go:35 [35;1mrecord not found
+[0m[33m[0.901ms] [34;1m[rows:0][0m SELECT * FROM `eval_probe_generation_event` WHERE event_id='attempt' LIMIT 1
+    router_held_probe_result_test.go:120: expired held result applied exactly once in prototype; old receiver rejects
+--- PASS: TestHeldProbeLateResultCanResolveOnce (0.07s)
+=== RUN   TestProbeReplacementHoldsUnknownSending
+    router_probe_sending_hold_test.go:105: expired sending retained; no replacement issued; manual resolution still required
+--- PASS: TestProbeReplacementHoldsUnknownSending (0.06s)
+=== RUN   TestHeldFailureRespectsCooldown
+
+2026/11/05 02:50:58 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/router_held_probe_result_test.go:35 [35;1mrecord not found
+[0m[33m[2.448ms] [34;1m[rows:0][0m SELECT * FROM `eval_probe_generation_event` WHERE event_id='first' LIMIT 1
+    router_held_probe_cooldown_test.go:58: failure applied once; immediate probe held; expired cooldown permits next generation
+--- PASS: TestHeldFailureRespectsCooldown (0.09s)
+=== RUN   TestHeldProbeFailureAllowsImmediateReplacement
+
+2026/11/05 02:50:58 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/router_held_probe_result_test.go:35 [35;1mrecord not found
+[0m[33m[4.277ms] [34;1m[rows:0][0m SELECT * FROM `eval_probe_generation_event` WHERE event_id='failed' LIMIT 1
+    router_held_probe_failure_test.go:48: late failure applied once but next generation issued immediately; cooldown missing
+--- PASS: TestHeldProbeFailureAllowsImmediateReplacement (0.06s)
+=== RUN   TestHeldProbeLateResultCanResolveOnce
+
+2026/11/05 02:50:58 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/router_probe_generation_test.go:76 [35;1mrecord not found
+[0m[33m[2.447ms] [34;1m[rows:0][0m SELECT * FROM `eval_probe_generation_event` WHERE event_id='attempt' LIMIT 1
+
+2026/11/05 02:50:58 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/router_held_probe_result_test.go:35 [35;1mrecord not found
+[0m[33m[0.830ms] [34;1m[rows:0][0m SELECT * FROM `eval_probe_generation_event` WHERE event_id='attempt' LIMIT 1
+    router_held_probe_result_test.go:120: expired held result applied exactly once in prototype; old receiver rejects
+--- PASS: TestHeldProbeLateResultCanResolveOnce (0.06s)
+=== RUN   TestProbeReplacementHoldsUnknownSending
+    router_probe_sending_hold_test.go:105: expired sending retained; no replacement issued; manual resolution still required
+--- PASS: TestProbeReplacementHoldsUnknownSending (0.05s)
+=== RUN   TestHeldFailureRespectsCooldown
+
+2026/11/05 02:50:58 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/router_held_probe_result_test.go:35 [35;1mrecord not found
+[0m[33m[2.900ms] [34;1m[rows:0][0m SELECT * FROM `eval_probe_generation_event` WHERE event_id='first' LIMIT 1
+    router_held_probe_cooldown_test.go:58: failure applied once; immediate probe held; expired cooldown permits next generation
+--- PASS: TestHeldFailureRespectsCooldown (0.07s)
+=== RUN   TestHeldProbeFailureAllowsImmediateReplacement
+
+2026/11/05 02:50:58 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/router_held_probe_result_test.go:35 [35;1mrecord not found
+[0m[33m[4.072ms] [34;1m[rows:0][0m SELECT * FROM `eval_probe_generation_event` WHERE event_id='failed' LIMIT 1
+    router_held_probe_failure_test.go:48: late failure applied once but next generation issued immediately; cooldown missing
+--- PASS: TestHeldProbeFailureAllowsImmediateReplacement (0.07s)
+=== RUN   TestHeldProbeLateResultCanResolveOnce
+
+2026/11/05 02:50:59 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/router_probe_generation_test.go:76 [35;1mrecord not found
+[0m[33m[2.874ms] [34;1m[rows:0][0m SELECT * FROM `eval_probe_generation_event` WHERE event_id='attempt' LIMIT 1
+
+2026/11/05 02:50:59 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/router_held_probe_result_test.go:35 [35;1mrecord not found
+[0m[33m[0.852ms] [34;1m[rows:0][0m SELECT * FROM `eval_probe_generation_event` WHERE event_id='attempt' LIMIT 1
+    router_held_probe_result_test.go:120: expired held result applied exactly once in prototype; old receiver rejects
+--- PASS: TestHeldProbeLateResultCanResolveOnce (0.07s)
+=== RUN   TestProbeReplacementHoldsUnknownSending
+    router_probe_sending_hold_test.go:105: expired sending retained; no replacement issued; manual resolution still required
+--- PASS: TestProbeReplacementHoldsUnknownSending (0.06s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	2.758s

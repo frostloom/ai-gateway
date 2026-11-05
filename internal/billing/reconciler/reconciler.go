@@ -5,8 +5,8 @@
 //
 //	扫描条件：reserve 行 status=pending 且 created_at 早于「最大流时长 + 宽限期」
 //	三分类：
-//	  pending + 无 usage_reported_at（无 marker）→ 流从未产出完整结果 → Reverse 全退
-//	  pending + 有 usage_reported_at（有 marker）→ 流已跑完但结算丢失 → 补 Settle
+//	  pending + 无 usage_reported_at → 默认保留待核查；可显式启用旧版 Reverse
+//	  pending + 有 usage_reported_at → 按已记录用量补 Settle
 //	  其余（settled/reversed/未过期）→ 跳过
 //
 // 只读 MySQL 扫描，写操作一律走 billing 幂等 RPC（Reverse/Settle/RebuildBalance）。
@@ -29,31 +29,57 @@ import (
 
 // Stats 一轮对账的结果（供日志/集成测试断言）。
 type Stats struct {
-	Scanned  int // 扫描到的待处理 pending 行
-	Reversed int // 冲正成功（全退）
-	Settled  int // 补结算成功
-	Rebuilt  int // 重建余额的租户数
+	Scanned                        int       // 扫描到的待处理 pending 行
+	Reversed                       int       // 冲正成功（全退）
+	Settled                        int       // 补结算成功
+	Rebuilt                        int       // 重建余额的租户数
+	Held                           int       // 本轮保留的无用量 pending 行（不是唯一账单数）
+	HeldOldestCreatedAt            time.Time // 本轮扫描到的 held 中最早时间；不代表实时全库快照
+	SweepAttempted, SweepError     bool
+	SettleErrors, ReverseErrors    int
+	RebuildAttempted, RebuildError bool
+	RebuildErrors                  int
 }
 
 type Reconciler struct {
-	db    *gorm.DB // 只读扫描（账本）
-	cli   billingv1.BillingServiceClient
-	log   *slog.Logger
-	grace time.Duration // 宽限期：created_at 早于 now-grace 才处理
+	db            *gorm.DB // 只读扫描（账本）
+	cli           billingv1.BillingServiceClient
+	log           *slog.Logger
+	grace         time.Duration // 宽限期：created_at 早于 now-grace 才处理
+	noAutoReverse bool
 
 	// 最近一轮结果快照（HTTP /status 观测，mutex 保护）。
-	lastMu sync.Mutex
-	last   Stats
+	lastMu         sync.Mutex
+	last           Stats
+	lastObservedAt time.Time
 }
 
-func New(db *gorm.DB, cli billingv1.BillingServiceClient, log *slog.Logger, grace time.Duration) *Reconciler {
-	return &Reconciler{db: db, cli: cli, log: log, grace: grace}
+type Option func(*Reconciler)
+
+// WithoutAutoReverse retains pending bills without usage for later review.
+func WithoutAutoReverse() Option {
+	return func(r *Reconciler) { r.noAutoReverse = true }
+}
+
+// WithAutoReverse enables legacy refunds of expired bills without usage.
+// Missing usage does not prove the upstream request was not executed.
+func WithAutoReverse() Option {
+	return func(r *Reconciler) { r.noAutoReverse = false }
+}
+
+func New(db *gorm.DB, cli billingv1.BillingServiceClient, log *slog.Logger, grace time.Duration, options ...Option) *Reconciler {
+	r := &Reconciler{db: db, cli: cli, log: log, grace: grace, noAutoReverse: true}
+	for _, option := range options {
+		option(r)
+	}
+	return r
 }
 
 // RecordStats 记录最近一轮结果（Run 循环调用）。
 func (r *Reconciler) RecordStats(s Stats) {
 	r.lastMu.Lock()
 	r.last = s
+	r.lastObservedAt = time.Now().UTC()
 	r.lastMu.Unlock()
 }
 
@@ -72,61 +98,127 @@ func (r *Reconciler) HTTPHandler() http.Handler {
 		_, _ = w.Write([]byte(`{"ok":true,"svc":"reconciler"}`))
 	})
 	mux.HandleFunc("/status", func(w http.ResponseWriter, req *http.Request) {
-		s := r.LastStats()
+		r.lastMu.Lock()
+		s, observed := r.last, r.lastObservedAt
+		r.lastMu.Unlock()
+		var observedValue, oldestValue any
+		if !observed.IsZero() {
+			observedValue = observed
+		}
+		if !s.HeldOldestCreatedAt.IsZero() {
+			oldestValue = s.HeldOldestCreatedAt
+		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(map[string]any{
 			"ok": true, "svc": "reconciler",
 			"last_scanned": s.Scanned, "last_reversed": s.Reversed,
 			"last_settled": s.Settled, "last_rebuilt": s.Rebuilt,
+			"last_held": s.Held, "auto_reverse_disabled": r.noAutoReverse,
+			"last_observed_at": observedValue, "last_held_oldest_created_at": oldestValue,
+			"last_sweep_attempted": s.SweepAttempted, "last_sweep_error": s.SweepError,
+			"last_settle_errors": s.SettleErrors, "last_reverse_errors": s.ReverseErrors,
+			"last_rebuild_attempted": s.RebuildAttempted, "last_rebuild_error": s.RebuildError, "last_rebuild_errors": s.RebuildErrors,
 		})
 	})
 	return mux
 }
+
+const sweepPageSize = 256
+
+// A slow billing call must not indefinitely block every later pending bill.
+// A timeout leaves the result unknown; the next sweep retries idempotently.
+const settleRPCTimeout = 10 * time.Second
 
 // SweepOnce 跑一轮扫描 + 分类 + 收敛。每行的写操作都是 billing 幂等 RPC，
 // 并发重复执行是安全的（重复 sweep 只是 no-op）。
 func (r *Reconciler) SweepOnce(ctx context.Context) (Stats, error) {
 	var stats Stats
 	cutoff := time.Now().Add(-r.grace)
-	var rows []store.Bill
-	if err := r.db.WithContext(ctx).
-		Where("phase = ? AND status = ? AND created_at < ?",
-			store.PhaseReserve, store.StatusPending, cutoff).
-		Find(&rows).Error; err != nil {
+	baseQuery := func() *gorm.DB {
+		return r.db.WithContext(ctx).Model(&store.Bill{}).
+			Where("phase = ? AND status = ? AND created_at < ?",
+				store.PhaseReserve, store.StatusPending, cutoff)
+	}
+	// Freeze an upper ID so new rows cannot keep a sweep alive indefinitely.
+	var upperID uint64
+	if err := baseQuery().Select("COALESCE(MAX(id), 0)").Scan(&upperID).Error; err != nil {
 		return stats, err
 	}
-
-	stats.Scanned = len(rows)
-	for i := range rows {
-		row := &rows[i]
-		rid := row.RequestID
-		if row.UsageReportedAt == nil {
-			// 无 marker：流从未产出完整结果 → 全退。Reverse 幂等，重复跑 no-op。
-			resp, err := r.cli.Reverse(ctx, &billingv1.ReverseRequest{
-				RequestId: rid, BillId: int64(row.ID), Reason: "recon:no_usage",
-			})
-			if err != nil {
-				r.log.Error("recon reverse", "request_id", rid, "err", err)
+	var afterID uint64
+	for afterID < upperID {
+		var rows []store.Bill
+		if err := baseQuery().Where("id > ? AND id <= ?", afterID, upperID).
+			Select("id", "request_id", "usage_reported_at", "created_at").
+			Order("id ASC").Limit(sweepPageSize).Find(&rows).Error; err != nil {
+			return stats, err
+		}
+		if len(rows) == 0 {
+			break
+		}
+		afterID = rows[len(rows)-1].ID
+		stats.Scanned += len(rows)
+		for i := range rows {
+			if err := ctx.Err(); err != nil {
+				return stats, err
+			}
+			row := &rows[i]
+			rid := row.RequestID
+			if row.UsageReportedAt == nil {
+				// Absence of usage does not prove that an upstream request was unsent.
+				if r.noAutoReverse {
+					stats.Held++
+					if stats.HeldOldestCreatedAt.IsZero() || row.CreatedAt.Before(stats.HeldOldestCreatedAt) {
+						stats.HeldOldestCreatedAt = row.CreatedAt
+					}
+					continue
+				}
+				resp, err := r.cli.Reverse(ctx, &billingv1.ReverseRequest{
+					RequestId: rid, BillId: int64(row.ID), Reason: "recon:no_usage",
+				})
+				if err != nil {
+					stats.ReverseErrors++
+					r.log.Error("recon reverse", "request_id", rid, "err", err)
+					continue
+				}
+				if resp == nil {
+					stats.ReverseErrors++
+					r.log.Error("recon reverse", "request_id", rid, "err", "empty response")
+					continue
+				}
+				if resp.Reversed {
+					stats.Reversed++
+					r.log.Info("recon reversed", "request_id", rid, "refund_quota", resp.RefundQuota,
+						"bill_id", row.ID, "created_at", row.CreatedAt.Format(time.RFC3339))
+				} else {
+					r.log.Warn("recon reverse skipped", "request_id", rid, "bill_id", row.ID)
+				}
 				continue
 			}
-			stats.Reversed++
-			r.log.Info("recon reversed", "request_id", rid, "refund_quota", resp.RefundQuota,
-				"bill_id", row.ID, "created_at", row.CreatedAt.Format(time.RFC3339))
-			continue
+			// 有 marker：流已跑完，只差结算 → 补 Settle（按记录的 actual，幂等）。
+			settleCtx, cancel := context.WithTimeout(ctx, settleRPCTimeout)
+			resp, err := r.cli.Settle(settleCtx, &billingv1.SettleRequest{RequestId: rid, BillId: int64(row.ID)})
+			cancel()
+			if err != nil {
+				stats.SettleErrors++
+				r.log.Error("recon settle", "request_id", rid, "err", err)
+				continue
+			}
+			if resp == nil {
+				stats.SettleErrors++
+				r.log.Error("recon settle", "request_id", rid, "err", "empty response")
+				continue
+			}
+			if resp.Settled {
+				stats.Settled++
+				r.log.Info("recon settled", "request_id", rid, "delta_quota", resp.DeltaQuota,
+					"bill_id", row.ID, "created_at", row.CreatedAt.Format(time.RFC3339))
+			} else {
+				r.log.Warn("recon settle skipped", "request_id", rid, "reason", "already finalized")
+			}
 		}
-		// 有 marker：流已跑完，只差结算 → 补 Settle（按记录的 actual，幂等）。
-		resp, err := r.cli.Settle(ctx, &billingv1.SettleRequest{RequestId: rid, BillId: int64(row.ID)})
-		if err != nil {
-			r.log.Error("recon settle", "request_id", rid, "err", err)
-			continue
-		}
-		if resp.Settled {
-			stats.Settled++
-			r.log.Info("recon settled", "request_id", rid, "delta_quota", resp.DeltaQuota,
-				"bill_id", row.ID, "created_at", row.CreatedAt.Format(time.RFC3339))
-		} else {
-			r.log.Warn("recon settle skipped", "request_id", rid, "reason", "already finalized")
-		}
+	}
+	if err := ctx.Err(); err != nil {
+		return stats, err
 	}
 	return stats, nil
 }
@@ -141,7 +233,13 @@ func (r *Reconciler) RebuildAll(ctx context.Context) (Stats, error) {
 	for _, t := range tenants {
 		resp, err := r.cli.RebuildBalance(ctx, &billingv1.RebuildBalanceRequest{TenantId: int64(t.ID)})
 		if err != nil {
+			stats.RebuildErrors++
 			r.log.Error("recon rebuild", "tenant_id", t.ID, "err", err)
+			continue
+		}
+		if resp == nil {
+			stats.RebuildErrors++
+			r.log.Error("recon rebuild", "tenant_id", t.ID, "err", "empty response")
 			continue
 		}
 		stats.Rebuilt++
@@ -150,25 +248,34 @@ func (r *Reconciler) RebuildAll(ctx context.Context) (Stats, error) {
 	return stats, nil
 }
 
-// Run 按 interval 循环：每轮 sweep + rebuild，直到 ctx 取消。
+// Run 按 interval 循环：按选项执行 sweep 和 rebuild，直到 ctx 取消。
 // noRebuild=true 时只跑 sweep（压测期间用）：rebuild 是「重建投影」的维护操作，
 // 与在途 Reserve/Settle 竞态会漏掉 pre 预占，只能在流量安静时跑。
-func (r *Reconciler) Run(ctx context.Context, interval time.Duration, noRebuild bool) {
+func (r *Reconciler) Run(ctx context.Context, interval time.Duration, noSweep, noRebuild bool) {
 	for {
 		var s Stats
-		if ss, err := r.SweepOnce(ctx); err != nil {
-			r.log.Error("sweep", "err", err)
-		} else {
+		if !noSweep {
+			ss, err := r.SweepOnce(ctx)
 			s = ss
-			if ss.Scanned > 0 {
-				r.log.Info("sweep done", "scanned", ss.Scanned, "reversed", ss.Reversed, "settled", ss.Settled)
+			s.SweepAttempted = true
+			s.SweepError = err != nil
+			if err != nil {
+				r.log.Error("sweep", "err", err)
+			} else {
+				if ss.Scanned > 0 {
+					r.log.Info("sweep done", "scanned", ss.Scanned, "reversed", ss.Reversed, "settled", ss.Settled, "held", ss.Held, "settle_errors", ss.SettleErrors, "reverse_errors", ss.ReverseErrors)
+				}
 			}
 		}
 		if !noRebuild {
-			if ss, err := r.RebuildAll(ctx); err != nil {
+			ss, err := r.RebuildAll(ctx)
+			s.RebuildAttempted = true
+			s.RebuildError = err != nil
+			s.Rebuilt = ss.Rebuilt
+			s.RebuildErrors = ss.RebuildErrors
+			if err != nil {
 				r.log.Error("rebuild", "err", err)
 			} else {
-				s.Rebuilt = ss.Rebuilt
 				if ss.Rebuilt > 0 {
 					r.log.Info("rebuild done", "tenants", ss.Rebuilt)
 				}

@@ -10,8 +10,10 @@ import (
 	"crypto/sha256"
 	"database/sql"
 	"database/sql/driver"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"math"
 	"strconv"
 	"sync"
 	"time"
@@ -24,6 +26,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
+	"github.com/frostloom/ai-gateway/internal/pkg/controlplane"
 	"github.com/frostloom/ai-gateway/internal/pkg/quota"
 	billingv1 "github.com/frostloom/ai-gateway/internal/proto/billing/v1"
 
@@ -102,20 +105,23 @@ type Provider struct {
 }
 
 type Bill struct {
-	ID               uint64  `gorm:"primaryKey"`
-	RequestID        string  `gorm:"size:64;not null;uniqueIndex:uk_request_phase,priority:1"`
-	Phase            string  `gorm:"size:16;not null;uniqueIndex:uk_request_phase,priority:2"`
-	Status           string  `gorm:"size:16;not null;index:idx_recon,priority:1"`
-	TenantID         uint64  `gorm:"not null;index:idx_tenant_status_created,priority:1"`
-	APIKeyID         uint64  `gorm:"not null"`
-	ProviderID       *uint64 `gorm:"index:idx_provider_created,priority:1"`
-	Model            string  `gorm:"size:64"`                          // 调用名 == 目录 model_id
-	Funding          string  `gorm:"size:16;not null;default:balance"` // 扣费来源：balance|subscription（M9）
-	PreQuota         int64   `gorm:"not null"`                         // 预扣金额（分）
-	ActualQuota      *int64  // settle 实际金额（分）
-	DeltaQuota       *int64  // actual - pre（settle 行）
-	PromptTokens     *int64
-	CompletionTokens *int64
+	ID                 uint64  `gorm:"primaryKey"`
+	ReserveFingerprint *string `gorm:"size:64"` // nil for historical bills; cannot safely verify replay
+	RequestID          string  `gorm:"size:64;not null;uniqueIndex:uk_request_phase,priority:1"`
+	Phase              string  `gorm:"size:16;not null;uniqueIndex:uk_request_phase,priority:2"`
+	Status             string  `gorm:"size:16;not null;index:idx_recon,priority:1"`
+	TenantID           uint64  `gorm:"not null;index:idx_tenant_status_created,priority:1"`
+	APIKeyID           uint64  `gorm:"not null"`
+	ProviderID         *uint64 `gorm:"index:idx_provider_created,priority:1"`
+	Model              string  `gorm:"size:64"`                          // 调用名 == 目录 model_id
+	Funding            string  `gorm:"size:16;not null;default:balance"` // 扣费来源：balance|subscription（M9）
+	PreQuota           int64   `gorm:"not null"`                         // 预扣金额（分）
+	ReservedTokens     *int64  // 订阅预占 token；历史未记录的 pending 为 nil
+	ReservedTier       *string `gorm:"size:64"` // 预占时档次快照
+	ActualQuota        *int64  // settle 实际金额（分）
+	DeltaQuota         *int64  // actual - pre（settle 行）
+	PromptTokens       *int64
+	CompletionTokens   *int64
 	// 价格快照（分/百万 token）：reserve 时写入当时目录价，settle 用快照算实际，
 	// 使 delta 自洽、历史账单不受 admin 改价影响。
 	InPriceCent     *int64
@@ -135,9 +141,11 @@ func UsageKey(requestID string) string      { return fmt.Sprintf("usage:%s", req
 // ---------- Store ----------
 
 type Store struct {
-	db   *gorm.DB
-	rdb  *goredis.Client
-	cash *cashSession
+	db             *gorm.DB
+	rdb            *goredis.Client
+	cash           *cashSession
+	authCacheTTL   time.Duration
+	authCacheState *authCacheState
 }
 
 func NewStore(db *gorm.DB, rdb *goredis.Client) *Store {
@@ -165,6 +173,21 @@ func (s *Store) AutoMigrate() error {
 //
 // 恢复不用 INCRBY：释放会话期间其他重建可能已归还这笔预扣，不能再加一次。
 // Redis 写入同时核验租户 owner，失联的旧会话不能覆盖新持有者的余额。
+// ReserveWithReplaySignal preserves Reserve's ledger semantics while allowing
+// callers to distinguish a fresh reservation from an existing pending one.
+func (s *Store) ReserveWithReplaySignal(ctx context.Context, req *billingv1.ReserveRequest) (*billingv1.ReserveResponse, error) {
+	return s.Reserve(context.WithValue(ctx, reserveReplaySignalKey{}, true), req)
+}
+
+type reserveReplaySignalKey struct{}
+
+func reserveReplayCode(ctx context.Context) billingv1.ReserveCode {
+	if enabled, _ := ctx.Value(reserveReplaySignalKey{}).(bool); enabled {
+		return billingv1.ReserveCode_RESERVE_DUPLICATE
+	}
+	return billingv1.ReserveCode_RESERVE_OK
+}
+
 func (s *Store) Reserve(ctx context.Context, req *billingv1.ReserveRequest) (*billingv1.ReserveResponse, error) {
 	locked, release, err := s.lockCash(ctx, uint64(req.TenantId))
 	if err != nil {
@@ -230,8 +253,65 @@ func (s *Store) lockNamed(ctx context.Context, name string) (*sql.Conn, func(), 
 	}, nil
 }
 
+// reserveFingerprint binds all billing inputs, including raw estimates. The
+// version prefix makes future changes to this encoding explicit.
+func reserveFingerprint(req *billingv1.ReserveRequest) string {
+	data, _ := json.Marshal([]any{"reserve-v1", req.TenantId, req.ApiKeyId, req.ProviderId, req.Model, req.EstPromptTokens, req.MaxCompletionTokens})
+	return fmt.Sprintf("%x", sha256.Sum256(data))
+}
+
+func reserveFingerprintForContext(ctx context.Context, req *billingv1.ReserveRequest) string {
+	if digest := controlplane.ReserveContent(ctx); digest != "" {
+		data, _ := json.Marshal([]any{"reserve-v2", req.TenantId, req.ApiKeyId, req.ProviderId, req.Model, req.EstPromptTokens, req.MaxCompletionTokens, digest})
+		return fmt.Sprintf("%x", sha256.Sum256(data))
+	}
+	return reserveFingerprint(req)
+}
+
+func verifyReserveReplay(row *Bill, req *billingv1.ReserveRequest) error {
+	return verifyReserveReplayWithContext(context.Background(), row, req)
+}
+
+func verifyReserveReplayWithContext(ctx context.Context, row *Bill, req *billingv1.ReserveRequest) error {
+	if row.ReserveFingerprint == nil || *row.ReserveFingerprint != reserveFingerprintForContext(ctx, req) {
+		return status.Error(codes.FailedPrecondition, "request id already used with different or unverifiable reserve parameters")
+	}
+	// A completed or reversed reservation no longer authorizes another upstream
+	// request. A pending row with usage already reported has also passed the
+	// upstream boundary and must not be treated as a fresh reservation.
+	if row.Status != StatusPending || row.UsageReportedAt != nil {
+		return status.Error(codes.FailedPrecondition, "reservation is finalized or usage already reported")
+	}
+	return nil
+}
+
 func (s *Store) reserveLocked(ctx context.Context, req *billingv1.ReserveRequest) (*billingv1.ReserveResponse, error) {
 	dbctx := ctx
+	// Enforce tenant status before either fresh reservations or legacy replay;
+	// subscription-funded requests do not pass through cash balance rebuild.
+	var tenant Tenant
+	if err := s.db.WithContext(dbctx).Select("id", "status").First(&tenant, uint64(req.TenantId)).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, status.Error(codes.PermissionDenied, "tenant unavailable")
+		}
+		return nil, status.Errorf(codes.Unavailable, "tenant lookup: %v", err)
+	}
+	if tenant.Status != 0 {
+		return nil, status.Error(codes.PermissionDenied, "tenant unavailable")
+	}
+	fingerprint := reserveFingerprintForContext(ctx, req)
+	if row, err := s.getReserve(ctx, req.RequestId); err != nil {
+		return nil, status.Errorf(codes.Unavailable, "reserve lookup: %v", err)
+	} else if row != nil {
+		if err := verifyReserveReplayWithContext(ctx, row, req); err != nil {
+			return nil, err
+		}
+		bal, err := s.balanceOrEnsure(ctx, uint64(req.TenantId))
+		if err != nil {
+			return nil, err
+		}
+		return &billingv1.ReserveResponse{Code: reserveReplayCode(ctx), BillId: int64(row.ID), BalanceAfter: bal}, nil
+	}
 	// 目录是计费权威：未上架/不存在的模型直接拒绝（gateway 映射为 400「模型未上架/已下架」）。
 	model, err := s.GetModelByModelID(dbctx, req.Model)
 	if err != nil {
@@ -242,12 +322,9 @@ func (s *Store) reserveLocked(ctx context.Context, req *billingv1.ReserveRequest
 	}
 	// 预扣 = 估算用量按目录价 ×1.2 安全系数；价格快照落 bill，settle 用快照多退少补。
 	estCompletion := req.MaxCompletionTokens
-	if estCompletion < 0 {
-		estCompletion = 0
-	}
-	pre := quota.ReserveCostCent(req.EstPromptTokens, estCompletion, model.InputPriceCent, model.OutputPriceCent)
-	if pre < 0 {
-		pre = 0
+	pre, err := quota.ReserveCostCentChecked(req.EstPromptTokens, estCompletion, model.InputPriceCent, model.OutputPriceCent)
+	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "invalid reserve cost: %v", err)
 	}
 	inC, outC := model.InputPriceCent, model.OutputPriceCent
 
@@ -260,38 +337,35 @@ func (s *Store) reserveLocked(ctx context.Context, req *billingv1.ReserveRequest
 		return nil, status.Errorf(codes.Unavailable, "subscription path: %v", err)
 	}
 
-	// 1) DB 快速查重（幂等重放，两种路径共用）
-	if row, err := s.getReserve(dbctx, req.RequestId); err == nil && row != nil {
-		bal, _ := s.getBalance(ctx, tenantID)
-		return &billingv1.ReserveResponse{Code: billingv1.ReserveCode_RESERVE_OK, BillId: int64(row.ID), BalanceAfter: bal}, nil
-	}
-
 	if isSub {
 		// 窗口额度检查：consumed[本档]（滚动窗口内已用 token）+ 本次估算 ≤ 窗口额度，否则超限拒绝。
 		consumed, err := s.subscriptionConsumed(dbctx, tenantID, refreshHours)
 		if err != nil {
 			return nil, status.Errorf(codes.Unavailable, "subscription consumed: %v", err)
 		}
-		est := req.EstPromptTokens + estCompletion
-		if est < 0 {
-			est = 0
+		if req.EstPromptTokens < 0 || estCompletion > math.MaxInt64-req.EstPromptTokens {
+			return nil, status.Error(codes.InvalidArgument, "invalid subscription token estimate")
 		}
-		if consumed[tier]+est > quota {
+		est := req.EstPromptTokens + estCompletion
+		if quota < 0 || est > quota || consumed[tier] > quota-est {
 			return &billingv1.ReserveResponse{Code: billingv1.ReserveCode_RESERVE_SUB_QUOTA, BalanceAfter: 0}, nil
 		}
 		// 落订阅额度 reserve 行：pre_quota=0、funding=subscription，不走 Lua/余额（额度按窗口涌现，非预扣）。
 		row := &Bill{
-			RequestID:    req.RequestId,
-			Phase:        PhaseReserve,
-			Status:       StatusPending,
-			TenantID:     tenantID,
-			APIKeyID:     uint64(req.ApiKeyId),
-			Model:        req.Model,
-			Funding:      FundingSubscription,
-			PreQuota:     0,
-			InPriceCent:  &inC,
-			OutPriceCent: &outC,
-			CreatedAt:    time.Now(),
+			RequestID:          req.RequestId,
+			ReserveFingerprint: &fingerprint,
+			Phase:              PhaseReserve,
+			Status:             StatusPending,
+			TenantID:           tenantID,
+			APIKeyID:           uint64(req.ApiKeyId),
+			Model:              req.Model,
+			Funding:            FundingSubscription,
+			PreQuota:           0,
+			ReservedTokens:     &est,
+			ReservedTier:       &tier,
+			InPriceCent:        &inC,
+			OutPriceCent:       &outC,
+			CreatedAt:          time.Now(),
 		}
 		if req.ProviderId > 0 {
 			pid := uint64(req.ProviderId)
@@ -309,13 +383,22 @@ func (s *Store) reserveLocked(ctx context.Context, req *billingv1.ReserveRequest
 		}); err != nil {
 			if isDupKey(err) {
 				if r2, e2 := s.getReserve(dbctx, req.RequestId); e2 == nil && r2 != nil {
-					bal, _ := s.getBalance(ctx, tenantID)
-					return &billingv1.ReserveResponse{Code: billingv1.ReserveCode_RESERVE_OK, BillId: int64(r2.ID), BalanceAfter: bal}, nil
+					if err := verifyReserveReplayWithContext(ctx, r2, req); err != nil {
+						return nil, err
+					}
+					bal, err := s.balanceOrEnsure(ctx, tenantID)
+					if err != nil {
+						return nil, status.Errorf(codes.Unavailable, "balance lookup: %v", err)
+					}
+					return &billingv1.ReserveResponse{Code: reserveReplayCode(ctx), BillId: int64(r2.ID), BalanceAfter: bal}, nil
 				}
 			}
 			return nil, status.Errorf(codes.Unavailable, "reserve insert: %v", err)
 		}
-		bal, _ := s.getBalance(ctx, tenantID)
+		bal, err := s.balanceOrEnsure(ctx, tenantID)
+		if err != nil {
+			return nil, status.Errorf(codes.Unavailable, "balance lookup: %v", err)
+		}
 		return &billingv1.ReserveResponse{Code: billingv1.ReserveCode_RESERVE_OK, BillId: int64(row.ID), BalanceAfter: bal}, nil
 	}
 
@@ -336,8 +419,11 @@ func (s *Store) reserveLocked(ctx context.Context, req *billingv1.ReserveRequest
 	if row, err := s.getReserve(dbctx, req.RequestId); err != nil {
 		return nil, status.Errorf(codes.Unavailable, "reserve lookup: %v", err)
 	} else if row != nil {
+		if err := verifyReserveReplayWithContext(ctx, row, req); err != nil {
+			return nil, err
+		}
 		bal, _ := s.getBalance(ctx, tenantID)
-		return &billingv1.ReserveResponse{Code: billingv1.ReserveCode_RESERVE_OK, BillId: int64(row.ID), BalanceAfter: bal}, nil
+		return &billingv1.ReserveResponse{Code: reserveReplayCode(ctx), BillId: int64(row.ID), BalanceAfter: bal}, nil
 	}
 	// No durable reserve exists. A remaining guard belongs to an interrupted
 	// attempt and may already have been refunded by a projection rebuild.
@@ -370,17 +456,18 @@ func (s *Store) reserveLocked(ctx context.Context, req *billingv1.ReserveRequest
 
 	// 3) 落 reserve 行
 	row := &Bill{
-		RequestID:    req.RequestId,
-		Phase:        PhaseReserve,
-		Status:       StatusPending,
-		TenantID:     tenantID,
-		APIKeyID:     uint64(req.ApiKeyId),
-		Model:        req.Model,
-		Funding:      FundingBalance,
-		PreQuota:     pre,
-		InPriceCent:  &inC,
-		OutPriceCent: &outC,
-		CreatedAt:    time.Now(),
+		RequestID:          req.RequestId,
+		ReserveFingerprint: &fingerprint,
+		Phase:              PhaseReserve,
+		Status:             StatusPending,
+		TenantID:           tenantID,
+		APIKeyID:           uint64(req.ApiKeyId),
+		Model:              req.Model,
+		Funding:            FundingBalance,
+		PreQuota:           pre,
+		InPriceCent:        &inC,
+		OutPriceCent:       &outC,
+		CreatedAt:          time.Now(),
 	}
 	if req.ProviderId > 0 {
 		pid := uint64(req.ProviderId)
@@ -397,7 +484,13 @@ func (s *Store) reserveLocked(ctx context.Context, req *billingv1.ReserveRequest
 	}); err != nil {
 		if isDupKey(err) {
 			if r2, e2 := s.getReserve(dbctx, req.RequestId); e2 == nil && r2 != nil {
-				return &billingv1.ReserveResponse{Code: billingv1.ReserveCode_RESERVE_OK, BillId: int64(r2.ID), BalanceAfter: bal}, nil
+				if err := verifyReserveReplayWithContext(ctx, r2, req); err != nil {
+					if _, recoveryErr := s.rebuildCash(dbctx, tenantID, ReqGuardKey(req.RequestId), owner); recoveryErr != nil {
+						return nil, status.Errorf(codes.Unavailable, "reserve conflict recovery: %v", recoveryErr)
+					}
+					return nil, err
+				}
+				return &billingv1.ReserveResponse{Code: reserveReplayCode(ctx), BillId: int64(r2.ID), BalanceAfter: bal}, nil
 			}
 		}
 		// Even a failed COMMIT may have reached MySQL. A broken connection also
@@ -467,7 +560,20 @@ func (s *Store) subscriptionAllowancePath(ctx context.Context, model *Model, ten
 
 // GetBalance 查租户当前余额（Redis 投影；权威口径是 MySQL 账本）。
 func (s *Store) GetBalance(ctx context.Context, tenantID uint64) (int64, error) {
-	return s.getBalance(ctx, tenantID)
+	return s.balanceOrEnsure(ctx, tenantID)
+}
+
+// balanceOrEnsure distinguishes a missing projection from a real zero balance.
+// ensureBalanceKey takes the cash lock and rechecks before rebuilding.
+func (s *Store) balanceOrEnsure(ctx context.Context, tenantID uint64) (int64, error) {
+	value, err := s.rdb.Get(ctx, BalanceKey(tenantID)).Int64()
+	if !errors.Is(err, goredis.Nil) {
+		return value, err
+	}
+	if err := s.ensureBalanceKey(ctx, tenantID); err != nil {
+		return 0, err
+	}
+	return s.rdb.Get(ctx, BalanceKey(tenantID)).Int64()
 }
 
 // EnsureBalanceKeys 启动时为活跃租户补建缺失的余额投影。
@@ -510,9 +616,19 @@ func (s *Store) ensureBalanceKey(ctx context.Context, tenant uint64) error {
 
 // ---------- 用量上报 / 结算 / 退款 / 密钥校验 ----------
 
+// Zero is the legacy omitted bill ID. A supplied ID must refer to the
+// reserve selected by request ID, including on idempotent replays.
+func validateReserveBillID(id int64, row *Bill) error {
+	if id != 0 && (id < 0 || uint64(id) != row.ID) {
+		return status.Error(codes.FailedPrecondition, "bill id does not match request")
+	}
+	return nil
+}
+
 // ReportUsage 上报实际用量：把 usage_reported_at（持久 marker）+ token 数写进 reserve 行。
 // 幂等：锁定 reserve 行，重复同值无副作用；首次写入后拒绝覆盖用量和上游。
-// 这个 marker 是对账的「分水岭」：无 marker = 流没跑完（应全退）；有 marker = 跑完了（只差 settle）。
+// marker 表示已持久化用量，可用于补结算；没有 marker 不能证明上游未执行或未计费，
+// 因此不能仅凭 marker 缺失推断可以退款。
 // M10：UPDATE 与 outbox usage 事件同一事务提交。
 func (s *Store) ReportUsage(ctx context.Context, req *billingv1.ReportUsageRequest) error {
 	if req.ProviderId < 0 || req.PromptTokens < 0 || req.CompletionTokens < 0 {
@@ -524,6 +640,9 @@ func (s *Store) ReportUsage(ctx context.Context, req *billingv1.ReportUsageReque
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				return status.Errorf(codes.NotFound, "reserve row not found: %s", req.RequestId)
 			}
+			return err
+		}
+		if err := validateReserveBillID(req.BillId, &row); err != nil {
 			return err
 		}
 		providerMatches := req.ProviderId == 0 || (row.ProviderID != nil && *row.ProviderID == uint64(req.ProviderId))
@@ -577,12 +696,23 @@ func (s *Store) Settle(ctx context.Context, req *billingv1.SettleRequest) (*bill
 	if row == nil {
 		return nil, status.Errorf(codes.NotFound, "reserve row not found: %s", req.RequestId)
 	}
+	if err := validateReserveBillID(req.BillId, row); err != nil {
+		return nil, err
+	}
 	locked, release, err := s.lockCash(ctx, row.TenantID)
 	if err != nil {
 		return nil, err
 	}
 	defer release()
-	return locked.settleCash(locked.cashSQLContext(), req)
+	// Existing bills must remain finalizable after a tenant is disabled.
+	locked.cash.allowDisabledTerminal = true
+	resp, terminalErr := locked.settleCash(locked.cashSQLContext(), req)
+	var repairFailure *terminalProjectionRepairFailure
+	if errors.As(terminalErr, &repairFailure) {
+		release()
+		return nil, s.recoverTerminalProjection(ctx, row.TenantID, req.RequestId, repairFailure)
+	}
+	return resp, terminalErr
 }
 
 func (s *Store) settleCash(ctx context.Context, req *billingv1.SettleRequest) (*billingv1.SettleResponse, error) {
@@ -659,6 +789,9 @@ func (s *Store) settleCash(ctx context.Context, req *billingv1.SettleRequest) (*
 			}
 			return insertOutbox(tx, newBillingEvent(settleRow, 0, PhaseSettle))
 		}); err != nil {
+			if repairErr := s.repairOrphanGuard(ctx, row.TenantID, DeltaGuardKey(req.RequestId)); repairErr != nil {
+				return nil, &terminalProjectionRepairFailure{operation: "settle insert", cause: err, repair: repairErr}
+			}
 			return nil, status.Errorf(codes.Unavailable, "settle insert: %v", err)
 		}
 		return &billingv1.SettleResponse{Settled: true, DeltaQuota: 0, BalanceAfter: bal}, nil
@@ -669,7 +802,10 @@ func (s *Store) settleCash(ctx context.Context, req *billingv1.SettleRequest) (*
 	if err != nil {
 		return nil, status.Errorf(codes.FailedPrecondition, "settle price: %v", err)
 	}
-	actual := quota.CostCent(*row.PromptTokens, *row.CompletionTokens, inC, outC)
+	actual, err := quota.CostCentChecked(*row.PromptTokens, *row.CompletionTokens, inC, outC)
+	if err != nil {
+		return nil, status.Errorf(codes.FailedPrecondition, "invalid settlement cost: %v", err)
+	}
 	delta := actual - row.PreQuota
 
 	bal, applied, err := s.applyDelta(ctx, row.TenantID, req.RequestId, delta)
@@ -722,10 +858,50 @@ func (s *Store) settleCash(ctx context.Context, req *billingv1.SettleRequest) (*
 		}
 		return insertOutbox(tx, newBillingEvent(settleRow, delta, PhaseSettle))
 	}); err != nil {
+		// The delta has already changed Redis. Repair from committed ledger
+		// while still holding the tenant lock, including the retry guard.
+		if repairErr := s.repairOrphanGuard(ctx, row.TenantID, DeltaGuardKey(req.RequestId)); repairErr != nil {
+			return nil, &terminalProjectionRepairFailure{operation: "settle insert", cause: err, repair: repairErr}
+		}
+		// A missing delta guard does not prove that Redis was unchanged.
+		// Rebuild from committed SQL state while the tenant lock is held.
+		if _, repairErr := s.rebuildCash(ctx, row.TenantID, "", ""); repairErr != nil {
+			return nil, &terminalProjectionRepairFailure{operation: "settle insert", cause: err, repair: repairErr}
+		}
 		return nil, status.Errorf(codes.Unavailable, "settle insert: %v", err)
 	}
 
 	return &billingv1.SettleResponse{Settled: true, DeltaQuota: delta, BalanceAfter: bal}, nil
+}
+
+type terminalProjectionRepairFailure struct {
+	operation string
+	cause     error
+	repair    error
+}
+
+func (e *terminalProjectionRepairFailure) Error() string {
+	return fmt.Sprintf("%s: %v; projection repair: %v", e.operation, e.cause, e.repair)
+}
+
+// A lost SQL session cannot repair its own projection. Reacquire the tenant
+// lock on a fresh session before reading the committed ledger or guard.
+func (s *Store) recoverTerminalProjection(ctx context.Context, tenant uint64, requestID string, failure *terminalProjectionRepairFailure) error {
+	recovery, cancel := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
+	defer cancel()
+	locked, release, err := s.lockCash(recovery, tenant)
+	if err == nil {
+		defer release()
+		locked.cash.allowDisabledTerminal = true
+		err = locked.repairOrphanGuard(locked.cashSQLContext(), tenant, DeltaGuardKey(requestID))
+		if err == nil {
+			_, err = locked.rebuildCash(locked.cashSQLContext(), tenant, "", "")
+		}
+	}
+	if err != nil {
+		return status.Errorf(codes.Unavailable, "%s; fresh projection repair: %v", failure.Error(), err)
+	}
+	return status.Errorf(codes.Unavailable, "%s: %v", failure.operation, failure.cause)
 }
 
 // Reverse 冲正/退款：pending → reversed，退回全部预扣。
@@ -738,12 +914,23 @@ func (s *Store) Reverse(ctx context.Context, req *billingv1.ReverseRequest) (*bi
 	if row == nil {
 		return nil, status.Errorf(codes.NotFound, "reserve row not found: %s", req.RequestId)
 	}
+	if err := validateReserveBillID(req.BillId, row); err != nil {
+		return nil, err
+	}
 	locked, release, err := s.lockCash(ctx, row.TenantID)
 	if err != nil {
 		return nil, err
 	}
 	defer release()
-	return locked.reverseCash(locked.cashSQLContext(), req)
+	// Existing bills must remain finalizable after a tenant is disabled.
+	locked.cash.allowDisabledTerminal = true
+	resp, terminalErr := locked.reverseCash(locked.cashSQLContext(), req)
+	var repairFailure *terminalProjectionRepairFailure
+	if errors.As(terminalErr, &repairFailure) {
+		release()
+		return nil, s.recoverTerminalProjection(ctx, row.TenantID, req.RequestId, repairFailure)
+	}
+	return resp, terminalErr
 }
 
 func (s *Store) reverseCash(ctx context.Context, req *billingv1.ReverseRequest) (*billingv1.ReverseResponse, error) {
@@ -785,6 +972,16 @@ func (s *Store) reverseCash(ctx context.Context, req *billingv1.ReverseRequest) 
 		}
 		return insertOutbox(tx, newBillingEvent(row, -row.PreQuota, PhaseReverse))
 	}); err != nil {
+		// Redis was changed before the SQL transaction. While the tenant lock
+		// is still held, rebuild from the committed ledger and clear the delta
+		// guard together so a retry cannot apply the old refund a second time.
+		if repairErr := s.repairOrphanGuard(ctx, row.TenantID, DeltaGuardKey(req.RequestId)); repairErr != nil {
+			return nil, &terminalProjectionRepairFailure{operation: "reverse update", cause: err, repair: repairErr}
+		}
+		// The guard may have disappeared after the refund changed Redis.
+		if _, repairErr := s.rebuildCash(ctx, row.TenantID, "", ""); repairErr != nil {
+			return nil, &terminalProjectionRepairFailure{operation: "reverse update", cause: err, repair: repairErr}
+		}
 		return nil, status.Errorf(codes.Unavailable, "reverse update: %v", err)
 	}
 	return &billingv1.ReverseResponse{Reversed: true, RefundQuota: row.PreQuota}, nil
@@ -812,32 +1009,22 @@ func (s *Store) RebuildBalance(ctx context.Context, tenantID uint64) (int64, err
 }
 
 // ValidateAPIKey 按 SHA-256 哈希查 key，校验状态与过期时间。
-func (s *Store) ValidateAPIKey(ctx context.Context, keyHash string) (*APIKey, error) {
-	var k APIKey
-	err := s.db.WithContext(ctx).Where("key_hash = ?", keyHash).First(&k).Error
-	if errors.Is(err, gorm.ErrRecordNotFound) {
+func (s *Store) validateAPIKeyAuthority(ctx context.Context, keyHash string) (*APIKey, error) {
+	var row struct {
+		APIKey
+		SessionCount int64
+	}
+	q := s.db.WithContext(ctx).Table("api_keys").Select(`api_keys.*, CASE WHEN BINARY api_keys.name = BINARY ? THEN (SELECT COUNT(*) FROM portal_sessions JOIN portal_users ON portal_users.id = portal_sessions.user_id JOIN tenants session_tenant ON session_tenant.id = portal_users.tenant_id WHERE portal_sessions.api_key_id = api_keys.id AND portal_users.status = 0 AND session_tenant.status = 0 AND session_tenant.id = api_keys.tenant_id) ELSE 1 END AS session_count`, browserKeyName).
+		Joins("JOIN tenants ON tenants.id = api_keys.tenant_id").
+		Where("api_keys.key_hash = ? AND tenants.status = ?", keyHash, 0).
+		Limit(1).Scan(&row)
+	if q.Error != nil {
+		return nil, q.Error
+	}
+	if q.RowsAffected == 0 || row.Status != 0 || (row.ExpiresAt != nil && time.Now().After(*row.ExpiresAt)) || row.SessionCount != 1 {
 		return nil, nil
 	}
-	if err != nil {
-		return nil, err
-	}
-	if k.Status != 0 || (k.ExpiresAt != nil && time.Now().After(*k.ExpiresAt)) {
-		return nil, nil
-	}
-	if k.Name == browserKeyName {
-		var n int64
-		err := s.db.WithContext(ctx).Model(&PortalSession{}).
-			Joins("JOIN portal_users ON portal_users.id = portal_sessions.user_id").
-			Joins("JOIN tenants ON tenants.id = portal_users.tenant_id").
-			Where("portal_sessions.api_key_id = ? AND portal_users.status = 0 AND tenants.status = 0 AND tenants.id = ?", k.ID, k.TenantID).Count(&n).Error
-		if err != nil {
-			return nil, err
-		}
-		if n != 1 {
-			return nil, nil
-		}
-	}
-	return &k, nil
+	return &row.APIKey, nil
 }
 
 // ---------- 观测（Web 面板数据源，只读） ----------
@@ -941,7 +1128,10 @@ func (s *Store) OverviewStats(ctx context.Context) (*Overview, error) {
 			return nil, err
 		}
 
-		balance := t.InitialQuota + topups - settled - pending
+		balance, err := checkedLedgerBalance(t.InitialQuota, topups, pending, settled)
+		if err != nil {
+			return nil, fmt.Errorf("tenant %d: %w", t.ID, err)
+		}
 		redisBal, _ := s.getBalance(ctx, t.ID)
 		o.Tenants = append(o.Tenants, TenantStat{
 			ID: t.ID, Name: t.Name, InitialQuota: t.InitialQuota,
@@ -991,14 +1181,14 @@ func (s *Store) priceSnapshot(ctx context.Context, row *Bill) (int64, int64, err
 
 func (s *Store) getReserve(ctx context.Context, requestID string) (*Bill, error) {
 	var row Bill
-	err := s.db.WithContext(ctx).
+	result := s.db.WithContext(ctx).
 		Where("request_id = ? AND phase = ?", requestID, PhaseReserve).
-		First(&row).Error
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, nil
+		Order("id ASC").Limit(1).Find(&row)
+	if result.Error != nil {
+		return nil, result.Error
 	}
-	if err != nil {
-		return nil, err
+	if result.RowsAffected == 0 {
+		return nil, nil
 	}
 	return &row, nil
 }

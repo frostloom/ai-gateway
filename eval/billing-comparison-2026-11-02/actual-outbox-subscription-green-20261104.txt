@@ -1,0 +1,98 @@
+head=d607e1465094269e8dc8e2f07cf5b3ac28560abf
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestActualStoreOrphanOutboxConflictCharacterization
+    outbox_orphan_actual_test.go:58: reserve_rejected=true bills=0 existing_events=1 balance=500 ledger=500
+--- PASS: TestActualStoreOrphanOutboxConflictCharacterization (1.56s)
+=== RUN   TestActualStoreOutboxNormalReplay
+    outbox_orphan_actual_test.go:137: normal_replays=true events=3 balance=460 ledger=460
+--- PASS: TestActualStoreOutboxNormalReplay (0.62s)
+=== RUN   TestActualStoreTerminalOutboxConflicts
+=== RUN   TestActualStoreTerminalOutboxConflicts/usage
+    outbox_orphan_actual_test.go:228: phase=usage rejected_then_retry=true prior_balance=400 final_balance=400 ledger=400
+=== RUN   TestActualStoreTerminalOutboxConflicts/settle
+    outbox_orphan_actual_test.go:228: phase=settle rejected_then_retry=true prior_balance=400 final_balance=460 ledger=460
+=== RUN   TestActualStoreTerminalOutboxConflicts/reverse
+    outbox_orphan_actual_test.go:228: phase=reverse rejected_then_retry=true prior_balance=400 final_balance=500 ledger=500
+--- PASS: TestActualStoreTerminalOutboxConflicts (2.28s)
+    --- PASS: TestActualStoreTerminalOutboxConflicts/usage (0.49s)
+    --- PASS: TestActualStoreTerminalOutboxConflicts/settle (0.49s)
+    --- PASS: TestActualStoreTerminalOutboxConflicts/reverse (1.29s)
+=== RUN   TestActualSubscriptionOutboxConflicts
+=== RUN   TestActualSubscriptionOutboxConflicts/reserve
+    outbox_subscription_conflict_test.go:117: phase=reserve rejected_then_retry=true cash=100000 ledger=100000
+=== RUN   TestActualSubscriptionOutboxConflicts/usage
+    outbox_subscription_conflict_test.go:117: phase=usage rejected_then_retry=true cash=100000 ledger=100000
+=== RUN   TestActualSubscriptionOutboxConflicts/settle
+    outbox_subscription_conflict_test.go:117: phase=settle rejected_then_retry=true cash=100000 ledger=100000
+=== RUN   TestActualSubscriptionOutboxConflicts/reverse
+    outbox_subscription_conflict_test.go:117: phase=reverse rejected_then_retry=true cash=100000 ledger=100000
+--- PASS: TestActualSubscriptionOutboxConflicts (2.56s)
+    --- PASS: TestActualSubscriptionOutboxConflicts/reserve (0.51s)
+    --- PASS: TestActualSubscriptionOutboxConflicts/usage (0.55s)
+    --- PASS: TestActualSubscriptionOutboxConflicts/settle (0.68s)
+    --- PASS: TestActualSubscriptionOutboxConflicts/reverse (0.83s)
+=== RUN   TestActualStoreOrphanOutboxConflictCharacterization
+    outbox_orphan_actual_test.go:58: reserve_rejected=true bills=0 existing_events=1 balance=500 ledger=500
+--- PASS: TestActualStoreOrphanOutboxConflictCharacterization (0.59s)
+=== RUN   TestActualStoreOutboxNormalReplay
+    outbox_orphan_actual_test.go:137: normal_replays=true events=3 balance=460 ledger=460
+--- PASS: TestActualStoreOutboxNormalReplay (0.40s)
+=== RUN   TestActualStoreTerminalOutboxConflicts
+=== RUN   TestActualStoreTerminalOutboxConflicts/usage
+    outbox_orphan_actual_test.go:228: phase=usage rejected_then_retry=true prior_balance=400 final_balance=400 ledger=400
+=== RUN   TestActualStoreTerminalOutboxConflicts/settle
+    outbox_orphan_actual_test.go:228: phase=settle rejected_then_retry=true prior_balance=400 final_balance=460 ledger=460
+=== RUN   TestActualStoreTerminalOutboxConflicts/reverse
+    outbox_orphan_actual_test.go:228: phase=reverse rejected_then_retry=true prior_balance=400 final_balance=500 ledger=500
+--- PASS: TestActualStoreTerminalOutboxConflicts (2.10s)
+    --- PASS: TestActualStoreTerminalOutboxConflicts/usage (0.66s)
+    --- PASS: TestActualStoreTerminalOutboxConflicts/settle (0.72s)
+    --- PASS: TestActualStoreTerminalOutboxConflicts/reverse (0.72s)
+=== RUN   TestActualSubscriptionOutboxConflicts
+=== RUN   TestActualSubscriptionOutboxConflicts/reserve
+    outbox_subscription_conflict_test.go:117: phase=reserve rejected_then_retry=true cash=100000 ledger=100000
+=== RUN   TestActualSubscriptionOutboxConflicts/usage
+    outbox_subscription_conflict_test.go:117: phase=usage rejected_then_retry=true cash=100000 ledger=100000
+=== RUN   TestActualSubscriptionOutboxConflicts/settle
+    outbox_subscription_conflict_test.go:117: phase=settle rejected_then_retry=true cash=100000 ledger=100000
+=== RUN   TestActualSubscriptionOutboxConflicts/reverse
+    outbox_subscription_conflict_test.go:117: phase=reverse rejected_then_retry=true cash=100000 ledger=100000
+--- PASS: TestActualSubscriptionOutboxConflicts (5.55s)
+    --- PASS: TestActualSubscriptionOutboxConflicts/reserve (1.18s)
+    --- PASS: TestActualSubscriptionOutboxConflicts/usage (3.37s)
+    --- PASS: TestActualSubscriptionOutboxConflicts/settle (0.54s)
+    --- PASS: TestActualSubscriptionOutboxConflicts/reverse (0.47s)
+=== RUN   TestActualStoreOrphanOutboxConflictCharacterization
+    outbox_orphan_actual_test.go:58: reserve_rejected=true bills=0 existing_events=1 balance=500 ledger=500
+--- PASS: TestActualStoreOrphanOutboxConflictCharacterization (0.38s)
+=== RUN   TestActualStoreOutboxNormalReplay
+    outbox_orphan_actual_test.go:137: normal_replays=true events=3 balance=460 ledger=460
+--- PASS: TestActualStoreOutboxNormalReplay (0.52s)
+=== RUN   TestActualStoreTerminalOutboxConflicts
+=== RUN   TestActualStoreTerminalOutboxConflicts/usage
+    outbox_orphan_actual_test.go:228: phase=usage rejected_then_retry=true prior_balance=400 final_balance=400 ledger=400
+=== RUN   TestActualStoreTerminalOutboxConflicts/settle
+    outbox_orphan_actual_test.go:228: phase=settle rejected_then_retry=true prior_balance=400 final_balance=460 ledger=460
+=== RUN   TestActualStoreTerminalOutboxConflicts/reverse
+    outbox_orphan_actual_test.go:228: phase=reverse rejected_then_retry=true prior_balance=400 final_balance=500 ledger=500
+--- PASS: TestActualStoreTerminalOutboxConflicts (1.24s)
+    --- PASS: TestActualStoreTerminalOutboxConflicts/usage (0.41s)
+    --- PASS: TestActualStoreTerminalOutboxConflicts/settle (0.43s)
+    --- PASS: TestActualStoreTerminalOutboxConflicts/reverse (0.40s)
+=== RUN   TestActualSubscriptionOutboxConflicts
+=== RUN   TestActualSubscriptionOutboxConflicts/reserve
+    outbox_subscription_conflict_test.go:117: phase=reserve rejected_then_retry=true cash=100000 ledger=100000
+=== RUN   TestActualSubscriptionOutboxConflicts/usage
+    outbox_subscription_conflict_test.go:117: phase=usage rejected_then_retry=true cash=100000 ledger=100000
+=== RUN   TestActualSubscriptionOutboxConflicts/settle
+    outbox_subscription_conflict_test.go:117: phase=settle rejected_then_retry=true cash=100000 ledger=100000
+=== RUN   TestActualSubscriptionOutboxConflicts/reverse
+    outbox_subscription_conflict_test.go:117: phase=reverse rejected_then_retry=true cash=100000 ledger=100000
+--- PASS: TestActualSubscriptionOutboxConflicts (2.06s)
+    --- PASS: TestActualSubscriptionOutboxConflicts/reserve (0.40s)
+    --- PASS: TestActualSubscriptionOutboxConflicts/usage (0.70s)
+    --- PASS: TestActualSubscriptionOutboxConflicts/settle (0.43s)
+    --- PASS: TestActualSubscriptionOutboxConflicts/reverse (0.54s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	22.499s

@@ -1,0 +1,23 @@
+head=63b9d1ed4d64bb583d15fa884c37468e5c53044c
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestGuardedTenantDisableLeavesCachedKeys
+    auth_fence_integration_test.go:64: tenant_disabled=true authoritative_keys_rejected=2 cached_keys_still_valid=2 after_ttl_rejected=2
+--- PASS: TestGuardedTenantDisableLeavesCachedKeys (0.86s)
+=== RUN   TestGuardedFenceLossBeforeCommit
+    auth_fence_integration_test.go:109: fence_deleted_before_db_write=true old_value_refilled=true authoritative_rejects=true candidate_accepts=true
+--- PASS: TestGuardedFenceLossBeforeCommit (0.11s)
+=== RUN   TestGuardedTenantDisableLeavesCachedKeys
+    auth_fence_integration_test.go:64: tenant_disabled=true authoritative_keys_rejected=2 cached_keys_still_valid=2 after_ttl_rejected=2
+--- PASS: TestGuardedTenantDisableLeavesCachedKeys (0.69s)
+=== RUN   TestGuardedFenceLossBeforeCommit
+    auth_fence_integration_test.go:109: fence_deleted_before_db_write=true old_value_refilled=true authoritative_rejects=true candidate_accepts=true
+--- PASS: TestGuardedFenceLossBeforeCommit (0.11s)
+=== RUN   TestGuardedTenantDisableLeavesCachedKeys
+    auth_fence_integration_test.go:64: tenant_disabled=true authoritative_keys_rejected=2 cached_keys_still_valid=2 after_ttl_rejected=2
+--- PASS: TestGuardedTenantDisableLeavesCachedKeys (0.69s)
+=== RUN   TestGuardedFenceLossBeforeCommit
+    auth_fence_integration_test.go:109: fence_deleted_before_db_write=true old_value_refilled=true authoritative_rejects=true candidate_accepts=true
+--- PASS: TestGuardedFenceLossBeforeCommit (0.07s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	5.328s

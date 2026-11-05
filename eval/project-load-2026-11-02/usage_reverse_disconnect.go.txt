@@ -1,0 +1,38 @@
+
+func TestUsageCandidateLostSQLSession(t *testing.T) {
+ s,done:=newTestStore(t);defer done();ctx:=context.Background();seedMockModel(t,s);tenant:=seedTenant(t,s,1000);id:="usage-session-lost"
+ if _,e:=s.Reserve(ctx,reserveReq(id,tenant,84));e!=nil{t.Fatal(e)}
+ entered,resume:=make(chan struct{}),make(chan struct{});var once atomic.Bool
+ if e:=s.db.Callback().Update().Before("gorm:update").Register("test:pause_usage_kill",func(tx *gorm.DB){if tx.Statement.Table=="bills" && once.CompareAndSwap(false,true){close(entered);<-resume}});e!=nil{t.Fatal(e)}
+ defer s.db.Callback().Update().Remove("test:pause_usage_kill")
+ result:=make(chan error,1);go func(){result<-s.ReportUsage(ctx,&billingv1.ReportUsageRequest{RequestId:id,PromptTokens:50,CompletionTokens:10})}()
+ select {case <-entered: case <-time.After(5*time.Second):close(resume);t.Fatal("usage did not reach update")}
+ lock:=fmt.Sprintf("billing:reserve:%x",sha256.Sum256([]byte(id)))[:64];var owner sql.NullInt64
+ if e:=s.db.Raw("SELECT IS_USED_LOCK(?)",lock).Scan(&owner).Error;e!=nil||!owner.Valid{close(resume);t.Fatalf("lock owner=%v err=%v",owner,e)}
+ if e:=s.db.Exec(fmt.Sprintf("KILL CONNECTION %d",owner.Int64)).Error;e!=nil{close(resume);t.Fatal(e)}
+ reverse,e:=NewStore(s.db,s.rdb).Reverse(ctx,&billingv1.ReverseRequest{RequestId:id,Reason:"recon:no_usage"});close(resume)
+ if e!=nil || reverse==nil || !reverse.Reversed {t.Fatalf("reverse=%v err=%v",reverse,e)}
+ if e=<-result;e==nil{t.Fatal("killed usage unexpectedly succeeded")}
+ var row Bill;if e=s.db.Where("request_id = ? AND phase = ?",id,PhaseReserve).First(&row).Error;e!=nil{t.Fatal(e)}
+ if row.Status!=StatusReversed || row.UsageReportedAt!=nil {t.Fatalf("row=%+v",row)}
+ live,e:=s.getBalance(ctx,tenant);if e!=nil{t.Fatal(e)};ledger,e:=LedgerBalance(ctx,s.db,tenant);if e!=nil||live!=1000||live!=ledger{t.Fatalf("live=%d ledger=%d err=%v",live,ledger,e)}
+ var usageEvents int64;if e=s.db.Model(&OutboxEvent{}).Where("event_key = ?",id+":usage").Count(&usageEvents).Error;e!=nil||usageEvents!=0{t.Fatalf("usage outbox=%d err=%v",usageEvents,e)}
+}
+
+func TestReverseCandidateLostSQLSessionAfterCheck(t *testing.T) {
+ s,done:=newTestStore(t);defer done();ctx:=context.Background();seedMockModel(t,s);tenant:=seedTenant(t,s,1000);id:="reverse-session-lost"
+ if _,e:=s.Reserve(ctx,reserveReq(id,tenant,84));e!=nil{t.Fatal(e)}
+ entered,resume:=make(chan struct{}),make(chan struct{});var once atomic.Bool
+ s.rdb.AddHook(cashRedisHook{before:func(_ context.Context,cmd redis.Cmder)error{if changesCash(cmd,tenant)&&once.CompareAndSwap(false,true){close(entered);<-resume};return nil}})
+ result:=make(chan error,1);go func(){_,e:=s.Reverse(ctx,&billingv1.ReverseRequest{RequestId:id,Reason:"recon:no_usage"});result<-e}()
+ select {case <-entered:case <-time.After(5*time.Second):close(resume);t.Fatal("reverse did not reach Redis")}
+ var owner sql.NullInt64;if e:=s.db.Raw("SELECT IS_USED_LOCK(?)",fmt.Sprintf("billing:cash:%d",tenant)).Scan(&owner).Error;e!=nil||!owner.Valid{close(resume);t.Fatalf("owner=%v err=%v",owner,e)}
+ if e:=s.db.Exec(fmt.Sprintf("KILL CONNECTION %d",owner.Int64)).Error;e!=nil{close(resume);t.Fatal(e)}
+ usageErr:=NewStore(s.db,s.rdb).ReportUsage(ctx,&billingv1.ReportUsageRequest{RequestId:id,PromptTokens:50,CompletionTokens:10})
+ close(resume);reverseErr:=<-result
+ if usageErr!=nil || reverseErr==nil{t.Fatalf("usage=%v reverse=%v",usageErr,reverseErr)}
+ if _,e:=NewStore(s.db,s.rdb).Settle(ctx,&billingv1.SettleRequest{RequestId:id});e!=nil{t.Fatalf("recover settle: %v",e)}
+ var row Bill;if e:=s.db.Where("request_id = ? AND phase = ?",id,PhaseReserve).First(&row).Error;e!=nil{t.Fatal(e)}
+ if row.Status!=StatusSettled || row.UsageReportedAt==nil{t.Fatalf("row=%+v",row)}
+ live,e:=s.getBalance(ctx,tenant);if e!=nil{t.Fatal(e)};ledger,e:=LedgerBalance(ctx,s.db,tenant);if e!=nil||live!=940||live!=ledger{t.Fatalf("live=%d ledger=%d err=%v",live,ledger,e)}
+}

@@ -1,0 +1,12 @@
+func TestConservativeNonstreamDoesNotWaitForErrorBody(t *testing.T) {
+ for _, code := range []int{http.StatusBadRequest,http.StatusServiceUnavailable} { t.Run(fmt.Sprintf("status=%d",code),func(t *testing.T){
+  release:=make(chan struct{}); entered:=make(chan struct{}); done:=make(chan struct{})
+  server:=httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter,r *http.Request){_,_=io.Copy(io.Discard,r.Body);w.WriteHeader(code);w.(http.Flusher).Flush();close(entered);<-release}));defer server.Close()
+  bill:=&fakeBilling{};router:=&fakeRouter{};c,w:=newGinCtx();c.Request=httptest.NewRequest(http.MethodPost,"/v1/chat/completions",nil)
+  go func(){forwardNonStream(c,bill,router,slog.New(slog.DiscardHandler),&client.RouteResult{ProviderID:1,BaseURL:server.URL},&chatRequest{Model:"m",Messages:[]chatMessage{{Role:"user",Content:"hello"}}},"nonstream-error",1,1,time.Second,true);close(done)}()
+  select{case <-entered:case <-time.After(3*time.Second):close(release);t.Fatal("upstream not called")}
+  var completed bool;select{case <-done:completed=true;case <-time.After(500*time.Millisecond):}
+  close(release);if !completed{<-done;t.Fatal("handler waited for error response body in conservative mode")}
+  if w.Code!=http.StatusBadGateway||len(bill.reverses)!=0||len(bill.reports)!=0||len(bill.settles)!=0{t.Fatalf("status=%d reverses=%d usage=%d settles=%d",w.Code,len(bill.reverses),len(bill.reports),len(bill.settles))}
+ }) }
+}

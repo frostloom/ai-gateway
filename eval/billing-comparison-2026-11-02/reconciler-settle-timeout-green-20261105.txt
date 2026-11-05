@@ -1,0 +1,58 @@
+head=c84cbf64ae8982272ae5bcb2aff06a6f44d2c31d
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+# github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02.test
+ld: warning: '/private/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-1672637815/000013.o' has malformed LC_DYSYMTAB, expected 98 undefined symbols to start at index 1626, found 95 undefined symbols starting at index 1626
+=== RUN   TestReconcilerSettleOnlyRetainsUnknown
+=== RUN   TestReconcilerSettleOnlyRetainsUnknown/explicit
+    reconciler_settle_only_test.go:30: unknown=pending known=settled balance=860 ledger=860
+=== RUN   TestReconcilerSettleOnlyRetainsUnknown/default
+    reconciler_settle_only_test.go:31: unknown=pending known=settled balance=860 ledger=860
+--- PASS: TestReconcilerSettleOnlyRetainsUnknown (1.08s)
+    --- PASS: TestReconcilerSettleOnlyRetainsUnknown/explicit (0.57s)
+    --- PASS: TestReconcilerSettleOnlyRetainsUnknown/default (0.51s)
+=== RUN   TestReconcilerBlockedRPCDelaysLaterBill
+    reconciler_stalled_rpc_test.go:87: blocked first mock RPC delayed the second until release; both responses are synthetic
+--- PASS: TestReconcilerBlockedRPCDelaysLaterBill (0.58s)
+=== RUN   TestReconcilerStalledSettleTimesOutAndContinues
+--- PASS: TestReconcilerStalledSettleTimesOutAndContinues (10.09s)
+=== RUN   TestReconcilerTimeoutAfterCommitDoesNotDoubleCharge
+
+2026/11/05 12:12:09 [32m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:1197 [33mSLOW SQL >= 200ms
+[0m[31;1m[362.223ms] [33m[rows:1][35m SELECT * FROM `bills` WHERE request_id = 'timeout-commit-1793851918911280000-2' AND phase = 'reserve' ORDER BY id ASC LIMIT 1[0m
+    reconciler_timeout_commit_test.go:89: first commit succeeded before artificial lost response; two bills settled once balance=920
+--- PASS: TestReconcilerTimeoutAfterCommitDoesNotDoubleCharge (12.52s)
+=== RUN   TestReconcilerSettleOnlyRetainsUnknown
+=== RUN   TestReconcilerSettleOnlyRetainsUnknown/explicit
+    reconciler_settle_only_test.go:30: unknown=pending known=settled balance=860 ledger=860
+=== RUN   TestReconcilerSettleOnlyRetainsUnknown/default
+    reconciler_settle_only_test.go:31: unknown=pending known=settled balance=860 ledger=860
+--- PASS: TestReconcilerSettleOnlyRetainsUnknown (3.87s)
+    --- PASS: TestReconcilerSettleOnlyRetainsUnknown/explicit (2.07s)
+    --- PASS: TestReconcilerSettleOnlyRetainsUnknown/default (1.79s)
+=== RUN   TestReconcilerBlockedRPCDelaysLaterBill
+    reconciler_stalled_rpc_test.go:87: blocked first mock RPC delayed the second until release; both responses are synthetic
+--- PASS: TestReconcilerBlockedRPCDelaysLaterBill (0.66s)
+=== RUN   TestReconcilerStalledSettleTimesOutAndContinues
+--- PASS: TestReconcilerStalledSettleTimesOutAndContinues (10.14s)
+=== RUN   TestReconcilerTimeoutAfterCommitDoesNotDoubleCharge
+    reconciler_timeout_commit_test.go:89: first commit succeeded before artificial lost response; two bills settled once balance=920
+--- PASS: TestReconcilerTimeoutAfterCommitDoesNotDoubleCharge (10.64s)
+=== RUN   TestReconcilerSettleOnlyRetainsUnknown
+=== RUN   TestReconcilerSettleOnlyRetainsUnknown/explicit
+    reconciler_settle_only_test.go:30: unknown=pending known=settled balance=860 ledger=860
+=== RUN   TestReconcilerSettleOnlyRetainsUnknown/default
+    reconciler_settle_only_test.go:31: unknown=pending known=settled balance=860 ledger=860
+--- PASS: TestReconcilerSettleOnlyRetainsUnknown (1.13s)
+    --- PASS: TestReconcilerSettleOnlyRetainsUnknown/explicit (0.63s)
+    --- PASS: TestReconcilerSettleOnlyRetainsUnknown/default (0.50s)
+=== RUN   TestReconcilerBlockedRPCDelaysLaterBill
+    reconciler_stalled_rpc_test.go:87: blocked first mock RPC delayed the second until release; both responses are synthetic
+--- PASS: TestReconcilerBlockedRPCDelaysLaterBill (0.56s)
+=== RUN   TestReconcilerStalledSettleTimesOutAndContinues
+--- PASS: TestReconcilerStalledSettleTimesOutAndContinues (10.08s)
+=== RUN   TestReconcilerTimeoutAfterCommitDoesNotDoubleCharge
+    reconciler_timeout_commit_test.go:89: first commit succeeded before artificial lost response; two bills settled once balance=920
+--- PASS: TestReconcilerTimeoutAfterCommitDoesNotDoubleCharge (11.18s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	74.493s

@@ -1,0 +1,35 @@
+head=42d8ef8e5ca2471b18800e50f8e7a57fbcfdd47f
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+# github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02 [github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02.test]
+eval/billing-comparison-2026-11-02/concurrent_stream_client_cancel_test.go:102:139: too many arguments in call to handler.Chat
+	have (*client.Billing, gatewayExecutionRouter, *slog.Logger, time.Duration, bool)
+	want (handler.billingAPI, handler.routingAPI, *slog.Logger, time.Duration)
+eval/billing-comparison-2026-11-02/execution_gateway_attempt_guard_test.go:225:80: too many arguments in call to handler.Chat
+	have (*guardedAttemptBridge, *sequentialExecutionRouter, *slog.Logger, time.Duration, bool)
+	want (handler.billingAPI, handler.routingAPI, *slog.Logger, time.Duration)
+eval/billing-comparison-2026-11-02/execution_gateway_failover_test.go:131:80: too many arguments in call to handler.Chat
+	have (*gatewayExecutionBridge, *sequentialExecutionRouter, *slog.Logger, time.Duration, bool)
+	want (handler.billingAPI, handler.routingAPI, *slog.Logger, time.Duration)
+eval/billing-comparison-2026-11-02/execution_gateway_http_stream_test.go:95:134: too many arguments in call to handler.Chat
+	have (*gatewayExecutionBridge, gatewayExecutionRouter, *slog.Logger, time.Duration, bool)
+	want (handler.billingAPI, handler.routingAPI, *slog.Logger, time.Duration)
+eval/billing-comparison-2026-11-02/execution_gateway_integration_test.go:318:139: too many arguments in call to handler.Chat
+	have (executionBillingAPI, gatewayExecutionRouter, *slog.Logger, time.Duration, bool)
+	want (handler.billingAPI, handler.routingAPI, *slog.Logger, time.Duration)
+eval/billing-comparison-2026-11-02/experimental_subscription_intent_test.go:163:75: row.ReservedTokens undefined (type store.Bill has no field or method ReservedTokens)
+eval/billing-comparison-2026-11-02/gateway_hold_nonstream_no_usage_test.go:80:78: too many arguments in call to handler.Chat
+	have (*client.Billing, *sequentialExecutionRouter, *slog.Logger, time.Duration, bool)
+	want (handler.billingAPI, handler.routingAPI, *slog.Logger, time.Duration)
+eval/billing-comparison-2026-11-02/gateway_hold_stream_no_usage_test.go:80:78: too many arguments in call to handler.Chat
+	have (*client.Billing, *sequentialExecutionRouter, *slog.Logger, time.Duration, bool)
+	want (handler.billingAPI, handler.routingAPI, *slog.Logger, time.Duration)
+eval/billing-comparison-2026-11-02/gateway_missing_balance_insufficient_test.go:93:164: too many arguments in call to handler.Chat
+	have (*client.Billing, usageRetryRouter, *slog.Logger, time.Duration, bool)
+	want (handler.billingAPI, handler.routingAPI, *slog.Logger, time.Duration)
+eval/billing-comparison-2026-11-02/gateway_pending_redis_restart_insufficient_test.go:105:164: too many arguments in call to handler.Chat
+	have (*client.Billing, usageRetryRouter, *slog.Logger, time.Duration, bool)
+	want (handler.billingAPI, handler.routingAPI, *slog.Logger, time.Duration)
+eval/billing-comparison-2026-11-02/gateway_pending_redis_restart_insufficient_test.go:105:164: too many errors
+FAIL	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02 [build failed]
+FAIL

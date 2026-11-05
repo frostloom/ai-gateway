@@ -1,0 +1,29 @@
+head=63b9d1ed4d64bb583d15fa884c37468e5c53044c
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestTerminalProcessKilledAfterRedisDelta
+=== RUN   TestTerminalProcessKilledAfterRedisDelta/settle
+    terminal_process_crash_test.go:53: mode=settle SIGKILL observed initial_query=400 ledger=400 other_reserve=300 retry_balance=360 terminal_events=1
+=== RUN   TestTerminalProcessKilledAfterRedisDelta/reverse
+    terminal_process_crash_test.go:53: mode=reverse SIGKILL observed initial_query=400 ledger=400 other_reserve=300 retry_balance=400 terminal_events=1
+--- PASS: TestTerminalProcessKilledAfterRedisDelta (0.80s)
+    --- PASS: TestTerminalProcessKilledAfterRedisDelta/settle (0.18s)
+    --- PASS: TestTerminalProcessKilledAfterRedisDelta/reverse (0.16s)
+=== RUN   TestTerminalProcessKilledAfterRedisDelta
+=== RUN   TestTerminalProcessKilledAfterRedisDelta/settle
+    terminal_process_crash_test.go:53: mode=settle SIGKILL observed initial_query=400 ledger=400 other_reserve=300 retry_balance=360 terminal_events=1
+=== RUN   TestTerminalProcessKilledAfterRedisDelta/reverse
+    terminal_process_crash_test.go:53: mode=reverse SIGKILL observed initial_query=400 ledger=400 other_reserve=300 retry_balance=400 terminal_events=1
+--- PASS: TestTerminalProcessKilledAfterRedisDelta (0.70s)
+    --- PASS: TestTerminalProcessKilledAfterRedisDelta/settle (0.18s)
+    --- PASS: TestTerminalProcessKilledAfterRedisDelta/reverse (0.15s)
+=== RUN   TestTerminalProcessKilledAfterRedisDelta
+=== RUN   TestTerminalProcessKilledAfterRedisDelta/settle
+    terminal_process_crash_test.go:53: mode=settle SIGKILL observed initial_query=400 ledger=400 other_reserve=300 retry_balance=360 terminal_events=1
+=== RUN   TestTerminalProcessKilledAfterRedisDelta/reverse
+    terminal_process_crash_test.go:53: mode=reverse SIGKILL observed initial_query=400 ledger=400 other_reserve=300 retry_balance=400 terminal_events=1
+--- PASS: TestTerminalProcessKilledAfterRedisDelta (0.69s)
+    --- PASS: TestTerminalProcessKilledAfterRedisDelta/settle (0.16s)
+    --- PASS: TestTerminalProcessKilledAfterRedisDelta/reverse (0.19s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	4.065s

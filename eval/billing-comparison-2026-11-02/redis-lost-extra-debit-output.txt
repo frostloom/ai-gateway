@@ -1,0 +1,29 @@
+head=63b9d1ed4d64bb583d15fa884c37468e5c53044c
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestSettlementExtraDebitLostReply
+=== RUN   TestSettlementExtraDebitLostReply/fully-collected
+    redis_lost_settlement_reply_test.go:159: balance=850 ledger=850 actual=150 error_code="" settle_rows=1 events=3
+=== RUN   TestSettlementExtraDebitLostReply/shortfall
+    redis_lost_settlement_reply_test.go:159: balance=0 ledger=0 actual=150 error_code="shortfall:100" settle_rows=1 events=3
+--- PASS: TestSettlementExtraDebitLostReply (0.55s)
+    --- PASS: TestSettlementExtraDebitLostReply/fully-collected (0.11s)
+    --- PASS: TestSettlementExtraDebitLostReply/shortfall (0.08s)
+=== RUN   TestSettlementExtraDebitLostReply
+=== RUN   TestSettlementExtraDebitLostReply/fully-collected
+    redis_lost_settlement_reply_test.go:159: balance=850 ledger=850 actual=150 error_code="" settle_rows=1 events=3
+=== RUN   TestSettlementExtraDebitLostReply/shortfall
+    redis_lost_settlement_reply_test.go:159: balance=0 ledger=0 actual=150 error_code="shortfall:100" settle_rows=1 events=3
+--- PASS: TestSettlementExtraDebitLostReply (0.54s)
+    --- PASS: TestSettlementExtraDebitLostReply/fully-collected (0.10s)
+    --- PASS: TestSettlementExtraDebitLostReply/shortfall (0.09s)
+=== RUN   TestSettlementExtraDebitLostReply
+=== RUN   TestSettlementExtraDebitLostReply/fully-collected
+    redis_lost_settlement_reply_test.go:159: balance=850 ledger=850 actual=150 error_code="" settle_rows=1 events=3
+=== RUN   TestSettlementExtraDebitLostReply/shortfall
+    redis_lost_settlement_reply_test.go:159: balance=0 ledger=0 actual=150 error_code="shortfall:100" settle_rows=1 events=3
+--- PASS: TestSettlementExtraDebitLostReply (0.60s)
+    --- PASS: TestSettlementExtraDebitLostReply/fully-collected (0.09s)
+    --- PASS: TestSettlementExtraDebitLostReply/shortfall (0.07s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	3.694s

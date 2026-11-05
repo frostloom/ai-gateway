@@ -1,0 +1,25 @@
+# github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02.test
+ld: warning: '/private/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-652306605/000013.o' has malformed LC_DYSYMTAB, expected 98 undefined symbols to start at index 1626, found 95 undefined symbols starting at index 1626
+=== RUN   TestAdminChatRejectsTruncatedResponse
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /admin/chat               --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdminChat.func1 (1 handlers)
+--- PASS: TestAdminChatRejectsTruncatedResponse (0.02s)
+=== RUN   TestAdminChatRejectsTruncatedResponse
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /admin/chat               --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdminChat.func1 (1 handlers)
+--- PASS: TestAdminChatRejectsTruncatedResponse (0.02s)
+=== RUN   TestAdminChatRejectsTruncatedResponse
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /admin/chat               --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdminChat.func1 (1 handlers)
+--- PASS: TestAdminChatRejectsTruncatedResponse (0.01s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	2.391s

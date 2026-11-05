@@ -1,0 +1,13 @@
+head=4e4c7fdd6b3a97f0f2503e1e0dd73a95707af541
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestAuditQuarantineLoad
+    audit_quarantine_load_test.go:132: guard=true unique=false round=1 operations=120 workers=12 throughput=113.89 mean_ms=100.998 p95_ms=155.034 p99_ms=191.757 errors=0 deadlock_retries=0 outcomes=map[accepted:1 duplicate:119] audits=1 deliveries=120 quarantined=0 pool_wait=0 pool_wait_ms=0.000 mysql_waits=119 mysql_wait_ms=10601
+    audit_quarantine_load_test.go:132: guard=true unique=false round=2 operations=120 workers=12 throughput=117.90 mean_ms=97.636 p95_ms=146.216 p99_ms=156.818 errors=0 deadlock_retries=0 outcomes=map[accepted:1 duplicate:119] audits=1 deliveries=120 quarantined=0 pool_wait=0 pool_wait_ms=0.000 mysql_waits=119 mysql_wait_ms=10424
+    audit_quarantine_load_test.go:132: guard=true unique=false round=3 operations=120 workers=12 throughput=122.72 mean_ms=94.326 p95_ms=152.178 p99_ms=157.304 errors=0 deadlock_retries=0 outcomes=map[accepted:1 duplicate:119] audits=1 deliveries=120 quarantined=0 pool_wait=0 pool_wait_ms=0.000 mysql_waits=119 mysql_wait_ms=10087
+    audit_quarantine_load_test.go:132: guard=true unique=true round=1 operations=120 workers=12 throughput=689.43 mean_ms=16.806 p95_ms=23.267 p99_ms=25.872 errors=0 deadlock_retries=0 outcomes=map[accepted:120] audits=120 deliveries=120 quarantined=0 pool_wait=0 pool_wait_ms=0.000 mysql_waits=0 mysql_wait_ms=0
+    audit_quarantine_load_test.go:132: guard=true unique=true round=2 operations=120 workers=12 throughput=619.82 mean_ms=18.911 p95_ms=22.544 p99_ms=28.956 errors=0 deadlock_retries=0 outcomes=map[accepted:120] audits=120 deliveries=120 quarantined=0 pool_wait=0 pool_wait_ms=0.000 mysql_waits=0 mysql_wait_ms=0
+    audit_quarantine_load_test.go:132: guard=true unique=true round=3 operations=120 workers=12 throughput=366.48 mean_ms=32.490 p95_ms=92.898 p99_ms=131.171 errors=0 deadlock_retries=0 outcomes=map[accepted:120] audits=120 deliveries=120 quarantined=0 pool_wait=0 pool_wait_ms=0.000 mysql_waits=0 mysql_wait_ms=0
+--- PASS: TestAuditQuarantineLoad (4.01s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	6.257s

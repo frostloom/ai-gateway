@@ -1,0 +1,11 @@
+{
+  "head": "63b9d1ed4d64bb583d15fa884c37468e5c53044c",
+  "source_sha256": {
+    "internal/billing/consumer/consumer.go": "2efcbb63fcfb49bfd890083a98a90c0f3cd691221d4b1b8f771671806061ed1a",
+    "internal/pkg/kafka/consumer.go": "3054c3f076edcefc618674f1653aa59ace6e55408736af8cef23407b267e9438"
+  },
+  "test_sha256": "24c7b277ecab8277a28f5e00fc616ecc0c03740769817924edab32490547f5f7",
+  "returncode": 0,
+  "stdout": "=== RUN   TestIsolatedAuditFailureDoesNotSkip\ntime=2026-11-04T05:36:28.094+08:00 level=ERROR msg=\"handle message\" event_id=same-key err=\"injected audit write failure\"\n--- PASS: TestIsolatedAuditFailureDoesNotSkip (14.25s)\nPASS\nok  \tgithub.com/frostloom/ai-gateway/internal/billing/consumer\t14.915s\n",
+  "stderr": ""
+}

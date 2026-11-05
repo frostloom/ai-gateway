@@ -1,0 +1,45 @@
+head=63b9d1ed4d64bb583d15fa884c37468e5c53044c
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestRechargeAndRefundAmountBounds
+=== RUN   TestRechargeAndRefundAmountBounds/recharge_multiplication
+    recharge_amount_bounds_test.go:33: overflowing order created: &{ID:1 TenantID:1 OrderNo:amount-bounds-1793734033889554000-huge AmountMoney:9223372036854775807 AmountCent:-100 Status:pending_payment PaidAt:<nil> CreatedAt:2026-11-04 03:27:13.900287 +0800 CST m=+0.441390084 UpdatedAt:2026-11-04 03:27:13.900287 +0800 CST m=+0.441390209}
+=== RUN   TestRechargeAndRefundAmountBounds/recharge_pushes_balance_over_safe_maximum
+    recharge_amount_bounds_test.go:43: unsafe payment accepted: &{ID:2 TenantID:1 OrderNo:amount-bounds-1793734033889554000-normal AmountMoney:1 AmountCent:100 Status:paid PaidAt:2026-11-04 03:27:13.911852 +0800 CST m=+0.452955626 CreatedAt:2026-11-04 03:27:13.904 +0800 CST UpdatedAt:2026-11-04 03:27:13.904 +0800 CST}
+    recharge_amount_bounds_test.go:58: status=paid topups=1 balance=100000000000049
+=== RUN   TestRechargeAndRefundAmountBounds/refund_multiplication
+    recharge_amount_bounds_test.go:64: overflowing refund accepted: &{OrderNo: AmountCent:84 RefundCent:84 BalanceAfter:99999999999965}
+    recharge_amount_bounds_test.go:71: unexpected refund rows=1
+--- FAIL: TestRechargeAndRefundAmountBounds (0.47s)
+    --- FAIL: TestRechargeAndRefundAmountBounds/recharge_multiplication (0.00s)
+    --- FAIL: TestRechargeAndRefundAmountBounds/recharge_pushes_balance_over_safe_maximum (0.02s)
+    --- FAIL: TestRechargeAndRefundAmountBounds/refund_multiplication (0.02s)
+=== RUN   TestRechargeAndRefundAmountBounds
+=== RUN   TestRechargeAndRefundAmountBounds/recharge_multiplication
+    recharge_amount_bounds_test.go:33: overflowing order created: &{ID:3 TenantID:2 OrderNo:amount-bounds-1793734034324724000-huge AmountMoney:9223372036854775807 AmountCent:-100 Status:pending_payment PaidAt:<nil> CreatedAt:2026-11-04 03:27:14.331937 +0800 CST m=+0.873034959 UpdatedAt:2026-11-04 03:27:14.331937 +0800 CST m=+0.873035043}
+=== RUN   TestRechargeAndRefundAmountBounds/recharge_pushes_balance_over_safe_maximum
+    recharge_amount_bounds_test.go:43: unsafe payment accepted: &{ID:4 TenantID:2 OrderNo:amount-bounds-1793734034324724000-normal AmountMoney:1 AmountCent:100 Status:paid PaidAt:2026-11-04 03:27:14.343152 +0800 CST m=+0.884250126 CreatedAt:2026-11-04 03:27:14.335 +0800 CST UpdatedAt:2026-11-04 03:27:14.335 +0800 CST}
+    recharge_amount_bounds_test.go:58: status=paid topups=1 balance=100000000000049
+=== RUN   TestRechargeAndRefundAmountBounds/refund_multiplication
+    recharge_amount_bounds_test.go:64: overflowing refund accepted: &{OrderNo: AmountCent:84 RefundCent:84 BalanceAfter:99999999999965}
+    recharge_amount_bounds_test.go:71: unexpected refund rows=1
+--- FAIL: TestRechargeAndRefundAmountBounds (0.43s)
+    --- FAIL: TestRechargeAndRefundAmountBounds/recharge_multiplication (0.00s)
+    --- FAIL: TestRechargeAndRefundAmountBounds/recharge_pushes_balance_over_safe_maximum (0.02s)
+    --- FAIL: TestRechargeAndRefundAmountBounds/refund_multiplication (0.02s)
+=== RUN   TestRechargeAndRefundAmountBounds
+=== RUN   TestRechargeAndRefundAmountBounds/recharge_multiplication
+    recharge_amount_bounds_test.go:33: overflowing order created: &{ID:5 TenantID:3 OrderNo:amount-bounds-1793734034723072000-huge AmountMoney:9223372036854775807 AmountCent:-100 Status:pending_payment PaidAt:<nil> CreatedAt:2026-11-04 03:27:14.728757 +0800 CST m=+1.269850376 UpdatedAt:2026-11-04 03:27:14.728757 +0800 CST m=+1.269850543}
+=== RUN   TestRechargeAndRefundAmountBounds/recharge_pushes_balance_over_safe_maximum
+    recharge_amount_bounds_test.go:43: unsafe payment accepted: &{ID:6 TenantID:3 OrderNo:amount-bounds-1793734034723072000-normal AmountMoney:1 AmountCent:100 Status:paid PaidAt:2026-11-04 03:27:14.741872 +0800 CST m=+1.282965501 CreatedAt:2026-11-04 03:27:14.732 +0800 CST UpdatedAt:2026-11-04 03:27:14.732 +0800 CST}
+    recharge_amount_bounds_test.go:58: status=paid topups=1 balance=100000000000049
+=== RUN   TestRechargeAndRefundAmountBounds/refund_multiplication
+    recharge_amount_bounds_test.go:64: overflowing refund accepted: &{OrderNo: AmountCent:84 RefundCent:84 BalanceAfter:99999999999965}
+    recharge_amount_bounds_test.go:71: unexpected refund rows=1
+--- FAIL: TestRechargeAndRefundAmountBounds (0.40s)
+    --- FAIL: TestRechargeAndRefundAmountBounds/recharge_multiplication (0.00s)
+    --- FAIL: TestRechargeAndRefundAmountBounds/recharge_pushes_balance_over_safe_maximum (0.02s)
+    --- FAIL: TestRechargeAndRefundAmountBounds/refund_multiplication (0.02s)
+FAIL
+FAIL	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	2.499s
+FAIL

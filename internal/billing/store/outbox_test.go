@@ -56,15 +56,15 @@ func TestOutboxLifecycle(t *testing.T) {
 		t.Fatalf("after sent polled = %d, want 1", len(rows2))
 	}
 
-	// 投递失败 bump 到上限（attempts >= max）→ 不再被 poll。
+	// 超过尝试上限但未发送的行仍可被 poll，以便 relay 转投 DLQ 或恢复旧卡住的行。
 	for i := 0; i < 5; i++ {
 		if err := s.BumpOutboxAttempt(ctx, rows[1].ID, "boom"); err != nil {
 			t.Fatalf("bump: %v", err)
 		}
 	}
 	rows3, _ := s.PollOutbox(ctx, 10, 5)
-	if len(rows3) != 0 {
-		t.Fatalf("after attempts max polled = %d, want 0", len(rows3))
+	if len(rows3) != 1 || rows3[0].ID != rows[1].ID {
+		t.Fatalf("after attempts max polled = %+v, want unsent row %d", rows3, rows[1].ID)
 	}
 
 	// DLQ：topic 改 dlq + sent_at 置位。

@@ -1,0 +1,28 @@
+head=42d8ef8e5ca2471b18800e50f8e7a57fbcfdd47f
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+# github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02.test
+ld: warning: '/private/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-3862772579/000013.o' has malformed LC_DYSYMTAB, expected 98 undefined symbols to start at index 1626, found 95 undefined symbols starting at index 1626
+=== RUN   TestReserveCommittedAckLostRedisCrashOneWinner
+redis: 2026/11/05 01:56:04 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:62167: connect: connection refused
+redis: 2026/11/05 01:56:04 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:62167: connect: connection refused
+redis: 2026/11/05 01:56:05 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:62167: connect: connection refused
+redis: 2026/11/05 01:56:05 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:62167: connect: connection refused
+    reserve_ack_crash_onewinner_test.go:230: confirmed committed before injected lost ack; Redis killed; one competitor reserved 240 and seven insufficient; initial=rpc error: code = Unavailable desc = reserve insert: injected commit acknowledgement loss; cash recovery: dial tcp 127.0.0.1:62167: connect: connection refused retry=duplicate bills=1 events=1 balance=160
+--- PASS: TestReserveCommittedAckLostRedisCrashOneWinner (3.11s)
+=== RUN   TestReserveCommittedAckLostRedisCrashOneWinner
+redis: 2026/11/05 01:56:07 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:62167: connect: connection refused
+redis: 2026/11/05 01:56:07 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:62167: connect: connection refused
+redis: 2026/11/05 01:56:08 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:62167: connect: connection refused
+redis: 2026/11/05 01:56:08 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:62167: connect: connection refused
+    reserve_ack_crash_onewinner_test.go:230: confirmed committed before injected lost ack; Redis killed; one competitor reserved 240 and seven insufficient; initial=rpc error: code = Unavailable desc = reserve insert: injected commit acknowledgement loss; cash recovery: dial tcp 127.0.0.1:62167: connect: connection refused retry=duplicate bills=1 events=1 balance=160
+--- PASS: TestReserveCommittedAckLostRedisCrashOneWinner (2.64s)
+=== RUN   TestReserveCommittedAckLostRedisCrashOneWinner
+redis: 2026/11/05 01:56:09 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:62167: connect: connection refused
+redis: 2026/11/05 01:56:10 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:62167: connect: connection refused
+redis: 2026/11/05 01:56:10 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:62167: connect: connection refused
+redis: 2026/11/05 01:56:11 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:62167: connect: connection refused
+    reserve_ack_crash_onewinner_test.go:230: confirmed committed before injected lost ack; Redis killed; one competitor reserved 240 and seven insufficient; initial=rpc error: code = Unavailable desc = reserve insert: injected commit acknowledgement loss; cash recovery: dial tcp 127.0.0.1:62167: connect: connection refused retry=duplicate bills=1 events=1 balance=160
+--- PASS: TestReserveCommittedAckLostRedisCrashOneWinner (2.63s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	10.535s

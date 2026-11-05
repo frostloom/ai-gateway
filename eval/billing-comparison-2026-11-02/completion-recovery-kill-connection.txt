@@ -1,0 +1,41 @@
+head=63b9d1ed4d64bb583d15fa884c37468e5c53044c
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestSettledUsageCannotIdentifyCompletedStream
+    execution_attempt_ambiguity_test.go:223: recovery outbox failure rolled back state and event; retry follows
+[mysql] 2026/11/03 22:11:10 packets.go:58 unexpected EOF
+--- FAIL: TestSettledUsageCannotIdentifyCompletedStream (0.59s)
+panic: runtime error: invalid memory address or nil pointer dereference [recovered, repanicked]
+[signal SIGSEGV: segmentation violation code=0x2 addr=0x0 pc=0x1052e5f80]
+
+goroutine 5 [running]:
+testing.tRunner.func1.2({0x106190f80, 0x106fe4690})
+	/Users/a1/开发工具/go/src/testing/testing.go:1872 +0x2b4
+testing.tRunner.func1()
+	/Users/a1/开发工具/go/src/testing/testing.go:1875 +0x460
+panic({0x106190f80?, 0x106fe4690?})
+	/Users/a1/开发工具/go/src/runtime/panic.go:783 +0x120
+gorm.io/gorm/callbacks.ConvertToCreateValues(0xc000149a40)
+	/Users/a1/go/pkg/mod/gorm.io/gorm@v1.31.2/callbacks/create.go:265 +0x380
+gorm.io/gorm/callbacks.RegisterDefaultCallbacks.Create.func3(0xc00016d6e0)
+	/Users/a1/go/pkg/mod/gorm.io/gorm@v1.31.2/callbacks/create.go:70 +0x344
+gorm.io/gorm.(*processor).Execute(0xc0000fcd20, 0xc00016d6e0)
+	/Users/a1/go/pkg/mod/gorm.io/gorm@v1.31.2/callbacks.go:136 +0x848
+gorm.io/gorm.(*DB).Create(0xc00016d6e0, {0x1060d5500, 0xc00027c680})
+	/Users/a1/go/pkg/mod/gorm.io/gorm@v1.31.2/finisher_api.go:26 +0x130
+github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02.experimentalRecoverCompletedAttemptsHook.func1(0xc000511a40)
+	/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/completion_recovery_test.go:70 +0x8d0
+gorm.io/gorm.(*DB).Transaction(0xc000511920, 0xc00050f3f8, {0x0, 0x0, 0x0})
+	/Users/a1/go/pkg/mod/gorm.io/gorm@v1.31.2/finisher_api.go:669 +0x320
+github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02.experimentalRecoverCompletedAttemptsHook({0x106391658, 0x10703f420}, 0xc0001c28d0, 0x0)
+	/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/completion_recovery_test.go:37 +0x2b0
+github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02.experimentalRecoverCompletedAttempts(...)
+	/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/completion_recovery_test.go:13
+github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02.TestSettledUsageCannotIdentifyCompletedStream(0xc000003c00)
+	/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/execution_attempt_ambiguity_test.go:245 +0x47e8
+testing.tRunner(0xc000003c00, 0x106372950)
+	/Users/a1/开发工具/go/src/testing/testing.go:1934 +0x168
+created by testing.(*T).Run in goroutine 1
+	/Users/a1/开发工具/go/src/testing/testing.go:1997 +0x6e4
+FAIL	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	1.732s
+FAIL

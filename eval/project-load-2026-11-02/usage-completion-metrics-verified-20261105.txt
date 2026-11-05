@@ -1,0 +1,30 @@
+# github.com/frostloom/ai-gateway/internal/gateway/handler.test
+ld: warning: '/private/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-3228281001/000013.o' has malformed LC_DYSYMTAB, expected 98 undefined symbols to start at index 1626, found 95 undefined symbols starting at index 1626
+=== RUN   TestChatLeavesPendingWhenActualUsageCannotBeRecorded
+--- PASS: TestChatLeavesPendingWhenActualUsageCannotBeRecorded (0.00s)
+=== RUN   TestUsageMustBeAcknowledgedBeforeSettle
+=== RUN   TestUsageMustBeAcknowledgedBeforeSettle/accepted
+=== RUN   TestUsageMustBeAcknowledgedBeforeSettle/rejected
+=== RUN   TestUsageMustBeAcknowledgedBeforeSettle/missing
+--- PASS: TestUsageMustBeAcknowledgedBeforeSettle (0.00s)
+    --- PASS: TestUsageMustBeAcknowledgedBeforeSettle/accepted (0.00s)
+    --- PASS: TestUsageMustBeAcknowledgedBeforeSettle/rejected (0.00s)
+    --- PASS: TestUsageMustBeAcknowledgedBeforeSettle/missing (0.00s)
+=== RUN   TestUsageCompletionMetricsObserveOutcomes
+=== RUN   TestUsageCompletionMetricsObserveOutcomes/usage_error
+=== RUN   TestUsageCompletionMetricsObserveOutcomes/usage_nil
+=== RUN   TestUsageCompletionMetricsObserveOutcomes/usage_refused
+=== RUN   TestUsageCompletionMetricsObserveOutcomes/settle_error
+=== RUN   TestUsageCompletionMetricsObserveOutcomes/settle_nil
+=== RUN   TestUsageCompletionMetricsObserveOutcomes/settle_refused
+=== RUN   TestUsageCompletionMetricsObserveOutcomes/settled
+--- PASS: TestUsageCompletionMetricsObserveOutcomes (0.03s)
+    --- PASS: TestUsageCompletionMetricsObserveOutcomes/usage_error (0.01s)
+    --- PASS: TestUsageCompletionMetricsObserveOutcomes/usage_nil (0.00s)
+    --- PASS: TestUsageCompletionMetricsObserveOutcomes/usage_refused (0.00s)
+    --- PASS: TestUsageCompletionMetricsObserveOutcomes/settle_error (0.00s)
+    --- PASS: TestUsageCompletionMetricsObserveOutcomes/settle_nil (0.01s)
+    --- PASS: TestUsageCompletionMetricsObserveOutcomes/settle_refused (0.00s)
+    --- PASS: TestUsageCompletionMetricsObserveOutcomes/settled (0.00s)
+PASS
+ok  	github.com/frostloom/ai-gateway/internal/gateway/handler	1.882s

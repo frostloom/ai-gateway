@@ -1,0 +1,10 @@
+head=63b9d1ed4d64bb583d15fa884c37468e5c53044c
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestConcurrentRateRejectionCleanupRedisStall
+    idempotency_rate_concurrent_stall_test.go:153: requests=64 status429=64 downstream_initial=1 mean_ms=1269.91 p95_ms=2084.63 p99_ms=2085.48 max_ms=2085.48 redis_pool_waits=129 redis_pool_wait_ms=21796.92 redis_pool_timeouts=0 keys_remaining_after_resume=44 retained_retry=409 released_retry=204
+--- PASS: TestConcurrentRateRejectionCleanupRedisStall (4.19s)
+=== RUN   TestConcurrentRateRejectionCleanupRedisStall
+    idempotency_rate_concurrent_stall_test.go:153: requests=64 status429=64 downstream_initial=1 mean_ms=1226.13 p95_ms=2072.14 p99_ms=2072.80 max_ms=2072.80 redis_pool_waits=128 redis_pool_wait_ms=20526.88 redis_pool_timeouts=0 keys_remaining_after_resume=44 retained_retry=409 released_retry=204
+--- PASS: TestConcurrentRateRejectionCleanupRedisStall (4.20s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/project-load-2026-11-02	10.519s

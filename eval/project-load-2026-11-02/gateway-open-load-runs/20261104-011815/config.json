@@ -1,0 +1,67 @@
+{
+  "head": "63b9d1ed4d64bb583d15fa884c37468e5c53044c",
+  "branch": "codex/billing-mysql-comparison",
+  "git_status": " M AGENTS.md\n M internal/billing/server/service.go\n M internal/billing/store/cash.go\n M internal/billing/store/mysql.go\n M internal/billing/store/subscription_reserve_test.go\n M internal/gateway/client/billing.go\n M internal/gateway/handler/chat.go\n M internal/gateway/handler/chat_stream_test.go\n M internal/gateway/middleware/apikey.go\n D internal/gateway/web/dist/assets/Empty-B78rz8Qh.css\n D internal/gateway/web/dist/assets/Empty-Cq6uueat.js\n D internal/gateway/web/dist/assets/dashboard-H93iLNlz.js\n D internal/gateway/web/dist/assets/dashboard-jpnukakx.css\n D internal/gateway/web/dist/assets/portal-CI_uKi_F.js\n D internal/gateway/web/dist/assets/portal-fDtFA2oX.css\n M internal/gateway/web/dist/dashboard.html\n M internal/gateway/web/dist/portal.html\n M internal/pkg/controlplane/token.go\n M scripts/schema.sql\n?? .tmp/\n?? eval/billing-comparison-2026-11-02/\n?? eval/project-load-2026-11-02/\n?? integrations/\n?? internal/billing/store/reserve_fingerprint_test.go\n?? internal/gateway/client/billing_replay_test.go\n?? internal/gateway/middleware/apikey_status_test.go\n?? internal/gateway/web/dist/assets/Empty-D1TVEnQN.css\n?? internal/gateway/web/dist/assets/Empty-DFn-BFPp.js\n?? internal/gateway/web/dist/assets/dashboard-BGbdPy4C.js\n?? internal/gateway/web/dist/assets/dashboard-Bt40SYhT.css\n?? internal/gateway/web/dist/assets/portal-CX4r-21-.js\n?? internal/gateway/web/dist/assets/portal-DUpRuSip.css\n?? plate_sim.py\n?? scripts/migrations/\n",
+  "source_sha256": {
+    "internal/billing/store/mysql.go": "23940a523da6de45770b5ebc3be8ed7cd7e5c9fedd4c9ee0a1d2dcf5330e2fee",
+    "internal/billing/server/service.go": "5b4089901a1ec7e95fc241cdd7a1f615f019bff6b4e88f8c597f282acb13aa0b",
+    "internal/gateway/client/billing.go": "f5a35ffad3cf137787852e29e1caa5c3347fac2437c80ff7293c32258f3a813f",
+    "internal/gateway/handler/chat.go": "49ffed74ec07ea171262136331d0eeb40ceb0fbb8e4b2dc2b90aeba5f659d89e",
+    "internal/gateway/middleware/apikey.go": "9c75083f75687a0a287e67c2f5af0bf9b447cf565cb6c2c30be839852167aa8d",
+    "cmd/gateway/main.go": "91d5d30ed17c5ecb42b8a5ac810de8a3d072a332bdb5fdfdab4e0814d9dd85cb",
+    "cmd/router/main.go": "eb54d320360e452ac16be25d9cdf6804aedbde91da5c77b0e18adcd2d841021c",
+    "cmd/billing/main.go": "3056db14e70ca305c182f56cc44eb132b3d65b8c194352d500ac56d5107ffa91",
+    "cmd/mock-provider/main.go": "3a42cc4753dbf60f5482fc81eb65ffbb2103b626d0ea60981d1ddd48d78e2d8e",
+    "eval/project-load-2026-11-02/pending-fixture/main.go": "3cfb79ab805d0524c616e7538d9cc69c85661ace82b2e0c5befbb23a2b42830f"
+  },
+  "images": {
+    "docker.m.daocloud.io/library/mysql:8.0.40": "sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff",
+    "docker.m.daocloud.io/library/redis:7-alpine": "sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499"
+  },
+  "gomaxprocs": 8,
+  "mysql_pool_max": 100,
+  "rate_per_min": 600,
+  "mock_latency_ms": 15,
+  "mock_completion_tokens": 100,
+  "kafka": "disabled",
+  "isolated_agents": "disabled",
+  "reconciler": "sweep every 5s, grace 600s; rebuild disabled",
+  "ports": {
+    "gateway": 56330,
+    "billing": 56331,
+    "admin": 56332,
+    "router": 56333,
+    "mock": 56334,
+    "reconciler": 56335
+  },
+  "mysql_port": "56312",
+  "redis_port": "56314",
+  "quick": false,
+  "started": "2026-11-04T01:18:50.018575",
+  "go_version": "go version go1.25.12 darwin/arm64",
+  "sdkroot": "/Library/Developer/CommandLineTools/SDKs/MacOSX26.5.sdk",
+  "binary_sha256": {
+    "billing": "75e21c58a189bf067dcc69e6f6b4662521e22f4d0cd9efb625fb558ba11bdc6c",
+    "router": "c32a77098fc478813b952ad27f663a2997819a169f42c0cbaaf6c131f455e7a7",
+    "reconciler": "b3efc5b307caf434fe70e7291b3f72382b84ebde210dd506ed0ed524d9096f0d",
+    "gateway": "2e8d249efa438cfa9d85a2b4b18beb445b6818dd0c8d4d6cd9c0709445b681b0",
+    "mock": "d3fda769609d803485d7bedc569062f9c4ca754ff8ca14de33d282ce0c7818b8",
+    "seed": "1483b49fcfb18a6a57dd1e6581c5c19baf59d50c55db96f54612d6729b4b4dec",
+    "load": "8ed14d0aab6d0a2707c9ce58961351dabc79d8678c4b725e10d39ac65dfaa5f8",
+    "inject": "9784322e71d1857679defb2009e859c362d5635ba3860ab280f2f68691289e3d"
+  },
+  "offered_rates": [
+    100,
+    140
+  ],
+  "duration_seconds": 15,
+  "repetitions": 2,
+  "max_inflight": 2000,
+  "recovery_wait_seconds": 0,
+  "router_candidate": "current",
+  "router_candidate_sha256": null,
+  "load_source_sha256": "fcecacfb8cb4b35ed45c5f1d2730d46cf4db52ccef4be5e3d692c07c7b0ff443",
+  "runner_sha256": "8fe43ab3334e7bacb3019fb6bd4f43246b8776be3aeb7fffda78c63a1c4cec1f",
+  "billing_candidate": "current",
+  "billing_candidate_sha256": null
+}

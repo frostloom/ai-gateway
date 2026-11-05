@@ -12,6 +12,8 @@ import (
 // 滑动窗口限流：ZSET 记录窗口内每个请求，Lua 原子「清理过期 + 计数 + 放行」。
 // member 是「毫秒:序号」。同一毫秒的多次请求不能共用一个 member，否则 ZADD 会覆盖，突发被少计。
 // key: rate:win:{tenant_id}；序号 key: rate:seq:{tenant_id}。超过 limit 返回 429。
+const rateLimitRejectedKey = "gateway.rate_limit_rejected"
+
 const rateLimitLua = `
 local window = tonumber(ARGV[2])
 local now = tonumber(ARGV[1])
@@ -42,6 +44,8 @@ func RateLimit(rdb *goredis.Client, window time.Duration, limit int) gin.Handler
 			return
 		}
 		if !allowed {
+			// No downstream billing or upstream call has started.
+			c.Set(rateLimitRejectedKey, true)
 			abort(c, http.StatusTooManyRequests, "rate limit exceeded")
 			return
 		}

@@ -1,0 +1,13 @@
+head=60d4bc9afe98b75a8d9b1fb5d8d355dcce958d91
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestRouterEventLoad
+    router_event_load_test.go:113: providers=1 round=1 operations=600 concurrency=16 rps=88.32 mean_ms=179.038 p95_ms=762.181 p99_ms=974.070 errors=0 timeout=not_configured db_wait_count=0 db_wait_ms=0.000 open_connections=16 mysql_row_waits=599 mysql_row_wait_ms=95056
+    router_event_load_test.go:113: providers=1 round=2 operations=600 concurrency=16 rps=157.90 mean_ms=100.585 p95_ms=212.721 p99_ms=299.305 errors=0 timeout=not_configured db_wait_count=0 db_wait_ms=0.000 open_connections=16 mysql_row_waits=599 mysql_row_wait_ms=53394
+    router_event_load_test.go:113: providers=1 round=3 operations=600 concurrency=16 rps=174.15 mean_ms=91.180 p95_ms=182.647 p99_ms=209.651 errors=0 timeout=not_configured db_wait_count=0 db_wait_ms=0.000 open_connections=16 mysql_row_waits=599 mysql_row_wait_ms=48632
+    router_event_load_test.go:113: providers=32 round=1 operations=600 concurrency=16 rps=691.74 mean_ms=22.778 p95_ms=36.649 p99_ms=42.402 errors=0 timeout=not_configured db_wait_count=0 db_wait_ms=0.000 open_connections=16 mysql_row_waits=0 mysql_row_wait_ms=0
+    router_event_load_test.go:113: providers=32 round=2 operations=600 concurrency=16 rps=496.06 mean_ms=32.088 p95_ms=110.113 p99_ms=170.781 errors=0 timeout=not_configured db_wait_count=0 db_wait_ms=0.000 open_connections=16 mysql_row_waits=0 mysql_row_wait_ms=0
+    router_event_load_test.go:113: providers=32 round=3 operations=600 concurrency=16 rps=574.76 mean_ms=27.739 p95_ms=72.188 p99_ms=80.118 errors=0 timeout=not_configured db_wait_count=0 db_wait_ms=0.000 open_connections=16 mysql_row_waits=0 mysql_row_wait_ms=0
+--- PASS: TestRouterEventLoad (17.86s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	20.047s

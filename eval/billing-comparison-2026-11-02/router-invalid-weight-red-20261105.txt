@@ -1,0 +1,32 @@
+head=42d8ef8e5ca2471b18800e50f8e7a57fbcfdd47f
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+# github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02.test
+ld: warning: '/private/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-910924571/000013.o' has malformed LC_DYSYMTAB, expected 98 undefined symbols to start at index 1626, found 95 undefined symbols starting at index 1626
+=== RUN   TestRouterInvalidWeightsFailClosed
+--- FAIL: TestRouterInvalidWeightsFailClosed (0.18s)
+panic: invalid argument to Intn [recovered, repanicked]
+
+goroutine 69 [running]:
+testing.tRunner.func1.2({0x1024d00a0, 0x102798c60})
+	/Users/a1/开发工具/go/src/testing/testing.go:1872 +0x2b4
+testing.tRunner.func1()
+	/Users/a1/开发工具/go/src/testing/testing.go:1875 +0x460
+panic({0x1024d00a0?, 0x102798c60?})
+	/Users/a1/开发工具/go/src/runtime/panic.go:783 +0x120
+math/rand.(*Rand).Intn(0xc00038f5c0, 0xffffffffffffffff)
+	/Users/a1/开发工具/go/src/math/rand/rand.go:180 +0x98
+math/rand.Intn(0xffffffffffffffff)
+	/Users/a1/开发工具/go/src/math/rand/rand.go:464 +0x30
+github.com/frostloom/ai-gateway/internal/router.pickWeighted({0xc000238680, 0x2, 0x2?})
+	/Users/a1/项目/ai-gateway/internal/router/registry.go:429 +0xc0
+github.com/frostloom/ai-gateway/internal/router.(*Registry).RouteExcludeContext(0xc000212690, {0x1027afaf8, 0x10455c4c0}, {0xc0001a0420, 0x1f}, 0x0)
+	/Users/a1/项目/ai-gateway/internal/router/registry.go:126 +0x3bc
+github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02.TestRouterInvalidWeightsFailClosed(0xc000504700)
+	/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/router_invalid_weight_test.go:32 +0x8c4
+testing.tRunner(0xc000504700, 0x10278c558)
+	/Users/a1/开发工具/go/src/testing/testing.go:1934 +0x168
+created by testing.(*T).Run in goroutine 1
+	/Users/a1/开发工具/go/src/testing/testing.go:1997 +0x6e4
+FAIL	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	1.426s
+FAIL

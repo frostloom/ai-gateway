@@ -1,0 +1,98 @@
+=== RUN   TestReserveConflictingTenant
+
+2026/11/02 16:45:52 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:1033 [35;1mrecord not found
+[0m[33m[1.982ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id = 'comparison-conflict' AND phase = 'reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/02 16:45:52 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:1033 [35;1mrecord not found
+[0m[33m[0.763ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id = 'comparison-conflict' AND phase = 'reserve' ORDER BY `bills`.`id` LIMIT 1
+    conflict_test.go:85: first code=RESERVE_OK bill=1; conflicting second status=FailedPrecondition; stored tenant=1 pre=100; balances=900,1000
+
+2026/11/02 16:45:52 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:1033 [35;1mrecord not found
+[0m[33m[0.979ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id = 'comparison-race' AND phase = 'reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/02 16:45:52 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:1033 [35;1mrecord not found
+[0m[33m[1.019ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id = 'comparison-race' AND phase = 'reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/02 16:45:52 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:1033 [35;1mrecord not found
+[0m[33m[1.017ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id = 'comparison-race' AND phase = 'reserve' ORDER BY `bills`.`id` LIMIT 1
+--- PASS: TestReserveConflictingTenant (0.41s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	1.920s
+=== RUN   TestTerminalSQLFailureRebuildAndRetry
+=== RUN   TestTerminalSQLFailureRebuildAndRetry/settle
+=== RUN   TestTerminalSQLFailureRebuildAndRetry/reverse
+--- PASS: TestTerminalSQLFailureRebuildAndRetry (1.47s)
+    --- PASS: TestTerminalSQLFailureRebuildAndRetry/settle (0.67s)
+    --- PASS: TestTerminalSQLFailureRebuildAndRetry/reverse (0.80s)
+=== RUN   TestReserveOutboxIdempotent
+--- PASS: TestReserveOutboxIdempotent (1.00s)
+=== RUN   TestFullFlowOutboxEvents
+--- PASS: TestFullFlowOutboxEvents (0.63s)
+=== RUN   TestReserveConcurrentNoOversell
+--- PASS: TestReserveConcurrentNoOversell (2.26s)
+=== RUN   TestReserveIdempotentSameRequest
+--- PASS: TestReserveIdempotentSameRequest (0.51s)
+=== RUN   TestReserveConcurrentSameRequest
+--- PASS: TestReserveConcurrentSameRequest (0.47s)
+=== RUN   TestReserveInsufficient
+--- PASS: TestReserveInsufficient (0.48s)
+=== RUN   TestSettleFullFlow
+--- PASS: TestSettleFullFlow (0.53s)
+=== RUN   TestSettleIdempotent
+--- PASS: TestSettleIdempotent (0.56s)
+=== RUN   TestReverseIdempotent
+--- PASS: TestReverseIdempotent (0.59s)
+=== RUN   TestReverseAfterSettled
+--- PASS: TestReverseAfterSettled (0.55s)
+=== RUN   TestRebuildBalance
+--- PASS: TestRebuildBalance (0.49s)
+=== RUN   TestRebuildBalanceIdempotent
+--- PASS: TestRebuildBalanceIdempotent (0.54s)
+=== RUN   TestReserveSubscriptionAllowance
+--- PASS: TestReserveSubscriptionAllowance (0.55s)
+PASS
+ok  	github.com/frostloom/ai-gateway/internal/billing/store	11.245s
+=== RUN   TestRedisOutageValue
+
+2026/11/02 16:46:07 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:1033 [35;1mrecord not found
+[0m[33m[0.908ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id = 'outage-before' AND phase = 'reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/02 16:46:07 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:1033 [35;1mrecord not found
+[0m[33m[0.840ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id = 'outage-before' AND phase = 'reserve' ORDER BY `bills`.`id` LIMIT 1
+redis: 2026/11/02 16:46:08 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:56889: connect: connection refused
+redis: 2026/11/02 16:46:08 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:56889: connect: connection refused
+
+2026/11/02 16:46:08 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/mysql_candidate_test_impl_test.go:92 [35;1mrecord not found
+[0m[33m[1.003ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id='outage-candidate' AND phase='reserve' ORDER BY `bills`.`id` LIMIT 1
+redis: 2026/11/02 16:46:09 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:56889: connect: connection refused
+redis: 2026/11/02 16:46:09 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:56889: connect: connection refused
+redis: 2026/11/02 16:46:10 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:56889: connect: connection refused
+redis: 2026/11/02 16:46:10 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:56889: connect: connection refused
+redis: 2026/11/02 16:46:11 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:56889: connect: connection refused
+redis: 2026/11/02 16:46:11 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:56889: connect: connection refused
+redis: 2026/11/02 16:46:12 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:56889: connect: connection refused
+redis: 2026/11/02 16:46:12 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:56889: connect: connection refused
+redis: 2026/11/02 16:46:13 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:56889: connect: connection refused
+redis: 2026/11/02 16:46:13 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:56889: connect: connection refused
+redis: 2026/11/02 16:46:14 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:56889: connect: connection refused
+redis: 2026/11/02 16:46:14 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:56889: connect: connection refused
+redis: 2026/11/02 16:46:15 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:56889: connect: connection refused
+redis: 2026/11/02 16:46:15 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:56889: connect: connection refused
+redis: 2026/11/02 16:46:16 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:56889: connect: connection refused
+redis: 2026/11/02 16:46:16 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:56889: connect: connection refused
+redis: 2026/11/02 16:46:17 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:56889: connect: connection refused
+redis: 2026/11/02 16:46:17 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:56889: connect: connection refused
+redis: 2026/11/02 16:46:18 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:56889: connect: connection refused
+redis: 2026/11/02 16:46:18 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:56889: connect: connection refused
+    redis_value_test.go:82: Redis restart timeout
+--- FAIL: TestRedisOutageValue (11.58s)
+=== RUN   TestBalanceReadValue
+redis: 2026/11/02 16:46:19 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:56889: connect: connection refused
+redis: 2026/11/02 16:46:19 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:56889: connect: connection refused
+redis: 2026/11/02 16:46:20 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:56889: connect: connection refused
+redis: 2026/11/02 16:46:20 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:56889: connect: connection refused
+    redis_value_test.go:131: dial tcp 127.0.0.1:56889: connect: connection refused
+--- FAIL: TestBalanceReadValue (1.87s)
+FAIL
+FAIL	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	13.951s
+FAIL

@@ -1,0 +1,19 @@
+head=63b9d1ed4d64bb583d15fa884c37468e5c53044c
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestRouterBatchLoad
+BATCH_LOAD {"elapsed_s":2.069056375,"errors":0,"mean_ms":64.9120806772909,"mode":"baseline","p95_ms":126.956,"p99_ms":145.361,"rep":1,"requests":1004,"sql_updates":1004,"success_per_s":485.24535731898555,"workers":32}
+BATCH_LOAD {"elapsed_s":2.001853334,"errors":0,"mean_ms":3.590152755199279,"mode":"batch","p95_ms":6.851,"p99_ms":14.112,"rep":1,"requests":17839,"sql_updates":1102,"success_per_s":8911.242245881735,"workers":32}
+BATCH_LOAD {"elapsed_s":2.300545458,"errors":0,"mean_ms":233.02714671163594,"mode":"baseline","p95_ms":369.056,"p99_ms":385.013,"rep":1,"requests":1186,"sql_updates":1186,"success_per_s":515.5299130802917,"workers":128}
+BATCH_LOAD {"elapsed_s":2.003312708,"errors":0,"mean_ms":2.773387025552809,"mode":"batch","p95_ms":5.271,"p99_ms":10.614,"rep":1,"requests":92397,"sql_updates":1106,"success_per_s":46122.10546612276,"workers":128}
+BATCH_LOAD {"elapsed_s":2.003260708,"errors":0,"mean_ms":3.080606991729165,"mode":"batch","p95_ms":4.43,"p99_ms":8.86,"rep":2,"requests":20796,"sql_updates":1288,"success_per_s":10381.075172568102,"workers":32}
+BATCH_LOAD {"elapsed_s":2.065740542,"errors":0,"mean_ms":61.52121866164,"mode":"baseline","p95_ms":126.684,"p99_ms":151.243,"rep":2,"requests":1061,"sql_updates":1061,"success_per_s":513.6172614266289,"workers":32}
+BATCH_LOAD {"elapsed_s":2.002331083,"errors":0,"mean_ms":2.8901049221774384,"mode":"batch","p95_ms":5.852,"p99_ms":10.739,"rep":2,"requests":88599,"sql_updates":1056,"success_per_s":44247.927204554115,"workers":128}
+BATCH_LOAD {"elapsed_s":2.232494042,"errors":0,"mean_ms":204.12530780780776,"mode":"baseline","p95_ms":250.333,"p99_ms":263.046,"rep":2,"requests":1332,"sql_updates":1332,"success_per_s":596.6421298068575,"workers":128}
+BATCH_LOAD {"elapsed_s":2.049479834,"errors":0,"mean_ms":52.170501610306005,"mode":"baseline","p95_ms":85.139,"p99_ms":104.467,"rep":3,"requests":1242,"sql_updates":1242,"success_per_s":606.0074265653886,"workers":32}
+BATCH_LOAD {"elapsed_s":2.002728875,"errors":0,"mean_ms":3.383895456946625,"mode":"batch","p95_ms":5.822,"p99_ms":12.656,"rep":3,"requests":18930,"sql_updates":1169,"success_per_s":9452.103195945583,"workers":32}
+BATCH_LOAD {"elapsed_s":2.23233225,"errors":0,"mean_ms":237.5955013123357,"mode":"baseline","p95_ms":518.891,"p99_ms":546.113,"rep":3,"requests":1143,"sql_updates":1143,"success_per_s":512.0205560798578,"workers":128}
+BATCH_LOAD {"elapsed_s":2.002732708,"errors":0,"mean_ms":2.7796112027252806,"mode":"batch","p95_ms":5.466,"p99_ms":16.459,"rep":3,"requests":92174,"sql_updates":1081,"success_per_s":46024.11476669207,"workers":128}
+--- PASS: TestRouterBatchLoad (25.04s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	25.929s

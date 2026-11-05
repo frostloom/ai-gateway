@@ -1,0 +1,8 @@
+=== RUN   TestConcurrentConservativeStreamMemory
+    chat_stream_test.go:380: streams=8 bytes_each=4217856 retained_heap_delta=336736 baseline=false
+--- PASS: TestConcurrentConservativeStreamMemory (1.64s)
+=== RUN   TestConcurrentConservativeStreamMemory
+    chat_stream_test.go:380: streams=8 bytes_each=4217856 retained_heap_delta=219032 baseline=false
+--- PASS: TestConcurrentConservativeStreamMemory (1.39s)
+PASS
+ok  	github.com/frostloom/ai-gateway/internal/gateway/handler	4.986s

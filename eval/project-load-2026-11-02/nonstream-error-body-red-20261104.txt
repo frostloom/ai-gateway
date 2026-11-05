@@ -1,0 +1,27 @@
+=== RUN   TestConservativeNonstreamDoesNotWaitForErrorBody
+=== RUN   TestConservativeNonstreamDoesNotWaitForErrorBody/status=400
+    chat_stream_test.go:353: handler waited for error response body in conservative mode
+=== RUN   TestConservativeNonstreamDoesNotWaitForErrorBody/status=503
+    chat_stream_test.go:353: handler waited for error response body in conservative mode
+--- FAIL: TestConservativeNonstreamDoesNotWaitForErrorBody (1.01s)
+    --- FAIL: TestConservativeNonstreamDoesNotWaitForErrorBody/status=400 (0.50s)
+    --- FAIL: TestConservativeNonstreamDoesNotWaitForErrorBody/status=503 (0.50s)
+=== RUN   TestConservativeNonstreamDoesNotWaitForErrorBody
+=== RUN   TestConservativeNonstreamDoesNotWaitForErrorBody/status=400
+    chat_stream_test.go:353: handler waited for error response body in conservative mode
+=== RUN   TestConservativeNonstreamDoesNotWaitForErrorBody/status=503
+    chat_stream_test.go:353: handler waited for error response body in conservative mode
+--- FAIL: TestConservativeNonstreamDoesNotWaitForErrorBody (1.01s)
+    --- FAIL: TestConservativeNonstreamDoesNotWaitForErrorBody/status=400 (0.50s)
+    --- FAIL: TestConservativeNonstreamDoesNotWaitForErrorBody/status=503 (0.50s)
+=== RUN   TestConservativeNonstreamDoesNotWaitForErrorBody
+=== RUN   TestConservativeNonstreamDoesNotWaitForErrorBody/status=400
+    chat_stream_test.go:353: handler waited for error response body in conservative mode
+=== RUN   TestConservativeNonstreamDoesNotWaitForErrorBody/status=503
+    chat_stream_test.go:353: handler waited for error response body in conservative mode
+--- FAIL: TestConservativeNonstreamDoesNotWaitForErrorBody (1.00s)
+    --- FAIL: TestConservativeNonstreamDoesNotWaitForErrorBody/status=400 (0.50s)
+    --- FAIL: TestConservativeNonstreamDoesNotWaitForErrorBody/status=503 (0.50s)
+FAIL
+FAIL	github.com/frostloom/ai-gateway/internal/gateway/handler	4.239s
+FAIL

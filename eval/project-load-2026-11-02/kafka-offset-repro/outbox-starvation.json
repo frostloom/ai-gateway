@@ -1,0 +1,18 @@
+{
+  "head": "63b9d1ed4d64bb583d15fa884c37468e5c53044c",
+  "mysql_image_id": "sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff",
+  "source_sha256": {
+    "internal/billing/outbox/relay.go": "f9b4e2e60e4e832c57cf8c1c6ccdfa6a69f84c406d9a3664eadf25259718bb9e",
+    "internal/billing/store/outbox.go": "1c805d5785714bf18b94ae70e5579d10788e8df0463c076909cec23bfb451316"
+  },
+  "test_sha256": "949ed5c77e03d500d3f3442de540670737e59a95271cfe3478e6981419d2d901",
+  "returncode": 0,
+  "stdout": "=== RUN   TestIsolatedDLQMarkFailureRemainsRetryable\ntime=2026-11-04T05:49:28.652+08:00 level=ERROR msg=\"mark dlq\" id=1 err=\"injected dlq mark failure\"\n--- PASS: TestIsolatedDLQMarkFailureRemainsRetryable (0.08s)\n=== RUN   TestIsolatedTwoRelaysDoNotStrandUnsent\n--- PASS: TestIsolatedTwoRelaysDoNotStrandUnsent (0.06s)\n=== RUN   TestIsolatedObserveHeadOfLineStarvation\ntime=2026-11-04T05:49:28.784+08:00 level=ERROR msg=\"publish dlq\" event_key=blocked err=\"broker unreachable\"\ntime=2026-11-04T05:49:28.786+08:00 level=ERROR msg=\"publish dlq\" event_key=blocked err=\"broker unreachable\"\ntime=2026-11-04T05:49:28.787+08:00 level=ERROR msg=\"publish dlq\" event_key=blocked err=\"broker unreachable\"\n    isolated_dlq_test.go:74: observed: three failed flushes left later deliverable row unsent\n--- PASS: TestIsolatedObserveHeadOfLineStarvation (0.07s)\nPASS\nok  \tgithub.com/frostloom/ai-gateway/internal/billing/outbox\t2.271s\n",
+  "stderr": "# github.com/frostloom/ai-gateway/internal/billing/outbox.test\nld: warning: '/private/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-526689731/000013.o' has malformed LC_DYSYMTAB, expected 98 undefined symbols to start at index 1626, found 95 undefined symbols starting at index 1626\n",
+  "lifecycle": {
+    "returncode": 0,
+    "stdout": "=== RUN   TestOutboxLifecycle\n--- PASS: TestOutboxLifecycle (0.54s)\nPASS\nok  \tgithub.com/frostloom/ai-gateway/internal/billing/store\t1.187s\n",
+    "stderr": "",
+    "test_sha256": "a5c88fe51f03a0a1b526a8d642148e6c0394de6b415940006967600114dfff5d"
+  }
+}

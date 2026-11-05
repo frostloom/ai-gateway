@@ -1,0 +1,14 @@
+=== RUN   TestRouterReportRecordsTransportAndHTTPOutcome
+=== RUN   TestRouterReportRecordsTransportAndHTTPOutcome/success
+    router_report_metrics_test.go:57: outcome http_200 before=0 after=0
+=== RUN   TestRouterReportRecordsTransportAndHTTPOutcome/unavailable
+    router_report_metrics_test.go:57: outcome http_error before=0 after=0
+=== RUN   TestRouterReportRecordsTransportAndHTTPOutcome/canceled
+    router_report_metrics_test.go:57: outcome transport_error before=0 after=0
+--- FAIL: TestRouterReportRecordsTransportAndHTTPOutcome (0.00s)
+    --- FAIL: TestRouterReportRecordsTransportAndHTTPOutcome/success (0.00s)
+    --- FAIL: TestRouterReportRecordsTransportAndHTTPOutcome/unavailable (0.00s)
+    --- FAIL: TestRouterReportRecordsTransportAndHTTPOutcome/canceled (0.00s)
+FAIL
+FAIL	github.com/frostloom/ai-gateway/internal/gateway/client	0.873s
+FAIL

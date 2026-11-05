@@ -1,0 +1,10 @@
+head=63b9d1ed4d64bb583d15fa884c37468e5c53044c
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestRateRejectionCleanupRedisStall
+    idempotency_rate_redis_stall_test.go:84: status=429 handler_calls=1 middleware_elapsed_ms=1061 context_budget_ms=1000 key_exists_after_unpause=0
+--- PASS: TestRateRejectionCleanupRedisStall (4.17s)
+=== RUN   TestRateRejectionCleanupRedisStall
+    idempotency_rate_redis_stall_test.go:84: status=429 handler_calls=1 middleware_elapsed_ms=1052 context_budget_ms=1000 key_exists_after_unpause=0
+--- PASS: TestRateRejectionCleanupRedisStall (4.15s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/project-load-2026-11-02	10.451s

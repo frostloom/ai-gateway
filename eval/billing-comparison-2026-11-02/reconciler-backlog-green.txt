@@ -1,0 +1,14 @@
+head=63b9d1ed4d64bb583d15fa884c37468e5c53044c
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestReconcilerBacklogBoundedWithoutStarvingUsage
+    reconciler_pending_backlog_test.go:95: backlog=1025 scanned=1026 held=1025 settled=1 max_bill_rows=256 elapsed_ms=48 live=960 ledger=960
+--- PASS: TestReconcilerBacklogBoundedWithoutStarvingUsage (0.56s)
+=== RUN   TestReconcilerBacklogBoundedWithoutStarvingUsage
+    reconciler_pending_backlog_test.go:95: backlog=1025 scanned=2051 held=2050 settled=1 max_bill_rows=256 elapsed_ms=62 live=960 ledger=960
+--- PASS: TestReconcilerBacklogBoundedWithoutStarvingUsage (0.65s)
+=== RUN   TestReconcilerBacklogBoundedWithoutStarvingUsage
+    reconciler_pending_backlog_test.go:95: backlog=1025 scanned=3076 held=3075 settled=1 max_bill_rows=256 elapsed_ms=76 live=960 ledger=960
+--- PASS: TestReconcilerBacklogBoundedWithoutStarvingUsage (0.74s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	4.770s

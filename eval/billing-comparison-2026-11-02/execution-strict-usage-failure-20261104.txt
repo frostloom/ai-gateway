@@ -1,0 +1,37 @@
+head=63b9d1ed4d64bb583d15fa884c37468e5c53044c
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+current_source_sha256=be5ced15d64432b55979cf62b24e005c89ca340c509a01020d94f63147eaa6c9
+current_candidate_sha256=ce0ee7bbd2b77d13470e23cbce6e02aeabd715a1f713a173fd99c2e0ba139471
+=== RUN   TestRealGatewayWithExecutionBridge
+=== RUN   TestRealGatewayWithExecutionBridge/usage_failed
+    execution_gateway_integration_test.go:423: mode=usage_failed HTTP=200 usage_unavailable=true sweep_reverse=0 pending_preserved=true memory_replay_settled=true
+    execution_gateway_integration_test.go:531: mode=usage_failed status=200 calls=1 bill=settled balance=960 ledger=960 expected_events=3
+=== RUN   TestRealGatewayWithExecutionBridge/stream_usage_failed
+    execution_gateway_integration_test.go:423: mode=stream_usage_failed HTTP=200 usage_unavailable=true sweep_reverse=0 pending_preserved=true memory_replay_settled=true
+    execution_gateway_integration_test.go:531: mode=stream_usage_failed status=200 calls=1 bill=settled balance=958 ledger=958 expected_events=3
+--- PASS: TestRealGatewayWithExecutionBridge (0.68s)
+    --- PASS: TestRealGatewayWithExecutionBridge/usage_failed (0.13s)
+    --- PASS: TestRealGatewayWithExecutionBridge/stream_usage_failed (0.12s)
+=== RUN   TestRealGatewayWithExecutionBridge
+=== RUN   TestRealGatewayWithExecutionBridge/usage_failed
+    execution_gateway_integration_test.go:423: mode=usage_failed HTTP=200 usage_unavailable=true sweep_reverse=0 pending_preserved=true memory_replay_settled=true
+    execution_gateway_integration_test.go:531: mode=usage_failed status=200 calls=1 bill=settled balance=960 ledger=960 expected_events=3
+=== RUN   TestRealGatewayWithExecutionBridge/stream_usage_failed
+    execution_gateway_integration_test.go:423: mode=stream_usage_failed HTTP=200 usage_unavailable=true sweep_reverse=0 pending_preserved=true memory_replay_settled=true
+    execution_gateway_integration_test.go:531: mode=stream_usage_failed status=200 calls=1 bill=settled balance=958 ledger=958 expected_events=3
+--- PASS: TestRealGatewayWithExecutionBridge (0.66s)
+    --- PASS: TestRealGatewayWithExecutionBridge/usage_failed (0.11s)
+    --- PASS: TestRealGatewayWithExecutionBridge/stream_usage_failed (0.08s)
+=== RUN   TestRealGatewayWithExecutionBridge
+=== RUN   TestRealGatewayWithExecutionBridge/usage_failed
+    execution_gateway_integration_test.go:423: mode=usage_failed HTTP=200 usage_unavailable=true sweep_reverse=0 pending_preserved=true memory_replay_settled=true
+    execution_gateway_integration_test.go:531: mode=usage_failed status=200 calls=1 bill=settled balance=960 ledger=960 expected_events=3
+=== RUN   TestRealGatewayWithExecutionBridge/stream_usage_failed
+    execution_gateway_integration_test.go:423: mode=stream_usage_failed HTTP=200 usage_unavailable=true sweep_reverse=0 pending_preserved=true memory_replay_settled=true
+    execution_gateway_integration_test.go:531: mode=stream_usage_failed status=200 calls=1 bill=settled balance=958 ledger=958 expected_events=3
+--- PASS: TestRealGatewayWithExecutionBridge (1.30s)
+    --- PASS: TestRealGatewayWithExecutionBridge/usage_failed (0.16s)
+    --- PASS: TestRealGatewayWithExecutionBridge/stream_usage_failed (0.37s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	5.059s

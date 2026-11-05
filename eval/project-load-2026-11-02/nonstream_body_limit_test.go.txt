@@ -1,0 +1,55 @@
+
+// This limit is an experimental policy, not a production default.
+func TestExperimentalNonStreamBodyLimit(t *testing.T) {
+ const limit = 1 << 20
+ const prefix = `{"choices":[{"message":{"content":"`
+ const suffix = `"}}],"usage":{"prompt_tokens":1,"completion_tokens":2}}`
+ for _, size := range []int{limit-1, limit, limit+1} {
+  t.Run(fmt.Sprintf("bytes=%d", size), func(t *testing.T) {
+   payload := prefix + strings.Repeat("x", size-len(prefix)-len(suffix)) + suffix
+   upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { _, _ = io.WriteString(w, payload) }))
+   defer upstream.Close()
+   bill := &fakeBilling{}
+   route := &fakeRouter{next: []*client.RouteResult{{ProviderID: 2, BaseURL: upstream.URL}}}
+   c, w := newGinCtx()
+   c.Request = httptest.NewRequest(http.MethodPost, "/v1/chat/completions", strings.NewReader(`{"model":"m","messages":[{"role":"user","content":"hi"}]}`))
+   c.Set("request_id", "body-limit")
+   Chat(bill, route, slog.New(slog.DiscardHandler), 10*time.Second, true)(c)
+   wantStatus, wantReports := http.StatusOK, 1
+   if size > limit { wantStatus, wantReports = http.StatusBadGateway, 0 }
+   if w.Code != wantStatus || len(bill.reports) != wantReports || len(bill.settles) != wantReports || len(bill.reverses) != 0 {
+    t.Fatalf("size=%d status=%d reports=%d settles=%d reverses=%d", size, w.Code, len(bill.reports), len(bill.settles), len(bill.reverses))
+   }
+  })
+ }
+}
+
+func TestExperimentalCompressedNonStreamBodyLimit(t *testing.T) {
+ const limit = 1 << 20
+ const prefix = `{"choices":[{"message":{"content":"`
+ const suffix = `"}}],"usage":{"prompt_tokens":1,"completion_tokens":2}}`
+ for _, size := range []int{limit, limit+1} {
+  t.Run(fmt.Sprintf("expanded=%d", size), func(t *testing.T) {
+   payload := prefix + strings.Repeat("x", size-len(prefix)-len(suffix)) + suffix
+   upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+    if r.Header.Get("Accept-Encoding") != "gzip" { t.Errorf("expected transparent gzip request, got %q", r.Header.Get("Accept-Encoding")) }
+    w.Header().Set("Content-Encoding", "gzip")
+    zw := gzip.NewWriter(w)
+    _, _ = io.WriteString(zw, payload)
+    _ = zw.Close()
+   }))
+   defer upstream.Close()
+   bill := &fakeBilling{}
+   route := &fakeRouter{next: []*client.RouteResult{{ProviderID: 2, BaseURL: upstream.URL}}}
+   c, w := newGinCtx()
+   c.Request = httptest.NewRequest(http.MethodPost, "/v1/chat/completions", strings.NewReader(`{"model":"m","messages":[{"role":"user","content":"hi"}]}`))
+   c.Set("request_id", "compressed-body-limit")
+   Chat(bill, route, slog.New(slog.DiscardHandler), 10*time.Second, true)(c)
+   wantStatus, wantReports := http.StatusOK, 1
+   if size > limit { wantStatus, wantReports = http.StatusBadGateway, 0 }
+   if w.Code != wantStatus || len(bill.reports) != wantReports || len(bill.settles) != wantReports || len(bill.reverses) != 0 {
+    t.Fatalf("expanded=%d status=%d reports=%d settles=%d reverses=%d", size, w.Code, len(bill.reports), len(bill.settles), len(bill.reverses))
+   }
+  })
+ }
+}

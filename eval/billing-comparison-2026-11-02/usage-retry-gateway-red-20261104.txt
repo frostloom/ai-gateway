@@ -1,0 +1,36 @@
+head=42d8ef8e5ca2471b18800e50f8e7a57fbcfdd47f
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestUsageRetryRealGatewayStore
+=== RUN   TestUsageRetryRealGatewayStore/before
+    usage_retry_gateway_test.go:140: mode=before calls=1 bill=pending usage=0 settle=0 reverse=0 balance=998/998
+=== RUN   TestUsageRetryRealGatewayStore/after
+    usage_retry_gateway_test.go:140: mode=after calls=1 bill=pending usage=1 settle=0 reverse=0 balance=998/998
+=== RUN   TestUsageRetryRealGatewayStore/permanent
+--- FAIL: TestUsageRetryRealGatewayStore (1.35s)
+    --- FAIL: TestUsageRetryRealGatewayStore/before (0.42s)
+    --- FAIL: TestUsageRetryRealGatewayStore/after (0.49s)
+    --- PASS: TestUsageRetryRealGatewayStore/permanent (0.44s)
+=== RUN   TestUsageRetryRealGatewayStore
+=== RUN   TestUsageRetryRealGatewayStore/before
+    usage_retry_gateway_test.go:140: mode=before calls=1 bill=pending usage=0 settle=0 reverse=0 balance=998/998
+=== RUN   TestUsageRetryRealGatewayStore/after
+    usage_retry_gateway_test.go:140: mode=after calls=1 bill=pending usage=1 settle=0 reverse=0 balance=998/998
+=== RUN   TestUsageRetryRealGatewayStore/permanent
+--- FAIL: TestUsageRetryRealGatewayStore (1.24s)
+    --- FAIL: TestUsageRetryRealGatewayStore/before (0.43s)
+    --- FAIL: TestUsageRetryRealGatewayStore/after (0.41s)
+    --- PASS: TestUsageRetryRealGatewayStore/permanent (0.40s)
+=== RUN   TestUsageRetryRealGatewayStore
+=== RUN   TestUsageRetryRealGatewayStore/before
+    usage_retry_gateway_test.go:140: mode=before calls=1 bill=pending usage=0 settle=0 reverse=0 balance=998/998
+=== RUN   TestUsageRetryRealGatewayStore/after
+    usage_retry_gateway_test.go:140: mode=after calls=1 bill=pending usage=1 settle=0 reverse=0 balance=998/998
+=== RUN   TestUsageRetryRealGatewayStore/permanent
+--- FAIL: TestUsageRetryRealGatewayStore (1.30s)
+    --- FAIL: TestUsageRetryRealGatewayStore/before (0.44s)
+    --- FAIL: TestUsageRetryRealGatewayStore/after (0.43s)
+    --- PASS: TestUsageRetryRealGatewayStore/permanent (0.43s)
+FAIL
+FAIL	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	5.050s
+FAIL

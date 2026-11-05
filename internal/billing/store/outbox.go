@@ -71,8 +71,8 @@ func newBillingEvent(row *Bill, amount int64, phase string) *BillingEvent {
 	}
 }
 
-// insertOutbox 在事务内落 outbox 行。撞 uk_event_key（并发/重试另一事务已落同一事件）
-// → 吞掉 no-op：同一事件只入一行，重复投递由唯一索引收敛。
+// insertOutbox 在事务内落 outbox 行。唯一键冲突不能证明已有事件与本次账务一致；
+// 返回错误使调用方事务回滚，正常请求重放由各账务操作的状态检查处理。
 func insertOutbox(tx *gorm.DB, ev *BillingEvent) error {
 	payload, err := json.Marshal(ev)
 	if err != nil {
@@ -84,18 +84,16 @@ func insertOutbox(tx *gorm.DB, ev *BillingEvent) error {
 		Payload:   string(payload),
 		CreatedAt: time.Now(),
 	}).Error
-	if err != nil && isDupKey(err) {
-		return nil
-	}
 	return err
 }
 
-// PollOutbox 取一批待投递事件：sent_at IS NULL 且 attempts < maxAttempts（按 id 升序，
-// 先入先投）。relay 单写者轮询，无需加锁——撞 uk_event_key 由唯一索引兜底。
-func (s *Store) PollOutbox(ctx context.Context, limit int, maxAttempts int) ([]OutboxEvent, error) {
+// PollOutbox 取一批未标记发送的事件（按 id 升序）。即使 attempts 已达上限也必须
+// 返回：并发 relay 或旧版本故障可能让未发送的行跨过上限，relay 会再尝试主 topic/DLQ。
+// 兼容现有接口，maxAttempts 由 relay 使用，而不作为筛选条件。
+func (s *Store) PollOutbox(ctx context.Context, limit int, _ int) ([]OutboxEvent, error) {
 	var rows []OutboxEvent
 	err := s.db.WithContext(ctx).
-		Where("sent_at IS NULL AND attempts < ?", maxAttempts).
+		Where("sent_at IS NULL").
 		Order("id ASC").
 		Limit(limit).
 		Find(&rows).Error

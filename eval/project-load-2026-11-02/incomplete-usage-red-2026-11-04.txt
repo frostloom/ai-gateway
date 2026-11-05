@@ -1,0 +1,50 @@
+=== RUN   TestTruncatedNonStreamMustNotSettleOrReverse
+--- PASS: TestTruncatedNonStreamMustNotSettleOrReverse (0.00s)
+=== RUN   TestCompleteNonStreamWithoutUsageStillSucceeds
+--- PASS: TestCompleteNonStreamWithoutUsageStillSucceeds (0.00s)
+=== RUN   TestMalformedNonStreamMustNotSettleOrReverse
+=== RUN   TestMalformedNonStreamMustNotSettleOrReverse/{"choices":[
+=== RUN   TestMalformedNonStreamMustNotSettleOrReverse/null
+=== RUN   TestMalformedNonStreamMustNotSettleOrReverse/[]
+=== RUN   TestMalformedNonStreamMustNotSettleOrReverse/{"usage":{"prompt_tokens":-1,"completion_tokens":0}}
+=== RUN   TestMalformedNonStreamMustNotSettleOrReverse/{"usage":{"prompt_tokens":1,"completion_tokens":-1}}
+=== RUN   TestMalformedNonStreamMustNotSettleOrReverse/{"usage":{}}
+    chat_stream_test.go:364: status=200 reports=1 settles=1 reverses=0
+=== RUN   TestMalformedNonStreamMustNotSettleOrReverse/{"usage":{"prompt_tokens":1}}
+    chat_stream_test.go:364: status=200 reports=1 settles=1 reverses=0
+=== RUN   TestMalformedNonStreamMustNotSettleOrReverse/{"usage":{"completion_tokens":1}}
+    chat_stream_test.go:364: status=200 reports=1 settles=1 reverses=0
+=== RUN   TestMalformedNonStreamMustNotSettleOrReverse/{"usage":{"prompt_tokens":null,"completion_tokens":1}}
+    chat_stream_test.go:364: status=200 reports=1 settles=1 reverses=0
+=== RUN   TestMalformedNonStreamMustNotSettleOrReverse/{"usage":{"prompt_tokens":1,"completion_tokens":null}}
+    chat_stream_test.go:364: status=200 reports=1 settles=1 reverses=0
+--- FAIL: TestMalformedNonStreamMustNotSettleOrReverse (0.01s)
+    --- PASS: TestMalformedNonStreamMustNotSettleOrReverse/{"choices":[ (0.00s)
+    --- PASS: TestMalformedNonStreamMustNotSettleOrReverse/null (0.00s)
+    --- PASS: TestMalformedNonStreamMustNotSettleOrReverse/[] (0.00s)
+    --- PASS: TestMalformedNonStreamMustNotSettleOrReverse/{"usage":{"prompt_tokens":-1,"completion_tokens":0}} (0.00s)
+    --- PASS: TestMalformedNonStreamMustNotSettleOrReverse/{"usage":{"prompt_tokens":1,"completion_tokens":-1}} (0.00s)
+    --- FAIL: TestMalformedNonStreamMustNotSettleOrReverse/{"usage":{}} (0.00s)
+    --- FAIL: TestMalformedNonStreamMustNotSettleOrReverse/{"usage":{"prompt_tokens":1}} (0.00s)
+    --- FAIL: TestMalformedNonStreamMustNotSettleOrReverse/{"usage":{"completion_tokens":1}} (0.00s)
+    --- FAIL: TestMalformedNonStreamMustNotSettleOrReverse/{"usage":{"prompt_tokens":null,"completion_tokens":1}} (0.00s)
+    --- FAIL: TestMalformedNonStreamMustNotSettleOrReverse/{"usage":{"prompt_tokens":1,"completion_tokens":null}} (0.00s)
+=== RUN   TestNonStreamErrorResponseCompleteness
+=== RUN   TestNonStreamErrorResponseCompleteness/truncated_400
+=== RUN   TestNonStreamErrorResponseCompleteness/complete_400
+--- PASS: TestNonStreamErrorResponseCompleteness (0.00s)
+    --- PASS: TestNonStreamErrorResponseCompleteness/truncated_400 (0.00s)
+    --- PASS: TestNonStreamErrorResponseCompleteness/complete_400 (0.00s)
+=== RUN   TestStreamContentContainingDoneDoesNotEndStream
+--- PASS: TestStreamContentContainingDoneDoesNotEndStream (0.00s)
+=== RUN   TestStreamDoneTextInCommentDoesNotEndStream
+--- PASS: TestStreamDoneTextInCommentDoesNotEndStream (0.00s)
+=== RUN   TestStreamFinalLineWithoutNewline
+=== RUN   TestStreamFinalLineWithoutNewline/usage
+=== RUN   TestStreamFinalLineWithoutNewline/done
+--- PASS: TestStreamFinalLineWithoutNewline (0.00s)
+    --- PASS: TestStreamFinalLineWithoutNewline/usage (0.00s)
+    --- PASS: TestStreamFinalLineWithoutNewline/done (0.00s)
+FAIL
+FAIL	github.com/frostloom/ai-gateway/internal/gateway/handler	1.002s
+FAIL

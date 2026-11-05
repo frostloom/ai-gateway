@@ -1,0 +1,23 @@
+package client
+
+import (
+ "context"
+ "net/http"
+ "net/http/httptest"
+ "testing"
+ "github.com/prometheus/client_golang/prometheus"
+)
+func reportDurationCount(t *testing.T) uint64 {
+ t.Helper()
+ families, err := prometheus.DefaultGatherer.Gather(); if err != nil { t.Fatal(err) }
+ for _, f := range families { if f.GetName() == "gateway_router_report_duration_seconds" { return f.Metric[0].GetHistogram().GetSampleCount() } }
+ return 0
+}
+func TestRouterReportDurationIncludesFailure(t *testing.T) {
+ server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(200) })); defer server.Close()
+ before := reportDurationCount(t)
+ router := NewRouter(server.URL, "")
+ router.Report(context.Background(), 1, true)
+ ctx, cancel := context.WithCancel(context.Background()); cancel(); router.Report(ctx, 1, false)
+ if got := reportDurationCount(t); got != before+2 { t.Fatalf("samples=%d want=%d", got, before+2) }
+}

@@ -1,0 +1,51 @@
+=== RUN   TestAuthBulkheadLimitsAndReleases
+--- PASS: TestAuthBulkheadLimitsAndReleases (0.00s)
+=== RUN   TestAuthBulkheadWaitsAndHonorsCancellation
+--- PASS: TestAuthBulkheadWaitsAndHonorsCancellation (0.00s)
+=== RUN   TestAuthBulkheadWaitExpires
+--- PASS: TestAuthBulkheadWaitExpires (0.03s)
+=== RUN   TestAuthBulkheadBoundedQueue
+--- PASS: TestAuthBulkheadBoundedQueue (0.00s)
+=== RUN   TestAuthBulkheadQueueSlotReleasedOnAdmission
+--- PASS: TestAuthBulkheadQueueSlotReleasedOnAdmission (0.00s)
+=== RUN   TestFenceActualStoreMultiInstance
+    auth_fence_integration_test.go:14: disposable services required
+--- SKIP: TestFenceActualStoreMultiInstance (0.00s)
+=== RUN   TestGuardedActualStoreMultiInstance
+    auth_fence_integration_test.go:48: disposable services required
+--- SKIP: TestGuardedActualStoreMultiInstance (0.00s)
+=== RUN   TestFenceBlocksStaleRefill
+=== RUN   TestFenceBlocksStaleRefill/within_fence
+=== RUN   TestFenceBlocksStaleRefill/fence_expired
+--- PASS: TestFenceBlocksStaleRefill (0.01s)
+    --- PASS: TestFenceBlocksStaleRefill/within_fence (0.01s)
+    --- PASS: TestFenceBlocksStaleRefill/fence_expired (0.00s)
+=== RUN   TestFenceRedisFailure
+redis: 2026/11/03 16:33:20 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:55935: connect: connection refused
+--- PASS: TestFenceRedisFailure (0.44s)
+=== RUN   TestFenceStateLossAllowsStaleRefill
+--- PASS: TestFenceStateLossAllowsStaleRefill (0.00s)
+=== RUN   TestFenceBestEffortDeleteFailure
+--- PASS: TestFenceBestEffortDeleteFailure (0.00s)
+=== RUN   TestGuardedCacheMutationFailureDoesNotCommit
+--- PASS: TestGuardedCacheMutationFailureDoesNotCommit (0.00s)
+=== RUN   TestGuardedCacheFenceRejectsExistingValue
+--- PASS: TestGuardedCacheFenceRejectsExistingValue (0.00s)
+=== RUN   TestGuardedSlowMutationCanRepublishStale
+--- PASS: TestGuardedSlowMutationCanRepublishStale (0.01s)
+=== RUN   TestGuardedUnavailableSkipsRefill
+--- PASS: TestGuardedUnavailableSkipsRefill (0.00s)
+=== RUN   TestRedisContextTimeoutObservation
+=== RUN   TestRedisContextTimeoutObservation/default
+    redis_timeout_test.go:48: context_enabled=false requested_ms=30 elapsed_ms=301.3 err=i/o timeout
+=== RUN   TestRedisContextTimeoutObservation/enabled
+    redis_timeout_test.go:48: context_enabled=true requested_ms=30 elapsed_ms=30.7 err=i/o timeout
+--- PASS: TestRedisContextTimeoutObservation (0.33s)
+    --- PASS: TestRedisContextTimeoutObservation/default (0.30s)
+    --- PASS: TestRedisContextTimeoutObservation/enabled (0.03s)
+=== RUN   TestGuardedFallbackOnUnresponsiveRedis
+redis: 2026/11/03 16:33:21 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:55935: connect: connection refused
+    redis_timeout_test.go:89: unresponsive Redis fallback calls=1 elapsed_ms=30.9
+--- PASS: TestGuardedFallbackOnUnresponsiveRedis (0.03s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	2.692s

@@ -1,0 +1,50 @@
+# github.com/frostloom/ai-gateway/internal/gateway/handler.test
+/Users/a1/开发工具/go/pkg/tool/darwin_arm64/link: running clang failed: exit status 1
+/usr/bin/clang -arch arm64 -Wl,-S -Wl,-x -o $WORK/b410/handler.test /var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-1463035861/go.o /var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-1463035861/000000.o /var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-1463035861/000001.o /var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-1463035861/000002.o /var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-1463035861/000003.o /var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-1463035861/000004.o /var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-1463035861/000005.o /var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-1463035861/000006.o /var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-1463035861/000007.o /var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-1463035861/000008.o /var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-1463035861/000009.o /var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-1463035861/000010.o /var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-1463035861/000011.o /var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-1463035861/000012.o /var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-1463035861/000013.o -lresolv -O2 -g -O2 -g -framework CoreFoundation -framework CoreFoundation -framework Security
+ld: warning: '/private/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-1463035861/000013.o' has malformed LC_DYSYMTAB, expected 98 undefined symbols to start at index 1626, found 95 undefined symbols starting at index 1626
+ld: multiple errors: tapi error: malformed file
+/Library/Developer/CommandLineTools/SDKs/MacOSX27.0.sdk/usr/lib/libresolv.9.tbd:4:20: error: unknown architecture
+                   arm64e.x1-macos, arm64e.x1-maccatalyst ]
+                   ^~~~~~~~~~~~~~~
+ in '/Library/Developer/CommandLineTools/SDKs/MacOSX27.0.sdk/usr/lib/libresolv.tbd'; tapi error: malformed file
+/Library/Developer/CommandLineTools/SDKs/MacOSX27.0.sdk/usr/lib/libSystem.B.tbd:4:20: error: unknown architecture
+                   arm64e.x1-macos, arm64e.x1-maccatalyst ]
+                   ^~~~~~~~~~~~~~~
+ in '/Library/Developer/CommandLineTools/SDKs/MacOSX27.0.sdk/usr/lib/libSystem.tbd'; tapi error: malformed file
+/Library/Developer/CommandLineTools/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation.tbd:4:54: error: unknown architecture
+                   arm64e-macos, arm64e-maccatalyst, arm64e.x1-macos, arm64e.x1-maccatalyst ]
+                                                     ^~~~~~~~~~~~~~~
+ in '/Library/Developer/CommandLineTools/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/CoreFoundation.framework/CoreFoundation.tbd'; tapi error: malformed file
+/Library/Developer/CommandLineTools/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/Security.framework/Versions/A/Security.tbd:4:20: error: unknown architecture
+                   arm64e.x1-macos, arm64e.x1-maccatalyst ]
+                   ^~~~~~~~~~~~~~~
+ in '/Library/Developer/CommandLineTools/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/Security.framework/Security.tbd'
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+
+# github.com/frostloom/ai-gateway/internal/billing/admin.test
+/Users/a1/开发工具/go/pkg/tool/darwin_arm64/link: running clang failed: exit status 1
+/usr/bin/clang -arch arm64 -Wl,-S -Wl,-x -o $WORK/b001/admin.test /var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-852396050/go.o /var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-852396050/000000.o /var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-852396050/000001.o /var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-852396050/000002.o /var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-852396050/000003.o /var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-852396050/000004.o /var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-852396050/000005.o /var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-852396050/000006.o /var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-852396050/000007.o /var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-852396050/000008.o /var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-852396050/000009.o /var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-852396050/000010.o /var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-852396050/000011.o /var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-852396050/000012.o /var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-852396050/000013.o -lresolv -O2 -g -O2 -g -framework CoreFoundation -framework CoreFoundation -framework Security
+ld: warning: '/private/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-852396050/000013.o' has malformed LC_DYSYMTAB, expected 98 undefined symbols to start at index 1626, found 95 undefined symbols starting at index 1626
+ld: multiple errors: tapi error: malformed file
+/Library/Developer/CommandLineTools/SDKs/MacOSX27.0.sdk/usr/lib/libresolv.9.tbd:4:20: error: unknown architecture
+                   arm64e.x1-macos, arm64e.x1-maccatalyst ]
+                   ^~~~~~~~~~~~~~~
+ in '/Library/Developer/CommandLineTools/SDKs/MacOSX27.0.sdk/usr/lib/libresolv.tbd'; tapi error: malformed file
+/Library/Developer/CommandLineTools/SDKs/MacOSX27.0.sdk/usr/lib/libSystem.B.tbd:4:20: error: unknown architecture
+                   arm64e.x1-macos, arm64e.x1-maccatalyst ]
+                   ^~~~~~~~~~~~~~~
+ in '/Library/Developer/CommandLineTools/SDKs/MacOSX27.0.sdk/usr/lib/libSystem.tbd'; tapi error: malformed file
+/Library/Developer/CommandLineTools/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation.tbd:4:54: error: unknown architecture
+                   arm64e-macos, arm64e-maccatalyst, arm64e.x1-macos, arm64e.x1-maccatalyst ]
+                                                     ^~~~~~~~~~~~~~~
+ in '/Library/Developer/CommandLineTools/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/CoreFoundation.framework/CoreFoundation.tbd'; tapi error: malformed file
+/Library/Developer/CommandLineTools/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/Security.framework/Versions/A/Security.tbd:4:20: error: unknown architecture
+                   arm64e.x1-macos, arm64e.x1-maccatalyst ]
+                   ^~~~~~~~~~~~~~~
+ in '/Library/Developer/CommandLineTools/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/Security.framework/Security.tbd'
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+
+FAIL	github.com/frostloom/ai-gateway/internal/billing/admin [build failed]
+ok  	github.com/frostloom/ai-gateway/internal/billing/store	45.918s
+FAIL	github.com/frostloom/ai-gateway/internal/gateway/handler [build failed]
+FAIL

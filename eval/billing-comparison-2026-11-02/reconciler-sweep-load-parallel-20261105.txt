@@ -1,0 +1,20 @@
+head=2237f6be387ce3ac51624efbdbf9b6dc0b6f2f15
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+fc93bd6f62c0ea5aa7343c6e255e06c5853a6219693649d4fedcdc65f6a0bf57  /var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T//usage-atomic-overlay.DTcTB7/reconciler.go
+# github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02.test
+ld: warning: '/private/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-1646753853/000013.o' has malformed LC_DYSYMTAB, expected 98 undefined symbols to start at index 1626, found 95 undefined symbols starting at index 1626
+=== RUN   TestReconcilerSweepActualLoad
+    reconciler_sweep_load_test.go:149: accounts=1 n=32 elapsed_ms=645.76 settle_s=49.55 mean_rpc_ms=76.45 p95_rpc_ms=102.41 p99_rpc_ms=102.97 errors=0 pool_waits=0
+    reconciler_sweep_load_test.go:149: accounts=8 n=32 elapsed_ms=200.54 settle_s=159.57 mean_rpc_ms=24.42 p95_rpc_ms=27.41 p99_rpc_ms=28.12 errors=0 pool_waits=0
+--- PASS: TestReconcilerSweepActualLoad (5.22s)
+=== RUN   TestReconcilerSweepActualLoad
+    reconciler_sweep_load_test.go:149: accounts=1 n=32 elapsed_ms=557.15 settle_s=57.43 mean_rpc_ms=66.63 p95_rpc_ms=81.36 p99_rpc_ms=82.09 errors=0 pool_waits=0
+    reconciler_sweep_load_test.go:149: accounts=8 n=32 elapsed_ms=255.16 settle_s=125.41 mean_rpc_ms=31.27 p95_rpc_ms=41.14 p99_rpc_ms=41.63 errors=0 pool_waits=0
+--- PASS: TestReconcilerSweepActualLoad (3.96s)
+=== RUN   TestReconcilerSweepActualLoad
+    reconciler_sweep_load_test.go:149: accounts=1 n=32 elapsed_ms=487.63 settle_s=65.62 mean_rpc_ms=58.10 p95_rpc_ms=74.59 p99_rpc_ms=75.01 errors=0 pool_waits=0
+    reconciler_sweep_load_test.go:149: accounts=8 n=32 elapsed_ms=210.30 settle_s=152.16 mean_rpc_ms=25.61 p95_rpc_ms=34.96 p99_rpc_ms=36.42 errors=0 pool_waits=0
+--- PASS: TestReconcilerSweepActualLoad (4.11s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	15.639s

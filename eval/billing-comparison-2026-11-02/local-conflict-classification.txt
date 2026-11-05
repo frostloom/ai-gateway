@@ -1,0 +1,65 @@
+=== RUN   TestInboxConnectionFailureClassification
+=== RUN   TestInboxConnectionFailureClassification/wrapped_connection
+=== RUN   TestInboxConnectionFailureClassification/deadline
+=== RUN   TestInboxConnectionFailureClassification/socket
+=== RUN   TestInboxConnectionFailureClassification/conflict
+=== RUN   TestInboxConnectionFailureClassification/cancelled
+=== RUN   TestInboxConnectionFailureClassification/not_found
+=== RUN   TestInboxConnectionFailureClassification/mysql_denied
+=== RUN   TestInboxConnectionFailureClassification/unknown
+--- PASS: TestInboxConnectionFailureClassification (0.00s)
+    --- PASS: TestInboxConnectionFailureClassification/wrapped_connection (0.00s)
+    --- PASS: TestInboxConnectionFailureClassification/deadline (0.00s)
+    --- PASS: TestInboxConnectionFailureClassification/socket (0.00s)
+    --- PASS: TestInboxConnectionFailureClassification/conflict (0.00s)
+    --- PASS: TestInboxConnectionFailureClassification/cancelled (0.00s)
+    --- PASS: TestInboxConnectionFailureClassification/not_found (0.00s)
+    --- PASS: TestInboxConnectionFailureClassification/mysql_denied (0.00s)
+    --- PASS: TestInboxConnectionFailureClassification/unknown (0.00s)
+=== RUN   TestLocalUsageJournalSurvivesProcessDeath
+    local_usage_journal_test.go:153: synced file survived worker kill; duplicate writes matched; conflicting values rejected
+--- PASS: TestLocalUsageJournalSurvivesProcessDeath (0.12s)
+=== RUN   TestInboxConnectionFailureClassification
+=== RUN   TestInboxConnectionFailureClassification/wrapped_connection
+=== RUN   TestInboxConnectionFailureClassification/deadline
+=== RUN   TestInboxConnectionFailureClassification/socket
+=== RUN   TestInboxConnectionFailureClassification/conflict
+=== RUN   TestInboxConnectionFailureClassification/cancelled
+=== RUN   TestInboxConnectionFailureClassification/not_found
+=== RUN   TestInboxConnectionFailureClassification/mysql_denied
+=== RUN   TestInboxConnectionFailureClassification/unknown
+--- PASS: TestInboxConnectionFailureClassification (0.00s)
+    --- PASS: TestInboxConnectionFailureClassification/wrapped_connection (0.00s)
+    --- PASS: TestInboxConnectionFailureClassification/deadline (0.00s)
+    --- PASS: TestInboxConnectionFailureClassification/socket (0.00s)
+    --- PASS: TestInboxConnectionFailureClassification/conflict (0.00s)
+    --- PASS: TestInboxConnectionFailureClassification/cancelled (0.00s)
+    --- PASS: TestInboxConnectionFailureClassification/not_found (0.00s)
+    --- PASS: TestInboxConnectionFailureClassification/mysql_denied (0.00s)
+    --- PASS: TestInboxConnectionFailureClassification/unknown (0.00s)
+=== RUN   TestLocalUsageJournalSurvivesProcessDeath
+    local_usage_journal_test.go:153: synced file survived worker kill; duplicate writes matched; conflicting values rejected
+--- PASS: TestLocalUsageJournalSurvivesProcessDeath (0.13s)
+=== RUN   TestInboxConnectionFailureClassification
+=== RUN   TestInboxConnectionFailureClassification/wrapped_connection
+=== RUN   TestInboxConnectionFailureClassification/deadline
+=== RUN   TestInboxConnectionFailureClassification/socket
+=== RUN   TestInboxConnectionFailureClassification/conflict
+=== RUN   TestInboxConnectionFailureClassification/cancelled
+=== RUN   TestInboxConnectionFailureClassification/not_found
+=== RUN   TestInboxConnectionFailureClassification/mysql_denied
+=== RUN   TestInboxConnectionFailureClassification/unknown
+--- PASS: TestInboxConnectionFailureClassification (0.00s)
+    --- PASS: TestInboxConnectionFailureClassification/wrapped_connection (0.00s)
+    --- PASS: TestInboxConnectionFailureClassification/deadline (0.00s)
+    --- PASS: TestInboxConnectionFailureClassification/socket (0.00s)
+    --- PASS: TestInboxConnectionFailureClassification/conflict (0.00s)
+    --- PASS: TestInboxConnectionFailureClassification/cancelled (0.00s)
+    --- PASS: TestInboxConnectionFailureClassification/not_found (0.00s)
+    --- PASS: TestInboxConnectionFailureClassification/mysql_denied (0.00s)
+    --- PASS: TestInboxConnectionFailureClassification/unknown (0.00s)
+=== RUN   TestLocalUsageJournalSurvivesProcessDeath
+    local_usage_journal_test.go:153: synced file survived worker kill; duplicate writes matched; conflicting values rejected
+--- PASS: TestLocalUsageJournalSurvivesProcessDeath (0.11s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	2.269s

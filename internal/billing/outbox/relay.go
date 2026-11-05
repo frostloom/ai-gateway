@@ -42,11 +42,13 @@ type Config struct {
 
 // Stats 最近一轮 flush 统计（/status 观测用）。
 type Stats struct {
-	Polled    int64     `json:"polled"`     // 本轮取到的待投行
-	Sent      int64     `json:"sent"`       // 主 topic 投递成功
-	Failed    int64     `json:"failed"`     // 失败待重试
-	DLQed     int64     `json:"dlqed"`      // 超限改投 DLQ
-	LastRunAt time.Time `json:"last_run_at"` // 本轮结束时间
+	Polled         int64     `json:"polled"`           // 本轮取到的待投行
+	Sent           int64     `json:"sent"`             // 主 topic 发布成功，不代表发送标记已持久化
+	Failed         int64     `json:"failed"`           // 失败待重试
+	DLQed          int64     `json:"dlqed"`            // DLQ 发布成功，不代表标记已持久化
+	MarkSentErrors int64     `json:"mark_sent_errors"` // 发送标记返回错误，提交结果可能未知
+	MarkDLQErrors  int64     `json:"mark_dlq_errors"`  // DLQ 标记返回错误，提交结果可能未知
+	LastRunAt      time.Time `json:"last_run_at"`      // 本轮结束时间
 }
 
 // Relay outbox 轮询投递器。
@@ -112,17 +114,18 @@ func (r *Relay) FlushOnce(ctx context.Context) (Stats, error) {
 			if row.Attempts+1 >= r.cfg.MaxAttempts {
 				if dErr := r.dlqProd.Publish(ctx, row.EventKey, value); dErr != nil {
 					// DLQ 也失败（通常是 broker 宕机）→ 不标终态：attempts/sent_at 都不动，
-					// 该行仍满足 PollOutbox 过滤（attempts < max），下轮继续重试；
+					// 未标记发送的行下轮继续轮询；
 					// 等 broker 恢复后主 topic 或 DLQ 必有一端成功，事件不丢。
 					r.log.Error("publish dlq", "event_key", row.EventKey, "err", dErr)
 					continue
 				}
 				metrics.BillingEventsProduced("dlq")
 				if err := r.st.MarkOutboxDLQ(ctx, row.ID, err.Error()); err != nil {
+					st.MarkDLQErrors++
+					metrics.BillingOutboxMarkError("dlq")
 					r.log.Error("mark dlq", "id", row.ID, "err", err)
-					if bErr := r.st.BumpOutboxAttempt(ctx, row.ID, err.Error()); bErr != nil {
-						r.log.Error("bump attempt fallback", "id", row.ID, "err", bErr)
-					}
+					// 不增加 attempts：否则未标记的行会达到上限并被轮询过滤。
+					// 标记未提交时下轮可能重复投递，由消费者按 event_id 去重。
 				}
 				st.DLQed++
 				continue
@@ -135,6 +138,8 @@ func (r *Relay) FlushOnce(ctx context.Context) (Stats, error) {
 		// 已 produce，标记 sent。若标记失败下轮会重投——由消费端 uk_event_id 幂等吸收
 		//（at-least-once 的正常代价，不丢不重库）。
 		if err := r.st.MarkOutboxSent(ctx, row.ID); err != nil {
+			st.MarkSentErrors++
+			metrics.BillingOutboxMarkError("sent")
 			r.log.Error("mark sent", "id", row.ID, "err", err)
 		}
 		metrics.BillingEventsProduced("ok")
@@ -163,6 +168,7 @@ func (r *Relay) flush(ctx context.Context) {
 	}
 	if st.Polled > 0 {
 		r.log.Info("outbox flush", "polled", st.Polled, "sent", st.Sent,
-			"failed", st.Failed, "dlqed", st.DLQed)
+			"failed", st.Failed, "dlqed", st.DLQed,
+			"mark_sent_errors", st.MarkSentErrors, "mark_dlq_errors", st.MarkDLQErrors)
 	}
 }

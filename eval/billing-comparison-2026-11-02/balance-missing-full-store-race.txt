@@ -1,0 +1,279 @@
+=== RUN   TestReserveConflictingTenant
+
+2026/11/04 03:05:05 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:1110 [35;1mrecord not found
+[0m[33m[2.034ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id = 'comparison-conflict' AND phase = 'reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/04 03:05:05 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:1110 [35;1mrecord not found
+[0m[33m[1.183ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id = 'comparison-conflict' AND phase = 'reserve' ORDER BY `bills`.`id` LIMIT 1
+    conflict_test.go:85: first code=RESERVE_OK bill=1; conflicting second status=FailedPrecondition; stored tenant=1 pre=100; balances=900,1000
+
+2026/11/04 03:05:05 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:1110 [35;1mrecord not found
+[0m[33m[1.204ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id = 'comparison-race' AND phase = 'reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/04 03:05:05 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:1110 [35;1mrecord not found
+[0m[33m[1.189ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id = 'comparison-race' AND phase = 'reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/04 03:05:05 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:1110 [35;1mrecord not found
+[0m[33m[1.191ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id = 'comparison-race' AND phase = 'reserve' ORDER BY `bills`.`id` LIMIT 1
+--- PASS: TestReserveConflictingTenant (0.86s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	2.598s
+=== RUN   TestTerminalSQLFailureRebuildAndRetry
+=== RUN   TestTerminalSQLFailureRebuildAndRetry/settle
+=== RUN   TestTerminalSQLFailureRebuildAndRetry/reverse
+--- PASS: TestTerminalSQLFailureRebuildAndRetry (1.40s)
+    --- PASS: TestTerminalSQLFailureRebuildAndRetry/settle (0.54s)
+    --- PASS: TestTerminalSQLFailureRebuildAndRetry/reverse (0.86s)
+=== RUN   TestReserveOutboxIdempotent
+--- PASS: TestReserveOutboxIdempotent (0.61s)
+=== RUN   TestFullFlowOutboxEvents
+--- PASS: TestFullFlowOutboxEvents (0.62s)
+=== RUN   TestReserveConcurrentNoOversell
+--- PASS: TestReserveConcurrentNoOversell (2.49s)
+=== RUN   TestReserveIdempotentSameRequest
+--- PASS: TestReserveIdempotentSameRequest (0.79s)
+=== RUN   TestReserveConcurrentSameRequest
+--- PASS: TestReserveConcurrentSameRequest (0.59s)
+=== RUN   TestReserveInsufficient
+--- PASS: TestReserveInsufficient (0.64s)
+=== RUN   TestSettleFullFlow
+--- PASS: TestSettleFullFlow (0.65s)
+=== RUN   TestSettleIdempotent
+--- PASS: TestSettleIdempotent (0.60s)
+=== RUN   TestReverseIdempotent
+--- PASS: TestReverseIdempotent (0.57s)
+=== RUN   TestReverseAfterSettled
+--- PASS: TestReverseAfterSettled (0.57s)
+=== RUN   TestRebuildBalance
+--- PASS: TestRebuildBalance (0.63s)
+=== RUN   TestRebuildBalanceIdempotent
+--- PASS: TestRebuildBalanceIdempotent (0.52s)
+=== RUN   TestReserveSubscriptionAllowance
+--- PASS: TestReserveSubscriptionAllowance (0.64s)
+=== RUN   TestStrictSubscriptionReserveReplay
+--- PASS: TestStrictSubscriptionReserveReplay (0.60s)
+PASS
+ok  	github.com/frostloom/ai-gateway/internal/billing/store	13.670s
+=== RUN   TestReserveConcurrentFailureCannotRefundCommittedReplay
+--- PASS: TestReserveConcurrentFailureCannotRefundCommittedReplay (0.68s)
+=== RUN   TestReserveCanceledInsertStillCompensates
+--- PASS: TestReserveCanceledInsertStillCompensates (0.63s)
+=== RUN   TestSettleLegacyGuardRecoversPendingLedger
+=== RUN   TestSettleLegacyGuardRecoversPendingLedger/debit
+=== RUN   TestSettleLegacyGuardRecoversPendingLedger/refund
+--- PASS: TestSettleLegacyGuardRecoversPendingLedger (1.45s)
+    --- PASS: TestSettleLegacyGuardRecoversPendingLedger/debit (0.69s)
+    --- PASS: TestSettleLegacyGuardRecoversPendingLedger/refund (0.76s)
+=== RUN   TestDeltaOneReplayPreservesAppliedAmount
+--- PASS: TestDeltaOneReplayPreservesAppliedAmount (0.56s)
+=== RUN   TestReserveLostConnectionCannotRefundCommittedReplay
+[mysql] 2026/11/04 03:05:28 packets.go:58 unexpected EOF
+--- PASS: TestReserveLostConnectionCannotRefundCommittedReplay (0.62s)
+=== RUN   TestReserveRecoveryLostConnectionCannotRefundNewOwner
+[mysql] 2026/11/04 03:05:29 packets.go:58 unexpected EOF
+--- PASS: TestReserveRecoveryLostConnectionCannotRefundNewOwner (0.64s)
+=== RUN   TestCashMatchRejectsRedisReadFailureAndMismatch
+=== RUN   TestCashMatchRejectsRedisReadFailureAndMismatch/read_failure
+=== RUN   TestCashMatchRejectsRedisReadFailureAndMismatch/mismatch
+--- PASS: TestCashMatchRejectsRedisReadFailureAndMismatch (1.03s)
+    --- PASS: TestCashMatchRejectsRedisReadFailureAndMismatch/read_failure (0.49s)
+    --- PASS: TestCashMatchRejectsRedisReadFailureAndMismatch/mismatch (0.54s)
+=== RUN   TestLostRebuildSessionCannotOverwriteNewReserve
+[mysql] 2026/11/04 03:05:31 packets.go:58 unexpected EOF
+--- PASS: TestLostRebuildSessionCannotOverwriteNewReserve (0.64s)
+=== RUN   TestCashMutationAfterRefundProjectionFailure
+=== RUN   TestCashMutationAfterRefundProjectionFailure/reserve
+=== RUN   TestCashMutationAfterRefundProjectionFailure/settle
+=== RUN   TestCashMutationAfterRefundProjectionFailure/settle_debit
+=== RUN   TestCashMutationAfterRefundProjectionFailure/reverse
+--- PASS: TestCashMutationAfterRefundProjectionFailure (2.47s)
+    --- PASS: TestCashMutationAfterRefundProjectionFailure/reserve (0.61s)
+    --- PASS: TestCashMutationAfterRefundProjectionFailure/settle (0.69s)
+    --- PASS: TestCashMutationAfterRefundProjectionFailure/settle_debit (0.60s)
+    --- PASS: TestCashMutationAfterRefundProjectionFailure/reverse (0.56s)
+=== RUN   TestCashProjectionFailureRetainsCommittedLedger
+=== RUN   TestCashProjectionFailureRetainsCommittedLedger/pay
+=== RUN   TestCashProjectionFailureRetainsCommittedLedger/refund_order
+=== RUN   TestCashProjectionFailureRetainsCommittedLedger/refund_amount
+--- PASS: TestCashProjectionFailureRetainsCommittedLedger (1.85s)
+    --- PASS: TestCashProjectionFailureRetainsCommittedLedger/pay (0.56s)
+    --- PASS: TestCashProjectionFailureRetainsCommittedLedger/refund_order (0.65s)
+    --- PASS: TestCashProjectionFailureRetainsCommittedLedger/refund_amount (0.64s)
+=== RUN   TestRebuildWaitsForInFlightReserve
+=== RUN   TestRebuildWaitsForInFlightReserve/committed
+=== RUN   TestRebuildWaitsForInFlightReserve/compensated
+--- PASS: TestRebuildWaitsForInFlightReserve (1.22s)
+    --- PASS: TestRebuildWaitsForInFlightReserve/committed (0.61s)
+    --- PASS: TestRebuildWaitsForInFlightReserve/compensated (0.61s)
+=== RUN   TestRebuildWaitsForInFlightTerminalMutation
+=== RUN   TestRebuildWaitsForInFlightTerminalMutation/settle
+=== RUN   TestRebuildWaitsForInFlightTerminalMutation/reverse
+--- PASS: TestRebuildWaitsForInFlightTerminalMutation (1.24s)
+    --- PASS: TestRebuildWaitsForInFlightTerminalMutation/settle (0.63s)
+    --- PASS: TestRebuildWaitsForInFlightTerminalMutation/reverse (0.61s)
+=== RUN   TestSettleReplayAfterGuardExpiryDoesNotDebitAgain
+--- PASS: TestSettleReplayAfterGuardExpiryDoesNotDebitAgain (0.69s)
+=== RUN   TestConcurrentRefundsCannotSpendSameLedgerBalance
+--- PASS: TestConcurrentRefundsCannotSpendSameLedgerBalance (0.66s)
+=== RUN   TestCashOperationsWithSingleDatabaseConnection
+--- PASS: TestCashOperationsWithSingleDatabaseConnection (0.65s)
+=== RUN   TestCashCancellationBeforeMutationDoesNotCommit
+=== RUN   TestCashCancellationBeforeMutationDoesNotCommit/pay
+=== RUN   TestCashCancellationBeforeMutationDoesNotCommit/refund_order
+=== RUN   TestCashCancellationBeforeMutationDoesNotCommit/refund_amount
+=== RUN   TestCashCancellationBeforeMutationDoesNotCommit/settle
+=== RUN   TestCashCancellationBeforeMutationDoesNotCommit/reverse
+--- PASS: TestCashCancellationBeforeMutationDoesNotCommit (2.98s)
+    --- PASS: TestCashCancellationBeforeMutationDoesNotCommit/pay (0.56s)
+    --- PASS: TestCashCancellationBeforeMutationDoesNotCommit/refund_order (0.61s)
+    --- PASS: TestCashCancellationBeforeMutationDoesNotCommit/refund_amount (0.65s)
+    --- PASS: TestCashCancellationBeforeMutationDoesNotCommit/settle (0.57s)
+    --- PASS: TestCashCancellationBeforeMutationDoesNotCommit/reverse (0.59s)
+=== RUN   TestTerminalSQLFailureRebuildAndRetry
+=== RUN   TestTerminalSQLFailureRebuildAndRetry/settle
+=== RUN   TestTerminalSQLFailureRebuildAndRetry/reverse
+--- PASS: TestTerminalSQLFailureRebuildAndRetry (1.27s)
+    --- PASS: TestTerminalSQLFailureRebuildAndRetry/settle (0.66s)
+    --- PASS: TestTerminalSQLFailureRebuildAndRetry/reverse (0.61s)
+=== RUN   TestEnsureBalanceKeysUsesLedgerAndPreservesExistingKey
+--- PASS: TestEnsureBalanceKeysUsesLedgerAndPreservesExistingKey (0.74s)
+=== RUN   TestEnsureBalanceKeysRechecksAfterConcurrentReserve
+--- PASS: TestEnsureBalanceKeysRechecksAfterConcurrentReserve (0.57s)
+=== RUN   TestCashLoad
+    cash_load_test.go:23: set BILLING_CASH_LOAD=1 to run the isolated cash load probe
+--- SKIP: TestCashLoad (0.00s)
+=== RUN   TestCashMatchReadsLedgerOnce
+--- PASS: TestCashMatchReadsLedgerOnce (0.57s)
+=== RUN   TestCashProfileRowTiming
+    cash_profile_test.go:66: set BILLING_CASH_PROFILE=1 to check the opt-in profiler
+--- SKIP: TestCashProfileRowTiming (0.00s)
+=== RUN   TestDeltaLegacySentinelReplay
+=== RUN   TestDeltaLegacySentinelReplay/50ns
+=== RUN   TestDeltaLegacySentinelReplay/-50ns
+=== RUN   TestDeltaLegacySentinelReplay/0s
+--- PASS: TestDeltaLegacySentinelReplay (0.01s)
+    --- PASS: TestDeltaLegacySentinelReplay/50ns (0.01s)
+    --- PASS: TestDeltaLegacySentinelReplay/-50ns (0.00s)
+    --- PASS: TestDeltaLegacySentinelReplay/0s (0.00s)
+=== RUN   TestDeltaVersionedOneReplay
+--- PASS: TestDeltaVersionedOneReplay (0.00s)
+=== RUN   TestDeltaLegacyNumericRefundPreserved
+--- PASS: TestDeltaLegacyNumericRefundPreserved (0.00s)
+=== RUN   TestOutboxLifecycle
+--- PASS: TestOutboxLifecycle (0.53s)
+=== RUN   TestReserveOutboxIdempotent
+--- PASS: TestReserveOutboxIdempotent (0.66s)
+=== RUN   TestFullFlowOutboxEvents
+--- PASS: TestFullFlowOutboxEvents (0.53s)
+=== RUN   TestRefundUsesLedgerWhenProjectionIsHigh
+--- PASS: TestRefundUsesLedgerWhenProjectionIsHigh (0.56s)
+=== RUN   TestMeOverviewRepairsStaleProjection
+--- PASS: TestMeOverviewRepairsStaleProjection (0.64s)
+=== RUN   TestPayRechargeLedgerMatchesProjection
+--- PASS: TestPayRechargeLedgerMatchesProjection (0.56s)
+=== RUN   TestRefundCappedAtBalance
+--- PASS: TestRefundCappedAtBalance (0.60s)
+=== RUN   TestRefundZeroWhenBalanceSpent
+--- PASS: TestRefundZeroWhenBalanceSpent (0.60s)
+=== RUN   TestRefundAmountCappedAtBalance
+--- PASS: TestRefundAmountCappedAtBalance (0.58s)
+=== RUN   TestPayRechargeIdempotent
+--- PASS: TestPayRechargeIdempotent (0.55s)
+=== RUN   TestSubscribeOneTimeRefused
+--- PASS: TestSubscribeOneTimeRefused (0.54s)
+=== RUN   TestSubscribeRecurringOnceAndCancelNoRefund
+--- PASS: TestSubscribeRecurringOnceAndCancelNoRefund (0.56s)
+=== RUN   TestRenewDueSubscription
+--- PASS: TestRenewDueSubscription (0.55s)
+=== RUN   TestChangePlanPendingNextCycle
+--- PASS: TestChangePlanPendingNextCycle (0.59s)
+=== RUN   TestPortalAccountLifecycle
+--- PASS: TestPortalAccountLifecycle (0.60s)
+=== RUN   TestChatSessionTenantIsolation
+--- PASS: TestChatSessionTenantIsolation (0.73s)
+=== RUN   TestReportUsageAttributesSettlementToSuccessfulProvider
+--- PASS: TestReportUsageAttributesSettlementToSuccessfulProvider (0.71s)
+=== RUN   TestReportUsageRejectsUnknownProviderWithoutWritingUsage
+--- PASS: TestReportUsageRejectsUnknownProviderWithoutWritingUsage (0.52s)
+=== RUN   TestUpsertProviderIdempotent
+--- PASS: TestUpsertProviderIdempotent (0.61s)
+=== RUN   TestListProvidersWithMargin
+--- PASS: TestListProvidersWithMargin (0.52s)
+=== RUN   TestReserveInsertFailureCompensatesRedis
+--- PASS: TestReserveInsertFailureCompensatesRedis (0.56s)
+=== RUN   TestCompensateReserveIgnoresMismatchedGuard
+--- PASS: TestCompensateReserveIgnoresMismatchedGuard (0.52s)
+=== RUN   TestReserveReplayFingerprint
+--- PASS: TestReserveReplayFingerprint (0.00s)
+=== RUN   TestReserveReplayRejectsFinalizedOrReported
+=== RUN   TestReserveReplayRejectsFinalizedOrReported/pending
+=== RUN   TestReserveReplayRejectsFinalizedOrReported/pending_with_usage
+=== RUN   TestReserveReplayRejectsFinalizedOrReported/reversed
+=== RUN   TestReserveReplayRejectsFinalizedOrReported/settled
+=== RUN   TestReserveReplayRejectsFinalizedOrReported/unknown
+--- PASS: TestReserveReplayRejectsFinalizedOrReported (0.00s)
+    --- PASS: TestReserveReplayRejectsFinalizedOrReported/pending (0.00s)
+    --- PASS: TestReserveReplayRejectsFinalizedOrReported/pending_with_usage (0.00s)
+    --- PASS: TestReserveReplayRejectsFinalizedOrReported/reversed (0.00s)
+    --- PASS: TestReserveReplayRejectsFinalizedOrReported/settled (0.00s)
+    --- PASS: TestReserveReplayRejectsFinalizedOrReported/unknown (0.00s)
+=== RUN   TestReserveContentFingerprintVersioning
+--- PASS: TestReserveContentFingerprintVersioning (0.00s)
+=== RUN   TestReserveLuaReplayTransfersCompensationOwner
+--- PASS: TestReserveLuaReplayTransfersCompensationOwner (0.00s)
+=== RUN   TestReserveLuaAdoptsLegacyGuardWithoutSecondDebit
+--- PASS: TestReserveLuaAdoptsLegacyGuardWithoutSecondDebit (0.00s)
+=== RUN   TestReserveConcurrentNoOversell
+--- PASS: TestReserveConcurrentNoOversell (2.87s)
+=== RUN   TestReserveIdempotentSameRequest
+--- PASS: TestReserveIdempotentSameRequest (0.64s)
+=== RUN   TestReserveConcurrentSameRequest
+--- PASS: TestReserveConcurrentSameRequest (0.58s)
+=== RUN   TestReserveInsufficient
+--- PASS: TestReserveInsufficient (0.55s)
+=== RUN   TestCostCent
+--- PASS: TestCostCent (0.00s)
+=== RUN   TestReserveModelUnavailable
+--- PASS: TestReserveModelUnavailable (0.54s)
+=== RUN   TestSalesStats
+--- PASS: TestSalesStats (0.98s)
+=== RUN   TestSalesStatsByDayUsesLocalDay
+--- PASS: TestSalesStatsByDayUsesLocalDay (0.67s)
+=== RUN   TestSalesDayShiftSeconds
+--- PASS: TestSalesDayShiftSeconds (0.00s)
+=== RUN   TestReserveMinimumCentWhenPriceRoundsToZero
+--- PASS: TestReserveMinimumCentWhenPriceRoundsToZero (0.71s)
+=== RUN   TestSettleShortfallDoesNotStickPending
+--- PASS: TestSettleShortfallDoesNotStickPending (0.56s)
+=== RUN   TestSettleFullFlow
+--- PASS: TestSettleFullFlow (0.60s)
+=== RUN   TestSettleIdempotent
+--- PASS: TestSettleIdempotent (0.63s)
+=== RUN   TestReverseIdempotent
+--- PASS: TestReverseIdempotent (0.59s)
+=== RUN   TestReverseAfterSettled
+--- PASS: TestReverseAfterSettled (0.61s)
+=== RUN   TestRebuildBalance
+--- PASS: TestRebuildBalance (0.64s)
+=== RUN   TestRebuildBalanceIdempotent
+--- PASS: TestRebuildBalanceIdempotent (0.65s)
+=== RUN   TestTierFromTags
+--- PASS: TestTierFromTags (0.00s)
+=== RUN   TestReserveSubscriptionAllowance
+--- PASS: TestReserveSubscriptionAllowance (0.78s)
+=== RUN   TestMeViewSubscriptionAllowance
+--- PASS: TestMeViewSubscriptionAllowance (0.75s)
+=== RUN   TestCancelledEntitlementBoundaries
+=== RUN   TestCancelledEntitlementBoundaries/future
+=== RUN   TestCancelledEntitlementBoundaries/expired
+=== RUN   TestCancelledEntitlementBoundaries/boundary
+=== RUN   TestCancelledEntitlementBoundaries/missing
+--- PASS: TestCancelledEntitlementBoundaries (2.76s)
+    --- PASS: TestCancelledEntitlementBoundaries/future (0.63s)
+    --- PASS: TestCancelledEntitlementBoundaries/expired (0.66s)
+    --- PASS: TestCancelledEntitlementBoundaries/boundary (0.66s)
+    --- PASS: TestCancelledEntitlementBoundaries/missing (0.80s)
+=== RUN   TestStrictSubscriptionReserveReplay
+--- PASS: TestStrictSubscriptionReserveReplay (0.60s)
+PASS
+ok  	github.com/frostloom/ai-gateway/internal/billing/store	52.302s

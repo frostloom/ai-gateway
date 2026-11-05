@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/frostloom/ai-gateway/internal/pkg/controlplane"
+	"github.com/frostloom/ai-gateway/internal/pkg/metrics"
 )
 
 type Router struct {
@@ -83,11 +84,14 @@ func (r *Router) Route(ctx context.Context, model string, exclude ...uint64) (*R
 	return &rr, nil
 }
 
-// Report 回传一次上游调用成败（驱动 router 熔断/AutoBan）。失败不影响主流程，只记日志。
+// Report 回传一次上游调用成败（驱动 router 熔断/AutoBan）。失败不影响主流程；指标仅表示 HTTP 观察结果。
 func (r *Router) Report(ctx context.Context, providerID uint64, ok bool) {
+	started := time.Now()
+	defer func() { metrics.RouterReportDuration(time.Since(started)) }()
 	body, _ := json.Marshal(map[string]any{"provider_id": providerID, "ok": ok})
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, r.baseURL+"/report", bytes.NewReader(body))
 	if err != nil {
+		metrics.RouterReport("invalid_request")
 		return
 	}
 	req.Header.Set("Content-Type", "application/json")
@@ -96,11 +100,20 @@ func (r *Router) Report(ctx context.Context, providerID uint64, ok bool) {
 	}
 	resp, err := r.cli.Do(req)
 	if err != nil {
+		metrics.RouterReport("transport_error")
 		return
 	}
 	// 关键：必须先读完 Body 再 Close，否则连接不会回池，每个 /report 都新建 TCP 连接。
 	// 这是压测 368 req/s 打爆 Windows 临时端口的元凶之一（一次请求一次 report，60s 内
 	// 8876 个 TIME_WAIT → Only one usage of each socket address）。
-	io.Copy(io.Discard, resp.Body)
+	_, readErr := io.Copy(io.Discard, resp.Body)
 	resp.Body.Close()
+	switch {
+	case resp.StatusCode != http.StatusOK:
+		metrics.RouterReport("http_error")
+	case readErr != nil:
+		metrics.RouterReport("body_error")
+	default:
+		metrics.RouterReport("http_200")
+	}
 }

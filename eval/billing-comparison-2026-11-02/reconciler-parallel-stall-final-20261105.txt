@@ -1,0 +1,16 @@
+head=944c6336acd60213eb43dfa59648536bffbddfea
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+# github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02.test
+ld: warning: '/private/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-1705462971/000013.o' has malformed LC_DYSYMTAB, expected 98 undefined symbols to start at index 1626, found 95 undefined symbols starting at index 1626
+=== RUN   TestParallelBatchBlockedAndDuplicateRealLedger
+    reconciler_parallel_stall_test.go:127: same account: second bill completed before first released, duplicate first settled once, ledger=balance=920
+--- PASS: TestParallelBatchBlockedAndDuplicateRealLedger (0.56s)
+=== RUN   TestParallelBatchBlockedAndDuplicateRealLedger
+    reconciler_parallel_stall_test.go:127: same account: second bill completed before first released, duplicate first settled once, ledger=balance=920
+--- PASS: TestParallelBatchBlockedAndDuplicateRealLedger (0.58s)
+=== RUN   TestParallelBatchBlockedAndDuplicateRealLedger
+    reconciler_parallel_stall_test.go:127: same account: second bill completed before first released, duplicate first settled once, ledger=balance=920
+--- PASS: TestParallelBatchBlockedAndDuplicateRealLedger (0.43s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	3.349s

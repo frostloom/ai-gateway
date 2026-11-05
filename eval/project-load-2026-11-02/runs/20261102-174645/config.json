@@ -1,0 +1,35 @@
+{
+  "head": "63b9d1ed4d64bb583d15fa884c37468e5c53044c",
+  "branch": "codex/billing-mysql-comparison",
+  "git_status": " M internal/billing/store/mysql.go\n M internal/gateway/handler/chat.go\n M internal/gateway/handler/chat_stream_test.go\n D internal/gateway/web/dist/assets/Empty-B78rz8Qh.css\n D internal/gateway/web/dist/assets/Empty-Cq6uueat.js\n D internal/gateway/web/dist/assets/dashboard-H93iLNlz.js\n D internal/gateway/web/dist/assets/dashboard-jpnukakx.css\n D internal/gateway/web/dist/assets/portal-CI_uKi_F.js\n D internal/gateway/web/dist/assets/portal-fDtFA2oX.css\n M internal/gateway/web/dist/dashboard.html\n M internal/gateway/web/dist/portal.html\n M scripts/schema.sql\n?? .tmp/\n?? eval/billing-comparison-2026-11-02/\n?? eval/project-load-2026-11-02/\n?? integrations/\n?? internal/billing/store/reserve_fingerprint_test.go\n?? internal/gateway/web/dist/assets/Empty-D1TVEnQN.css\n?? internal/gateway/web/dist/assets/Empty-DFn-BFPp.js\n?? internal/gateway/web/dist/assets/dashboard-BGbdPy4C.js\n?? internal/gateway/web/dist/assets/dashboard-Bt40SYhT.css\n?? internal/gateway/web/dist/assets/portal-CX4r-21-.js\n?? internal/gateway/web/dist/assets/portal-DUpRuSip.css\n?? plate_sim.py\n?? scripts/migrations/\n",
+  "source_sha256": {
+    "internal/billing/store/mysql.go": "71d5925e6d5824babac842559bdc6a0872c453f90904db261622bd2efe540299",
+    "internal/gateway/handler/chat.go": "65fa4b051b41cd0a2e936843c0407a61bdaa91f6c68a3ef097964a8c36655066",
+    "cmd/gateway/main.go": "91d5d30ed17c5ecb42b8a5ac810de8a3d072a332bdb5fdfdab4e0814d9dd85cb",
+    "cmd/router/main.go": "eb54d320360e452ac16be25d9cdf6804aedbde91da5c77b0e18adcd2d841021c",
+    "cmd/billing/main.go": "3056db14e70ca305c182f56cc44eb132b3d65b8c194352d500ac56d5107ffa91",
+    "cmd/mock-provider/main.go": "3a42cc4753dbf60f5482fc81eb65ffbb2103b626d0ea60981d1ddd48d78e2d8e"
+  },
+  "images": {
+    "docker.m.daocloud.io/library/mysql:8.0.40": "sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff",
+    "docker.m.daocloud.io/library/redis:7-alpine": "sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499"
+  },
+  "gomaxprocs": 8,
+  "mysql_pool_max": 100,
+  "rate_per_min": 100000,
+  "mock_latency_ms": 15,
+  "mock_completion_tokens": 100,
+  "kafka": "disabled",
+  "isolated_agents": "disabled",
+  "ports": {
+    "gateway": 63856,
+    "billing": 63857,
+    "admin": 63858,
+    "router": 63859,
+    "mock": 63860
+  },
+  "mysql_port": "63829",
+  "redis_port": "63830",
+  "quick": true,
+  "started": "2026-11-02T17:47:20.280607"
+}

@@ -1,0 +1,38 @@
+=== RUN   TestUsageReverseCandidateRegression
+    settle_test.go:234: usage_first iteration 0: usage and reverse both succeeded
+--- FAIL: TestUsageReverseCandidateRegression (0.67s)
+FAIL
+FAIL	github.com/frostloom/ai-gateway/internal/billing/store	1.579s
+FAIL
+=== RUN   TestTerminalSQLFailureRebuildAndRetry
+=== RUN   TestTerminalSQLFailureRebuildAndRetry/settle
+=== RUN   TestTerminalSQLFailureRebuildAndRetry/reverse
+    cash_concurrency_test.go:650: rpc error: code = FailedPrecondition desc = cannot reverse reported usage
+--- FAIL: TestTerminalSQLFailureRebuildAndRetry (1.16s)
+    --- PASS: TestTerminalSQLFailureRebuildAndRetry/settle (0.62s)
+    --- FAIL: TestTerminalSQLFailureRebuildAndRetry/reverse (0.55s)
+=== RUN   TestFullFlowOutboxEvents
+--- PASS: TestFullFlowOutboxEvents (0.52s)
+=== RUN   TestReserveConcurrentNoOversell
+--- PASS: TestReserveConcurrentNoOversell (2.17s)
+=== RUN   TestReserveIdempotentSameRequest
+--- PASS: TestReserveIdempotentSameRequest (0.51s)
+=== RUN   TestReserveConcurrentSameRequest
+--- PASS: TestReserveConcurrentSameRequest (0.49s)
+=== RUN   TestSettleFullFlow
+--- PASS: TestSettleFullFlow (0.58s)
+=== RUN   TestSettleIdempotent
+--- PASS: TestSettleIdempotent (0.72s)
+=== RUN   TestReverseIdempotent
+--- PASS: TestReverseIdempotent (0.56s)
+=== RUN   TestReverseAfterSettled
+--- PASS: TestReverseAfterSettled (0.56s)
+=== RUN   TestRebuildBalance
+--- PASS: TestRebuildBalance (0.65s)
+=== RUN   TestUsageReverseCandidateRegression
+--- PASS: TestUsageReverseCandidateRegression (2.83s)
+=== RUN   TestReserveSubscriptionAllowance
+--- PASS: TestReserveSubscriptionAllowance (0.83s)
+FAIL
+FAIL	github.com/frostloom/ai-gateway/internal/billing/store	12.294s
+FAIL

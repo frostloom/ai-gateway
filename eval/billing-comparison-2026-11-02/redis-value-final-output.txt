@@ -1,0 +1,97 @@
+=== RUN   TestReserveConflictingTenant
+
+2026/11/02 16:47:04 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:1033 [35;1mrecord not found
+[0m[33m[2.270ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id = 'comparison-conflict' AND phase = 'reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/02 16:47:04 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:1033 [35;1mrecord not found
+[0m[33m[1.021ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id = 'comparison-conflict' AND phase = 'reserve' ORDER BY `bills`.`id` LIMIT 1
+    conflict_test.go:85: first code=RESERVE_OK bill=1; conflicting second status=FailedPrecondition; stored tenant=1 pre=100; balances=900,1000
+
+2026/11/02 16:47:04 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:1033 [35;1mrecord not found
+[0m[33m[0.849ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id = 'comparison-race' AND phase = 'reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/02 16:47:04 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:1033 [35;1mrecord not found
+[0m[33m[1.144ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id = 'comparison-race' AND phase = 'reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/02 16:47:04 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:1033 [35;1mrecord not found
+[0m[33m[1.041ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id = 'comparison-race' AND phase = 'reserve' ORDER BY `bills`.`id` LIMIT 1
+--- PASS: TestReserveConflictingTenant (0.41s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	1.051s
+=== RUN   TestTerminalSQLFailureRebuildAndRetry
+=== RUN   TestTerminalSQLFailureRebuildAndRetry/settle
+=== RUN   TestTerminalSQLFailureRebuildAndRetry/reverse
+--- PASS: TestTerminalSQLFailureRebuildAndRetry (1.23s)
+    --- PASS: TestTerminalSQLFailureRebuildAndRetry/settle (0.60s)
+    --- PASS: TestTerminalSQLFailureRebuildAndRetry/reverse (0.63s)
+=== RUN   TestReserveOutboxIdempotent
+--- PASS: TestReserveOutboxIdempotent (0.52s)
+=== RUN   TestFullFlowOutboxEvents
+--- PASS: TestFullFlowOutboxEvents (0.59s)
+=== RUN   TestReserveConcurrentNoOversell
+--- PASS: TestReserveConcurrentNoOversell (2.09s)
+=== RUN   TestReserveIdempotentSameRequest
+--- PASS: TestReserveIdempotentSameRequest (0.49s)
+=== RUN   TestReserveConcurrentSameRequest
+--- PASS: TestReserveConcurrentSameRequest (0.53s)
+=== RUN   TestReserveInsufficient
+--- PASS: TestReserveInsufficient (0.45s)
+=== RUN   TestSettleFullFlow
+--- PASS: TestSettleFullFlow (0.53s)
+=== RUN   TestSettleIdempotent
+--- PASS: TestSettleIdempotent (0.53s)
+=== RUN   TestReverseIdempotent
+--- PASS: TestReverseIdempotent (0.48s)
+=== RUN   TestReverseAfterSettled
+--- PASS: TestReverseAfterSettled (0.53s)
+=== RUN   TestRebuildBalance
+--- PASS: TestRebuildBalance (0.78s)
+=== RUN   TestRebuildBalanceIdempotent
+--- PASS: TestRebuildBalanceIdempotent (0.57s)
+=== RUN   TestReserveSubscriptionAllowance
+--- PASS: TestReserveSubscriptionAllowance (0.72s)
+PASS
+ok  	github.com/frostloom/ai-gateway/internal/billing/store	10.699s
+=== RUN   TestRedisOutageValue
+
+2026/11/02 16:47:18 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:1033 [35;1mrecord not found
+[0m[33m[1.673ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id = 'outage-before' AND phase = 'reserve' ORDER BY `bills`.`id` LIMIT 1
+
+2026/11/02 16:47:18 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:1033 [35;1mrecord not found
+[0m[33m[0.955ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id = 'outage-before' AND phase = 'reserve' ORDER BY `bills`.`id` LIMIT 1
+redis: 2026/11/02 16:47:19 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:57241: connect: connection refused
+redis: 2026/11/02 16:47:20 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:57241: connect: connection refused
+
+2026/11/02 16:47:20 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/mysql_candidate_test_impl_test.go:92 [35;1mrecord not found
+[0m[33m[1.157ms] [34;1m[rows:0][0m SELECT * FROM `bills` WHERE request_id='outage-candidate' AND phase='reserve' ORDER BY `bills`.`id` LIMIT 1
+    redis_value_test.go:118: A rejected reads and reserve during Redis outage; B completed reserve/usage/settle; A rebuilt balance=900, B=950
+--- PASS: TestRedisOutageValue (1.66s)
+=== RUN   TestBalanceReadValue
+    redis_value_test.go:201: BALANCE_READ mode=A rep=1 workers=1 elapsed=2.000067 completed=4689 errors=0 reads_per_second=2344.42 mean_ms=0.4262 p95_ms=0.6020 p99_ms=1.4227
+    redis_value_test.go:201: BALANCE_READ mode=B rep=1 workers=1 elapsed=2.000252 completed=2188 errors=0 reads_per_second=1093.86 mean_ms=0.9138 p95_ms=1.2374 p99_ms=2.8891
+    redis_value_test.go:201: BALANCE_READ mode=A rep=1 workers=8 elapsed=2.000526 completed=20188 errors=0 reads_per_second=10091.34 mean_ms=0.7923 p95_ms=1.5698 p99_ms=3.3855
+    redis_value_test.go:201: BALANCE_READ mode=B rep=1 workers=8 elapsed=2.001075 completed=9892 errors=0 reads_per_second=4943.34 mean_ms=1.6175 p95_ms=2.7972 p99_ms=4.2212
+    redis_value_test.go:201: BALANCE_READ mode=A rep=1 workers=32 elapsed=2.000366 completed=50949 errors=0 reads_per_second=25469.83 mean_ms=1.2559 p95_ms=2.1161 p99_ms=3.7454
+    redis_value_test.go:201: BALANCE_READ mode=B rep=1 workers=32 elapsed=2.004490 completed=19649 errors=0 reads_per_second=9802.49 mean_ms=3.2616 p95_ms=5.8500 p99_ms=10.4788
+    redis_value_test.go:201: BALANCE_READ mode=A rep=2 workers=1 elapsed=2.000216 completed=5054 errors=0 reads_per_second=2526.73 mean_ms=0.3955 p95_ms=0.6293 p99_ms=1.2469
+    redis_value_test.go:201: BALANCE_READ mode=B rep=2 workers=1 elapsed=2.000575 completed=1858 errors=0 reads_per_second=928.73 mean_ms=1.0764 p95_ms=2.0936 p99_ms=3.6883
+    redis_value_test.go:201: BALANCE_READ mode=A rep=2 workers=8 elapsed=2.000431 completed=21469 errors=0 reads_per_second=10732.19 mean_ms=0.7449 p95_ms=1.2823 p99_ms=2.8039
+    redis_value_test.go:201: BALANCE_READ mode=B rep=2 workers=8 elapsed=2.000616 completed=10768 errors=0 reads_per_second=5382.34 mean_ms=1.4857 p95_ms=2.1839 p99_ms=3.5995
+    redis_value_test.go:201: BALANCE_READ mode=A rep=2 workers=32 elapsed=2.000440 completed=53525 errors=0 reads_per_second=26756.61 mean_ms=1.1955 p95_ms=1.9145 p99_ms=2.9405
+    redis_value_test.go:201: BALANCE_READ mode=B rep=2 workers=32 elapsed=2.004302 completed=20299 errors=0 reads_per_second=10127.71 mean_ms=3.1554 p95_ms=5.3637 p99_ms=8.8176
+    redis_value_test.go:201: BALANCE_READ mode=A rep=3 workers=1 elapsed=2.000301 completed=3116 errors=0 reads_per_second=1557.77 mean_ms=0.6416 p95_ms=1.6713 p99_ms=4.5055
+    redis_value_test.go:201: BALANCE_READ mode=B rep=3 workers=1 elapsed=2.000960 completed=2117 errors=0 reads_per_second=1057.99 mean_ms=0.9447 p95_ms=1.3611 p99_ms=2.6363
+    redis_value_test.go:201: BALANCE_READ mode=A rep=3 workers=8 elapsed=2.000569 completed=21476 errors=0 reads_per_second=10734.94 mean_ms=0.7446 p95_ms=1.3377 p99_ms=2.5289
+    redis_value_test.go:201: BALANCE_READ mode=B rep=3 workers=8 elapsed=2.002063 completed=10925 errors=0 reads_per_second=5456.87 mean_ms=1.4649 p95_ms=2.0768 p99_ms=3.2566
+    redis_value_test.go:201: BALANCE_READ mode=A rep=3 workers=32 elapsed=2.000735 completed=55090 errors=0 reads_per_second=27534.89 mean_ms=1.1617 p95_ms=1.7407 p99_ms=2.8773
+    redis_value_test.go:201: BALANCE_READ mode=B rep=3 workers=32 elapsed=2.006608 completed=19062 errors=0 reads_per_second=9499.61 mean_ms=3.3621 p95_ms=6.1395 p99_ms=10.4136
+--- PASS: TestBalanceReadValue (36.31s)
+=== RUN   TestMySQLDownCachedRead
+[mysql] 2026/11/02 16:48:01 connection.go:801 closing bad idle connection: EOF
+
+2026/11/02 16:48:01 [31;1m/Users/a1/项目/ai-gateway/eval/billing-comparison-2026-11-02/mysql_candidate_test_impl_test.go:69 [35;1mdial tcp 127.0.0.1:57235: connect: connection refused
+[0m[33m[0.908ms] [34;1m[rows:0][0m SELECT * FROM `candidate_accounts` WHERE `candidate_accounts`.`id` = 70002 ORDER BY `candidate_accounts`.`id` LIMIT 1
+    redis_value_test.go:244: A cached balance read=1000 succeeded while MySQL unavailable; B balance read failed; cached value freshness was not tested
+--- PASS: TestMySQLDownCachedRead (4.76s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	43.267s

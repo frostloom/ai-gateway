@@ -1,0 +1,12 @@
+{
+  "head": "63b9d1ed4d64bb583d15fa884c37468e5c53044c",
+  "mysql_image_id": "sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff",
+  "source_sha256": {
+    "internal/billing/outbox/relay.go": "c1e9bd0ddb31c296d9833325feaae124db8b1575d76a980e0e12ba5e47c97e16",
+    "internal/billing/store/outbox.go": "224db5272afb84ea26a9c348de158d197cbf6b6dc49fa557eee0824c2cbbed21"
+  },
+  "test_sha256": "be6138cb22ca2e0cca2f839ac049b2b471d1761a4c6cb326bd3e1445f80c4020",
+  "returncode": 1,
+  "stdout": "=== RUN   TestIsolatedDLQMarkFailureRemainsRetryable\ntime=2026-11-04T05:41:46.079+08:00 level=ERROR msg=\"mark dlq\" id=1 err=\"injected dlq mark failure\"\n--- PASS: TestIsolatedDLQMarkFailureRemainsRetryable (0.10s)\n=== RUN   TestIsolatedTwoRelaysDoNotStrandUnsent\n    isolated_dlq_test.go:55: concurrent relays stranded unsent row: attempts=5, dlq publishes=0\n--- FAIL: TestIsolatedTwoRelaysDoNotStrandUnsent (0.04s)\nFAIL\nFAIL\tgithub.com/frostloom/ai-gateway/internal/billing/outbox\t0.916s\nFAIL\n",
+  "stderr": "# github.com/frostloom/ai-gateway/internal/billing/outbox.test\nld: warning: '/private/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-3005362791/000013.o' has malformed LC_DYSYMTAB, expected 98 undefined symbols to start at index 1626, found 95 undefined symbols starting at index 1626\n"
+}

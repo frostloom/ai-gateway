@@ -1,0 +1,14 @@
+{
+  "head": "42d8ef8e5ca2471b18800e50f8e7a57fbcfdd47f",
+  "source_sha256": {
+    "internal/billing/consumer/consumer.go": "2efcbb63fcfb49bfd890083a98a90c0f3cd691221d4b1b8f771671806061ed1a",
+    "internal/billing/outbox/relay.go": "3124c6ac81410f95295d2e4f4ddf6884ad142e767b4c7dab77de3b8c7fb934e2",
+    "internal/billing/store/outbox.go": "85aa0844f87a9059ae675336add8a42d8c70a434ef522d83f141bc69df201cbd",
+    "internal/pkg/kafka/consumer.go": "3054c3f076edcefc618674f1653aa59ace6e55408736af8cef23407b267e9438",
+    "internal/pkg/kafka/producer.go": "e9d654daba9c84a64235832217124422d820b0dce2d81953f6690a37c708e4f0"
+  },
+  "test_sha256": "b3c1217be089aadf23578744b4146efa15122e4522d44fe87aedac4ef18cbeec",
+  "returncode": 0,
+  "stdout": "=== RUN   TestIsolatedOverlappingRelaysDuplicate\n    isolated_broker_outage_test.go:71: two overlapping relays polled 16 each, consumed=32 audit=16 unsent=0 json_mismatch=0\n--- PASS: TestIsolatedOverlappingRelaysDuplicate (14.37s)\nPASS\nok  \tgithub.com/frostloom/ai-gateway/internal/billing/outbox\t16.384s\n",
+  "stderr": "# github.com/frostloom/ai-gateway/internal/billing/outbox.test\nld: warning: '/private/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-1965080245/000013.o' has malformed LC_DYSYMTAB, expected 98 undefined symbols to start at index 1626, found 95 undefined symbols starting at index 1626\n"
+}

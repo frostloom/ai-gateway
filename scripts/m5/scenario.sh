@@ -49,13 +49,13 @@ call() {
 
 # /breakers 里 provider 1 的状态；没有 Report 过则返回 no_report
 p1_state() {
-  curl -s "$ROUTER/breakers" | python -c "
+  curl -s -H "X-Control-Token: $CONTROL_PLANE_TOKEN" "$ROUTER/breakers" | python -c "
 import sys,json
 s=[x for x in json.load(sys.stdin) if x['provider_id']==1]
 print(s[0]['state'] if s else 'no_report')"
 }
 p1_fails() {
-  curl -s "$ROUTER/breakers" | python -c "
+  curl -s -H "X-Control-Token: $CONTROL_PLANE_TOKEN" "$ROUTER/breakers" | python -c "
 import sys,json
 s=[x for x in json.load(sys.stdin) if x['provider_id']==1]
 print(s[0]['consecutive_fail'] if s else '-1')"

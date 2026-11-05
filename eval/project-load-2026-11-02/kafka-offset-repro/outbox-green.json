@@ -1,0 +1,12 @@
+{
+  "head": "63b9d1ed4d64bb583d15fa884c37468e5c53044c",
+  "mysql_image_id": "sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff",
+  "source_sha256": {
+    "internal/billing/outbox/relay.go": "c1e9bd0ddb31c296d9833325feaae124db8b1575d76a980e0e12ba5e47c97e16",
+    "internal/billing/store/outbox.go": "224db5272afb84ea26a9c348de158d197cbf6b6dc49fa557eee0824c2cbbed21"
+  },
+  "test_sha256": "fd93114252241ff38cf59558d27980bc4adad4dd5a2008cfd3e493c3c4faf740",
+  "returncode": 0,
+  "stdout": "=== RUN   TestIsolatedDLQMarkFailureRemainsRetryable\ntime=2026-11-04T05:41:03.398+08:00 level=ERROR msg=\"mark dlq\" id=1 err=\"injected dlq mark failure\"\n--- PASS: TestIsolatedDLQMarkFailureRemainsRetryable (0.07s)\nPASS\nok  \tgithub.com/frostloom/ai-gateway/internal/billing/outbox\t1.858s\n",
+  "stderr": "# github.com/frostloom/ai-gateway/internal/billing/outbox.test\nld: warning: '/private/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-2587388587/000013.o' has malformed LC_DYSYMTAB, expected 98 undefined symbols to start at index 1626, found 95 undefined symbols starting at index 1626\n"
+}

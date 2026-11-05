@@ -1,0 +1,19 @@
+head=42d8ef8e5ca2471b18800e50f8e7a57fbcfdd47f
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+# github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02.test
+ld: warning: '/private/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-354830501/000013.o' has malformed LC_DYSYMTAB, expected 98 undefined symbols to start at index 1626, found 95 undefined symbols starting at index 1626
+=== RUN   TestPendingSummaryLargeSnapshot
+    pending_summary_load_test.go:51: mysql_explain={   "query_block": {     "select_id": 1,     "cost_info": {       "query_cost": "5000.75"     },     "table": {       "table_name": "bills",       "access_type": "ref",       "possible_keys": [         "idx_recon"       ],       "key": "idx_recon",       "used_key_parts": [         "status"       ],       "key_length": "66",       "ref": [         "const"       ],       "rows_examined_per_scan": 50000,       "rows_produced_per_join": 5000,       "filtered": "10.00",       "cost_info": {         "read_cost": "0.75",         "eval_cost": "500.00",         "prefix_cost": "5000.75",         "data_read_per_join": "7M"       },       "used_columns": [         "phase",         "status",         "usage_reported_at",         "created_at"       ],       "attached_condition": "(`billing_compare`.`bills`.`phase` = 'reserve')"     }   } }
+    pending_summary_load_test.go:104: rows=100000 pending=50000 workers=4 n=20 elapsed_ms=656.4 mean_ms=120.5 p95_ms=178.0 max_ms=253.9
+--- PASS: TestPendingSummaryLargeSnapshot (5.51s)
+=== RUN   TestPendingSummaryLargeSnapshot
+    pending_summary_load_test.go:51: mysql_explain={   "query_block": {     "select_id": 1,     "cost_info": {       "query_cost": "5000.75"     },     "table": {       "table_name": "bills",       "access_type": "ref",       "possible_keys": [         "idx_recon"       ],       "key": "idx_recon",       "used_key_parts": [         "status"       ],       "key_length": "66",       "ref": [         "const"       ],       "rows_examined_per_scan": 50000,       "rows_produced_per_join": 5000,       "filtered": "10.00",       "cost_info": {         "read_cost": "0.75",         "eval_cost": "500.00",         "prefix_cost": "5000.75",         "data_read_per_join": "7M"       },       "used_columns": [         "phase",         "status",         "usage_reported_at",         "created_at"       ],       "attached_condition": "(`billing_compare`.`bills`.`phase` = 'reserve')"     }   } }
+    pending_summary_load_test.go:104: rows=100000 pending=50000 workers=4 n=20 elapsed_ms=637.4 mean_ms=117.0 p95_ms=165.8 max_ms=203.4
+--- PASS: TestPendingSummaryLargeSnapshot (7.26s)
+=== RUN   TestPendingSummaryLargeSnapshot
+    pending_summary_load_test.go:51: mysql_explain={   "query_block": {     "select_id": 1,     "cost_info": {       "query_cost": "5678.85"     },     "table": {       "table_name": "bills",       "access_type": "ref",       "possible_keys": [         "idx_recon"       ],       "key": "idx_recon",       "used_key_parts": [         "status"       ],       "key_length": "66",       "ref": [         "const"       ],       "rows_examined_per_scan": 50061,       "rows_produced_per_join": 5006,       "filtered": "10.00",       "cost_info": {         "read_cost": "672.75",         "eval_cost": "500.61",         "prefix_cost": "5678.85",         "data_read_per_join": "7M"       },       "used_columns": [         "phase",         "status",         "usage_reported_at",         "created_at"       ],       "attached_condition": "(`billing_compare`.`bills`.`phase` = 'reserve')"     }   } }
+    pending_summary_load_test.go:104: rows=100000 pending=50000 workers=4 n=20 elapsed_ms=501.4 mean_ms=96.4 p95_ms=129.0 max_ms=131.1
+--- PASS: TestPendingSummaryLargeSnapshot (6.49s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	21.514s

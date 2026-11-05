@@ -1,0 +1,12 @@
+
+func TestSuccessResetsFailureFromOtherRouter(t *testing.T) {
+ dsn:=os.Getenv("COMPARISON_MYSQL_DSN");if dsn==""{t.Fatal("isolated MySQL DSN required")}
+ db,e:=gorm.Open(mysql.Open(dsn),&gorm.Config{Logger:logger.Default.LogMode(logger.Silent)});if e!=nil{t.Fatal(e)}
+ if e=db.Exec("CREATE TABLE IF NOT EXISTS providers (id BIGINT PRIMARY KEY,status TINYINT NOT NULL,consecutive_fail INT NOT NULL)").Error;e!=nil{t.Fatal(e)}
+ if e=db.Exec("DELETE FROM providers").Error;e!=nil{t.Fatal(e)}
+ if e=db.Exec("INSERT INTO providers(id,status,consecutive_fail) VALUES(1,0,0)").Error;e!=nil{t.Fatal(e)}
+ first:=New(db,slog.New(slog.DiscardHandler));second:=New(db,slog.New(slog.DiscardHandler))
+ first.Report(1,false)
+ second.Report(1,true)
+ var count int;if e=db.Table("providers").Select("consecutive_fail").Where("id=?",1).Scan(&count).Error;e!=nil||count!=0{t.Fatalf("other-router failure not cleared: count=%d err=%v",count,e)}
+}

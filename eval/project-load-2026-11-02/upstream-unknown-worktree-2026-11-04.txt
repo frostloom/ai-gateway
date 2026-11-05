@@ -1,0 +1,17 @@
+=== RUN   TestGatewayDoesNotResendUnknownUpstreamOutcome
+=== RUN   TestGatewayDoesNotResendUnknownUpstreamOutcome/stream=false/disconnect
+    chat_stream_test.go:359: primary=1 secondary=1 HTTP=200 reverses=0 usage=1 settle=1
+=== RUN   TestGatewayDoesNotResendUnknownUpstreamOutcome/stream=false/server_503
+    chat_stream_test.go:359: primary=1 secondary=1 HTTP=200 reverses=0 usage=1 settle=1
+=== RUN   TestGatewayDoesNotResendUnknownUpstreamOutcome/stream=true/disconnect
+    chat_stream_test.go:359: primary=1 secondary=1 HTTP=200 reverses=0 usage=1 settle=1
+=== RUN   TestGatewayDoesNotResendUnknownUpstreamOutcome/stream=true/server_503
+    chat_stream_test.go:359: primary=1 secondary=1 HTTP=200 reverses=0 usage=1 settle=1
+--- FAIL: TestGatewayDoesNotResendUnknownUpstreamOutcome (0.01s)
+    --- FAIL: TestGatewayDoesNotResendUnknownUpstreamOutcome/stream=false/disconnect (0.00s)
+    --- FAIL: TestGatewayDoesNotResendUnknownUpstreamOutcome/stream=false/server_503 (0.00s)
+    --- FAIL: TestGatewayDoesNotResendUnknownUpstreamOutcome/stream=true/disconnect (0.00s)
+    --- FAIL: TestGatewayDoesNotResendUnknownUpstreamOutcome/stream=true/server_503 (0.00s)
+FAIL
+FAIL	github.com/frostloom/ai-gateway/internal/gateway/handler	0.747s
+FAIL

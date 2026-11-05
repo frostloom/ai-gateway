@@ -1,0 +1,13 @@
+head=63b9d1ed4d64bb583d15fa884c37468e5c53044c
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestAtomicAdmissionConcurrency
+    atomic_admission_test.go:142: different_keys=64 admitted=1 rejected=63 no_rejected_keys=true duplicate_first=true retry_after_reset=true same_key_admitted=1 duplicate=63
+--- PASS: TestAtomicAdmissionConcurrency (0.08s)
+=== RUN   TestAtomicAdmissionConcurrency
+    atomic_admission_test.go:142: different_keys=64 admitted=1 rejected=63 no_rejected_keys=true duplicate_first=true retry_after_reset=true same_key_admitted=1 duplicate=63
+--- PASS: TestAtomicAdmissionConcurrency (0.07s)
+=== RUN   TestAtomicAdmissionConcurrency
+    atomic_admission_test.go:142: different_keys=64 admitted=1 rejected=63 no_rejected_keys=true duplicate_first=true retry_after_reset=true same_key_admitted=1 duplicate=63
+--- PASS: TestAtomicAdmissionConcurrency (0.05s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/project-load-2026-11-02	2.192s

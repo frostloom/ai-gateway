@@ -1,0 +1,227 @@
+head=42d8ef8e5ca2471b18800e50f8e7a57fbcfdd47f
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+# github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02.test
+ld: warning: '/private/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-745313484/000013.o' has malformed LC_DYSYMTAB, expected 98 undefined symbols to start at index 1626, found 95 undefined symbols starting at index 1626
+=== RUN   TestRouterProcessPersistenceMetricOnMySQLOutage
+[mysql] 2026/11/05 11:49:47 connection.go:801 closing bad idle connection: EOF
+[mysql] 2026/11/05 11:49:47 packets.go:58 unexpected EOF
+time=2026-11-05T11:49:47.263+08:00 level=ERROR msg="persist fail" provider_id=1 err="invalid connection"
+[mysql] 2026/11/05 11:49:51 connection.go:801 closing bad idle connection: EOF
+[mysql] 2026/11/05 11:49:51 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:49:51 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:49:51 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:49:51 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:49:52 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:49:52 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:49:52 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:49:52 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:49:52 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:49:53 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:49:53 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:49:53 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:49:53 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:49:54 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:49:54 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:49:54 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:49:54 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:49:54 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:49:55 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:49:55 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:49:55 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:49:55 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:49:56 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:49:56 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:49:56 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:49:56 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:49:56 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:49:57 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:49:57 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:49:57 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:49:57 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:49:58 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:49:58 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:49:58 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:49:59 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:49:59 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:49:59 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:49:59 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:00 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:00 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:00 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:00 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:01 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:01 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:01 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:01 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:01 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:02 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:02 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:02 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:02 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:02 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:03 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:03 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:03 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:04 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:04 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:04 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:04 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:04 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:05 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:05 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:05 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:05 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:05 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:06 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:06 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:06 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:06 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:07 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:07 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:07 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:07 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:07 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:08 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:08 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:08 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:08 packets.go:58 unexpected EOF
+    router_metric_process_test.go:191: actual router process: outage report HTTP 200, exposed increment error=1; recovery report HTTP 200, DB count=1, memory count=2
+--- PASS: TestRouterProcessPersistenceMetricOnMySQLOutage (30.40s)
+=== RUN   TestRouterProcessPersistenceMetricOnMySQLOutage
+[mysql] 2026/11/05 11:50:32 connection.go:801 closing bad idle connection: EOF
+[mysql] 2026/11/05 11:50:32 packets.go:58 unexpected EOF
+time=2026-11-05T11:50:32.862+08:00 level=ERROR msg="persist fail" provider_id=2 err="invalid connection"
+[mysql] 2026/11/05 11:50:36 connection.go:801 closing bad idle connection: EOF
+[mysql] 2026/11/05 11:50:36 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:36 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:36 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:36 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:37 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:37 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:37 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:37 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:37 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:38 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:38 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:38 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:38 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:38 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:39 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:39 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:39 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:39 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:39 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:40 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:40 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:40 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:40 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:41 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:41 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:41 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:41 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:41 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:42 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:42 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:42 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:42 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:42 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:43 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:43 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:43 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:43 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:44 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:44 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:44 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:44 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:44 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:45 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:45 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:45 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:45 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:45 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:46 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:46 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:46 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:46 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:46 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:47 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:47 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:47 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:47 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:47 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:48 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:48 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:48 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:48 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:49 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:49 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:49 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:49 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:49 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:50 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:50 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:50 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:50 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:51 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:51 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:51 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:51 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:51 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:52 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:52 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:52 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:52 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:52 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:53 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:53 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:50:53 packets.go:58 unexpected EOF
+    router_metric_process_test.go:191: actual router process: outage report HTTP 200, exposed increment error=1; recovery report HTTP 200, DB count=1, memory count=2
+--- PASS: TestRouterProcessPersistenceMetricOnMySQLOutage (42.90s)
+=== RUN   TestRouterProcessPersistenceMetricOnMySQLOutage
+[mysql] 2026/11/05 11:51:04 connection.go:801 closing bad idle connection: EOF
+time=2026-11-05T11:51:04.841+08:00 level=ERROR msg="persist fail" provider_id=3 err="dial tcp 127.0.0.1:57563: connect: connection refused"
+[mysql] 2026/11/05 11:51:06 connection.go:801 closing bad idle connection: EOF
+[mysql] 2026/11/05 11:51:06 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:51:06 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:51:06 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:51:07 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:51:07 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:51:07 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:51:07 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:51:08 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:51:08 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:51:08 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:51:08 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:51:08 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:51:09 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:51:09 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:51:09 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:51:09 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:51:09 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:51:10 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:51:10 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:51:10 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:51:10 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:51:10 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:51:11 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:51:11 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:51:11 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:51:11 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:51:11 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:51:12 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:51:12 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:51:12 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:51:12 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:51:13 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:51:13 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:51:13 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:51:13 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:51:13 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:51:14 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:51:14 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 11:51:14 packets.go:58 unexpected EOF
+    router_metric_process_test.go:191: actual router process: outage report HTTP 200, exposed increment error=1; recovery report HTTP 200, DB count=1, memory count=2
+--- PASS: TestRouterProcessPersistenceMetricOnMySQLOutage (21.05s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	96.149s

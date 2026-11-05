@@ -1,0 +1,24 @@
+head=42d8ef8e5ca2471b18800e50f8e7a57fbcfdd47f
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestReconcilerOnceSignalsSettlementFailure
+    reconciler_once_exit_test.go:62: failed settlement returned success: output=time=2026-11-05T00:46:30.601+08:00 level=INFO msg="reconciler starting" once=true interval=30 grace=0 no_sweep=false no_rebuild=true no_auto_reverse=true
+        time=2026-11-05T00:46:30.601+08:00 level=INFO msg="reconciler http listening" port=0
+        time=2026-11-05T00:46:30.606+08:00 level=ERROR msg="recon settle" request_id=once-exit-1793810788185598000 err="rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing: dial tcp 127.0.0.1:61001: connect: connection refused\""
+        time=2026-11-05T00:46:30.606+08:00 level=INFO msg="one-shot done" scanned=1 reversed=0 settled=0 held=0 rebuilt=0
+--- FAIL: TestReconcilerOnceSignalsSettlementFailure (2.85s)
+=== RUN   TestReconcilerOnceSignalsSettlementFailure
+    reconciler_once_exit_test.go:62: failed settlement returned success: output=time=2026-11-05T00:46:32.062+08:00 level=INFO msg="reconciler starting" once=true interval=30 grace=0 no_sweep=false no_rebuild=true no_auto_reverse=true
+        time=2026-11-05T00:46:32.062+08:00 level=INFO msg="reconciler http listening" port=0
+        time=2026-11-05T00:46:32.066+08:00 level=ERROR msg="recon settle" request_id=once-exit-1793810790933778000 err="rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing: dial tcp 127.0.0.1:61009: connect: connection refused\""
+        time=2026-11-05T00:46:32.066+08:00 level=INFO msg="one-shot done" scanned=1 reversed=0 settled=0 held=0 rebuilt=0
+--- FAIL: TestReconcilerOnceSignalsSettlementFailure (1.46s)
+=== RUN   TestReconcilerOnceSignalsSettlementFailure
+    reconciler_once_exit_test.go:62: failed settlement returned success: output=time=2026-11-05T00:46:33.787+08:00 level=INFO msg="reconciler starting" once=true interval=30 grace=0 no_sweep=false no_rebuild=true no_auto_reverse=true
+        time=2026-11-05T00:46:33.787+08:00 level=INFO msg="reconciler http listening" port=0
+        time=2026-11-05T00:46:33.791+08:00 level=ERROR msg="recon settle" request_id=once-exit-1793810792385201000 err="rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing: dial tcp 127.0.0.1:61015: connect: connection refused\""
+        time=2026-11-05T00:46:33.791+08:00 level=INFO msg="one-shot done" scanned=1 reversed=0 settled=0 held=0 rebuilt=0
+--- FAIL: TestReconcilerOnceSignalsSettlementFailure (1.73s)
+FAIL
+FAIL	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	7.178s
+FAIL

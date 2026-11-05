@@ -1,0 +1,28 @@
+head=42d8ef8e5ca2471b18800e50f8e7a57fbcfdd47f
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+# github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02.test
+ld: warning: '/private/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-3754755787/000013.o' has malformed LC_DYSYMTAB, expected 98 undefined symbols to start at index 1626, found 95 undefined symbols starting at index 1626
+=== RUN   TestHeldFailureAndAllocationConcurrent
+    router_held_probe_cooldown_race_test.go:100: simultaneous result and 16 allocations: result=1 allocations=0 attempts=1 events=1
+--- PASS: TestHeldFailureAndAllocationConcurrent (0.27s)
+=== RUN   TestHeldFailureCommitAckLost
+    router_held_probe_cooldown_race_test.go:124: injected=injected commit acknowledgement loss committed failure replay no-op, cooldown holds, events=1
+    router_held_probe_cooldown_race_test.go:124: injected=driver: bad connection committed failure replay no-op, cooldown holds, events=1
+--- PASS: TestHeldFailureCommitAckLost (0.12s)
+=== RUN   TestHeldFailureAndAllocationConcurrent
+    router_held_probe_cooldown_race_test.go:100: simultaneous result and 16 allocations: result=1 allocations=0 attempts=1 events=1
+--- PASS: TestHeldFailureAndAllocationConcurrent (0.07s)
+=== RUN   TestHeldFailureCommitAckLost
+    router_held_probe_cooldown_race_test.go:124: injected=injected commit acknowledgement loss committed failure replay no-op, cooldown holds, events=1
+    router_held_probe_cooldown_race_test.go:124: injected=driver: bad connection committed failure replay no-op, cooldown holds, events=1
+--- PASS: TestHeldFailureCommitAckLost (0.13s)
+=== RUN   TestHeldFailureAndAllocationConcurrent
+    router_held_probe_cooldown_race_test.go:100: simultaneous result and 16 allocations: result=1 allocations=0 attempts=1 events=1
+--- PASS: TestHeldFailureAndAllocationConcurrent (0.17s)
+=== RUN   TestHeldFailureCommitAckLost
+    router_held_probe_cooldown_race_test.go:124: injected=injected commit acknowledgement loss committed failure replay no-op, cooldown holds, events=1
+    router_held_probe_cooldown_race_test.go:124: injected=driver: bad connection committed failure replay no-op, cooldown holds, events=1
+--- PASS: TestHeldFailureCommitAckLost (0.14s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	3.046s

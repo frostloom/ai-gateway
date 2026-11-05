@@ -1,0 +1,31 @@
+
+// Characterization only: the 1 MiB policy is a test assumption.
+func TestNonstreamConcurrentMemoryCharacterization(t *testing.T) {
+ const n=16
+ const size=4<<20
+ const prefix=`{"choices":[{"message":{"content":"`
+ const suffix=`"}}],"usage":{"prompt_tokens":4,"completion_tokens":2}}`
+ payload:=prefix+strings.Repeat("x",size-len(prefix)-len(suffix))+suffix
+ arrived:=make(chan struct{},n);release:=make(chan struct{})
+ upstream:=httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter,r *http.Request){arrived<-struct{}{};<-release;_,_=io.WriteString(w,payload)}));defer upstream.Close()
+ type result struct{code int;reserves,reports,settles,reverses int;elapsed time.Duration}
+ results:=make(chan result,n);start:=make(chan struct{});var wg sync.WaitGroup
+ gateMode:=os.Getenv("NONSTREAM_MEMORY_GATE")=="1";gate:=make(chan struct{},4);decided:=make(chan struct{},n)
+ gin.SetMode(gin.TestMode)
+ for i:=0;i<n;i++{wg.Add(1);go func(){defer wg.Done();bill:=&fakeBilling{};route:=&fakeRouter{next:[]*client.RouteResult{{ProviderID:2,BaseURL:upstream.URL}}};w:=httptest.NewRecorder();c,_:=gin.CreateTestContext(w);c.Request=httptest.NewRequest(http.MethodPost,"/v1/chat/completions",strings.NewReader(`{"model":"m","messages":[{"role":"user","content":"hi"}]}`));c.Set("request_id","memory-case");<-start;begin:=time.Now();if gateMode {select{case gate<-struct{}{}:defer func(){<-gate}();default:decided<-struct{}{};results<-result{503,0,0,0,0,time.Since(begin)};return}};decided<-struct{}{};Chat(bill,route,slog.New(slog.DiscardHandler),30*time.Second,true)(c);code:=w.Code;if code==200&&!bytes.Equal(w.Body.Bytes(),[]byte(payload)) {code=599};results<-result{code,len(bill.reserves),len(bill.reports),len(bill.settles),len(bill.reverses),time.Since(begin)}}()}
+ runtime.GC();var before runtime.MemStats;runtime.ReadMemStats(&before)
+ close(start)
+ for i:=0;i<n;i++{select{case <-decided:case <-time.After(30*time.Second):close(release);wg.Wait();t.Fatal("admission decisions timed out")}}
+ expectedArrivals:=n;if gateMode{expectedArrivals=4}
+ for i:=0;i<expectedArrivals;i++{select{case <-arrived:case <-time.After(30*time.Second):close(release);wg.Wait();t.Fatal("upstreams did not all arrive")}}
+ stop:=make(chan struct{});sampleDone:=make(chan uint64,1)
+ go func(){var peak uint64;ticker:=time.NewTicker(10*time.Millisecond);defer ticker.Stop();for{select{case <-stop:sampleDone<-peak;return;case <-ticker.C:var m runtime.MemStats;runtime.ReadMemStats(&m);if m.HeapAlloc>peak{peak=m.HeapAlloc}}}}()
+ close(release);wg.Wait();close(stop);peak:=<-sampleDone;close(results)
+ var delays []time.Duration;statuses:=map[int]int{};reserves,reports,settles,reverses:=0,0,0,0
+ for r:=range results{statuses[r.code]++;reserves+=r.reserves;reports+=r.reports;settles+=r.settles;reverses+=r.reverses;delays=append(delays,r.elapsed)}
+ sort.Slice(delays,func(i,j int)bool{return delays[i]<delays[j]})
+ candidate:=os.Getenv("NONSTREAM_MEMORY_LIMITED")=="1"
+ if gateMode {if statuses[200]!=4||statuses[503]!=12||reserves!=4||reports!=4||settles!=4||reverses!=0{t.Fatalf("statuses=%v reserves=%d reports=%d settles=%d reverses=%d",statuses,reserves,reports,settles,reverses)}} else if candidate {if statuses[502]!=n||reserves!=n||reports!=0||settles!=0||reverses!=0{t.Fatalf("statuses=%v reserves=%d reports=%d settles=%d reverses=%d",statuses,reserves,reports,settles,reverses)}} else if statuses[200]!=n||reserves!=n||reports!=n||settles!=n||reverses!=0 {t.Fatalf("statuses=%v reserves=%d reports=%d settles=%d reverses=%d",statuses,reserves,reports,settles,reverses)}
+ delta:=int64(peak)-int64(before.HeapAlloc)
+ t.Logf("candidate=%t gate=%t requests=%d upstream_bytes=%d baseline_heap=%d sampled_peak_heap=%d peak_delta=%d p95_ms=%.3f p99_ms=%.3f statuses=%v reserves=%d reports=%d settles=%d reverses=%d",candidate,gateMode,n,size,before.HeapAlloc,peak,delta,float64(delays[(n*95+99)/100-1].Microseconds())/1000,float64(delays[(n*99+99)/100-1].Microseconds())/1000,statuses,reserves,reports,settles,reverses)
+}

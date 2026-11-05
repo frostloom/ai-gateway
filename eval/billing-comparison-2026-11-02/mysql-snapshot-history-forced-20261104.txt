@@ -1,0 +1,397 @@
+head=63b9d1ed4d64bb583d15fa884c37468e5c53044c
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestIsolatedBalanceHistoryLoad
+HISTORY_PLAN stage=original_index rows=0 json={
+  "query_block": {
+    "select_id": 1,
+    "cost_info": {
+      "query_cost": "0.35"
+    },
+    "table": {
+      "table_name": "bills",
+      "access_type": "ref",
+      "possible_keys": [
+        "idx_recon",
+        "idx_tenant_status_created"
+      ],
+      "key": "idx_tenant_status_created",
+      "used_key_parts": [
+        "tenant_id"
+      ],
+      "key_length": "8",
+      "ref": [
+        "const"
+      ],
+      "rows_examined_per_scan": 1,
+      "rows_produced_per_join": 0,
+      "filtered": "5.00",
+      "cost_info": {
+        "read_cost": "0.25",
+        "eval_cost": "0.01",
+        "prefix_cost": "0.35",
+        "data_read_per_join": "80"
+      },
+      "used_columns": [
+        "phase",
+        "status",
+        "tenant_id",
+        "actual_quota"
+      ],
+      "attached_condition": "((`billing_compare`.`bills`.`status` = 'settled') and (`billing_compare`.`bills`.`phase` = 'settle'))"
+    }
+  }
+}
+HISTORY_READ stage=original_index rows=0 rep=1 count=64 workers=8 seconds=0.085 ops_sec=756.6 mean_ms=10.356 p95_ms=16.368 p99_ms=17.431 errors=0
+HISTORY_READ stage=original_index rows=0 rep=2 count=64 workers=8 seconds=0.084 ops_sec=760.3 mean_ms=10.345 p95_ms=14.565 p99_ms=16.045 errors=0
+HISTORY_PLAN stage=original_index rows=5000 json={
+  "query_block": {
+    "select_id": 1,
+    "cost_info": {
+      "query_cost": "500.75"
+    },
+    "table": {
+      "table_name": "bills",
+      "access_type": "ref",
+      "possible_keys": [
+        "idx_recon",
+        "idx_tenant_status_created"
+      ],
+      "key": "idx_tenant_status_created",
+      "used_key_parts": [
+        "tenant_id"
+      ],
+      "key_length": "8",
+      "ref": [
+        "const"
+      ],
+      "rows_examined_per_scan": 5000,
+      "rows_produced_per_join": 250,
+      "filtered": "5.00",
+      "cost_info": {
+        "read_cost": "0.75",
+        "eval_cost": "25.00",
+        "prefix_cost": "500.75",
+        "data_read_per_join": "390K"
+      },
+      "used_columns": [
+        "phase",
+        "status",
+        "tenant_id",
+        "actual_quota"
+      ],
+      "attached_condition": "((`billing_compare`.`bills`.`status` = 'settled') and (`billing_compare`.`bills`.`phase` = 'settle'))"
+    }
+  }
+}
+HISTORY_READ stage=original_index rows=5000 rep=1 count=64 workers=8 seconds=0.171 ops_sec=374.2 mean_ms=20.579 p95_ms=33.753 p99_ms=34.960 errors=0
+HISTORY_READ stage=original_index rows=5000 rep=2 count=64 workers=8 seconds=0.153 ops_sec=419.2 mean_ms=18.429 p95_ms=25.506 p99_ms=28.772 errors=0
+HISTORY_PLAN stage=original_index rows=20000 json={
+  "query_block": {
+    "select_id": 1,
+    "cost_info": {
+      "query_cost": "1250.75"
+    },
+    "table": {
+      "table_name": "bills",
+      "access_type": "ref",
+      "possible_keys": [
+        "idx_recon",
+        "idx_tenant_status_created"
+      ],
+      "key": "idx_recon",
+      "used_key_parts": [
+        "status"
+      ],
+      "key_length": "66",
+      "ref": [
+        "const"
+      ],
+      "rows_examined_per_scan": 12500,
+      "rows_produced_per_join": 625,
+      "filtered": "5.00",
+      "cost_info": {
+        "read_cost": "0.75",
+        "eval_cost": "62.50",
+        "prefix_cost": "1250.75",
+        "data_read_per_join": "976K"
+      },
+      "used_columns": [
+        "phase",
+        "status",
+        "tenant_id",
+        "actual_quota"
+      ],
+      "attached_condition": "((`billing_compare`.`bills`.`phase` = 'settle') and (`billing_compare`.`bills`.`tenant_id` = 3))"
+    }
+  }
+}
+HISTORY_READ stage=original_index rows=20000 rep=1 count=64 workers=8 seconds=0.663 ops_sec=96.5 mean_ms=80.271 p95_ms=126.765 p99_ms=155.244 errors=0
+HISTORY_READ stage=original_index rows=20000 rep=2 count=64 workers=8 seconds=0.599 ops_sec=106.9 mean_ms=72.898 p95_ms=92.606 p99_ms=107.596 errors=0
+HISTORY_PLAN stage=covering_index rows=0 json={
+  "query_block": {
+    "select_id": 1,
+    "cost_info": {
+      "query_cost": "0.35"
+    },
+    "table": {
+      "table_name": "bills",
+      "access_type": "ref",
+      "possible_keys": [
+        "idx_recon",
+        "idx_tenant_status_created",
+        "idx_eval_balance_cover"
+      ],
+      "key": "idx_tenant_status_created",
+      "used_key_parts": [
+        "tenant_id"
+      ],
+      "key_length": "8",
+      "ref": [
+        "const"
+      ],
+      "rows_examined_per_scan": 1,
+      "rows_produced_per_join": 0,
+      "filtered": "5.00",
+      "cost_info": {
+        "read_cost": "0.25",
+        "eval_cost": "0.01",
+        "prefix_cost": "0.35",
+        "data_read_per_join": "80"
+      },
+      "used_columns": [
+        "phase",
+        "status",
+        "tenant_id",
+        "actual_quota"
+      ],
+      "attached_condition": "((`billing_compare`.`bills`.`status` = 'settled') and (`billing_compare`.`bills`.`phase` = 'settle'))"
+    }
+  }
+}
+HISTORY_FORCED_PLAN rows=0 json={
+  "query_block": {
+    "select_id": 1,
+    "cost_info": {
+      "query_cost": "1.09"
+    },
+    "table": {
+      "table_name": "bills",
+      "access_type": "ref",
+      "possible_keys": [
+        "idx_eval_balance_cover"
+      ],
+      "key": "idx_eval_balance_cover",
+      "used_key_parts": [
+        "tenant_id",
+        "phase",
+        "status"
+      ],
+      "key_length": "140",
+      "ref": [
+        "const",
+        "const",
+        "const"
+      ],
+      "rows_examined_per_scan": 1,
+      "rows_produced_per_join": 1,
+      "filtered": "100.00",
+      "using_index": true,
+      "cost_info": {
+        "read_cost": "0.99",
+        "eval_cost": "0.10",
+        "prefix_cost": "1.09",
+        "data_read_per_join": "1K"
+      },
+      "used_columns": [
+        "phase",
+        "status",
+        "tenant_id",
+        "actual_quota"
+      ]
+    }
+  }
+}
+HISTORY_SUM rows=0 forced=false count=20 mean_ms=1.086
+HISTORY_SUM rows=0 forced=true count=20 mean_ms=0.945
+HISTORY_READ stage=covering_index rows=0 rep=1 count=64 workers=8 seconds=0.076 ops_sec=847.6 mean_ms=9.296 p95_ms=10.556 p99_ms=10.890 errors=0
+HISTORY_READ stage=covering_index rows=0 rep=2 count=64 workers=8 seconds=0.075 ops_sec=854.9 mean_ms=9.182 p95_ms=10.702 p99_ms=11.426 errors=0
+HISTORY_PLAN stage=covering_index rows=5000 json={
+  "query_block": {
+    "select_id": 1,
+    "cost_info": {
+      "query_cost": "668.75"
+    },
+    "table": {
+      "table_name": "bills",
+      "access_type": "ref",
+      "possible_keys": [
+        "idx_recon",
+        "idx_tenant_status_created",
+        "idx_eval_balance_cover"
+      ],
+      "key": "idx_tenant_status_created",
+      "used_key_parts": [
+        "tenant_id"
+      ],
+      "key_length": "8",
+      "ref": [
+        "const"
+      ],
+      "rows_examined_per_scan": 5000,
+      "rows_produced_per_join": 250,
+      "filtered": "5.00",
+      "cost_info": {
+        "read_cost": "168.75",
+        "eval_cost": "25.00",
+        "prefix_cost": "668.75",
+        "data_read_per_join": "390K"
+      },
+      "used_columns": [
+        "phase",
+        "status",
+        "tenant_id",
+        "actual_quota"
+      ],
+      "attached_condition": "((`billing_compare`.`bills`.`status` = 'settled') and (`billing_compare`.`bills`.`phase` = 'settle'))"
+    }
+  }
+}
+HISTORY_FORCED_PLAN rows=5000 json={
+  "query_block": {
+    "select_id": 1,
+    "cost_info": {
+      "query_cost": "1102.69"
+    },
+    "table": {
+      "table_name": "bills",
+      "access_type": "ref",
+      "possible_keys": [
+        "idx_eval_balance_cover"
+      ],
+      "key": "idx_eval_balance_cover",
+      "used_key_parts": [
+        "tenant_id",
+        "phase",
+        "status"
+      ],
+      "key_length": "140",
+      "ref": [
+        "const",
+        "const",
+        "const"
+      ],
+      "rows_examined_per_scan": 9284,
+      "rows_produced_per_join": 9284,
+      "filtered": "100.00",
+      "using_index": true,
+      "cost_info": {
+        "read_cost": "174.29",
+        "eval_cost": "928.40",
+        "prefix_cost": "1102.69",
+        "data_read_per_join": "14M"
+      },
+      "used_columns": [
+        "phase",
+        "status",
+        "tenant_id",
+        "actual_quota"
+      ]
+    }
+  }
+}
+HISTORY_SUM rows=5000 forced=false count=20 mean_ms=4.193
+HISTORY_SUM rows=5000 forced=true count=20 mean_ms=2.191
+HISTORY_READ stage=covering_index rows=5000 rep=1 count=64 workers=8 seconds=0.155 ops_sec=412.2 mean_ms=18.416 p95_ms=23.096 p99_ms=24.691 errors=0
+HISTORY_READ stage=covering_index rows=5000 rep=2 count=64 workers=8 seconds=0.175 ops_sec=366.4 mean_ms=20.928 p95_ms=27.851 p99_ms=34.619 errors=0
+HISTORY_PLAN stage=covering_index rows=20000 json={
+  "query_block": {
+    "select_id": 1,
+    "cost_info": {
+      "query_cost": "1374.95"
+    },
+    "table": {
+      "table_name": "bills",
+      "access_type": "ref",
+      "possible_keys": [
+        "idx_recon",
+        "idx_tenant_status_created",
+        "idx_eval_balance_cover"
+      ],
+      "key": "idx_recon",
+      "used_key_parts": [
+        "status"
+      ],
+      "key_length": "66",
+      "ref": [
+        "const"
+      ],
+      "rows_examined_per_scan": 12062,
+      "rows_produced_per_join": 603,
+      "filtered": "5.00",
+      "cost_info": {
+        "read_cost": "168.75",
+        "eval_cost": "60.31",
+        "prefix_cost": "1374.95",
+        "data_read_per_join": "942K"
+      },
+      "used_columns": [
+        "phase",
+        "status",
+        "tenant_id",
+        "actual_quota"
+      ],
+      "attached_condition": "((`billing_compare`.`bills`.`phase` = 'settle') and (`billing_compare`.`bills`.`tenant_id` = 3))"
+    }
+  }
+}
+HISTORY_FORCED_PLAN rows=20000 json={
+  "query_block": {
+    "select_id": 1,
+    "cost_info": {
+      "query_cost": "1432.35"
+    },
+    "table": {
+      "table_name": "bills",
+      "access_type": "ref",
+      "possible_keys": [
+        "idx_eval_balance_cover"
+      ],
+      "key": "idx_eval_balance_cover",
+      "used_key_parts": [
+        "tenant_id",
+        "phase",
+        "status"
+      ],
+      "key_length": "140",
+      "ref": [
+        "const",
+        "const",
+        "const"
+      ],
+      "rows_examined_per_scan": 12062,
+      "rows_produced_per_join": 12062,
+      "filtered": "100.00",
+      "using_index": true,
+      "cost_info": {
+        "read_cost": "226.15",
+        "eval_cost": "1206.20",
+        "prefix_cost": "1432.35",
+        "data_read_per_join": "18M"
+      },
+      "used_columns": [
+        "phase",
+        "status",
+        "tenant_id",
+        "actual_quota"
+      ]
+    }
+  }
+}
+HISTORY_SUM rows=20000 forced=false count=20 mean_ms=21.386
+HISTORY_SUM rows=20000 forced=true count=20 mean_ms=6.738
+HISTORY_READ stage=covering_index rows=20000 rep=1 count=64 workers=8 seconds=1.026 ops_sec=62.4 mean_ms=121.766 p95_ms=173.854 p99_ms=187.251 errors=0
+HISTORY_READ stage=covering_index rows=20000 rep=2 count=64 workers=8 seconds=0.827 ops_sec=77.4 mean_ms=99.231 p95_ms=177.087 p99_ms=212.149 errors=0
+--- PASS: TestIsolatedBalanceHistoryLoad (6.62s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	7.388s

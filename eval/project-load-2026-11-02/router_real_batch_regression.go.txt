@@ -1,0 +1,14 @@
+
+func TestRealRouterBatchesConcurrentSuccess(t *testing.T) {
+ dsn:=os.Getenv("COMPARISON_MYSQL_DSN");if dsn==""{t.Fatal("isolated MySQL DSN required")}
+ db,e:=gorm.Open(mysql.Open(dsn),&gorm.Config{Logger:logger.Default.LogMode(logger.Silent)});if e!=nil{t.Fatal(e)}
+ if e=db.Exec("CREATE TABLE IF NOT EXISTS providers (id BIGINT PRIMARY KEY,status TINYINT NOT NULL,consecutive_fail INT NOT NULL)").Error;e!=nil{t.Fatal(e)};if e=db.Exec("DELETE FROM providers").Error;e!=nil{t.Fatal(e)};if e=db.Exec("INSERT INTO providers(id,status,consecutive_fail) VALUES(1,0,3)").Error;e!=nil{t.Fatal(e)}
+ r:=New(db,slog.New(slog.DiscardHandler));entered,resume:=make(chan struct{}),make(chan struct{});var calls atomic.Int32
+ if e=db.Callback().Update().Before("gorm:update").Register("test:batch-real-router",func(tx *gorm.DB){if tx.Statement.Table=="providers"&&calls.Add(1)==1{close(entered);<-resume}});e!=nil{t.Fatal(e)};defer db.Callback().Update().Remove("test:batch-real-router")
+ const n=32;var ready,wg sync.WaitGroup;ready.Add(n);wg.Add(n);start:=make(chan struct{})
+ for i:=0;i<n;i++{go func(){defer wg.Done();ready.Done();<-start;r.Report(1,true)}()};ready.Wait();close(start)
+ select{case <-entered:case <-time.After(5*time.Second):close(resume);t.Fatal("no DB update")};time.Sleep(150*time.Millisecond);close(resume)
+ finished:=make(chan struct{});go func(){wg.Wait();close(finished)}();select{case <-finished:case <-time.After(10*time.Second):t.Fatal("reports stuck")}
+ var value int;if e=db.Table("providers").Select("consecutive_fail").Where("id=?",1).Scan(&value).Error;e!=nil||value!=0{t.Fatalf("failures=%d err=%v",value,e)}
+ if calls.Load()>=n {t.Fatalf("concurrent successes not merged: SQL updates=%d",calls.Load())};t.Logf("reports=%d SQL_updates=%d",n,calls.Load())
+}

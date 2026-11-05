@@ -1,0 +1,48 @@
+head=42d8ef8e5ca2471b18800e50f8e7a57fbcfdd47f
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestRouterEventRetryAfterMySQLCrash
+[mysql] 2026/11/05 01:00:33 connection.go:801 closing bad idle connection: EOF
+[mysql] 2026/11/05 01:00:33 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 01:00:34 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 01:00:34 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 01:00:34 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 01:00:34 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 01:00:34 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 01:00:35 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 01:00:35 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 01:00:35 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 01:00:35 packets.go:58 unexpected EOF
+    router_event_mysql_restart_test.go:107: while down: dial tcp 127.0.0.1:50665: connect: connection refused; after restart retry twice events=1 failures=1 conflicting replay rejected
+--- PASS: TestRouterEventRetryAfterMySQLCrash (3.22s)
+=== RUN   TestRouterEventRetryAfterMySQLCrash
+[mysql] 2026/11/05 01:00:36 connection.go:801 closing bad idle connection: EOF
+[mysql] 2026/11/05 01:00:36 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 01:00:36 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 01:00:36 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 01:00:37 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 01:00:37 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 01:00:37 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 01:00:37 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 01:00:37 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 01:00:38 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 01:00:38 packets.go:58 unexpected EOF
+    router_event_mysql_restart_test.go:107: while down: dial tcp 127.0.0.1:50665: connect: connection refused; after restart retry twice events=1 failures=1 conflicting replay rejected
+--- PASS: TestRouterEventRetryAfterMySQLCrash (2.70s)
+=== RUN   TestRouterEventRetryAfterMySQLCrash
+[mysql] 2026/11/05 01:00:39 connection.go:801 closing bad idle connection: EOF
+[mysql] 2026/11/05 01:00:39 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 01:00:39 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 01:00:39 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 01:00:39 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 01:00:39 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 01:00:40 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 01:00:40 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 01:00:40 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 01:00:40 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 01:00:40 packets.go:58 unexpected EOF
+[mysql] 2026/11/05 01:00:41 packets.go:58 unexpected EOF
+    router_event_mysql_restart_test.go:107: while down: invalid connection; after restart retry twice events=1 failures=1 conflicting replay rejected
+--- PASS: TestRouterEventRetryAfterMySQLCrash (2.79s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	11.234s

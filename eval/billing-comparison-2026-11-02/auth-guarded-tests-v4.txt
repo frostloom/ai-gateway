@@ -1,0 +1,41 @@
+=== RUN   TestFenceActualStoreMultiInstance
+    auth_fence_integration_test.go:14: disposable services required
+--- SKIP: TestFenceActualStoreMultiInstance (0.00s)
+=== RUN   TestGuardedActualStoreMultiInstance
+    auth_fence_integration_test.go:48: disposable services required
+--- SKIP: TestGuardedActualStoreMultiInstance (0.00s)
+=== RUN   TestFenceBlocksStaleRefill
+=== RUN   TestFenceBlocksStaleRefill/within_fence
+=== RUN   TestFenceBlocksStaleRefill/fence_expired
+--- PASS: TestFenceBlocksStaleRefill (0.03s)
+    --- PASS: TestFenceBlocksStaleRefill/within_fence (0.02s)
+    --- PASS: TestFenceBlocksStaleRefill/fence_expired (0.01s)
+=== RUN   TestFenceRedisFailure
+redis: 2026/11/03 16:17:36 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:57596: connect: connection refused
+--- PASS: TestFenceRedisFailure (0.44s)
+=== RUN   TestFenceStateLossAllowsStaleRefill
+--- PASS: TestFenceStateLossAllowsStaleRefill (0.07s)
+=== RUN   TestFenceBestEffortDeleteFailure
+--- PASS: TestFenceBestEffortDeleteFailure (0.03s)
+=== RUN   TestGuardedCacheMutationFailureDoesNotCommit
+--- PASS: TestGuardedCacheMutationFailureDoesNotCommit (0.02s)
+=== RUN   TestGuardedCacheFenceRejectsExistingValue
+--- PASS: TestGuardedCacheFenceRejectsExistingValue (0.02s)
+=== RUN   TestGuardedSlowMutationCanRepublishStale
+--- PASS: TestGuardedSlowMutationCanRepublishStale (0.02s)
+=== RUN   TestGuardedUnavailableSkipsRefill
+--- PASS: TestGuardedUnavailableSkipsRefill (0.00s)
+=== RUN   TestRedisContextTimeoutObservation
+=== RUN   TestRedisContextTimeoutObservation/default
+redis: 2026/11/03 16:17:37 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:57596: connect: connection refused
+    redis_timeout_test.go:48: context_enabled=false requested_ms=30 elapsed_ms=306.0 err=i/o timeout
+=== RUN   TestRedisContextTimeoutObservation/enabled
+    redis_timeout_test.go:48: context_enabled=true requested_ms=30 elapsed_ms=32.1 err=i/o timeout
+--- PASS: TestRedisContextTimeoutObservation (0.34s)
+    --- PASS: TestRedisContextTimeoutObservation/default (0.31s)
+    --- PASS: TestRedisContextTimeoutObservation/enabled (0.03s)
+=== RUN   TestGuardedFallbackOnUnresponsiveRedis
+    redis_timeout_test.go:89: unresponsive Redis fallback calls=1 elapsed_ms=32.6
+--- PASS: TestGuardedFallbackOnUnresponsiveRedis (0.03s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	2.996s

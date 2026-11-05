@@ -1,0 +1,65 @@
+head=d607e1465094269e8dc8e2f07cf5b3ac28560abf
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestContentFingerprintSubscriptionConcurrentQuota
+    content_fingerprint_subscription_concurrency_test.go:119: quota=300 concurrent=8 reserve=3 rejected=5 settled=3 balance=100000 ledger=100000
+--- PASS: TestContentFingerprintSubscriptionConcurrentQuota (0.62s)
+=== RUN   TestReserveRedisAppliedReplyLostThenRetry
+    redis_lost_reserve_reply_test.go:102: injected=1 bills_before=0 balance_after_lost=900 retry=RESERVE_OK replay=RESERVE_DUPLICATE balance=900 ledger=900 events=1
+--- PASS: TestReserveRedisAppliedReplyLostThenRetry (0.46s)
+=== RUN   TestSettlementRedisAppliedReplyLostThenRetry
+    redis_lost_settlement_reply_test.go:86: lost_balance=960 pending_with_usage=true retry_settled=true repeat_settled=true balance=960 ledger=960 settle_rows=1 events=3
+--- PASS: TestSettlementRedisAppliedReplyLostThenRetry (0.93s)
+=== RUN   TestSubscriptionReservedQuotaLifecycle
+    subscription_reservation_lifecycle_test.go:122: held=200 reject=150 actual=50 then allow=150 reverse releases=true allow=250 legacy=unavailable balance=100000 ledger=100000
+--- PASS: TestSubscriptionReservedQuotaLifecycle (0.51s)
+=== RUN   TestTerminalCommitAcknowledgementLoss
+=== RUN   TestTerminalCommitAcknowledgementLoss/settle
+    terminal_commit_ack_loss_test.go:111: mode=settle committed=true reported=unavailable balance=460 ledger=460 replay_events=1
+=== RUN   TestTerminalCommitAcknowledgementLoss/reverse
+    terminal_commit_ack_loss_test.go:111: mode=reverse committed=true reported=unavailable balance=500 ledger=500 replay_events=1
+--- PASS: TestTerminalCommitAcknowledgementLoss (0.52s)
+    --- PASS: TestTerminalCommitAcknowledgementLoss/settle (0.10s)
+    --- PASS: TestTerminalCommitAcknowledgementLoss/reverse (0.08s)
+=== RUN   TestContentFingerprintSubscriptionConcurrentQuota
+    content_fingerprint_subscription_concurrency_test.go:119: quota=300 concurrent=8 reserve=3 rejected=5 settled=3 balance=100000 ledger=100000
+--- PASS: TestContentFingerprintSubscriptionConcurrentQuota (0.66s)
+=== RUN   TestReserveRedisAppliedReplyLostThenRetry
+    redis_lost_reserve_reply_test.go:102: injected=1 bills_before=0 balance_after_lost=900 retry=RESERVE_OK replay=RESERVE_DUPLICATE balance=900 ledger=900 events=1
+--- PASS: TestReserveRedisAppliedReplyLostThenRetry (0.57s)
+=== RUN   TestSettlementRedisAppliedReplyLostThenRetry
+    redis_lost_settlement_reply_test.go:86: lost_balance=960 pending_with_usage=true retry_settled=true repeat_settled=true balance=960 ledger=960 settle_rows=1 events=3
+--- PASS: TestSettlementRedisAppliedReplyLostThenRetry (0.48s)
+=== RUN   TestSubscriptionReservedQuotaLifecycle
+    subscription_reservation_lifecycle_test.go:122: held=200 reject=150 actual=50 then allow=150 reverse releases=true allow=250 legacy=unavailable balance=100000 ledger=100000
+--- PASS: TestSubscriptionReservedQuotaLifecycle (0.59s)
+=== RUN   TestTerminalCommitAcknowledgementLoss
+=== RUN   TestTerminalCommitAcknowledgementLoss/settle
+    terminal_commit_ack_loss_test.go:111: mode=settle committed=true reported=unavailable balance=460 ledger=460 replay_events=1
+=== RUN   TestTerminalCommitAcknowledgementLoss/reverse
+    terminal_commit_ack_loss_test.go:111: mode=reverse committed=true reported=unavailable balance=500 ledger=500 replay_events=1
+--- PASS: TestTerminalCommitAcknowledgementLoss (0.57s)
+    --- PASS: TestTerminalCommitAcknowledgementLoss/settle (0.10s)
+    --- PASS: TestTerminalCommitAcknowledgementLoss/reverse (0.06s)
+=== RUN   TestContentFingerprintSubscriptionConcurrentQuota
+    content_fingerprint_subscription_concurrency_test.go:119: quota=300 concurrent=8 reserve=3 rejected=5 settled=3 balance=100000 ledger=100000
+--- PASS: TestContentFingerprintSubscriptionConcurrentQuota (0.58s)
+=== RUN   TestReserveRedisAppliedReplyLostThenRetry
+    redis_lost_reserve_reply_test.go:102: injected=1 bills_before=0 balance_after_lost=900 retry=RESERVE_OK replay=RESERVE_DUPLICATE balance=900 ledger=900 events=1
+--- PASS: TestReserveRedisAppliedReplyLostThenRetry (0.45s)
+=== RUN   TestSettlementRedisAppliedReplyLostThenRetry
+    redis_lost_settlement_reply_test.go:86: lost_balance=960 pending_with_usage=true retry_settled=true repeat_settled=true balance=960 ledger=960 settle_rows=1 events=3
+--- PASS: TestSettlementRedisAppliedReplyLostThenRetry (0.44s)
+=== RUN   TestSubscriptionReservedQuotaLifecycle
+    subscription_reservation_lifecycle_test.go:122: held=200 reject=150 actual=50 then allow=150 reverse releases=true allow=250 legacy=unavailable balance=100000 ledger=100000
+--- PASS: TestSubscriptionReservedQuotaLifecycle (0.47s)
+=== RUN   TestTerminalCommitAcknowledgementLoss
+=== RUN   TestTerminalCommitAcknowledgementLoss/settle
+    terminal_commit_ack_loss_test.go:111: mode=settle committed=true reported=unavailable balance=460 ledger=460 replay_events=1
+=== RUN   TestTerminalCommitAcknowledgementLoss/reverse
+    terminal_commit_ack_loss_test.go:111: mode=reverse committed=true reported=unavailable balance=500 ledger=500 replay_events=1
+--- PASS: TestTerminalCommitAcknowledgementLoss (0.51s)
+    --- PASS: TestTerminalCommitAcknowledgementLoss/settle (0.12s)
+    --- PASS: TestTerminalCommitAcknowledgementLoss/reverse (0.07s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	11.104s

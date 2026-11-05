@@ -1,0 +1,51 @@
+=== RUN   TestExperimentalNonStreamBodyLimit
+=== RUN   TestExperimentalNonStreamBodyLimit/bytes=1048575
+=== RUN   TestExperimentalNonStreamBodyLimit/bytes=1048576
+=== RUN   TestExperimentalNonStreamBodyLimit/bytes=1048577
+    chat_stream_test.go:366: size=1048577 status=200 reports=1 settles=1 reverses=0
+--- FAIL: TestExperimentalNonStreamBodyLimit (0.60s)
+    --- PASS: TestExperimentalNonStreamBodyLimit/bytes=1048575 (0.20s)
+    --- PASS: TestExperimentalNonStreamBodyLimit/bytes=1048576 (0.19s)
+    --- FAIL: TestExperimentalNonStreamBodyLimit/bytes=1048577 (0.21s)
+=== RUN   TestExperimentalCompressedNonStreamBodyLimit
+=== RUN   TestExperimentalCompressedNonStreamBodyLimit/expanded=1048576
+=== RUN   TestExperimentalCompressedNonStreamBodyLimit/expanded=1048577
+    chat_stream_test.go:396: expanded=1048577 status=200 reports=1 settles=1 reverses=0
+--- FAIL: TestExperimentalCompressedNonStreamBodyLimit (0.88s)
+    --- PASS: TestExperimentalCompressedNonStreamBodyLimit/expanded=1048576 (0.37s)
+    --- FAIL: TestExperimentalCompressedNonStreamBodyLimit/expanded=1048577 (0.51s)
+=== RUN   TestExperimentalNonStreamBodyLimit
+=== RUN   TestExperimentalNonStreamBodyLimit/bytes=1048575
+=== RUN   TestExperimentalNonStreamBodyLimit/bytes=1048576
+=== RUN   TestExperimentalNonStreamBodyLimit/bytes=1048577
+    chat_stream_test.go:366: size=1048577 status=200 reports=1 settles=1 reverses=0
+--- FAIL: TestExperimentalNonStreamBodyLimit (0.88s)
+    --- PASS: TestExperimentalNonStreamBodyLimit/bytes=1048575 (0.28s)
+    --- PASS: TestExperimentalNonStreamBodyLimit/bytes=1048576 (0.27s)
+    --- FAIL: TestExperimentalNonStreamBodyLimit/bytes=1048577 (0.33s)
+=== RUN   TestExperimentalCompressedNonStreamBodyLimit
+=== RUN   TestExperimentalCompressedNonStreamBodyLimit/expanded=1048576
+=== RUN   TestExperimentalCompressedNonStreamBodyLimit/expanded=1048577
+    chat_stream_test.go:396: expanded=1048577 status=200 reports=1 settles=1 reverses=0
+--- FAIL: TestExperimentalCompressedNonStreamBodyLimit (0.84s)
+    --- PASS: TestExperimentalCompressedNonStreamBodyLimit/expanded=1048576 (0.39s)
+    --- FAIL: TestExperimentalCompressedNonStreamBodyLimit/expanded=1048577 (0.45s)
+=== RUN   TestExperimentalNonStreamBodyLimit
+=== RUN   TestExperimentalNonStreamBodyLimit/bytes=1048575
+=== RUN   TestExperimentalNonStreamBodyLimit/bytes=1048576
+=== RUN   TestExperimentalNonStreamBodyLimit/bytes=1048577
+    chat_stream_test.go:366: size=1048577 status=200 reports=1 settles=1 reverses=0
+--- FAIL: TestExperimentalNonStreamBodyLimit (0.66s)
+    --- PASS: TestExperimentalNonStreamBodyLimit/bytes=1048575 (0.23s)
+    --- PASS: TestExperimentalNonStreamBodyLimit/bytes=1048576 (0.24s)
+    --- FAIL: TestExperimentalNonStreamBodyLimit/bytes=1048577 (0.20s)
+=== RUN   TestExperimentalCompressedNonStreamBodyLimit
+=== RUN   TestExperimentalCompressedNonStreamBodyLimit/expanded=1048576
+=== RUN   TestExperimentalCompressedNonStreamBodyLimit/expanded=1048577
+    chat_stream_test.go:396: expanded=1048577 status=200 reports=1 settles=1 reverses=0
+--- FAIL: TestExperimentalCompressedNonStreamBodyLimit (0.77s)
+    --- PASS: TestExperimentalCompressedNonStreamBodyLimit/expanded=1048576 (0.34s)
+    --- FAIL: TestExperimentalCompressedNonStreamBodyLimit/expanded=1048577 (0.43s)
+FAIL
+FAIL	github.com/frostloom/ai-gateway/internal/gateway/handler	5.733s
+FAIL

@@ -1,0 +1,12 @@
+{
+  "request_id": "idem:mixed-2586bd531cab47f2afd859a7fe60e341",
+  "first": {
+    "status": 503,
+    "body": "{\"error\":{\"message\":\"billing unavailable\"}}"
+  },
+  "retry": {
+    "status": 409,
+    "body": "{\"error\":{\"message\":\"duplicate Idempotency-Key\",\"type\":\"authentication_error\"}}"
+  },
+  "upstream_calls": 0
+}

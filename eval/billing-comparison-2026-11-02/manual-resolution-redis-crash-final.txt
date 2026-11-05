@@ -1,0 +1,38 @@
+head=63b9d1ed4d64bb583d15fa884c37468e5c53044c
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestHandlerJournalSurvivesProcessKill
+[mysql] 2026/11/04 00:26:45 connection.go:801 closing bad idle connection: EOF
+    handler_journal_process_test.go:279: upstream replied once; handler killed before journal; no usage evidence; expired forwarding remains pending; no automatic refund
+    handler_journal_process_test.go:520: late contradictory usage rejected before inbox replay
+redis: 2026/11/04 00:26:46 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:61836: connect: connection refused
+redis: 2026/11/04 00:26:47 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:61836: connect: connection refused
+redis: 2026/11/04 00:26:47 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:61836: connect: connection refused
+redis: 2026/11/04 00:26:47 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:61836: connect: connection refused
+    handler_journal_process_test.go:587: Redis killed: usage durable and settlement pending; key_exists_after_restart=0; rebuilt from ledger
+    handler_journal_process_test.go:613: synthetic manual record accepted idempotently; conflict rejected; one audit and settlement; balance=458
+--- PASS: TestHandlerJournalSurvivesProcessKill (5.87s)
+=== RUN   TestHandlerJournalSurvivesProcessKill
+[mysql] 2026/11/04 00:26:51 connection.go:801 closing bad idle connection: EOF
+    handler_journal_process_test.go:279: upstream replied once; handler killed before journal; no usage evidence; expired forwarding remains pending; no automatic refund
+    handler_journal_process_test.go:520: late contradictory usage rejected before inbox replay
+redis: 2026/11/04 00:26:52 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:61836: connect: connection refused
+redis: 2026/11/04 00:26:52 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:61836: connect: connection refused
+redis: 2026/11/04 00:26:52 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:61836: connect: connection refused
+redis: 2026/11/04 00:26:53 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:61836: connect: connection refused
+    handler_journal_process_test.go:587: Redis killed: usage durable and settlement pending; key_exists_after_restart=0; rebuilt from ledger
+    handler_journal_process_test.go:613: synthetic manual record accepted idempotently; conflict rejected; one audit and settlement; balance=458
+--- PASS: TestHandlerJournalSurvivesProcessKill (5.44s)
+=== RUN   TestHandlerJournalSurvivesProcessKill
+[mysql] 2026/11/04 00:26:56 connection.go:801 closing bad idle connection: EOF
+    handler_journal_process_test.go:279: upstream replied once; handler killed before journal; no usage evidence; expired forwarding remains pending; no automatic refund
+    handler_journal_process_test.go:520: late contradictory usage rejected before inbox replay
+redis: 2026/11/04 00:26:57 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:61836: connect: connection refused
+redis: 2026/11/04 00:26:57 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:61836: connect: connection refused
+redis: 2026/11/04 00:26:58 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:61836: connect: connection refused
+redis: 2026/11/04 00:26:58 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:61836: connect: connection refused
+    handler_journal_process_test.go:587: Redis killed: usage durable and settlement pending; key_exists_after_restart=0; rebuilt from ledger
+    handler_journal_process_test.go:613: synthetic manual record accepted idempotently; conflict rejected; one audit and settlement; balance=458
+--- PASS: TestHandlerJournalSurvivesProcessKill (5.48s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	18.957s

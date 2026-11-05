@@ -1,0 +1,9 @@
+run failed: equal-estimate payload did not receive content conflict; raw: /Users/a1/项目/ai-gateway/eval/project-load-2026-11-02/unknown-hold-fingerprint-runs/20261104-023427
+Traceback (most recent call last):
+  File "/Users/a1/项目/ai-gateway/eval/project-load-2026-11-02/run_unknown_hold_fingerprint.py", line 131, in <module>
+    try: main()
+         ^^^^^^
+  File "/Users/a1/项目/ai-gateway/eval/project-load-2026-11-02/run_unknown_hold_fingerprint.py", line 114, in main
+    if equal_estimate.get('status')!=409 or 'request id conflict' not in equal_estimate.get('body','') or count()!=1:raise RuntimeError('equal-estimate payload did not receive content conflict')
+                                                                                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: equal-estimate payload did not receive content conflict

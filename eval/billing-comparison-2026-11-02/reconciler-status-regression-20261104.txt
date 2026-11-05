@@ -1,0 +1,51 @@
+head=42d8ef8e5ca2471b18800e50f8e7a57fbcfdd47f
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestBillIDMismatchGRPCRecovery
+    bill_id_grpc_recovery_test.go:112: RPC mismatches rejected; reconciler settled A, B reversed; balances=960
+--- PASS: TestBillIDMismatchGRPCRecovery (0.58s)
+=== RUN   TestReconcilerSettleOnlyRetainsUnknown
+=== RUN   TestReconcilerSettleOnlyRetainsUnknown/explicit
+    reconciler_settle_only_test.go:30: unknown=pending known=settled balance=860 ledger=860
+=== RUN   TestReconcilerSettleOnlyRetainsUnknown/default
+    reconciler_settle_only_test.go:31: unknown=pending known=settled balance=860 ledger=860
+--- PASS: TestReconcilerSettleOnlyRetainsUnknown (1.07s)
+    --- PASS: TestReconcilerSettleOnlyRetainsUnknown/explicit (0.53s)
+    --- PASS: TestReconcilerSettleOnlyRetainsUnknown/default (0.54s)
+=== RUN   TestReconcilerStatusReportsFailures
+    reconciler_status_failure_test.go:87: settle outage status: map[auto_reverse_disabled:true last_held:2 last_rebuild_attempted:false last_rebuild_error:false last_rebuild_errors:0 last_rebuilt:0 last_reverse_errors:0 last_reversed:0 last_scanned:3 last_settle_errors:1 last_settled:0 last_sweep_attempted:true last_sweep_error:false ok:true svc:reconciler]
+    reconciler_status_failure_test.go:117: individual RPC failures: map[auto_reverse_disabled:false last_held:0 last_rebuild_attempted:true last_rebuild_error:false last_rebuild_errors:4 last_rebuilt:0 last_reverse_errors:3 last_reversed:0 last_scanned:4 last_settle_errors:1 last_settled:0 last_sweep_attempted:true last_sweep_error:false ok:true svc:reconciler]
+--- FAIL: TestReconcilerStatusReportsFailures (0.51s)
+=== RUN   TestBillIDMismatchGRPCRecovery
+    bill_id_grpc_recovery_test.go:112: RPC mismatches rejected; reconciler settled A, B reversed; balances=960
+--- PASS: TestBillIDMismatchGRPCRecovery (0.58s)
+=== RUN   TestReconcilerSettleOnlyRetainsUnknown
+=== RUN   TestReconcilerSettleOnlyRetainsUnknown/explicit
+    reconciler_settle_only_test.go:30: unknown=pending known=settled balance=860 ledger=860
+=== RUN   TestReconcilerSettleOnlyRetainsUnknown/default
+    reconciler_settle_only_test.go:31: unknown=pending known=settled balance=860 ledger=860
+--- PASS: TestReconcilerSettleOnlyRetainsUnknown (1.18s)
+    --- PASS: TestReconcilerSettleOnlyRetainsUnknown/explicit (0.49s)
+    --- PASS: TestReconcilerSettleOnlyRetainsUnknown/default (0.69s)
+=== RUN   TestReconcilerStatusReportsFailures
+    reconciler_status_failure_test.go:87: settle outage status: map[auto_reverse_disabled:true last_held:4 last_rebuild_attempted:false last_rebuild_error:false last_rebuild_errors:0 last_rebuilt:0 last_reverse_errors:0 last_reversed:0 last_scanned:5 last_settle_errors:1 last_settled:0 last_sweep_attempted:true last_sweep_error:false ok:true svc:reconciler]
+    reconciler_status_failure_test.go:117: individual RPC failures: map[auto_reverse_disabled:false last_held:0 last_rebuild_attempted:true last_rebuild_error:false last_rebuild_errors:7 last_rebuilt:0 last_reverse_errors:5 last_reversed:0 last_scanned:6 last_settle_errors:1 last_settled:0 last_sweep_attempted:true last_sweep_error:false ok:true svc:reconciler]
+--- FAIL: TestReconcilerStatusReportsFailures (0.55s)
+=== RUN   TestBillIDMismatchGRPCRecovery
+    bill_id_grpc_recovery_test.go:112: RPC mismatches rejected; reconciler settled A, B reversed; balances=960
+--- PASS: TestBillIDMismatchGRPCRecovery (0.52s)
+=== RUN   TestReconcilerSettleOnlyRetainsUnknown
+=== RUN   TestReconcilerSettleOnlyRetainsUnknown/explicit
+    reconciler_settle_only_test.go:30: unknown=pending known=settled balance=860 ledger=860
+=== RUN   TestReconcilerSettleOnlyRetainsUnknown/default
+    reconciler_settle_only_test.go:31: unknown=pending known=settled balance=860 ledger=860
+--- PASS: TestReconcilerSettleOnlyRetainsUnknown (1.09s)
+    --- PASS: TestReconcilerSettleOnlyRetainsUnknown/explicit (0.56s)
+    --- PASS: TestReconcilerSettleOnlyRetainsUnknown/default (0.53s)
+=== RUN   TestReconcilerStatusReportsFailures
+    reconciler_status_failure_test.go:87: settle outage status: map[auto_reverse_disabled:true last_held:6 last_rebuild_attempted:false last_rebuild_error:false last_rebuild_errors:0 last_rebuilt:0 last_reverse_errors:0 last_reversed:0 last_scanned:7 last_settle_errors:1 last_settled:0 last_sweep_attempted:true last_sweep_error:false ok:true svc:reconciler]
+    reconciler_status_failure_test.go:117: individual RPC failures: map[auto_reverse_disabled:false last_held:0 last_rebuild_attempted:true last_rebuild_error:false last_rebuild_errors:10 last_rebuilt:0 last_reverse_errors:7 last_reversed:0 last_scanned:8 last_settle_errors:1 last_settled:0 last_sweep_attempted:true last_sweep_error:false ok:true svc:reconciler]
+--- FAIL: TestReconcilerStatusReportsFailures (0.67s)
+FAIL
+FAIL	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	7.684s
+FAIL

@@ -1,0 +1,113 @@
+
+func TestTruncatedNonStreamMustNotSettleOrReverse(t *testing.T) {
+ upstream:=httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter,r *http.Request){w.Header().Set("Content-Length","200");w.WriteHeader(200);_,_=io.WriteString(w,`{"choices":[{"message":{"content":"partial`) }));defer upstream.Close()
+ bill:=&fakeBilling{};router:=&fakeRouter{next:[]*client.RouteResult{{ProviderID:2,BaseURL:upstream.URL}}};c,w:=newGinCtx();c.Request=httptest.NewRequest(http.MethodPost,"/v1/chat/completions",strings.NewReader(`{"model":"m","messages":[{"role":"user","content":"hi"}]}`));c.Set("request_id","truncated-safety")
+ Chat(bill,router,slog.New(slog.DiscardHandler),time.Second)(c)
+ if w.Code!=http.StatusBadGateway||len(bill.reports)!=0||len(bill.settles)!=0||len(bill.reverses)!=0{t.Fatalf("status=%d reports=%d settles=%d reverses=%d body=%q",w.Code,len(bill.reports),len(bill.settles),len(bill.reverses),w.Body.String())}
+}
+func TestCompleteNonStreamWithoutUsageStillSucceeds(t *testing.T) {
+ upstream:=httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter,r *http.Request){_,_=io.WriteString(w,`{"choices":[{"message":{"content":"ok"}}]}`)}));defer upstream.Close()
+ bill:=&fakeBilling{};router:=&fakeRouter{next:[]*client.RouteResult{{ProviderID:2,BaseURL:upstream.URL}}};c,w:=newGinCtx();c.Request=httptest.NewRequest(http.MethodPost,"/v1/chat/completions",strings.NewReader(`{"model":"m","messages":[{"role":"user","content":"hi"}]}`));c.Set("request_id","complete-without-usage")
+ Chat(bill,router,slog.New(slog.DiscardHandler),time.Second)(c)
+ if w.Code!=http.StatusOK||len(bill.reports)!=1||len(bill.settles)!=1||len(bill.reverses)!=0{t.Fatalf("status=%d reports=%d settles=%d reverses=%d",w.Code,len(bill.reports),len(bill.settles),len(bill.reverses))}
+}
+
+func TestMalformedNonStreamMustNotSettleOrReverse(t *testing.T) {
+ for _, body := range []string{`{"choices":[`, `null`, `[]`, `{"usage":{"prompt_tokens":-1,"completion_tokens":0}}`, `{"usage":{"prompt_tokens":1,"completion_tokens":-1}}`, `{"usage":{}}`, `{"usage":{"prompt_tokens":1}}`, `{"usage":{"completion_tokens":1}}`, `{"usage":{"prompt_tokens":null,"completion_tokens":1}}`, `{"usage":{"prompt_tokens":1,"completion_tokens":null}}`} {
+  t.Run(body,func(t *testing.T){
+   upstream:=httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter,r *http.Request){_,_=io.WriteString(w,body)}));defer upstream.Close()
+   bill:=&fakeBilling{};route:=&fakeRouter{next:[]*client.RouteResult{{ProviderID:2,BaseURL:upstream.URL}}};c,w:=newGinCtx();c.Request=httptest.NewRequest(http.MethodPost,"/v1/chat/completions",strings.NewReader(`{"model":"m","messages":[{"role":"user","content":"hi"}]}`));c.Set("request_id","malformed-safety")
+   Chat(bill,route,slog.New(slog.DiscardHandler),time.Second)(c)
+   if w.Code!=http.StatusBadGateway||len(bill.reports)!=0||len(bill.settles)!=0||len(bill.reverses)!=0 {t.Fatalf("status=%d reports=%d settles=%d reverses=%d",w.Code,len(bill.reports),len(bill.settles),len(bill.reverses))}
+  })
+ }
+}
+
+func TestNonStreamErrorResponseCompleteness(t *testing.T) {
+ for _,tc:=range []struct{name string;truncated bool;wantStatus int;wantReverse int}{
+  {"truncated_400",true,http.StatusBadGateway,0},
+  {"complete_400",false,http.StatusBadRequest,1},
+ } { t.Run(tc.name,func(t *testing.T){
+  upstream:=httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter,r *http.Request){if tc.truncated{w.Header().Set("Content-Length","200")};w.WriteHeader(http.StatusBadRequest);_,_=io.WriteString(w,`{"error":"invalid"}`)}));defer upstream.Close()
+  bill:=&fakeBilling{};route:=&fakeRouter{next:[]*client.RouteResult{{ProviderID:2,BaseURL:upstream.URL}}};c,w:=newGinCtx();c.Request=httptest.NewRequest(http.MethodPost,"/v1/chat/completions",strings.NewReader(`{"model":"m","messages":[{"role":"user","content":"hi"}]}`));c.Set("request_id","error-response-safety")
+  Chat(bill,route,slog.New(slog.DiscardHandler),time.Second)(c)
+  if w.Code!=tc.wantStatus||len(bill.reports)!=0||len(bill.settles)!=0||len(bill.reverses)!=tc.wantReverse {t.Fatalf("status=%d reports=%d settles=%d reverses=%d",w.Code,len(bill.reports),len(bill.settles),len(bill.reverses))}
+ }) }
+}
+
+func TestStreamContentContainingDoneDoesNotEndStream(t *testing.T) {
+ upstream:=httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter,r *http.Request){
+  w.Header().Set("Content-Type","text/event-stream")
+  _,_=io.WriteString(w,"data: {\"choices\":[{\"delta\":{\"content\":\"literal [DONE] text\"}}]}\n\n")
+  _,_=io.WriteString(w,"data: {\"choices\":[{\"delta\":{\"content\":\"continued\"}}]}\n\n")
+  _,_=io.WriteString(w,"data: {\"choices\":[],\"usage\":{\"prompt_tokens\":7,\"completion_tokens\":9}}\n\ndata: [DONE]\n\n")
+ }));defer upstream.Close()
+ bill:=&fakeBilling{};route:=&fakeRouter{};c,w:=newGinCtx();prov:=&client.RouteResult{ProviderID:2,BaseURL:upstream.URL};req:=&chatRequest{Model:"m",Messages:[]chatMessage{{Role:"user",Content:"hi"}},Stream:true}
+ relayStream(c,bill,route,slog.New(slog.DiscardHandler),prov,req,"done-in-content",1,3)
+ if !strings.Contains(w.Body.String(),"continued") || len(bill.reports)!=1 || bill.reports[0].PromptTokens!=7 || bill.reports[0].CompletionTokens!=9 || len(bill.settles)!=1 || len(bill.reverses)!=0 {t.Fatalf("body=%q reports=%+v settles=%d reverses=%d",w.Body.String(),bill.reports,len(bill.settles),len(bill.reverses))}
+}
+
+func TestStreamDoneTextInCommentDoesNotEndStream(t *testing.T) {
+ upstream:=httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter,r *http.Request){
+  w.Header().Set("Content-Type","text/event-stream")
+  _,_=io.WriteString(w,": diagnostic [DONE]\n\ndata: {\"choices\":[],\"usage\":{\"prompt_tokens\":7,\"completion_tokens\":9}}\n\ndata: [DONE]\n\n")
+ }));defer upstream.Close()
+ bill:=&fakeBilling{};c,w:=newGinCtx();prov:=&client.RouteResult{ProviderID:2,BaseURL:upstream.URL};req:=&chatRequest{Model:"m",Messages:[]chatMessage{{Role:"user",Content:"hi"}},Stream:true}
+ relayStream(c,bill,&fakeRouter{},slog.New(slog.DiscardHandler),prov,req,"done-in-comment",1,3)
+ if len(bill.reports)!=1 || bill.reports[0].PromptTokens!=7 || bill.reports[0].CompletionTokens!=9 || len(bill.settles)!=1 || len(bill.reverses)!=0 || !strings.Contains(w.Body.String(),"completion_tokens") {t.Fatalf("body=%q reports=%+v settles=%d reverses=%d",w.Body.String(),bill.reports,len(bill.settles),len(bill.reverses))}
+}
+
+func TestStreamFinalLineWithoutNewline(t *testing.T) {
+ for _,tc:=range []struct{name,body string;wantPrompt,wantCompletion int64;wantSuffix string}{
+  {"usage", "data: {\"choices\":[{\"delta\":{\"content\":\"text\"}}]}\n\ndata: {\"choices\":[],\"usage\":{\"prompt_tokens\":7,\"completion_tokens\":9}}",7,9,"\"completion_tokens\":9}}"},
+  {"done", "data: {\"choices\":[],\"usage\":{\"prompt_tokens\":7,\"completion_tokens\":9}}\n\ndata: [DONE]",7,9,"data: [DONE]"},
+ } {t.Run(tc.name,func(t *testing.T){
+  upstream:=httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter,r *http.Request){w.Header().Set("Content-Type","text/event-stream");_,_=io.WriteString(w,tc.body)}));defer upstream.Close()
+  bill:=&fakeBilling{};c,w:=newGinCtx();prov:=&client.RouteResult{ProviderID:2,BaseURL:upstream.URL};req:=&chatRequest{Model:"m",Messages:[]chatMessage{{Role:"user",Content:"hi"}},Stream:true}
+  relayStream(c,bill,&fakeRouter{},slog.New(slog.DiscardHandler),prov,req,"last-line",1,3)
+  if !strings.HasSuffix(w.Body.String(),tc.wantSuffix)||len(bill.reports)!=1||bill.reports[0].PromptTokens!=tc.wantPrompt||bill.reports[0].CompletionTokens!=tc.wantCompletion||len(bill.settles)!=1||len(bill.reverses)!=0 {t.Fatalf("body=%q reports=%+v settles=%d reverses=%d",w.Body.String(),bill.reports,len(bill.settles),len(bill.reverses))}
+ })}
+}
+
+func TestCompleteNonStreamExplicitZeroUsage(t *testing.T) {
+ upstream:=httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter,r *http.Request){_,_=io.WriteString(w,`{"usage":{"prompt_tokens":0,"completion_tokens":0}}`)}));defer upstream.Close()
+ bill:=&fakeBilling{};router:=&fakeRouter{next:[]*client.RouteResult{{ProviderID:2,BaseURL:upstream.URL}}};c,w:=newGinCtx();c.Request=httptest.NewRequest(http.MethodPost,"/v1/chat/completions",strings.NewReader(`{"model":"m","messages":[{"role":"user","content":"hi"}]}`));c.Set("request_id","zero-usage")
+ Chat(bill,router,slog.New(slog.DiscardHandler),time.Second)(c)
+ if w.Code!=http.StatusOK||len(bill.reports)!=1||bill.reports[0].PromptTokens!=0||bill.reports[0].CompletionTokens!=0||len(bill.settles)!=1||len(bill.reverses)!=0{t.Fatalf("status=%d reports=%+v settles=%d reverses=%d",w.Code,bill.reports,len(bill.settles),len(bill.reverses))}
+}
+
+func TestStreamIncompleteUsageStaysPending(t *testing.T) {
+ for _,payload:=range []string{`{}`,`{"prompt_tokens":1}`,`{"completion_tokens":1}`,`{"prompt_tokens":null,"completion_tokens":1}`,`{"prompt_tokens":1,"completion_tokens":null}`,`{"prompt_tokens":-1,"completion_tokens":1}`,`{"prompt_tokens":1,"completion_tokens":-1}`,`{"prompt_tokens":"bad","completion_tokens":1}`} {
+  t.Run(payload,func(t *testing.T){
+   upstream:=httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter,r *http.Request){w.Header().Set("Content-Type","text/event-stream");_,_=io.WriteString(w,"data: {\"choices\":[{\"delta\":{\"content\":\"text\"}}]}\n\ndata: {\"choices\":[],\"usage\":"+payload+"}\n\ndata: [DONE]\n\n")}));defer upstream.Close()
+   bill:=&fakeBilling{};c,w:=newGinCtx();prov:=&client.RouteResult{ProviderID:2,BaseURL:upstream.URL};req:=&chatRequest{Model:"m",Messages:[]chatMessage{{Role:"user",Content:"hi"}},Stream:true}
+   relayStream(c,bill,&fakeRouter{},slog.New(slog.DiscardHandler),prov,req,"invalid-usage",1,3)
+   if !strings.Contains(w.Body.String(),"text")||len(bill.reports)!=0||len(bill.settles)!=0||len(bill.reverses)!=0 {t.Fatalf("body=%q reports=%+v settles=%d reverses=%d",w.Body.String(),bill.reports,len(bill.settles),len(bill.reverses))}
+  })
+ }
+}
+
+func TestStreamUsageZeroAndConflict(t *testing.T) {
+ for _,tc:=range []struct{name,frames string;wantReports int}{
+  {"explicit_zero", "data: {\"choices\":[],\"usage\":{\"prompt_tokens\":0,\"completion_tokens\":0}}\n\n",1},
+  {"valid_then_invalid", "data: {\"choices\":[],\"usage\":{\"prompt_tokens\":7,\"completion_tokens\":9}}\n\ndata: {\"choices\":[],\"usage\":{}}\n\n",0},
+ } {t.Run(tc.name,func(t *testing.T){
+  upstream:=httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter,r *http.Request){w.Header().Set("Content-Type","text/event-stream");_,_=io.WriteString(w,tc.frames+"data: [DONE]\n\n")}));defer upstream.Close()
+  bill:=&fakeBilling{};c,_:=newGinCtx();prov:=&client.RouteResult{ProviderID:2,BaseURL:upstream.URL};req:=&chatRequest{Model:"m",Messages:[]chatMessage{{Role:"user",Content:"hi"}},Stream:true}
+  relayStream(c,bill,&fakeRouter{},slog.New(slog.DiscardHandler),prov,req,"usage-variants",1,3)
+  if len(bill.reports)!=tc.wantReports||len(bill.settles)!=tc.wantReports||len(bill.reverses)!=0{t.Fatalf("reports=%+v settles=%d reverses=%d",bill.reports,len(bill.settles),len(bill.reverses))}
+ })}
+}
+
+func TestStreamUsageWithUnfinishedChoicesStaysPending(t *testing.T) {
+ for _,frame:=range []string{
+  `{"choices":[{"delta":{"content":"text"}}],"usage":{"prompt_tokens":7,"completion_tokens":9}}`,
+  `{"choices":[{"finish_reason":"stop"},{"finish_reason":null}],"usage":{"prompt_tokens":7,"completion_tokens":9}}`,
+  `{"choices":[{"finish_reason":"stop"}],"usage":{"prompt_tokens":7}}`,
+ } {t.Run(frame,func(t *testing.T){
+  upstream:=httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter,r *http.Request){w.Header().Set("Content-Type","text/event-stream");_,_=io.WriteString(w,"data: "+frame+"\n\ndata: [DONE]\n\n")}));defer upstream.Close()
+  bill:=&fakeBilling{};c,_:=newGinCtx();prov:=&client.RouteResult{ProviderID:2,BaseURL:upstream.URL};req:=&chatRequest{Model:"m",Messages:[]chatMessage{{Role:"user",Content:"hi"}},Stream:true}
+  relayStream(c,bill,&fakeRouter{},slog.New(slog.DiscardHandler),prov,req,"ambiguous-usage",1,3)
+  if len(bill.reports)!=0||len(bill.settles)!=0||len(bill.reverses)!=0{t.Fatalf("reports=%+v settles=%d reverses=%d",bill.reports,len(bill.settles),len(bill.reverses))}
+ })}
+}

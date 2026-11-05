@@ -1,0 +1,37 @@
+head=42d8ef8e5ca2471b18800e50f8e7a57fbcfdd47f
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+# github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02.test
+ld: warning: '/private/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-739122346/000013.o' has malformed LC_DYSYMTAB, expected 98 undefined symbols to start at index 1626, found 95 undefined symbols starting at index 1626
+=== RUN   TestOutboxGenerationCommitAckLost
+    outbox_lease_generation_ack_test.go:50: injected=injected commit acknowledgement loss commit=1 returned_empty=true retry_blocked=true replacement=2 stale_rejected=true
+    outbox_lease_generation_ack_test.go:50: injected=driver: bad connection commit=1 returned_empty=true retry_blocked=true replacement=2 stale_rejected=true
+--- PASS: TestOutboxGenerationCommitAckLost (0.10s)
+=== RUN   TestOutboxLeaseGenerationFencesReuseAndOverflow
+    outbox_lease_generation_test.go:108: same owner: stale generation rejected, current marked once, overflow rejected
+--- PASS: TestOutboxLeaseGenerationFencesReuseAndOverflow (0.03s)
+=== RUN   TestOutboxGenerationConcurrentOneWinner
+    outbox_lease_generation_test.go:157: same owner concurrent claim: wins=1 generation=1
+--- PASS: TestOutboxGenerationConcurrentOneWinner (0.02s)
+=== RUN   TestOutboxGenerationCommitAckLost
+    outbox_lease_generation_ack_test.go:50: injected=injected commit acknowledgement loss commit=1 returned_empty=true retry_blocked=true replacement=2 stale_rejected=true
+    outbox_lease_generation_ack_test.go:50: injected=driver: bad connection commit=1 returned_empty=true retry_blocked=true replacement=2 stale_rejected=true
+--- PASS: TestOutboxGenerationCommitAckLost (0.06s)
+=== RUN   TestOutboxLeaseGenerationFencesReuseAndOverflow
+    outbox_lease_generation_test.go:108: same owner: stale generation rejected, current marked once, overflow rejected
+--- PASS: TestOutboxLeaseGenerationFencesReuseAndOverflow (0.03s)
+=== RUN   TestOutboxGenerationConcurrentOneWinner
+    outbox_lease_generation_test.go:157: same owner concurrent claim: wins=1 generation=1
+--- PASS: TestOutboxGenerationConcurrentOneWinner (0.02s)
+=== RUN   TestOutboxGenerationCommitAckLost
+    outbox_lease_generation_ack_test.go:50: injected=injected commit acknowledgement loss commit=1 returned_empty=true retry_blocked=true replacement=2 stale_rejected=true
+    outbox_lease_generation_ack_test.go:50: injected=driver: bad connection commit=1 returned_empty=true retry_blocked=true replacement=2 stale_rejected=true
+--- PASS: TestOutboxGenerationCommitAckLost (0.09s)
+=== RUN   TestOutboxLeaseGenerationFencesReuseAndOverflow
+    outbox_lease_generation_test.go:108: same owner: stale generation rejected, current marked once, overflow rejected
+--- PASS: TestOutboxLeaseGenerationFencesReuseAndOverflow (0.04s)
+=== RUN   TestOutboxGenerationConcurrentOneWinner
+    outbox_lease_generation_test.go:157: same owner concurrent claim: wins=1 generation=1
+--- PASS: TestOutboxGenerationConcurrentOneWinner (0.02s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	2.327s

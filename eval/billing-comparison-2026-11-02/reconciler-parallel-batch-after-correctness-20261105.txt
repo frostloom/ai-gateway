@@ -1,0 +1,31 @@
+head=944c6336acd60213eb43dfa59648536bffbddfea
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+# github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02.test
+ld: warning: '/private/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-1927809213/000013.o' has malformed LC_DYSYMTAB, expected 98 undefined symbols to start at index 1626, found 95 undefined symbols starting at index 1626
+=== RUN   TestParallelReconcileBatchRealLedger
+    reconciler_parallel_batch_test.go:171: accounts=1 workers=1 n=32 elapsed_ms=985.8 ops_s=32.5 mean_ms=30.80 p95_ms=67.97 p99_ms=98.77 errors=0 timeouts=0 pool_waits=0
+    reconciler_parallel_batch_test.go:171: accounts=1 workers=4 n=32 elapsed_ms=667.6 ops_s=47.9 mean_ms=79.38 p95_ms=110.03 p99_ms=115.08 errors=0 timeouts=0 pool_waits=0
+    reconciler_parallel_batch_test.go:171: accounts=8 workers=1 n=32 elapsed_ms=671.2 ops_s=47.7 mean_ms=20.97 p95_ms=30.45 p99_ms=37.95 errors=0 timeouts=0 pool_waits=0
+    reconciler_parallel_batch_test.go:171: accounts=8 workers=4 n=32 elapsed_ms=224.3 ops_s=142.7 mean_ms=27.82 p95_ms=48.31 p99_ms=49.11 errors=0 timeouts=0 pool_waits=0
+--- PASS: TestParallelReconcileBatchRealLedger (10.13s)
+=== RUN   TestParallelReconcileBatchRealLedger
+
+2026/11/05 12:24:46 [32m/Users/a1/项目/ai-gateway/internal/billing/store/plan.go:176 [33mSLOW SQL >= 200ms
+[0m[31;1m[501.077ms] [33m[rows:1][35m SELECT COALESCE(SUM(actual_quota),0) FROM `bills` WHERE tenant_id = 19 AND phase = 'settle' AND status = 'settled'[0m
+
+2026/11/05 12:24:47 [32m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:291 [33mSLOW SQL >= 200ms
+[0m[31;1m[237.503ms] [33m[rows:1][35m SELECT `id`,`status` FROM `tenants` WHERE `tenants`.`id` = 19 ORDER BY `tenants`.`id` LIMIT 1[0m
+    reconciler_parallel_batch_test.go:171: accounts=1 workers=1 n=32 elapsed_ms=677.1 ops_s=47.3 mean_ms=21.15 p95_ms=30.30 p99_ms=30.58 errors=0 timeouts=0 pool_waits=0
+    reconciler_parallel_batch_test.go:171: accounts=1 workers=4 n=32 elapsed_ms=1225.2 ops_s=26.1 mean_ms=135.63 p95_ms=252.93 p99_ms=345.94 errors=0 timeouts=0 pool_waits=0
+    reconciler_parallel_batch_test.go:171: accounts=8 workers=1 n=32 elapsed_ms=1289.9 ops_s=24.8 mean_ms=40.30 p95_ms=93.87 p99_ms=115.87 errors=0 timeouts=0 pool_waits=0
+    reconciler_parallel_batch_test.go:171: accounts=8 workers=4 n=32 elapsed_ms=390.6 ops_s=81.9 mean_ms=48.27 p95_ms=125.97 p99_ms=133.58 errors=0 timeouts=0 pool_waits=0
+--- PASS: TestParallelReconcileBatchRealLedger (16.70s)
+=== RUN   TestParallelReconcileBatchRealLedger
+    reconciler_parallel_batch_test.go:171: accounts=1 workers=1 n=32 elapsed_ms=625.3 ops_s=51.2 mean_ms=19.53 p95_ms=30.74 p99_ms=32.30 errors=0 timeouts=0 pool_waits=0
+    reconciler_parallel_batch_test.go:171: accounts=1 workers=4 n=32 elapsed_ms=499.3 ops_s=64.1 mean_ms=59.88 p95_ms=80.47 p99_ms=91.65 errors=0 timeouts=0 pool_waits=0
+    reconciler_parallel_batch_test.go:171: accounts=8 workers=1 n=32 elapsed_ms=920.9 ops_s=34.7 mean_ms=28.77 p95_ms=61.93 p99_ms=98.71 errors=0 timeouts=0 pool_waits=0
+    reconciler_parallel_batch_test.go:171: accounts=8 workers=4 n=32 elapsed_ms=226.6 ops_s=141.2 mean_ms=27.45 p95_ms=35.73 p99_ms=36.56 errors=0 timeouts=0 pool_waits=0
+--- PASS: TestParallelReconcileBatchRealLedger (8.54s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	37.322s

@@ -1,0 +1,13 @@
+# github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02.test
+ld: warning: '/private/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-1421288151/000013.o' has malformed LC_DYSYMTAB, expected 98 undefined symbols to start at index 1626, found 95 undefined symbols starting at index 1626
+=== RUN   TestCompletionJournalSurvivesProcessKill
+    local_completion_journal_test.go:204: synced record survived child SIGKILL; same record idempotent, changed attempt rejected
+--- PASS: TestCompletionJournalSurvivesProcessKill (0.06s)
+=== RUN   TestCompletionJournalSurvivesProcessKill
+    local_completion_journal_test.go:204: synced record survived child SIGKILL; same record idempotent, changed attempt rejected
+--- PASS: TestCompletionJournalSurvivesProcessKill (0.05s)
+=== RUN   TestCompletionJournalSurvivesProcessKill
+    local_completion_journal_test.go:204: synced record survived child SIGKILL; same record idempotent, changed attempt rejected
+--- PASS: TestCompletionJournalSurvivesProcessKill (0.06s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	2.188s

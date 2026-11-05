@@ -66,16 +66,28 @@ func (c *EventConsumer) Run(ctx context.Context) error {
 			time.Sleep(time.Second)
 			continue
 		}
-		rec, err := c.handle(ctx, msg)
-		c.record(rec)
-		if err != nil {
-			// 落库失败：不 commit → broker 重投（at-least-once 的自愈路径）
+		// 同一分区提交后续 offset 会跳过先前失败的消息，因此必须先处理完
+		// 当前消息，不能仅靠不提交并继续 Fetch 来等待重投。
+		for {
+			rec, err := c.handle(ctx, msg)
+			c.record(rec)
+			if err == nil {
+				break
+			}
 			c.log.Error("handle message", "event_id", string(msg.Key), "err", err)
-			continue
+			timer := time.NewTimer(time.Second)
+			select {
+			case <-ctx.Done():
+				if !timer.Stop() {
+					<-timer.C
+				}
+				return nil
+			case <-timer.C:
+			}
 		}
 		if err := c.kc.CommitMessages(ctx, msg); err != nil {
 			c.log.Error("commit message", "event_id", string(msg.Key), "err", err)
-			// commit 失败由下轮 FetchMessage 重投 + uk_event_id 幂等吸收
+			// 已落库；提交失败可能在重启或 rebalance 后重投，由 uk_event_id 幂等吸收。
 		}
 	}
 }

@@ -1,0 +1,26 @@
+{
+  "head": "63b9d1ed4d64bb583d15fa884c37468e5c53044c",
+  "branch": "codex/billing-mysql-comparison",
+  "sources": {
+    "internal/billing/store/mysql.go": "961238c36123b0ff54965f873b028c4adb5c66506ec032cb5c9316a962836a17",
+    "internal/billing/reconciler/reconciler.go": "a812216d8c6708c8376c466b7bf06c02677f5b86109ef5a1293c6dc5b8509d03",
+    "internal/billing/server/service.go": "5b4089901a1ec7e95fc241cdd7a1f615f019bff6b4e88f8c597f282acb13aa0b",
+    "eval/project-load-2026-11-02/stale-sweep/main.go": "14f5b54b616c81b6093dd11e708673fac6cf86c7e8d52c61d5844a4d52fa4ed2"
+  },
+  "binaries": {
+    "billing": "d88a394708ca0812d0bf7a908b577eb95a1ab45c5976e23f50dca3a9e45ca7d6",
+    "router": "c32a77098fc478813b952ad27f663a2997819a169f42c0cbaaf6c131f455e7a7",
+    "reconciler": "62962b7d79ec064eab1e8343148d632e2efb21f35bd04ca3823069c543e6037e",
+    "gateway": "d4a3be042152bb0d75df722cf8620f674d840d5cd18cc496178fa151ea55930c",
+    "mock": "ff5f37fb5bf063248635e200e9b1f4fa81261b10714e5c3d328e61f12f9b28d8",
+    "seed": "76930c853b06540d3178dea166578c48164af0b3bb69396e6adb00b06426dd6c",
+    "load": "ea357c06f7b303e3069d0fcbfef060f57f5a11c4ce7c5c9e3119fa42bd076856",
+    "stale": "6214bf7a17bdc5fc149b059795f9211653833ede9e99ebb58a7ece2d6fc715e9"
+  },
+  "images": {
+    "docker.m.daocloud.io/library/mysql:8.0.40": "sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff",
+    "docker.m.daocloud.io/library/redis:7-alpine": "sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499"
+  },
+  "grace_s": 0,
+  "note": "single controlled scan; test-only interposition on Reverse; no upstream"
+}

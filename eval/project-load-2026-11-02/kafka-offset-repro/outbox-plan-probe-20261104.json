@@ -1,0 +1,347 @@
+{
+  "container": "outbox-plan-234980ed20dd",
+  "image": "docker.m.daocloud.io/library/mysql:8.0.40",
+  "queries": [
+    {
+      "distribution": "sparse",
+      "index": "existing",
+      "query": "current_poll",
+      "iteration": 1,
+      "output": "EXPLAIN\n-> Limit: 100 row(s)  (cost=350 rows=100) (actual time=3.73..3.75 rows=100 loops=1)\n    -> Sort: outbox_events.id, limit input to 100 row(s) per chunk  (cost=350 rows=1000) (actual time=3.73..3.74 rows=100 loops=1)\n        -> Index lookup on outbox_events using idx_unsent (sent_at=NULL), with index condition: (outbox_events.sent_at is null)  (cost=350 rows=1000) (actual time=0.05..3.49 rows=1000 loops=1)\n\n"
+    },
+    {
+      "distribution": "sparse",
+      "index": "existing",
+      "query": "current_poll",
+      "iteration": 2,
+      "output": "EXPLAIN\n-> Limit: 100 row(s)  (cost=350 rows=100) (actual time=2.1..2.11 rows=100 loops=1)\n    -> Sort: outbox_events.id, limit input to 100 row(s) per chunk  (cost=350 rows=1000) (actual time=2.1..2.11 rows=100 loops=1)\n        -> Index lookup on outbox_events using idx_unsent (sent_at=NULL), with index condition: (outbox_events.sent_at is null)  (cost=350 rows=1000) (actual time=0.0195..1.95 rows=1000 loops=1)\n\n"
+    },
+    {
+      "distribution": "sparse",
+      "index": "existing",
+      "query": "current_poll",
+      "iteration": 3,
+      "output": "EXPLAIN\n-> Limit: 100 row(s)  (cost=350 rows=100) (actual time=2.56..2.57 rows=100 loops=1)\n    -> Sort: outbox_events.id, limit input to 100 row(s) per chunk  (cost=350 rows=1000) (actual time=2.56..2.56 rows=100 loops=1)\n        -> Index lookup on outbox_events using idx_unsent (sent_at=NULL), with index condition: (outbox_events.sent_at is null)  (cost=350 rows=1000) (actual time=0.0213..2.34 rows=1000 loops=1)\n\n"
+    },
+    {
+      "distribution": "sparse",
+      "index": "existing",
+      "query": "fair_ceiling",
+      "iteration": 1,
+      "output": "EXPLAIN\n-> Aggregate: max(outbox_events.id)  (cost=201 rows=1) (actual time=0.645..0.645 rows=1 loops=1)\n    -> Filter: (outbox_events.sent_at is null)  (cost=101 rows=1000) (actual time=0.109..0.423 rows=1000 loops=1)\n        -> Covering index lookup on outbox_events using idx_unsent (sent_at=NULL)  (cost=101 rows=1000) (actual time=0.107..0.352 rows=1000 loops=1)\n\n"
+    },
+    {
+      "distribution": "sparse",
+      "index": "existing",
+      "query": "fair_ceiling",
+      "iteration": 2,
+      "output": "EXPLAIN\n-> Aggregate: max(outbox_events.id)  (cost=201 rows=1) (actual time=0.252..0.252 rows=1 loops=1)\n    -> Filter: (outbox_events.sent_at is null)  (cost=101 rows=1000) (actual time=0.0451..0.207 rows=1000 loops=1)\n        -> Covering index lookup on outbox_events using idx_unsent (sent_at=NULL)  (cost=101 rows=1000) (actual time=0.044..0.158 rows=1000 loops=1)\n\n"
+    },
+    {
+      "distribution": "sparse",
+      "index": "existing",
+      "query": "fair_ceiling",
+      "iteration": 3,
+      "output": "EXPLAIN\n-> Aggregate: max(outbox_events.id)  (cost=201 rows=1) (actual time=0.258..0.258 rows=1 loops=1)\n    -> Filter: (outbox_events.sent_at is null)  (cost=101 rows=1000) (actual time=0.0463..0.209 rows=1000 loops=1)\n        -> Covering index lookup on outbox_events using idx_unsent (sent_at=NULL)  (cost=101 rows=1000) (actual time=0.0452..0.158 rows=1000 loops=1)\n\n"
+    },
+    {
+      "distribution": "sparse",
+      "index": "existing",
+      "query": "fair_first",
+      "iteration": 1,
+      "output": "EXPLAIN\n-> Limit: 100 row(s)  (cost=300 rows=100) (actual time=4.81..4.83 rows=100 loops=1)\n    -> Sort: outbox_events.id, limit input to 100 row(s) per chunk  (cost=300 rows=1000) (actual time=4.81..4.82 rows=100 loops=1)\n        -> Index lookup on outbox_events using idx_unsent (sent_at=NULL), with index condition: ((outbox_events.sent_at is null) and (outbox_events.id > 0) and (outbox_events.id <= 100000))  (cost=300 rows=1000) (actual time=0.0238..4.53 rows=1000 loops=1)\n\n"
+    },
+    {
+      "distribution": "sparse",
+      "index": "existing",
+      "query": "fair_first",
+      "iteration": 2,
+      "output": "EXPLAIN\n-> Limit: 100 row(s)  (cost=300 rows=100) (actual time=7.11..7.12 rows=100 loops=1)\n    -> Sort: outbox_events.id, limit input to 100 row(s) per chunk  (cost=300 rows=1000) (actual time=7.11..7.12 rows=100 loops=1)\n        -> Index lookup on outbox_events using idx_unsent (sent_at=NULL), with index condition: ((outbox_events.sent_at is null) and (outbox_events.id > 0) and (outbox_events.id <= 100000))  (cost=300 rows=1000) (actual time=0.0209..6.76 rows=1000 loops=1)\n\n"
+    },
+    {
+      "distribution": "sparse",
+      "index": "existing",
+      "query": "fair_first",
+      "iteration": 3,
+      "output": "EXPLAIN\n-> Limit: 100 row(s)  (cost=300 rows=100) (actual time=4.09..4.1 rows=100 loops=1)\n    -> Sort: outbox_events.id, limit input to 100 row(s) per chunk  (cost=300 rows=1000) (actual time=4.09..4.1 rows=100 loops=1)\n        -> Index lookup on outbox_events using idx_unsent (sent_at=NULL), with index condition: ((outbox_events.sent_at is null) and (outbox_events.id > 0) and (outbox_events.id <= 100000))  (cost=300 rows=1000) (actual time=0.0207..3.89 rows=1000 loops=1)\n\n"
+    },
+    {
+      "distribution": "sparse",
+      "index": "existing",
+      "query": "fair_middle",
+      "iteration": 1,
+      "output": "EXPLAIN\n-> Limit: 100 row(s)  (cost=300 rows=100) (actual time=1.2..1.22 rows=100 loops=1)\n    -> Sort: outbox_events.id, limit input to 100 row(s) per chunk  (cost=300 rows=1000) (actual time=1.2..1.21 rows=100 loops=1)\n        -> Index lookup on outbox_events using idx_unsent (sent_at=NULL), with index condition: ((outbox_events.sent_at is null) and (outbox_events.id > 50000) and (outbox_events.id <= 100000))  (cost=300 rows=1000) (actual time=0.034..1.11 rows=500 loops=1)\n\n"
+    },
+    {
+      "distribution": "sparse",
+      "index": "existing",
+      "query": "fair_middle",
+      "iteration": 2,
+      "output": "EXPLAIN\n-> Limit: 100 row(s)  (cost=300 rows=100) (actual time=1.31..1.32 rows=100 loops=1)\n    -> Sort: outbox_events.id, limit input to 100 row(s) per chunk  (cost=300 rows=1000) (actual time=1.31..1.31 rows=100 loops=1)\n        -> Index lookup on outbox_events using idx_unsent (sent_at=NULL), with index condition: ((outbox_events.sent_at is null) and (outbox_events.id > 50000) and (outbox_events.id <= 100000))  (cost=300 rows=1000) (actual time=0.029..1.21 rows=500 loops=1)\n\n"
+    },
+    {
+      "distribution": "sparse",
+      "index": "existing",
+      "query": "fair_middle",
+      "iteration": 3,
+      "output": "EXPLAIN\n-> Limit: 100 row(s)  (cost=300 rows=100) (actual time=1.39..1.4 rows=100 loops=1)\n    -> Sort: outbox_events.id, limit input to 100 row(s) per chunk  (cost=300 rows=1000) (actual time=1.39..1.4 rows=100 loops=1)\n        -> Index lookup on outbox_events using idx_unsent (sent_at=NULL), with index condition: ((outbox_events.sent_at is null) and (outbox_events.id > 50000) and (outbox_events.id <= 100000))  (cost=300 rows=1000) (actual time=0.0355..1.28 rows=500 loops=1)\n\n"
+    },
+    {
+      "distribution": "sparse",
+      "index": "candidate",
+      "query": "current_poll",
+      "iteration": 1,
+      "output": "EXPLAIN\n-> Limit: 100 row(s)  (cost=350 rows=100) (actual time=4.61..4.62 rows=100 loops=1)\n    -> Sort: outbox_events.id, limit input to 100 row(s) per chunk  (cost=350 rows=1000) (actual time=4.61..4.62 rows=100 loops=1)\n        -> Index lookup on outbox_events using idx_unsent (sent_at=NULL), with index condition: (outbox_events.sent_at is null)  (cost=350 rows=1000) (actual time=0.0214..4.36 rows=1000 loops=1)\n\n"
+    },
+    {
+      "distribution": "sparse",
+      "index": "candidate",
+      "query": "current_poll",
+      "iteration": 2,
+      "output": "EXPLAIN\n-> Limit: 100 row(s)  (cost=350 rows=100) (actual time=2.1..2.11 rows=100 loops=1)\n    -> Sort: outbox_events.id, limit input to 100 row(s) per chunk  (cost=350 rows=1000) (actual time=2.1..2.11 rows=100 loops=1)\n        -> Index lookup on outbox_events using idx_unsent (sent_at=NULL), with index condition: (outbox_events.sent_at is null)  (cost=350 rows=1000) (actual time=0.0242..1.91 rows=1000 loops=1)\n\n"
+    },
+    {
+      "distribution": "sparse",
+      "index": "candidate",
+      "query": "current_poll",
+      "iteration": 3,
+      "output": "EXPLAIN\n-> Limit: 100 row(s)  (cost=350 rows=100) (actual time=1.8..1.81 rows=100 loops=1)\n    -> Sort: outbox_events.id, limit input to 100 row(s) per chunk  (cost=350 rows=1000) (actual time=1.8..1.81 rows=100 loops=1)\n        -> Index lookup on outbox_events using idx_unsent (sent_at=NULL), with index condition: (outbox_events.sent_at is null)  (cost=350 rows=1000) (actual time=0.0342..1.63 rows=1000 loops=1)\n\n"
+    },
+    {
+      "distribution": "sparse",
+      "index": "candidate",
+      "query": "fair_ceiling",
+      "iteration": 1,
+      "output": "EXPLAIN\n-> Rows fetched before execution  (cost=0..0 rows=1) (actual time=84e-6..126e-6 rows=1 loops=1)\n\n"
+    },
+    {
+      "distribution": "sparse",
+      "index": "candidate",
+      "query": "fair_ceiling",
+      "iteration": 2,
+      "output": "EXPLAIN\n-> Rows fetched before execution  (cost=0..0 rows=1) (actual time=42e-6..84e-6 rows=1 loops=1)\n\n"
+    },
+    {
+      "distribution": "sparse",
+      "index": "candidate",
+      "query": "fair_ceiling",
+      "iteration": 3,
+      "output": "EXPLAIN\n-> Rows fetched before execution  (cost=0..0 rows=1) (actual time=84e-6..126e-6 rows=1 loops=1)\n\n"
+    },
+    {
+      "distribution": "sparse",
+      "index": "candidate",
+      "query": "fair_first",
+      "iteration": 1,
+      "output": "EXPLAIN\n-> Limit: 100 row(s)  (cost=300 rows=100) (actual time=2.43..2.44 rows=100 loops=1)\n    -> Sort: outbox_events.id, limit input to 100 row(s) per chunk  (cost=300 rows=1000) (actual time=2.42..2.43 rows=100 loops=1)\n        -> Index lookup on outbox_events using idx_unsent (sent_at=NULL), with index condition: ((outbox_events.sent_at is null) and (outbox_events.id > 0) and (outbox_events.id <= 100000))  (cost=300 rows=1000) (actual time=0.0257..2.25 rows=1000 loops=1)\n\n"
+    },
+    {
+      "distribution": "sparse",
+      "index": "candidate",
+      "query": "fair_first",
+      "iteration": 2,
+      "output": "EXPLAIN\n-> Limit: 100 row(s)  (cost=300 rows=100) (actual time=2.36..2.37 rows=100 loops=1)\n    -> Sort: outbox_events.id, limit input to 100 row(s) per chunk  (cost=300 rows=1000) (actual time=2.36..2.37 rows=100 loops=1)\n        -> Index lookup on outbox_events using idx_unsent (sent_at=NULL), with index condition: ((outbox_events.sent_at is null) and (outbox_events.id > 0) and (outbox_events.id <= 100000))  (cost=300 rows=1000) (actual time=0.019..2.2 rows=1000 loops=1)\n\n"
+    },
+    {
+      "distribution": "sparse",
+      "index": "candidate",
+      "query": "fair_first",
+      "iteration": 3,
+      "output": "EXPLAIN\n-> Limit: 100 row(s)  (cost=300 rows=100) (actual time=1.44..1.46 rows=100 loops=1)\n    -> Sort: outbox_events.id, limit input to 100 row(s) per chunk  (cost=300 rows=1000) (actual time=1.44..1.45 rows=100 loops=1)\n        -> Index lookup on outbox_events using idx_unsent (sent_at=NULL), with index condition: ((outbox_events.sent_at is null) and (outbox_events.id > 0) and (outbox_events.id <= 100000))  (cost=300 rows=1000) (actual time=0.0183..1.29 rows=1000 loops=1)\n\n"
+    },
+    {
+      "distribution": "sparse",
+      "index": "candidate",
+      "query": "fair_middle",
+      "iteration": 1,
+      "output": "EXPLAIN\n-> Limit: 100 row(s)  (cost=225 rows=100) (actual time=0.0253..0.168 rows=100 loops=1)\n    -> Index range scan on outbox_events using idx_unsent_id over (sent_at = NULL AND 50000 < id <= 100000), with index condition: ((outbox_events.sent_at is null) and (outbox_events.id > 50000) and (outbox_events.id <= 100000))  (cost=225 rows=500) (actual time=0.0243..0.163 rows=100 loops=1)\n\n"
+    },
+    {
+      "distribution": "sparse",
+      "index": "candidate",
+      "query": "fair_middle",
+      "iteration": 2,
+      "output": "EXPLAIN\n-> Limit: 100 row(s)  (cost=225 rows=100) (actual time=0.0286..0.247 rows=100 loops=1)\n    -> Index range scan on outbox_events using idx_unsent_id over (sent_at = NULL AND 50000 < id <= 100000), with index condition: ((outbox_events.sent_at is null) and (outbox_events.id > 50000) and (outbox_events.id <= 100000))  (cost=225 rows=500) (actual time=0.0277..0.24 rows=100 loops=1)\n\n"
+    },
+    {
+      "distribution": "sparse",
+      "index": "candidate",
+      "query": "fair_middle",
+      "iteration": 3,
+      "output": "EXPLAIN\n-> Limit: 100 row(s)  (cost=225 rows=100) (actual time=0.0241..0.169 rows=100 loops=1)\n    -> Index range scan on outbox_events using idx_unsent_id over (sent_at = NULL AND 50000 < id <= 100000), with index condition: ((outbox_events.sent_at is null) and (outbox_events.id > 50000) and (outbox_events.id <= 100000))  (cost=225 rows=500) (actual time=0.0233..0.164 rows=100 loops=1)\n\n"
+    },
+    {
+      "distribution": "dense",
+      "index": "existing",
+      "query": "current_poll",
+      "iteration": 1,
+      "output": "EXPLAIN\n-> Limit: 100 row(s)  (cost=1.04 rows=100) (actual time=0.166..0.253 rows=100 loops=1)\n    -> Filter: (outbox_events.sent_at is null)  (cost=1.04 rows=100) (actual time=0.133..0.214 rows=100 loops=1)\n        -> Index scan on outbox_events using PRIMARY  (cost=1.04 rows=200) (actual time=0.0685..0.139 rows=111 loops=1)\n\n"
+    },
+    {
+      "distribution": "dense",
+      "index": "existing",
+      "query": "current_poll",
+      "iteration": 2,
+      "output": "EXPLAIN\n-> Limit: 100 row(s)  (cost=1.04 rows=100) (actual time=0.0164..0.0671 rows=100 loops=1)\n    -> Filter: (outbox_events.sent_at is null)  (cost=1.04 rows=100) (actual time=0.0153..0.0619 rows=100 loops=1)\n        -> Index scan on outbox_events using PRIMARY  (cost=1.04 rows=200) (actual time=0.0141..0.0553 rows=111 loops=1)\n\n"
+    },
+    {
+      "distribution": "dense",
+      "index": "existing",
+      "query": "current_poll",
+      "iteration": 3,
+      "output": "EXPLAIN\n-> Limit: 100 row(s)  (cost=1.04 rows=100) (actual time=0.0245..0.0718 rows=100 loops=1)\n    -> Filter: (outbox_events.sent_at is null)  (cost=1.04 rows=100) (actual time=0.0232..0.0663 rows=100 loops=1)\n        -> Index scan on outbox_events using PRIMARY  (cost=1.04 rows=200) (actual time=0.0218..0.059 rows=111 loops=1)\n\n"
+    },
+    {
+      "distribution": "dense",
+      "index": "existing",
+      "query": "fair_ceiling",
+      "iteration": 1,
+      "output": "EXPLAIN\n-> Aggregate: max(outbox_events.id)  (cost=9984 rows=1) (actual time=18.6..18.6 rows=1 loops=1)\n    -> Filter: (outbox_events.sent_at is null)  (cost=5013 rows=49706) (actual time=0.0934..14.9 rows=90000 loops=1)\n        -> Covering index lookup on outbox_events using idx_unsent (sent_at=NULL)  (cost=5013 rows=49706) (actual time=0.0871..10.5 rows=90000 loops=1)\n\n"
+    },
+    {
+      "distribution": "dense",
+      "index": "existing",
+      "query": "fair_ceiling",
+      "iteration": 2,
+      "output": "EXPLAIN\n-> Aggregate: max(outbox_events.id)  (cost=9984 rows=1) (actual time=18.3..18.3 rows=1 loops=1)\n    -> Filter: (outbox_events.sent_at is null)  (cost=5013 rows=49706) (actual time=0.0571..14.6 rows=90000 loops=1)\n        -> Covering index lookup on outbox_events using idx_unsent (sent_at=NULL)  (cost=5013 rows=49706) (actual time=0.0559..10.3 rows=90000 loops=1)\n\n"
+    },
+    {
+      "distribution": "dense",
+      "index": "existing",
+      "query": "fair_ceiling",
+      "iteration": 3,
+      "output": "EXPLAIN\n-> Aggregate: max(outbox_events.id)  (cost=9984 rows=1) (actual time=17.5..17.5 rows=1 loops=1)\n    -> Filter: (outbox_events.sent_at is null)  (cost=5013 rows=49706) (actual time=0.068..13.9 rows=90000 loops=1)\n        -> Covering index lookup on outbox_events using idx_unsent (sent_at=NULL)  (cost=5013 rows=49706) (actual time=0.067..9.65 rows=90000 loops=1)\n\n"
+    },
+    {
+      "distribution": "dense",
+      "index": "existing",
+      "query": "fair_first",
+      "iteration": 1,
+      "output": "EXPLAIN\n-> Limit: 100 row(s)  (cost=2990 rows=100) (actual time=0.073..0.253 rows=100 loops=1)\n    -> Filter: ((outbox_events.sent_at is null) and (outbox_events.id > 0) and (outbox_events.id <= 100000))  (cost=2990 rows=24853) (actual time=0.071..0.243 rows=100 loops=1)\n        -> Index range scan on outbox_events using PRIMARY over (0 < id <= 100000)  (cost=2990 rows=49706) (actual time=0.0298..0.176 rows=111 loops=1)\n\n"
+    },
+    {
+      "distribution": "dense",
+      "index": "existing",
+      "query": "fair_first",
+      "iteration": 2,
+      "output": "EXPLAIN\n-> Limit: 100 row(s)  (cost=2990 rows=100) (actual time=0.0185..0.0716 rows=100 loops=1)\n    -> Filter: ((outbox_events.sent_at is null) and (outbox_events.id > 0) and (outbox_events.id <= 100000))  (cost=2990 rows=24853) (actual time=0.0174..0.0659 rows=100 loops=1)\n        -> Index range scan on outbox_events using PRIMARY over (0 < id <= 100000)  (cost=2990 rows=49706) (actual time=0.0152..0.0554 rows=111 loops=1)\n\n"
+    },
+    {
+      "distribution": "dense",
+      "index": "existing",
+      "query": "fair_first",
+      "iteration": 3,
+      "output": "EXPLAIN\n-> Limit: 100 row(s)  (cost=2990 rows=100) (actual time=0.0203..0.072 rows=100 loops=1)\n    -> Filter: ((outbox_events.sent_at is null) and (outbox_events.id > 0) and (outbox_events.id <= 100000))  (cost=2990 rows=24853) (actual time=0.0194..0.0669 rows=100 loops=1)\n        -> Index range scan on outbox_events using PRIMARY over (0 < id <= 100000)  (cost=2990 rows=49706) (actual time=0.0171..0.0559 rows=111 loops=1)\n\n"
+    },
+    {
+      "distribution": "dense",
+      "index": "existing",
+      "query": "fair_middle",
+      "iteration": 1,
+      "output": "EXPLAIN\n-> Limit: 100 row(s)  (cost=2990 rows=100) (actual time=0.0282..0.0799 rows=100 loops=1)\n    -> Filter: ((outbox_events.sent_at is null) and (outbox_events.id > 50000) and (outbox_events.id <= 100000))  (cost=2990 rows=24853) (actual time=0.0273..0.0749 rows=100 loops=1)\n        -> Index range scan on outbox_events using PRIMARY over (50000 < id <= 100000)  (cost=2990 rows=49706) (actual time=0.025..0.0645 rows=111 loops=1)\n\n"
+    },
+    {
+      "distribution": "dense",
+      "index": "existing",
+      "query": "fair_middle",
+      "iteration": 2,
+      "output": "EXPLAIN\n-> Limit: 100 row(s)  (cost=2990 rows=100) (actual time=0.0277..0.0826 rows=100 loops=1)\n    -> Filter: ((outbox_events.sent_at is null) and (outbox_events.id > 50000) and (outbox_events.id <= 100000))  (cost=2990 rows=24853) (actual time=0.0264..0.0771 rows=100 loops=1)\n        -> Index range scan on outbox_events using PRIMARY over (50000 < id <= 100000)  (cost=2990 rows=49706) (actual time=0.024..0.0659 rows=111 loops=1)\n\n"
+    },
+    {
+      "distribution": "dense",
+      "index": "existing",
+      "query": "fair_middle",
+      "iteration": 3,
+      "output": "EXPLAIN\n-> Limit: 100 row(s)  (cost=2990 rows=100) (actual time=0.0224..0.0735 rows=100 loops=1)\n    -> Filter: ((outbox_events.sent_at is null) and (outbox_events.id > 50000) and (outbox_events.id <= 100000))  (cost=2990 rows=24853) (actual time=0.0212..0.0681 rows=100 loops=1)\n        -> Index range scan on outbox_events using PRIMARY over (50000 < id <= 100000)  (cost=2990 rows=49706) (actual time=0.0186..0.0569 rows=111 loops=1)\n\n"
+    },
+    {
+      "distribution": "dense",
+      "index": "candidate",
+      "query": "current_poll",
+      "iteration": 1,
+      "output": "EXPLAIN\n-> Limit: 100 row(s)  (cost=1.03 rows=100) (actual time=0.0234..0.0899 rows=100 loops=1)\n    -> Filter: (outbox_events.sent_at is null)  (cost=1.03 rows=100) (actual time=0.0223..0.0836 rows=100 loops=1)\n        -> Index scan on outbox_events using PRIMARY  (cost=1.03 rows=200) (actual time=0.0209..0.0753 rows=111 loops=1)\n\n"
+    },
+    {
+      "distribution": "dense",
+      "index": "candidate",
+      "query": "current_poll",
+      "iteration": 2,
+      "output": "EXPLAIN\n-> Limit: 100 row(s)  (cost=1.03 rows=100) (actual time=0.0187..0.0661 rows=100 loops=1)\n    -> Filter: (outbox_events.sent_at is null)  (cost=1.03 rows=100) (actual time=0.0177..0.061 rows=100 loops=1)\n        -> Index scan on outbox_events using PRIMARY  (cost=1.03 rows=200) (actual time=0.0164..0.0545 rows=111 loops=1)\n\n"
+    },
+    {
+      "distribution": "dense",
+      "index": "candidate",
+      "query": "current_poll",
+      "iteration": 3,
+      "output": "EXPLAIN\n-> Limit: 100 row(s)  (cost=1.03 rows=100) (actual time=0.0191..0.0675 rows=100 loops=1)\n    -> Filter: (outbox_events.sent_at is null)  (cost=1.03 rows=100) (actual time=0.0181..0.062 rows=100 loops=1)\n        -> Index scan on outbox_events using PRIMARY  (cost=1.03 rows=200) (actual time=0.0167..0.0553 rows=111 loops=1)\n\n"
+    },
+    {
+      "distribution": "dense",
+      "index": "candidate",
+      "query": "fair_ceiling",
+      "iteration": 1,
+      "output": "EXPLAIN\n-> Rows fetched before execution  (cost=0..0 rows=1) (actual time=83e-6..125e-6 rows=1 loops=1)\n\n"
+    },
+    {
+      "distribution": "dense",
+      "index": "candidate",
+      "query": "fair_ceiling",
+      "iteration": 2,
+      "output": "EXPLAIN\n-> Rows fetched before execution  (cost=0..0 rows=1) (actual time=83e-6..125e-6 rows=1 loops=1)\n\n"
+    },
+    {
+      "distribution": "dense",
+      "index": "candidate",
+      "query": "fair_ceiling",
+      "iteration": 3,
+      "output": "EXPLAIN\n-> Rows fetched before execution  (cost=0..0 rows=1) (actual time=167e-6..167e-6 rows=1 loops=1)\n\n"
+    },
+    {
+      "distribution": "dense",
+      "index": "candidate",
+      "query": "fair_first",
+      "iteration": 1,
+      "output": "EXPLAIN\n-> Limit: 100 row(s)  (cost=2996 rows=100) (actual time=0.0329..0.0882 rows=100 loops=1)\n    -> Filter: ((outbox_events.sent_at is null) and (outbox_events.id > 0) and (outbox_events.id <= 100000))  (cost=2996 rows=24908) (actual time=0.0288..0.0798 rows=100 loops=1)\n        -> Index range scan on outbox_events using PRIMARY over (0 < id <= 100000)  (cost=2996 rows=49816) (actual time=0.0235..0.0654 rows=111 loops=1)\n\n"
+    },
+    {
+      "distribution": "dense",
+      "index": "candidate",
+      "query": "fair_first",
+      "iteration": 2,
+      "output": "EXPLAIN\n-> Limit: 100 row(s)  (cost=2996 rows=100) (actual time=0.0232..0.0814 rows=100 loops=1)\n    -> Filter: ((outbox_events.sent_at is null) and (outbox_events.id > 0) and (outbox_events.id <= 100000))  (cost=2996 rows=24908) (actual time=0.0222..0.0742 rows=100 loops=1)\n        -> Index range scan on outbox_events using PRIMARY over (0 < id <= 100000)  (cost=2996 rows=49816) (actual time=0.0154..0.0584 rows=111 loops=1)\n\n"
+    },
+    {
+      "distribution": "dense",
+      "index": "candidate",
+      "query": "fair_first",
+      "iteration": 3,
+      "output": "EXPLAIN\n-> Limit: 100 row(s)  (cost=2996 rows=100) (actual time=0.0202..0.0715 rows=100 loops=1)\n    -> Filter: ((outbox_events.sent_at is null) and (outbox_events.id > 0) and (outbox_events.id <= 100000))  (cost=2996 rows=24908) (actual time=0.0192..0.0664 rows=100 loops=1)\n        -> Index range scan on outbox_events using PRIMARY over (0 < id <= 100000)  (cost=2996 rows=49816) (actual time=0.0151..0.0537 rows=111 loops=1)\n\n"
+    },
+    {
+      "distribution": "dense",
+      "index": "candidate",
+      "query": "fair_middle",
+      "iteration": 1,
+      "output": "EXPLAIN\n-> Limit: 100 row(s)  (cost=2996 rows=100) (actual time=0.0183..0.0676 rows=100 loops=1)\n    -> Filter: ((outbox_events.sent_at is null) and (outbox_events.id > 50000) and (outbox_events.id <= 100000))  (cost=2996 rows=24908) (actual time=0.0175..0.0626 rows=100 loops=1)\n        -> Index range scan on outbox_events using PRIMARY over (50000 < id <= 100000)  (cost=2996 rows=49816) (actual time=0.0155..0.052 rows=111 loops=1)\n\n"
+    },
+    {
+      "distribution": "dense",
+      "index": "candidate",
+      "query": "fair_middle",
+      "iteration": 2,
+      "output": "EXPLAIN\n-> Limit: 100 row(s)  (cost=2996 rows=100) (actual time=0.055..0.157 rows=100 loops=1)\n    -> Filter: ((outbox_events.sent_at is null) and (outbox_events.id > 50000) and (outbox_events.id <= 100000))  (cost=2996 rows=24908) (actual time=0.0538..0.151 rows=100 loops=1)\n        -> Index range scan on outbox_events using PRIMARY over (50000 < id <= 100000)  (cost=2996 rows=49816) (actual time=0.042..0.125 rows=111 loops=1)\n\n"
+    },
+    {
+      "distribution": "dense",
+      "index": "candidate",
+      "query": "fair_middle",
+      "iteration": 3,
+      "output": "EXPLAIN\n-> Limit: 100 row(s)  (cost=2996 rows=100) (actual time=0.0355..0.135 rows=100 loops=1)\n    -> Filter: ((outbox_events.sent_at is null) and (outbox_events.id > 50000) and (outbox_events.id <= 100000))  (cost=2996 rows=24908) (actual time=0.0344..0.128 rows=100 loops=1)\n        -> Index range scan on outbox_events using PRIMARY over (50000 < id <= 100000)  (cost=2996 rows=49816) (actual time=0.0267..0.103 rows=111 loops=1)\n\n"
+    }
+  ],
+  "head": "4e4c7fdd6b3a97f0f2503e1e0dd73a95707af541",
+  "schema_sha256": "96a27f8315ec38c510d5525da13edc3ca3e81631d2ce8f7db021e0fba4373300",
+  "script_sha256": "f645cbfc290abfd2a9c4da9118c9a8ee14a796c4749ac7867b9dd97b1f08ceb6",
+  "image_id": "sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff",
+  "status": "ok"
+}

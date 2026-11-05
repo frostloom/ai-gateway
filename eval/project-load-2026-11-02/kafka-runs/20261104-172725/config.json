@@ -1,0 +1,60 @@
+{
+  "head": "42d8ef8e5ca2471b18800e50f8e7a57fbcfdd47f",
+  "branch": "codex/billing-mysql-comparison",
+  "git_status": " M AGENTS.md\n M cmd/billing/main.go\n M cmd/gateway/main.go\n M cmd/reconciler/main.go\n M internal/billing/consumer/consumer.go\n M internal/billing/outbox/relay.go\n M internal/billing/reconciler/reconciler.go\n M internal/billing/server/service.go\n M internal/billing/store/cash.go\n M internal/billing/store/lua/compensate.lua\n M internal/billing/store/lua/reserve.lua\n M internal/billing/store/lua/settle.lua\n M internal/billing/store/mysql.go\n M internal/billing/store/outbox.go\n M internal/billing/store/outbox_test.go\n M internal/billing/store/plan.go\n M internal/billing/store/subscription_reserve_test.go\n M internal/gateway/client/billing.go\n M internal/gateway/handler/chat.go\n M internal/gateway/handler/chat_stream_test.go\n M internal/gateway/middleware/apikey.go\n M internal/gateway/middleware/idempotency.go\n M internal/gateway/middleware/ratelimit.go\n D internal/gateway/web/dist/assets/Empty-B78rz8Qh.css\n D internal/gateway/web/dist/assets/Empty-Cq6uueat.js\n D internal/gateway/web/dist/assets/dashboard-H93iLNlz.js\n D internal/gateway/web/dist/assets/dashboard-jpnukakx.css\n D internal/gateway/web/dist/assets/portal-CI_uKi_F.js\n D internal/gateway/web/dist/assets/portal-fDtFA2oX.css\n M internal/gateway/web/dist/dashboard.html\n M internal/gateway/web/dist/portal.html\n M internal/pkg/controlplane/token.go\n M internal/pkg/quota/quota.go\n M internal/router/http.go\n M internal/router/registry.go\n M scripts/schema.sql\n?? .tmp/\n?? eval/billing-comparison-2026-11-02/\n?? eval/project-load-2026-11-02/\n?? integrations/\n?? internal/billing/store/reserve_fingerprint_test.go\n?? internal/gateway/client/billing_replay_test.go\n?? internal/gateway/middleware/apikey_status_test.go\n?? internal/gateway/web/dist/assets/Empty-D1TVEnQN.css\n?? internal/gateway/web/dist/assets/Empty-DFn-BFPp.js\n?? internal/gateway/web/dist/assets/dashboard-BGbdPy4C.js\n?? internal/gateway/web/dist/assets/dashboard-Bt40SYhT.css\n?? internal/gateway/web/dist/assets/portal-CX4r-21-.js\n?? internal/gateway/web/dist/assets/portal-DUpRuSip.css\n?? plate_sim.py\n?? scripts/migrations/\n",
+  "source_sha256": {
+    "internal/billing/store/mysql.go": "1f72783b889b7d0fed621cadd7fe49327a44457fc1c38f4049601c7dc2879510",
+    "internal/gateway/handler/chat.go": "1980f1d7461a16a867049123acdc22790e8623a5f9d42598fdf88124014eb253",
+    "cmd/gateway/main.go": "1fdd2632e4bf4a089c9fd5b5821294584bb1462241e14532782b69b280b054b6",
+    "cmd/router/main.go": "eb54d320360e452ac16be25d9cdf6804aedbde91da5c77b0e18adcd2d841021c",
+    "cmd/billing/main.go": "eb2f4f6cf8b84b14efdd21421888a3348da301103cdf9749f708542ef9e2e3d4",
+    "cmd/mock-provider/main.go": "3a42cc4753dbf60f5482fc81eb65ffbb2103b626d0ea60981d1ddd48d78e2d8e"
+  },
+  "images": {
+    "docker.m.daocloud.io/library/mysql:8.0.40": "sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff",
+    "docker.m.daocloud.io/library/redis:7-alpine": "sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499",
+    "docker.m.daocloud.io/apache/kafka:3.7.0": "sha256:41c20d65b0a2180b9deca056d47540771752e69fe9225d5748dd65a25a9675d7"
+  },
+  "gomaxprocs": 8,
+  "mysql_pool_max": 100,
+  "rate_per_min": 600,
+  "mock_latency_ms": 15,
+  "mock_completion_tokens": 100,
+  "kafka": "isolated KRaft, relay and event-consumer enabled",
+  "isolated_agents": "disabled",
+  "reconciler": "sweep every 5s, grace 600s; rebuild disabled",
+  "ports": {
+    "gateway": 64230,
+    "billing": 64231,
+    "admin": 64232,
+    "router": 64233,
+    "mock": 64234,
+    "reconciler": 64235,
+    "consumer": 64236
+  },
+  "mysql_port": "64106",
+  "redis_port": "64110",
+  "quick": false,
+  "started": "2026-11-04T17:28:53.179083",
+  "go_version": "go version go1.25.12 darwin/arm64",
+  "sdkroot": "/Library/Developer/CommandLineTools/SDKs/MacOSX26.5.sdk",
+  "binary_sha256": {
+    "billing": "ef5b6617dc0c6c548a19c36ec0a6a1e958693acccacf157bd5bdfadeb5d2c65e",
+    "router": "39b882e7f0c125bb2b3423e03403c23bbca830e9692ca9d01c9010f26480c967",
+    "reconciler": "d342a51d3041917299b975573adf32368adfecf4f2f1a96c9a2795cdb52a8f9b",
+    "consumer": "5529b74f1f3f1988222d5c2b2a69d175f7ba594b6fb36770b4f83415a28b063a",
+    "gateway": "a7da6d1cc20a25367bb9d47f8449eb5d85150049a37c3afb89447ce10ae3e19c",
+    "mock": "1c98a9b66f30224199b764de90cf20897a3990b2ab558bedd0c8d3f7966f27c1",
+    "seed": "9fcf48a44c10e7f2d3d255e0969f5cf0d693b95a976771b127afdc3f9feef105",
+    "load": "91b5f4e36e9fec700f5f7db94df80317a659217bea2cdb7711e954b6b0f6561d"
+  },
+  "fixed_tenants": 32,
+  "trace_mode": true,
+  "workers": [
+    256,
+    512
+  ],
+  "diagnostic_load": true,
+  "stage_detail": true,
+  "load_source_sha256": "2a38a0101b272da23cd7572fc1805c70d57a82ab38b2c15953d40e4334793dd2"
+}

@@ -1,0 +1,28 @@
+head=42d8ef8e5ca2471b18800e50f8e7a57fbcfdd47f
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+# github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02.test
+ld: warning: '/private/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-4226711825/000013.o' has malformed LC_DYSYMTAB, expected 98 undefined symbols to start at index 1626, found 95 undefined symbols starting at index 1626
+=== RUN   TestAuthSingleQueryConcurrentMixed
+    auth_single_query_concurrency_test.go:146: variant=baseline n=1280 workers=32 rps=1474.1 mean_ms=21.135 p95_ms=73.759 p99_ms=103.468 errors=0 timeouts=0 pool_wait_count=1840 pool_wait_ms=13237.433 sampled_max_open=16 sampled_max_inuse=16
+    auth_single_query_concurrency_test.go:146: variant=candidate n=1280 workers=32 rps=5108.9 mean_ms=5.887 p95_ms=12.606 p99_ms=17.093 errors=0 timeouts=0 pool_wait_count=1219 pool_wait_ms=3517.242 sampled_max_open=16 sampled_max_inuse=16
+    auth_single_query_concurrency_test.go:146: variant=candidate n=1280 workers=32 rps=4376.3 mean_ms=6.839 p95_ms=15.238 p99_ms=24.613 errors=0 timeouts=0 pool_wait_count=1239 pool_wait_ms=4029.016 sampled_max_open=16 sampled_max_inuse=16
+    auth_single_query_concurrency_test.go:146: variant=baseline n=1280 workers=32 rps=3697.8 mean_ms=8.252 p95_ms=16.170 p99_ms=21.893 errors=0 timeouts=0 pool_wait_count=1866 pool_wait_ms=5036.538 sampled_max_open=16 sampled_max_inuse=16
+    auth_single_query_concurrency_test.go:184: after commits: 64 concurrent calls rejected disabled normal key or browser user
+--- PASS: TestAuthSingleQueryConcurrentMixed (2.62s)
+=== RUN   TestAuthSingleQueryConcurrentMixed
+    auth_single_query_concurrency_test.go:146: variant=baseline n=1280 workers=32 rps=3457.1 mean_ms=8.764 p95_ms=17.666 p99_ms=23.156 errors=0 timeouts=0 pool_wait_count=1869 pool_wait_ms=5367.033 sampled_max_open=16 sampled_max_inuse=16
+    auth_single_query_concurrency_test.go:146: variant=candidate n=1280 workers=32 rps=5125.4 mean_ms=5.839 p95_ms=11.310 p99_ms=15.920 errors=0 timeouts=0 pool_wait_count=1208 pool_wait_ms=3437.024 sampled_max_open=16 sampled_max_inuse=16
+    auth_single_query_concurrency_test.go:146: variant=candidate n=1280 workers=32 rps=5028.5 mean_ms=5.906 p95_ms=12.075 p99_ms=15.864 errors=0 timeouts=0 pool_wait_count=1226 pool_wait_ms=3505.353 sampled_max_open=16 sampled_max_inuse=16
+    auth_single_query_concurrency_test.go:146: variant=baseline n=1280 workers=32 rps=3763.3 mean_ms=8.112 p95_ms=16.021 p99_ms=21.383 errors=0 timeouts=0 pool_wait_count=1873 pool_wait_ms=4932.969 sampled_max_open=16 sampled_max_inuse=16
+    auth_single_query_concurrency_test.go:184: after commits: 64 concurrent calls rejected disabled normal key or browser user
+--- PASS: TestAuthSingleQueryConcurrentMixed (1.86s)
+=== RUN   TestAuthSingleQueryConcurrentMixed
+    auth_single_query_concurrency_test.go:146: variant=baseline n=1280 workers=32 rps=3610.8 mean_ms=8.089 p95_ms=16.249 p99_ms=22.398 errors=0 timeouts=0 pool_wait_count=1836 pool_wait_ms=4795.983 sampled_max_open=16 sampled_max_inuse=16
+    auth_single_query_concurrency_test.go:146: variant=candidate n=1280 workers=32 rps=4419.8 mean_ms=6.739 p95_ms=14.983 p99_ms=23.915 errors=0 timeouts=0 pool_wait_count=1242 pool_wait_ms=3908.737 sampled_max_open=16 sampled_max_inuse=16
+    auth_single_query_concurrency_test.go:146: variant=candidate n=1280 workers=32 rps=4613.8 mean_ms=6.435 p95_ms=13.319 p99_ms=20.753 errors=0 timeouts=0 pool_wait_count=1237 pool_wait_ms=3790.785 sampled_max_open=16 sampled_max_inuse=16
+    auth_single_query_concurrency_test.go:146: variant=baseline n=1280 workers=32 rps=3759.7 mean_ms=8.110 p95_ms=16.645 p99_ms=21.605 errors=0 timeouts=0 pool_wait_count=1868 pool_wait_ms=4913.420 sampled_max_open=16 sampled_max_inuse=16
+    auth_single_query_concurrency_test.go:184: after commits: 64 concurrent calls rejected disabled normal key or browser user
+--- PASS: TestAuthSingleQueryConcurrentMixed (1.93s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	8.572s

@@ -1,0 +1,56 @@
+head=d607e1465094269e8dc8e2f07cf5b3ac28560abf
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestActualStoreOrphanOutboxConflictCharacterization
+    outbox_orphan_actual_test.go:58: reserve_rejected=true bills=0 existing_events=1 balance=500 ledger=500
+--- PASS: TestActualStoreOrphanOutboxConflictCharacterization (5.11s)
+=== RUN   TestActualStoreOutboxNormalReplay
+    outbox_orphan_actual_test.go:137: normal_replays=true events=3 balance=460 ledger=460
+--- PASS: TestActualStoreOutboxNormalReplay (0.89s)
+=== RUN   TestActualStoreTerminalOutboxConflicts
+=== RUN   TestActualStoreTerminalOutboxConflicts/usage
+    outbox_orphan_actual_test.go:228: phase=usage rejected_then_retry=true prior_balance=400 final_balance=400 ledger=400
+=== RUN   TestActualStoreTerminalOutboxConflicts/settle
+    outbox_orphan_actual_test.go:228: phase=settle rejected_then_retry=true prior_balance=400 final_balance=460 ledger=460
+=== RUN   TestActualStoreTerminalOutboxConflicts/reverse
+    outbox_orphan_actual_test.go:228: phase=reverse rejected_then_retry=true prior_balance=400 final_balance=500 ledger=500
+--- PASS: TestActualStoreTerminalOutboxConflicts (1.67s)
+    --- PASS: TestActualStoreTerminalOutboxConflicts/usage (0.53s)
+    --- PASS: TestActualStoreTerminalOutboxConflicts/settle (0.55s)
+    --- PASS: TestActualStoreTerminalOutboxConflicts/reverse (0.59s)
+=== RUN   TestActualStoreOrphanOutboxConflictCharacterization
+    outbox_orphan_actual_test.go:58: reserve_rejected=true bills=0 existing_events=1 balance=500 ledger=500
+--- PASS: TestActualStoreOrphanOutboxConflictCharacterization (0.46s)
+=== RUN   TestActualStoreOutboxNormalReplay
+    outbox_orphan_actual_test.go:137: normal_replays=true events=3 balance=460 ledger=460
+--- PASS: TestActualStoreOutboxNormalReplay (0.45s)
+=== RUN   TestActualStoreTerminalOutboxConflicts
+=== RUN   TestActualStoreTerminalOutboxConflicts/usage
+    outbox_orphan_actual_test.go:228: phase=usage rejected_then_retry=true prior_balance=400 final_balance=400 ledger=400
+=== RUN   TestActualStoreTerminalOutboxConflicts/settle
+    outbox_orphan_actual_test.go:228: phase=settle rejected_then_retry=true prior_balance=400 final_balance=460 ledger=460
+=== RUN   TestActualStoreTerminalOutboxConflicts/reverse
+    outbox_orphan_actual_test.go:228: phase=reverse rejected_then_retry=true prior_balance=400 final_balance=500 ledger=500
+--- PASS: TestActualStoreTerminalOutboxConflicts (1.63s)
+    --- PASS: TestActualStoreTerminalOutboxConflicts/usage (0.54s)
+    --- PASS: TestActualStoreTerminalOutboxConflicts/settle (0.49s)
+    --- PASS: TestActualStoreTerminalOutboxConflicts/reverse (0.59s)
+=== RUN   TestActualStoreOrphanOutboxConflictCharacterization
+    outbox_orphan_actual_test.go:58: reserve_rejected=true bills=0 existing_events=1 balance=500 ledger=500
+--- PASS: TestActualStoreOrphanOutboxConflictCharacterization (0.45s)
+=== RUN   TestActualStoreOutboxNormalReplay
+    outbox_orphan_actual_test.go:137: normal_replays=true events=3 balance=460 ledger=460
+--- PASS: TestActualStoreOutboxNormalReplay (0.54s)
+=== RUN   TestActualStoreTerminalOutboxConflicts
+=== RUN   TestActualStoreTerminalOutboxConflicts/usage
+    outbox_orphan_actual_test.go:228: phase=usage rejected_then_retry=true prior_balance=400 final_balance=400 ledger=400
+=== RUN   TestActualStoreTerminalOutboxConflicts/settle
+    outbox_orphan_actual_test.go:228: phase=settle rejected_then_retry=true prior_balance=400 final_balance=460 ledger=460
+=== RUN   TestActualStoreTerminalOutboxConflicts/reverse
+    outbox_orphan_actual_test.go:228: phase=reverse rejected_then_retry=true prior_balance=400 final_balance=500 ledger=500
+--- PASS: TestActualStoreTerminalOutboxConflicts (1.40s)
+    --- PASS: TestActualStoreTerminalOutboxConflicts/usage (0.48s)
+    --- PASS: TestActualStoreTerminalOutboxConflicts/settle (0.46s)
+    --- PASS: TestActualStoreTerminalOutboxConflicts/reverse (0.45s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	14.855s

@@ -1,0 +1,24 @@
+package handler
+
+import (
+ "log/slog"
+ "net/http"
+ "net/http/httptest"
+ "testing"
+ "strings"
+ "encoding/json"
+
+ "github.com/frostloom/ai-gateway/internal/gateway/client"
+)
+
+func TestEmptyUpstreamStreamReturnsErrorAndKeepsPending(t *testing.T) {
+ upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {}))
+ defer upstream.Close()
+ bill := &fakeBilling{}
+ c, recorder := newGinCtx()
+ relayStream(c, bill, &fakeRouter{}, slog.New(slog.DiscardHandler), &client.RouteResult{ProviderID: 7, BaseURL: upstream.URL}, &chatRequest{Model: "m", Stream: true}, "empty-stream", 9, 4, true)
+ if recorder.Code != http.StatusBadGateway { t.Fatalf("status=%d body=%q", recorder.Code, recorder.Body.String()) }
+ var result map[string]any
+ if err := json.Unmarshal(recorder.Body.Bytes(), &result); err != nil || result["error"] == nil || !strings.HasPrefix(recorder.Header().Get("Content-Type"), "application/json") { t.Fatalf("content type=%q body=%q err=%v", recorder.Header().Get("Content-Type"), recorder.Body.String(), err) }
+ if len(bill.reports) != 0 || len(bill.settles) != 0 || len(bill.reverses) != 0 { t.Fatal("empty response must remain pending") }
+}

@@ -1,0 +1,11 @@
+=== RUN   TestLocalUsageJournalSurvivesProcessDeath
+    local_usage_journal_test.go:153: synced file survived worker kill; duplicate writes matched; conflicting values rejected
+--- PASS: TestLocalUsageJournalSurvivesProcessDeath (0.14s)
+=== RUN   TestLocalUsageJournalSurvivesProcessDeath
+    local_usage_journal_test.go:153: synced file survived worker kill; duplicate writes matched; conflicting values rejected
+--- PASS: TestLocalUsageJournalSurvivesProcessDeath (0.12s)
+=== RUN   TestLocalUsageJournalSurvivesProcessDeath
+    local_usage_journal_test.go:153: synced file survived worker kill; duplicate writes matched; conflicting values rejected
+--- PASS: TestLocalUsageJournalSurvivesProcessDeath (0.10s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	2.308s

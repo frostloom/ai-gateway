@@ -1,0 +1,9 @@
+run failed: expected 502, one mock call and pending bill; raw: /Users/a1/项目/ai-gateway/eval/project-load-2026-11-02/unknown-safe-default-runs/20261104-045833
+Traceback (most recent call last):
+  File "/Users/a1/项目/ai-gateway/eval/project-load-2026-11-02/run_unknown_safe_defaults.py", line 129, in <module>
+    try: main()
+         ^^^^^^
+  File "/Users/a1/项目/ai-gateway/eval/project-load-2026-11-02/run_unknown_safe_defaults.py", line 95, in main
+    if result.get('status')!=502 or count()!=1 or 'reserve\tpending\t1' not in before:raise RuntimeError('expected 502, one mock call and pending bill')
+                                                                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: expected 502, one mock call and pending bill

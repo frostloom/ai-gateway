@@ -3,28 +3,76 @@ package server
 
 import (
 	"context"
+	"encoding/hex"
 	"log/slog"
 
+	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 
 	"github.com/frostloom/ai-gateway/internal/billing/store"
+	"github.com/frostloom/ai-gateway/internal/pkg/controlplane"
 	billingv1 "github.com/frostloom/ai-gateway/internal/proto/billing/v1"
 )
 
 type Service struct {
 	billingv1.UnimplementedBillingServiceServer
-	store *store.Store
-	log   *slog.Logger
+	store            *store.Store
+	log              *slog.Logger
+	requireReserveV2 bool
 }
 
-func NewService(st *store.Store, log *slog.Logger) *Service {
-	return &Service{store: st, log: log}
+type Option func(*Service)
+
+// RequireReserveV2 rejects legacy reservations before any store mutation.
+func RequireReserveV2() Option {
+	return func(s *Service) { s.requireReserveV2 = true }
+}
+
+func NewService(st *store.Store, log *slog.Logger, options ...Option) *Service {
+	s := &Service{store: st, log: log}
+	for _, option := range options {
+		option(s)
+	}
+	return s
 }
 
 // Reserve 预占额度（幂等）。
 func (s *Service) Reserve(ctx context.Context, req *billingv1.ReserveRequest) (*billingv1.ReserveResponse, error) {
-	resp, err := s.store.Reserve(ctx, req)
+	md, _ := metadata.FromIncomingContext(ctx)
+	modes := md.Get(controlplane.ReserveModeKey)
+	strict := len(modes) == 1 && (modes[0] == controlplane.ReserveReplayV1 || modes[0] == controlplane.ReserveReplayV2)
+	if len(modes) > 0 && !strict {
+		return nil, status.Error(codes.InvalidArgument, "unsupported reserve contract")
+	}
+	if s.requireReserveV2 && (!strict || modes[0] != controlplane.ReserveReplayV2) {
+		return nil, status.Error(codes.FailedPrecondition, "reserve content contract required")
+	}
+	if (!strict || modes[0] != controlplane.ReserveReplayV2) && len(md.Get(controlplane.ReserveContentKey)) > 0 {
+		return nil, status.Error(codes.InvalidArgument, "unexpected reserve content digest")
+	}
+	if len(modes) == 1 && modes[0] == controlplane.ReserveReplayV2 {
+		values := md.Get(controlplane.ReserveContentKey)
+		if len(values) != 1 || len(values[0]) != 64 {
+			return nil, status.Error(codes.InvalidArgument, "invalid reserve content digest")
+		}
+		decoded, err := hex.DecodeString(values[0])
+		if err != nil || hex.EncodeToString(decoded) != values[0] {
+			return nil, status.Error(codes.InvalidArgument, "invalid reserve content digest")
+		}
+		ctx = controlplane.WithReserveContent(ctx, values[0])
+	}
+	var resp *billingv1.ReserveResponse
+	var err error
+	if strict {
+		if err = grpc.SetHeader(ctx, metadata.Pairs(controlplane.ReserveContractKey, modes[0])); err != nil {
+			return nil, status.Error(codes.Unavailable, "reserve replay negotiation unavailable")
+		}
+		resp, err = s.store.ReserveWithReplaySignal(ctx, req)
+	} else {
+		resp, err = s.store.Reserve(ctx, req)
+	}
 	if err != nil {
 		return nil, err
 	}

@@ -1,0 +1,21 @@
+=== RUN   TestAuthCacheBoundaries
+--- PASS: TestAuthCacheBoundaries (0.34s)
+=== RUN   TestAuthCacheStaleRefill
+--- PASS: TestAuthCacheStaleRefill (0.00s)
+=== RUN   TestFenceBlocksStaleRefill
+=== RUN   TestFenceBlocksStaleRefill/within_fence
+=== RUN   TestFenceBlocksStaleRefill/fence_expired
+--- PASS: TestFenceBlocksStaleRefill (0.01s)
+    --- PASS: TestFenceBlocksStaleRefill/within_fence (0.00s)
+    --- PASS: TestFenceBlocksStaleRefill/fence_expired (0.00s)
+=== RUN   TestFenceRedisFailure
+redis: 2026/11/03 15:44:57 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:65396: connect: connection refused
+redis: 2026/11/03 15:44:57 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:65396: connect: connection refused
+redis: 2026/11/03 15:44:58 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:65396: connect: connection refused
+redis: 2026/11/03 15:44:58 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:65418: connect: connection refused
+--- PASS: TestFenceRedisFailure (0.43s)
+=== RUN   TestFenceStateLossAllowsStaleRefill
+--- PASS: TestFenceStateLossAllowsStaleRefill (0.00s)
+PASS
+redis: 2026/11/03 15:44:58 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:65418: connect: connection refused
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	2.497s

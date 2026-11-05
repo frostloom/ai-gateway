@@ -1,0 +1,14 @@
+run failed: Command '['go', 'build', '-overlay', '/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/codex-project-load-cplvz47_/router-overlay.json', '-o', '/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/codex-project-load-cplvz47_/router', './cmd/router']' returned non-zero exit status 1.; raw: /Users/a1/项目/ai-gateway/eval/project-load-2026-11-02/gateway-open-load-runs/20261105-005315
+Traceback (most recent call last):
+  File "/Users/a1/项目/ai-gateway/eval/project-load-2026-11-02/run_gateway_v2_open_load.py", line 226, in <module>
+    try: main()
+         ^^^^^^
+  File "/Users/a1/项目/ai-gateway/eval/project-load-2026-11-02/run_gateway_v2_open_load.py", line 151, in main
+    dest=bindir/name; args=['go','build']+(['-overlay',str(overlay)] if name=='gateway' else (['-overlay',str(router_overlay)] if name=='router' and (router_candidate=='1' or router_lock_scope=='1') else (['-overlay',str(billing_overlay)] if name=='billing' and (unknown_store=='1' or legacy_lookup=='1' or lock_timing=='1' or auth_pool=='1') else (['-overlay',str(mock_overlay)] if name=='mock' and trace_mock=='1' else []))))+['-o',str(dest),pkg]; run(args,cwd=ROOT,env=buildenv,timeout=180,stdout=subprocess.DEVNULL,stderr=open(OUT/(name+'-build.log'),'w'));binaries[name]=str(dest)
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/a1/项目/ai-gateway/eval/project-load-2026-11-02/run_gateway_v2_open_load.py", line 9, in run
+    def run(args,**kw): return subprocess.run(args,check=True,text=True,**kw)
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/a1/.local/share/uv/python/cpython-3.12.15-macos-aarch64-none/lib/python3.12/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['go', 'build', '-overlay', '/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/codex-project-load-cplvz47_/router-overlay.json', '-o', '/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/codex-project-load-cplvz47_/router', './cmd/router']' returned non-zero exit status 1.

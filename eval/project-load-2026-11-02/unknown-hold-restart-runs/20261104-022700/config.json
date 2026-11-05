@@ -1,0 +1,56 @@
+{
+  "head": "63b9d1ed4d64bb583d15fa884c37468e5c53044c",
+  "branch": "codex/billing-mysql-comparison",
+  "git_status": " M AGENTS.md\n M cmd/gateway/main.go\n M cmd/reconciler/main.go\n M internal/billing/reconciler/reconciler.go\n M internal/billing/server/service.go\n M internal/billing/store/cash.go\n M internal/billing/store/mysql.go\n M internal/billing/store/subscription_reserve_test.go\n M internal/gateway/client/billing.go\n M internal/gateway/handler/chat.go\n M internal/gateway/handler/chat_stream_test.go\n M internal/gateway/middleware/apikey.go\n D internal/gateway/web/dist/assets/Empty-B78rz8Qh.css\n D internal/gateway/web/dist/assets/Empty-Cq6uueat.js\n D internal/gateway/web/dist/assets/dashboard-H93iLNlz.js\n D internal/gateway/web/dist/assets/dashboard-jpnukakx.css\n D internal/gateway/web/dist/assets/portal-CI_uKi_F.js\n D internal/gateway/web/dist/assets/portal-fDtFA2oX.css\n M internal/gateway/web/dist/dashboard.html\n M internal/gateway/web/dist/portal.html\n M internal/pkg/controlplane/token.go\n M scripts/schema.sql\n?? .tmp/\n?? eval/billing-comparison-2026-11-02/\n?? eval/project-load-2026-11-02/\n?? integrations/\n?? internal/billing/store/reserve_fingerprint_test.go\n?? internal/gateway/client/billing_replay_test.go\n?? internal/gateway/middleware/apikey_status_test.go\n?? internal/gateway/web/dist/assets/Empty-D1TVEnQN.css\n?? internal/gateway/web/dist/assets/Empty-DFn-BFPp.js\n?? internal/gateway/web/dist/assets/dashboard-BGbdPy4C.js\n?? internal/gateway/web/dist/assets/dashboard-Bt40SYhT.css\n?? internal/gateway/web/dist/assets/portal-CX4r-21-.js\n?? internal/gateway/web/dist/assets/portal-DUpRuSip.css\n?? plate_sim.py\n?? scripts/migrations/\n",
+  "source_sha256": {
+    "internal/billing/store/mysql.go": "23940a523da6de45770b5ebc3be8ed7cd7e5c9fedd4c9ee0a1d2dcf5330e2fee",
+    "internal/billing/server/service.go": "5b4089901a1ec7e95fc241cdd7a1f615f019bff6b4e88f8c597f282acb13aa0b",
+    "internal/billing/reconciler/reconciler.go": "9efd7f75b2aa63ea739c723eee6ed6fbae13cf42cbc2dd2c893f6564e49782ad",
+    "internal/gateway/client/billing.go": "f5a35ffad3cf137787852e29e1caa5c3347fac2437c80ff7293c32258f3a813f",
+    "internal/gateway/handler/chat.go": "eec24ecf06a55238c9577bf62765e2ea8ce7674d92756b5fa197ab51b8153a58",
+    "internal/gateway/middleware/idempotency.go": "d8c02c0d688e51c0c10b52f00775a2b31bbffb29049b9b4099fb87df2782a2fd",
+    "eval/project-load-2026-11-02/unknown-503-mock/main.go": "1faf7cb02f18ee2131af204327d48338e054b2b2dc9d3e84abc126c06d8c9959",
+    "cmd/gateway/main.go": "bbbabbb4fa68ca480c8d0cae7fa827fb4790c14075156c4a17e180e6ae53ec74",
+    "cmd/router/main.go": "eb54d320360e452ac16be25d9cdf6804aedbde91da5c77b0e18adcd2d841021c",
+    "cmd/billing/main.go": "3056db14e70ca305c182f56cc44eb132b3d65b8c194352d500ac56d5107ffa91",
+    "cmd/reconciler/main.go": "4415048250f2f0287d9248eb2756ee5e177251ffe8c9c971554b9071e4934991",
+    "cmd/mock-provider/main.go": "3a42cc4753dbf60f5482fc81eb65ffbb2103b626d0ea60981d1ddd48d78e2d8e"
+  },
+  "images": {
+    "docker.m.daocloud.io/library/mysql:8.0.40": "sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff",
+    "docker.m.daocloud.io/library/redis:7-alpine": "sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499"
+  },
+  "gomaxprocs": 8,
+  "mysql_pool_max": 100,
+  "rate_per_min": 100000,
+  "mock_latency_ms": 15,
+  "mock_completion_tokens": 100,
+  "kafka": "disabled",
+  "isolated_agents": "disabled",
+  "reconciler": "sweep every 1s, grace 5s (test only); rebuild disabled; no-auto-reverse enabled",
+  "ports": {
+    "gateway": 62851,
+    "billing": 62852,
+    "admin": 62853,
+    "router": 62854,
+    "mock": 62855,
+    "reconciler": 62856
+  },
+  "mysql_port": "62836",
+  "redis_port": "62838",
+  "quick": false,
+  "started": "2026-11-04T02:27:32.736381",
+  "go_version": "go version go1.25.12 darwin/arm64",
+  "gateway_variant": "current_worktree",
+  "candidate_sha256": null,
+  "sdkroot": "/Library/Developer/CommandLineTools/SDKs/MacOSX26.5.sdk",
+  "binary_sha256": {
+    "billing": "75e21c58a189bf067dcc69e6f6b4662521e22f4d0cd9efb625fb558ba11bdc6c",
+    "router": "c32a77098fc478813b952ad27f663a2997819a169f42c0cbaaf6c131f455e7a7",
+    "reconciler": "e39166864bde87709e731e9c16954cb3f56baea5ab8fd2ed467dd2bb6f977545",
+    "gateway": "b507a53a5e979225a04586b97e8ab417b16dba82037a45b709663cfc6d758145",
+    "mock": "0a862726730e7eb4a3d6d4e52b708e29b36b89da604e3a4c473fd5b3951d44cb",
+    "seed": "33512d449287fe2ccca0164c91e3bddda60ba3c100de9291d621a49651b025ac",
+    "load": "ea357c06f7b303e3069d0fcbfef060f57f5a11c4ce7c5c9e3119fa42bd076856"
+  }
+}

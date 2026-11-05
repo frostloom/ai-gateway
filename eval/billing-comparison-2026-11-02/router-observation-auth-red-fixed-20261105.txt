@@ -1,0 +1,116 @@
+head=42d8ef8e5ca2471b18800e50f8e7a57fbcfdd47f
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+# github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02.test
+ld: warning: '/private/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-4250372173/000013.o' has malformed LC_DYSYMTAB, expected 98 undefined symbols to start at index 1626, found 95 undefined symbols starting at index 1626
+=== RUN   TestRouterObservationControlPlaneAndGateway
+    router_observation_auth_test.go:58: /providers token="" status=200 body=[{"id":1,"name":"observation-auth-test","base_url":"https://example.invalid/private","models":"[\"synthetic\"]","weight":1,"status":0,"consecutive_fail":1,"breaker_state":"closed"}]
+    router_observation_auth_test.go:58: /providers token="wrong" status=200 body=[{"id":1,"name":"observation-auth-test","base_url":"https://example.invalid/private","models":"[\"synthetic\"]","weight":1,"status":0,"consecutive_fail":1,"breaker_state":"closed"}]
+    router_observation_auth_test.go:58: /breakers token="" status=200 body=[{"provider_id":1,"state":"closed","consecutive_fail":1}]
+    router_observation_auth_test.go:58: /breakers token="wrong" status=200 body=[{"provider_id":1,"state":"closed","consecutive_fail":1}]
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /admin/overview           --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func1 (2 handlers)
+[GIN-debug] GET    /admin/pending-summary    --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func2 (2 handlers)
+[GIN-debug] GET    /admin/bills              --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func3 (2 handlers)
+[GIN-debug] GET    /admin/subscription       --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func4 (2 handlers)
+[GIN-debug] GET    /admin/topups             --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func5 (2 handlers)
+[GIN-debug] GET    /admin/recharge-orders    --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func6 (2 handlers)
+[GIN-debug] GET    /admin/providers          --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func7 (2 handlers)
+[GIN-debug] GET    /admin/channels           --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func8 (2 handlers)
+[GIN-debug] POST   /admin/channels           --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func9 (2 handlers)
+[GIN-debug] GET    /admin/models             --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func10 (2 handlers)
+[GIN-debug] POST   /admin/models             --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func10 (2 handlers)
+[GIN-debug] PUT    /admin/models             --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func10 (2 handlers)
+[GIN-debug] PATCH  /admin/models             --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func10 (2 handlers)
+[GIN-debug] HEAD   /admin/models             --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func10 (2 handlers)
+[GIN-debug] OPTIONS /admin/models             --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func10 (2 handlers)
+[GIN-debug] DELETE /admin/models             --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func10 (2 handlers)
+[GIN-debug] CONNECT /admin/models             --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func10 (2 handlers)
+[GIN-debug] TRACE  /admin/models             --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func10 (2 handlers)
+[GIN-debug] POST   /admin/models/status      --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func11 (2 handlers)
+[GIN-debug] POST   /admin/models/price       --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func12 (2 handlers)
+[GIN-debug] GET    /admin/sales              --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func13 (2 handlers)
+[GIN-debug] GET    /admin/audit              --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func14 (2 handlers)
+[GIN-debug] GET    /admin/reconcile-check    --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func15 (2 handlers)
+[GIN-debug] GET    /admin/me                 --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func16 (2 handlers)
+[GIN-debug] GET    /admin/consumption        --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func17 (2 handlers)
+[GIN-debug] GET    /admin/health             --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func18 (2 handlers)
+--- FAIL: TestRouterObservationControlPlaneAndGateway (0.10s)
+=== RUN   TestRouterObservationControlPlaneAndGateway
+    router_observation_auth_test.go:58: /providers token="" status=200 body=[{"id":2,"name":"observation-auth-test","base_url":"https://example.invalid/private","models":"[\"synthetic\"]","weight":1,"status":0,"consecutive_fail":1,"breaker_state":"closed"}]
+    router_observation_auth_test.go:58: /providers token="wrong" status=200 body=[{"id":2,"name":"observation-auth-test","base_url":"https://example.invalid/private","models":"[\"synthetic\"]","weight":1,"status":0,"consecutive_fail":1,"breaker_state":"closed"}]
+    router_observation_auth_test.go:58: /breakers token="" status=200 body=[{"provider_id":2,"state":"closed","consecutive_fail":1}]
+    router_observation_auth_test.go:58: /breakers token="wrong" status=200 body=[{"provider_id":2,"state":"closed","consecutive_fail":1}]
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /admin/overview           --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func1 (2 handlers)
+[GIN-debug] GET    /admin/pending-summary    --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func2 (2 handlers)
+[GIN-debug] GET    /admin/bills              --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func3 (2 handlers)
+[GIN-debug] GET    /admin/subscription       --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func4 (2 handlers)
+[GIN-debug] GET    /admin/topups             --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func5 (2 handlers)
+[GIN-debug] GET    /admin/recharge-orders    --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func6 (2 handlers)
+[GIN-debug] GET    /admin/providers          --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func7 (2 handlers)
+[GIN-debug] GET    /admin/channels           --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func8 (2 handlers)
+[GIN-debug] POST   /admin/channels           --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func9 (2 handlers)
+[GIN-debug] GET    /admin/models             --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func10 (2 handlers)
+[GIN-debug] POST   /admin/models             --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func10 (2 handlers)
+[GIN-debug] PUT    /admin/models             --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func10 (2 handlers)
+[GIN-debug] PATCH  /admin/models             --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func10 (2 handlers)
+[GIN-debug] HEAD   /admin/models             --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func10 (2 handlers)
+[GIN-debug] OPTIONS /admin/models             --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func10 (2 handlers)
+[GIN-debug] DELETE /admin/models             --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func10 (2 handlers)
+[GIN-debug] CONNECT /admin/models             --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func10 (2 handlers)
+[GIN-debug] TRACE  /admin/models             --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func10 (2 handlers)
+[GIN-debug] POST   /admin/models/status      --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func11 (2 handlers)
+[GIN-debug] POST   /admin/models/price       --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func12 (2 handlers)
+[GIN-debug] GET    /admin/sales              --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func13 (2 handlers)
+[GIN-debug] GET    /admin/audit              --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func14 (2 handlers)
+[GIN-debug] GET    /admin/reconcile-check    --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func15 (2 handlers)
+[GIN-debug] GET    /admin/me                 --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func16 (2 handlers)
+[GIN-debug] GET    /admin/consumption        --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func17 (2 handlers)
+[GIN-debug] GET    /admin/health             --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func18 (2 handlers)
+--- FAIL: TestRouterObservationControlPlaneAndGateway (0.06s)
+=== RUN   TestRouterObservationControlPlaneAndGateway
+    router_observation_auth_test.go:58: /providers token="" status=200 body=[{"id":3,"name":"observation-auth-test","base_url":"https://example.invalid/private","models":"[\"synthetic\"]","weight":1,"status":0,"consecutive_fail":1,"breaker_state":"closed"}]
+    router_observation_auth_test.go:58: /providers token="wrong" status=200 body=[{"id":3,"name":"observation-auth-test","base_url":"https://example.invalid/private","models":"[\"synthetic\"]","weight":1,"status":0,"consecutive_fail":1,"breaker_state":"closed"}]
+    router_observation_auth_test.go:58: /breakers token="" status=200 body=[{"provider_id":3,"state":"closed","consecutive_fail":1}]
+    router_observation_auth_test.go:58: /breakers token="wrong" status=200 body=[{"provider_id":3,"state":"closed","consecutive_fail":1}]
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /admin/overview           --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func1 (2 handlers)
+[GIN-debug] GET    /admin/pending-summary    --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func2 (2 handlers)
+[GIN-debug] GET    /admin/bills              --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func3 (2 handlers)
+[GIN-debug] GET    /admin/subscription       --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func4 (2 handlers)
+[GIN-debug] GET    /admin/topups             --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func5 (2 handlers)
+[GIN-debug] GET    /admin/recharge-orders    --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func6 (2 handlers)
+[GIN-debug] GET    /admin/providers          --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func7 (2 handlers)
+[GIN-debug] GET    /admin/channels           --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func8 (2 handlers)
+[GIN-debug] POST   /admin/channels           --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func9 (2 handlers)
+[GIN-debug] GET    /admin/models             --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func10 (2 handlers)
+[GIN-debug] POST   /admin/models             --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func10 (2 handlers)
+[GIN-debug] PUT    /admin/models             --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func10 (2 handlers)
+[GIN-debug] PATCH  /admin/models             --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func10 (2 handlers)
+[GIN-debug] HEAD   /admin/models             --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func10 (2 handlers)
+[GIN-debug] OPTIONS /admin/models             --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func10 (2 handlers)
+[GIN-debug] DELETE /admin/models             --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func10 (2 handlers)
+[GIN-debug] CONNECT /admin/models             --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func10 (2 handlers)
+[GIN-debug] TRACE  /admin/models             --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func10 (2 handlers)
+[GIN-debug] POST   /admin/models/status      --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func11 (2 handlers)
+[GIN-debug] POST   /admin/models/price       --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func12 (2 handlers)
+[GIN-debug] GET    /admin/sales              --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func13 (2 handlers)
+[GIN-debug] GET    /admin/audit              --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func14 (2 handlers)
+[GIN-debug] GET    /admin/reconcile-check    --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func15 (2 handlers)
+[GIN-debug] GET    /admin/me                 --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func16 (2 handlers)
+[GIN-debug] GET    /admin/consumption        --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func17 (2 handlers)
+[GIN-debug] GET    /admin/health             --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterAdmin.func18 (2 handlers)
+--- FAIL: TestRouterObservationControlPlaneAndGateway (0.04s)
+FAIL
+FAIL	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	1.127s
+FAIL

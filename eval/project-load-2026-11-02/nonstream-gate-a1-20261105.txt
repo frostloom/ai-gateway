@@ -1,0 +1,11 @@
+=== RUN   TestNonstreamConcurrentMemoryCharacterization
+    chat_stream_test.go:426: candidate=false gate=false requests=16 upstream_bytes=4194304 baseline_heap=5201632 sampled_peak_heap=146158224 peak_delta=140956592 p95_ms=154.595 p99_ms=154.595 statuses=map[200:16] reserves=16 reports=16 settles=16 reverses=0
+--- PASS: TestNonstreamConcurrentMemoryCharacterization (0.16s)
+=== RUN   TestNonstreamConcurrentMemoryCharacterization
+    chat_stream_test.go:426: candidate=false gate=false requests=16 upstream_bytes=4194304 baseline_heap=5241832 sampled_peak_heap=136446472 peak_delta=131204640 p95_ms=139.998 p99_ms=139.998 statuses=map[200:16] reserves=16 reports=16 settles=16 reverses=0
+--- PASS: TestNonstreamConcurrentMemoryCharacterization (0.14s)
+=== RUN   TestNonstreamConcurrentMemoryCharacterization
+    chat_stream_test.go:426: candidate=false gate=false requests=16 upstream_bytes=4194304 baseline_heap=5467312 sampled_peak_heap=129651320 peak_delta=124184008 p95_ms=140.228 p99_ms=140.228 statuses=map[200:16] reserves=16 reports=16 settles=16 reverses=0
+--- PASS: TestNonstreamConcurrentMemoryCharacterization (0.14s)
+PASS
+ok  	github.com/frostloom/ai-gateway/internal/gateway/handler	1.168s

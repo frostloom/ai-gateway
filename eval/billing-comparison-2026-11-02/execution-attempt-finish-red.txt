@@ -1,0 +1,81 @@
+head=63b9d1ed4d64bb583d15fa884c37468e5c53044c
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestAttemptGuardBlocksUnknownFailover
+=== RUN   TestAttemptGuardBlocksUnknownFailover/stream=false
+    execution_gateway_attempt_guard_test.go:200: stream=false first=1 second=0 status=502 attempt_state=sending bill=pending balance=999 ledger=999
+=== RUN   TestAttemptGuardBlocksUnknownFailover/stream=true
+    execution_gateway_attempt_guard_test.go:200: stream=true first=1 second=0 status=502 attempt_state=sending bill=pending balance=999 ledger=999
+--- PASS: TestAttemptGuardBlocksUnknownFailover (0.54s)
+    --- PASS: TestAttemptGuardBlocksUnknownFailover/stream=false (0.08s)
+    --- PASS: TestAttemptGuardBlocksUnknownFailover/stream=true (0.07s)
+=== RUN   TestRealGatewayWithExecutionBridge
+=== RUN   TestRealGatewayWithExecutionBridge/complete
+    execution_gateway_integration_test.go:200: [{cfcad14aefb659d056b397a8016b196f 3 gw-execution-complete-1793713508553589000-request 0 5 sending <nil> <nil>}] <nil>
+=== RUN   TestRealGatewayWithExecutionBridge/truncated
+    execution_gateway_integration_test.go:271: mode=truncated status=502 calls=1 bill=pending balance=999 ledger=999 expected_events=1
+=== RUN   TestRealGatewayWithExecutionBridge/stream_complete
+    execution_gateway_integration_test.go:200: [{0fb558c92c34b93b25d2d099806588cd 5 gw-execution-stream_complete-1793713508721577000-request 0 7 sending <nil> <nil>}] <nil>
+=== RUN   TestRealGatewayWithExecutionBridge/stream_partial
+    execution_gateway_integration_test.go:271: mode=stream_partial status=200 calls=1 bill=settled balance=997 ledger=997 expected_events=3
+=== RUN   TestRealGatewayWithExecutionBridge/stream_empty
+    execution_gateway_integration_test.go:271: mode=stream_empty status=502 calls=1 bill=pending balance=999 ledger=999 expected_events=1
+--- FAIL: TestRealGatewayWithExecutionBridge (0.79s)
+    --- FAIL: TestRealGatewayWithExecutionBridge/complete (0.08s)
+    --- PASS: TestRealGatewayWithExecutionBridge/truncated (0.09s)
+    --- FAIL: TestRealGatewayWithExecutionBridge/stream_complete (0.07s)
+    --- PASS: TestRealGatewayWithExecutionBridge/stream_partial (0.08s)
+    --- PASS: TestRealGatewayWithExecutionBridge/stream_empty (0.07s)
+=== RUN   TestAttemptGuardBlocksUnknownFailover
+=== RUN   TestAttemptGuardBlocksUnknownFailover/stream=false
+    execution_gateway_attempt_guard_test.go:200: stream=false first=1 second=0 status=502 attempt_state=sending bill=pending balance=999 ledger=999
+=== RUN   TestAttemptGuardBlocksUnknownFailover/stream=true
+    execution_gateway_attempt_guard_test.go:200: stream=true first=1 second=0 status=502 attempt_state=sending bill=pending balance=999 ledger=999
+--- PASS: TestAttemptGuardBlocksUnknownFailover (0.57s)
+    --- PASS: TestAttemptGuardBlocksUnknownFailover/stream=false (0.08s)
+    --- PASS: TestAttemptGuardBlocksUnknownFailover/stream=true (0.08s)
+=== RUN   TestRealGatewayWithExecutionBridge
+=== RUN   TestRealGatewayWithExecutionBridge/complete
+    execution_gateway_integration_test.go:200: [{f40a12b65a16b8ae9bb5ed4591396c94 10 gw-execution-complete-1793713509924520000-request 0 14 sending <nil> <nil>}] <nil>
+=== RUN   TestRealGatewayWithExecutionBridge/truncated
+    execution_gateway_integration_test.go:271: mode=truncated status=502 calls=1 bill=pending balance=999 ledger=999 expected_events=1
+=== RUN   TestRealGatewayWithExecutionBridge/stream_complete
+    execution_gateway_integration_test.go:200: [{7680b6271f58c4ec0513acd1535ae0ab 12 gw-execution-stream_complete-1793713510083767000-request 0 16 sending <nil> <nil>}] <nil>
+=== RUN   TestRealGatewayWithExecutionBridge/stream_partial
+    execution_gateway_integration_test.go:271: mode=stream_partial status=200 calls=1 bill=settled balance=997 ledger=997 expected_events=3
+=== RUN   TestRealGatewayWithExecutionBridge/stream_empty
+    execution_gateway_integration_test.go:271: mode=stream_empty status=502 calls=1 bill=pending balance=999 ledger=999 expected_events=1
+--- FAIL: TestRealGatewayWithExecutionBridge (0.83s)
+    --- FAIL: TestRealGatewayWithExecutionBridge/complete (0.08s)
+    --- PASS: TestRealGatewayWithExecutionBridge/truncated (0.08s)
+    --- FAIL: TestRealGatewayWithExecutionBridge/stream_complete (0.10s)
+    --- PASS: TestRealGatewayWithExecutionBridge/stream_partial (0.10s)
+    --- PASS: TestRealGatewayWithExecutionBridge/stream_empty (0.07s)
+=== RUN   TestAttemptGuardBlocksUnknownFailover
+=== RUN   TestAttemptGuardBlocksUnknownFailover/stream=false
+    execution_gateway_attempt_guard_test.go:200: stream=false first=1 second=0 status=502 attempt_state=sending bill=pending balance=999 ledger=999
+=== RUN   TestAttemptGuardBlocksUnknownFailover/stream=true
+    execution_gateway_attempt_guard_test.go:200: stream=true first=1 second=0 status=502 attempt_state=sending bill=pending balance=999 ledger=999
+--- PASS: TestAttemptGuardBlocksUnknownFailover (0.67s)
+    --- PASS: TestAttemptGuardBlocksUnknownFailover/stream=false (0.10s)
+    --- PASS: TestAttemptGuardBlocksUnknownFailover/stream=true (0.13s)
+=== RUN   TestRealGatewayWithExecutionBridge
+=== RUN   TestRealGatewayWithExecutionBridge/complete
+    execution_gateway_integration_test.go:200: [{a64538d9a0b85247eb13228059ca9d55 17 gw-execution-complete-1793713511594009000-request 0 23 sending <nil> <nil>}] <nil>
+=== RUN   TestRealGatewayWithExecutionBridge/truncated
+    execution_gateway_integration_test.go:271: mode=truncated status=502 calls=1 bill=pending balance=999 ledger=999 expected_events=1
+=== RUN   TestRealGatewayWithExecutionBridge/stream_complete
+    execution_gateway_integration_test.go:200: [{1aa7f34052a0d8132986e91b6d57f92a 19 gw-execution-stream_complete-1793713511742392000-request 0 25 sending <nil> <nil>}] <nil>
+=== RUN   TestRealGatewayWithExecutionBridge/stream_partial
+    execution_gateway_integration_test.go:271: mode=stream_partial status=200 calls=1 bill=settled balance=997 ledger=997 expected_events=3
+=== RUN   TestRealGatewayWithExecutionBridge/stream_empty
+    execution_gateway_integration_test.go:271: mode=stream_empty status=502 calls=1 bill=pending balance=999 ledger=999 expected_events=1
+--- FAIL: TestRealGatewayWithExecutionBridge (1.17s)
+    --- FAIL: TestRealGatewayWithExecutionBridge/complete (0.08s)
+    --- PASS: TestRealGatewayWithExecutionBridge/truncated (0.07s)
+    --- FAIL: TestRealGatewayWithExecutionBridge/stream_complete (0.10s)
+    --- PASS: TestRealGatewayWithExecutionBridge/stream_partial (0.24s)
+    --- PASS: TestRealGatewayWithExecutionBridge/stream_empty (0.09s)
+FAIL
+FAIL	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	5.752s
+FAIL

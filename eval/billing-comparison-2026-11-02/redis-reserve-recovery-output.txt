@@ -1,0 +1,27 @@
+head=63b9d1ed4d64bb583d15fa884c37468e5c53044c
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+=== RUN   TestRedisStopThenRetrySameReservation
+redis: 2026/11/03 20:22:46 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:51251: connect: connection refused
+redis: 2026/11/03 20:22:46 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:51251: connect: connection refused
+redis: 2026/11/03 20:22:47 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:51251: connect: connection refused
+redis: 2026/11/03 20:22:47 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:51251: connect: connection refused
+    redis_reserve_recovery_test.go:105: outage=Unavailable bills_during_outage=0 retry=RESERVE_OK repeat=RESERVE_DUPLICATE balance=900 ledger=900 events=1
+--- PASS: TestRedisStopThenRetrySameReservation (2.82s)
+=== RUN   TestRedisStopThenRetrySameReservation
+redis: 2026/11/03 20:22:48 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:51251: connect: connection refused
+redis: 2026/11/03 20:22:49 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:51251: connect: connection refused
+redis: 2026/11/03 20:22:49 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:51251: connect: connection refused
+redis: 2026/11/03 20:22:50 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:51251: connect: connection refused
+    redis_reserve_recovery_test.go:42: dial tcp 127.0.0.1:51251: connect: connection refused
+--- FAIL: TestRedisStopThenRetrySameReservation (2.10s)
+=== RUN   TestRedisStopThenRetrySameReservation
+redis: 2026/11/03 20:22:50 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:51251: connect: connection refused
+redis: 2026/11/03 20:22:51 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:51251: connect: connection refused
+redis: 2026/11/03 20:22:51 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:51251: connect: connection refused
+redis: 2026/11/03 20:22:52 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:51251: connect: connection refused
+    redis_reserve_recovery_test.go:42: dial tcp 127.0.0.1:51251: connect: connection refused
+--- FAIL: TestRedisStopThenRetrySameReservation (2.13s)
+FAIL
+FAIL	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	8.203s
+FAIL

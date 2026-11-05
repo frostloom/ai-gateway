@@ -1,0 +1,16 @@
+
+// Test-only fake servers: first consumes the request, then loses/returns an error.
+func TestGatewayDoesNotResendUnknownUpstreamOutcome(t *testing.T) {
+ for _,stream:=range []bool{false,true}{for _,failure:=range []string{"disconnect","server_503"}{t.Run(fmt.Sprintf("stream=%v/%s",stream,failure),func(t *testing.T){
+  var primaryCalls,secondaryCalls atomic.Int32
+  primary:=httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter,r *http.Request){
+   _,e:=io.Copy(io.Discard,r.Body);if e!=nil{t.Errorf("read request: %v",e);return};primaryCalls.Add(1)
+   if failure=="server_503"{w.WriteHeader(http.StatusServiceUnavailable);return}
+   hijacker,ok:=w.(http.Hijacker);if !ok{t.Error("hijacking unsupported");return};conn,_,e:=hijacker.Hijack();if e!=nil{t.Errorf("hijack: %v",e);return};_ = conn.Close()
+  }));defer primary.Close()
+  secondary:=httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter,r *http.Request){secondaryCalls.Add(1);if stream{_,_=io.WriteString(w,"data: {\"choices\":[],\"usage\":{\"prompt_tokens\":4,\"completion_tokens\":2}}\n\ndata: [DONE]\n\n")}else{_,_=io.WriteString(w,`{"choices":[],"usage":{"prompt_tokens":4,"completion_tokens":2}}`)}}));defer secondary.Close()
+  bill:=&fakeBilling{};route:=&fakeRouter{next:[]*client.RouteResult{{ProviderID:1,BaseURL:primary.URL},{ProviderID:2,BaseURL:secondary.URL}}};c,w:=newGinCtx();c.Request=httptest.NewRequest(http.MethodPost,"/v1/chat/completions",strings.NewReader(fmt.Sprintf(`{"model":"m","messages":[{"role":"user","content":"synthetic"}],"stream":%v}`,stream)));c.Set("tenant_id",int64(1));c.Set("request_id","unknown-synthetic")
+  Chat(bill,route,slog.New(slog.DiscardHandler),time.Second)(c)
+  if primaryCalls.Load()!=1||secondaryCalls.Load()!=0||w.Code!=http.StatusBadGateway||len(bill.reverses)!=0||len(bill.reports)!=0||len(bill.settles)!=0 {t.Fatalf("primary=%d secondary=%d HTTP=%d reverses=%d usage=%d settle=%d",primaryCalls.Load(),secondaryCalls.Load(),w.Code,len(bill.reverses),len(bill.reports),len(bill.settles))}
+ })}}
+}

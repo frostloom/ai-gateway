@@ -1,0 +1,278 @@
+head=b0810a72ddda83cd8479c6921ec7faa7e66c2fca
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+4578a0dafe2698b714506b8bb8e4561751a8c30143f8fd11d079dc777267e3c5  /var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T//usage-atomic-overlay.CwErL9/plan.go
+# github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02.test
+ld: warning: '/private/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-2562697658/000013.o' has malformed LC_DYSYMTAB, expected 98 undefined symbols to start at index 1626, found 95 undefined symbols starting at index 1626
+=== RUN   TestPortalSnapshotSubscriptionRechargeFields
+
+2026/11/05 13:26:14 [32m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:155 [33mSLOW SQL >= 200ms
+[0m[31;1m[263.022ms] [33m[rows:0][35m CREATE TABLE `tenants` (`id` bigint unsigned AUTO_INCREMENT,`name` varchar(64) NOT NULL,`initial_quota` bigint NOT NULL DEFAULT 0,`status` tinyint NOT NULL DEFAULT 0,`created_at` datetime(3) NULL,`updated_at` datetime(3) NULL,PRIMARY KEY (`id`),UNIQUE INDEX `uk_name` (`name`))[0m
+
+2026/11/05 13:26:15 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/plan.go:249 [35;1mrecord not found
+[0m[33m[13.442ms] [34;1m[rows:0][0m SELECT * FROM `subscriptions` WHERE tenant_id = 1 AND status = 'active' AND plan_type = 'recurring' ORDER BY `subscriptions`.`id` LIMIT 1
+
+2026/11/05 13:26:15 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/subscription_entitlement.go:19 [35;1mrecord not found
+[0m[33m[15.318ms] [34;1m[rows:0][0m SELECT * FROM `subscriptions` WHERE tenant_id = 1 AND status = 'cancelled' AND plan_type = 'recurring' AND cycle_end IS NOT NULL AND cycle_end > '2026-11-05 13:26:15.813' ORDER BY cycle_end DESC, id DESC,`subscriptions`.`id` LIMIT 1
+
+2026/11/05 13:26:16 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/plan.go:249 [35;1mrecord not found
+[0m[33m[2.605ms] [34;1m[rows:0][0m SELECT * FROM `subscriptions` WHERE tenant_id = 1 AND status = 'active' AND plan_type = 'recurring' ORDER BY `subscriptions`.`id` LIMIT 1
+    portal_snapshot_business_test.go:94: recharge=100 balance=1100, active/cancelled subscription entitlement remains 300-40=260
+--- PASS: TestPortalSnapshotSubscriptionRechargeFields (1.89s)
+=== RUN   TestPortalSnapshotDuringConcurrentSettle
+    portal_snapshot_consistency_test.go:106: concurrent snapshot balance=400 consumption=0; after committed settlement balance=460 consumption=40
+--- PASS: TestPortalSnapshotDuringConcurrentSettle (0.83s)
+=== RUN   TestPortalSnapshotDuringRedisOutage
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /portal/me                --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func1 (2 handlers)
+[GIN-debug] GET    /portal/plans             --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func2 (2 handlers)
+[GIN-debug] GET    /portal/topups            --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func3 (2 handlers)
+[GIN-debug] GET    /portal/recharge-orders   --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func4 (2 handlers)
+[GIN-debug] GET    /portal/models            --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func5 (2 handlers)
+[GIN-debug] GET    /portal/consumption       --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func6 (2 handlers)
+[GIN-debug] POST   /portal/recharge          --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func7 (2 handlers)
+[GIN-debug] POST   /portal/recharge/pay      --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func8 (2 handlers)
+[GIN-debug] POST   /portal/recharge/refund   --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func9 (2 handlers)
+[GIN-debug] POST   /portal/subscribe         --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func10 (2 handlers)
+[GIN-debug] POST   /portal/change-plan       --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func11 (2 handlers)
+[GIN-debug] POST   /portal/cancel-subscription --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func12 (2 handlers)
+[GIN-debug] POST   /portal/chat              --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func13 (2 handlers)
+redis: 2026/11/05 13:26:18 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:61682: connect: connection refused
+redis: 2026/11/05 13:26:19 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:61682: connect: connection refused
+redis: 2026/11/05 13:26:19 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:61682: connect: connection refused
+redis: 2026/11/05 13:26:20 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:61682: connect: connection refused
+
+2026/11/05 13:26:20 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/plan.go:249 [35;1mrecord not found
+[0m[33m[1.876ms] [34;1m[rows:0][0m SELECT * FROM `subscriptions` WHERE tenant_id = 3 AND status = 'active' AND plan_type = 'recurring' ORDER BY `subscriptions`.`id` LIMIT 1
+
+2026/11/05 13:26:20 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/subscription_entitlement.go:19 [35;1mrecord not found
+[0m[33m[1.713ms] [34;1m[rows:0][0m SELECT * FROM `subscriptions` WHERE tenant_id = 3 AND status = 'cancelled' AND plan_type = 'recurring' AND cycle_end IS NOT NULL AND cycle_end > '2026-11-05 13:26:20.085' ORDER BY cycle_end DESC, id DESC,`subscriptions`.`id` LIMIT 1
+
+2026/11/05 13:26:20 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/plan.go:234 [35;1mrecord not found
+[0m[33m[2.069ms] [34;1m[rows:0][0m SELECT * FROM `subscriptions` WHERE tenant_id = 3 AND status = 'active' AND plan_type = 'one_time' ORDER BY id DESC,`subscriptions`.`id` LIMIT 1
+
+2026/11/05 13:26:20 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/plan.go:249 [35;1mrecord not found
+[0m[33m[6.088ms] [34;1m[rows:0][0m SELECT * FROM `subscriptions` WHERE tenant_id = 3 AND status = 'active' AND plan_type = 'recurring' ORDER BY `subscriptions`.`id` LIMIT 1
+
+2026/11/05 13:26:20 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/subscription_entitlement.go:19 [35;1mrecord not found
+[0m[33m[5.729ms] [34;1m[rows:0][0m SELECT * FROM `subscriptions` WHERE tenant_id = 3 AND status = 'cancelled' AND plan_type = 'recurring' AND cycle_end IS NOT NULL AND cycle_end > '2026-11-05 13:26:20.584' ORDER BY cycle_end DESC, id DESC,`subscriptions`.`id` LIMIT 1
+
+2026/11/05 13:26:20 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/plan.go:234 [35;1mrecord not found
+[0m[33m[4.954ms] [34;1m[rows:0][0m SELECT * FROM `subscriptions` WHERE tenant_id = 3 AND status = 'active' AND plan_type = 'one_time' ORDER BY id DESC,`subscriptions`.`id` LIMIT 1
+    portal_snapshot_outage_test.go:167: Redis down: gRPC failed, portal snapshot 1000 with projection unchecked; after restart portal remained 200 and missing projection unchanged
+--- PASS: TestPortalSnapshotDuringRedisOutage (3.72s)
+=== RUN   TestPortalSnapshotTenantIsolation
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /portal/me                --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func1 (2 handlers)
+[GIN-debug] GET    /portal/plans             --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func2 (2 handlers)
+[GIN-debug] GET    /portal/topups            --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func3 (2 handlers)
+[GIN-debug] GET    /portal/recharge-orders   --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func4 (2 handlers)
+[GIN-debug] GET    /portal/models            --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func5 (2 handlers)
+[GIN-debug] GET    /portal/consumption       --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func6 (2 handlers)
+[GIN-debug] POST   /portal/recharge          --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func7 (2 handlers)
+[GIN-debug] POST   /portal/recharge/pay      --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func8 (2 handlers)
+[GIN-debug] POST   /portal/recharge/refund   --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func9 (2 handlers)
+[GIN-debug] POST   /portal/subscribe         --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func10 (2 handlers)
+[GIN-debug] POST   /portal/change-plan       --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func11 (2 handlers)
+[GIN-debug] POST   /portal/cancel-subscription --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func12 (2 handlers)
+[GIN-debug] POST   /portal/chat              --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func13 (2 handlers)
+
+2026/11/05 13:26:21 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/plan.go:249 [35;1mrecord not found
+[0m[33m[0.952ms] [34;1m[rows:0][0m SELECT * FROM `subscriptions` WHERE tenant_id = 4 AND status = 'active' AND plan_type = 'recurring' ORDER BY `subscriptions`.`id` LIMIT 1
+
+2026/11/05 13:26:21 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/subscription_entitlement.go:19 [35;1mrecord not found
+[0m[33m[1.404ms] [34;1m[rows:0][0m SELECT * FROM `subscriptions` WHERE tenant_id = 4 AND status = 'cancelled' AND plan_type = 'recurring' AND cycle_end IS NOT NULL AND cycle_end > '2026-11-05 13:26:21.725' ORDER BY cycle_end DESC, id DESC,`subscriptions`.`id` LIMIT 1
+
+2026/11/05 13:26:21 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/plan.go:234 [35;1mrecord not found
+[0m[33m[1.123ms] [34;1m[rows:0][0m SELECT * FROM `subscriptions` WHERE tenant_id = 4 AND status = 'active' AND plan_type = 'one_time' ORDER BY id DESC,`subscriptions`.`id` LIMIT 1
+
+2026/11/05 13:26:21 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:1015 [35;1mrecord not found
+[0m[33m[1.554ms] [34;1m[rows:0][0m SELECT `api_keys`.`id`,`api_keys`.`tenant_id`,`api_keys`.`key_hash`,`api_keys`.`key_prefix`,`api_keys`.`name`,`api_keys`.`status`,`api_keys`.`expires_at`,`api_keys`.`created_at`,`api_keys`.`updated_at` FROM `api_keys` JOIN tenants ON tenants.id = api_keys.tenant_id WHERE api_keys.key_hash = 'f1234d75178d892a133a410355a5a990cf75d2f33eba25d575943d4df632f3a4' AND tenants.status = 0 ORDER BY `api_keys`.`id` LIMIT 1
+    portal_snapshot_tenant_test.go:89: tenant A balance=600 despite tenant B query parameter, invalid API key denied
+--- PASS: TestPortalSnapshotTenantIsolation (1.11s)
+=== RUN   TestPortalSnapshotSubscriptionRechargeFields
+
+2026/11/05 13:26:22 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/plan.go:249 [35;1mrecord not found
+[0m[33m[2.888ms] [34;1m[rows:0][0m SELECT * FROM `subscriptions` WHERE tenant_id = 6 AND status = 'active' AND plan_type = 'recurring' ORDER BY `subscriptions`.`id` LIMIT 1
+
+2026/11/05 13:26:22 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/subscription_entitlement.go:19 [35;1mrecord not found
+[0m[33m[2.697ms] [34;1m[rows:0][0m SELECT * FROM `subscriptions` WHERE tenant_id = 6 AND status = 'cancelled' AND plan_type = 'recurring' AND cycle_end IS NOT NULL AND cycle_end > '2026-11-05 13:26:22.33' ORDER BY cycle_end DESC, id DESC,`subscriptions`.`id` LIMIT 1
+
+2026/11/05 13:26:22 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/plan.go:249 [35;1mrecord not found
+[0m[33m[1.506ms] [34;1m[rows:0][0m SELECT * FROM `subscriptions` WHERE tenant_id = 6 AND status = 'active' AND plan_type = 'recurring' ORDER BY `subscriptions`.`id` LIMIT 1
+    portal_snapshot_business_test.go:94: recharge=100 balance=1100, active/cancelled subscription entitlement remains 300-40=260
+--- PASS: TestPortalSnapshotSubscriptionRechargeFields (0.71s)
+=== RUN   TestPortalSnapshotDuringConcurrentSettle
+    portal_snapshot_consistency_test.go:106: concurrent snapshot balance=400 consumption=0; after committed settlement balance=460 consumption=40
+--- PASS: TestPortalSnapshotDuringConcurrentSettle (0.84s)
+=== RUN   TestPortalSnapshotDuringRedisOutage
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /portal/me                --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func1 (2 handlers)
+[GIN-debug] GET    /portal/plans             --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func2 (2 handlers)
+[GIN-debug] GET    /portal/topups            --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func3 (2 handlers)
+[GIN-debug] GET    /portal/recharge-orders   --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func4 (2 handlers)
+[GIN-debug] GET    /portal/models            --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func5 (2 handlers)
+[GIN-debug] GET    /portal/consumption       --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func6 (2 handlers)
+[GIN-debug] POST   /portal/recharge          --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func7 (2 handlers)
+[GIN-debug] POST   /portal/recharge/pay      --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func8 (2 handlers)
+[GIN-debug] POST   /portal/recharge/refund   --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func9 (2 handlers)
+[GIN-debug] POST   /portal/subscribe         --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func10 (2 handlers)
+[GIN-debug] POST   /portal/change-plan       --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func11 (2 handlers)
+[GIN-debug] POST   /portal/cancel-subscription --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func12 (2 handlers)
+[GIN-debug] POST   /portal/chat              --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func13 (2 handlers)
+redis: 2026/11/05 13:26:24 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:61682: connect: connection refused
+redis: 2026/11/05 13:26:25 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:61682: connect: connection refused
+redis: 2026/11/05 13:26:25 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:61682: connect: connection refused
+redis: 2026/11/05 13:26:26 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:61682: connect: connection refused
+
+2026/11/05 13:26:26 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/plan.go:249 [35;1mrecord not found
+[0m[33m[2.133ms] [34;1m[rows:0][0m SELECT * FROM `subscriptions` WHERE tenant_id = 8 AND status = 'active' AND plan_type = 'recurring' ORDER BY `subscriptions`.`id` LIMIT 1
+
+2026/11/05 13:26:26 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/subscription_entitlement.go:19 [35;1mrecord not found
+[0m[33m[1.566ms] [34;1m[rows:0][0m SELECT * FROM `subscriptions` WHERE tenant_id = 8 AND status = 'cancelled' AND plan_type = 'recurring' AND cycle_end IS NOT NULL AND cycle_end > '2026-11-05 13:26:26.033' ORDER BY cycle_end DESC, id DESC,`subscriptions`.`id` LIMIT 1
+
+2026/11/05 13:26:26 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/plan.go:234 [35;1mrecord not found
+[0m[33m[2.262ms] [34;1m[rows:0][0m SELECT * FROM `subscriptions` WHERE tenant_id = 8 AND status = 'active' AND plan_type = 'one_time' ORDER BY id DESC,`subscriptions`.`id` LIMIT 1
+
+2026/11/05 13:26:26 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/plan.go:249 [35;1mrecord not found
+[0m[33m[6.952ms] [34;1m[rows:0][0m SELECT * FROM `subscriptions` WHERE tenant_id = 8 AND status = 'active' AND plan_type = 'recurring' ORDER BY `subscriptions`.`id` LIMIT 1
+
+2026/11/05 13:26:26 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/subscription_entitlement.go:19 [35;1mrecord not found
+[0m[33m[4.039ms] [34;1m[rows:0][0m SELECT * FROM `subscriptions` WHERE tenant_id = 8 AND status = 'cancelled' AND plan_type = 'recurring' AND cycle_end IS NOT NULL AND cycle_end > '2026-11-05 13:26:26.523' ORDER BY cycle_end DESC, id DESC,`subscriptions`.`id` LIMIT 1
+
+2026/11/05 13:26:26 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/plan.go:234 [35;1mrecord not found
+[0m[33m[8.824ms] [34;1m[rows:0][0m SELECT * FROM `subscriptions` WHERE tenant_id = 8 AND status = 'active' AND plan_type = 'one_time' ORDER BY id DESC,`subscriptions`.`id` LIMIT 1
+    portal_snapshot_outage_test.go:167: Redis down: gRPC failed, portal snapshot 1000 with projection unchecked; after restart portal remained 200 and missing projection unchanged
+--- PASS: TestPortalSnapshotDuringRedisOutage (3.27s)
+=== RUN   TestPortalSnapshotTenantIsolation
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /portal/me                --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func1 (2 handlers)
+[GIN-debug] GET    /portal/plans             --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func2 (2 handlers)
+[GIN-debug] GET    /portal/topups            --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func3 (2 handlers)
+[GIN-debug] GET    /portal/recharge-orders   --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func4 (2 handlers)
+[GIN-debug] GET    /portal/models            --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func5 (2 handlers)
+[GIN-debug] GET    /portal/consumption       --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func6 (2 handlers)
+[GIN-debug] POST   /portal/recharge          --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func7 (2 handlers)
+[GIN-debug] POST   /portal/recharge/pay      --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func8 (2 handlers)
+[GIN-debug] POST   /portal/recharge/refund   --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func9 (2 handlers)
+[GIN-debug] POST   /portal/subscribe         --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func10 (2 handlers)
+[GIN-debug] POST   /portal/change-plan       --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func11 (2 handlers)
+[GIN-debug] POST   /portal/cancel-subscription --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func12 (2 handlers)
+[GIN-debug] POST   /portal/chat              --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func13 (2 handlers)
+
+2026/11/05 13:26:27 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/plan.go:249 [35;1mrecord not found
+[0m[33m[1.875ms] [34;1m[rows:0][0m SELECT * FROM `subscriptions` WHERE tenant_id = 9 AND status = 'active' AND plan_type = 'recurring' ORDER BY `subscriptions`.`id` LIMIT 1
+
+2026/11/05 13:26:27 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/subscription_entitlement.go:19 [35;1mrecord not found
+[0m[33m[1.608ms] [34;1m[rows:0][0m SELECT * FROM `subscriptions` WHERE tenant_id = 9 AND status = 'cancelled' AND plan_type = 'recurring' AND cycle_end IS NOT NULL AND cycle_end > '2026-11-05 13:26:27.576' ORDER BY cycle_end DESC, id DESC,`subscriptions`.`id` LIMIT 1
+
+2026/11/05 13:26:27 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/plan.go:234 [35;1mrecord not found
+[0m[33m[1.331ms] [34;1m[rows:0][0m SELECT * FROM `subscriptions` WHERE tenant_id = 9 AND status = 'active' AND plan_type = 'one_time' ORDER BY id DESC,`subscriptions`.`id` LIMIT 1
+
+2026/11/05 13:26:27 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:1015 [35;1mrecord not found
+[0m[33m[1.527ms] [34;1m[rows:0][0m SELECT `api_keys`.`id`,`api_keys`.`tenant_id`,`api_keys`.`key_hash`,`api_keys`.`key_prefix`,`api_keys`.`name`,`api_keys`.`status`,`api_keys`.`expires_at`,`api_keys`.`created_at`,`api_keys`.`updated_at` FROM `api_keys` JOIN tenants ON tenants.id = api_keys.tenant_id WHERE api_keys.key_hash = 'f1234d75178d892a133a410355a5a990cf75d2f33eba25d575943d4df632f3a4' AND tenants.status = 0 ORDER BY `api_keys`.`id` LIMIT 1
+    portal_snapshot_tenant_test.go:89: tenant A balance=600 despite tenant B query parameter, invalid API key denied
+--- PASS: TestPortalSnapshotTenantIsolation (1.02s)
+=== RUN   TestPortalSnapshotSubscriptionRechargeFields
+
+2026/11/05 13:26:28 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/plan.go:249 [35;1mrecord not found
+[0m[33m[1.251ms] [34;1m[rows:0][0m SELECT * FROM `subscriptions` WHERE tenant_id = 11 AND status = 'active' AND plan_type = 'recurring' ORDER BY `subscriptions`.`id` LIMIT 1
+
+2026/11/05 13:26:28 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/subscription_entitlement.go:19 [35;1mrecord not found
+[0m[33m[1.067ms] [34;1m[rows:0][0m SELECT * FROM `subscriptions` WHERE tenant_id = 11 AND status = 'cancelled' AND plan_type = 'recurring' AND cycle_end IS NOT NULL AND cycle_end > '2026-11-05 13:26:28.262' ORDER BY cycle_end DESC, id DESC,`subscriptions`.`id` LIMIT 1
+
+2026/11/05 13:26:28 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/plan.go:249 [35;1mrecord not found
+[0m[33m[1.497ms] [34;1m[rows:0][0m SELECT * FROM `subscriptions` WHERE tenant_id = 11 AND status = 'active' AND plan_type = 'recurring' ORDER BY `subscriptions`.`id` LIMIT 1
+    portal_snapshot_business_test.go:94: recharge=100 balance=1100, active/cancelled subscription entitlement remains 300-40=260
+--- PASS: TestPortalSnapshotSubscriptionRechargeFields (0.76s)
+=== RUN   TestPortalSnapshotDuringConcurrentSettle
+    portal_snapshot_consistency_test.go:106: concurrent snapshot balance=400 consumption=0; after committed settlement balance=460 consumption=40
+--- PASS: TestPortalSnapshotDuringConcurrentSettle (0.63s)
+=== RUN   TestPortalSnapshotDuringRedisOutage
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /portal/me                --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func1 (2 handlers)
+[GIN-debug] GET    /portal/plans             --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func2 (2 handlers)
+[GIN-debug] GET    /portal/topups            --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func3 (2 handlers)
+[GIN-debug] GET    /portal/recharge-orders   --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func4 (2 handlers)
+[GIN-debug] GET    /portal/models            --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func5 (2 handlers)
+[GIN-debug] GET    /portal/consumption       --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func6 (2 handlers)
+[GIN-debug] POST   /portal/recharge          --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func7 (2 handlers)
+[GIN-debug] POST   /portal/recharge/pay      --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func8 (2 handlers)
+[GIN-debug] POST   /portal/recharge/refund   --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func9 (2 handlers)
+[GIN-debug] POST   /portal/subscribe         --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func10 (2 handlers)
+[GIN-debug] POST   /portal/change-plan       --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func11 (2 handlers)
+[GIN-debug] POST   /portal/cancel-subscription --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func12 (2 handlers)
+[GIN-debug] POST   /portal/chat              --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func13 (2 handlers)
+redis: 2026/11/05 13:26:30 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:61682: connect: connection refused
+redis: 2026/11/05 13:26:30 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:61682: connect: connection refused
+redis: 2026/11/05 13:26:30 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:61682: connect: connection refused
+redis: 2026/11/05 13:26:31 pool.go:762: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:61682: connect: connection refused
+
+2026/11/05 13:26:31 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/plan.go:249 [35;1mrecord not found
+[0m[33m[2.035ms] [34;1m[rows:0][0m SELECT * FROM `subscriptions` WHERE tenant_id = 13 AND status = 'active' AND plan_type = 'recurring' ORDER BY `subscriptions`.`id` LIMIT 1
+
+2026/11/05 13:26:31 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/subscription_entitlement.go:19 [35;1mrecord not found
+[0m[33m[3.751ms] [34;1m[rows:0][0m SELECT * FROM `subscriptions` WHERE tenant_id = 13 AND status = 'cancelled' AND plan_type = 'recurring' AND cycle_end IS NOT NULL AND cycle_end > '2026-11-05 13:26:31.469' ORDER BY cycle_end DESC, id DESC,`subscriptions`.`id` LIMIT 1
+
+2026/11/05 13:26:31 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/plan.go:234 [35;1mrecord not found
+[0m[33m[2.955ms] [34;1m[rows:0][0m SELECT * FROM `subscriptions` WHERE tenant_id = 13 AND status = 'active' AND plan_type = 'one_time' ORDER BY id DESC,`subscriptions`.`id` LIMIT 1
+
+2026/11/05 13:26:31 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/plan.go:249 [35;1mrecord not found
+[0m[33m[3.091ms] [34;1m[rows:0][0m SELECT * FROM `subscriptions` WHERE tenant_id = 13 AND status = 'active' AND plan_type = 'recurring' ORDER BY `subscriptions`.`id` LIMIT 1
+
+2026/11/05 13:26:31 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/subscription_entitlement.go:19 [35;1mrecord not found
+[0m[33m[2.577ms] [34;1m[rows:0][0m SELECT * FROM `subscriptions` WHERE tenant_id = 13 AND status = 'cancelled' AND plan_type = 'recurring' AND cycle_end IS NOT NULL AND cycle_end > '2026-11-05 13:26:31.853' ORDER BY cycle_end DESC, id DESC,`subscriptions`.`id` LIMIT 1
+
+2026/11/05 13:26:31 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/plan.go:234 [35;1mrecord not found
+[0m[33m[2.501ms] [34;1m[rows:0][0m SELECT * FROM `subscriptions` WHERE tenant_id = 13 AND status = 'active' AND plan_type = 'one_time' ORDER BY id DESC,`subscriptions`.`id` LIMIT 1
+    portal_snapshot_outage_test.go:167: Redis down: gRPC failed, portal snapshot 1000 with projection unchecked; after restart portal remained 200 and missing projection unchanged
+--- PASS: TestPortalSnapshotDuringRedisOutage (2.91s)
+=== RUN   TestPortalSnapshotTenantIsolation
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /portal/me                --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func1 (2 handlers)
+[GIN-debug] GET    /portal/plans             --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func2 (2 handlers)
+[GIN-debug] GET    /portal/topups            --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func3 (2 handlers)
+[GIN-debug] GET    /portal/recharge-orders   --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func4 (2 handlers)
+[GIN-debug] GET    /portal/models            --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func5 (2 handlers)
+[GIN-debug] GET    /portal/consumption       --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func6 (2 handlers)
+[GIN-debug] POST   /portal/recharge          --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func7 (2 handlers)
+[GIN-debug] POST   /portal/recharge/pay      --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func8 (2 handlers)
+[GIN-debug] POST   /portal/recharge/refund   --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func9 (2 handlers)
+[GIN-debug] POST   /portal/subscribe         --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func10 (2 handlers)
+[GIN-debug] POST   /portal/change-plan       --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func11 (2 handlers)
+[GIN-debug] POST   /portal/cancel-subscription --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func12 (2 handlers)
+[GIN-debug] POST   /portal/chat              --> github.com/frostloom/ai-gateway/internal/gateway/handler.RegisterPortal.func13 (2 handlers)
+
+2026/11/05 13:26:32 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/plan.go:249 [35;1mrecord not found
+[0m[33m[1.279ms] [34;1m[rows:0][0m SELECT * FROM `subscriptions` WHERE tenant_id = 14 AND status = 'active' AND plan_type = 'recurring' ORDER BY `subscriptions`.`id` LIMIT 1
+
+2026/11/05 13:26:32 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/subscription_entitlement.go:19 [35;1mrecord not found
+[0m[33m[1.498ms] [34;1m[rows:0][0m SELECT * FROM `subscriptions` WHERE tenant_id = 14 AND status = 'cancelled' AND plan_type = 'recurring' AND cycle_end IS NOT NULL AND cycle_end > '2026-11-05 13:26:32.714' ORDER BY cycle_end DESC, id DESC,`subscriptions`.`id` LIMIT 1
+
+2026/11/05 13:26:32 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/plan.go:234 [35;1mrecord not found
+[0m[33m[1.312ms] [34;1m[rows:0][0m SELECT * FROM `subscriptions` WHERE tenant_id = 14 AND status = 'active' AND plan_type = 'one_time' ORDER BY id DESC,`subscriptions`.`id` LIMIT 1
+
+2026/11/05 13:26:32 [31;1m/Users/a1/项目/ai-gateway/internal/billing/store/mysql.go:1015 [35;1mrecord not found
+[0m[33m[4.760ms] [34;1m[rows:0][0m SELECT `api_keys`.`id`,`api_keys`.`tenant_id`,`api_keys`.`key_hash`,`api_keys`.`key_prefix`,`api_keys`.`name`,`api_keys`.`status`,`api_keys`.`expires_at`,`api_keys`.`created_at`,`api_keys`.`updated_at` FROM `api_keys` JOIN tenants ON tenants.id = api_keys.tenant_id WHERE api_keys.key_hash = 'f1234d75178d892a133a410355a5a990cf75d2f33eba25d575943d4df632f3a4' AND tenants.status = 0 ORDER BY `api_keys`.`id` LIMIT 1
+    portal_snapshot_tenant_test.go:89: tenant A balance=600 despite tenant B query parameter, invalid API key denied
+--- PASS: TestPortalSnapshotTenantIsolation (0.83s)
+PASS
+ok  	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	20.788s

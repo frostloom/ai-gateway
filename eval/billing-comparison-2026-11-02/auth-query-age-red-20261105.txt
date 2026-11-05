@@ -1,0 +1,14 @@
+# github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02.test
+ld: warning: '/private/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-306372339/000013.o' has malformed LC_DYSYMTAB, expected 98 undefined symbols to start at index 1626, found 95 undefined symbols starting at index 1626
+=== RUN   TestGuardedSlowLookupDoesNotRefreshStaleTTL
+    auth_guarded_query_age_test.go:39: old lookup populated cache after TTL: exists=1 err=<nil>
+--- FAIL: TestGuardedSlowLookupDoesNotRefreshStaleTTL (0.16s)
+=== RUN   TestGuardedSlowLookupDoesNotRefreshStaleTTL
+    auth_guarded_query_age_test.go:39: old lookup populated cache after TTL: exists=1 err=<nil>
+--- FAIL: TestGuardedSlowLookupDoesNotRefreshStaleTTL (0.15s)
+=== RUN   TestGuardedSlowLookupDoesNotRefreshStaleTTL
+    auth_guarded_query_age_test.go:39: old lookup populated cache after TTL: exists=1 err=<nil>
+--- FAIL: TestGuardedSlowLookupDoesNotRefreshStaleTTL (0.16s)
+FAIL
+FAIL	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	1.599s
+FAIL

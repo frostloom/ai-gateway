@@ -1,0 +1,53 @@
+{
+  "head": "63b9d1ed4d64bb583d15fa884c37468e5c53044c",
+  "branch": "codex/billing-mysql-comparison",
+  "git_status": " M AGENTS.md\n M internal/billing/store/mysql.go\n M internal/gateway/handler/chat.go\n M internal/gateway/handler/chat_stream_test.go\n M internal/gateway/middleware/apikey.go\n D internal/gateway/web/dist/assets/Empty-B78rz8Qh.css\n D internal/gateway/web/dist/assets/Empty-Cq6uueat.js\n D internal/gateway/web/dist/assets/dashboard-H93iLNlz.js\n D internal/gateway/web/dist/assets/dashboard-jpnukakx.css\n D internal/gateway/web/dist/assets/portal-CI_uKi_F.js\n D internal/gateway/web/dist/assets/portal-fDtFA2oX.css\n M internal/gateway/web/dist/dashboard.html\n M internal/gateway/web/dist/portal.html\n M scripts/schema.sql\n?? .tmp/\n?? eval/billing-comparison-2026-11-02/\n?? eval/project-load-2026-11-02/\n?? integrations/\n?? internal/billing/store/reserve_fingerprint_test.go\n?? internal/gateway/middleware/apikey_status_test.go\n?? internal/gateway/web/dist/assets/Empty-D1TVEnQN.css\n?? internal/gateway/web/dist/assets/Empty-DFn-BFPp.js\n?? internal/gateway/web/dist/assets/dashboard-BGbdPy4C.js\n?? internal/gateway/web/dist/assets/dashboard-Bt40SYhT.css\n?? internal/gateway/web/dist/assets/portal-CX4r-21-.js\n?? internal/gateway/web/dist/assets/portal-DUpRuSip.css\n?? plate_sim.py\n?? scripts/migrations/\n",
+  "source_sha256": {
+    "internal/billing/store/mysql.go": "78c48b3f3156b6b618be18d944ffb5c7d0ae80c3a7dd7cfcd8f339757961ece7",
+    "internal/gateway/handler/chat.go": "d52dbfd5a32d3c0304c3c12abab1d090d8a072b41ff8e10949e118e1720e2dfa",
+    "internal/gateway/middleware/idempotency.go": "d8c02c0d688e51c0c10b52f00775a2b31bbffb29049b9b4099fb87df2782a2fd",
+    "eval/project-load-2026-11-02/idem-mock/main.go": "2029bcddadcd5d2b727c8a9aa5d3b990a1ba87888223d955e9b63a13dd4ada28",
+    "cmd/gateway/main.go": "91d5d30ed17c5ecb42b8a5ac810de8a3d072a332bdb5fdfdab4e0814d9dd85cb",
+    "cmd/router/main.go": "eb54d320360e452ac16be25d9cdf6804aedbde91da5c77b0e18adcd2d841021c",
+    "cmd/billing/main.go": "3056db14e70ca305c182f56cc44eb132b3d65b8c194352d500ac56d5107ffa91",
+    "cmd/mock-provider/main.go": "3a42cc4753dbf60f5482fc81eb65ffbb2103b626d0ea60981d1ddd48d78e2d8e"
+  },
+  "images": {
+    "docker.m.daocloud.io/library/mysql:8.0.40": "sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff",
+    "docker.m.daocloud.io/library/redis:7-alpine": "sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499"
+  },
+  "gomaxprocs": 8,
+  "mysql_pool_max": 100,
+  "rate_per_min": 100000,
+  "mock_latency_ms": 15,
+  "mock_completion_tokens": 100,
+  "kafka": "disabled",
+  "isolated_agents": "disabled",
+  "reconciler": "sweep every 5s, grace 30s (test only); rebuild disabled",
+  "ports": {
+    "gateway": 52322,
+    "billing": 52323,
+    "admin": 52324,
+    "router": 52325,
+    "mock": 52326,
+    "reconciler": 52327
+  },
+  "mysql_port": "52309",
+  "redis_port": "52311",
+  "quick": false,
+  "started": "2026-11-03T17:07:28.491162",
+  "go_version": "go version go1.25.12 darwin/arm64",
+  "sdkroot": "/Library/Developer/CommandLineTools/SDKs/MacOSX26.5.sdk",
+  "binary_sha256": {
+    "billing": "4c0fe13673c7a98e0028d193b12bc3fbe4cd129b5133f8e4caab6c7ef3c4fcf1",
+    "router": "cb94258761fd493d502e9141cabbea01bc77cd57b4cc9438dbdd9fbdfb98f9db",
+    "reconciler": "9af06750d098fd7eb007b901a886f87895e421c451a153029fda57c9d0e3dc60",
+    "gateway": "16f9119a61acc117e56a9bcbb01b578e3a54ec6126875fdf23f7c5c0a4bfada1",
+    "mock": "ff5f37fb5bf063248635e200e9b1f4fa81261b10714e5c3d328e61f12f9b28d8",
+    "seed": "e3c97de667ad7633c514e451a0cc311bd65fe9da23b0adfe7fe7c0b791f76a42",
+    "load": "ea357c06f7b303e3069d0fcbfef060f57f5a11c4ce7c5c9e3119fa42bd076856"
+  },
+  "test": "TTL accelerated only after first upstream arrival; mock provider blocks until released",
+  "tenants": 1,
+  "workers": 2
+}

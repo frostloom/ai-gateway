@@ -1,0 +1,21 @@
+
+// Characterization: real HTTP server closes a declared-length body early.
+func TestGatewayTruncatedNonStreamResponseCharacterization(t *testing.T) {
+ upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+  w.Header().Set("Content-Type", "application/json")
+  w.Header().Set("Content-Length", "200")
+  w.WriteHeader(http.StatusOK)
+  _, _ = io.WriteString(w, `{"choices":[{"message":{"content":"partial`)
+ }))
+ defer upstream.Close()
+ bill := &fakeBilling{}
+ router := &fakeRouter{next: []*client.RouteResult{{ProviderID: 2, BaseURL: upstream.URL}}}
+ c, w := newGinCtx()
+ c.Request = httptest.NewRequest(http.MethodPost, "/v1/chat/completions", strings.NewReader(`{"model":"m","messages":[{"role":"user","content":"hi"}]}`))
+ c.Set("request_id", "truncated-synthetic")
+ Chat(bill, router, slog.New(slog.DiscardHandler), time.Second)(c)
+ if w.Code != http.StatusOK || !strings.Contains(w.Body.String(), "partial") || len(bill.reports) != 1 || bill.reports[0].CompletionTokens != 0 || len(bill.settles) != 1 || len(bill.reverses) != 0 {
+  t.Fatalf("status=%d body=%q reports=%+v settles=%d reverses=%d", w.Code, w.Body.String(), bill.reports, len(bill.settles), len(bill.reverses))
+ }
+ t.Logf("status=%d response=%q prompt=%d completion=%d settles=%d",w.Code,w.Body.String(),bill.reports[0].PromptTokens,bill.reports[0].CompletionTokens,len(bill.settles))
+}

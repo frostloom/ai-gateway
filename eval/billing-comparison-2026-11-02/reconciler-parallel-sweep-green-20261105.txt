@@ -1,0 +1,69 @@
+head=2237f6be387ce3ac51624efbdbf9b6dc0b6f2f15
+mysql_image=sha256:d58ac93387f644e4e040c636b8f50494e78e5afc27ca0a87348b2f577da2b7ff
+redis_image=sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+fc93bd6f62c0ea5aa7343c6e255e06c5853a6219693649d4fedcdc65f6a0bf57  /var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T//usage-atomic-overlay.aC2F2Q/reconciler.go
+# github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02.test
+ld: warning: '/private/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/go-link-2988422302/000013.o' has malformed LC_DYSYMTAB, expected 98 undefined symbols to start at index 1626, found 95 undefined symbols starting at index 1626
+=== RUN   TestReconcilerNilResponsesCountAsErrors
+    reconciler_nil_responses_test.go:86: nil settle/reverse/rebuild recorded as errors; subsequent nonnil responses counted normally
+--- PASS: TestReconcilerNilResponsesCountAsErrors (0.16s)
+=== RUN   TestParallelSweepProgressWithBlockedFirst
+    reconciler_parallel_sweep_test.go:142: same account: second bill completed before first released, both settled once, ledger=balance=920
+--- PASS: TestParallelSweepProgressWithBlockedFirst (0.50s)
+=== RUN   TestReconcilerBacklogBoundedWithoutStarvingUsage
+    reconciler_pending_backlog_test.go:103: backlog=1025 scanned=1026 held=1025 settled=1 max_bill_rows=256 elapsed_ms=38 live=960 ledger=960
+--- PASS: TestReconcilerBacklogBoundedWithoutStarvingUsage (0.56s)
+=== RUN   TestReconcilerSweepBoundsNewIDs
+    reconciler_pending_backlog_test.go:156: first_scanned=1325 new_id_deferred=true second_scanned=1326
+--- PASS: TestReconcilerSweepBoundsNewIDs (0.48s)
+=== RUN   TestReconcilerSettleOnlyRetainsUnknown
+=== RUN   TestReconcilerSettleOnlyRetainsUnknown/explicit
+    reconciler_settle_only_test.go:30: unknown=pending known=settled balance=860 ledger=860
+=== RUN   TestReconcilerSettleOnlyRetainsUnknown/default
+    reconciler_settle_only_test.go:31: unknown=pending known=settled balance=860 ledger=860
+--- PASS: TestReconcilerSettleOnlyRetainsUnknown (1.08s)
+    --- PASS: TestReconcilerSettleOnlyRetainsUnknown/explicit (0.58s)
+    --- PASS: TestReconcilerSettleOnlyRetainsUnknown/default (0.50s)
+=== RUN   TestReconcilerNilResponsesCountAsErrors
+    reconciler_nil_responses_test.go:71: nil sweep={Scanned:1330 Reversed:0 Settled:0 Rebuilt:0 Held:0 HeldOldestCreatedAt:0001-01-01 00:00:00 +0000 UTC SweepAttempted:false SweepError:false SettleErrors:1 ReverseErrors:1329 RebuildAttempted:false RebuildError:false RebuildErrors:0} err=<nil>
+--- FAIL: TestReconcilerNilResponsesCountAsErrors (0.09s)
+=== RUN   TestParallelSweepProgressWithBlockedFirst
+    reconciler_parallel_sweep_test.go:142: same account: second bill completed before first released, both settled once, ledger=balance=920
+--- PASS: TestParallelSweepProgressWithBlockedFirst (0.52s)
+=== RUN   TestReconcilerBacklogBoundedWithoutStarvingUsage
+    reconciler_pending_backlog_test.go:103: backlog=1025 scanned=2354 held=2353 settled=1 max_bill_rows=256 elapsed_ms=70 live=960 ledger=960
+--- PASS: TestReconcilerBacklogBoundedWithoutStarvingUsage (0.64s)
+=== RUN   TestReconcilerSweepBoundsNewIDs
+    reconciler_pending_backlog_test.go:156: first_scanned=2653 new_id_deferred=true second_scanned=2654
+--- PASS: TestReconcilerSweepBoundsNewIDs (0.56s)
+=== RUN   TestReconcilerSettleOnlyRetainsUnknown
+=== RUN   TestReconcilerSettleOnlyRetainsUnknown/explicit
+    reconciler_settle_only_test.go:30: unknown=pending known=settled balance=860 ledger=860
+=== RUN   TestReconcilerSettleOnlyRetainsUnknown/default
+    reconciler_settle_only_test.go:31: unknown=pending known=settled balance=860 ledger=860
+--- PASS: TestReconcilerSettleOnlyRetainsUnknown (1.21s)
+    --- PASS: TestReconcilerSettleOnlyRetainsUnknown/explicit (0.57s)
+    --- PASS: TestReconcilerSettleOnlyRetainsUnknown/default (0.64s)
+=== RUN   TestReconcilerNilResponsesCountAsErrors
+    reconciler_nil_responses_test.go:71: nil sweep={Scanned:2658 Reversed:0 Settled:0 Rebuilt:0 Held:0 HeldOldestCreatedAt:0001-01-01 00:00:00 +0000 UTC SweepAttempted:false SweepError:false SettleErrors:1 ReverseErrors:2657 RebuildAttempted:false RebuildError:false RebuildErrors:0} err=<nil>
+--- FAIL: TestReconcilerNilResponsesCountAsErrors (0.11s)
+=== RUN   TestParallelSweepProgressWithBlockedFirst
+    reconciler_parallel_sweep_test.go:142: same account: second bill completed before first released, both settled once, ledger=balance=920
+--- PASS: TestParallelSweepProgressWithBlockedFirst (0.64s)
+=== RUN   TestReconcilerBacklogBoundedWithoutStarvingUsage
+    reconciler_pending_backlog_test.go:103: backlog=1025 scanned=3682 held=3681 settled=1 max_bill_rows=256 elapsed_ms=178 live=960 ledger=960
+--- PASS: TestReconcilerBacklogBoundedWithoutStarvingUsage (0.71s)
+=== RUN   TestReconcilerSweepBoundsNewIDs
+    reconciler_pending_backlog_test.go:156: first_scanned=3981 new_id_deferred=true second_scanned=3982
+--- PASS: TestReconcilerSweepBoundsNewIDs (0.52s)
+=== RUN   TestReconcilerSettleOnlyRetainsUnknown
+=== RUN   TestReconcilerSettleOnlyRetainsUnknown/explicit
+    reconciler_settle_only_test.go:30: unknown=pending known=settled balance=860 ledger=860
+=== RUN   TestReconcilerSettleOnlyRetainsUnknown/default
+    reconciler_settle_only_test.go:31: unknown=pending known=settled balance=860 ledger=860
+--- PASS: TestReconcilerSettleOnlyRetainsUnknown (1.74s)
+    --- PASS: TestReconcilerSettleOnlyRetainsUnknown/explicit (0.90s)
+    --- PASS: TestReconcilerSettleOnlyRetainsUnknown/default (0.84s)
+FAIL
+FAIL	github.com/frostloom/ai-gateway/eval/billing-comparison-2026-11-02	10.548s
+FAIL
