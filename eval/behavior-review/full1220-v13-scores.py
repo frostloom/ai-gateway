@@ -356,7 +356,7 @@ def _validate_summary(summary, receipt, receipt_sha, manifest):
 
 _COLLECTION_QUALITY_CODES = frozenset(('unexpected_action', 'wrong_read_tool', 'missing_read',
     'missing_preview', 'missing_execution', 'terminal_goal', 'semantic_negative', 'fact_mismatch'))
-_COLLECTION_POLICY_SHA256 = '36824968a95f4b9a39c86989550c33a2f8e011e7fd57aa11afbaaaaff0622c5f'
+_COLLECTION_POLICY_SHA256 = '3fd68fc05f8ebc4b3a5d87cbeb905caa46abbcedc5b34de836d910a5425f3213'
 
 
 def validate_completed_record_state(record_raw):

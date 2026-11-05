@@ -120,6 +120,17 @@ class OperatorAndDependencies(unittest.TestCase):
         for name in m.DEPENDENCIES:m.dependency(name)
         self.assertEqual(m.SOURCE_HELPER_SHA256,m.sha((HERE/m.SOURCE_HELPER).read_bytes()))
         self.assertEqual(m.CAPTURE_INPUT_SCHEMA,'full1220-content-projection-input.v1')
+        # Go-generated frozen DATA vectors bind every independent Python consumer.
+        # A stale score literal must fail even when synthetic records are built
+        # with that same stale module constant.
+        v=declarations();authority=json.loads((HERE/'fixtures/v13-contracts/go-authority-data.json').read_bytes())
+        self.assertIs(v['data_only'],True);self.assertIs(authority['data_only'],True)
+        collection=v['collection_policy_sha256'];owned=v['owned_policy_sha256']
+        self.assertEqual(authority['authorization']['collection_policy_sha256'],collection)
+        self.assertEqual(m.COLLECTION_POLICY_SHA256,collection)
+        self.assertEqual(m.OWNED_POLICY_SHA256,owned)
+        self.assertEqual(m.dependency('codec')._COLLECTION_POLICY_SHA,collection)
+        self.assertEqual(load('scores')._COLLECTION_POLICY_SHA256,collection)
     def test_owner_inactive_and_exact_command_boundary(self):
         m=load('owner-template')
         def no(*a,**kw):raise AssertionError('default owner IO')
