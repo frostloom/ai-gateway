@@ -104,7 +104,7 @@ func TestWindowV11SettingsWireAndFrozenSpool(t *testing.T) {
 func TestWindowV11OldActualEpochsRejectBeforeSettings(t *testing.T) {
 	for _, epoch := range []string{"v8", "v9", "v10", "v11"} {
 		r := &FullWindowActualReady{manifest: windowActualManifest{Schema: "full-window-actual-ready." + epoch, Scope: fullWindowScope{Schema: "full-window-scope." + epoch}}}
-		if _, e := OpenFullWindowActual(context.Background(), r, "/must-not-read-private-settings"); e == nil || !strings.Contains(e.Error(), "v12 delegated") {
+		if _, e := OpenFullWindowActual(context.Background(), r, "/must-not-read-private-settings"); e == nil || !strings.Contains(e.Error(), "v13 delegated") {
 			t.Fatalf("%s: %v", epoch, e)
 		}
 	}
