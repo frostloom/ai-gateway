@@ -554,6 +554,8 @@ func TestCollectionPreviewFailureExactLoopExhaustionHistory(t *testing.T) {
 	o.Turn.Message = c.Scenario.Turns[0].User
 	tr := o.Turn.Response.Trace[0]
 	o.Turn.Response.Trace = []Trace{tr, tr, tr, tr, tr}
+	o.Turn.Response.Telemetry.LLMCalls = 5
+	o.Turn.Response.Telemetry.LLMUsageResponses = 5
 	o.Turn.Response.Reply = "（工具循环次数过多，请换一种说法）"
 	o.State.Own.Audits = []store.AgentAuditLog{}
 	for i := 0; i < 5; i++ {
@@ -576,5 +578,103 @@ func TestCollectionPreviewFailureExactLoopExhaustionHistory(t *testing.T) {
 	o.Turn.RawBody = string(mustCollectionJSON(t, o.Turn.Response))
 	if verifyCollectionPreviewFailureEvidence(c, d.f, e.Before.State, *o, *e) == nil {
 		t.Fatal("unstored arbitrary reply admitted")
+	}
+}
+
+func TestCollectionPreviewFailureBindsProductionSanitizedReply(t *testing.T) {
+	for _, tt := range []struct {
+		name, raw, http string
+		want            bool
+	}{
+		{"terminal-newline", "请选择标准或旗舰。\n", "请选择标准或旗舰。", true},
+		{"production-gear-and-blank-lines", "  请先选择。\n\n\n⚙ list_plans\n\n标准或旗舰。\n", "请先选择。\n\n标准或旗舰。", true},
+		{"unrecognized-gear-line", "请选择标准或旗舰。\n⚙ unknown_command\n", "请选择标准或旗舰。", false},
+		{"different-content", "另一个回答\n", "请选择标准或旗舰。", false},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			c, d := collectionFailedPreviewExample(t)
+			o := &d.steps[0]
+			e := &d.evidence
+			o.Turn.Message = c.Scenario.Turns[0].User
+			o.Turn.Response.Reply = tt.http
+			rebindCollectionFailedPreview(t, o, e)
+			var session struct {
+				History []agent.Message `json:"history"`
+				Pending any             `json:"pending_action"`
+			}
+			if json.Unmarshal(e.AfterSession, &session) != nil {
+				t.Fatal("history")
+			}
+			session.History[len(session.History)-1].Content = tt.raw
+			e.AfterSession = mustCollectionJSON(t, session)
+			rawSession := string(e.AfterSession)
+			got := recordCollectionPreviewFailureConversation(context.Background(), c, d)
+			if tt.want {
+				if got.Disposition != "continue_recorded" || len(d.sent) != 3 || len(got.PreviewFailures) != 1 || verifyCollectionPreviewFailureRecording(got) != nil {
+					t.Fatal("production sanitizer projection falsely halted original turns", got.Issues)
+				}
+				if string(got.PreviewFailures[0].AfterSession) != rawSession || got.Result.Observations[0].Turn.Response.Reply != tt.http {
+					t.Fatal("raw history or HTTP reply was rewritten")
+				}
+			} else if got.Disposition != "halt" || len(d.sent) != 1 || len(got.PreviewFailures) != 0 {
+				t.Fatal("arbitrary history/reply mismatch admitted")
+			}
+		})
+	}
+}
+
+func TestCollectionPreviewFailureBindsRepairIterationFallback(t *testing.T) {
+	for _, tt := range []struct {
+		name                  string
+		pairs, repairs, calls int
+		want                  bool
+	}{
+		{"five-tools-no-repair", 5, 0, 5, true},
+		{"four-tools-one-repair", 4, 1, 5, true},
+		{"five-tools-plus-repair-exceeds-loop", 5, 1, 5, false},
+		{"four-tools-without-repair", 4, 0, 5, false},
+		{"three-tools-one-repair", 3, 1, 5, false},
+		{"two-repairs", 3, 2, 5, false},
+		{"negative-repair", 5, -1, 5, false},
+		{"five-tools-not-five-calls", 5, 0, 4, false},
+		{"four-tools-repair-not-five-calls", 4, 1, 4, false},
+		{"six-tools", 6, 0, 6, false},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			c, d := collectionFailedPreviewExample(t)
+			o := &d.steps[0]
+			e := &d.evidence
+			o.Turn.Message = c.Scenario.Turns[0].User
+			tr := o.Turn.Response.Trace[0]
+			o.Turn.Response.Trace = []Trace{}
+			o.State.Own.Audits = []store.AgentAuditLog{}
+			for i := 0; i < tt.pairs; i++ {
+				o.Turn.Response.Trace = append(o.Turn.Response.Trace, tr)
+				o.State.Own.Audits = append(o.State.Own.Audits, store.AgentAuditLog{ID: uint64(4 + i), TenantID: 19, SessionID: "session-19", Tool: tr.Tool, Args: tr.ResolvedArgs, Result: tr.Result})
+			}
+			tm := o.Turn.Response.Telemetry
+			tm.ReplyRepairs, tm.LLMCalls, tm.LLMUsageResponses = tt.repairs, tt.calls, tt.calls
+			o.Turn.Response.Reply = "（工具循环次数过多，请换一种说法）"
+			e.After.State = o.State
+			e.After.Audits = o.State.Own.Audits
+			rebindCollectionFailedPreview(t, o, e)
+			var session struct {
+				History []agent.Message `json:"history"`
+				Pending any             `json:"pending_action"`
+			}
+			if json.Unmarshal(e.AfterSession, &session) != nil {
+				t.Fatal("history")
+			}
+			session.History = session.History[:len(session.History)-1]
+			e.AfterSession = mustCollectionJSON(t, session)
+			got := recordCollectionPreviewFailureConversation(context.Background(), c, d)
+			if tt.want {
+				if got.Disposition != "continue_recorded" || len(d.sent) != 3 || len(got.PreviewFailures) != 1 || verifyCollectionPreviewFailureRecording(got) != nil {
+					t.Fatal("source-bounded repair fallback falsely halted original turns", got.Issues)
+				}
+			} else if got.Disposition != "halt" || len(d.sent) != 1 || len(got.PreviewFailures) != 0 {
+				t.Fatal("incoherent or unbounded repair fallback admitted")
+			}
+		})
 	}
 }

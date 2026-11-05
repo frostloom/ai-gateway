@@ -40,7 +40,7 @@ type collectionPreviewFailureRecorder struct {
 }
 
 func collectionPreviewFailurePolicySHA() string {
-	return qualityJSONSHA([]string{collectionPreviewFailurePolicyID, collectionPolicySHA(), qualityPreviewPolicySHA(), "own-allowed-write;unconfirmed-preview-failure;strict-raw-response-trace-args;derived-business-rejection;no-pending-before-after;exact-history-handler-one-read-reuse-exact-five-loop-fallback;whole-sql-session-audit-state;retain-origin-quality-negatives;admission-not-a-correctness-verdict;full-original-turns;same-live-replay;full-private-recharge-orders-projected-to-unchanged-sql;no-authority"})
+	return qualityJSONSHA([]string{collectionPreviewFailurePolicyID, collectionPolicySHA(), qualityPreviewPolicySHA(), "own-allowed-write;unconfirmed-preview-failure;strict-raw-response-trace-args;derived-business-rejection;no-pending-before-after;exact-history-production-reply-sanitizer-handler-one-read-reuse-five-model-loop-repairs-zero-or-one-fallback;whole-sql-session-audit-state;retain-origin-quality-negatives;admission-not-a-correctness-verdict;full-original-turns;same-live-replay;full-private-recharge-orders-projected-to-unchanged-sql;no-authority"})
 }
 func recordCollectionPreviewFailureConversation(ctx context.Context, c ConversationCase, d ConversationDriver) collectionPreviewFailureRecording {
 	provider, _ := d.(collectionPreviewFailureProvider)
@@ -96,7 +96,7 @@ func verifyCollectionPreviewFailureEvidence(c ConversationCase, f Fixture, previ
 		return fail()
 	}
 	tm := obs.Turn.Response.Telemetry
-	if tm == nil || tm.Runtime == nil || tm.LangfuseTraceID == "" || tm.LLMCalls < 0 || tm.JevCalls < 0 || tm.LLMUsageMissing != 0 || tm.JevUsageMissing != 0 || tm.JevErrors != 0 || tm.LLMUsageResponses != tm.LLMCalls || tm.JevUsageResponses != tm.JevCalls {
+	if tm == nil || tm.Runtime == nil || tm.LangfuseTraceID == "" || tm.LLMCalls < 0 || tm.JevCalls < 0 || tm.LLMUsageMissing != 0 || tm.JevUsageMissing != 0 || tm.JevErrors != 0 || tm.LLMUsageResponses != tm.LLMCalls || tm.JevUsageResponses != tm.JevCalls || tm.ReplyRepairs < 0 || tm.ReplyRepairs > 1 {
 		return fail()
 	}
 	var response Response
@@ -213,12 +213,18 @@ func collectionPreviewFailureHistory(obs ConversationObservation, in collectionP
 		return fail()
 	}
 	end := len(added)
-	if reflect.DeepEqual(added[end-1], agent.Message{Role: "assistant", Content: obs.Turn.Response.Reply}) {
+	terminal := added[end-1]
+	terminal.Content = agent.EvaluationSanitizeReply(terminal.Content)
+	if reflect.DeepEqual(terminal, agent.Message{Role: "assistant", Content: obs.Turn.Response.Reply}) {
 		end--
-	} else if obs.Turn.Response.Reply != "（工具循环次数过多，请换一种说法）" || end != 11 {
-		// The source's exact five-iteration fallback is returned without
-		// appending another assistant message to session history.
-		return fail()
+	} else {
+		tm := obs.Turn.Response.Telemetry
+		if obs.Turn.Response.Reply != "（工具循环次数过多，请换一种说法）" || tm == nil || tm.LLMCalls != 5 || tm.ReplyRepairs < 0 || tm.ReplyRepairs > 1 || end != 1+2*(5-tm.ReplyRepairs) {
+			// The five source iterations contain either five tool pairs or
+			// four tool pairs plus its one unrecorded reply-repair iteration.
+			// Only this exact fallback returns without a stored final reply.
+			return fail()
+		}
 	}
 	if (end-1)%2 != 0 || (end-1)/2 > 5 {
 		return fail()
