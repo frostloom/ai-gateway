@@ -324,6 +324,10 @@ func (d *windowOwnedDriver) Step(ctx context.Context, f Fixture, session, messag
 	if e != nil {
 		return obs, d.stopWindowOwned()
 	}
+	obs, e = d.observationForWindowRecording(obs, stored)
+	if e != nil {
+		return obs, d.stopWindowOwned()
+	}
 	d.observations = append(d.observations, stored)
 	d.nextTurn++
 	if obs.Turn.Response.SessionID != "" {

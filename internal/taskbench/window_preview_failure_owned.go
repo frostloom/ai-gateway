@@ -231,3 +231,12 @@ func (d *windowOwnedDriver) windowQualityOwnedPolicySHA() string {
 	}
 	return windowOwnedQualityPolicySHA()
 }
+
+// V13 returns the same wire representation used by its retained capture,
+// without non-wire clock metadata or aliases into the owner's evidence.
+func (d *windowOwnedDriver) observationForWindowRecording(live, stored ConversationObservation) (ConversationObservation, error) {
+	if d.windowPreviewFailureMode() {
+		return cloneWindowOwned(stored)
+	}
+	return live, nil
+}
