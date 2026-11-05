@@ -53,7 +53,7 @@ func windowQualityProofEvidence(proof *windowOwnedArmProof) (*windowQualityEndEv
 		return reject()
 	}
 	q := proof.quality
-	if q.Deleted != 1 || !q.SessionAbsent || q.Evidence.PolicySHA256 != windowOwnedQualityPolicySHA() || q.Evidence.EnvelopeSHA256 != windowQualityEnvelopeSHA(q) || q.Evidence.SourceSHA256 != q.Candidate.SourceSHA256 || q.Evidence.RuleSHA256 != q.Candidate.RuleSHA256 || q.Evidence.ObservedTurns != len(proof.recording.Result.Observations) || q.Evidence.UnrunTurns != len(q.Candidate.Unrun) || q.Evidence.ObservedTurns+q.Evidence.UnrunTurns != len(proof.recording.Result.Case.Scenario.Turns) || !reflect.DeepEqual(q.Candidate.Evidence.Record, proof.recording) || verifyQualityPreviewSidecar(q.Candidate) != nil {
+	if q.Deleted != 1 || !q.SessionAbsent || q.Evidence.PolicySHA256 != proof.driver.windowQualityOwnedPolicySHA() || q.Evidence.EnvelopeSHA256 != windowQualityEnvelopeSHA(q) || q.Evidence.SourceSHA256 != q.Candidate.SourceSHA256 || q.Evidence.RuleSHA256 != q.Candidate.RuleSHA256 || q.Evidence.ObservedTurns != len(proof.recording.Result.Observations) || q.Evidence.UnrunTurns != len(q.Candidate.Unrun) || q.Evidence.ObservedTurns+q.Evidence.UnrunTurns != len(proof.recording.Result.Case.Scenario.Turns) || !reflect.DeepEqual(q.Candidate.Evidence.Record, proof.recording) || verifyWindowQualityCandidate(q.Candidate) != nil {
 		return reject()
 	}
 	r := proof.permit.acquisition
@@ -79,7 +79,7 @@ func windowQualityEnvelopeSHA(q *windowQualityOwnedEnd) string {
 	return conversationHash(raw)
 }
 func (d *windowOwnedDriver) windowQualityMode() bool {
-	return d != nil && d.permit != nil && d.permit.campaign != nil && d.permit.campaign.prepared.scope.Bindings.PolicySHA256 == windowOwnedQualityPolicySHA()
+	return d != nil && d.permit != nil && d.permit.campaign != nil && (d.permit.campaign.prepared.scope.Bindings.PolicySHA256 == windowOwnedQualityPolicySHA() || d.windowPreviewFailureMode())
 }
 func (r *windowAcquisitionRun) validateWindowQualityFiles() error {
 	if r == nil || r.permit == nil || r.permit.acquisition != r || r.auth.campaign != r.permit.campaign || r.ledger != r.permit.ledger || r.environment != r.permit.environment || r.rootInfo == nil || r.recordFiles == nil || !reflect.DeepEqual(r.scope, r.permit.campaign.prepared.scope) || r.permit.windowIndex < 1 || r.permit.windowIndex > len(r.scope.Windows) || r.window != r.scope.Windows[r.permit.windowIndex-1] {
@@ -125,7 +125,12 @@ func (d *windowOwnedDriver) latchWindowQualityCandidate(ctx context.Context, bef
 		return fmt.Errorf("quality acquisition unavailable")
 	}
 	replay := &replayConversationDriver{episode: ConversationEpisode{Key: d.caseDefinition.Key(), Fixture: d.fixture, Initial: d.initial, Final: d.observations[len(d.observations)-1].State, Steps: d.observations}}
-	record := recordCollectionConversation(ctx, d.caseDefinition, replay)
+	record := collectionRecording{}
+	if d.windowPreviewFailureMode() {
+		record = recordCollectionPreviewFailureConversation(ctx, d.caseDefinition, d.previewFailureReplay(d.observations[len(d.observations)-1].State)).collectionRecording
+	} else {
+		record = recordCollectionConversation(ctx, d.caseDefinition, replay)
+	}
 	after, err := captureWindowQualityEffects(ctx, d)
 	if err != nil {
 		return err
@@ -138,7 +143,7 @@ func (d *windowOwnedDriver) latchWindowQualityCandidate(ctx context.Context, bef
 	if err = d.environment.db.WithContext(ctx).Order("id").Find(&plans).Error; err != nil {
 		return err
 	}
-	candidate, err := qualityPreviewCandidate(qualityPreviewInput{Record: record, Turn: d.nextTurn, BeforeSession: previous, Pending: pending, Before: before, After: after, Plans: plans})
+	candidate, err := d.windowQualityCandidate(qualityPreviewInput{Record: record, Turn: d.nextTurn, BeforeSession: previous, Pending: pending, Before: before, After: after, Plans: plans})
 	if err != nil {
 		return err
 	}
@@ -160,7 +165,7 @@ func (d *windowOwnedDriver) finishWindowQualityOwned(ctx context.Context, record
 	}
 	input := d.qualityCandidate.Evidence
 	input.Record = record
-	candidate, err := qualityPreviewCandidate(input)
+	candidate, err := d.windowQualityCandidate(input)
 	if err != nil {
 		return fail()
 	}
@@ -203,7 +208,11 @@ func (d *windowOwnedDriver) finishWindowQualityOwned(ctx context.Context, record
 		return fail()
 	}
 	stats := d.observer.Stats()
-	if d.observer.EvaluationIdentity() != d.permit.observerIdentity || stats.Failed != 0 || stats.Dropped != 0 || stats.QueueDepth != 0 || stats.Accepted != stats.Exported || stats.Turns-d.observerStart.Turns != uint64(d.nextTurn) || stats.SampledTurns-d.observerStart.SampledTurns != uint64(d.nextTurn) {
+	observationOK := d.observer.EvaluationIdentity() == d.permit.observerIdentity && stats.Failed == 0 && stats.Dropped == 0 && stats.QueueDepth == 0 && stats.Accepted == stats.Exported && stats.Turns-d.observerStart.Turns == uint64(d.nextTurn) && stats.SampledTurns-d.observerStart.SampledTurns == uint64(d.nextTurn)
+	if d.windowPreviewFailureMode() {
+		observationOK = checkWindowArmObservationReceipt(ctx, d.permit.campaign.prepared.scope.Schema, d.observer, d.permit.observerIdentity, d.observerStart, d.nextTurn) == nil
+	}
+	if !observationOK {
 		return fail()
 	}
 	cleanup := struct {
@@ -221,7 +230,7 @@ func (d *windowOwnedDriver) finishWindowQualityOwned(ctx context.Context, record
 	if r.validateWindowQualityFiles() != nil {
 		return fail()
 	}
-	q := &windowQualityOwnedEnd{Candidate: candidate, PostCleanup: post, Deleted: n, SessionAbsent: true, Evidence: windowQualityEndEvidence{PolicySHA256: windowOwnedQualityPolicySHA(), SourceSHA256: candidate.SourceSHA256, RuleSHA256: candidate.RuleSHA256, CandidateFile: candidateFile, CandidateSHA256: candidateSHA, CleanupFile: cleanupFile, CleanupSHA256: cleanupSHA, ObservedTurns: d.nextTurn, UnrunTurns: len(candidate.Unrun)}}
+	q := &windowQualityOwnedEnd{Candidate: candidate, PostCleanup: post, Deleted: n, SessionAbsent: true, Evidence: windowQualityEndEvidence{PolicySHA256: d.windowQualityOwnedPolicySHA(), SourceSHA256: candidate.SourceSHA256, RuleSHA256: candidate.RuleSHA256, CandidateFile: candidateFile, CandidateSHA256: candidateSHA, CleanupFile: cleanupFile, CleanupSHA256: cleanupSHA, ObservedTurns: d.nextTurn, UnrunTurns: len(candidate.Unrun)}}
 	q.Evidence.EnvelopeSHA256 = windowQualityEnvelopeSHA(q)
 	raw, err = json.Marshal(q)
 	if err != nil {

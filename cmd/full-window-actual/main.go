@@ -44,6 +44,8 @@ func runActualCLI(ctx context.Context, args []string, in io.ReadCloser, out io.W
 	checkOnly := fs.Bool("check", false, "read-only frozen readiness check")
 	prepareV8 := fs.Bool("prepare-v8", false, "read-only V8 technical preparation; never execution authority")
 	prepareV9 := fs.Bool("prepare-v9", false, "read-only V9 technical preparation; never execution authority")
+	prepareV13 := fs.Bool("prepare-v13", false, "read-only V13 typed156 preview-failure preparation")
+	epochV13 := fs.Bool("epoch-v13", false, "select independently frozen V13 suffix authority")
 	prepareV12 := fs.Bool("prepare-v12", false, "read-only V12 fixed suffix durable preparation")
 	epochV12 := fs.Bool("epoch-v12", false, "select independently frozen V12 suffix authority")
 	prepareV11 := fs.Bool("prepare-v11", false, "read-only V11 full primary durable preparation; never execution authority")
@@ -62,6 +64,9 @@ func runActualCLI(ctx context.Context, args []string, in io.ReadCloser, out io.W
 		}
 		return actualCLIError(out, "invalid_flags")
 	}
+	if (*prepareV13 && (*prepareV8 || *prepareV9 || *prepareV10 || *prepareV11 || *prepareV12 || *checkOnly || *serve || *settings != "" || *authorization != "" || *epochV9 || *epochV10 || *epochV11 || *epochV12 || *epochV13)) || (*epochV13 && (!*serve || *authorization == "" || *prepareV8 || *prepareV9 || *prepareV10 || *prepareV11 || *prepareV12 || *epochV9 || *epochV10 || *epochV11 || *epochV12)) {
+		return actualCLIError(out, "invalid_start")
+	}
 	if (*prepareV12 && (*prepareV8 || *prepareV9 || *prepareV10 || *prepareV11 || *checkOnly || *serve || *settings != "" || *authorization != "" || *epochV9 || *epochV10 || *epochV11 || *epochV12)) || (*epochV12 && (!*serve || *authorization == "" || *prepareV8 || *prepareV9 || *prepareV10 || *prepareV11 || *epochV9 || *epochV10 || *epochV11)) {
 		return actualCLIError(out, "invalid_start")
 	}
@@ -77,7 +82,7 @@ func runActualCLI(ctx context.Context, args []string, in io.ReadCloser, out io.W
 	if fs.NArg() != 0 || ctx == nil || ctx.Err() != nil || (*checkOnly && *serve) || (*prepareV8 && (*checkOnly || *serve || *settings != "" || *authorization != "")) || (*authorization != "" && !*serve) {
 		return actualCLIError(out, "invalid_start")
 	}
-	if !*checkOnly && !*serve && !*prepareV8 && !*prepareV9 && !*prepareV10 && !*prepareV11 && !*prepareV12 {
+	if !*checkOnly && !*serve && !*prepareV8 && !*prepareV9 && !*prepareV10 && !*prepareV11 && !*prepareV12 && !*prepareV13 {
 		if *manifest != "" || *settings != "" {
 			return actualCLIError(out, "explicit_mode_required")
 		}
@@ -86,8 +91,18 @@ func runActualCLI(ctx context.Context, args []string, in io.ReadCloser, out io.W
 		}
 		return 0
 	}
-	if *manifest == "" || (!*prepareV8 && !*prepareV9 && !*prepareV10 && !*prepareV11 && !*prepareV12 && *authorization == "" && check == nil) || (*checkOnly && *settings != "") || (*serve && (*settings == "" || open == nil || in == nil)) {
+	if *manifest == "" || (!*prepareV8 && !*prepareV9 && !*prepareV10 && !*prepareV11 && !*prepareV12 && !*prepareV13 && *authorization == "" && check == nil) || (*checkOnly && *settings != "") || (*serve && (*settings == "" || open == nil || in == nil)) {
 		return actualCLIError(out, "incomplete_actual_declaration")
+	}
+	if *prepareV13 {
+		summary, prepared, err := taskbench.CheckFullWindowV13Preparation(taskbench.FullWindowActualReadyOptions{ManifestPath: *manifest})
+		if err != nil || prepared == nil {
+			return actualCLIError(out, "actual_v13_preparation_rejected")
+		}
+		if actualEmit(out, map[string]any{"type": "prepared", "read_only": true, "actual_execution_authorized": false, "retry_policy_approved": false, "preparation": summary}) != nil {
+			return 1
+		}
+		return 0
 	}
 	if *prepareV12 {
 		summary, prepared, err := taskbench.CheckFullWindowV12Preparation(taskbench.FullWindowActualReadyOptions{ManifestPath: *manifest})
@@ -142,7 +157,16 @@ func runActualCLI(ctx context.Context, args []string, in io.ReadCloser, out io.W
 	var summary taskbench.FullWindowActualReadySummary
 	var ready *taskbench.FullWindowActualReady
 	var err error
-	if *authorization != "" && *epochV12 {
+	if *authorization != "" && *epochV13 {
+		var prepared *taskbench.FullWindowV13Preparation
+		summary, prepared, err = taskbench.CheckFullWindowV13Preparation(taskbench.FullWindowActualReadyOptions{ManifestPath: *manifest})
+		if err == nil && prepared != nil {
+			ready, err = taskbench.AuthorizeFullWindowV13Preparation(prepared, *authorization)
+		}
+		if err != nil || ready == nil {
+			return actualCLIError(out, "actual_v13_authorization_rejected")
+		}
+	} else if *authorization != "" && *epochV12 {
 		var prepared *taskbench.FullWindowV12Preparation
 		summary, prepared, err = taskbench.CheckFullWindowV12Preparation(taskbench.FullWindowActualReadyOptions{ManifestPath: *manifest})
 		if err == nil && prepared != nil {

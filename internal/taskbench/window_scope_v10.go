@@ -98,7 +98,7 @@ func prepareFullWindowScopeV10(s ConversationSuite, p PairedProfiles, caps []ful
 
 func validateWindowV10Declarations(scope fullWindowScope) error {
 	budget, retry, completion := expectedWindowV10BudgetDeclaration(), expectedWindowV10RetryDeclaration(), expectedWindowCompletionDeclarationV10()
-	if scope.CompletionV12 != nil || scope.Observation != nil || scope.BaselineEvidenceSHA256 != windowV10BaselineSHA || scope.BudgetApprovalSHA256 != "" || scope.AllowPaid || scope.ReadyForPaidRun || !reflect.DeepEqual(scope.Completion, &completion) || !reflect.DeepEqual(scope.BudgetDeclaration, &budget) || !reflect.DeepEqual(scope.RetryDeclaration, &retry) || scope.BudgetDeclarationSHA256 != windowV8DeclarationSHA(budget) || scope.RetryPolicySHA256 != windowV8DeclarationSHA(retry) {
+	if scope.CompletionV13 != nil || scope.CollectionPolicySHA256 != "" || scope.CompletionV12 != nil || scope.Observation != nil || scope.BaselineEvidenceSHA256 != windowV10BaselineSHA || scope.BudgetApprovalSHA256 != "" || scope.AllowPaid || scope.ReadyForPaidRun || !reflect.DeepEqual(scope.Completion, &completion) || !reflect.DeepEqual(scope.BudgetDeclaration, &budget) || !reflect.DeepEqual(scope.RetryDeclaration, &retry) || scope.BudgetDeclarationSHA256 != windowV8DeclarationSHA(budget) || scope.RetryPolicySHA256 != windowV8DeclarationSHA(retry) {
 		return fmt.Errorf("v10 fixed completion candidate declarations required; no human authority")
 	}
 	return nil
@@ -126,7 +126,11 @@ func validateWindowV10ExecutionShape(scope fullWindowScope) error {
 
 // Local index 1 means the copied declaration window-056, not a prefix slot.
 func executionWindowAt(scope fullWindowScope, localIndex int) (fullWindowDeclaration, error) {
-	if scope.Schema == "full-window-scope.v12" {
+	if scope.Schema == "full-window-scope.v13" {
+		if err := validateWindowV13ExecutionShape(scope); err != nil {
+			return fullWindowDeclaration{}, err
+		}
+	} else if scope.Schema == "full-window-scope.v12" {
 		if err := validateWindowV12ExecutionShape(scope); err != nil {
 			return fullWindowDeclaration{}, err
 		}
@@ -150,6 +154,12 @@ func executionWindowAt(scope fullWindowScope, localIndex int) (fullWindowDeclara
 // V10 returns only suffix totals. The original 1851 boundaries remain the
 // separate Completion.Boundaries denominator, not an invented suffix partition.
 func executionTotals(scope fullWindowScope) (fullWindowTotals, error) {
+	if scope.Schema == "full-window-scope.v13" {
+		if err := validateWindowV13ExecutionShape(scope); err != nil {
+			return fullWindowTotals{}, err
+		}
+		return fullWindowTotals{3275, 6550, 10504, 0, 110191257, 1818872}, nil
+	}
 	if scope.Schema == "full-window-scope.v12" {
 		if err := validateWindowV12ExecutionShape(scope); err != nil {
 			return fullWindowTotals{}, err
@@ -182,7 +192,7 @@ func executionTotals(scope fullWindowScope) (fullWindowTotals, error) {
 	return out, nil
 }
 func legacyExecutionScope(scope fullWindowScope) bool {
-	if scope.CompletionV12 != nil || scope.Completion != nil || scope.Observation != nil {
+	if scope.CompletionV13 != nil || scope.CollectionPolicySHA256 != "" || scope.CompletionV12 != nil || scope.Completion != nil || scope.Observation != nil {
 		return false
 	}
 	switch scope.Schema {

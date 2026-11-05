@@ -76,12 +76,14 @@ type windowCampaignPrepared struct {
 	stoppedHistory   windowStoppedHistory
 	stoppedV9        *windowStoppedV9Baseline
 	stoppedV10       *windowStoppedV10Baseline
+	stoppedV12       *windowStoppedV12Baseline
 	stoppedV11       *windowStoppedV11Baseline
 	observationOwner *windowV11ObservationOwner
 	v8Authority      *windowV8Authority
 }
 type windowCampaignArmEvidence struct {
-	QualityEnd                   *windowQualityEndEvidence `json:",omitempty"`
+	PreviewFailure               *windowPreviewFailureEvidence `json:",omitempty"`
+	QualityEnd                   *windowQualityEndEvidence     `json:",omitempty"`
 	Ordinal, Pass, ObservedTurns int
 	Key, Arm                     string
 	RecordingSHA256              string
@@ -267,7 +269,7 @@ func newWindowCampaign(root, frozenRoot, historicalDir string, scope fullWindowS
 // wrapper calls it in production. It creates no provider capability or token.
 func startWindowCampaign(p windowCampaignPrepared, baseline fullWindowBaseline) (*windowCampaign, error) {
 	startupCtx := context.Background()
-	if p.scope.Schema == "full-window-scope.v11" || p.scope.Schema == "full-window-scope.v12" {
+	if p.scope.Schema == "full-window-scope.v11" || p.scope.Schema == "full-window-scope.v12" || p.scope.Schema == "full-window-scope.v13" {
 		if p.observationOwner == nil || p.observationOwner.context == nil {
 			return nil, fmt.Errorf("v11 bound observer context required")
 		}
@@ -321,6 +323,10 @@ func validatePreparedWindowCampaign(p windowCampaignPrepared, b fullWindowBaseli
 		return e
 	}
 	switch p.scope.Schema {
+	case "full-window-scope.v13":
+		if err := validateStoppedV13CampaignHistory(p, b); err != nil {
+			return err
+		}
 	case "full-window-scope.v12":
 		if err := validateStoppedV12CampaignHistory(p, b); err != nil {
 			return err
@@ -399,11 +405,15 @@ func validatePreparedWindowCampaign(p windowCampaignPrepared, b fullWindowBaseli
 		claimModelBound, claimJEVBound = 84510611, 650855
 	} else if windowScopeUsesNativeV8(p.scope.Schema) {
 		claimModelBound, claimJEVBound = 84500000, 600000
-		if p.scope.Schema == "full-window-scope.v9" || (p.scope.Schema == "full-window-scope.v11" || p.scope.Schema == "full-window-scope.v12") {
+		if p.scope.Schema == "full-window-scope.v9" || (p.scope.Schema == "full-window-scope.v11" || p.scope.Schema == "full-window-scope.v12" || p.scope.Schema == "full-window-scope.v13") {
 			claimModelBound, claimJEVBound = 123827032, 2037474
 		}
 	}
-	if p.scope.Schema == "full-window-scope.v12" {
+	if p.scope.Schema == "full-window-scope.v13" {
+		if e := validateV13ClaimDeclaration(d, p.scope.CompletionV13); e != nil {
+			return e
+		}
+	} else if p.scope.Schema == "full-window-scope.v12" {
 		if e := validateV12ClaimDeclaration(d, p.scope.CompletionV12); e != nil {
 			return e
 		}
@@ -522,7 +532,9 @@ func (c *windowCampaign) persistClaimWindowCampaignContext(ctx context.Context, 
 		historyCtx, done := c.windowCampaignHistoryContextLocked(ctx)
 		defer done()
 		var err error
-		if c.prepared.scope.Schema == "full-window-scope.v12" {
+		if c.prepared.scope.Schema == "full-window-scope.v13" {
+			err = validateStoppedV13CampaignHistoryContext(historyCtx, c.prepared, c.baseline)
+		} else if c.prepared.scope.Schema == "full-window-scope.v12" {
 			err = validateStoppedV12CampaignHistoryContext(historyCtx, c.prepared, c.baseline)
 		} else if c.prepared.scope.Schema == "full-window-scope.v11" {
 			err = validateStoppedV11CampaignHistoryContext(historyCtx, c.prepared, c.baseline)
@@ -589,10 +601,13 @@ func (c *windowCampaign) persistClaimWindowCampaignContext(ctx context.Context, 
 	}
 	if windowScopeUsesNativeV8(d.Schema) {
 		r.Schema = "full-window-campaign-claim.v8"
-		if d.Schema == "full-window-scope.v11" || d.Schema == "full-window-scope.v12" {
+		if d.Schema == "full-window-scope.v11" || d.Schema == "full-window-scope.v12" || d.Schema == "full-window-scope.v13" {
 			r.Schema = "full-window-campaign-claim.v11"
 			if d.Schema == "full-window-scope.v12" {
 				r.Schema = "full-window-campaign-claim.v12"
+			}
+			if d.Schema == "full-window-scope.v13" {
+				r.Schema = "full-window-campaign-claim.v13"
 			}
 		}
 		if d.Schema == "full-window-scope.v9" {
@@ -612,7 +627,7 @@ func (c *windowCampaign) persistClaimWindowCampaignContext(ctx context.Context, 
 	if err := c.checkWindowCampaignContextLocked(ctx); err != nil {
 		return err
 	}
-	if d.Schema == "full-window-scope.v11" || d.Schema == "full-window-scope.v12" {
+	if d.Schema == "full-window-scope.v11" || d.Schema == "full-window-scope.v12" || d.Schema == "full-window-scope.v13" {
 		o := c.prepared.observationOwner
 		if o == nil {
 			return fmt.Errorf("v11 observer owner absent before claim")
@@ -801,6 +816,13 @@ func (c *windowCampaign) validateEvidenceWindowCampaign(p *windowCampaignOwnedCh
 			if e.Ordinal != slot.Ordinal || e.Pass != slot.Pass || e.Key != slot.CaseKey || e.Arm != arm || (e.QualityEnd == nil && e.ObservedTurns != slot.UserTurns) || !e.Cleanup || !e.Observer || !comparisonDigest(e.RecordingSHA256) {
 				return fmt.Errorf("wrong/missing owned execution evidence")
 			}
+			if c.prepared.scope.Schema == "full-window-scope.v13" {
+				if e.QualityEnd == nil && validateWindowPreviewFailureEvidence(e.PreviewFailure, e.RecordingSHA256) != nil || e.QualityEnd != nil && e.PreviewFailure != nil {
+					return fmt.Errorf("v13 checkpoint failed-preview proof differs")
+				}
+			} else if e.PreviewFailure != nil {
+				return fmt.Errorf("old epoch carries failed-preview proof")
+			}
 			if e.QualityEnd != nil && validateWindowQualityEndEvidence(c.prepared.scope.Bindings.PolicySHA256, slot, arm, e.ObservedTurns, e.QualityEnd) != nil {
 				return fmt.Errorf("invalid quality-end evidence")
 			}
@@ -854,10 +876,13 @@ func (c *windowCampaign) advanceWindowCampaignContext(ctx context.Context, p *wi
 			return fail(fmt.Errorf("v8 extras unresolved"))
 		}
 		checkpoint.Schema = "full-window-campaign-owned-checkpoint.v8"
-		if d.Schema == "full-window-scope.v11" || d.Schema == "full-window-scope.v12" {
+		if d.Schema == "full-window-scope.v11" || d.Schema == "full-window-scope.v12" || d.Schema == "full-window-scope.v13" {
 			checkpoint.Schema = "full-window-campaign-owned-checkpoint.v11"
 			if d.Schema == "full-window-scope.v12" {
 				checkpoint.Schema = "full-window-campaign-owned-checkpoint.v12"
+			}
+			if d.Schema == "full-window-scope.v13" {
+				checkpoint.Schema = "full-window-campaign-owned-checkpoint.v13"
 			}
 		}
 		if d.Schema == "full-window-scope.v10" {
@@ -914,7 +939,7 @@ func (c *windowCampaign) closeWindowCampaign() error {
 // This validates checkpoint data after the collector checked its live proof.
 // It cannot mint a checkpoint or replace genuine driver/cleanup authority.
 func validateWindowQualityEndEvidence(policy string, slot fullWindowSlot, arm string, observed int, q *windowQualityEndEvidence) error {
-	if q == nil || policy != windowOwnedQualityPolicySHA() || q.PolicySHA256 != policy || observed < 1 || observed > slot.UserTurns || q.ObservedTurns != observed || q.UnrunTurns != slot.UserTurns-observed || !comparisonDigest(q.SourceSHA256) || !comparisonDigest(q.RuleSHA256) || !comparisonDigest(q.CandidateSHA256) || !comparisonDigest(q.CleanupSHA256) || !comparisonDigest(q.EnvelopeSHA256) || q.CandidateFile == q.CleanupFile {
+	if q == nil || (policy != windowOwnedQualityPolicySHA() && policy != windowOwnedPreviewFailurePolicySHA()) || q.PolicySHA256 != policy || observed < 1 || observed > slot.UserTurns || q.ObservedTurns != observed || q.UnrunTurns != slot.UserTurns-observed || !comparisonDigest(q.SourceSHA256) || !comparisonDigest(q.RuleSHA256) || !comparisonDigest(q.CandidateSHA256) || !comparisonDigest(q.CleanupSHA256) || !comparisonDigest(q.EnvelopeSHA256) || q.CandidateFile == q.CleanupFile {
 		return fmt.Errorf("invalid quality-end evidence")
 	}
 	for _, name := range []string{q.CandidateFile, q.CleanupFile} {

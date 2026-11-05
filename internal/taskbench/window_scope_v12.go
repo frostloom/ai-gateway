@@ -46,7 +46,7 @@ func prepareFullWindowScopeV12(s ConversationSuite, p PairedProfiles, caps []ful
 
 func validateWindowV12Declarations(s fullWindowScope) error {
 	c, d, r := expectedWindowCompletionDeclarationV12(), expectedWindowV12BudgetDeclaration(), expectedWindowV12RetryDeclaration()
-	if s.Schema != "full-window-scope.v12" || s.Completion != nil || s.BaselineEvidenceSHA256 != windowV12BaselineSHA || s.AllowPaid || s.ReadyForPaidRun || s.BudgetApprovalSHA256 != "" || !reflect.DeepEqual(s.CompletionV12, &c) || !reflect.DeepEqual(s.BudgetDeclaration, &d) || !reflect.DeepEqual(s.RetryDeclaration, &r) || s.BudgetDeclarationSHA256 != windowV8DeclarationSHA(d) || s.RetryPolicySHA256 != windowV8DeclarationSHA(r) {
+	if s.Schema != "full-window-scope.v12" || s.CompletionV13 != nil || s.CollectionPolicySHA256 != "" || s.Completion != nil || s.BaselineEvidenceSHA256 != windowV12BaselineSHA || s.AllowPaid || s.ReadyForPaidRun || s.BudgetApprovalSHA256 != "" || !reflect.DeepEqual(s.CompletionV12, &c) || !reflect.DeepEqual(s.BudgetDeclaration, &d) || !reflect.DeepEqual(s.RetryDeclaration, &r) || s.BudgetDeclarationSHA256 != windowV8DeclarationSHA(d) || s.RetryPolicySHA256 != windowV8DeclarationSHA(r) {
 		return fmt.Errorf("v12 fixed completion candidate declarations required; no human authority")
 	}
 	// Observation is absent in pure preparation. If separately bound, it must

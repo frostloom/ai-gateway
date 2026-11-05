@@ -37,27 +37,28 @@ type windowAcquisitionAuthorization struct {
 	privateReportRoot, evidenceKind                        string
 }
 type windowAcquisitionRow struct {
-	FailureEvidence               *windowFailureEvidence    `json:"failure_evidence,omitempty"`
-	QualityEnd                    *windowQualityEndEvidence `json:"quality_end,omitempty"`
-	ExcludeCompleteTaskComparison bool                      `json:"exclude_complete_task_comparison,omitempty"`
-	Ordinal                       int                       `json:"ordinal"`
-	Pass                          int                       `json:"pass"`
-	DefinedTurns                  int                       `json:"defined_turns"`
-	ObservedTurns                 int                       `json:"observed_turns"`
-	CaseKey                       string                    `json:"case_key"`
-	Arm                           string                    `json:"arm"`
-	TraceID                       string                    `json:"trace_id"`
-	RecordingSHA256               string                    `json:"recording_sha256"`
-	RecordingFile                 string                    `json:"recording_file"`
-	Status                        string                    `json:"status"`
-	Disposition                   string                    `json:"disposition"`
-	Attempted                     bool                      `json:"attempted"`
-	Finished                      bool                      `json:"finished"`
-	Cleanup                       bool                      `json:"cleanup"`
-	Observer                      bool                      `json:"observer"`
-	StructuralPass                bool                      `json:"structural_pass"`
-	Success                       bool                      `json:"success"`
-	DurationMS                    float64                   `json:"duration_ms"`
+	FailureEvidence               *windowFailureEvidence        `json:"failure_evidence,omitempty"`
+	PreviewFailure                *windowPreviewFailureEvidence `json:"preview_failure,omitempty"`
+	QualityEnd                    *windowQualityEndEvidence     `json:"quality_end,omitempty"`
+	ExcludeCompleteTaskComparison bool                          `json:"exclude_complete_task_comparison,omitempty"`
+	Ordinal                       int                           `json:"ordinal"`
+	Pass                          int                           `json:"pass"`
+	DefinedTurns                  int                           `json:"defined_turns"`
+	ObservedTurns                 int                           `json:"observed_turns"`
+	CaseKey                       string                        `json:"case_key"`
+	Arm                           string                        `json:"arm"`
+	TraceID                       string                        `json:"trace_id"`
+	RecordingSHA256               string                        `json:"recording_sha256"`
+	RecordingFile                 string                        `json:"recording_file"`
+	Status                        string                        `json:"status"`
+	Disposition                   string                        `json:"disposition"`
+	Attempted                     bool                          `json:"attempted"`
+	Finished                      bool                          `json:"finished"`
+	Cleanup                       bool                          `json:"cleanup"`
+	Observer                      bool                          `json:"observer"`
+	StructuralPass                bool                          `json:"structural_pass"`
+	Success                       bool                          `json:"success"`
+	DurationMS                    float64                       `json:"duration_ms"`
 }
 type windowAcquisitionReceipt struct {
 	Observation                *windowObservationReceiptV11    `json:"observation,omitempty"`
@@ -139,7 +140,7 @@ func runWindowAcquisition(ctx context.Context, auth *windowAcquisitionAuthorizat
 	runErr = err
 	run.started = started
 	defer func() {
-		if run.scope.Schema == "full-window-scope.v11" || run.scope.Schema == "full-window-scope.v12" {
+		if run.scope.Schema == "full-window-scope.v11" || run.scope.Schema == "full-window-scope.v12" || run.scope.Schema == "full-window-scope.v13" {
 			receipt, re := windowV11Receipt(run.auth.observer, false)
 			run.receipt.Observation = receipt
 			if re != nil && runErr == nil {
@@ -157,7 +158,7 @@ func runWindowAcquisition(ctx context.Context, auth *windowAcquisitionAuthorizat
 				_ = run.ledger.Close()
 			}
 		}
-		if run.scope.Bindings.PolicySHA256 == windowOwnedQualityPolicySHA() {
+		if run.scope.Bindings.PolicySHA256 == windowOwnedQualityPolicySHA() || run.scope.Bindings.PolicySHA256 == windowOwnedPreviewFailurePolicySHA() {
 			run.receipt.GlobalUnrunTurns = run.receipt.PlannedCurrentTurns - run.receipt.ObservedTurns - run.receipt.QualityEndUnrunTurns
 		}
 		run.receipt.DurationMS = float64(time.Since(run.started).Microseconds()) / 1000
@@ -241,7 +242,7 @@ func openWindowAcquisition(ctx context.Context, auth *windowAcquisitionAuthoriza
 	scope, e := cloneWindowOwned(c.prepared.scope)
 	root, scopeSHA, executionSHA, index, limits := c.root, c.prepared.scopeSHA, c.prepared.executionSHA, c.index, c.prepared.limits
 	c.mu.Unlock()
-	if e != nil || (scope.Bindings.PolicySHA256 != collectionPolicySHA() && scope.Bindings.PolicySHA256 != windowOwnedQualityPolicySHA()) || identity.Release != scope.Bindings.ExecutorRevision || strings.HasPrefix(auth.privateReportRoot, root+string(os.PathSeparator)) || strings.HasPrefix(root, auth.privateReportRoot+string(os.PathSeparator)) || root == auth.privateReportRoot {
+	if e != nil || !windowOwnedRecordingPolicyAllowed(scope) || identity.Release != scope.Bindings.ExecutorRevision || strings.HasPrefix(auth.privateReportRoot, root+string(os.PathSeparator)) || strings.HasPrefix(root, auth.privateReportRoot+string(os.PathSeparator)) || root == auth.privateReportRoot {
 		return reject()
 	}
 	actual, e := executionSHAWindowCampaign(scopeSHA, root, limits)
@@ -263,10 +264,13 @@ func openWindowAcquisition(ctx context.Context, auth *windowAcquisitionAuthoriza
 	if windowScopeUsesNativeV8(scope.Schema) {
 		run.receipt.Schema = "full-window-acquisition-receipt.v8"
 	}
-	if scope.Schema == "full-window-scope.v11" || scope.Schema == "full-window-scope.v12" {
+	if scope.Schema == "full-window-scope.v11" || scope.Schema == "full-window-scope.v12" || scope.Schema == "full-window-scope.v13" {
 		run.receipt.Schema = "full-window-acquisition-receipt.v11"
 		if scope.Schema == "full-window-scope.v12" {
 			run.receipt.Schema = "full-window-acquisition-receipt.v12"
+		}
+		if scope.Schema == "full-window-scope.v13" {
+			run.receipt.Schema = "full-window-acquisition-receipt.v13"
 		}
 	}
 	if scope.Schema == "full-window-scope.v10" {
@@ -381,7 +385,12 @@ func (r *windowAcquisitionRun) runWindowAcquisitionArms(ctx context.Context) err
 			armCtx, task := r.auth.observer.StartEvaluation(ctx, observability.Evaluation{RunID: r.receipt.ScopeSHA256, CaseKey: slot.CaseKey, Arm: arm, EvidenceKind: r.auth.evidenceKind, PairID: pairID, BlockID: slot.WindowID, ArmOrder: slot.ArmOrder[:]})
 			trace.SpanFromContext(armCtx).SetAttributes(attribute.String("langfuse.trace.metadata.scope_sha256", r.receipt.ScopeSHA256), attribute.String("langfuse.trace.metadata.execution_sha256", r.receipt.ExecutionSHA256), attribute.String("langfuse.trace.metadata.window_id", slot.WindowID), attribute.Int("langfuse.trace.metadata.ordinal", slot.Ordinal), attribute.Int("langfuse.trace.metadata.pass", slot.Pass))
 			row.TraceID = task.TraceID()
-			record := recordCollectionConversation(armCtx, cases[slot.CaseKey], driver)
+			var record collectionRecording
+			if driver.windowPreviewFailureMode() {
+				record = recordCollectionPreviewFailureConversation(armCtx, cases[slot.CaseKey], driver).collectionRecording
+			} else {
+				record = recordCollectionConversation(armCtx, cases[slot.CaseKey], driver)
+			}
 			task.End(observability.EvaluationResult{Status: record.Result.Status, StructuralPass: record.Result.StructuralPass, NecessaryClarifications: record.Result.NecessaryClarifications, HTTPFailures: record.Result.HTTPFailures})
 			row.DurationMS = float64(time.Since(started).Microseconds()) / 1000
 			row.Status = record.Result.Status
@@ -421,6 +430,11 @@ func (r *windowAcquisitionRun) runWindowAcquisitionArms(ctx context.Context) err
 			if finishErr != nil || proof == nil || qualityErr != nil || (record.Disposition != "continue_recorded" && quality == nil) || validateWindowOwnedArmProof(r.permit, proof) != nil || proof.recordingSHA != row.RecordingSHA256 || len(row.TraceID) != 32 {
 				return r.failWindowAcquisition("arm_proof", slot.Ordinal, arm)
 			}
+			previewFailure, previewErr := windowPreviewFailureProofEvidence(proof)
+			if previewErr != nil {
+				return r.failWindowAcquisition("preview_failure_proof", slot.Ordinal, arm)
+			}
+			row.PreviewFailure = previewFailure
 			row.QualityEnd = quality
 			if quality != nil {
 				if validateWindowQualityEndEvidence(r.scope.Bindings.PolicySHA256, slot, arm, row.ObservedTurns, quality) != nil {
@@ -439,7 +453,7 @@ func (r *windowAcquisitionRun) runWindowAcquisitionArms(ctx context.Context) err
 			row.Cleanup = true
 			row.Observer = true
 			r.receipt.FinishedArms++
-			r.evidence = append(r.evidence, windowCampaignArmEvidence{Ordinal: slot.Ordinal, Pass: slot.Pass, ObservedTurns: row.ObservedTurns, Key: slot.CaseKey, Arm: arm, Cleanup: true, Observer: true, RecordingSHA256: proof.recordingSHA, QualityEnd: quality})
+			r.evidence = append(r.evidence, windowCampaignArmEvidence{Ordinal: slot.Ordinal, Pass: slot.Pass, ObservedTurns: row.ObservedTurns, Key: slot.CaseKey, Arm: arm, Cleanup: true, Observer: true, RecordingSHA256: proof.recordingSHA, QualityEnd: quality, PreviewFailure: previewFailure})
 		}
 	}
 	return nil
@@ -457,6 +471,10 @@ func (r *windowAcquisitionRun) completeWindowAcquisition(ctx context.Context) er
 			return r.failWindowAcquisition("window_proofs", proof.slot.Ordinal, proof.arm)
 		}
 		quality, qualityErr := windowQualityProofEvidence(proof)
+		preview, previewErr := windowPreviewFailureProofEvidence(proof)
+		if previewErr != nil || !qualityJSONEqual(preview, row.PreviewFailure) || !qualityJSONEqual(row.PreviewFailure, evidence.PreviewFailure) {
+			return r.failWindowAcquisition("preview_failure_proofs", row.Ordinal, row.Arm)
+		}
 		if qualityErr != nil || !qualityJSONEqual(quality, row.QualityEnd) || !qualityJSONEqual(row.QualityEnd, evidence.QualityEnd) {
 			return r.failWindowAcquisition("quality_proofs", row.Ordinal, row.Arm)
 		}

@@ -59,7 +59,7 @@ func validateWindowV11Declarations(s fullWindowScope) error {
 		return e
 	}
 	d, r := expectedWindowV11BudgetDeclaration(), expectedWindowV8RetryDeclaration()
-	if s.CompletionV12 != nil || s.Schema != "full-window-scope.v11" || s.Completion != nil || s.AllowPaid || s.ReadyForPaidRun || s.BudgetApprovalSHA256 != "" || s.BaselineEvidenceSHA256 != windowV11BaselineSHA || !reflect.DeepEqual(s.BudgetDeclaration, &d) || !reflect.DeepEqual(s.RetryDeclaration, &r) || s.BudgetDeclarationSHA256 != windowV8DeclarationSHA(d) || s.RetryPolicySHA256 != windowV8DeclarationSHA(r) {
+	if s.CompletionV13 != nil || s.CollectionPolicySHA256 != "" || s.CompletionV12 != nil || s.Schema != "full-window-scope.v11" || s.Completion != nil || s.AllowPaid || s.ReadyForPaidRun || s.BudgetApprovalSHA256 != "" || s.BaselineEvidenceSHA256 != windowV11BaselineSHA || !reflect.DeepEqual(s.BudgetDeclaration, &d) || !reflect.DeepEqual(s.RetryDeclaration, &r) || s.BudgetDeclarationSHA256 != windowV8DeclarationSHA(d) || s.RetryPolicySHA256 != windowV8DeclarationSHA(r) {
 		return fmt.Errorf("v11 full primary candidate declarations required")
 	}
 	return nil

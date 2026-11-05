@@ -33,13 +33,14 @@ type qualityEffectCapture struct {
 	Sessions []store.AgentSession           `json:"sessions"`
 }
 type qualityPreviewInput struct {
-	Plans         []store.Plan           `json:"plans"`
-	Record        collectionRecording    `json:"record"`
-	Turn          int                    `json:"turn"`
-	BeforeSession json.RawMessage        `json:"before_session"`
-	Pending       *qualityPendingCapture `json:"pending"`
-	Before        qualityEffectCapture   `json:"before"`
-	After         qualityEffectCapture   `json:"after"`
+	PreviewFailures []collectionPreviewFailureEvidence `json:"preview_failures,omitempty"`
+	Plans           []store.Plan                       `json:"plans"`
+	Record          collectionRecording                `json:"record"`
+	Turn            int                                `json:"turn"`
+	BeforeSession   json.RawMessage                    `json:"before_session"`
+	Pending         *qualityPendingCapture             `json:"pending"`
+	Before          qualityEffectCapture               `json:"before"`
+	After           qualityEffectCapture               `json:"after"`
 }
 type qualityUnrunTurn struct {
 	Turn       int              `json:"turn"`
@@ -79,10 +80,22 @@ func qualityPreviewCandidate(in qualityPreviewInput) (qualityPreviewSidecar, err
 	fail := func(reason string) (qualityPreviewSidecar, error) {
 		return qualityPreviewSidecar{}, fmt.Errorf("preview candidate rejected: %s", reason)
 	}
-	r := in.Record.Result
+	if in.PreviewFailures != nil {
+		return fail("v1 assessment")
+	}
 	if err := verifyCollectionRecording(in.Record); err != nil {
 		return fail("v1 assessment")
 	}
+	return qualityPreviewCandidateVerified(in)
+}
+
+// Only callers that have verified the exact versioned recording may enter.
+// This core retains all original stopped-turn, effect and pending predicates.
+func qualityPreviewCandidateVerified(in qualityPreviewInput) (qualityPreviewSidecar, error) {
+	fail := func(reason string) (qualityPreviewSidecar, error) {
+		return qualityPreviewSidecar{}, fmt.Errorf("preview candidate rejected: %s", reason)
+	}
+	r := in.Record.Result
 	if in.Record.Disposition != "halt" || r.Status != "failed" || r.Success || r.StructuralPass || in.Turn < 1 || in.Turn != len(r.Observations) || in.Turn > len(r.Case.Scenario.Turns) {
 		return fail("not an original v1 stopped turn")
 	}

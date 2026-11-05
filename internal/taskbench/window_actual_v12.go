@@ -219,6 +219,9 @@ func validateWindowV12ExecutorEquivalence(m windowActualManifest) error {
 	return validateWindowV12ExecutorEquivalencePinnedData(m.Sources, eq, windowExecutorEquivalencePinsV12{p.OriginalSourcesSHA256, p.SourcesSHA256, p.ChangesSHA256})
 }
 func (r *FullWindowActualReady) revalidateStoppedActualEpoch() error {
+	if r != nil && r.manifest.Schema == "full-window-actual-ready.v13" {
+		return r.revalidateStoppedV13()
+	}
 	if r != nil && r.manifest.Schema == "full-window-actual-ready.v12" {
 		return r.revalidateStoppedV12()
 	}

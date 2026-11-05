@@ -60,44 +60,47 @@ type windowOwnedDriver struct {
 	failureStepInputSession string
 	failureSessionConflict  bool
 
-	mu                  sync.Mutex
-	permit              *windowAcquisitionPermit
-	ledger              *windowAccounting
-	slot                fullWindowSlot
-	arm                 string
-	environment         *PairedFixtureEnvironment
-	observer            *observability.Observer
-	phase               *windowOwnedPhase
-	setupDone           bool
-	nextTurn            int
-	base                *HandlerConversationDriver
-	oracle              *pairedStoreOracle
-	server              *httptest.Server
-	caseDefinition      ConversationCase
-	fixture             Fixture
-	initial, final      ConversationState
-	observations        []ConversationObservation
-	session             string
-	finalDone, finished bool
-	runtime             *agent.RuntimeMetadata
-	observerStart       observability.Stats
-	retained            *collectionRecording
-	qualityCandidate    *qualityPreviewSidecar
-	qualityRetainedSHA  string
-	qualityAcquisition  *windowAcquisitionRun
-	policySHA           string
-	qualityRoot         trace.Span
+	mu                     sync.Mutex
+	permit                 *windowAcquisitionPermit
+	ledger                 *windowAccounting
+	slot                   fullWindowSlot
+	arm                    string
+	environment            *PairedFixtureEnvironment
+	observer               *observability.Observer
+	phase                  *windowOwnedPhase
+	setupDone              bool
+	nextTurn               int
+	base                   *HandlerConversationDriver
+	oracle                 *pairedStoreOracle
+	server                 *httptest.Server
+	caseDefinition         ConversationCase
+	fixture                Fixture
+	initial, final         ConversationState
+	observations           []ConversationObservation
+	session                string
+	finalDone, finished    bool
+	runtime                *agent.RuntimeMetadata
+	observerStart          observability.Stats
+	retained               *collectionRecording
+	qualityCandidate       *qualityPreviewSidecar
+	qualityRetainedSHA     string
+	qualityAcquisition     *windowAcquisitionRun
+	policySHA              string
+	qualityRoot            trace.Span
+	previewFailures        []collectionPreviewFailureEvidence
+	previewFailureRetained *windowPreviewFailureEvidence
 }
 
 type windowOwnedArmProof struct {
-	quality      *windowQualityOwnedEnd
-	qualitySHA   string
-	permit       *windowAcquisitionPermit
-	driver       *windowOwnedDriver
-	slot         fullWindowSlot
-	arm          string
-	recording    collectionRecording
-	recordingSHA string
+	previewFailure *windowPreviewFailureEvidence
+	quality        *windowQualityOwnedEnd
+	qualitySHA     string
+	permit         *windowAcquisitionPermit
+	driver         *windowOwnedDriver
+	slot           fullWindowSlot
+	arm            string
+	recording      collectionRecording
+	recordingSHA   string
 }
 
 func newWindowOwnedDriver(permit *windowAcquisitionPermit, source ConversationSuite, slot fullWindowSlot, arm string, env *PairedFixtureEnvironment, observer *observability.Observer, modelKey, jevKey string, modelUpstream, jevUpstream http.RoundTripper) (*windowOwnedDriver, error) {
@@ -125,7 +128,7 @@ func newWindowOwnedDriver(permit *windowAcquisitionPermit, source ConversationSu
 	if !identity.Enabled || !identity.CaptureContent || identity.SampleRate != 1 || identity.Environment != "evaluation" || identity.Release == "" || identity.Release == "unknown" || identity.ExportTimeoutMS != windowObserverTimeoutForScope(scope.Schema) || identity.QueueSize < 1 || !comparisonDigest(identity.EndpointSHA256) || !comparisonDigest(identity.ProjectSHA256) || identity != permit.observerIdentity {
 		return fail()
 	}
-	if scope.Bindings.PolicySHA256 != collectionPolicySHA() && scope.Bindings.PolicySHA256 != windowOwnedQualityPolicySHA() {
+	if !windowOwnedRecordingPolicyAllowed(scope) {
 		return fail()
 	}
 	digest, _, e := validateFullWindowScope(scope, source, env.profiles, scope.Bindings)
@@ -148,7 +151,7 @@ func newWindowOwnedDriver(permit *windowAcquisitionPermit, source ConversationSu
 	if !found || len(actual.Scenario.Turns) != slot.UserTurns {
 		return fail()
 	}
-	d := &windowOwnedDriver{permit: permit, ledger: permit.ledger, slot: slot, arm: arm, environment: env, observer: observer, observerStart: observer.Stats(), policySHA: scope.Bindings.PolicySHA256}
+	d := &windowOwnedDriver{previewFailures: []collectionPreviewFailureEvidence{}, permit: permit, ledger: permit.ledger, slot: slot, arm: arm, environment: env, observer: observer, observerStart: observer.Stats(), policySHA: scope.Bindings.PolicySHA256}
 	permit.active = d
 	if permit.guardWindowOwnedLocked(d) != nil {
 		permit.active = nil
@@ -346,7 +349,16 @@ func (d *windowOwnedDriver) Step(ctx context.Context, f Fixture, session, messag
 	}
 	prefix.Scenario.Turns = prefix.Scenario.Turns[:d.nextTurn]
 	replay := &replayConversationDriver{episode: ConversationEpisode{Key: prefix.Key(), Fixture: d.fixture, Initial: d.initial, Final: stored.State, Steps: d.observations}}
-	assessment := recordCollectionConversation(ctx, prefix, replay)
+	assessment := collectionRecording{}
+	if d.windowPreviewFailureMode() {
+		if d.captureWindowPreviewFailure(ctx, before, previous, stored) != nil {
+			_ = d.stopWindowOwned()
+			return obs, nil
+		}
+		assessment = recordCollectionPreviewFailureConversation(ctx, prefix, d.previewFailureReplay(stored.State)).collectionRecording
+	} else {
+		assessment = recordCollectionConversation(ctx, prefix, replay)
+	}
 	if assessment.Disposition != "continue_recorded" {
 		// Revoke the next phase immediately, while returning this actual observed
 		// turn without inventing a Step error. The outer core must retain the same
@@ -414,10 +426,10 @@ func (p *windowAcquisitionPermit) guardWindowOwnedLocked(d *windowOwnedDriver) e
 	if p == nil || p.stopped || p.campaign == nil || p.ledger == nil || p.active != d || d == nil || d.ledger != p.ledger || d.environment != p.environment || d.observer != p.observer || p.environment == nil || p.environment.closed {
 		return fmt.Errorf("owned acquisition stopped")
 	}
-	if d.policySHA != "" && (d.policySHA != p.campaign.prepared.scope.Bindings.PolicySHA256 || (d.policySHA != collectionPolicySHA() && d.policySHA != windowOwnedQualityPolicySHA())) {
+	if d.policySHA != "" && (d.policySHA != p.campaign.prepared.scope.Bindings.PolicySHA256 || (!windowOwnedRecordingPolicyAllowed(p.campaign.prepared.scope))) {
 		return fmt.Errorf("owned acquisition policy changed")
 	}
-	if c := p.campaign; c != nil && c.prepared.scope.Bindings.PolicySHA256 == windowOwnedQualityPolicySHA() {
+	if c := p.campaign; c != nil && (c.prepared.scope.Bindings.PolicySHA256 == windowOwnedQualityPolicySHA() || c.prepared.scope.Bindings.PolicySHA256 == windowOwnedPreviewFailurePolicySHA()) {
 		if p.acquisition == nil || p.acquisition.validateWindowQualityFiles() != nil {
 			return fmt.Errorf("owned quality acquisition persistence changed")
 		}
@@ -525,7 +537,7 @@ func (d *windowOwnedDriver) finishWindowOwnedArm(ctx context.Context, record col
 		_ = d.cleanupWindowOwnedSession(ctx)
 		return nil, d.stopWindowOwned()
 	}
-	if ctx == nil || ctx.Err() != nil || !d.setupDone || !d.finalDone || verifyCollectionRecording(record) != nil {
+	if ctx == nil || ctx.Err() != nil || !d.setupDone || !d.finalDone || d.verifyOwnedCollectionRecord(record) != nil {
 		return fail()
 	}
 	if !sameMaterialWindowOwned(record.Result, d) {
@@ -550,6 +562,9 @@ func (d *windowOwnedDriver) finishWindowOwnedArm(ctx context.Context, record col
 		return fail()
 	}
 	seal := conversationHash(raw)
+	if d.retainWindowPreviewFailure(retained) != nil {
+		return fail()
+	}
 	if d.windowFailureDiagnostics() != nil {
 		d.failure.mu.Lock()
 		d.failure.evidence.CleanupAttempted = true
@@ -584,7 +599,7 @@ func (d *windowOwnedDriver) finishWindowOwnedArm(ctx context.Context, record col
 	if p.guardWindowOwnedLocked(d) != nil {
 		return nil, fmt.Errorf("owned permit stopped before proof")
 	}
-	proof := &windowOwnedArmProof{permit: p, driver: d, slot: d.slot, arm: d.arm, recording: retained, recordingSHA: seal}
+	proof := &windowOwnedArmProof{permit: p, driver: d, slot: d.slot, arm: d.arm, recording: retained, recordingSHA: seal, previewFailure: d.previewFailureRetained}
 	p.proofs = append(p.proofs, proof)
 	p.proofSHA = append(p.proofSHA, seal)
 	p.nextArm++
@@ -687,6 +702,9 @@ func validateWindowOwnedArmProof(permit *windowAcquisitionPermit, proof *windowO
 			raw, e := json.Marshal(proof.recording)
 			retained, e2 := json.Marshal(proof.driver.retained)
 			if e != nil || e2 != nil || conversationHash(raw) != permit.proofSHA[i] || conversationHash(retained) != permit.proofSHA[i] || proof.recordingSHA != permit.proofSHA[i] || proof.slot != slot || proof.slot != proof.driver.slot || proof.arm != slot.ArmOrder[i%2] || proof.arm != proof.driver.arm || proof.recording.Result.Case.Key() != slot.CaseKey {
+				return fail()
+			}
+			if _, err := windowPreviewFailureProofEvidence(proof); err != nil {
 				return fail()
 			}
 			if _, err := windowQualityProofEvidence(proof); err != nil {

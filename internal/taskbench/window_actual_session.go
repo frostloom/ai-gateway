@@ -317,12 +317,12 @@ func OpenFullWindowActual(ctx context.Context, ready *FullWindowActualReady, pri
 	if ctx == nil || ctx.Err() != nil {
 		return nil, fmt.Errorf("actual session context rejected")
 	}
-	// All older owners are permanently consumed. V12 is the only new actual
+	// All older owners are permanently consumed. V13 is the only new actual
 	// epoch; old manifests remain readable through their technical checkers.
-	if ready == nil || ready.manifest.Schema != "full-window-actual-ready.v12" || ready.manifest.Scope.Schema != "full-window-scope.v12" || ready.v8Authority == nil || ready.v8Authority.v12 == nil || ready.v8Authority.revalidate() != nil {
-		return nil, fmt.Errorf("actual v12 delegated authority required before settings")
+	if ready == nil || ready.manifest.Schema != "full-window-actual-ready.v13" || ready.manifest.Scope.Schema != "full-window-scope.v13" || ready.v8Authority == nil || ready.v8Authority.v13 == nil || ready.v8Authority.revalidate() != nil {
+		return nil, fmt.Errorf("actual v13 delegated authority required before settings")
 	}
-	if e := ready.revalidateStoppedV12(); e != nil {
+	if e := ready.revalidateStoppedV13(); e != nil {
 		return nil, e
 	}
 	if e := ready.revalidate(); e != nil {
@@ -509,7 +509,7 @@ func (s *FullWindowActualSession) stop() error {
 		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 		shutdownErr := s.auth.observer.Shutdown(ctx)
 		failures = append(failures, shutdownErr)
-		if s.ready != nil && (s.ready.manifest.Scope.Schema == "full-window-scope.v11" || s.ready.manifest.Scope.Schema == "full-window-scope.v12") {
+		if s.ready != nil && (s.ready.manifest.Scope.Schema == "full-window-scope.v11" || s.ready.manifest.Scope.Schema == "full-window-scope.v12" || s.ready.manifest.Scope.Schema == "full-window-scope.v13") {
 			receipt, re := windowV11Receipt(s.auth.observer, s.status.AcquisitionDone && shutdownErr == nil && errors.Join(failures...) == nil)
 			failures = append(failures, re)
 			s.mu.Lock()
@@ -577,6 +577,15 @@ func (s *FullWindowActualSession) rememberReport(name string, report windowAcqui
 	for _, row := range report.Rows {
 		if row.RecordingFile != "" {
 			allowed[row.RecordingFile] = row.RecordingSHA256
+		}
+		if row.PreviewFailure != nil {
+			if s.ready.manifest.Schema != "full-window-actual-ready.v13" || report.Schema != "full-window-acquisition-receipt.v13" || row.QualityEnd != nil || validateWindowPreviewFailureEvidence(row.PreviewFailure, row.RecordingSHA256) != nil {
+				return fmt.Errorf("actual failed-preview archive binding differs")
+			}
+			if _, exists := allowed[row.PreviewFailure.SidecarFile]; exists {
+				return fmt.Errorf("actual failed-preview archive path collides")
+			}
+			allowed[row.PreviewFailure.SidecarFile] = row.PreviewFailure.SidecarSHA256
 		}
 		if row.QualityEnd != nil {
 			allowed[row.QualityEnd.CandidateFile] = row.QualityEnd.CandidateSHA256

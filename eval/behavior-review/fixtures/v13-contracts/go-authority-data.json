@@ -1,0 +1,58 @@
+{
+  "data_only": true,
+  "authorization": {
+    "schema": "full-window-delegated-execution-authorization.v13",
+    "human_authorized": true,
+    "retry_policy_approved": true,
+    "human_reply": {
+      "path": "/private/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/TestWindowV9DelegatedAuthorityAndSyntheticCanonicalVector126148266/001/window_v9_budget_approval.json",
+      "sha256": "22a9ec8c97ded148879f4a30abaa2a0e8370371ecd7fecb56a85988f89943a57"
+    },
+    "manifest_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "source_sha256": "2ad4bf3b43ad0cbf5942e45e97ce3d99b03de3a88957ac634f5267f2ee19fc6e",
+    "binary_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "scope_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "execution_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "budget_declaration_sha256": "b20b0894e85bad9b3db31a5834bd8eb350895ab2b3f9ef2eae67850b095d8a3a",
+    "retry_policy_sha256": "26fef0e90b466ed651b2e8bc11790d336d12d75554f14e7fd06a8d18009cf088",
+    "parent": {
+      "model_micro_cny": 195000000,
+      "jev_micro_usd": 3000000
+    },
+    "owner_id": "synthetic-test-owner",
+    "single_owner": true,
+    "no_relaunch": true,
+    "autonomous_authorization": {
+      "path": "/private/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/TestWindowV9DelegatedAuthorityAndSyntheticCanonicalVector126148266/001/window_v9_autonomous_authorization.json",
+      "sha256": "8f428b68f0f9f5c2821c03da8c41ee220dbc4e18741ace3982a4cfcb93b52a95"
+    },
+    "global_budget": {
+      "model_micro_cny": 200000000,
+      "jev_micro_usd": 4000000
+    },
+    "human_reviewed_exact_scope": false,
+    "private_settings_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "spool_root": "/controlled/spool",
+    "observer": {
+      "observation_receipt_boundary": "durable_local",
+      "spool_root_sha256": "3cab478ad0ced385ae8e8c206dad33e184138dba81b46496f2ced9a5ebce1b91",
+      "spool_run_id": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "spool_max_bytes": 4294967296,
+      "enabled": true,
+      "capture_content": true,
+      "sample_rate": 1,
+      "environment": "evaluation",
+      "release": "cccccccccccccccccccccccccccccccccccccccc",
+      "export_timeout_ms": 10000,
+      "queue_size": 4096,
+      "endpoint_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "project_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+    },
+    "collection_policy_sha256": "36824968a95f4b9a39c86989550c33a2f8e011e7fd57aa11afbaaaaff0622c5f",
+    "completion_sha256": "8dffa2b26461726cb5e53fbcba47ebb9f053a6ddef086b14c8e7def73d41bec7",
+    "executor_equivalence_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+    "signature": "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "signing_bytes": "{\"schema\":\"full-window-delegated-execution-authorization.v13\",\"human_authorized\":true,\"retry_policy_approved\":true,\"human_reply\":{\"path\":\"/private/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/TestWindowV9DelegatedAuthorityAndSyntheticCanonicalVector126148266/001/window_v9_budget_approval.json\",\"sha256\":\"22a9ec8c97ded148879f4a30abaa2a0e8370371ecd7fecb56a85988f89943a57\"},\"manifest_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"source_sha256\":\"2ad4bf3b43ad0cbf5942e45e97ce3d99b03de3a88957ac634f5267f2ee19fc6e\",\"binary_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"scope_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"execution_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"budget_declaration_sha256\":\"b20b0894e85bad9b3db31a5834bd8eb350895ab2b3f9ef2eae67850b095d8a3a\",\"retry_policy_sha256\":\"26fef0e90b466ed651b2e8bc11790d336d12d75554f14e7fd06a8d18009cf088\",\"parent\":{\"model_micro_cny\":195000000,\"jev_micro_usd\":3000000},\"owner_id\":\"synthetic-test-owner\",\"single_owner\":true,\"no_relaunch\":true,\"autonomous_authorization\":{\"path\":\"/private/var/folders/sw/_x387kld25bgsp22s4n5rfjm0000gn/T/TestWindowV9DelegatedAuthorityAndSyntheticCanonicalVector126148266/001/window_v9_autonomous_authorization.json\",\"sha256\":\"8f428b68f0f9f5c2821c03da8c41ee220dbc4e18741ace3982a4cfcb93b52a95\"},\"global_budget\":{\"model_micro_cny\":200000000,\"jev_micro_usd\":4000000},\"human_reviewed_exact_scope\":false,\"private_settings_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"spool_root\":\"/controlled/spool\",\"observer\":{\"observation_receipt_boundary\":\"durable_local\",\"spool_root_sha256\":\"3cab478ad0ced385ae8e8c206dad33e184138dba81b46496f2ced9a5ebce1b91\",\"spool_run_id\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"spool_max_bytes\":4294967296,\"enabled\":true,\"capture_content\":true,\"sample_rate\":1,\"environment\":\"evaluation\",\"release\":\"cccccccccccccccccccccccccccccccccccccccc\",\"export_timeout_ms\":10000,\"queue_size\":4096,\"endpoint_sha256\":\"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd\",\"project_sha256\":\"eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee\"},\"collection_policy_sha256\":\"36824968a95f4b9a39c86989550c33a2f8e011e7fd57aa11afbaaaaff0622c5f\",\"completion_sha256\":\"8dffa2b26461726cb5e53fbcba47ebb9f053a6ddef086b14c8e7def73d41bec7\",\"executor_equivalence_sha256\":\"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff\"}",
+  "signing_sha256": "247bff46b1f5a76a3610455bf48e87152f364c620da9895c7e0ca68880ab5e21"
+}

@@ -55,7 +55,16 @@ func validateWindowCampaignNativeAuthority(p windowCampaignPrepared) error {
 	if a == nil || validateWindowNativeDeclarations(p.scope) != nil {
 		return fmt.Errorf("native exact epoch authority absent")
 	}
-	if p.scope.Schema == "full-window-scope.v12" {
+	if p.scope.Schema == "full-window-scope.v13" {
+		if a.v13 == nil || a.v12 != nil || a.v11 != nil || a.v10 != nil || a.v9 != nil || a.manifest.Schema != "full-window-actual-ready.v13" || a.binding.Schema != "full-window-delegated-execution-authorization.v13" || !reflect.DeepEqual(a.manifest.Scope, p.scope) || windowV8DeclarationSHA(p.scope) != p.scopeSHA {
+			return fmt.Errorf("v13 exact authority mismatch")
+		}
+		if e := p.observationOwner.healthy(context.Background(), a.manifest); e != nil {
+			return e
+		}
+	} else if a.v13 != nil {
+		return fmt.Errorf("cross epoch v13 authority")
+	} else if p.scope.Schema == "full-window-scope.v12" {
 		if a.v12 == nil || a.v11 != nil || a.v10 != nil || a.v9 != nil || a.manifest.Schema != "full-window-actual-ready.v12" || a.binding.Schema != "full-window-delegated-execution-authorization.v12" || !reflect.DeepEqual(a.manifest.Scope, p.scope) || windowV8DeclarationSHA(p.scope) != p.scopeSHA {
 			return fmt.Errorf("v12 exact authority mismatch")
 		}
