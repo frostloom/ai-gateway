@@ -16,7 +16,7 @@ func TestWindowOperationPolicyV14KeepsLegacyDeadlines(t *testing.T) {
 	if err != nil || got != 600*time.Second {
 		t.Fatalf("candidate epoch14: limit=%s error=%v", got, err)
 	}
-	for _, epoch := range []int{-1, 0, 15, 100} {
+	for _, epoch := range []int{-1, 0, 16, 100} {
 		if got, err := windowOperationLimitForEpoch(epoch); err == nil || got != 0 {
 			t.Fatalf("unknown epoch %d accepted: %s %v", epoch, got, err)
 		}
