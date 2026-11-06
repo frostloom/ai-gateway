@@ -26,28 +26,34 @@ type windowObservationReceiptV11 struct {
 
 func validateWindowV11SpoolBinding(m windowActualManifest) error {
 	id := m.Observer
-	if m.Schema == "full-window-actual-ready.v14" && (id.SpoolRunID == "dd3af173632b3d28051540c33e2437affb0c3c65ffab342bde35ca143c21c29b" || m.PrivateSettingsSHA256 == "33e8b67d9d7b1aa1550972f1a2df33b16e105cd426c7b86151edea61ee6385ed") {
+	if m.Schema == "full-window-actual-ready.v15" && (id.SpoolRunID == "878871f56b992d123b3e1d8e0eee4613bcb1b1f7a1c55e85a50829b40f73241f" || m.PrivateSettingsSHA256 == "4e78740578d56091f092e4fb85ce7824514760f66450496c998549380da64efe") {
+		return fmt.Errorf("v15 consumed V14 observation identity")
+	}
+	if (m.Schema == "full-window-actual-ready.v14" || m.Schema == "full-window-actual-ready.v15") && (id.SpoolRunID == "dd3af173632b3d28051540c33e2437affb0c3c65ffab342bde35ca143c21c29b" || m.PrivateSettingsSHA256 == "33e8b67d9d7b1aa1550972f1a2df33b16e105cd426c7b86151edea61ee6385ed") {
 		return fmt.Errorf("v14 consumed V13 observation identity")
 	}
 
-	if (m.Schema == "full-window-actual-ready.v13" || m.Schema == "full-window-actual-ready.v14") && (id.SpoolRunID == "f419a799e9915b8f0249a8f09e8834aeb209d3336cd811ddfb2791445550b308" || m.PrivateSettingsSHA256 == "25cdb8728d5a32b3402685f01d79687eac4a29a7859749aab3c22eea329a7811") {
+	if (m.Schema == "full-window-actual-ready.v13" || (m.Schema == "full-window-actual-ready.v14" || m.Schema == "full-window-actual-ready.v15")) && (id.SpoolRunID == "f419a799e9915b8f0249a8f09e8834aeb209d3336cd811ddfb2791445550b308" || m.PrivateSettingsSHA256 == "25cdb8728d5a32b3402685f01d79687eac4a29a7859749aab3c22eea329a7811") {
 		return fmt.Errorf("v13 consumed observation identity")
 	}
-	if (m.Schema == "full-window-actual-ready.v12" || (m.Schema == "full-window-actual-ready.v13" || m.Schema == "full-window-actual-ready.v14")) && (id.SpoolRunID == "c7d34cb23ca0507a18e9892b5f90ae3f0580a6772289b7276c4bf46db83a9ac4" || m.PrivateSettingsSHA256 == "8c4f09c6ba7a04fa1812fe1b45e623ff9be73a1905380dab6032ffa4684e5394" || windowV8DeclarationSHA(id) == "6d6684c766677fba1cd6bb9f1ac352bc282c1aac48f558383e1c1f193e7ced87") {
+	if (m.Schema == "full-window-actual-ready.v12" || (m.Schema == "full-window-actual-ready.v13" || (m.Schema == "full-window-actual-ready.v14" || m.Schema == "full-window-actual-ready.v15"))) && (id.SpoolRunID == "c7d34cb23ca0507a18e9892b5f90ae3f0580a6772289b7276c4bf46db83a9ac4" || m.PrivateSettingsSHA256 == "8c4f09c6ba7a04fa1812fe1b45e623ff9be73a1905380dab6032ffa4684e5394" || windowV8DeclarationSHA(id) == "6d6684c766677fba1cd6bb9f1ac352bc282c1aac48f558383e1c1f193e7ced87") {
 		return fmt.Errorf("v12 consumed observation identity")
 	}
 
+	if m.Schema == "full-window-actual-ready.v15" && m.Scope.Schema != "full-window-scope.v15" {
+		return fmt.Errorf("durable epoch mismatch")
+	}
 	if m.Schema == "full-window-actual-ready.v14" && m.Scope.Schema != "full-window-scope.v14" || m.Schema == "full-window-actual-ready.v13" && m.Scope.Schema != "full-window-scope.v13" || m.Schema == "full-window-actual-ready.v12" && m.Scope.Schema != "full-window-scope.v12" || m.Schema == "full-window-actual-ready.v11" && m.Scope.Schema != "full-window-scope.v11" {
 		return fmt.Errorf("durable epoch mismatch")
 	}
-	if m.Schema != "full-window-actual-ready.v11" && m.Schema != "full-window-actual-ready.v12" && m.Schema != "full-window-actual-ready.v13" && m.Schema != "full-window-actual-ready.v14" {
+	if m.Schema != "full-window-actual-ready.v11" && m.Schema != "full-window-actual-ready.v12" && m.Schema != "full-window-actual-ready.v13" && m.Schema != "full-window-actual-ready.v14" && m.Schema != "full-window-actual-ready.v15" {
 		if m.Scope.Observation != nil || m.SpoolRoot != "" || id.ObservationReceiptBoundary != "" || id.SpoolRootSHA256 != "" || id.SpoolRunID != "" || id.SpoolMaxBytes != 0 {
 			return fmt.Errorf("old epoch cannot carry durable identity")
 		}
 		return nil
 	}
 	d := m.Scope.Observation
-	if (m.Scope.Schema != "full-window-scope.v11" && m.Scope.Schema != "full-window-scope.v12" && m.Scope.Schema != "full-window-scope.v13" && m.Scope.Schema != "full-window-scope.v14") || d.validate() != nil || d.PrivateSettingsSHA256 != m.PrivateSettingsSHA256 || d.SpoolRoot != m.SpoolRoot || d.SpoolRunID != id.SpoolRunID || d.SpoolMaxBytes != id.SpoolMaxBytes || d.Boundary != id.ObservationReceiptBoundary || d.ObserverIdentitySHA256 != windowV8DeclarationSHA(id) {
+	if (m.Scope.Schema != "full-window-scope.v11" && m.Scope.Schema != "full-window-scope.v12" && m.Scope.Schema != "full-window-scope.v13" && m.Scope.Schema != "full-window-scope.v14" && m.Scope.Schema != "full-window-scope.v15") || d.validate() != nil || d.PrivateSettingsSHA256 != m.PrivateSettingsSHA256 || d.SpoolRoot != m.SpoolRoot || d.SpoolRunID != id.SpoolRunID || d.SpoolMaxBytes != id.SpoolMaxBytes || d.Boundary != id.ObservationReceiptBoundary || d.ObserverIdentitySHA256 != windowV8DeclarationSHA(id) {
 		return fmt.Errorf("v11 scope/manifest observation mismatch")
 	}
 	if canonicalRootWindowCampaign(m.SpoolRoot) != nil || id.ObservationReceiptBoundary != "durable_local" || id.SpoolRootSHA256 != conversationHash([]byte(m.SpoolRoot)) || !comparisonDigest(id.SpoolRunID) || id.SpoolMaxBytes != 4<<30 || id.SampleRate != 1 {
@@ -72,7 +78,7 @@ func checkWindowV11FreshSpool(m windowActualManifest) error {
 	if e := validateWindowV11SpoolBinding(m); e != nil {
 		return e
 	}
-	if m.Schema != "full-window-actual-ready.v11" && m.Schema != "full-window-actual-ready.v12" && m.Schema != "full-window-actual-ready.v13" && m.Schema != "full-window-actual-ready.v14" {
+	if m.Schema != "full-window-actual-ready.v11" && m.Schema != "full-window-actual-ready.v12" && m.Schema != "full-window-actual-ready.v13" && m.Schema != "full-window-actual-ready.v14" && m.Schema != "full-window-actual-ready.v15" {
 		return nil
 	}
 	if _, e := os.Lstat(m.SpoolRoot); !os.IsNotExist(e) {
@@ -94,7 +100,7 @@ func selectWindowV11ObservationOwner(ctx context.Context, m windowActualManifest
 	if e := validateWindowV11SpoolBinding(m); e != nil {
 		return nil, e
 	}
-	if m.Schema != "full-window-actual-ready.v11" && m.Schema != "full-window-actual-ready.v12" && m.Schema != "full-window-actual-ready.v13" && m.Schema != "full-window-actual-ready.v14" || o == nil || o.EvaluationIdentity() != m.Observer {
+	if m.Schema != "full-window-actual-ready.v11" && m.Schema != "full-window-actual-ready.v12" && m.Schema != "full-window-actual-ready.v13" && m.Schema != "full-window-actual-ready.v14" && m.Schema != "full-window-actual-ready.v15" || o == nil || o.EvaluationIdentity() != m.Observer {
 		return nil, fmt.Errorf("v11 selected observer mismatch")
 	}
 	if e := checkWindowObservationReceipt(ctx, m.Scope.Schema, o, m.Observer); e != nil {
@@ -120,7 +126,7 @@ func checkWindowObservationReceipt(ctx context.Context, schema string, o *observ
 	if st.Failed != 0 || st.Dropped != 0 || st.QueueDepth != 0 {
 		return fmt.Errorf("observation counters unhealthy")
 	}
-	if schema == "full-window-scope.v11" || schema == "full-window-scope.v12" || (schema == "full-window-scope.v13" || schema == "full-window-scope.v14") {
+	if schema == "full-window-scope.v11" || schema == "full-window-scope.v12" || (schema == "full-window-scope.v13" || (schema == "full-window-scope.v14" || schema == "full-window-scope.v15")) {
 		if !id.Enabled || !id.CaptureContent || id.SampleRate != 1 || id.Environment != "evaluation" || id.ObservationReceiptBoundary != "durable_local" || !comparisonDigest(id.SpoolRootSHA256) || !comparisonDigest(id.SpoolRunID) || id.SpoolMaxBytes != 4<<30 || st.Accepted != st.Persisted || st.Exported != 0 {
 			return fmt.Errorf("v11 local receipt boundary required")
 		}

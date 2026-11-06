@@ -129,7 +129,11 @@ func validateWindowV10ExecutionShape(scope fullWindowScope) error {
 
 // Local index 1 means the copied declaration window-056, not a prefix slot.
 func executionWindowAt(scope fullWindowScope, localIndex int) (fullWindowDeclaration, error) {
-	if scope.Schema == "full-window-scope.v14" {
+	if scope.Schema == "full-window-scope.v15" {
+		if err := validateWindowV15ExecutionShape(scope); err != nil {
+			return fullWindowDeclaration{}, err
+		}
+	} else if scope.Schema == "full-window-scope.v14" {
 		if err := validateWindowV14ExecutionShape(scope); err != nil {
 			return fullWindowDeclaration{}, err
 		}
@@ -161,6 +165,12 @@ func executionWindowAt(scope fullWindowScope, localIndex int) (fullWindowDeclara
 // V10 returns only suffix totals. The original 1851 boundaries remain the
 // separate Completion.Boundaries denominator, not an invented suffix partition.
 func executionTotals(scope fullWindowScope) (fullWindowTotals, error) {
+	if scope.Schema == "full-window-scope.v15" {
+		if err := validateWindowV15ExecutionShape(scope); err != nil {
+			return fullWindowTotals{}, err
+		}
+		return fullWindowTotals{3275, 6550, 10504, 0, 110191257, 1818872}, nil
+	}
 	if scope.Schema == "full-window-scope.v14" {
 		if err := validateWindowV14ExecutionShape(scope); err != nil {
 			return fullWindowTotals{}, err

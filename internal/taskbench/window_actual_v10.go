@@ -187,6 +187,7 @@ func (a *windowV10Authority) nativeView() *windowV8Authority {
 
 // Public summaries must not expose mutable private completion snapshots.
 func detachedWindowActualStatusV10(in FullWindowActualStatus) FullWindowActualStatus {
+	in.PhaseTimingsV15 = append([]FullWindowPhaseTimingV15(nil), in.PhaseTimingsV15...)
 	if in.Observation != nil {
 		value := *in.Observation
 		in.Observation = &value

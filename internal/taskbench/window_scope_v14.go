@@ -23,7 +23,7 @@ func expectedWindowV14BudgetDeclaration() windowV8BudgetDeclaration {
 }
 
 func hasWindowV14Fields(s fullWindowScope) bool {
-	return s.CompletionV14 != nil || s.OperationPolicyV14 != nil
+	return s.CompletionV15 != nil || s.CompletionV14 != nil || s.OperationPolicyV14 != nil
 }
 
 // Pure candidate construction cannot create a policy approval or paid role.
@@ -47,7 +47,7 @@ func prepareFullWindowScopeV14(s ConversationSuite, p PairedProfiles, caps []ful
 
 func validateWindowV14Declarations(s fullWindowScope) error {
 	c, d, r, op := expectedWindowCompletionDeclarationV14(), expectedWindowV14BudgetDeclaration(), expectedWindowV14RetryDeclaration(), expectedWindowV14OperationPolicy()
-	if s.Schema != "full-window-scope.v14" || s.Completion != nil || s.CompletionV12 != nil || s.CompletionV13 != nil || s.CollectionPolicySHA256 != collectionPreviewFailurePolicySHA() || s.Bindings.PolicySHA256 != windowOwnedPreviewFailurePolicySHA() || s.BaselineEvidenceSHA256 != windowV14BaselineSHA || s.AllowPaid || s.ReadyForPaidRun || s.BudgetApprovalSHA256 != "" || !reflect.DeepEqual(s.CompletionV14, &c) || !reflect.DeepEqual(s.OperationPolicyV14, &op) || !reflect.DeepEqual(s.BudgetDeclaration, &d) || !reflect.DeepEqual(s.RetryDeclaration, &r) || s.BudgetDeclarationSHA256 != windowV8DeclarationSHA(d) || s.RetryPolicySHA256 != windowV8DeclarationSHA(r) {
+	if s.CompletionV15 != nil || s.Schema != "full-window-scope.v14" || s.Completion != nil || s.CompletionV12 != nil || s.CompletionV13 != nil || s.CollectionPolicySHA256 != collectionPreviewFailurePolicySHA() || s.Bindings.PolicySHA256 != windowOwnedPreviewFailurePolicySHA() || s.BaselineEvidenceSHA256 != windowV14BaselineSHA || s.AllowPaid || s.ReadyForPaidRun || s.BudgetApprovalSHA256 != "" || !reflect.DeepEqual(s.CompletionV14, &c) || !reflect.DeepEqual(s.OperationPolicyV14, &op) || !reflect.DeepEqual(s.BudgetDeclaration, &d) || !reflect.DeepEqual(s.RetryDeclaration, &r) || s.BudgetDeclarationSHA256 != windowV8DeclarationSHA(d) || s.RetryPolicySHA256 != windowV8DeclarationSHA(r) {
 		return fmt.Errorf("v14 fixed study and operation-policy DATA required; no execution authority")
 	}
 	if s.Observation != nil {

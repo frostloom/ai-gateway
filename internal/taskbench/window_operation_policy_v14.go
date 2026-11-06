@@ -33,7 +33,7 @@ func windowOperationLimitForEpoch(epoch int) (time.Duration, error) {
 	if epoch >= 1 && epoch <= 13 {
 		return 300 * time.Second, nil
 	}
-	if epoch == 14 {
+	if epoch == 14 || epoch == 15 {
 		return 600 * time.Second, nil
 	}
 	return 0, fmt.Errorf("unknown window operation-policy epoch")
@@ -50,7 +50,11 @@ func windowOperationLimitForScope(scope fullWindowScope) (time.Duration, error) 
 	if err != nil || scope.Schema != prefix+strconv.Itoa(epoch) {
 		return 0, fmt.Errorf("unknown window operation scope")
 	}
-	if epoch == 14 {
+	if epoch == 15 {
+		if err := validateWindowV15Declarations(scope); err != nil {
+			return 0, err
+		}
+	} else if epoch == 14 {
 		if err := validateWindowV14Declarations(scope); err != nil {
 			return 0, err
 		}

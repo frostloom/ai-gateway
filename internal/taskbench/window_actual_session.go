@@ -259,6 +259,7 @@ func checkWindowActualHealth(ctx context.Context, o windowActualObserverSettings
 }
 
 type FullWindowActualStatus struct {
+	PhaseTimingsV15      []FullWindowPhaseTimingV15      `json:"phase_timings_v15,omitempty"`
 	Observation          *windowObservationReceiptV11    `json:"observation,omitempty"`
 	Completion           *windowCompletionDeclarationV10 `json:"completion,omitempty"`
 	V8                   *windowV8RuntimeSummary         `json:"v8,omitempty"`
@@ -317,12 +318,12 @@ func OpenFullWindowActual(ctx context.Context, ready *FullWindowActualReady, pri
 	if ctx == nil || ctx.Err() != nil {
 		return nil, fmt.Errorf("actual session context rejected")
 	}
-	// All older owners are permanently consumed. V14 is the only new actual
+	// All older owners are permanently consumed. V15 is the only new actual
 	// epoch; old manifests remain readable through their technical checkers.
-	if ready == nil || ready.manifest.Schema != "full-window-actual-ready.v14" || ready.manifest.Scope.Schema != "full-window-scope.v14" || ready.v8Authority == nil || ready.v8Authority.v14 == nil || ready.v8Authority.revalidate() != nil {
+	if ready == nil || ready.manifest.Schema != "full-window-actual-ready.v15" || ready.manifest.Scope.Schema != "full-window-scope.v15" || ready.v8Authority == nil || ready.v8Authority.v15 == nil || ready.v8Authority.revalidate() != nil {
 		return nil, fmt.Errorf("actual v14 separate policy and delegated authority required before settings")
 	}
-	if e := ready.revalidateStoppedV14(); e != nil {
+	if e := ready.revalidateStoppedV15(); e != nil {
 		return nil, e
 	}
 	if e := ready.revalidate(); e != nil {
@@ -422,9 +423,13 @@ func (s *FullWindowActualSession) RunWindow(ctx context.Context, index int, prio
 		return out, errors.Join(fmt.Errorf("actual ready absent"), s.stop())
 	}
 	isV14 := s.ready.manifest.Scope.Schema == "full-window-scope.v14"
+	isV15 := s.ready.manifest.Scope.Schema == "full-window-scope.v15"
+	if isV15 {
+		s.resetPhaseTimingsV15()
+	}
 	// Legacy ordering remains unchanged. The new policy includes every per-window
 	// historical revalidation in the exact operation context before any output.
-	if !isV14 {
+	if !isV14 && !isV15 {
 		if e := s.verify(); e != nil {
 			return out, errors.Join(e, s.stop())
 		}
@@ -437,7 +442,7 @@ func (s *FullWindowActualSession) RunWindow(ctx context.Context, index int, prio
 	defer cancel()
 	detach := context.AfterFunc(s.lifetime, cancel)
 	defer detach()
-	if isV14 {
+	if isV14 || isV15 {
 		if e := s.verifyContext(operation); e != nil {
 			return out, errors.Join(e, s.stop())
 		}
@@ -446,7 +451,11 @@ func (s *FullWindowActualSession) RunWindow(ctx context.Context, index int, prio
 	auth := s.auth
 	name := fmt.Sprintf("window-%06d", index)
 	auth.privateReportRoot = filepath.Join(s.ready.manifest.SessionRoot, name)
+	acquisitionStarted := time.Now()
 	report, runErr := runWindowAcquisition(operation, &auth)
+	if isV15 {
+		s.recordPhaseV15(operation, "acquisition", acquisitionStarted, runErr)
+	}
 	s.mu.Lock()
 	s.status.Observation = report.Observation
 	s.status.V8 = mergeWindowV8Runtime(s.status.V8, report.V8)
@@ -527,7 +536,7 @@ func (s *FullWindowActualSession) stop() error {
 		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 		shutdownErr := s.auth.observer.Shutdown(ctx)
 		failures = append(failures, shutdownErr)
-		if s.ready != nil && (s.ready.manifest.Scope.Schema == "full-window-scope.v11" || s.ready.manifest.Scope.Schema == "full-window-scope.v12" || (s.ready.manifest.Scope.Schema == "full-window-scope.v13" || s.ready.manifest.Scope.Schema == "full-window-scope.v14")) {
+		if s.ready != nil && (s.ready.manifest.Scope.Schema == "full-window-scope.v11" || s.ready.manifest.Scope.Schema == "full-window-scope.v12" || (s.ready.manifest.Scope.Schema == "full-window-scope.v13" || s.ready.manifest.Scope.Schema == "full-window-scope.v14" || s.ready.manifest.Scope.Schema == "full-window-scope.v15")) {
 			receipt, re := windowV11Receipt(s.auth.observer, s.status.AcquisitionDone && shutdownErr == nil && errors.Join(failures...) == nil)
 			failures = append(failures, re)
 			s.mu.Lock()
@@ -597,7 +606,7 @@ func (s *FullWindowActualSession) rememberReport(name string, report windowAcqui
 			allowed[row.RecordingFile] = row.RecordingSHA256
 		}
 		if row.PreviewFailure != nil {
-			if ((s.ready.manifest.Schema != "full-window-actual-ready.v13" || report.Schema != "full-window-acquisition-receipt.v13") && (s.ready.manifest.Schema != "full-window-actual-ready.v14" || report.Schema != "full-window-acquisition-receipt.v14")) || row.QualityEnd != nil || validateWindowPreviewFailureEvidence(row.PreviewFailure, row.RecordingSHA256) != nil {
+			if ((s.ready.manifest.Schema != "full-window-actual-ready.v13" || report.Schema != "full-window-acquisition-receipt.v13") && (s.ready.manifest.Schema != "full-window-actual-ready.v14" || report.Schema != "full-window-acquisition-receipt.v14") && (s.ready.manifest.Schema != "full-window-actual-ready.v15" || report.Schema != "full-window-acquisition-receipt.v15")) || row.QualityEnd != nil || validateWindowPreviewFailureEvidence(row.PreviewFailure, row.RecordingSHA256) != nil {
 				return fmt.Errorf("actual failed-preview archive binding differs")
 			}
 			if _, exists := allowed[row.PreviewFailure.SidecarFile]; exists {
@@ -684,6 +693,9 @@ func (s *FullWindowActualSession) verifyInputs() error {
 	return s.verifyInputsContext(context.Background())
 }
 func (s *FullWindowActualSession) verifyInputsContext(ctx context.Context) error {
+	if s.ready != nil && s.ready.manifest.Schema == "full-window-actual-ready.v15" {
+		return s.verifyInputsV15Context(ctx)
+	}
 	if ctx == nil {
 		return fmt.Errorf("actual verification operation context required")
 	}
@@ -764,6 +776,9 @@ func (s *FullWindowActualSession) verifyInputsContext(ctx context.Context) error
 }
 func (s *FullWindowActualSession) verify() error { return s.verifyContext(context.Background()) }
 func (s *FullWindowActualSession) verifyContext(ctx context.Context) error {
+	if s.ready != nil && s.ready.manifest.Schema == "full-window-actual-ready.v15" {
+		return s.verifyV15Context(ctx)
+	}
 	if ctx == nil {
 		return fmt.Errorf("actual verification operation context required")
 	}

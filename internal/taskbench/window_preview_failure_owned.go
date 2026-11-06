@@ -18,13 +18,13 @@ func windowOwnedPreviewFailurePolicySHA() string {
 	return qualityJSONSHA([]string{"full-customer-owned-preview-failure.v13", windowOwnedQualityPolicySHA(), collectionPreviewFailurePolicySHA(), "quiesced-owned-capture;complete-orders-only-on-refund-failure;durable-sidecar-before-cleanup;opaque-owner-seal;all-original-turns;versioned-quality-end-with-verified-complete-admissions"})
 }
 func windowOwnedRecordingPolicyAllowed(scope fullWindowScope) bool {
-	if scope.Schema == "full-window-scope.v13" || scope.Schema == "full-window-scope.v14" {
+	if scope.Schema == "full-window-scope.v13" || (scope.Schema == "full-window-scope.v14" || scope.Schema == "full-window-scope.v15") {
 		return scope.Bindings.PolicySHA256 == windowOwnedPreviewFailurePolicySHA() && scope.CollectionPolicySHA256 == collectionPreviewFailurePolicySHA()
 	}
 	return scope.Bindings.PolicySHA256 == collectionPolicySHA() || scope.Bindings.PolicySHA256 == windowOwnedQualityPolicySHA()
 }
 func (d *windowOwnedDriver) windowPreviewFailureMode() bool {
-	return d != nil && d.permit != nil && d.permit.campaign != nil && (d.permit.campaign.prepared.scope.Schema == "full-window-scope.v13" || d.permit.campaign.prepared.scope.Schema == "full-window-scope.v14") && windowOwnedRecordingPolicyAllowed(d.permit.campaign.prepared.scope)
+	return d != nil && d.permit != nil && d.permit.campaign != nil && (d.permit.campaign.prepared.scope.Schema == "full-window-scope.v13" || (d.permit.campaign.prepared.scope.Schema == "full-window-scope.v14" || d.permit.campaign.prepared.scope.Schema == "full-window-scope.v15")) && windowOwnedRecordingPolicyAllowed(d.permit.campaign.prepared.scope)
 }
 
 type windowPreviewFailureEvidence struct {

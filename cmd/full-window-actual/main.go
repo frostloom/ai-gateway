@@ -44,6 +44,8 @@ func runActualCLI(ctx context.Context, args []string, in io.ReadCloser, out io.W
 	checkOnly := fs.Bool("check", false, "read-only frozen readiness check")
 	prepareV8 := fs.Bool("prepare-v8", false, "read-only V8 technical preparation; never execution authority")
 	prepareV9 := fs.Bool("prepare-v9", false, "read-only V9 technical preparation; never execution authority")
+	prepareV15 := fs.Bool("prepare-v15", false, "read-only V15 typed178 preparation; no execution grant")
+	epochV15 := fs.Bool("epoch-v15", false, "select independent V15 binding of the approved timing policy")
 	prepareV14 := fs.Bool("prepare-v14", false, "read-only V14 typed177 operation-policy preparation; no execution grant")
 	epochV14 := fs.Bool("epoch-v14", false, "select independently frozen V14 and separate human timing-policy authority")
 	prepareV13 := fs.Bool("prepare-v13", false, "read-only V13 typed156 preview-failure preparation")
@@ -66,6 +68,9 @@ func runActualCLI(ctx context.Context, args []string, in io.ReadCloser, out io.W
 		}
 		return actualCLIError(out, "invalid_flags")
 	}
+	if (*prepareV15 && (*prepareV8 || *prepareV9 || *prepareV10 || *prepareV11 || *prepareV12 || *prepareV13 || *prepareV14 || *checkOnly || *serve || *settings != "" || *authorization != "" || *epochV9 || *epochV10 || *epochV11 || *epochV12 || *epochV13 || *epochV14 || *epochV15)) || (*epochV15 && (!*serve || *checkOnly || *authorization == "" || *prepareV8 || *prepareV9 || *prepareV10 || *prepareV11 || *prepareV12 || *prepareV13 || *prepareV14 || *epochV9 || *epochV10 || *epochV11 || *epochV12 || *epochV13 || *epochV14)) {
+		return actualCLIError(out, "invalid_start")
+	}
 	if (*prepareV14 && (*prepareV8 || *prepareV9 || *prepareV10 || *prepareV11 || *prepareV12 || *prepareV13 || *checkOnly || *serve || *settings != "" || *authorization != "" || *epochV9 || *epochV10 || *epochV11 || *epochV12 || *epochV13 || *epochV14)) || (*epochV14 && (!*serve || *checkOnly || *authorization == "" || *prepareV8 || *prepareV9 || *prepareV10 || *prepareV11 || *prepareV12 || *prepareV13 || *epochV9 || *epochV10 || *epochV11 || *epochV12 || *epochV13)) {
 		return actualCLIError(out, "invalid_start")
 	}
@@ -87,7 +92,7 @@ func runActualCLI(ctx context.Context, args []string, in io.ReadCloser, out io.W
 	if fs.NArg() != 0 || ctx == nil || ctx.Err() != nil || (*checkOnly && *serve) || (*prepareV8 && (*checkOnly || *serve || *settings != "" || *authorization != "")) || (*authorization != "" && !*serve) {
 		return actualCLIError(out, "invalid_start")
 	}
-	if !*checkOnly && !*serve && !*prepareV8 && !*prepareV9 && !*prepareV10 && !*prepareV11 && !*prepareV12 && !*prepareV13 && !*prepareV14 {
+	if !*checkOnly && !*serve && !*prepareV8 && !*prepareV9 && !*prepareV10 && !*prepareV11 && !*prepareV12 && !*prepareV13 && !*prepareV14 && !*prepareV15 {
 		if *manifest != "" || *settings != "" {
 			return actualCLIError(out, "explicit_mode_required")
 		}
@@ -96,8 +101,18 @@ func runActualCLI(ctx context.Context, args []string, in io.ReadCloser, out io.W
 		}
 		return 0
 	}
-	if *manifest == "" || (!*prepareV8 && !*prepareV9 && !*prepareV10 && !*prepareV11 && !*prepareV12 && !*prepareV13 && !*prepareV14 && *authorization == "" && check == nil) || (*checkOnly && *settings != "") || (*serve && (*settings == "" || open == nil || in == nil)) {
+	if *manifest == "" || (!*prepareV8 && !*prepareV9 && !*prepareV10 && !*prepareV11 && !*prepareV12 && !*prepareV13 && !*prepareV14 && !*prepareV15 && *authorization == "" && check == nil) || (*checkOnly && *settings != "") || (*serve && (*settings == "" || open == nil || in == nil)) {
 		return actualCLIError(out, "incomplete_actual_declaration")
+	}
+	if *prepareV15 {
+		summary, prepared, err := taskbench.CheckFullWindowV15Preparation(taskbench.FullWindowActualReadyOptions{ManifestPath: *manifest})
+		if err != nil || prepared == nil {
+			return actualCLIError(out, "actual_v15_preparation_rejected")
+		}
+		if actualEmit(out, map[string]any{"type": "prepared", "read_only": true, "actual_execution_authorized": false, "retry_policy_approved": false, "operation_policy_approval_required": true, "preparation": summary}) != nil {
+			return 1
+		}
+		return 0
 	}
 	if *prepareV14 {
 		summary, prepared, err := taskbench.CheckFullWindowV14Preparation(taskbench.FullWindowActualReadyOptions{ManifestPath: *manifest})
@@ -172,7 +187,16 @@ func runActualCLI(ctx context.Context, args []string, in io.ReadCloser, out io.W
 	var summary taskbench.FullWindowActualReadySummary
 	var ready *taskbench.FullWindowActualReady
 	var err error
-	if *authorization != "" && *epochV14 {
+	if *authorization != "" && *epochV15 {
+		var prepared *taskbench.FullWindowV15Preparation
+		summary, prepared, err = taskbench.CheckFullWindowV15Preparation(taskbench.FullWindowActualReadyOptions{ManifestPath: *manifest})
+		if err == nil && prepared != nil {
+			ready, err = taskbench.AuthorizeFullWindowV15Preparation(prepared, *authorization)
+		}
+		if err != nil || ready == nil {
+			return actualCLIError(out, "actual_v15_authorization_rejected")
+		}
+	} else if *authorization != "" && *epochV14 {
 		var prepared *taskbench.FullWindowV14Preparation
 		summary, prepared, err = taskbench.CheckFullWindowV14Preparation(taskbench.FullWindowActualReadyOptions{ManifestPath: *manifest})
 		if err == nil && prepared != nil {

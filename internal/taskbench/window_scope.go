@@ -38,6 +38,7 @@ type fullWindowDeclaration struct {
 	fullWindowCaps
 }
 type fullWindowScope struct {
+	CompletionV15          *windowCompletionDeclarationV15  `json:"completion_v15,omitempty"`
 	CompletionV14          *windowCompletionDeclarationV14  `json:"completion_v14,omitempty"`
 	OperationPolicyV14     *windowV14OperationPolicy        `json:"operation_policy_v14,omitempty"`
 	CompletionV13          *windowCompletionDeclarationV13  `json:"completion_v13,omitempty"`
@@ -177,6 +178,12 @@ func validateFullWindowScope(scope fullWindowScope, s ConversationSuite, p Paire
 			return "", totals, err
 		}
 		expected, e = prepareFullWindowScopeV9(s, p, caps, b, scope.BaselineEvidenceSHA256)
+	case "full-window-scope.v15":
+		expected, e = prepareFullWindowScopeV15(s, p, caps, b, scope.BaselineEvidenceSHA256)
+		if e == nil {
+			expected.Observation = scope.Observation
+			e = validateWindowV15ExecutionShape(expected)
+		}
 	case "full-window-scope.v14":
 		expected, e = prepareFullWindowScopeV14(s, p, caps, b, scope.BaselineEvidenceSHA256)
 		if e == nil {
@@ -211,7 +218,7 @@ func validateFullWindowScope(scope fullWindowScope, s ConversationSuite, p Paire
 	if !reflect.DeepEqual(expected, scope) {
 		return "", totals, fmt.Errorf("scope differs from rederived frozen schedule")
 	}
-	if scope.Schema == "full-window-scope.v10" || scope.Schema == "full-window-scope.v12" || scope.Schema == "full-window-scope.v13" || scope.Schema == "full-window-scope.v14" {
+	if scope.Schema == "full-window-scope.v10" || scope.Schema == "full-window-scope.v12" || scope.Schema == "full-window-scope.v13" || (scope.Schema == "full-window-scope.v14" || scope.Schema == "full-window-scope.v15") {
 		totals, e = executionTotals(scope)
 		if e != nil {
 			return "", fullWindowTotals{}, e
