@@ -46,6 +46,9 @@ func prepareFullWindowScopeV13(s ConversationSuite, p PairedProfiles, caps []ful
 }
 
 func validateWindowV13Declarations(s fullWindowScope) error {
+	if hasWindowV14Fields(s) {
+		return fmt.Errorf("v14-only fields rejected by legacy declarations")
+	}
 	c, d, r := expectedWindowCompletionDeclarationV13(), expectedWindowV13BudgetDeclaration(), expectedWindowV13RetryDeclaration()
 	if s.Schema != "full-window-scope.v13" || s.Completion != nil || s.CompletionV12 != nil || s.CollectionPolicySHA256 != collectionPreviewFailurePolicySHA() || s.Bindings.PolicySHA256 != windowOwnedPreviewFailurePolicySHA() || s.BaselineEvidenceSHA256 != windowV13BaselineSHA || s.AllowPaid || s.ReadyForPaidRun || s.BudgetApprovalSHA256 != "" || !reflect.DeepEqual(s.CompletionV13, &c) || !reflect.DeepEqual(s.BudgetDeclaration, &d) || !reflect.DeepEqual(s.RetryDeclaration, &r) || s.BudgetDeclarationSHA256 != windowV8DeclarationSHA(d) || s.RetryPolicySHA256 != windowV8DeclarationSHA(r) {
 		return fmt.Errorf("v13 fixed completion candidate declarations required; no human authority")

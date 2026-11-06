@@ -131,7 +131,14 @@ func runWindowAcquisition(ctx context.Context, auth *windowAcquisitionAuthorizat
 		return receipt, fmt.Errorf("window acquisition authorization rejected")
 	}
 	started := time.Now()
-	ctx, cancel := context.WithTimeout(ctx, 300*time.Second)
+	if auth == nil || auth.campaign == nil {
+		return receipt, fmt.Errorf("window acquisition authorization rejected")
+	}
+	limit, limitErr := windowOperationLimitForScope(auth.campaign.prepared.scope)
+	if limitErr != nil {
+		return receipt, limitErr
+	}
+	ctx, cancel := context.WithTimeout(ctx, limit)
 	defer cancel()
 	run, err := openWindowAcquisition(ctx, auth)
 	if run == nil {
@@ -140,7 +147,7 @@ func runWindowAcquisition(ctx context.Context, auth *windowAcquisitionAuthorizat
 	runErr = err
 	run.started = started
 	defer func() {
-		if run.scope.Schema == "full-window-scope.v11" || run.scope.Schema == "full-window-scope.v12" || run.scope.Schema == "full-window-scope.v13" {
+		if run.scope.Schema == "full-window-scope.v11" || run.scope.Schema == "full-window-scope.v12" || (run.scope.Schema == "full-window-scope.v13" || run.scope.Schema == "full-window-scope.v14") {
 			receipt, re := windowV11Receipt(run.auth.observer, false)
 			run.receipt.Observation = receipt
 			if re != nil && runErr == nil {
@@ -264,13 +271,17 @@ func openWindowAcquisition(ctx context.Context, auth *windowAcquisitionAuthoriza
 	if windowScopeUsesNativeV8(scope.Schema) {
 		run.receipt.Schema = "full-window-acquisition-receipt.v8"
 	}
-	if scope.Schema == "full-window-scope.v11" || scope.Schema == "full-window-scope.v12" || scope.Schema == "full-window-scope.v13" {
+	if scope.Schema == "full-window-scope.v11" || scope.Schema == "full-window-scope.v12" || (scope.Schema == "full-window-scope.v13" || scope.Schema == "full-window-scope.v14") {
 		run.receipt.Schema = "full-window-acquisition-receipt.v11"
 		if scope.Schema == "full-window-scope.v12" {
 			run.receipt.Schema = "full-window-acquisition-receipt.v12"
 		}
 		if scope.Schema == "full-window-scope.v13" {
 			run.receipt.Schema = "full-window-acquisition-receipt.v13"
+		}
+		if scope.Schema == "full-window-scope.v14" {
+			run.receipt.Schema = "full-window-acquisition-receipt.v14"
+			run.receipt.OperationLimitSeconds = 600
 		}
 	}
 	if scope.Schema == "full-window-scope.v10" {

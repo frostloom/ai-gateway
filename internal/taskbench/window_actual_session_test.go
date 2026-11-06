@@ -15,7 +15,7 @@ import (
 func TestFullWindowActualOpenRejectsBeforeSettings(t *testing.T) {
 	for _, token := range []*FullWindowActualReady{nil, {}} {
 		s, err := OpenFullWindowActual(context.Background(), token, "/nonexistent/private-settings")
-		if err == nil || s != nil || !strings.Contains(err.Error(), "v13 delegated authority required before settings") {
+		if err == nil || s != nil || !strings.Contains(err.Error(), "v14 separate policy and delegated authority required before settings") {
 			t.Fatalf("ready must reject before settings: %v", err)
 		}
 	}

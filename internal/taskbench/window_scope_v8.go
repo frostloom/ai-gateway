@@ -106,6 +106,9 @@ func prepareFullWindowScopeV8(s ConversationSuite, p PairedProfiles, width int, 
 	return out, nil
 }
 func validateWindowV8Declarations(scope fullWindowScope) error {
+	if hasWindowV14Fields(scope) {
+		return fmt.Errorf("v14-only fields rejected by legacy declarations")
+	}
 	budget, retry := expectedWindowV8BudgetDeclaration(), expectedWindowV8RetryDeclaration()
 	if scope.BudgetApprovalSHA256 != "" || !reflect.DeepEqual(scope.BudgetDeclaration, &budget) || !reflect.DeepEqual(scope.RetryDeclaration, &retry) || scope.BudgetDeclarationSHA256 != windowV8DeclarationSHA(budget) || scope.RetryPolicySHA256 != windowV8DeclarationSHA(retry) {
 		return fmt.Errorf("v8 fixed candidate declarations required; no human authority")

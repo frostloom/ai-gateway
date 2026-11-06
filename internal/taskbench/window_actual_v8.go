@@ -42,6 +42,7 @@ type windowV8Authority struct {
 	v10                                                         *windowV10Authority
 	v11                                                         *windowV11Authority
 	v13                                                         *windowV13Authority
+	v14                                                         *windowV14Authority
 	v12                                                         *windowV12Authority
 	manifest                                                    windowActualManifest
 	manifestSHA, binarySHA, authorizationPath, authorizationSHA string
@@ -87,6 +88,13 @@ func verifyWindowV8ExecutionAuthorization(raw []byte, m windowActualManifest, ma
 }
 
 func (a *windowV8Authority) revalidate() error {
+	if a != nil && a.v14 != nil {
+		v := a.v14
+		if a.v9 != nil || a.v10 != nil || a.v11 != nil || a.v12 != nil || a.v13 != nil || a.binding != v.binding.windowV8ExecutionBinding || a.authorizationPath != v.authorizationPath || a.authorizationSHA != v.authorizationSHA || !bytes.Equal(a.raw, v.raw) || !reflect.DeepEqual(a.manifest, v.manifest) || a.manifestSHA != v.manifestSHA || a.binarySHA != v.binarySHA {
+			return fmt.Errorf("v14 native authority changed")
+		}
+		return v.revalidate()
+	}
 	if a != nil && a.v13 != nil {
 		v := a.v13
 		if a.v9 != nil || a.v10 != nil || a.v11 != nil || a.v12 != nil || a.binding != v.binding.windowV8ExecutionBinding || a.authorizationPath != v.authorizationPath || a.authorizationSHA != v.authorizationSHA || a.manifestSHA != v.manifestSHA || a.binarySHA != v.binarySHA || !bytes.Equal(a.raw, v.raw) || !reflect.DeepEqual(a.manifest, v.manifest) {
@@ -185,6 +193,9 @@ func (r *FullWindowActualReady) revalidateV8() error {
 	return nil
 }
 func windowActualBuildAnchors(m windowActualManifest) (string, string, string) {
+	if m.Schema == "full-window-actual-ready.v14" {
+		return fullWindowV14ManifestSHA, fullWindowV14ArchiveCommit, fullWindowV14ArchiveTree
+	}
 	if m.Schema == "full-window-actual-ready.v13" {
 		return fullWindowV13ManifestSHA, fullWindowV13ArchiveCommit, fullWindowV13ArchiveTree
 	}

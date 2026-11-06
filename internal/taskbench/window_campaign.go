@@ -77,6 +77,7 @@ type windowCampaignPrepared struct {
 	stoppedV9        *windowStoppedV9Baseline
 	stoppedV10       *windowStoppedV10Baseline
 	stoppedV12       *windowStoppedV12Baseline
+	stoppedV13       *windowStoppedV13Baseline
 	stoppedV11       *windowStoppedV11Baseline
 	observationOwner *windowV11ObservationOwner
 	v8Authority      *windowV8Authority
@@ -269,7 +270,7 @@ func newWindowCampaign(root, frozenRoot, historicalDir string, scope fullWindowS
 // wrapper calls it in production. It creates no provider capability or token.
 func startWindowCampaign(p windowCampaignPrepared, baseline fullWindowBaseline) (*windowCampaign, error) {
 	startupCtx := context.Background()
-	if p.scope.Schema == "full-window-scope.v11" || p.scope.Schema == "full-window-scope.v12" || p.scope.Schema == "full-window-scope.v13" {
+	if p.scope.Schema == "full-window-scope.v11" || p.scope.Schema == "full-window-scope.v12" || (p.scope.Schema == "full-window-scope.v13" || p.scope.Schema == "full-window-scope.v14") {
 		if p.observationOwner == nil || p.observationOwner.context == nil {
 			return nil, fmt.Errorf("v11 bound observer context required")
 		}
@@ -323,6 +324,10 @@ func validatePreparedWindowCampaign(p windowCampaignPrepared, b fullWindowBaseli
 		return e
 	}
 	switch p.scope.Schema {
+	case "full-window-scope.v14":
+		if err := validateStoppedV14CampaignHistory(p, b); err != nil {
+			return err
+		}
 	case "full-window-scope.v13":
 		if err := validateStoppedV13CampaignHistory(p, b); err != nil {
 			return err
@@ -405,11 +410,15 @@ func validatePreparedWindowCampaign(p windowCampaignPrepared, b fullWindowBaseli
 		claimModelBound, claimJEVBound = 84510611, 650855
 	} else if windowScopeUsesNativeV8(p.scope.Schema) {
 		claimModelBound, claimJEVBound = 84500000, 600000
-		if p.scope.Schema == "full-window-scope.v9" || (p.scope.Schema == "full-window-scope.v11" || p.scope.Schema == "full-window-scope.v12" || p.scope.Schema == "full-window-scope.v13") {
+		if p.scope.Schema == "full-window-scope.v9" || (p.scope.Schema == "full-window-scope.v11" || p.scope.Schema == "full-window-scope.v12" || (p.scope.Schema == "full-window-scope.v13" || p.scope.Schema == "full-window-scope.v14")) {
 			claimModelBound, claimJEVBound = 123827032, 2037474
 		}
 	}
-	if p.scope.Schema == "full-window-scope.v13" {
+	if p.scope.Schema == "full-window-scope.v14" {
+		if e := validateV14ClaimDeclaration(d, p.scope.CompletionV14); e != nil {
+			return e
+		}
+	} else if p.scope.Schema == "full-window-scope.v13" {
 		if e := validateV13ClaimDeclaration(d, p.scope.CompletionV13); e != nil {
 			return e
 		}
@@ -532,7 +541,9 @@ func (c *windowCampaign) persistClaimWindowCampaignContext(ctx context.Context, 
 		historyCtx, done := c.windowCampaignHistoryContextLocked(ctx)
 		defer done()
 		var err error
-		if c.prepared.scope.Schema == "full-window-scope.v13" {
+		if c.prepared.scope.Schema == "full-window-scope.v14" {
+			err = validateStoppedV14CampaignHistoryContext(historyCtx, c.prepared, c.baseline)
+		} else if c.prepared.scope.Schema == "full-window-scope.v13" {
 			err = validateStoppedV13CampaignHistoryContext(historyCtx, c.prepared, c.baseline)
 		} else if c.prepared.scope.Schema == "full-window-scope.v12" {
 			err = validateStoppedV12CampaignHistoryContext(historyCtx, c.prepared, c.baseline)
@@ -601,13 +612,16 @@ func (c *windowCampaign) persistClaimWindowCampaignContext(ctx context.Context, 
 	}
 	if windowScopeUsesNativeV8(d.Schema) {
 		r.Schema = "full-window-campaign-claim.v8"
-		if d.Schema == "full-window-scope.v11" || d.Schema == "full-window-scope.v12" || d.Schema == "full-window-scope.v13" {
+		if d.Schema == "full-window-scope.v11" || d.Schema == "full-window-scope.v12" || (d.Schema == "full-window-scope.v13" || d.Schema == "full-window-scope.v14") {
 			r.Schema = "full-window-campaign-claim.v11"
 			if d.Schema == "full-window-scope.v12" {
 				r.Schema = "full-window-campaign-claim.v12"
 			}
 			if d.Schema == "full-window-scope.v13" {
 				r.Schema = "full-window-campaign-claim.v13"
+			}
+			if d.Schema == "full-window-scope.v14" {
+				r.Schema = "full-window-campaign-claim.v14"
 			}
 		}
 		if d.Schema == "full-window-scope.v9" {
@@ -627,7 +641,7 @@ func (c *windowCampaign) persistClaimWindowCampaignContext(ctx context.Context, 
 	if err := c.checkWindowCampaignContextLocked(ctx); err != nil {
 		return err
 	}
-	if d.Schema == "full-window-scope.v11" || d.Schema == "full-window-scope.v12" || d.Schema == "full-window-scope.v13" {
+	if d.Schema == "full-window-scope.v11" || d.Schema == "full-window-scope.v12" || (d.Schema == "full-window-scope.v13" || d.Schema == "full-window-scope.v14") {
 		o := c.prepared.observationOwner
 		if o == nil {
 			return fmt.Errorf("v11 observer owner absent before claim")
@@ -816,7 +830,7 @@ func (c *windowCampaign) validateEvidenceWindowCampaign(p *windowCampaignOwnedCh
 			if e.Ordinal != slot.Ordinal || e.Pass != slot.Pass || e.Key != slot.CaseKey || e.Arm != arm || (e.QualityEnd == nil && e.ObservedTurns != slot.UserTurns) || !e.Cleanup || !e.Observer || !comparisonDigest(e.RecordingSHA256) {
 				return fmt.Errorf("wrong/missing owned execution evidence")
 			}
-			if c.prepared.scope.Schema == "full-window-scope.v13" {
+			if c.prepared.scope.Schema == "full-window-scope.v13" || c.prepared.scope.Schema == "full-window-scope.v14" {
 				if e.QualityEnd == nil && validateWindowPreviewFailureEvidence(e.PreviewFailure, e.RecordingSHA256) != nil || e.QualityEnd != nil && e.PreviewFailure != nil {
 					return fmt.Errorf("v13 checkpoint failed-preview proof differs")
 				}
@@ -876,13 +890,16 @@ func (c *windowCampaign) advanceWindowCampaignContext(ctx context.Context, p *wi
 			return fail(fmt.Errorf("v8 extras unresolved"))
 		}
 		checkpoint.Schema = "full-window-campaign-owned-checkpoint.v8"
-		if d.Schema == "full-window-scope.v11" || d.Schema == "full-window-scope.v12" || d.Schema == "full-window-scope.v13" {
+		if d.Schema == "full-window-scope.v11" || d.Schema == "full-window-scope.v12" || (d.Schema == "full-window-scope.v13" || d.Schema == "full-window-scope.v14") {
 			checkpoint.Schema = "full-window-campaign-owned-checkpoint.v11"
 			if d.Schema == "full-window-scope.v12" {
 				checkpoint.Schema = "full-window-campaign-owned-checkpoint.v12"
 			}
 			if d.Schema == "full-window-scope.v13" {
 				checkpoint.Schema = "full-window-campaign-owned-checkpoint.v13"
+			}
+			if d.Schema == "full-window-scope.v14" {
+				checkpoint.Schema = "full-window-campaign-owned-checkpoint.v14"
 			}
 		}
 		if d.Schema == "full-window-scope.v10" {

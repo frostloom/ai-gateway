@@ -317,12 +317,12 @@ func OpenFullWindowActual(ctx context.Context, ready *FullWindowActualReady, pri
 	if ctx == nil || ctx.Err() != nil {
 		return nil, fmt.Errorf("actual session context rejected")
 	}
-	// All older owners are permanently consumed. V13 is the only new actual
+	// All older owners are permanently consumed. V14 is the only new actual
 	// epoch; old manifests remain readable through their technical checkers.
-	if ready == nil || ready.manifest.Schema != "full-window-actual-ready.v13" || ready.manifest.Scope.Schema != "full-window-scope.v13" || ready.v8Authority == nil || ready.v8Authority.v13 == nil || ready.v8Authority.revalidate() != nil {
-		return nil, fmt.Errorf("actual v13 delegated authority required before settings")
+	if ready == nil || ready.manifest.Schema != "full-window-actual-ready.v14" || ready.manifest.Scope.Schema != "full-window-scope.v14" || ready.v8Authority == nil || ready.v8Authority.v14 == nil || ready.v8Authority.revalidate() != nil {
+		return nil, fmt.Errorf("actual v14 separate policy and delegated authority required before settings")
 	}
-	if e := ready.revalidateStoppedV13(); e != nil {
+	if e := ready.revalidateStoppedV14(); e != nil {
 		return nil, e
 	}
 	if e := ready.revalidate(); e != nil {
@@ -418,13 +418,31 @@ func (s *FullWindowActualSession) RunWindow(ctx context.Context, index int, prio
 	if ctx == nil || ctx.Err() != nil || s.lifetime.Err() != nil || st.Closed || index != st.NextWindowIndex || priorReceiptSHA != st.LastReceiptSHA256 {
 		return out, errors.Join(fmt.Errorf("actual session operation rejected"), s.stop())
 	}
-	if e := s.verify(); e != nil {
-		return out, errors.Join(e, s.stop())
+	if s.ready == nil {
+		return out, errors.Join(fmt.Errorf("actual ready absent"), s.stop())
 	}
-	operation, cancel := context.WithTimeout(ctx, 300*time.Second)
+	isV14 := s.ready.manifest.Scope.Schema == "full-window-scope.v14"
+	// Legacy ordering remains unchanged. The new policy includes every per-window
+	// historical revalidation in the exact operation context before any output.
+	if !isV14 {
+		if e := s.verify(); e != nil {
+			return out, errors.Join(e, s.stop())
+		}
+	}
+	limit, limitErr := windowOperationLimitForScope(s.ready.manifest.Scope)
+	if limitErr != nil {
+		return out, errors.Join(limitErr, s.stop())
+	}
+	operation, cancel := context.WithTimeout(ctx, limit)
 	defer cancel()
 	detach := context.AfterFunc(s.lifetime, cancel)
 	defer detach()
+	if isV14 {
+		if e := s.verifyContext(operation); e != nil {
+			return out, errors.Join(e, s.stop())
+		}
+	}
+
 	auth := s.auth
 	name := fmt.Sprintf("window-%06d", index)
 	auth.privateReportRoot = filepath.Join(s.ready.manifest.SessionRoot, name)
@@ -509,7 +527,7 @@ func (s *FullWindowActualSession) stop() error {
 		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 		shutdownErr := s.auth.observer.Shutdown(ctx)
 		failures = append(failures, shutdownErr)
-		if s.ready != nil && (s.ready.manifest.Scope.Schema == "full-window-scope.v11" || s.ready.manifest.Scope.Schema == "full-window-scope.v12" || s.ready.manifest.Scope.Schema == "full-window-scope.v13") {
+		if s.ready != nil && (s.ready.manifest.Scope.Schema == "full-window-scope.v11" || s.ready.manifest.Scope.Schema == "full-window-scope.v12" || (s.ready.manifest.Scope.Schema == "full-window-scope.v13" || s.ready.manifest.Scope.Schema == "full-window-scope.v14")) {
 			receipt, re := windowV11Receipt(s.auth.observer, s.status.AcquisitionDone && shutdownErr == nil && errors.Join(failures...) == nil)
 			failures = append(failures, re)
 			s.mu.Lock()
@@ -579,7 +597,7 @@ func (s *FullWindowActualSession) rememberReport(name string, report windowAcqui
 			allowed[row.RecordingFile] = row.RecordingSHA256
 		}
 		if row.PreviewFailure != nil {
-			if s.ready.manifest.Schema != "full-window-actual-ready.v13" || report.Schema != "full-window-acquisition-receipt.v13" || row.QualityEnd != nil || validateWindowPreviewFailureEvidence(row.PreviewFailure, row.RecordingSHA256) != nil {
+			if ((s.ready.manifest.Schema != "full-window-actual-ready.v13" || report.Schema != "full-window-acquisition-receipt.v13") && (s.ready.manifest.Schema != "full-window-actual-ready.v14" || report.Schema != "full-window-acquisition-receipt.v14")) || row.QualityEnd != nil || validateWindowPreviewFailureEvidence(row.PreviewFailure, row.RecordingSHA256) != nil {
 				return fmt.Errorf("actual failed-preview archive binding differs")
 			}
 			if _, exists := allowed[row.PreviewFailure.SidecarFile]; exists {
@@ -663,6 +681,16 @@ func (s *FullWindowActualSession) rememberReport(name string, report windowAcqui
 // Revalidate frozen inputs without requiring this live owner's roots to be
 // absent. Startup alone may use the public readiness gate's new-root rule.
 func (s *FullWindowActualSession) verifyInputs() error {
+	return s.verifyInputsContext(context.Background())
+}
+func (s *FullWindowActualSession) verifyInputsContext(ctx context.Context) error {
+	if ctx == nil {
+		return fmt.Errorf("actual verification operation context required")
+	}
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+
 	r := s.ready
 	if r == nil || len(r.manifestRaw) == 0 {
 		return fmt.Errorf("actual frozen inputs absent")
@@ -672,8 +700,15 @@ func (s *FullWindowActualSession) verifyInputs() error {
 			return e
 		}
 	}
-	if e := r.revalidateStoppedActualEpoch(); e != nil {
+	if r.manifest.Schema == "full-window-actual-ready.v14" {
+		if e := r.revalidateStoppedV14Context(ctx); e != nil {
+			return e
+		}
+	} else if e := r.revalidateStoppedActualEpoch(); e != nil {
 		return e
+	}
+	if err := ctx.Err(); err != nil {
+		return err
 	}
 	m := r.manifest
 	if err := validateWindowActualHelperCatalog(m, r.manifestPath); err != nil {
@@ -718,20 +753,40 @@ func (s *FullWindowActualSession) verifyInputs() error {
 	if s.auth.observer == nil || s.auth.observer.EvaluationIdentity() != m.Observer || s.auth.observerIdentity != m.Observer {
 		return fmt.Errorf("actual observer changed")
 	}
-	return checkWindowObservationReceipt(s.lifetime, m.Scope.Schema, s.auth.observer, m.Observer)
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	observerCtx := s.lifetime
+	if m.Schema == "full-window-actual-ready.v14" {
+		observerCtx = ctx
+	}
+	return checkWindowObservationReceipt(observerCtx, m.Scope.Schema, s.auth.observer, m.Observer)
 }
-func (s *FullWindowActualSession) verify() error {
-	if e := s.verifyInputs(); e != nil {
+func (s *FullWindowActualSession) verify() error { return s.verifyContext(context.Background()) }
+func (s *FullWindowActualSession) verifyContext(ctx context.Context) error {
+	if ctx == nil {
+		return fmt.Errorf("actual verification operation context required")
+	}
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	if e := s.verifyInputsContext(ctx); e != nil {
 		return e
 	}
 	if e := s.verifyReports(); e != nil {
 		return e
+	}
+	if err := ctx.Err(); err != nil {
+		return err
 	}
 	if s.campaign == nil {
 		return fmt.Errorf("actual campaign absent")
 	}
 	s.campaign.mu.Lock()
 	defer s.campaign.mu.Unlock()
+	if err := ctx.Err(); err != nil {
+		return err
+	}
 	if s.campaign.closed || s.campaign.poisoned || s.campaign.inventoryWindowCampaign() != nil {
 		return fmt.Errorf("actual live owner changed")
 	}

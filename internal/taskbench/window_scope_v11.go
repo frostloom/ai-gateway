@@ -55,6 +55,9 @@ func prepareFullWindowScopeV11(s ConversationSuite, p PairedProfiles, caps []ful
 	return out, validateWindowV11ExecutionShape(out)
 }
 func validateWindowV11Declarations(s fullWindowScope) error {
+	if hasWindowV14Fields(s) {
+		return fmt.Errorf("v14-only fields rejected by legacy declarations")
+	}
 	if e := s.Observation.validate(); e != nil {
 		return e
 	}

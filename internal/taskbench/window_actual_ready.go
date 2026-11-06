@@ -63,6 +63,7 @@ type FullWindowActualReady struct {
 	stoppedV9      windowStoppedV9Baseline
 	stoppedV10     windowStoppedV10Baseline
 	stoppedV12     windowStoppedV12Baseline
+	stoppedV13     windowStoppedV13Baseline
 	stoppedV11     windowStoppedV11Baseline
 	v8Authority    *windowV8Authority
 	source         ConversationSuite
@@ -148,6 +149,7 @@ func checkFullWindowActualReadyEpoch(o FullWindowActualReadyOptions, epoch int) 
 	v11 := epoch == 11
 	v12 := epoch == 12
 	v13 := epoch == 13
+	v14 := epoch == 14
 
 	manifestSHA, archiveCommit, archiveTree := fullWindowActualManifestSHA, fullWindowActualArchiveCommit, fullWindowActualArchiveTree
 	if v8 {
@@ -155,6 +157,9 @@ func checkFullWindowActualReadyEpoch(o FullWindowActualReadyOptions, epoch int) 
 	}
 	if v9 {
 		manifestSHA, archiveCommit, archiveTree = fullWindowV9ManifestSHA, fullWindowV9ArchiveCommit, fullWindowV9ArchiveTree
+	}
+	if v14 {
+		manifestSHA, archiveCommit, archiveTree = fullWindowV14ManifestSHA, fullWindowV14ArchiveCommit, fullWindowV14ArchiveTree
 	}
 	if v13 {
 		manifestSHA, archiveCommit, archiveTree = fullWindowV13ManifestSHA, fullWindowV13ArchiveCommit, fullWindowV13ArchiveTree
@@ -173,7 +178,7 @@ func checkFullWindowActualReadyEpoch(o FullWindowActualReadyOptions, epoch int) 
 	reject := func() (FullWindowActualReadySummary, *FullWindowActualReady, error) {
 		return summary, nil, &windowActualReadinessRejection{stage: stage}
 	}
-	if epoch != 0 && epoch != 8 && epoch != 9 && epoch != 10 && epoch != 11 && epoch != 12 && epoch != 13 {
+	if epoch != 0 && epoch != 8 && epoch != 9 && epoch != 10 && epoch != 11 && epoch != 12 && epoch != 13 && epoch != 14 {
 		return reject()
 	}
 	if !comparisonDigest(manifestSHA) || !windowActualRevision(archiveCommit) || !windowActualRevision(archiveTree) {
@@ -185,7 +190,7 @@ func checkFullWindowActualReadyEpoch(o FullWindowActualReadyOptions, epoch int) 
 		return reject()
 	}
 	var m windowActualManifest
-	if decodeWindowActualJSON(raw, &m) != nil || validateWindowActualPrivateSettingsBinding(&m) != nil || !(windowActualSupportedEpoch(m) && epoch == 0 || v8 && m.Schema == "full-window-actual-ready.v8" && m.Scope.Schema == "full-window-scope.v8" || v9 && m.Schema == "full-window-actual-ready.v9" && m.Scope.Schema == "full-window-scope.v9" || v10 && m.Schema == "full-window-actual-ready.v10" && m.Scope.Schema == "full-window-scope.v10" || v13 && m.Schema == "full-window-actual-ready.v13" && m.Scope.Schema == "full-window-scope.v13" || v12 && m.Schema == "full-window-actual-ready.v12" && m.Scope.Schema == "full-window-scope.v12" || v11 && m.Schema == "full-window-actual-ready.v11" && m.Scope.Schema == "full-window-scope.v11") || m.EvidenceKind != "actual" || m.ArchiveCommit != archiveCommit || m.ArchiveTree != archiveTree {
+	if decodeWindowActualJSON(raw, &m) != nil || validateWindowActualPrivateSettingsBinding(&m) != nil || !(windowActualSupportedEpoch(m) && epoch == 0 || v8 && m.Schema == "full-window-actual-ready.v8" && m.Scope.Schema == "full-window-scope.v8" || v9 && m.Schema == "full-window-actual-ready.v9" && m.Scope.Schema == "full-window-scope.v9" || v10 && m.Schema == "full-window-actual-ready.v10" && m.Scope.Schema == "full-window-scope.v10" || v14 && m.Schema == "full-window-actual-ready.v14" && m.Scope.Schema == "full-window-scope.v14" || v13 && m.Schema == "full-window-actual-ready.v13" && m.Scope.Schema == "full-window-scope.v13" || v12 && m.Schema == "full-window-actual-ready.v12" && m.Scope.Schema == "full-window-scope.v12" || v11 && m.Schema == "full-window-actual-ready.v11" && m.Scope.Schema == "full-window-scope.v11") || m.EvidenceKind != "actual" || m.ArchiveCommit != archiveCommit || m.ArchiveTree != archiveTree {
 		return reject()
 	}
 	stage = "frozen_evidence"
@@ -208,21 +213,25 @@ func checkFullWindowActualReadyEpoch(o FullWindowActualReadyOptions, epoch int) 
 	if err := validateWindowActualHelperCatalog(m, o.ManifestPath); err != nil {
 		return reject()
 	}
-	if v9 || v10 || v11 || v12 || v13 {
+	if v9 || v10 || v11 || v12 || v13 || v14 {
 		customerRevision = m.ArchiveCommit
 	}
 
 	expectedPolicy := windowOwnedQualityPolicySHA()
-	if v13 {
+	if v13 || v14 {
 		expectedPolicy = windowOwnedPreviewFailurePolicySHA()
 	}
 	if m.Scope.Bindings.CustomerRevision != customerRevision || m.Scope.Bindings.ExecutorRevision != m.ArchiveCommit || m.Scope.Bindings.PolicySHA256 != expectedPolicy {
 		return reject()
 	}
-	if !v12 && !v13 && m.ExecutorEquivalencePins != nil {
+	if !v12 && !v13 && !v14 && m.ExecutorEquivalencePins != nil {
 		return reject()
 	}
-	if v13 {
+	if v14 {
+		if err := validateWindowV14ExecutorEquivalence(m); err != nil {
+			return reject()
+		}
+	} else if v13 {
 		if err := validateWindowV13ExecutorEquivalence(m); err != nil {
 			return reject()
 		}
@@ -291,6 +300,9 @@ func checkFullWindowActualReadyEpoch(o FullWindowActualReadyOptions, epoch int) 
 	if v9 {
 		prepare = prepareWindowCampaignV9Technical
 	}
+	if v14 {
+		prepare = prepareWindowCampaignV14Technical
+	}
 	if v13 {
 		prepare = prepareWindowCampaignV13Technical
 	}
@@ -309,14 +321,20 @@ func checkFullWindowActualReadyEpoch(o FullWindowActualReadyOptions, epoch int) 
 	}
 	_, totals, err := validateFullWindowScope(m.Scope, source, profiles, m.Scope.Bindings)
 	expectedPairs, expectedArms, expectedTurns, expectedBoundaries := 3660, 7320, 11772, 1851
-	if v10 || v12 || v13 {
+	if v10 || v12 || v13 || v14 {
 		expectedPairs, expectedArms, expectedTurns, expectedBoundaries = 3275, 6550, 10504, 0
 	}
 	if err != nil || totals.Pairs != expectedPairs || totals.Arms != expectedArms || totals.DefinedUserTurns != expectedTurns || totals.Boundaries != expectedBoundaries {
 		return reject()
 	}
 	candidate := &FullWindowActualReady{manifestPath: o.ManifestPath, manifestRaw: append([]byte(nil), raw...), attestationRaw: append([]byte(nil), attestationRaw...), manifest: m, prepared: prepared, source: source, profiles: profiles}
-	if v13 {
+	if v14 {
+		proof, e := loadWindowActualStoppedBaselineV14(m)
+		if e != nil {
+			return reject()
+		}
+		candidate.baseline, candidate.stoppedV13, candidate.prepared.stoppedV13 = windowV14CandidateBaseline(proof.base), proof, &proof
+	} else if v13 {
 		proof, e := loadWindowActualStoppedBaselineV13(m)
 		if e != nil {
 			return reject()
@@ -403,6 +421,9 @@ func checkFullWindowActualReadyEpoch(o FullWindowActualReadyOptions, epoch int) 
 
 // Future session startup must recheck before any credential load or claim write.
 func (r *FullWindowActualReady) revalidate() error {
+	if r != nil && r.manifest.Schema == "full-window-actual-ready.v14" {
+		return r.revalidateV14()
+	}
 	if r != nil && r.manifest.Schema == "full-window-actual-ready.v13" {
 		return r.revalidateV13()
 	}
@@ -728,6 +749,9 @@ func validateWindowActualBuildPins(info *debug.BuildInfo, m windowActualManifest
 	}
 	prefix := "github.com/frostloom/ai-gateway/internal/taskbench."
 	expected := map[string]string{prefix + "fullWindowActualManifestSHA": sha, prefix + "fullWindowActualArchiveCommit": m.ArchiveCommit, prefix + "fullWindowActualArchiveTree": m.ArchiveTree}
+	if m.Schema == "full-window-actual-ready.v14" {
+		expected = map[string]string{prefix + "fullWindowV14ManifestSHA": sha, prefix + "fullWindowV14ArchiveCommit": m.ArchiveCommit, prefix + "fullWindowV14ArchiveTree": m.ArchiveTree, prefix + "fullWindowV14EquivalencePinsSHA": fullWindowV14EquivalencePinsSHA}
+	}
 	if m.Schema == "full-window-actual-ready.v13" {
 		expected = map[string]string{prefix + "fullWindowV13ManifestSHA": sha, prefix + "fullWindowV13ArchiveCommit": m.ArchiveCommit, prefix + "fullWindowV13ArchiveTree": m.ArchiveTree, prefix + "fullWindowV13EquivalencePinsSHA": fullWindowV13EquivalencePinsSHA}
 	}
@@ -766,7 +790,7 @@ func validateWindowActualBuildPins(info *debug.BuildInfo, m windowActualManifest
 			}
 			key, value, ok := strings.Cut(v, "=")
 			want, pinned := expected[key]
-			if (m.Schema == "full-window-actual-ready.v12" || m.Schema == "full-window-actual-ready.v13") && strings.HasPrefix(key, prefix+"fullWindow") && !pinned {
+			if (m.Schema == "full-window-actual-ready.v12" || m.Schema == "full-window-actual-ready.v13" || m.Schema == "full-window-actual-ready.v14") && strings.HasPrefix(key, prefix+"fullWindow") && !pinned {
 				return fmt.Errorf("foreign v12 build pin")
 			}
 

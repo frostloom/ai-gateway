@@ -153,7 +153,7 @@ func TestWindowV13RuntimeBuildAnchorSet(t *testing.T) {
 
 func TestWindowV13RejectsConsumedV12BeforeSettings(t *testing.T) {
 	old := &FullWindowActualReady{manifest: windowActualManifest{Schema: "full-window-actual-ready.v12", Scope: fullWindowScope{Schema: "full-window-scope.v12"}}, v8Authority: &windowV8Authority{v12: &windowV12Authority{}}}
-	if session, err := OpenFullWindowActual(context.Background(), old, "/must-not-read-settings"); session != nil || err == nil || !strings.Contains(err.Error(), "v13 delegated authority required before settings") {
+	if session, err := OpenFullWindowActual(context.Background(), old, "/must-not-read-settings"); session != nil || err == nil || !strings.Contains(err.Error(), "v14 separate policy and delegated authority required before settings") {
 		t.Fatalf("old12 accepted: %v", err)
 	}
 }
