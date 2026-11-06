@@ -1,4 +1,8 @@
 # Frozen evidence must retain exact bytes across Windows and Unix checkouts.
+# Later paired-pilot trees and pinned helpers are hashed by Windows CI.
+# Keep these before whitespace exceptions so those exceptions still apply.
+eval/paired-pilots/** -text
+scripts/helpers/** -text
 eval/paired-pilots/2026-10-17-jev-acceptance-v1/** -text
 eval/paired-pilots/2026-10-17-four-task-retest-v1/** -text
 eval/jev-offline-readiness/** -text

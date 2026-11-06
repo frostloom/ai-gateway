@@ -248,8 +248,14 @@ func TestWindowPayloadTamperDirectoryAndInodeChangesStop(t *testing.T) {
 			case "body":
 				os.WriteFile(file, []byte("tampered request"), 0600)
 			case "inode":
-				os.Remove(file)
-				os.WriteFile(file, req, 0600)
+				// Remove-then-create can reuse the inode and hide the identity change.
+				replacement := file + ".replacement"
+				if err := os.WriteFile(replacement, req, 0600); err != nil {
+					t.Fatal(err)
+				}
+				if err := os.Rename(replacement, file); err != nil {
+					t.Fatal(err)
+				}
 			case "mode":
 				os.Chmod(file, 0644)
 			case "metadata":

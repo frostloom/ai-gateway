@@ -95,7 +95,7 @@ def audit(root, probe, reservation):
                 'Consumed reservation snapshot differs: ' + key)
     price_raw = (root / PRICING).read_bytes()
     price_manifest = json.loads((root / PRICING.parent / 'manifest.json').read_bytes())
-    require(price_manifest['files'].get(str(PRICING)) == sha(price_raw), 'Archived pricing binding differs')
+    require(price_manifest['files'].get(PRICING.as_posix()) == sha(price_raw), 'Archived pricing binding differs')
     price = json.loads(price_raw)
     model, jev = price['deepseek'], price['typesafe']
     model_per_attempt = (model['max_input'] * model['peak_input_micro_cny_per_million']

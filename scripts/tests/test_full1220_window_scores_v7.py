@@ -150,7 +150,7 @@ class V7PureTests(unittest.TestCase):
         job={'schema':'full1220-window-score-job.v1','manifest_path':'/manifest','summary_path':'/summary','receipt_path':'/receipt','review_path':'/review','records_dir':'/records','expected_hashes':args[5]}
         files={'/job':old.wire(job),'/manifest':args[0],'/summary':args[1],'/receipt':args[2],'/review':args[4],f['manifest']['envelope']['path']:e['envelope_raw']}
         files.update({'/records/'+name:raw for name,raw in {**args[3],**e['sidecars']}.items()})
-        with patch.object(self.adapter,'_regular_bytes',side_effect=lambda path,*unused:files[str(path)]):
+        with patch.object(self.adapter,'_regular_bytes',side_effect=lambda path,*unused:files[Path(path).as_posix()]):
             loaded,inputs,plan=self.adapter._read_score_job('/job')
         self.assertEqual(loaded['_epoch7_evidence'],e);self.assertNotIn('_epoch6_evidence',loaded)
         self.assertEqual(plan,self.plan(f,e));self.assertEqual(inputs,args)

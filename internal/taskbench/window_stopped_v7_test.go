@@ -345,8 +345,10 @@ func TestWindowStoppedV7InventoryRejects(t *testing.T) {
 			case "mutation":
 				err = os.Chtimes(path, time.Unix(1, 0), time.Unix(1, 0))
 			case "replacement":
-				if err = os.Remove(path); err == nil {
-					err = os.WriteFile(path, []byte("abc"), 0600)
+				// Remove-then-create can reuse the inode and hide the identity change.
+				replacement := path + ".replacement"
+				if err = os.WriteFile(replacement, []byte("abc"), 0600); err == nil {
+					err = os.Rename(replacement, path)
 				}
 			case "directory_alias":
 				if err = os.Rename(dir, filepath.Join(root, "saved")); err == nil {

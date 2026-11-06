@@ -42,7 +42,7 @@ jobs:
       - name: vet
         run: go vet ./...
       - name: test
-        run: go test ./... -count=1
+        run: go test ./... -count=1 -timeout 20m
 
   offline-evaluation:
     runs-on: windows-latest
@@ -51,6 +51,11 @@ jobs:
       PYTHONIOENCODING: utf-8
     steps:
       - uses: actions/checkout@v4
+      - name: Keep hashed evidence bytes
+        shell: bash
+        run: |
+          git config --local core.autocrlf false
+          git checkout-index --force --all
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
