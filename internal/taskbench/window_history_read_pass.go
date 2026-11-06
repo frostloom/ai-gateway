@@ -99,6 +99,8 @@ type historyReadPass struct {
 	stoppedV11Metadata         bool
 	stoppedV11LegacyTranscript uint64
 	// New177 stage activates only inside its fixed epoch13 lock after genuine156.
+	stoppedV14Metadata     bool
+	stoppedV14MetadataLock *historyLockLease
 	stoppedV13Metadata     bool
 	stoppedV13MetadataLock *historyLockLease
 	// Activated only inside the fixed Root4 lock after its concrete154 loader.
@@ -205,6 +207,9 @@ func (p *historyReadPass) chargeLocked(key, path, sha string, extra uint64) erro
 		}
 	}
 	if legacy && p.stoppedV13Metadata && stoppedV13MetadataPath(path) {
+		legacy = false
+	}
+	if legacy && p.stoppedV14Metadata && stoppedV14MetadataPath(path) {
 		legacy = false
 	}
 	if !historyBudgetFits(charge, extra, limit) || !historyBudgetFits(p.stats.TranscriptBytes, charge+extra, limit) || p.stats.Records >= historyPassRecordsLimit || p.stoppedV11Metadata && legacy && !historyBudgetFits(p.stoppedV11LegacyTranscript, charge+extra, historyPassTranscriptLimit) {
@@ -368,7 +373,7 @@ func (p *historyReadPass) readLeaf(s historyReadSpec) (raw []byte, digest string
 		err = fmt.Errorf("history pass failed")
 	}
 	cache := p.retainHistoryBytesLocked(s, observed.identity.Size)
-	if p.stoppedV13Metadata && stoppedV13MetadataPath(s.path) {
+	if p.stoppedV13Metadata && stoppedV13MetadataPath(s.path) || p.stoppedV14Metadata && stoppedV14MetadataPath(s.path) {
 		cache = false
 	}
 	if !found && err == nil {
@@ -540,7 +545,7 @@ func (p *historyReadPass) CheckNamespace(path string, names map[string]bool, che
 	return nil
 }
 func (p *historyReadPass) WithStoppedLock(epoch int, path string, check func() error) (err error) {
-	if check == nil || epoch < 1 || epoch > 11 && !p.stoppedV12LockAllowed(epoch, path) && !p.stoppedV13LockAllowed(epoch, path) {
+	if check == nil || epoch < 1 || epoch > 11 && !p.stoppedV12LockAllowed(epoch, path) && !p.stoppedV13LockAllowed(epoch, path) && !p.stoppedV14LockAllowed(epoch, path) {
 		return p.fail(fmt.Errorf("history lock specification"))
 	}
 	if err = p.begin(true); err != nil {
@@ -603,6 +608,12 @@ func (p *historyReadPass) WithStoppedLock(epoch int, path string, check func() e
 	}
 	if err != nil {
 		return p.fail(err)
+	}
+	if epoch == 14 {
+		p.mu.Lock()
+		p.stoppedV14MetadataLock = lease
+		p.mu.Unlock()
+		defer func() { p.mu.Lock(); p.stoppedV14MetadataLock = nil; p.mu.Unlock() }()
 	}
 	if epoch == 13 {
 		p.mu.Lock()
