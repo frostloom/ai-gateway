@@ -133,7 +133,7 @@ func TestWindowV15RejectsConsumedV14Observation(t *testing.T) {
 func TestWindowV15VerificationRequiresLiveOperationContext(t *testing.T) {
 	canceled, cancel := context.WithCancel(context.Background())
 	cancel()
-	s := &FullWindowActualSession{}
+	s := &FullWindowActualSession{ready: &FullWindowActualReady{manifest: windowActualManifest{Schema: "full-window-actual-ready.v15"}}}
 	for _, ctx := range []context.Context{nil, canceled} {
 		if err := s.verifyInputsContext(ctx); err == nil || ctx != nil && !errors.Is(err, context.Canceled) {
 			t.Fatal("input check escaped operation context", err)
