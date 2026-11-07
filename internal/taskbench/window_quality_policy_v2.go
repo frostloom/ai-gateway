@@ -33,14 +33,15 @@ type qualityEffectCapture struct {
 	Sessions []store.AgentSession           `json:"sessions"`
 }
 type qualityPreviewInput struct {
-	PreviewFailures []collectionPreviewFailureEvidence `json:"preview_failures,omitempty"`
-	Plans           []store.Plan                       `json:"plans"`
-	Record          collectionRecording                `json:"record"`
-	Turn            int                                `json:"turn"`
-	BeforeSession   json.RawMessage                    `json:"before_session"`
-	Pending         *qualityPendingCapture             `json:"pending"`
-	Before          qualityEffectCapture               `json:"before"`
-	After           qualityEffectCapture               `json:"after"`
+	PreviewRecoveries []collectionPreviewRecoveryEvidence `json:"preview_recoveries,omitempty"`
+	PreviewFailures   []collectionPreviewFailureEvidence  `json:"preview_failures,omitempty"`
+	Plans             []store.Plan                        `json:"plans"`
+	Record            collectionRecording                 `json:"record"`
+	Turn              int                                 `json:"turn"`
+	BeforeSession     json.RawMessage                     `json:"before_session"`
+	Pending           *qualityPendingCapture              `json:"pending"`
+	Before            qualityEffectCapture                `json:"before"`
+	After             qualityEffectCapture                `json:"after"`
 }
 type qualityUnrunTurn struct {
 	Turn       int              `json:"turn"`
@@ -80,7 +81,7 @@ func qualityPreviewCandidate(in qualityPreviewInput) (qualityPreviewSidecar, err
 	fail := func(reason string) (qualityPreviewSidecar, error) {
 		return qualityPreviewSidecar{}, fmt.Errorf("preview candidate rejected: %s", reason)
 	}
-	if in.PreviewFailures != nil {
+	if in.PreviewFailures != nil || in.PreviewRecoveries != nil {
 		return fail("v1 assessment")
 	}
 	if err := verifyCollectionRecording(in.Record); err != nil {

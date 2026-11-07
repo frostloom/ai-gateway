@@ -79,7 +79,7 @@ func windowQualityEnvelopeSHA(q *windowQualityOwnedEnd) string {
 	return conversationHash(raw)
 }
 func (d *windowOwnedDriver) windowQualityMode() bool {
-	return d != nil && d.permit != nil && d.permit.campaign != nil && (d.permit.campaign.prepared.scope.Bindings.PolicySHA256 == windowOwnedQualityPolicySHA() || d.windowPreviewFailureMode())
+	return d != nil && d.permit != nil && d.permit.campaign != nil && (d.permit.campaign.prepared.scope.Bindings.PolicySHA256 == windowOwnedQualityPolicySHA() || d.windowPreviewFailureMode() || d.windowPreviewRecoveryMode())
 }
 func (r *windowAcquisitionRun) validateWindowQualityFiles() error {
 	if r == nil || r.permit == nil || r.permit.acquisition != r || r.auth.campaign != r.permit.campaign || r.ledger != r.permit.ledger || r.environment != r.permit.environment || r.rootInfo == nil || r.recordFiles == nil || !reflect.DeepEqual(r.scope, r.permit.campaign.prepared.scope) || r.permit.windowIndex < 1 || r.permit.windowIndex > len(r.scope.Windows) || r.window != r.scope.Windows[r.permit.windowIndex-1] {

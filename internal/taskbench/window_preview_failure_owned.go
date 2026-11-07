@@ -104,6 +104,9 @@ func (d *windowOwnedDriver) previewFailureReplay(final ConversationState) *colle
 	return &collectionPreviewFailureReplay{replayConversationDriver: &replayConversationDriver{episode: ConversationEpisode{Key: d.caseDefinition.Key(), Fixture: d.fixture, Initial: d.initial, Final: final, Steps: d.observations}}, evidence: d.previewFailures}
 }
 func (d *windowOwnedDriver) verifyOwnedCollectionRecord(record collectionRecording) error {
+	if d.windowPreviewRecoveryMode() {
+		return d.verifyOwnedRecoveryRecord(record)
+	}
 	if !d.windowPreviewFailureMode() {
 		return verifyCollectionRecording(record)
 	}
@@ -187,6 +190,9 @@ func windowPreviewFailureProofEvidence(p *windowOwnedArmProof) (*windowPreviewFa
 }
 
 func qualityPreviewCandidateV13(in qualityPreviewInput) (qualityPreviewSidecar, error) {
+	if in.PreviewRecoveries != nil {
+		return qualityPreviewSidecar{}, fmt.Errorf("old candidate carries recovery captures")
+	}
 	if in.PreviewFailures == nil {
 		in.PreviewFailures = []collectionPreviewFailureEvidence{}
 	}
@@ -209,6 +215,16 @@ func qualityPreviewCandidateV13(in qualityPreviewInput) (qualityPreviewSidecar, 
 	return out, nil
 }
 func verifyWindowQualityCandidate(sidecar qualityPreviewSidecar) error {
+	if sidecar.PolicyID == "full-customer-owned-preview-candidate.v16" {
+		expected, err := qualityPreviewCandidateV16(sidecar.Evidence)
+		if err != nil {
+			return err
+		}
+		if !qualityJSONEqual(expected, sidecar) {
+			return fmt.Errorf("v16 preview sidecar binding differs")
+		}
+		return nil
+	}
 	if sidecar.PolicyID == qualityPreviewPolicyID {
 		return verifyQualityPreviewSidecar(sidecar)
 	}
@@ -222,6 +238,10 @@ func verifyWindowQualityCandidate(sidecar qualityPreviewSidecar) error {
 	return nil
 }
 func (d *windowOwnedDriver) windowQualityCandidate(in qualityPreviewInput) (qualityPreviewSidecar, error) {
+	if d.windowPreviewRecoveryMode() {
+		in.PreviewRecoveries = d.previewRecoveries
+		return qualityPreviewCandidateV16(in)
+	}
 	if d.windowPreviewFailureMode() {
 		in.PreviewFailures = d.previewFailures
 		return qualityPreviewCandidateV13(in)
@@ -229,6 +249,9 @@ func (d *windowOwnedDriver) windowQualityCandidate(in qualityPreviewInput) (qual
 	return qualityPreviewCandidate(in)
 }
 func (d *windowOwnedDriver) windowQualityOwnedPolicySHA() string {
+	if d.windowPreviewRecoveryMode() {
+		return windowOwnedPreviewRecoveryPolicySHA()
+	}
 	if d.windowPreviewFailureMode() {
 		return windowOwnedPreviewFailurePolicySHA()
 	}

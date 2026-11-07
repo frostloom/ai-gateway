@@ -79,6 +79,30 @@ func TestWindowPreviewRecoveryOnlyExactNewMode(t *testing.T) {
 	}
 }
 
+func TestWindowPreviewRecoveryOwnedRecordingDispatch(t *testing.T) {
+	c, driver := collectionPreviewRecoveryConversationExample(t)
+	d := previewFailureObservationDriver("full-window-scope.v16", windowOwnedPreviewRecoveryPolicySHA(), collectionPreviewRecoveryPolicySHA())
+	got := d.recordWindowOwnedConversation(context.Background(), c, driver)
+	if got.PolicyID != collectionPreviewRecoveryPolicyID || got.Disposition != "continue_recorded" || len(driver.sent) != 2 {
+		t.Fatalf("new owned dispatch did not retain confirmation: %+v", got.Issues)
+	}
+	d.previewRecoveries = []collectionPreviewRecoveryEvidence{driver.evidence}
+	if err := d.verifyOwnedCollectionRecord(got); err != nil {
+		t.Fatal(err)
+	}
+	if !d.windowQualityMode() || d.windowQualityOwnedPolicySHA() != windowOwnedPreviewRecoveryPolicySHA() {
+		t.Fatal("new mode omitted owned SQL/session/quality guards")
+	}
+	for _, schema := range []string{"full-window-scope.v13", "full-window-scope.v14", "full-window-scope.v15"} {
+		c, driver := collectionPreviewRecoveryConversationExample(t)
+		old := previewFailureObservationDriver(schema, windowOwnedPreviewFailurePolicySHA(), collectionPreviewFailurePolicySHA())
+		record := old.recordWindowOwnedConversation(context.Background(), c, driver)
+		if record.PolicyID != collectionPreviewFailurePolicyID || record.Disposition != "halt" || len(driver.sent) != 1 {
+			t.Fatal("old scope admitted same-turn pending recovery", schema)
+		}
+	}
+}
+
 func TestWindowPreviewRecoveryProofRejectsMissingPermit(t *testing.T) {
 	d := previewFailureObservationDriver("full-window-scope.v16", windowOwnedPreviewRecoveryPolicySHA(), collectionPreviewRecoveryPolicySHA())
 	if _, err := windowPreviewRecoveryProofEvidence(&windowOwnedArmProof{driver: d}); err == nil {
@@ -163,6 +187,58 @@ func TestWindowPreviewRecoveryArchiveRejectsOldEpochAndRetainsNewSidecar(t *test
 			}
 			if s.verifyReports() == nil {
 				t.Fatal("changed recovery sidecar admitted")
+			}
+		})
+	}
+}
+
+func TestWindowPreviewRecoveryCompoundUnsafePreviewPreservesNegative(t *testing.T) {
+	in := previewFailureCompoundExample(t)
+	original := in.Record.Result
+	captures := []collectionPreviewRecoveryEvidence{}
+	for _, e := range in.PreviewFailures {
+		captures = append(captures, collectionPreviewRecoveryEvidence{Orders: e.Orders, Turn: e.Turn, BeforeSession: e.BeforeSession, AfterSession: e.AfterSession, Before: e.Before, After: e.After})
+	}
+	d := &collectionPreviewRecoveryReplay{replayConversationDriver: &replayConversationDriver{episode: ConversationEpisode{Key: original.Case.Key(), Fixture: original.Fixture, Initial: original.Initial, Final: original.Final, Steps: original.Observations}}, evidence: captures}
+	record := recordCollectionPreviewRecoveryConversation(context.Background(), original.Case, d)
+	if record.Disposition != "halt" || len(record.Result.Observations) != 2 || len(record.PreviewRecoveries) != 1 || verifyCollectionPreviewRecoveryRecording(record) != nil {
+		t.Fatalf("compound fixture differs: %+v", record.Issues)
+	}
+	in.Record, in.PreviewFailures, in.PreviewRecoveries = record.collectionRecording, nil, record.PreviewRecoveries
+	got, err := qualityPreviewCandidateV16(in)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got.PolicyID != "full-customer-owned-preview-candidate.v16" || !got.AuditOnly || len(got.Unrun) != 1 || got.Unrun[0].Turn != 3 || got.Evidence.Record.Result.Success {
+		t.Fatal("negative or original unrun confirmation promoted")
+	}
+	if err = verifyWindowQualityCandidate(got); err != nil {
+		t.Fatal(err)
+	}
+	if _, err = qualityPreviewCandidateV13(in); err == nil {
+		t.Fatal("old candidate accepted new recovery evidence")
+	}
+	if _, err = qualityPreviewCandidate(in); err == nil {
+		t.Fatal("legacy candidate accepted new recovery evidence")
+	}
+	for _, fault := range []string{"capture", "pending", "unrun", "policy"} {
+		t.Run(fault, func(t *testing.T) {
+			var bad qualityPreviewSidecar
+			if json.Unmarshal(mustCollectionJSON(t, got), &bad) != nil {
+				t.Fatal("decode")
+			}
+			switch fault {
+			case "capture":
+				bad.Evidence.PreviewRecoveries = nil
+			case "pending":
+				bad.Evidence.Pending.IdemKey = ""
+			case "unrun":
+				bad.Unrun = nil
+			case "policy":
+				bad.PolicyID = "full-customer-owned-preview-candidate.v13"
+			}
+			if verifyWindowQualityCandidate(bad) == nil {
+				t.Fatal("compound tamper admitted")
 			}
 		})
 	}

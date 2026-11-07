@@ -15,6 +15,39 @@ import (
 func windowOwnedPreviewRecoveryPolicySHA() string {
 	return qualityJSONSHA([]string{"full-customer-owned-preview-recovery.v16", windowOwnedQualityPolicySHA(), collectionPreviewRecoveryPolicySHA(), "quiesced-owned-full-sql-session-capture;durable-sidecar-before-cleanup;opaque-owner-seal;all-original-turns;no-old-epoch-selection"})
 }
+
+func (d *windowOwnedDriver) recordWindowOwnedConversation(ctx context.Context, c ConversationCase, driver ConversationDriver) collectionRecording {
+	if d.windowPreviewRecoveryMode() {
+		return recordCollectionPreviewRecoveryConversation(ctx, c, driver).collectionRecording
+	}
+	if d.windowPreviewFailureMode() {
+		return recordCollectionPreviewFailureConversation(ctx, c, driver).collectionRecording
+	}
+	return recordCollectionConversation(ctx, c, driver)
+}
+
+func qualityPreviewCandidateV16(in qualityPreviewInput) (qualityPreviewSidecar, error) {
+	if in.PreviewFailures != nil {
+		return qualityPreviewSidecar{}, fmt.Errorf("cross-policy preview captures")
+	}
+	if in.PreviewRecoveries == nil {
+		in.PreviewRecoveries = []collectionPreviewRecoveryEvidence{}
+	}
+	if verifyCollectionPreviewRecoveryRecording(collectionPreviewRecoveryRecording{collectionRecording: in.Record, PreviewRecoveries: in.PreviewRecoveries}) != nil {
+		return qualityPreviewSidecar{}, fmt.Errorf("recovery candidate assessment differs")
+	}
+	out, err := qualityPreviewCandidateVerified(in)
+	if err != nil {
+		return out, err
+	}
+	out.Evidence.PreviewRecoveries, err = cloneWindowOwned(in.PreviewRecoveries)
+	if err != nil {
+		return out, err
+	}
+	out.PolicyID = "full-customer-owned-preview-candidate.v16"
+	out.PolicySHA256 = qualityJSONSHA([]string{out.PolicyID, qualityPreviewPolicySHA(), collectionPreviewRecoveryPolicySHA()})
+	return out, nil
+}
 func windowRecoveryPolicyAllowed(scope fullWindowScope) bool {
 	return scope.Schema == "full-window-scope.v16" && scope.Bindings.PolicySHA256 == windowOwnedPreviewRecoveryPolicySHA() && scope.CollectionPolicySHA256 == collectionPreviewRecoveryPolicySHA()
 }
