@@ -18,6 +18,9 @@ func windowOwnedPreviewFailurePolicySHA() string {
 	return qualityJSONSHA([]string{"full-customer-owned-preview-failure.v13", windowOwnedQualityPolicySHA(), collectionPreviewFailurePolicySHA(), "quiesced-owned-capture;complete-orders-only-on-refund-failure;durable-sidecar-before-cleanup;opaque-owner-seal;all-original-turns;versioned-quality-end-with-verified-complete-admissions"})
 }
 func windowOwnedRecordingPolicyAllowed(scope fullWindowScope) bool {
+	if scope.Schema == "full-window-scope.v16" {
+		return windowRecoveryPolicyAllowed(scope)
+	}
 	if scope.Schema == "full-window-scope.v13" || (scope.Schema == "full-window-scope.v14" || scope.Schema == "full-window-scope.v15") {
 		return scope.Bindings.PolicySHA256 == windowOwnedPreviewFailurePolicySHA() && scope.CollectionPolicySHA256 == collectionPreviewFailurePolicySHA()
 	}
@@ -235,7 +238,7 @@ func (d *windowOwnedDriver) windowQualityOwnedPolicySHA() string {
 // V13 returns the same wire representation used by its retained capture,
 // without non-wire clock metadata or aliases into the owner's evidence.
 func (d *windowOwnedDriver) observationForWindowRecording(live, stored ConversationObservation) (ConversationObservation, error) {
-	if d.windowPreviewFailureMode() {
+	if d.windowPreviewFailureMode() || d.windowPreviewRecoveryMode() {
 		return cloneWindowOwned(stored)
 	}
 	return live, nil

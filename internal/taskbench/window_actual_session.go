@@ -602,6 +602,20 @@ func (s *FullWindowActualSession) rememberReport(name string, report windowAcqui
 	}
 	allowed := map[string]string{"receipt.json": conversationHash(receiptRaw)}
 	for _, row := range report.Rows {
+		if row.PreviewRecovery != nil {
+			if s.ready.manifest.Schema != "full-window-actual-ready.v16" || report.Schema != "full-window-acquisition-receipt.v16" || row.QualityEnd != nil || row.PreviewFailure != nil || validateWindowPreviewRecoveryEvidence(row.PreviewRecovery, row.RecordingSHA256) != nil {
+				return fmt.Errorf("actual preview-recovery archive binding differs")
+			}
+			if _, exists := allowed[row.PreviewRecovery.SidecarFile]; exists {
+				return fmt.Errorf("actual preview-recovery archive path collides")
+			}
+			for _, other := range report.Rows {
+				if other.RecordingFile == row.PreviewRecovery.SidecarFile {
+					return fmt.Errorf("actual preview-recovery record path collides")
+				}
+			}
+			allowed[row.PreviewRecovery.SidecarFile] = row.PreviewRecovery.SidecarSHA256
+		}
 		if row.RecordingFile != "" {
 			allowed[row.RecordingFile] = row.RecordingSHA256
 		}

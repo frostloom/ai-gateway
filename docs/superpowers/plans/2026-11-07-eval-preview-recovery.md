@@ -34,10 +34,10 @@
 
 **Interfaces:** New `collectionPreviewRecoveryEvidence` contains turn, before/after raw sessions, complete before/after `qualityEffectCapture`, optional `*qualityPendingCapture` and existing complete-order projection when needed. New `collectionPreviewRecoveryRecording` embeds `collectionRecording` plus `preview_recoveries`. Produce `recordCollectionPreviewRecoveryConversation(context.Context, ConversationCase, ConversationDriver) collectionPreviewRecoveryRecording`, `verifyCollectionPreviewRecoveryRecording(collectionPreviewRecoveryRecording) error`, `verifyCollectionPreviewRecoveryEvidence(ConversationCase, Fixture, ConversationState, ConversationObservation, collectionPreviewRecoveryEvidence) error` and `collectionPreviewRecoveryPolicySHA() string`. A new provider method returns exact turn evidence; no data type implements an owned permit.
 
-- [ ] Add `TestCollectionPreviewRecoveryMissingRefundBasisThenCorrectPending`: synthetic own refund{} failure, correct amount100 terminal pending, complete unchanged state/SQL, exact session/audits and raw response; original v2 verifier must reject this shape. First run must fail against current implementation, before adding production behavior.
-- [ ] Add table-driven rejection tests for wrong/foreign/duplicate/after-pending traces, unknown tool/outcome, confirmed/execute trace, pending before turn, wrong tenant/amount/preview/idem, malformed raw/session/telemetry, source-error mismatch, SQL/control/audit changes and cancelled context. Test empty-basis without final pending separately, and retain all old v2 known-family tests.
-- [ ] Implement only the observed missing-refund-basis derivation and existing v2 failure families, with strict trace ordering and at most the existing source iteration count. Reuse existing validators without weakening their old entry behavior. Failed calls/repairs remain in the original trace and accounting.
-- [ ] Run focused normal and race tests for new recovery and old failure/collection tests; verify old policy SHAs and JSON omission behavior unchanged. Root records exact commands/results and requests a fresh source/spec review before integration.
+- [x] Add `TestCollectionPreviewRecoveryMissingRefundBasisThenCorrectPending`: synthetic own refund{} failure, correct amount100 terminal pending, complete unchanged state/SQL, exact session/audits and raw response; original v2 verifier must reject this shape. First run must fail against current implementation, before adding production behavior.
+- [x] Add table-driven rejection tests for wrong/foreign/duplicate/after-pending traces, unknown tool/outcome, confirmed/execute trace, pending before turn, wrong tenant/amount/preview/idem, malformed raw/session/telemetry, source-error mismatch, SQL/control/audit changes and cancelled context. Test empty-basis without final pending separately, and retain all old v2 known-family tests.
+- [x] Implement only the observed missing-refund-basis derivation and existing v2 failure families, with strict trace ordering and at most the existing source iteration count. Reuse existing validators without weakening their old entry behavior. Failed calls/repairs remain in the original trace and accounting.
+- [x] Run focused normal and race tests for new recovery and old failure/collection tests; verify old policy SHAs and JSON omission behavior unchanged. Root records exact commands/results and requests a fresh source/spec review before integration.
 
 Command family: `go test ./internal/taskbench -run 'TestCollectionPreview(Recovery|Failure)' -count=1 -timeout=20m -json`; repeat with `-race`. A component pass is not actual readiness.
 
@@ -99,6 +99,7 @@ Command family: `go test ./internal/taskbench -run 'TestCollectionPreview(Recove
 - [x] V15 permanent stop, independent audit and root original preservation checks.
 - [x] All normal V15 windows1..70 independently reviewed and root DATA bindings checked.
 - [x] Design builder review: nothing important left.
-- [ ] Task1 RED/implementation, all later integration/freeze/actual2708 and Langfuse delivery.
+- [x] Task1 pure recovery RED/implementation and focused normal/race/core review.
+- [ ] Task2 owned capture integration, all later history/freeze/actual2708 and Langfuse delivery.
 
 Task1 production code is in progress and remains unselected by actual scopes. No fresh actual owner, financial claim, provider request or Langfuse request has been created by this plan.

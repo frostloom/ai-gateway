@@ -37,28 +37,29 @@ type windowAcquisitionAuthorization struct {
 	privateReportRoot, evidenceKind                        string
 }
 type windowAcquisitionRow struct {
-	FailureEvidence               *windowFailureEvidence        `json:"failure_evidence,omitempty"`
-	PreviewFailure                *windowPreviewFailureEvidence `json:"preview_failure,omitempty"`
-	QualityEnd                    *windowQualityEndEvidence     `json:"quality_end,omitempty"`
-	ExcludeCompleteTaskComparison bool                          `json:"exclude_complete_task_comparison,omitempty"`
-	Ordinal                       int                           `json:"ordinal"`
-	Pass                          int                           `json:"pass"`
-	DefinedTurns                  int                           `json:"defined_turns"`
-	ObservedTurns                 int                           `json:"observed_turns"`
-	CaseKey                       string                        `json:"case_key"`
-	Arm                           string                        `json:"arm"`
-	TraceID                       string                        `json:"trace_id"`
-	RecordingSHA256               string                        `json:"recording_sha256"`
-	RecordingFile                 string                        `json:"recording_file"`
-	Status                        string                        `json:"status"`
-	Disposition                   string                        `json:"disposition"`
-	Attempted                     bool                          `json:"attempted"`
-	Finished                      bool                          `json:"finished"`
-	Cleanup                       bool                          `json:"cleanup"`
-	Observer                      bool                          `json:"observer"`
-	StructuralPass                bool                          `json:"structural_pass"`
-	Success                       bool                          `json:"success"`
-	DurationMS                    float64                       `json:"duration_ms"`
+	FailureEvidence               *windowFailureEvidence         `json:"failure_evidence,omitempty"`
+	PreviewFailure                *windowPreviewFailureEvidence  `json:"preview_failure,omitempty"`
+	PreviewRecovery               *windowPreviewRecoveryEvidence `json:"preview_recovery,omitempty"`
+	QualityEnd                    *windowQualityEndEvidence      `json:"quality_end,omitempty"`
+	ExcludeCompleteTaskComparison bool                           `json:"exclude_complete_task_comparison,omitempty"`
+	Ordinal                       int                            `json:"ordinal"`
+	Pass                          int                            `json:"pass"`
+	DefinedTurns                  int                            `json:"defined_turns"`
+	ObservedTurns                 int                            `json:"observed_turns"`
+	CaseKey                       string                         `json:"case_key"`
+	Arm                           string                         `json:"arm"`
+	TraceID                       string                         `json:"trace_id"`
+	RecordingSHA256               string                         `json:"recording_sha256"`
+	RecordingFile                 string                         `json:"recording_file"`
+	Status                        string                         `json:"status"`
+	Disposition                   string                         `json:"disposition"`
+	Attempted                     bool                           `json:"attempted"`
+	Finished                      bool                           `json:"finished"`
+	Cleanup                       bool                           `json:"cleanup"`
+	Observer                      bool                           `json:"observer"`
+	StructuralPass                bool                           `json:"structural_pass"`
+	Success                       bool                           `json:"success"`
+	DurationMS                    float64                        `json:"duration_ms"`
 }
 type windowAcquisitionReceipt struct {
 	Observation                *windowObservationReceiptV11    `json:"observation,omitempty"`

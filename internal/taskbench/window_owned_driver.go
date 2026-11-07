@@ -60,47 +60,50 @@ type windowOwnedDriver struct {
 	failureStepInputSession string
 	failureSessionConflict  bool
 
-	mu                     sync.Mutex
-	permit                 *windowAcquisitionPermit
-	ledger                 *windowAccounting
-	slot                   fullWindowSlot
-	arm                    string
-	environment            *PairedFixtureEnvironment
-	observer               *observability.Observer
-	phase                  *windowOwnedPhase
-	setupDone              bool
-	nextTurn               int
-	base                   *HandlerConversationDriver
-	oracle                 *pairedStoreOracle
-	server                 *httptest.Server
-	caseDefinition         ConversationCase
-	fixture                Fixture
-	initial, final         ConversationState
-	observations           []ConversationObservation
-	session                string
-	finalDone, finished    bool
-	runtime                *agent.RuntimeMetadata
-	observerStart          observability.Stats
-	retained               *collectionRecording
-	qualityCandidate       *qualityPreviewSidecar
-	qualityRetainedSHA     string
-	qualityAcquisition     *windowAcquisitionRun
-	policySHA              string
-	qualityRoot            trace.Span
-	previewFailures        []collectionPreviewFailureEvidence
-	previewFailureRetained *windowPreviewFailureEvidence
+	mu                      sync.Mutex
+	permit                  *windowAcquisitionPermit
+	ledger                  *windowAccounting
+	slot                    fullWindowSlot
+	arm                     string
+	environment             *PairedFixtureEnvironment
+	observer                *observability.Observer
+	phase                   *windowOwnedPhase
+	setupDone               bool
+	nextTurn                int
+	base                    *HandlerConversationDriver
+	oracle                  *pairedStoreOracle
+	server                  *httptest.Server
+	caseDefinition          ConversationCase
+	fixture                 Fixture
+	initial, final          ConversationState
+	observations            []ConversationObservation
+	session                 string
+	finalDone, finished     bool
+	runtime                 *agent.RuntimeMetadata
+	observerStart           observability.Stats
+	retained                *collectionRecording
+	qualityCandidate        *qualityPreviewSidecar
+	qualityRetainedSHA      string
+	qualityAcquisition      *windowAcquisitionRun
+	policySHA               string
+	qualityRoot             trace.Span
+	previewFailures         []collectionPreviewFailureEvidence
+	previewFailureRetained  *windowPreviewFailureEvidence
+	previewRecoveries       []collectionPreviewRecoveryEvidence
+	previewRecoveryRetained *windowPreviewRecoveryEvidence
 }
 
 type windowOwnedArmProof struct {
-	previewFailure *windowPreviewFailureEvidence
-	quality        *windowQualityOwnedEnd
-	qualitySHA     string
-	permit         *windowAcquisitionPermit
-	driver         *windowOwnedDriver
-	slot           fullWindowSlot
-	arm            string
-	recording      collectionRecording
-	recordingSHA   string
+	previewFailure  *windowPreviewFailureEvidence
+	previewRecovery *windowPreviewRecoveryEvidence
+	quality         *windowQualityOwnedEnd
+	qualitySHA      string
+	permit          *windowAcquisitionPermit
+	driver          *windowOwnedDriver
+	slot            fullWindowSlot
+	arm             string
+	recording       collectionRecording
+	recordingSHA    string
 }
 
 func newWindowOwnedDriver(permit *windowAcquisitionPermit, source ConversationSuite, slot fullWindowSlot, arm string, env *PairedFixtureEnvironment, observer *observability.Observer, modelKey, jevKey string, modelUpstream, jevUpstream http.RoundTripper) (*windowOwnedDriver, error) {
