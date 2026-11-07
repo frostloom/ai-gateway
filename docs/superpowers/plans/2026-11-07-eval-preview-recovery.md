@@ -28,7 +28,7 @@
 - A gap, duplicate, wrong original slot or stopped arm in the952 prefix must prevent full-cohort composition and score publication.
 - Old-policy payloads and consumed owners must retain their original rejection/closure; new schema selection cannot reinterpret old records.
 
-## Task1: Pure versioned recovery evidence
+## Task 1: Pure versioned recovery evidence
 
 **Files:** Create `internal/taskbench/collection_preview_recovery.go`, `collection_preview_recovery_test.go`; modify `collection_policy.go:30` (`collectionRecorder`) and `conversation_runner.go` only for an explicitly selected new recorder field. Keep `collection_preview_failure.go` and its public policy identity/behavior intact.
 
@@ -41,7 +41,7 @@
 
 Command family: `go test ./internal/taskbench -run 'TestCollectionPreview(Recovery|Failure)' -count=1 -timeout=20m -json`; repeat with `-race`. A component pass is not actual readiness.
 
-## Task2: Owned capture, durable sidecars and proof isolation
+## Task 2: Owned capture, durable sidecars and proof isolation
 
 **Files:** Create `internal/taskbench/window_preview_recovery_owned.go`, `window_preview_recovery_test.go`; modify owned driver/proof declarations and dispatch in `window_owned_driver.go`, strict policy selection in `window_preview_failure_owned.go`, and the optional receipt reference in `window_collector.go:39` (`windowAcquisitionRow`). Add `preview_recovery` fields with `omitempty`; old scopes must reject them.
 
@@ -52,7 +52,7 @@ Command family: `go test ./internal/taskbench -run 'TestCollectionPreview(Recove
 - [ ] Implement owned quiescent capture using the existing same-owner full SQL/session/audit machinery. Persist a new versioned sidecar before cleanup; verify same-process and external replay through the same pure predicates.
 - [ ] Run focused normal/race tests and an owned fake-provider same-path test under unchanged limits. Independent reviewer checks the next-confirmation boundary, immutable old behavior and every negative mutation before proceeding.
 
-## Task3: Concrete stopped249 history
+## Task 3: Concrete stopped249 history
 
 **Files:** Create `internal/taskbench/window_stopped_v15.go`, `window_stopped_v15_bundle.go` and matching tests following the existing stopped-V14 pattern. Create a root-owned private exact descriptor and retained genuine-run results outside the source archive; no secrets in public fixtures.
 
@@ -62,7 +62,7 @@ Command family: `go test ./internal/taskbench -run 'TestCollectionPreview(Recove
 - [ ] Implement by invoking the original178 loader unchanged within one fresh pass, then validating the new original V15 physical bundle and all prior maps/metadata/locks. No quota expansion, recursive duplication or cross-pass cache.
 - [ ] Run focused normal/race tests and one genuine root constructor against unchanged originals. Record duration, file identities and complete source maps before/after. Perform a live-shaped read-only verification with forbidden actual/provider/claim sentinels; do not call it actual-ready.
 
-## Task4: Exact952 prefix and remaining2708 declaration/entry
+## Task 4: Exact952 prefix and remaining2708 declaration/entry
 
 **Files:** Create V16 counterparts of `window_completion_v15.go`, `window_scope_v15.go`, `window_claim_v15.go`, `window_campaign_v15.go`, `window_actual_v15.go`, `window_executor_equivalence_v15.go`, `window_operation_approval_v15.go` and focused tests. Modify shared strict DTO/dispatcher/CLI declarations only to select the new exact version; add `cmd/full-window-actual/v16_test.go`.
 
@@ -73,7 +73,7 @@ Command family: `go test ./internal/taskbench -run 'TestCollectionPreview(Recove
 - [ ] Implement strict version dispatch and exact source/equivalence bindings. Old ordinary/actual scopes reject new policy/fields before credential access. Human600 approval may be rebound as existing timing permission, never represented as a new exact-scope human answer.
 - [ ] Run focused pure/dispatch/authorization negative and normal/race tests. Fresh review checks budget arithmetic, old authority isolation and no obsolete scope reactivation.
 
-## Task5: Genuine prefix/source, score and delivery compatibility
+## Task 5: Genuine prefix/source, score and delivery compatibility
 
 **Files:** Create V16 counterparts of `eval/behavior-review/full1220-v15-{contracts,window,source,prefix-index,scores,delivery,helper-runtime,owner-template}.py`, the two V15 Go helper templates and corresponding role/contract/source/score tests. Reuse existing exact helpers by pinned identity when safe; do not copy or mutate historical archives.
 
@@ -84,7 +84,7 @@ Command family: `go test ./internal/taskbench -run 'TestCollectionPreview(Recove
 - [ ] Run pure Python suites and real Go source/capture helpers against controlled/stopped copies without provider/LF calls. Root performs one genuine952-prefix read-only preflight; no former JSON output is substituted for fresh opaque proof.
 - [ ] Independent review checks all content/score/once and original-source bindings. Do not publish partial positive scores or infer external payment settlement from ledger captures.
 
-## Task6: Exact freeze, actual remaining2708 and full delivery
+## Task 6: Exact freeze, actual remaining2708 and full delivery
 
 **Files:** Root-owned new private archive, regression/controlled/freeze evidence and unique owner; public frozen/progress/final reports. Source remains immutable after archive selection.
 
@@ -101,4 +101,4 @@ Command family: `go test ./internal/taskbench -run 'TestCollectionPreview(Recove
 - [x] Design builder review: nothing important left.
 - [ ] Task1 RED/implementation, all later integration/freeze/actual2708 and Langfuse delivery.
 
-No production code, fresh actual owner, financial claim, provider request or Langfuse request has been created by this plan.
+Task1 production code is in progress and remains unselected by actual scopes. No fresh actual owner, financial claim, provider request or Langfuse request has been created by this plan.

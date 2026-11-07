@@ -28,10 +28,11 @@ type collectionIssue struct {
 	Disposition string `json:"disposition"`
 }
 type collectionRecorder struct {
-	previewFailure *collectionPreviewFailureRecorder
-	issues         []collectionIssue
-	halted         bool
-	turn           int
+	previewFailure  *collectionPreviewFailureRecorder
+	previewRecovery *collectionPreviewRecoveryRecorder
+	issues          []collectionIssue
+	halted          bool
+	turn            int
 }
 
 var collectionQualityCodes = []string{"unexpected_action", "wrong_read_tool", "missing_read", "missing_preview", "missing_execution", "terminal_goal", "semantic_negative", "fact_mismatch"}
