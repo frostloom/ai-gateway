@@ -13,7 +13,37 @@ import (
 )
 
 func sameDomain(a, b Snapshot) bool {
-	return a.BalanceCent == b.BalanceCent && a.LedgerBalance == b.LedgerBalance && a.Consistent == b.Consistent && reflect.DeepEqual(a.Orders, b.Orders) && reflect.DeepEqual(a.Topups, b.Topups) && reflect.DeepEqual(a.Subscriptions, b.Subscriptions)
+	aa, ea := canonicalSnapshot(a)
+	bb, eb := canonicalSnapshot(b)
+	if ea != nil || eb != nil {
+		return false
+	}
+	return aa.BalanceCent == bb.BalanceCent && aa.LedgerBalance == bb.LedgerBalance && aa.Consistent == bb.Consistent && reflect.DeepEqual(aa.Orders, bb.Orders) && reflect.DeepEqual(aa.Topups, bb.Topups) && reflect.DeepEqual(aa.Subscriptions, bb.Subscriptions)
+}
+
+// parseTime stamps use time.Local. JSON clones use UTC. Compare the instant.
+func canonicalSnapshot(s Snapshot) (Snapshot, error) {
+	return cloneWindowOwned(s)
+}
+func sameConversationControls(a, b map[uint64]Snapshot) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for id, snap := range a {
+		other, ok := b[id]
+		if !ok || !sameControlSnapshot(snap, other) {
+			return false
+		}
+	}
+	return true
+}
+func sameControlSnapshot(a, b Snapshot) bool {
+	if !sameDomain(a, b) {
+		return false
+	}
+	aa, ea := cloneWindowOwned(a.Audits)
+	bb, eb := cloneWindowOwned(b.Audits)
+	return ea == nil && eb == nil && reflect.DeepEqual(aa, bb)
 }
 
 // Clarifies is deliberately a frozen text rubric, not a semantic LLM judge.

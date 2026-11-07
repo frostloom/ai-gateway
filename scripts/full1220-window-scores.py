@@ -20,13 +20,66 @@ import json
 import math
 import re
 import os
-import fcntl
 import base64
 import argparse
 import importlib.util
 import stat
 import subprocess
 from pathlib import Path
+
+
+# O_NOFOLLOW / O_DIRECTORY / flock are Unix. Windows CI still executes this module;
+# missing flags stay zero and directory or lock operations use the portable path.
+_O_NOFOLLOW = getattr(os, 'O_NOFOLLOW', 0)
+_O_DIRECTORY = getattr(os, 'O_DIRECTORY', 0)
+
+
+def _owned_private(info, mode):
+    """Unix owner/mode is the private-file boundary. Windows ACLs do not round-trip chmod."""
+    if os.name == 'nt':
+        return True
+    return info.st_uid == os.geteuid() and stat.S_IMODE(info.st_mode) == mode
+
+
+def _open_directory(path):
+    if os.name != 'nt':
+        return os.open(path, os.O_RDONLY | _O_DIRECTORY | _O_NOFOLLOW)
+    import ctypes
+    import msvcrt
+    kernel = ctypes.WinDLL('kernel32', use_last_error=True)
+    kernel.CreateFileW.argtypes = [ctypes.c_wchar_p, ctypes.c_uint32, ctypes.c_uint32, ctypes.c_void_p, ctypes.c_uint32, ctypes.c_uint32, ctypes.c_void_p]
+    kernel.CreateFileW.restype = ctypes.c_void_p
+    share = 1 | 2 | 4
+    handle = kernel.CreateFileW(os.fspath(path), 0x80000000, share, None, 3, 0x02000000, None)
+    if handle is None or handle == ctypes.c_void_p(-1).value:
+        raise OSError(ctypes.get_last_error(), 'cannot open directory')
+    return msvcrt.open_osfhandle(handle, os.O_RDONLY)
+
+
+def _open_at(dir_fd, relative, path, flags, mode=None):
+    """dir_fd is Unix-only. Windows opens the already-resolved path."""
+    flags |= _O_NOFOLLOW
+    if os.name != 'nt' and dir_fd is not None:
+        if mode is None:
+            return os.open(relative, flags, dir_fd=dir_fd)
+        return os.open(relative, flags, mode, dir_fd=dir_fd)
+    if mode is None:
+        return os.open(path, flags)
+    return os.open(path, flags, mode)
+
+
+def _lock_exclusive_nonblocking(fd):
+    if os.name == 'nt':
+        import msvcrt
+        os.lseek(fd, 0, os.SEEK_SET)
+        try:
+            # One byte is enough. Locking past EOF is valid and keeps an empty lock file empty.
+            msvcrt.locking(fd, msvcrt.LK_NBLCK, 1)
+        except OSError as error:
+            raise BlockingIOError(11, 'registry lock busy') from error
+        return
+    import fcntl
+    fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
 
 
 NAMESPACE = 'full1220.v1.'
@@ -900,7 +953,7 @@ def _regular_bytes(path, limit=64 << 20):
     path = Path(path)
     before = path.lstat()
     _require(stat.S_ISREG(before.st_mode) and before.st_size <= limit, 'Bounded regular file required')
-    descriptor = os.open(path, os.O_RDONLY | os.O_NOFOLLOW)
+    descriptor = os.open(path, os.O_RDONLY | _O_NOFOLLOW)
     with os.fdopen(descriptor, 'rb') as stream:
         opened = os.fstat(stream.fileno())
         _require(os.path.samestat(before, opened), 'File identity changed before read')
@@ -914,7 +967,7 @@ def _regular_bytes(path, limit=64 << 20):
 
 
 def _exclusive_write(path, raw):
-    descriptor = os.open(path, os.O_CREAT | os.O_EXCL | os.O_WRONLY | os.O_NOFOLLOW, 0o600)
+    descriptor = os.open(path, os.O_CREAT | os.O_EXCL | os.O_WRONLY | _O_NOFOLLOW, 0o600)
     with os.fdopen(descriptor, 'wb') as stream:
         stream.write(raw); stream.flush(); os.fsync(stream.fileno())
 
@@ -1632,7 +1685,7 @@ def load_window_score_client(manifest_raw, settings_path):
     """Only explicit owner0600 evaluation-only JSON; never load model settings."""
     try:
         info = Path(settings_path).lstat()
-        _require(info.st_uid == os.geteuid() and stat.S_IMODE(info.st_mode) == 0o600, 'Private owner0600 evaluation settings required')
+        _require(stat.S_ISREG(info.st_mode) and _owned_private(info, 0o600), 'Private owner0600 evaluation settings required')
         settings = _Document(_regular_bytes(settings_path, 16384)).value
         _require(set(settings) == {'OTEL_EXPORTER_OTLP_TRACES_ENDPOINT', 'AGENT_LANGFUSE_ENVIRONMENT', 'LANGFUSE_PUBLIC_KEY', 'LANGFUSE_SECRET_KEY'},
                  'Evaluation-only client configuration required')
@@ -1647,14 +1700,14 @@ def load_window_score_client(manifest_raw, settings_path):
 
 def _private_directory(path):
     info = path.lstat()
-    _require(stat.S_ISDIR(info.st_mode) and info.st_uid == os.geteuid() and stat.S_IMODE(info.st_mode) == 0o700,
+    _require(stat.S_ISDIR(info.st_mode) and _owned_private(info, 0o700),
              'Private owner0700 registry directory required')
     _require(path.resolve() == path.absolute(), 'Registry path must have no symlink aliases')
     return info
 
 
 def _sync_directory(path):
-    descriptor = os.open(path, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+    descriptor = _open_directory(path)
     try:
         os.fsync(descriptor)
     finally:
@@ -1685,14 +1738,14 @@ def _open_publication_registry(scope, *, create=False):
             return None
         root.mkdir(mode=0o700); _sync_directory(root.parent)
     _private_directory(root)
-    root_fd = os.open(root, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+    root_fd = _open_directory(root)
     lock_fd = scope_fd = None
     try:
-        flags = os.O_RDWR | os.O_NOFOLLOW | (os.O_CREAT if create else 0)
-        lock_fd = os.open('.lock', flags, 0o600, dir_fd=root_fd)
+        flags = os.O_RDWR | (os.O_CREAT if create else 0)
+        lock_fd = _open_at(root_fd, '.lock', root/'.lock', flags, 0o600)
         lock_info = os.fstat(lock_fd)
-        _require(stat.S_ISREG(lock_info.st_mode) and lock_info.st_uid == os.geteuid() and stat.S_IMODE(lock_info.st_mode) == 0o600, 'Private stable registry lock required')
-        fcntl.flock(lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        _require(stat.S_ISREG(lock_info.st_mode) and _owned_private(lock_info, 0o600), 'Private stable registry lock required')
+        _lock_exclusive_nonblocking(lock_fd)
         directory = root/scope; anchor_path = root/(scope+'.anchor.json')
         if not anchor_path.exists():
             if not create:
@@ -1708,7 +1761,7 @@ def _open_publication_registry(scope, *, create=False):
         anchor = _Document(_regular_bytes(anchor_path, 16384)).value
         _equal(anchor['schema'], 'full1220-fixed-scope-registry.v1', 'Scope anchor schema mismatch')
         _equal(anchor['scope_sha256'], scope, 'Scope anchor mismatch')
-        scope_fd = os.open(directory, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+        scope_fd = _open_directory(directory)
         handle = _RegistryHandle(root, directory, root_fd, scope_fd, lock_fd, anchor); handle.check()
         return handle
     except BaseException:
@@ -1721,7 +1774,7 @@ def _open_publication_registry(scope, *, create=False):
 def _publication_event(handle, name, event):
     handle.check()
     _require(re.fullmatch(r'[a-z0-9.-]+', name) is not None, 'Fixed event filename required')
-    descriptor = os.open(name, os.O_CREAT | os.O_EXCL | os.O_WRONLY | os.O_NOFOLLOW, 0o600, dir_fd=handle.scope_fd)
+    descriptor = _open_at(handle.scope_fd, name, handle.scope/name, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
     with os.fdopen(descriptor, 'wb') as stream:
         stream.write(_json_bytes(event)); stream.flush(); os.fsync(stream.fileno())
     os.fsync(handle.scope_fd); handle.check()
