@@ -4,6 +4,7 @@
 package admin
 
 import (
+	"context"
 	"encoding/json"
 	"log/slog"
 	"net/http"
@@ -45,6 +46,22 @@ func Handler(st *store.Store, log *slog.Logger, token string) http.Handler {
 			return
 		}
 		writeJSON(w, http.StatusOK, o)
+	})
+
+	mux.HandleFunc("/admin/pending-summary", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			writeErr(w, http.StatusMethodNotAllowed, "GET required")
+			return
+		}
+		ctx, cancel := context.WithTimeout(r.Context(), 2*time.Second)
+		defer cancel()
+		summary, err := st.PendingReserveSummary(ctx)
+		if err != nil {
+			log.Error("pending summary", "err", err)
+			writeErr(w, http.StatusInternalServerError, "pending summary failed")
+			return
+		}
+		writeJSON(w, http.StatusOK, summary)
 	})
 
 	mux.HandleFunc("/admin/bills", func(w http.ResponseWriter, r *http.Request) {

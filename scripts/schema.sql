@@ -8,8 +8,9 @@ USE ai_gateway;
 CREATE TABLE IF NOT EXISTS tenants (
   id            BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   name          VARCHAR(64) NOT NULL,
-  initial_quota BIGINT NOT NULL DEFAULT 0 COMMENT '初始额度；对账重建 balance 的依据',
-  status        TINYINT NOT NULL DEFAULT 0 COMMENT '0=active 1=disabled',
+  initial_quota  BIGINT NOT NULL DEFAULT 0 COMMENT '初始额度；对账重建 balance 的依据',
+  ledger_balance BIGINT NOT NULL DEFAULT 0 COMMENT '账本热值；与 Redis 不一致时才重算求和',
+  status         TINYINT NOT NULL DEFAULT 0 COMMENT '0=active 1=disabled',
   created_at    DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
   updated_at    DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
   UNIQUE KEY uk_name (name)
@@ -51,6 +52,7 @@ CREATE TABLE IF NOT EXISTS providers (
 CREATE TABLE IF NOT EXISTS bills (
   id                 BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   request_id         VARCHAR(64) NOT NULL,
+  reserve_fingerprint VARCHAR(64) NULL COMMENT '预占请求参数指纹；历史行为空时拒绝重放',
   phase              VARCHAR(16) NOT NULL COMMENT 'reserve|settle（一条请求两行账目）',
   status             VARCHAR(16) NOT NULL COMMENT 'reserve行: pending|settled|reversed；settle行: settled',
   tenant_id          BIGINT UNSIGNED NOT NULL,
@@ -61,6 +63,8 @@ CREATE TABLE IF NOT EXISTS bills (
   in_price_cent      BIGINT NULL COMMENT 'reserve 时目录价快照：输入价 分/百万token（改价不影响历史账单）',
   out_price_cent     BIGINT NULL COMMENT 'reserve 时目录价快照：输出价 分/百万token',
   pre_quota          BIGINT NOT NULL COMMENT 'reserve 预扣（分）',
+  reserved_tokens    BIGINT NULL COMMENT '订阅预占 token；历史未记录时为 NULL',
+  reserved_tier      VARCHAR(64) NULL COMMENT '预占时订阅档次快照',
   actual_quota       BIGINT NULL COMMENT 'settle 实际（分）',
   delta_quota        BIGINT NULL COMMENT 'actual - pre（settle 行，分）',
   prompt_tokens      INT NULL,
@@ -145,6 +149,7 @@ CREATE TABLE IF NOT EXISTS topups (
   tenant_id  BIGINT UNSIGNED NOT NULL,
   source     VARCHAR(16) NOT NULL COMMENT 'recharge|subscription|refund',
   amount     BIGINT NOT NULL COMMENT '正=入账，负=退款',
+  requested_cent BIGINT NULL COMMENT '按金额退款的原始请求金额；旧流水为 NULL',
   ref_type   VARCHAR(32) NOT NULL,
   ref_id     VARCHAR(64) NOT NULL,
   created_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),

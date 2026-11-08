@@ -8,12 +8,26 @@
 -- ARGV[2] = 唯一调用 owner
 --
 -- return 1=已补偿, 0=guard 不匹配或已不存在
+-- Lua 5.1 numbers are doubles, and tostring only retains limited digits.
+-- Restrict all arithmetic and persisted delta markers to exact 14-digit integers.
+local function safe_int(raw, signed)
+  if not raw or not string.match(raw, '^%-?%d+$') then return nil end
+  local negative = string.sub(raw, 1, 1) == '-'
+  if negative and not signed then return nil end
+  local digits = negative and string.sub(raw, 2) or raw
+  digits = string.gsub(digits, '^0+', '')
+  if digits == '' then digits = '0' end
+  if #digits > 14 then return nil end
+  return tonumber(raw)
+end
 local cur = redis.call('GET', KEYS[2])
 if cur ~= ARGV[2] then
   return 0
 end
+local n = safe_int(ARGV[1], false)
+local bal = safe_int(redis.call('GET', KEYS[1]) or '0', false)
+if not n or not bal or bal + n > 99999999999999 then return redis.error_reply('cash amount outside safe range') end
 redis.call('DEL', KEYS[2])
-local n = tonumber(ARGV[1])
 if n > 0 then
   redis.call('INCRBY', KEYS[1], n)
 end

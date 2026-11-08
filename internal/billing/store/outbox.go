@@ -14,6 +14,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"time"
 
 	"gorm.io/gorm"
@@ -51,6 +52,42 @@ type BillingEvent struct {
 	CompletionTokens *int64    `json:"completion_tokens,omitempty"`
 	BillID           uint64    `json:"bill_id,omitempty"`
 	CreatedAt        time.Time `json:"created_at"`
+	// ApplyLedger 为真时，消费者把这条消息写成账单，而不只是审计。
+	// 请求路径只在 Redis 扣款成功后投递；同一条消息重投靠账单唯一键跳过，余额只加一次。
+	ApplyLedger   bool    `json:"apply_ledger,omitempty"`
+	APIKeyID      uint64  `json:"api_key_id,omitempty"`
+	BillStatus    string  `json:"bill_status,omitempty"`
+	PreQuota      int64   `json:"pre_quota,omitempty"`
+	ActualQuota   *int64  `json:"actual_quota,omitempty"`
+	DeltaQuota    *int64  `json:"delta_quota,omitempty"`
+	ProviderID    *uint64 `json:"provider_id,omitempty"`
+	InPriceCent   *int64  `json:"in_price_cent,omitempty"`
+	OutPriceCent  *int64  `json:"out_price_cent,omitempty"`
+	LedgerDelta   int64   `json:"ledger_delta,omitempty"`
+	UsageReported bool    `json:"usage_reported,omitempty"`
+}
+
+// KafkaMessageKey 让同一用户的明细进同一分区。没有租户时退回请求号，再退回事件号。
+func KafkaMessageKey(ev *BillingEvent) string {
+	if ev == nil {
+		return ""
+	}
+	if ev.TenantID != 0 {
+		return strconv.FormatUint(ev.TenantID, 10)
+	}
+	if ev.RequestID != "" {
+		return ev.RequestID
+	}
+	return ev.EventID
+}
+
+// KafkaMessageKeyFromPayload 从已落库的事件正文取分区键。正文没有租户时用 fallback。
+func KafkaMessageKeyFromPayload(payload []byte, fallback string) string {
+	var ev BillingEvent
+	if len(payload) == 0 || json.Unmarshal(payload, &ev) != nil || ev.TenantID == 0 {
+		return fallback
+	}
+	return strconv.FormatUint(ev.TenantID, 10)
 }
 
 // newBillingEvent 由账目行构造事件。amount 为本次金额变动（分）：reserve 预扣、
@@ -71,31 +108,35 @@ func newBillingEvent(row *Bill, amount int64, phase string) *BillingEvent {
 	}
 }
 
-// insertOutbox 在事务内落 outbox 行。撞 uk_event_key（并发/重试另一事务已落同一事件）
-// → 吞掉 no-op：同一事件只入一行，重复投递由唯一索引收敛。
+// insertOutbox 在事务内落 outbox 行。唯一键冲突不能证明已有事件与本次账务一致；
+// 返回错误使调用方事务回滚，正常请求重放由各账务操作的状态检查处理。
 func insertOutbox(tx *gorm.DB, ev *BillingEvent) error {
-	payload, err := json.Marshal(ev)
-	if err != nil {
-		return err
-	}
-	err = tx.Create(&OutboxEvent{
-		Topic:     TopicBillingEvents,
-		EventKey:  ev.EventID,
-		Payload:   string(payload),
-		CreatedAt: time.Now(),
-	}).Error
-	if err != nil && isDupKey(err) {
-		return nil
-	}
-	return err
+	return insertOutboxBatch(tx, []*BillingEvent{ev})
 }
 
-// PollOutbox 取一批待投递事件：sent_at IS NULL 且 attempts < maxAttempts（按 id 升序，
-// 先入先投）。relay 单写者轮询，无需加锁——撞 uk_event_key 由唯一索引兜底。
-func (s *Store) PollOutbox(ctx context.Context, limit int, maxAttempts int) ([]OutboxEvent, error) {
+func insertOutboxBatch(tx *gorm.DB, events []*BillingEvent) error {
+	if len(events) == 0 {
+		return nil
+	}
+	rows := make([]OutboxEvent, len(events))
+	now := time.Now()
+	for i, ev := range events {
+		payload, err := json.Marshal(ev)
+		if err != nil {
+			return err
+		}
+		rows[i] = OutboxEvent{Topic: TopicBillingEvents, EventKey: ev.EventID, Payload: string(payload), CreatedAt: now}
+	}
+	return tx.CreateInBatches(&rows, 100).Error
+}
+
+// PollOutbox 取一批未标记发送的事件（按 id 升序）。即使 attempts 已达上限也必须
+// 返回：并发 relay 或旧版本故障可能让未发送的行跨过上限，relay 会再尝试主 topic/DLQ。
+// 兼容现有接口，maxAttempts 由 relay 使用，而不作为筛选条件。
+func (s *Store) PollOutbox(ctx context.Context, limit int, _ int) ([]OutboxEvent, error) {
 	var rows []OutboxEvent
 	err := s.db.WithContext(ctx).
-		Where("sent_at IS NULL AND attempts < ?", maxAttempts).
+		Where("sent_at IS NULL").
 		Order("id ASC").
 		Limit(limit).
 		Find(&rows).Error

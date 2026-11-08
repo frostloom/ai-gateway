@@ -3,9 +3,13 @@ package client
 
 import (
 	"context"
+	"strconv"
 	"time"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/status"
 
 	"github.com/frostloom/ai-gateway/internal/pkg/controlplane"
 	billingv1 "github.com/frostloom/ai-gateway/internal/proto/billing/v1"
@@ -31,7 +35,22 @@ func (b *Billing) ValidateAPIKey(ctx context.Context, keyHash string) (*billingv
 }
 
 func (b *Billing) Reserve(ctx context.Context, req *billingv1.ReserveRequest) (*billingv1.ReserveResponse, error) {
-	return b.cli.Reserve(ctx, req)
+	mode := controlplane.ReserveReplayV1
+	if digest := controlplane.ReserveContent(ctx); digest != "" {
+		mode = controlplane.ReserveReplayV2
+		ctx = metadata.AppendToOutgoingContext(ctx, controlplane.ReserveContentKey, digest)
+	}
+	ctx = metadata.AppendToOutgoingContext(ctx, controlplane.ReserveModeKey, mode)
+	var header metadata.MD
+	resp, err := b.cli.Reserve(ctx, req, grpc.Header(&header))
+	if err != nil {
+		return nil, err
+	}
+	values := header.Get(controlplane.ReserveContractKey)
+	if len(values) != 1 || values[0] != mode {
+		return nil, status.Error(codes.Unavailable, "billing reserve replay contract unavailable")
+	}
+	return resp, nil
 }
 
 func (b *Billing) ReportUsage(ctx context.Context, req *billingv1.ReportUsageRequest) (*billingv1.ReportUsageResponse, error) {
@@ -39,6 +58,13 @@ func (b *Billing) ReportUsage(ctx context.Context, req *billingv1.ReportUsageReq
 }
 
 func (b *Billing) Settle(ctx context.Context, req *billingv1.SettleRequest) (*billingv1.SettleResponse, error) {
+	if usage, ok := controlplane.SettleUsageFrom(ctx); ok {
+		ctx = metadata.AppendToOutgoingContext(ctx,
+			controlplane.SettlePromptKey, strconv.FormatInt(usage.Prompt, 10),
+			controlplane.SettleCompletionKey, strconv.FormatInt(usage.Completion, 10),
+			controlplane.SettleProviderKey, strconv.FormatInt(usage.Provider, 10),
+		)
+	}
 	return b.cli.Settle(ctx, req)
 }
 

@@ -13,22 +13,87 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
 	"github.com/frostloom/ai-gateway/internal/gateway/client"
+	"github.com/frostloom/ai-gateway/internal/pkg/controlplane"
 	billingv1 "github.com/frostloom/ai-gateway/internal/proto/billing/v1"
 )
 
 type fakeBilling struct {
-	reserves  []*billingv1.ReserveRequest
-	reportErr error
-	reports   []*billingv1.ReportUsageRequest
-	settles   []*billingv1.SettleRequest
-	reverses  []*billingv1.ReverseRequest
+	reserveErr    error
+	reserveCode   billingv1.ReserveCode
+	reserveNil    bool
+	reserveZeroID bool
+	reserves      []*billingv1.ReserveRequest
+	reportErr     error
+	reports       []*billingv1.ReportUsageRequest
+	settles       []*billingv1.SettleRequest
+	reverses      []*billingv1.ReverseRequest
+}
+
+type failUsageFrameWriter struct{ gin.ResponseWriter }
+
+func (w *failUsageFrameWriter) Write(p []byte) (int, error) {
+	if strings.Contains(string(p), `"usage"`) {
+		return 0, errors.New("client disconnected while writing usage")
+	}
+	return w.ResponseWriter.Write(p)
+}
+
+func TestRelayStreamReportsUsageReadBeforeClientWriteFails(t *testing.T) {
+	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		_, _ = io.WriteString(w, "data: {\"choices\":[{\"delta\":{\"content\":\"hi\"}}]}\n\n")
+		_, _ = io.WriteString(w, "data: {\"usage\":{\"prompt_tokens\":4,\"completion_tokens\":2}}\n\n")
+	}))
+	defer upstream.Close()
+	for _, conservative := range []bool{false, true} {
+		t.Run(map[bool]string{false: "legacy", true: "conservative"}[conservative], func(t *testing.T) {
+			bill := &fakeBilling{}
+			c, _ := newGinCtx()
+			c.Writer = &failUsageFrameWriter{ResponseWriter: c.Writer}
+			prov := &client.RouteResult{ProviderID: 7, Name: "up", BaseURL: upstream.URL}
+			req := &chatRequest{Model: "m", Messages: []chatMessage{{Role: "user", Content: "hi"}}, Stream: true}
+			relayStream(c, bill, &fakeRouter{}, slog.New(slog.DiscardHandler), prov, req, "rid-usage-disconnect", 9, 11, conservative)
+			if len(bill.reports) != 1 || bill.reports[0].PromptTokens != 4 || bill.reports[0].CompletionTokens != 2 || bill.reports[0].ProviderId != 7 {
+				t.Fatalf("received usage was not reported: %+v", bill.reports)
+			}
+			if len(bill.settles) != 1 || len(bill.reverses) != 0 {
+				t.Fatalf("settles=%d reverses=%d", len(bill.settles), len(bill.reverses))
+			}
+		})
+	}
+}
+
+func TestRelayStreamReportsFirstUsageFrameWhenClientWriteFails(t *testing.T) {
+	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		_, _ = io.WriteString(w, "data: {\"usage\":{\"prompt_tokens\":4,\"completion_tokens\":2}}\n\n")
+	}))
+	defer upstream.Close()
+	bill := &fakeBilling{}
+	c, _ := newGinCtx()
+	c.Writer = &failUsageFrameWriter{ResponseWriter: c.Writer}
+	prov := &client.RouteResult{ProviderID: 7, Name: "up", BaseURL: upstream.URL}
+	req := &chatRequest{Model: "m", Messages: []chatMessage{{Role: "user", Content: "hi"}}, Stream: true}
+	relayStream(c, bill, &fakeRouter{}, slog.New(slog.DiscardHandler), prov, req, "rid-first-usage-disconnect", 9, 11, true)
+	if len(bill.reports) != 1 || bill.reports[0].PromptTokens != 4 || bill.reports[0].CompletionTokens != 2 || len(bill.settles) != 1 || len(bill.reverses) != 0 {
+		t.Fatalf("reports=%+v settles=%d reverses=%d", bill.reports, len(bill.settles), len(bill.reverses))
+	}
 }
 
 func (f *fakeBilling) Reserve(_ context.Context, req *billingv1.ReserveRequest) (*billingv1.ReserveResponse, error) {
 	f.reserves = append(f.reserves, req)
-	return &billingv1.ReserveResponse{Code: billingv1.ReserveCode_RESERVE_OK, BillId: 1}, nil
+	if f.reserveErr != nil {
+		return nil, f.reserveErr
+	}
+	if f.reserveNil {
+		return nil, nil
+	}
+	if f.reserveZeroID {
+		return &billingv1.ReserveResponse{Code: f.reserveCode}, nil
+	}
+	return &billingv1.ReserveResponse{Code: f.reserveCode, BillId: 1}, nil
 }
 func (f *fakeBilling) ReportUsage(_ context.Context, req *billingv1.ReportUsageRequest) (*billingv1.ReportUsageResponse, error) {
 	f.reports = append(f.reports, req)
@@ -56,7 +121,16 @@ func TestChatLeavesPendingWhenActualUsageCannotBeRecorded(t *testing.T) {
 		t.Fatalf("usage failure must retain pending reserve: settles=%d reverses=%d", len(bill.settles), len(bill.reverses))
 	}
 }
-func (f *fakeBilling) Settle(_ context.Context, req *billingv1.SettleRequest) (*billingv1.SettleResponse, error) {
+func (f *fakeBilling) Settle(ctx context.Context, req *billingv1.SettleRequest) (*billingv1.SettleResponse, error) {
+	if usage, ok := controlplane.SettleUsageFrom(ctx); ok {
+		f.reports = append(f.reports, &billingv1.ReportUsageRequest{
+			RequestId: req.RequestId, BillId: req.BillId,
+			PromptTokens: usage.Prompt, CompletionTokens: usage.Completion, ProviderId: usage.Provider,
+		})
+	}
+	if f.reportErr != nil {
+		return nil, f.reportErr
+	}
 	f.settles = append(f.settles, req)
 	return &billingv1.SettleResponse{Settled: true}, nil
 }
@@ -195,7 +269,7 @@ func TestChatReportsSuccessfulFallbackProvider(t *testing.T) {
 			}
 			c.Request = httptest.NewRequest(http.MethodPost, "/v1/chat/completions", strings.NewReader(`{"model":"m","messages":[{"role":"user","content":"hi"}],"stream":`+stream+`}`))
 			c.Set("request_id", "rid-fallback")
-			Chat(bill, router, slog.New(slog.DiscardHandler), time.Second)(c)
+			Chat(bill, router, slog.New(slog.DiscardHandler), time.Second, false)(c)
 			if w.Code != http.StatusOK {
 				t.Fatalf("status = %d, body=%q", w.Code, w.Body.String())
 			}
@@ -259,5 +333,70 @@ func TestRelayStreamDoesNotWaitForFailedResponseBody(t *testing.T) {
 				t.Fatalf("refund result: status=%d reverses=%d reports=%d", w.Code, len(bill.reverses), len(bill.reports))
 			}
 		})
+	}
+}
+
+func TestChatReserveConflictReturns409(t *testing.T) {
+	bill := &fakeBilling{reserveErr: status.Error(codes.FailedPrecondition, "conflict")}
+	router := &fakeRouter{next: []*client.RouteResult{{ProviderID: 2, BaseURL: "http://127.0.0.1:1"}}}
+	c, w := newGinCtx()
+	c.Request = httptest.NewRequest(http.MethodPost, "/v1/chat/completions", strings.NewReader(`{"model":"m","messages":[{"role":"user","content":"hi"}]}`))
+	c.Set("request_id", "conflict")
+	Chat(bill, router, slog.New(slog.DiscardHandler), time.Second)(c)
+	if w.Code != http.StatusConflict {
+		t.Fatalf("status=%d body=%s", w.Code, w.Body.String())
+	}
+	if len(bill.reports) != 0 || len(bill.settles) != 0 || len(bill.reverses) != 0 {
+		t.Fatal("unexpected billing action")
+	}
+}
+
+func TestChatRejectsNonAuthorizingReserveCodes(t *testing.T) {
+	for _, tc := range []struct {
+		name string
+		code billingv1.ReserveCode
+		want int
+	}{
+		{"duplicate", billingv1.ReserveCode_RESERVE_DUPLICATE, http.StatusConflict},
+		{"unknown", billingv1.ReserveCode(99), http.StatusServiceUnavailable},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			bill := &fakeBilling{reserveCode: tc.code}
+			router := &fakeRouter{next: []*client.RouteResult{{ProviderID: 2, BaseURL: "http://127.0.0.1:1"}}}
+			c, w := newGinCtx()
+			c.Request = httptest.NewRequest(http.MethodPost, "/v1/chat/completions", strings.NewReader(`{"model":"m","messages":[{"role":"user","content":"hi"}]}`))
+			c.Set("request_id", "duplicate")
+			Chat(bill, router, slog.New(slog.DiscardHandler), time.Second)(c)
+			if w.Code != tc.want {
+				t.Fatalf("status=%d want=%d body=%s", w.Code, tc.want, w.Body.String())
+			}
+			if len(bill.reports) != 0 || len(bill.settles) != 0 || len(bill.reverses) != 0 {
+				t.Fatal("non-authorizing reserve triggered further billing")
+			}
+		})
+	}
+}
+
+func TestChatRejectsNilReserveResponse(t *testing.T) {
+	bill := &fakeBilling{reserveNil: true}
+	router := &fakeRouter{next: []*client.RouteResult{{ProviderID: 2, BaseURL: "http://127.0.0.1:1"}}}
+	c, w := newGinCtx()
+	c.Request = httptest.NewRequest(http.MethodPost, "/v1/chat/completions", strings.NewReader(`{"model":"m","messages":[{"role":"user","content":"hi"}]}`))
+	c.Set("request_id", "nil")
+	Chat(bill, router, slog.New(slog.DiscardHandler), time.Second)(c)
+	if w.Code != http.StatusServiceUnavailable || len(bill.reverses) != 0 {
+		t.Fatalf("status=%d reverses=%d", w.Code, len(bill.reverses))
+	}
+}
+
+func TestChatRejectsReserveSuccessWithoutBillID(t *testing.T) {
+	bill := &fakeBilling{reserveZeroID: true}
+	router := &fakeRouter{next: []*client.RouteResult{{ProviderID: 2, BaseURL: "http://127.0.0.1:1"}}}
+	c, w := newGinCtx()
+	c.Request = httptest.NewRequest(http.MethodPost, "/v1/chat/completions", strings.NewReader(`{"model":"m","messages":[{"role":"user","content":"hi"}]}`))
+	c.Set("request_id", "zero-bill")
+	Chat(bill, router, slog.New(slog.DiscardHandler), time.Second)(c)
+	if w.Code != http.StatusServiceUnavailable || len(bill.reverses) != 0 {
+		t.Fatalf("status=%d reverses=%d", w.Code, len(bill.reverses))
 	}
 }

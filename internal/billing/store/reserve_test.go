@@ -153,6 +153,12 @@ func countReserveRows(s *Store) int64 {
 	return n
 }
 
+func countBillRows(s *Store) int64 {
+	var n int64
+	s.db.Model(&Bill{}).Count(&n)
+	return n
+}
+
 // 核心测试：并发 100 协程从 1000 余额里各预占 100（estPrompt=84 → pre=100），
 // 恰好 10 个成功、90 个余额不足；余额归零且从不负。若 Lua 没有原子守卫，
 // check-then-act 会让超过 10 个通过检查，成功数 > 10（超卖）。所以成功数 == 10

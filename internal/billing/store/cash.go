@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"database/sql"
 	"fmt"
+	"sync"
 	"time"
 
 	redis "github.com/redis/go-redis/v9"
@@ -14,12 +15,14 @@ import (
 // One pinned session owns both the tenant lock and any nested request lock.
 // Its Redis token fences delayed workers after MySQL releases a lost session.
 type cashSession struct {
-	tenant  uint64
-	conn    *sql.Conn
-	root    *gorm.DB
-	token   string
-	release func()
-	caller  context.Context
+	tenant                uint64
+	conn                  *sql.Conn
+	root                  *gorm.DB
+	token                 string
+	release               func()
+	caller                context.Context
+	local                 bool // process mutex; Redis Lua remains the debit authority
+	allowDisabledTerminal bool // settle/reverse existing bills, never fresh spending
 }
 
 func cashFenceKey(tenant uint64) string { return fmt.Sprintf("billing:cash-owner:%d", tenant) }
@@ -30,6 +33,13 @@ func (s *Store) lockCash(ctx context.Context, tenant uint64) (*Store, func(), er
 			return nil, nil, fmt.Errorf("cash lock tenant mismatch")
 		}
 		return s, func() {}, nil
+	}
+	// The ledger batch is one process. A MySQL named lock on every reserve and
+	// settle was a round trip and held a pool connection. The in-process mutex
+	// keeps the same tenant's check-and-debit exclusive; Redis Lua still rejects
+	// a second spend of the same balance.
+	if s.batch != nil {
+		return s.lockCashLocal(ctx, tenant)
 	}
 	if err := ctx.Err(); err != nil {
 		return nil, nil, err
@@ -62,14 +72,36 @@ func (s *Store) lockCash(ctx context.Context, tenant uint64) (*Store, func(), er
 	return &locked, release, nil
 }
 
-func (s *Store) cashSQLContext() context.Context { return s.db.Statement.Context }
+func (s *Store) lockCashLocal(ctx context.Context, tenant uint64) (*Store, func(), error) {
+	if err := ctx.Err(); err != nil {
+		return nil, nil, err
+	}
+	mu := s.batch.tenantLock(tenant)
+	mu.Lock()
+	if err := ctx.Err(); err != nil {
+		mu.Unlock()
+		return nil, nil, err
+	}
+	locked := *s
+	var once sync.Once
+	release := func() { once.Do(mu.Unlock) }
+	locked.cash = &cashSession{tenant: tenant, root: s.db, local: true, release: release, caller: ctx}
+	return &locked, release, nil
+}
+
+func (s *Store) cashSQLContext() context.Context {
+	if s.cash != nil && s.cash.local {
+		return s.cash.caller
+	}
+	return s.db.Statement.Context
+}
 
 // Cancellation may stop a new financial operation. Once Redis/SQL writes
 // begin, the bounded detached SQL context lets it finish or recover safely.
 func (s *Store) cashMutationAllowed() error { return s.cash.caller.Err() }
 
 func (s *Store) runCashLua(ctx context.Context, source string, keys []string, args ...any) (any, error) {
-	if s.cash != nil {
+	if s.cash != nil && !s.cash.local {
 		source = `if redis.call('GET', KEYS[#KEYS]) ~= ARGV[#ARGV] then return redis.error_reply('stale cash owner') end
 ` + source
 		keys = append(keys, cashFenceKey(s.cash.tenant))
@@ -85,7 +117,7 @@ func (s *Store) rebuildCash(ctx context.Context, tenant uint64, guard, owner str
 	if err := s.db.WithContext(ctx).First(&row, tenant).Error; err != nil {
 		return 0, err
 	}
-	if row.Status != 0 {
+	if row.Status != 0 && (s.cash == nil || !s.cash.allowDisabledTerminal) {
 		return 0, fmt.Errorf("tenant disabled: %d", tenant)
 	}
 	bal, err := LedgerBalance(ctx, s.db, tenant)

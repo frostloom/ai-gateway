@@ -24,8 +24,11 @@ services:
   redis:
     image: docker.m.daocloud.io/library/redis:7-alpine
     container_name: ai-gateway-redis
+    command: ["redis-server", "--appendonly", "yes", "--appendfsync", "everysec"]
     ports:
       - "6381:6379"
+    volumes:
+      - redis-data:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -79,7 +82,7 @@ services:
       kafka:
         condition: service_healthy
     entrypoint: ["/bin/bash", "-c"]
-    command: ["/opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9092 --create --if-not-exists --topic billing.events --partitions 3 --replication-factor 1 && /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9092 --create --if-not-exists --topic billing.events.dlq --partitions 3 --replication-factor 1"]
+    command: ["/opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9092 --create --if-not-exists --topic billing.events --partitions 3 --replication-factor 1 --config min.insync.replicas=1 --config flush.messages=1 --config flush.ms=0 && /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9092 --create --if-not-exists --topic billing.events.dlq --partitions 3 --replication-factor 1 --config min.insync.replicas=1 --config flush.messages=1 --config flush.ms=0"]
 
   # ---- 以下服务在 M2/M5 加入 ----
   # billing:
@@ -88,4 +91,5 @@ services:
   #   ...
 volumes:
   mysql-data:
+  redis-data:
   kafka-data:

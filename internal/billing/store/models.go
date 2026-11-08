@@ -108,6 +108,11 @@ func (s *Store) GetModelByID(ctx context.Context, id uint64) (*Model, error) {
 // GetModelByModelID 按调用名取模型（计费用；nil=未上架/不存在）。
 // 停用的模型也返回（让调用方能区分「不存在」与「已下架」，见 Reserve 错误码）。
 func (s *Store) GetModelByModelID(ctx context.Context, modelID string) (*Model, error) {
+	if s.batch != nil {
+		if cached, ok := s.batch.cachedModel(modelID); ok {
+			return cached, nil
+		}
+	}
 	var m Model
 	err := s.db.WithContext(ctx).Where("model_id = ?", modelID).First(&m).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -116,28 +121,43 @@ func (s *Store) GetModelByModelID(ctx context.Context, modelID string) (*Model, 
 	if err != nil {
 		return nil, err
 	}
+	if s.batch != nil {
+		s.batch.rememberModel(modelID, &m)
+	}
 	return &m, nil
 }
 
 // CreateModel 新增 SKU。
 func (s *Store) CreateModel(ctx context.Context, m *Model) error {
-	return s.db.WithContext(ctx).Create(m).Error
+	if err := s.db.WithContext(ctx).Create(m).Error; err != nil {
+		return err
+	}
+	s.forgetCachedModels()
+	return nil
 }
 
 // UpdateModelStatus 启停（0=上架 1=下架）。
 func (s *Store) UpdateModelStatus(ctx context.Context, id uint64, status int8) error {
-	return s.db.WithContext(ctx).Model(&Model{}).
+	if err := s.db.WithContext(ctx).Model(&Model{}).
 		Where("id = ?", id).
-		Updates(map[string]any{"status": status, "updated_at": time.Now()}).Error
+		Updates(map[string]any{"status": status, "updated_at": time.Now()}).Error; err != nil {
+		return err
+	}
+	s.forgetCachedModels()
+	return nil
 }
 
 // UpdateModelPrice 改价（分/百万 token）。
 func (s *Store) UpdateModelPrice(ctx context.Context, id uint64, inCent, outCent int64) error {
-	return s.db.WithContext(ctx).Model(&Model{}).
+	if err := s.db.WithContext(ctx).Model(&Model{}).
 		Where("id = ?", id).
 		Updates(map[string]any{
 			"input_price_cent": inCent, "output_price_cent": outCent, "updated_at": time.Now(),
-		}).Error
+		}).Error; err != nil {
+		return err
+	}
+	s.forgetCachedModels()
+	return nil
 }
 
 // SeedModels 幂等填充商品目录：已存在的 model_id 跳过（不覆盖 admin 改价），新增的插入。

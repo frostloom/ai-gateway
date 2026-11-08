@@ -34,10 +34,21 @@ type AuditEvent struct {
 
 // UpsertAudit 幂等写审计明细：撞 uk_event_id（重投/多副本）→ UPDATE id=id（MySQL no-op）。
 func (s *Store) UpsertAudit(ctx context.Context, ev *AuditEvent) error {
+	return s.upsertAudit(ctx, []AuditEvent{*ev})
+}
+
+func (s *Store) UpsertAuditBatch(ctx context.Context, rows []AuditEvent) error {
+	return s.upsertAudit(ctx, rows)
+}
+
+func (s *Store) upsertAudit(ctx context.Context, rows []AuditEvent) error {
+	if len(rows) == 0 {
+		return nil
+	}
 	return s.db.WithContext(ctx).Clauses(clause.OnConflict{
 		Columns: []clause.Column{{Name: "event_id"}},
 		DoUpdates: clause.Assignments(map[string]any{
 			"id": gorm.Expr("id"),
 		}),
-	}).Create(ev).Error
+	}).CreateInBatches(rows, 100).Error
 }
