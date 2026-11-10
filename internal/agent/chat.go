@@ -325,22 +325,25 @@ func (h *Handler) process(ctx context.Context, sessionID string, tenantID uint64
 	// 中等可疑放行但警告+强制确认，正常则注入意图预判提示帮 LLM 一次选对工具。
 	// JEV 未接入或调用失败时静默退回原行为，绝不因判断引擎故障阻塞业务。
 	v := h.evaluateTurn(ctx, userMsg, ses)
-	if reply, handled := h.refuseOffTopic(ctx, sessionID, tenantID, ses, v); handled {
-		return reply, nil, nil
-	}
 	if v.Block {
 		if stats := turnTelemetry(ctx); stats != nil {
 			stats.JevBlocked = true
 			stats.JevShortCircuit = true
 		}
-		reply := "抱歉，这个请求我不能执行。它未通过安全校验，可能存在越权或异常操作的风险。" +
-			"如果你确实需要办理，请联系人工客服核实。"
+		reply := v.BlockReply
+		if reply == "" {
+			reply = "抱歉，这个请求我不能执行。它未通过安全校验，可能存在越权或异常操作的风险。" +
+				"如果你确实需要办理，请联系人工客服核实。"
+		}
 		h.audit(sessionID, tenantID, "jev_block", map[string]any{"message": userMsg}, false, "", v.Reason,
 			guardJSON("jev", "block", v.Reason, map[string]any{
 				"legit": round2(v.LegitProb), "risk": round2(v.RiskScore),
 				"risk_conf": round2(v.RiskConf), "intent": v.Intent,
 			}))
 		ses.History = append(ses.History, Message{Role: "assistant", Content: reply})
+		return reply, nil, nil
+	}
+	if reply, handled := h.refuseOffTopic(ctx, sessionID, tenantID, ses, v); handled {
 		return reply, nil, nil
 	}
 

@@ -144,7 +144,7 @@ func TestSelectiveContextPrefilterRuntimeIsDistinguishable(t *testing.T) {
 		if err := json.Unmarshal(raw, &metadata); err != nil {
 			t.Fatal(err)
 		}
-		if metadata["routing_revision"] != "selective-pending-read-offtopic-v1" {
+		if metadata["routing_revision"] != "selective-pending-read-offtopic-riskblock-v1" {
 			t.Fatalf("new routing implementation indistinguishable in %s: %s", mode, raw)
 		}
 	}

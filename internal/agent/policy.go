@@ -1,6 +1,9 @@
 package agent
 
-import "fmt"
+import (
+	"fmt"
+	"math"
+)
 
 // RoutingMode separates the primary routing experiment from historical safety
 // and hint experiments. A zero-value Handler retains legacy test behavior;
@@ -48,10 +51,26 @@ func (h *Handler) usesJevFastPath() bool {
 	return h.RoutingMode() == RoutingJevSelective || (h.RoutingMode() == RoutingLegacy && h.jevFastPathEnabled)
 }
 
+const selectiveRiskReply = "抱歉，这不在我的能力范围内"
+
+func selectiveHighRisk(v *jevVerdict) bool {
+	if v == nil || !v.Available || !boundedProbability(v.RiskConf) || v.RiskConf < .88 {
+		return false
+	}
+	return v.RiskScore >= 1.5 && v.RiskScore < math.Inf(1)
+}
+
 func (h *Handler) decideRoutingVerdict(v *jevVerdict) {
 	switch h.RoutingMode() {
 	case RoutingLegacy:
 		h.decideVerdict(v)
+	case RoutingJevSelective:
+		if selectiveHighRisk(v) {
+			v.Block = true
+			v.BlockReply = selectiveRiskReply
+			v.Reason = fmt.Sprintf("该请求未通过安全判定（合理性 %.2f，风险 %.2f/2，置信度 %.2f）",
+				v.LegitProb, v.RiskScore, v.RiskConf)
+		}
 	case RoutingJevHint:
 		min := h.jevIntentMin
 		if min <= 0 {

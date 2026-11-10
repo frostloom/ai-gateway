@@ -113,10 +113,11 @@ type jevVerdict struct {
 	RiskConf  float64
 
 	// 分层结论
-	Block  bool   // 直接拦截
-	Warn   bool   // 放行但警告 + 强制确认
-	Hint   string // 注入系统提示的行（意图预判 / 谨慎提醒）
-	Reason string // 拦截原因
+	Block      bool   // 直接拦截
+	BlockReply string // 非空时作为拦截回复；空则用原有安全说明
+	Warn       bool   // 放行但警告 + 强制确认
+	Hint       string // 注入系统提示的行（意图预判 / 谨慎提醒）
+	Reason     string // 拦截原因
 }
 
 // intentChoices 意图分类的可选项（与工具箱保持一致）。
