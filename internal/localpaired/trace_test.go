@@ -9,6 +9,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -119,5 +120,30 @@ func TestDefaultEndpointIsLocalLangfuse(t *testing.T) {
 	}
 	if used != want {
 		t.Fatalf("endpoint = %q, want %q", used, want)
+	}
+}
+
+func TestAttachScoreUsesTrace(t *testing.T) {
+	const traceID = "trace-local-9f3a"
+	score := []byte("score-payload")
+	var gotURL string
+	var gotBody []byte
+	err := AttachScore(context.Background(), "", traceID, score, func(ctx context.Context, endpoint string, body []byte) error {
+		gotURL = endpoint
+		gotBody = append([]byte(nil), body...)
+		return nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	const wantURL = "http://127.0.0.1:13000/api/public/scores"
+	if !strings.HasSuffix(gotURL, wantURL) {
+		t.Fatalf("url = %q, want suffix %q", gotURL, wantURL)
+	}
+	if !bytes.Contains(gotBody, []byte(traceID)) {
+		t.Fatalf("body = %q, missing trace id %s", gotBody, traceID)
+	}
+	if !bytes.Contains(gotBody, score) {
+		t.Fatalf("body = %q, missing score %q", gotBody, score)
 	}
 }
