@@ -130,3 +130,18 @@ func TestVerifierPinsRoutingOutcomes(t *testing.T) {
 		})
 	}
 }
+
+func TestVerifyRejectsUncheckedKind(t *testing.T) {
+	got := Verify(Observation{
+		Arm:        "jev_selective",
+		Kind:       "confirm",
+		ModelCalls: 1,
+		Tools:      []string{"get_balance"},
+	})
+	if got.Pass {
+		t.Fatal("Pass = true, want false")
+	}
+	if !reflect.DeepEqual(got.Reasons, []string{"unchecked_kind"}) {
+		t.Fatalf("Reasons = %#v, want %#v", got.Reasons, []string{"unchecked_kind"})
+	}
+}

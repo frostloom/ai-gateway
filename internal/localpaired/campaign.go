@@ -8,12 +8,13 @@ import (
 )
 
 type Campaign struct {
-	Passes   int
-	Arms     []string
-	Source   taskbench.ConversationSuite
-	Selected []string
-	Added    []Case
-	Rubrics  map[string][]RubricItem
+	Passes      int
+	Arms        []string
+	GraderModel string
+	Source      taskbench.ConversationSuite
+	Selected    []string
+	Added       []Case
+	Rubrics     map[string][]RubricItem
 }
 
 type Case struct {
@@ -73,12 +74,13 @@ func LoadCampaign(definitionsDir string) (Campaign, error) {
 	}
 
 	return Campaign{
-		Passes:   1,
-		Arms:     []string{"model", "jev_selective"},
-		Source:   source,
-		Selected: selected,
-		Added:    added,
-		Rubrics:  rubrics,
+		Passes:      1,
+		Arms:        []string{"model", "jev_selective"},
+		GraderModel: "gpt-6.1-sol",
+		Source:      source,
+		Selected:    selected,
+		Added:       added,
+		Rubrics:     rubrics,
 	}, nil
 }
 

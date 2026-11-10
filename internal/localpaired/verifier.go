@@ -50,5 +50,8 @@ func Verify(in Observation) Result {
 	if checked && in.DatabaseChanged {
 		reasons = append(reasons, "database_changed")
 	}
+	if !checked {
+		reasons = append(reasons, "unchecked_kind")
+	}
 	return Result{Pass: len(reasons) == 0, Reasons: reasons}
 }

@@ -23,6 +23,9 @@ func TestCampaignIsOnePassTwoArms(t *testing.T) {
 	if want := []string{"model", "jev_selective"}; !reflect.DeepEqual(campaign.Arms, want) {
 		t.Fatalf("Arms = %q, want %q", campaign.Arms, want)
 	}
+	if campaign.GraderModel != "gpt-6.1-sol" {
+		t.Fatalf("GraderModel = %q, want gpt-6.1-sol", campaign.GraderModel)
+	}
 	if len(campaign.Selected) != 1220 {
 		t.Fatalf("len(Selected) = %d, want 1220", len(campaign.Selected))
 	}

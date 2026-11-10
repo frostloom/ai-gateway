@@ -14,10 +14,7 @@ type Options struct {
 }
 
 func Run(ctx context.Context, opts Options) error {
-	if !opts.AllowPaid {
-		return fmt.Errorf("not started")
-	}
-	return nil
+	return fmt.Errorf("not started")
 }
 
 func Clean(allow []string, target string) error {
@@ -87,11 +84,11 @@ func hasDotDot(target string) bool {
 func hitsProtected(target string) bool {
 	parts := splitPath(target)
 	for _, root := range protectedRoots {
-		if containsSequence(parts, root) || isParentOfRoot(parts, root) {
+		if containsSequence(parts, root) {
 			return true
 		}
 	}
-	return false
+	return removalDeletesProtected(target)
 }
 
 func splitPath(target string) []string {
@@ -118,13 +115,74 @@ func containsSequence(parts, root []string) bool {
 	return false
 }
 
-func isParentOfRoot(parts, root []string) bool {
-	for n := 1; n < len(root); n++ {
-		if len(parts) >= n && equalParts(parts[len(parts)-n:], root[:n]) {
+func removalDeletesProtected(target string) bool {
+	targetForms, err := absoluteForms(target)
+	if err != nil {
+		return true
+	}
+	for _, form := range targetForms {
+		if isFilesystemRoot(form) {
 			return true
 		}
 	}
+	cwdForms, err := absoluteForms(".")
+	if err != nil {
+		return true
+	}
+	for _, targetForm := range targetForms {
+		for _, cwdForm := range cwdForms {
+			if strings.EqualFold(targetForm, cwdForm) {
+				return true
+			}
+		}
+	}
+	for _, cwdForm := range cwdForms {
+		for _, root := range protectedRoots {
+			protectedForm := filepath.Clean(filepath.Join(append([]string{cwdForm}, root...)...))
+			for _, targetForm := range targetForms {
+				if deletesByRemoval(targetForm, protectedForm) {
+					return true
+				}
+			}
+		}
+	}
 	return false
+}
+
+func absoluteForms(target string) ([]string, error) {
+	abs, err := filepath.Abs(target)
+	if err != nil {
+		return nil, err
+	}
+	abs = filepath.Clean(abs)
+	forms := []string{abs}
+	resolved, err := filepath.EvalSymlinks(abs)
+	if err != nil {
+		return forms, nil
+	}
+	resolved = filepath.Clean(resolved)
+	if !strings.EqualFold(resolved, abs) {
+		forms = append(forms, resolved)
+	}
+	return forms, nil
+}
+
+func isFilesystemRoot(target string) bool {
+	clean := filepath.Clean(target)
+	return clean == string(filepath.Separator)
+}
+
+func deletesByRemoval(target, protected string) bool {
+	target = strings.ToLower(filepath.Clean(target))
+	protected = strings.ToLower(filepath.Clean(protected))
+	if target == protected {
+		return true
+	}
+	sep := string(filepath.Separator)
+	if !strings.HasSuffix(target, sep) {
+		target += sep
+	}
+	return strings.HasPrefix(protected, target)
 }
 
 func equalParts(left, right []string) bool {

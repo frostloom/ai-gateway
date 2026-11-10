@@ -165,3 +165,68 @@ func keepFiles(t *testing.T) map[string]string {
 	}
 	return got
 }
+
+func TestCleanRejectsAbsoluteWorkdirAndRoot(t *testing.T) {
+	prepareCleanRoot(t)
+	cwd, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+	targets := []string{
+		cwd,
+		string(filepath.Separator),
+		filepath.Join(cwd, "deploy"),
+		filepath.Join(cwd, "eval"),
+		filepath.Join(cwd, "billing", "ledger"),
+		filepath.Join(cwd, "deploy", "Langfuse"),
+		filepath.Join(cwd, "eval", "task-definitions", "2026-10-12-full-dev-v1"),
+	}
+	before := keepFiles(t)
+	for _, target := range targets {
+		err := Clean([]string{target}, target)
+		if err == nil || !strings.Contains(err.Error(), "protected") {
+			t.Fatalf("Clean(%q) err = %v, want a protected-path refusal", target, err)
+		}
+	}
+	after := keepFiles(t)
+	if !reflect.DeepEqual(before, after) {
+		t.Fatalf("keep files = %v, want %v", after, before)
+	}
+}
+
+func TestCleanAllowsUnrelatedDeployAndEval(t *testing.T) {
+	prepareCleanRoot(t)
+	cwd, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+	targets := []string{
+		filepath.Join("side", "deploy"),
+		filepath.Join("side", "eval"),
+	}
+	for _, dir := range targets {
+		if err := os.MkdirAll(dir, 0o755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(filepath.Join(dir, "keep.txt"), []byte("keep"), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	for _, dir := range targets {
+		abs := filepath.Join(cwd, dir)
+		if err := Clean([]string{abs}, abs); err != nil {
+			t.Fatalf("Clean(%q) = %v, want removal of an unrelated directory", abs, err)
+		}
+		if _, err := os.Stat(abs); !os.IsNotExist(err) {
+			t.Fatalf("unrelated path %q = %v, want removed", abs, err)
+		}
+	}
+	for _, dir := range []string{
+		filepath.Join("billing", "ledger"),
+		filepath.Join("eval", "task-definitions", "2026-10-12-full-dev-v1"),
+		filepath.Join("deploy", "langfuse"),
+		"old-output",
+	} {
+		assertKept(t, dir)
+	}
+}

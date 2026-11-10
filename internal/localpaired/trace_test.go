@@ -123,12 +123,64 @@ func TestDefaultEndpointIsLocalLangfuse(t *testing.T) {
 	}
 }
 
+func TestExportKeepsEarlierBody(t *testing.T) {
+	dir := t.TempDir()
+	first := []byte("first-trace-body")
+	second := []byte("second-trace-body")
+	_, err := SaveAndExport(context.Background(), dir, "http://127.0.0.1:9/unused", first, func(context.Context, string, []byte) error {
+		return nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = SaveAndExport(context.Background(), dir, "http://127.0.0.1:9/unused", second, func(context.Context, string, []byte) error {
+		if !dirHasBody(t, dir, first) {
+			t.Fatal("first body was erased before the second post")
+		}
+		if !dirHasBody(t, dir, second) {
+			t.Fatal("second body was not on disk before post")
+		}
+		return nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !dirHasBody(t, dir, first) || !dirHasBody(t, dir, second) {
+		t.Fatal("directory does not still hold both bodies")
+	}
+}
+
+func dirHasBody(t *testing.T, dir string, body []byte) bool {
+	t.Helper()
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, entry := range entries {
+		if entry.IsDir() {
+			continue
+		}
+		got, err := os.ReadFile(filepath.Join(dir, entry.Name()))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if bytes.Equal(got, body) {
+			return true
+		}
+	}
+	return false
+}
+
 func TestAttachScoreUsesTrace(t *testing.T) {
 	const traceID = "trace-local-9f3a"
 	score := []byte("score-payload")
 	var gotURL string
 	var gotBody []byte
-	err := AttachScore(context.Background(), "", traceID, score, func(ctx context.Context, endpoint string, body []byte) error {
+	dir := t.TempDir()
+	err := AttachScore(context.Background(), dir, "", traceID, score, func(ctx context.Context, endpoint string, body []byte) error {
+		if !dirHasBody(t, dir, score) {
+			t.Fatal("score bytes were not on disk before post")
+		}
 		gotURL = endpoint
 		gotBody = append([]byte(nil), body...)
 		return nil
