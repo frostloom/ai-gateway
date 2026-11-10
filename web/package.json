@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "typecheck": "vue-tsc --noEmit",
     "smoke": "node scripts/smoke.mjs",
-    "verify": "vue-tsc --noEmit && vite build && node scripts/smoke.mjs"
+    "verify": "node scripts/types-regression.mjs && vue-tsc --noEmit && vite build && node scripts/smoke.mjs"
   },
   "dependencies": {
     "@fontsource-variable/jetbrains-mono": "^5.3.0",

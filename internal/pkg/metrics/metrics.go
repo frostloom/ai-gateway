@@ -173,6 +173,22 @@ func BillingCompletionStage(stage string, duration time.Duration) {
 	}
 }
 
+var requestHopDuration = promauto.NewHistogramVec(prometheus.HistogramOpts{
+	Name:    "gateway_request_hop_seconds",
+	Help:    "Time spent in one gateway or billing hop of a chat request",
+	Buckets: prometheus.DefBuckets,
+}, []string{"hop"})
+
+// RequestHop records one bounded hop. Gateway and billing expose it on their own metrics.
+func RequestHop(hop string, duration time.Duration) {
+	switch hop {
+	case "auth", "idempotency", "ratelimit", "route", "reserve", "upstream",
+		"reserve_match", "reserve_lua", "reserve_enqueue",
+		"settle_lookup", "settle_guard", "settle_match", "settle_lua", "settle_queue":
+		requestHopDuration.WithLabelValues(hop).Observe(duration.Seconds())
+	}
+}
+
 var billingAuthCacheRead = promauto.NewCounterVec(prometheus.CounterOpts{
 	Name: "billing_auth_cache_read_total",
 	Help: "Auth cache read outcomes; misses and errors fall back to the authority, browser sessions are never cached",

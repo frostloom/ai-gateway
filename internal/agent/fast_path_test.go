@@ -60,6 +60,13 @@ func TestJevFastPathReadWithoutLLM(t *testing.T) {
 			if !strings.Contains(body.Reply, tc.want) || body.Pending || len(body.Trace) != 1 || body.Trace[0].Tool != tc.tool || body.Trace[0].Confirmed {
 				t.Fatalf("wrong real tool reply/trace: %s", rec.Body.String())
 			}
+			if tc.tool == "list_plans" {
+				for _, amount := range []string{"¥10.00", "¥50.00", "¥100.00"} {
+					if !strings.Contains(body.Reply, amount) {
+						t.Fatalf("fast path omitted monetary entitlement %s: %s", amount, rec.Body.String())
+					}
+				}
+			}
 			if body.Telemetry["jev_fast_path"] != true || body.Telemetry["llm_calls"] != float64(0) || body.Telemetry["jev_calls"] != float64(1) {
 				t.Fatalf("wrong efficiency telemetry: %+v", body.Telemetry)
 			}
@@ -173,6 +180,101 @@ func TestJevFastPathToolFailureIsNotInventedSuccess(t *testing.T) {
 	}
 	if got := countAudit(t, db, "session_id = ? AND tool = ? AND confirmed = ?", "sid-fast-tool-error", "get_balance", false); got != 1 {
 		t.Fatalf("failed query missing audit rows=%d", got)
+	}
+}
+
+func TestSelectiveLaterWhitelistReadSkipsModel(t *testing.T) {
+	h, _, _, done := newAgentHandler(t)
+	defer done()
+	if err := h.SetRoutingMode("jev_selective"); err != nil {
+		t.Fatal(err)
+	}
+	h.SetJev(jev.NewFake(fastVerdict("get_balance", .98)))
+	h.llm = &scriptedLLM{steps: []*Message{contentMsg("不应该调用模型。")}}
+	ses := &session{History: []Message{{Role: "user", Content: "你好"}, {Role: "assistant", Content: "请说你的账户问题。"}}}
+	stats := &TurnTelemetry{}
+	ctx := context.WithValue(context.Background(), telemetryKey{}, stats)
+	reply, trace, err := h.process(ctx, "later-balance", 42, "查一下余额", ses)
+	if err != nil || stats.LLMCalls != 0 || stats.JevCalls != 1 || !stats.JevFastPath || len(trace) != 1 || trace[0].Tool != "get_balance" || !strings.Contains(reply, "¥20000.00") {
+		t.Fatalf("later whitelist read reached the model: reply=%s trace=%+v stats=%+v err=%v", reply, trace, stats, err)
+	}
+}
+
+func TestSelectiveOffTopicSkipsModel(t *testing.T) {
+	h, _, _, done := newAgentHandler(t)
+	defer done()
+	if err := h.SetRoutingMode("jev_selective"); err != nil {
+		t.Fatal(err)
+	}
+	script := fastVerdict("chitchat", .99)
+	script.Answers["route_shape"] = jev.AnswerChoice("complex", .99)
+	script.Answers["topic_fit"] = jev.AnswerChoice("off_topic", .96)
+	h.SetJev(jev.NewFake(script))
+	h.llm = &scriptedLLM{steps: []*Message{contentMsg("def calc(a, b, op):")}}
+	ses := &session{History: []Message{{Role: "user", Content: "查余额"}, {Role: "assistant", Content: "当前可用余额¥1.00。"}}}
+	stats := &TurnTelemetry{}
+	ctx := context.WithValue(context.Background(), telemetryKey{}, stats)
+	reply, trace, err := h.process(ctx, "off-topic-code", 42, "帮我写一段代码，实现python的简单加减乘除", ses)
+	if err != nil || stats.LLMCalls != 0 || stats.JevCalls != 1 || !stats.JevShortCircuit || stats.JevFastPathReason != "off_topic" || len(trace) != 0 || !strings.Contains(reply, "账户业务无关") || strings.Contains(reply, "def calc") {
+		t.Fatalf("off-topic reached the model: reply=%s trace=%+v stats=%+v err=%v", reply, trace, stats, err)
+	}
+}
+
+func TestSelectivePendingWhitelistReadSkipsModel(t *testing.T) {
+	h, _, _, done := newAgentHandler(t)
+	defer done()
+	if err := h.SetRoutingMode("jev_selective"); err != nil {
+		t.Fatal(err)
+	}
+	h.SetJev(jev.NewFake(fastVerdict("get_balance", .98)))
+	h.llm = &scriptedLLM{steps: []*Message{contentMsg("不应该调用模型。")}}
+	pending := &pendingAction{Tool: "recharge", TenantID: 42, Args: map[string]any{"amount_money": 100}, Preview: "将充值100元", IdemKey: "keep-pending"}
+	ses := &session{PendingAction: pending}
+	stats := &TurnTelemetry{}
+	ctx := context.WithValue(context.Background(), telemetryKey{}, stats)
+	reply, trace, err := h.process(ctx, "pending-balance", 42, "查一下余额", ses)
+	if err != nil || stats.LLMCalls != 0 || stats.JevCalls != 1 || !stats.JevFastPath || len(trace) != 1 || trace[0].Tool != "get_balance" || !strings.Contains(reply, "¥20000.00") || ses.PendingAction != pending {
+		t.Fatalf("pending whitelist read reached the model or dropped the write: reply=%s trace=%+v stats=%+v pending=%+v err=%v", reply, trace, stats, ses.PendingAction, err)
+	}
+}
+
+func TestSelectivePendingOffTopicSkipsModel(t *testing.T) {
+	h, _, _, done := newAgentHandler(t)
+	defer done()
+	if err := h.SetRoutingMode("jev_selective"); err != nil {
+		t.Fatal(err)
+	}
+	script := fastVerdict("chitchat", .99)
+	script.Answers["route_shape"] = jev.AnswerChoice("complex", .99)
+	script.Answers["topic_fit"] = jev.AnswerChoice("off_topic", .96)
+	h.SetJev(jev.NewFake(script))
+	h.llm = &scriptedLLM{steps: []*Message{contentMsg("def calc(a, b, op):")}}
+	pending := &pendingAction{Tool: "recharge", TenantID: 42, Args: map[string]any{"amount_money": 100}, Preview: "将充值100元", IdemKey: "keep-pending"}
+	ses := &session{PendingAction: pending}
+	stats := &TurnTelemetry{}
+	ctx := context.WithValue(context.Background(), telemetryKey{}, stats)
+	reply, trace, err := h.process(ctx, "pending-off-topic", 42, "帮我写一段代码，实现python的简单加减乘除", ses)
+	if err != nil || stats.LLMCalls != 0 || stats.JevCalls != 1 || !stats.JevShortCircuit || stats.JevFastPathReason != "off_topic" || len(trace) != 0 || !strings.Contains(reply, "账户业务无关") || strings.Contains(reply, "def calc") || ses.PendingAction != pending {
+		t.Fatalf("pending off-topic reached the model or dropped the write: reply=%s trace=%+v stats=%+v pending=%+v err=%v", reply, trace, stats, ses.PendingAction, err)
+	}
+}
+
+func TestLowConfidenceOffTopicStillUsesModel(t *testing.T) {
+	h, _, _, done := newAgentHandler(t)
+	defer done()
+	if err := h.SetRoutingMode("jev_selective"); err != nil {
+		t.Fatal(err)
+	}
+	script := fastVerdict("chitchat", .99)
+	script.Answers["route_shape"] = jev.AnswerChoice("complex", .99)
+	script.Answers["topic_fit"] = jev.AnswerChoice("off_topic", .89)
+	h.SetJev(jev.NewFake(script))
+	h.llm = &scriptedLLM{steps: []*Message{contentMsg("保留完整客服处理。")}}
+	stats := &TurnTelemetry{}
+	ctx := context.WithValue(context.Background(), telemetryKey{}, stats)
+	reply, trace, err := h.process(ctx, "off-topic-low", 42, "帮我写一段代码", &session{})
+	if err != nil || reply != "保留完整客服处理。" || len(trace) != 0 || stats.JevCalls != 1 || stats.JevShortCircuit || stats.JevFastPathReason == "off_topic" {
+		t.Fatalf("uncertain off-topic skipped the model: reply=%s stats=%+v err=%v", reply, stats, err)
 	}
 }
 

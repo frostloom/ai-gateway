@@ -19,7 +19,7 @@ withDefaults(defineProps<{
   letter-spacing: .005em;
   white-space: nowrap;
 }
-.ok     { background: var(--ok-bg);     color: var(--ok); }
+.ok     { background: var(--ok-bg);     color: var(--ok-text, var(--ok)); }
 .warn   { background: var(--warn-bg);   color: var(--warn); }
 .danger { background: var(--danger-bg); color: var(--danger); }
 .info   { background: var(--info-bg);   color: var(--info); }

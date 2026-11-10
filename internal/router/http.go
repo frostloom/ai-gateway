@@ -45,10 +45,13 @@ func NewHTTPHandler(reg *Registry, token string, log *slog.Logger) *http.ServeMu
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(map[string]any{
-			"provider_id": prov.ID,
-			"name":        prov.Name,
-			"base_url":    prov.BaseURL,
-			"api_key":     prov.UpstreamKey,
+			"provider_id":         prov.ID,
+			"name":                prov.Name,
+			"base_url":            prov.BaseURL,
+			"messages_base_url":   prov.MessagesBaseURL,
+			"responses_base_url":  prov.ResponsesBaseURL,
+			"api_key":             prov.UpstreamKey,
+			"skip_success_report": reg.failRedis != nil,
 		})
 		log.Info("route", "model", model, "provider", prov.Name, slog.Int64("provider_id", int64(prov.ID)))
 	})

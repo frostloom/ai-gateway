@@ -54,16 +54,19 @@ const (
 // Plan 套餐目录（M9 起 GPT Plus 式）：月费 + 每模型档次每窗口的 token 用量额度（滚动刷新）。
 // 订阅买的是「额度资格」而非钱：额度内使用不走余额；超限等待窗口刷新。one_time 不再售出（代码保留）。
 type Plan struct {
-	ID           uint64 `gorm:"primaryKey"`
-	Name         string `gorm:"size:64;not null;uniqueIndex:uk_name"`
-	PlanType     string `gorm:"size:16;not null"`   // recurring（目录只种定期订阅）
-	PriceMoney   int64  `gorm:"not null"`           // 月费（元，模拟价）
-	ValidityDays int    `gorm:"not null"`           // 计费周期天数（续费/改套餐周期）
-	RefreshHours int    `gorm:"not null;default:5"` // 额度滚动窗口小时数（每 N 小时刷新，未用不累积）
-	TierQuota    string `gorm:"type:json;not null"` // 每窗口每档次 token 额度 {"轻量":2000000,...}
-	Status       int8   `gorm:"not null;default:0"` // 0=active 1=disabled
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
+	ID              uint64 `gorm:"primaryKey"`
+	Name            string `gorm:"size:64;not null;uniqueIndex:uk_name"`
+	PlanType        string `gorm:"size:16;not null"`   // recurring（目录只种定期订阅）
+	PriceMoney      int64  `gorm:"not null"`           // 月费（元，模拟价）
+	ValidityDays    int    `gorm:"not null"`           // 计费周期天数（续费/改套餐周期）
+	RefreshHours    int    `gorm:"not null;default:5"` // 额度滚动窗口小时数（每 N 小时刷新，未用不累积）
+	WindowQuotaCent int64  `gorm:"not null;default:0" json:"WindowQuotaCent,omitempty"`
+	WeekQuotaCent   int64  `gorm:"not null;default:0" json:"WeekQuotaCent,omitempty"`
+	CycleQuotaCent  int64  `gorm:"not null;default:0" json:"CycleQuotaCent,omitempty"`
+	TierQuota       string `gorm:"type:json;not null"` // 每窗口每档次 token 额度 {"轻量":2000000,...}
+	Status          int8   `gorm:"not null;default:0"` // 0=active 1=disabled
+	CreatedAt       time.Time
+	UpdatedAt       time.Time
 }
 
 // TierQuotaMap 解析 tier_quota JSON 为 map[tier]token；坏 JSON/空返回空 map。
@@ -297,17 +300,18 @@ func (s *Store) ListRechargeOrders(ctx context.Context, tenantID uint64, limit i
 
 // MeView 用户自助页 / AI 客服「查一下」一次拉取的数据。金额单位分（=元/100）。
 type MeView struct {
-	Balance            int64         `json:"balance"`                 // 实时可用（Redis 投影，分）
-	BalanceCent        int64         `json:"balance_cent"`            // 同上，显式声明单位为分（展示端 /100 显示元）
-	LedgerBalance      int64         `json:"ledger_balance"`          // 账本口径（权威，分）
-	Consistent         bool          `json:"consistent"`              // 两者是否一致
-	Subscription       *Subscription `json:"subscription"`            // 生效中的定期订阅（可空）
-	Allowance          []TierRemain  `json:"allowance,omitempty"`     // 订阅各档次每窗口剩余额度（token，活跃订阅才非空）
-	RefreshHours       int           `json:"refresh_hours,omitempty"` // 额度滚动窗口小时数（活跃订阅套餐的；展示「每 N 小时刷新」）
-	Plans              []Plan        `json:"plans"`                   // 套餐目录
-	Consumption        []DayStat     `json:"consumption"`             // 近 7 天消耗（分/日）
-	ConsumptionByModel []ModelStat   `json:"consumption_by_model"`    // 近 7 天按模型消耗
-	Topups             []Topup       `json:"topups"`                  // 最近入账流水
+	MoneyAllowance     []MoneyAllowance `json:"money_allowance,omitempty"`
+	Balance            int64            `json:"balance"`                 // 实时可用（Redis 投影，分）
+	BalanceCent        int64            `json:"balance_cent"`            // 同上，显式声明单位为分（展示端 /100 显示元）
+	LedgerBalance      int64            `json:"ledger_balance"`          // 账本口径（权威，分）
+	Consistent         bool             `json:"consistent"`              // 两者是否一致
+	Subscription       *Subscription    `json:"subscription"`            // 生效中的定期订阅（可空）
+	Allowance          []TierRemain     `json:"allowance,omitempty"`     // 订阅各档次每窗口剩余额度（token，活跃订阅才非空）
+	RefreshHours       int              `json:"refresh_hours,omitempty"` // 额度滚动窗口小时数（活跃订阅套餐的；展示「每 N 小时刷新」）
+	Plans              []Plan           `json:"plans"`                   // 套餐目录
+	Consumption        []DayStat        `json:"consumption"`             // 近 7 天消耗（分/日）
+	ConsumptionByModel []ModelStat      `json:"consumption_by_model"`    // 近 7 天按模型消耗
+	Topups             []Topup          `json:"topups"`                  // 最近入账流水
 }
 
 // MeOverview 用户视角总览（portal /portal/me 与 agent 读工具共用）。
@@ -369,6 +373,10 @@ func (s *Store) meOverviewCash(ctx context.Context, tenantID uint64) (*MeView, e
 	if err != nil {
 		return nil, err
 	}
+	moneyAllowance, err := s.SubscriptionMoneyAllowance(ctx, sub)
+	if err != nil {
+		return nil, err
+	}
 	refreshHours := 0
 	if sub != nil {
 		if p, _ := s.GetPlan(ctx, sub.PlanID); p != nil {
@@ -377,7 +385,7 @@ func (s *Store) meOverviewCash(ctx context.Context, tenantID uint64) (*MeView, e
 	}
 	return &MeView{
 		Balance: bal, BalanceCent: bal, LedgerBalance: ledger, Consistent: bal == ledger,
-		Subscription: sub, Allowance: allowance, RefreshHours: refreshHours, Plans: plans,
+		Subscription: sub, MoneyAllowance: moneyAllowance, Allowance: allowance, RefreshHours: refreshHours, Plans: plans,
 		Consumption: cons, ConsumptionByModel: byModel, Topups: topups,
 	}, nil
 }
@@ -506,12 +514,22 @@ type ModelStat struct {
 	Calls        int64  `json:"calls"`            // 调用次数
 }
 
-// ConsumptionByModel 近 days 天按模型分组消耗（settle.actual 求和，JOIN 目录取厂商）。
-func (s *Store) ConsumptionByModel(ctx context.Context, tenantID uint64, days int) ([]ModelStat, error) {
+// consumptionRange uses the same bounded calendar days for every usage view.
+func consumptionRange(days int) (time.Time, int) {
 	if days <= 0 {
 		days = 7
 	}
-	since := time.Now().Add(-time.Duration(days) * 24 * time.Hour)
+	if days > 90 {
+		days = 90
+	}
+	now := time.Now()
+	today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+	return today.AddDate(0, 0, 1-days), days
+}
+
+// ConsumptionByModel 近 days 天按模型分组消耗（settle.actual 求和，JOIN 目录取厂商）。
+func (s *Store) ConsumptionByModel(ctx context.Context, tenantID uint64, days int) ([]ModelStat, error) {
+	since, _ := consumptionRange(days)
 	rows, err := s.db.WithContext(ctx).Model(&Bill{}).
 		Select("bills.model, models.vendor, COALESCE(SUM(bills.actual_quota),0) AS cost_cent, "+
 			"COALESCE(SUM(bills.prompt_tokens),0) AS input_tokens, COALESCE(SUM(bills.completion_tokens),0) AS output_tokens, COUNT(*) AS calls").
@@ -538,10 +556,7 @@ func (s *Store) ConsumptionByModel(ctx context.Context, tenantID uint64, days in
 
 // ConsumptionStats 近 days 天每日结算消耗（settle.actual 求和，缺失日补 0）。
 func (s *Store) ConsumptionStats(ctx context.Context, tenantID uint64, days int) ([]DayStat, error) {
-	if days <= 0 {
-		days = 7
-	}
-	since := time.Now().Add(-time.Duration(days) * 24 * time.Hour)
+	since, days := consumptionRange(days)
 	type row struct {
 		Day    string
 		Tokens int64
@@ -566,7 +581,7 @@ func (s *Store) ConsumptionStats(ctx context.Context, tenantID uint64, days int)
 	// 补齐缺失天
 	out := make([]DayStat, 0, days)
 	for i := days - 1; i >= 0; i-- {
-		d := time.Now().Add(-time.Duration(i) * 24 * time.Hour).Format("2006-01-02")
+		d := since.AddDate(0, 0, days-1-i).Format("2006-01-02")
 		out = append(out, DayStat{Day: d, Tokens: byDay[d]})
 	}
 	return out, nil
@@ -644,6 +659,9 @@ func (s *Store) payRechargeCash(ctx context.Context, orderNo string) (*RechargeO
 	}
 	if o.AmountMoney <= 0 || o.AmountMoney > quota.MaxCashLua/quota.CentPerYuan || o.AmountCent != o.AmountMoney*quota.CentPerYuan {
 		return nil, fmt.Errorf("订单金额超出安全范围")
+	}
+	if err := s.requireCashMatch(ctx, o.TenantID); err != nil {
+		return nil, err
 	}
 	bal, err := LedgerBalance(ctx, s.db, o.TenantID)
 	if err != nil {
@@ -1076,9 +1094,9 @@ func (s *Store) requireCashMatch(ctx context.Context, tenantID uint64) error {
 	if err != nil {
 		return err
 	}
-	// The 5s column lags behind Redis. A restarted process must not copy that
-	// older number back into Redis, or the debits still only in Redis are refunded.
-	if keyPresent && s.batch != nil && observed < ledger {
+	// 批量入账时 Redis 才是这份余额。比账单高，是 AOF 少了约一秒，不再补扣。
+	// 比账单低，是还有扣款没写入 MySQL，不能把较高的旧余额盖回 Redis。
+	if keyPresent && s.batch != nil && observed != ledger {
 		return nil
 	}
 	live, err := s.getBalance(ctx, tenantID)

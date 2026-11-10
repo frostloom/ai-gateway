@@ -50,6 +50,8 @@ export interface ProviderState {
   id: number
   name: string
   base_url: string
+  messages_base_url?: string
+  responses_base_url?: string
   models: string
   weight: number
   status: number             // 0=active 1=disabled 2=banned
@@ -63,6 +65,8 @@ export interface ProviderMargin {
   id: number
   name: string
   base_url: string
+  messages_base_url?: string
+  responses_base_url?: string
   upstream_key: string       // 已脱敏 sk-***
   cost_in_cent: number
   cost_out_cent: number
@@ -112,3 +116,41 @@ export interface HealthResp {
 
 /** 试一发 demo key（与 scripts/seed 的 demo 租户一致，管理端便利） */
 export const DEMO_TENANT_KEY = 'sk-demo-8f3a2b1c9d4e5f60'
+export interface ChannelDiscoverRequest {
+  provider_id?: number
+  name?: string
+  base_url?: string
+  upstream_key?: string
+}
+export interface DiscoveredModel {
+  model_id: string
+  name: string
+  vendor: string
+  context_len?: number
+  max_output_tokens?: number
+  metadata_source: 'upstream' | 'catalog' | 'unknown'
+  configured: boolean
+  exists: boolean
+  status?: number
+}
+export interface ChannelDiscovery {
+  ok: true
+  latency_ms: number
+  endpoint: string
+  models: DiscoveredModel[]
+  warnings?: string[]
+}
+export interface ModelImportItem {
+  model_id: string
+  name?: string
+  vendor?: string
+  context_len?: number
+  input_price_cent?: number
+  output_price_cent?: number
+}
+export interface ModelImportResult {
+  created: { model_id: string }[]
+  skipped: { model_id: string }[]
+  provider_id: number
+  configured_models: string[]
+}

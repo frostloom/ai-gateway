@@ -25,9 +25,9 @@ func TestPlanColloquialTargetResolvesWithoutReasking(t *testing.T) {
 			}))
 			defer server.Close()
 			args := map[string]any{"plan_name": name}
-			preview, err := NewToolbox(NewAdminClient(server.URL)).Preview(context.Background(), "subscribe_plan", args, 42)
-			if err != nil || !strings.Contains(preview, "将订阅") || args["plan_id"] == nil {
-				t.Fatalf("unique user target should preview: %q %v", preview, err)
+			plan, err := NewToolbox(NewAdminClient(server.URL)).findPlan(context.Background(), 42, args)
+			if err != nil || plan == nil || args["plan_id"] == nil {
+				t.Fatalf("unique user target should resolve: %+v %v", plan, err)
 			}
 		})
 	}

@@ -28,6 +28,7 @@ func TestConversationAuthorityRealAgentReads(t *testing.T) {
 	log := slog.New(slog.NewTextHandler(io.Discard, nil))
 	token := "local-authority-control"
 	t.Setenv(controlplane.Env, token)
+	t.Setenv("ENABLE_DEMO_BILLING", "true")
 	billingServer := httptest.NewServer(admin.Handler(st, log, token))
 	defer billingServer.Close()
 	for _, tc := range []struct{ tool, message string }{

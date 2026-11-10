@@ -1,0 +1,92 @@
+/* Hallmark · theme: opencode-console-reference · scope: app */
+/* Critique: console palette and type metrics are taken from the reference's public assets. */
+@font-face {
+  font-family: "Gateway Inter";
+  src: url("/fonts/inter-latin.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+}
+html.portal-theme {
+  --oc-background: #fff;
+  --oc-surface: #fafafa;
+  --oc-text: #161616;
+  --oc-secondary: #5c5c5c;
+  --oc-muted: #808080;
+  --oc-border: #0000001a;
+  --oc-border-muted: #00000014;
+  --oc-success: #198b43;
+  --oc-focus: #3b5cf6;
+  --oc-warning: #cb9f34;
+  --oc-danger: #b82d35;
+  --background: var(--oc-background);
+  --foreground: var(--oc-text);
+  --card: var(--oc-background);
+  --secondary: var(--oc-surface);
+  --secondary-foreground: var(--oc-text);
+  --muted: var(--oc-surface);
+  --muted-foreground: var(--oc-secondary);
+  --accent: var(--oc-surface);
+  --accent-foreground: var(--oc-text);
+  --primary: var(--oc-text);
+  --primary-foreground: var(--oc-background);
+  --border: var(--oc-border);
+  --input: var(--oc-border);
+  --ring: var(--oc-focus);
+  --ink-900: var(--oc-text);
+  --ink-800: var(--oc-text);
+  --ink-700: var(--oc-text);
+  --ink-600: var(--oc-secondary);
+  --ink-500: var(--oc-secondary);
+  --ink-400: var(--oc-secondary);
+  --bg: var(--oc-background);
+  --surface: var(--oc-background);
+  --surface-2: var(--oc-surface);
+  --shell: var(--oc-background);
+  --well: var(--oc-surface);
+  --hairline: var(--oc-border);
+  --hairline-2: var(--oc-border);
+  --ok: var(--oc-success);
+  --danger: var(--oc-danger);
+  --destructive: var(--oc-danger);
+  --font-sans: "Gateway Inter", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --r-sm: 4px;
+  --r-md: 6px;
+  --r-lg: 6px;
+  --r-xl: 8px;
+}
+.portal-theme body {
+  font-size: 13px;
+  font-weight: 440;
+  line-height: 20px;
+}
+.portal-theme h1 {
+  font-size: 21px;
+  font-weight: 530;
+  line-height: 28px;
+  letter-spacing: -0.3px;
+}
+.portal-theme h2 {
+  font-size: 15px;
+  font-weight: 530;
+  line-height: 20px;
+  letter-spacing: -0.1px;
+}
+.portal-theme h3 {
+  font-size: 14px;
+  font-weight: 530;
+  line-height: 20px;
+}
+.portal-theme button {
+  font-weight: 500;
+}
+.portal-theme :focus-visible {
+  outline-color: var(--oc-focus);
+}
+.portal-theme .btn {
+  border-radius: 6px;
+}
+.portal-theme .modal {
+  border: 1px solid var(--oc-border);
+  border-radius: 8px;
+}

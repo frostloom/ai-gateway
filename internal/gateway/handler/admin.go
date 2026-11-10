@@ -22,6 +22,7 @@ import (
 
 // adminHTTP 面板聚合转发共用 client（复用连接池，别每请求新建）。
 var adminHTTP = &http.Client{Timeout: 5 * time.Second}
+var discoveryHTTP = &http.Client{Timeout: 20 * time.Second}
 
 // controlToken 是 gateway 访问 billing admin 时附带的控制面令牌。
 var controlToken string
@@ -43,15 +44,27 @@ func RegisterAdminAuth(g *gin.RouterGroup, billingAdminBase string, log *slog.Lo
 		proxyJSON(c, billingAdminBase+"/admin/auth/initialized", log)
 	})
 	g.POST("/setup", func(c *gin.Context) {
-		body, _ := io.ReadAll(c.Request.Body)
+		body, err := io.ReadAll(http.MaxBytesReader(c.Writer, c.Request.Body, 64<<10))
+		if err != nil {
+			c.JSON(http.StatusRequestEntityTooLarge, gin.H{"error": "请求体超过 64 KiB"})
+			return
+		}
 		proxy(c, http.MethodPost, billingAdminBase+"/admin/auth/setup", body, log)
 	})
 	g.POST("/login", func(c *gin.Context) {
-		body, _ := io.ReadAll(c.Request.Body)
+		body, err := io.ReadAll(http.MaxBytesReader(c.Writer, c.Request.Body, 64<<10))
+		if err != nil {
+			c.JSON(http.StatusRequestEntityTooLarge, gin.H{"error": "请求体超过 64 KiB"})
+			return
+		}
 		proxy(c, http.MethodPost, billingAdminBase+"/admin/auth/login", body, log)
 	})
 	g.POST("/logout", func(c *gin.Context) {
-		body, _ := io.ReadAll(c.Request.Body)
+		body, err := io.ReadAll(http.MaxBytesReader(c.Writer, c.Request.Body, 64<<10))
+		if err != nil {
+			c.JSON(http.StatusRequestEntityTooLarge, gin.H{"error": "请求体超过 64 KiB"})
+			return
+		}
 		proxy(c, http.MethodPost, billingAdminBase+"/admin/auth/logout", body, log)
 	})
 	g.GET("/me", func(c *gin.Context) {
@@ -60,6 +73,35 @@ func RegisterAdminAuth(g *gin.RouterGroup, billingAdminBase string, log *slog.Lo
 }
 
 func RegisterAdmin(g *gin.RouterGroup, billingAdminBase, routerBase, reconcilerBase, agentBase string, log *slog.Logger) {
+	g.Use(func(c *gin.Context) { c.Header("Cache-Control", "no-store"); c.Next() })
+	for path, target := range map[string]string{"/channels/discover": "/admin/providers/discover", "/models/import": "/admin/models/import"} {
+		g.POST(path, func(c *gin.Context) {
+			body, err := io.ReadAll(http.MaxBytesReader(c.Writer, c.Request.Body, 128<<10))
+			if err != nil {
+				c.JSON(http.StatusRequestEntityTooLarge, gin.H{"error": "请求内容过大"})
+				return
+			}
+			proxyWithClient(c, http.MethodPost, billingAdminBase+target, body, log, discoveryHTTP)
+		})
+	}
+	g.GET("/vouchers", func(c *gin.Context) { proxyJSON(c, billingAdminBase+"/admin/vouchers", log) })
+	g.POST("/vouchers", func(c *gin.Context) {
+		body, err := io.ReadAll(http.MaxBytesReader(c.Writer, c.Request.Body, 4096))
+		if err != nil {
+			c.JSON(http.StatusRequestEntityTooLarge, gin.H{"error": "请求过大"})
+			return
+		}
+		proxy(c, http.MethodPost, billingAdminBase+"/admin/vouchers", body, log)
+	})
+	g.GET("/plans", func(c *gin.Context) { proxyJSON(c, billingAdminBase+"/admin/plans", log) })
+	g.POST("/plans", func(c *gin.Context) {
+		body, err := io.ReadAll(c.Request.Body)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "读取套餐失败"})
+			return
+		}
+		proxy(c, http.MethodPost, billingAdminBase+"/admin/plans", body, log)
+	})
 	// 总览：租户余额/消耗 + 全局汇总（转 billing）
 	g.GET("/overview", func(c *gin.Context) {
 		proxyJSON(c, billingAdminBase+"/admin/overview", log)
@@ -91,6 +133,9 @@ func RegisterAdmin(g *gin.RouterGroup, billingAdminBase, routerBase, reconcilerB
 	g.POST("/channels", func(c *gin.Context) {
 		body, _ := io.ReadAll(c.Request.Body)
 		proxy(c, http.MethodPost, billingAdminBase+"/admin/providers", body, log)
+	})
+	g.DELETE("/channels", func(c *gin.Context) {
+		proxy(c, http.MethodDelete, billingAdminBase+"/admin/providers?"+c.Request.URL.RawQuery, nil, log)
 	})
 
 	// ---------- 商城：商品目录（卖方管理） ----------
@@ -152,7 +197,10 @@ func RegisterAdmin(g *gin.RouterGroup, billingAdminBase, routerBase, reconcilerB
 			_ = resp.Body.Close()
 			results[name] = map[string]any{"ok": true}
 		}
-		c.JSON(http.StatusOK, map[string]any{"ok": allOK, "services": results})
+		c.JSON(http.StatusOK, map[string]any{
+			"ok": allOK, "services": results,
+			"agent_model": strings.TrimSpace(os.Getenv("AGENT_LLM_MODEL")),
+		})
 	})
 }
 
@@ -210,7 +258,7 @@ func proxyJSON(c *gin.Context, target string, log *slog.Logger) {
 
 func RegisterUserAuth(g *gin.RouterGroup, base string, log *slog.Logger) {
 	g.GET("/me", func(c *gin.Context) { proxyJSON(c, base+"/auth/me", log) })
-	for _, action := range []string{"register", "login", "logout"} {
+	for _, action := range []string{"register", "login", "unified-login", "logout"} {
 		g.POST("/"+action, func(c *gin.Context) {
 			body, err := io.ReadAll(http.MaxBytesReader(c.Writer, c.Request.Body, 4096))
 			if err != nil {
@@ -224,6 +272,10 @@ func RegisterUserAuth(g *gin.RouterGroup, base string, log *slog.Logger) {
 
 // proxy 转发到上游（billing/router 观测端点）。body 非空时为 POST + application/json。
 func proxy(c *gin.Context, method, target string, body []byte, log *slog.Logger) {
+	proxyWithClient(c, method, target, body, log, adminHTTP)
+}
+
+func proxyWithClient(c *gin.Context, method, target string, body []byte, log *slog.Logger, hc *http.Client) {
 	if _, err := url.Parse(target); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "bad upstream url"})
 		return
@@ -256,7 +308,7 @@ func proxy(c *gin.Context, method, target string, body []byte, log *slog.Logger)
 	if controlToken != "" {
 		req.Header.Set(controlplane.Header, controlToken)
 	}
-	resp, err := adminHTTP.Do(req)
+	resp, err := hc.Do(req)
 	if err != nil {
 		log.Error("admin proxy", "target", target, "err", err)
 		c.JSON(http.StatusBadGateway, gin.H{"error": "upstream unreachable"})

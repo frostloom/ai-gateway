@@ -130,9 +130,9 @@ func TestSelectiveRoutingAcceptanceBoundaries(t *testing.T) {
 		{"nonfinite", "查余额", func(v *jevVerdict, _ *session) { v.IntentConf = math.NaN() }, "intent_uncertain"},
 		{"write", "退款100", func(v *jevVerdict, _ *session) { v.Intent = "refund_recharge" }, "tool_not_supported"},
 		{"compound", "查余额并且充值100", nil, "compound_or_action_or_negation"},
-		{"context", "查余额", func(_ *jevVerdict, s *session) {
+		{"later_read", "查余额", func(_ *jevVerdict, s *session) {
 			s.History = append(s.History, Message{Role: "assistant", Content: "你好"})
-		}, "conversation_context"},
+		}, "eligible"},
 		{"custom_time", "今天消耗是多少", func(v *jevVerdict, _ *session) { v.Intent = "get_consumption" }, "parameters_or_custom_scope"},
 		{"schema", "查余额", func(v *jevVerdict, _ *session) { v.FastFieldsValid = false }, "judge_schema_invalid"},
 		{"fault", "查余额", func(v *jevVerdict, _ *session) { v.Available = false }, "judge_unavailable"},

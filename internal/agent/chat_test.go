@@ -142,7 +142,7 @@ func (f *fakeAdmin) handler() http.Handler {
 			Balance: 2_000_000, LedgerBalance: 2_000_000, Consistent: true,
 			Plans: []store.Plan{
 				{ID: 1, Name: "一次性·入门", PlanType: store.PlanTypeOneTime, PriceMoney: 10},
-				{ID: 2, Name: "月度·标准", PlanType: store.PlanTypeRecurring, PriceMoney: 80, ValidityDays: 30, RefreshHours: 5, TierQuota: `{"文本":100000}`},
+				{ID: 2, Name: "月度·标准", PlanType: store.PlanTypeRecurring, PriceMoney: 80, ValidityDays: 30, RefreshHours: 5, WindowQuotaCent: 1000, WeekQuotaCent: 5000, CycleQuotaCent: 10000, TierQuota: `{}`},
 			},
 		})
 	})
@@ -151,7 +151,7 @@ func (f *fakeAdmin) handler() http.Handler {
 	})
 	mux.HandleFunc("/admin/recharge", func(w http.ResponseWriter, r *http.Request) {
 		f.recordPost(r)
-		_ = json.NewEncoder(w).Encode(map[string]any{"order_no": "fake-ord-1", "amount_cent": 10_000, "status": store.RechargePaid})
+		_ = json.NewEncoder(w).Encode(store.RechargeOrder{OrderNo: "fake-ord-1", AmountMoney: 100, AmountCent: 10_000, Status: store.RechargePending})
 	})
 	mux.HandleFunc("/admin/recharge/pay", func(w http.ResponseWriter, r *http.Request) {
 		f.recordPost(r)
@@ -191,7 +191,7 @@ func newAgentHandler(t *testing.T) (*Handler, *fakeAdmin, *gorm.DB, func()) {
 	st, db, rdb, done := newAgentStore(t)
 	fa := &fakeAdmin{}
 	ts := httptest.NewServer(fa.handler())
-	tb := NewToolbox(NewAdminClient(ts.URL))
+	tb := confirmationFixtureToolbox(NewAdminClient(ts.URL))
 	log := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelError}))
 	h := &Handler{
 		billing: fakeBilling{tenantID: 42},

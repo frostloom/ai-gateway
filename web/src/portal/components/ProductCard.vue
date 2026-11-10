@@ -32,12 +32,12 @@ const isFree = computed(() => props.model.input_price_cent === 0 && props.model.
         <span class="vmark">{{ initials }}</span>
         <span class="vname">{{ model.vendor }}</span>
       </div>
-      <span v-if="isFree" class="free">免费额度</span>
-      <span v-else-if="featured" class="feat">热卖</span>
+      <span v-if="isFree" class="free">按量价格为零</span>
+      <span v-else-if="featured" class="feat">推荐</span>
     </header>
 
     <h3 class="name">{{ model.name }}</h3>
-    <p class="mid mono">{{ model.model_id }}</p>
+    <p class="mid mono" :title="model.model_id">{{ model.model_id }}</p>
 
     <div class="pricing">
       <div class="pcol">
@@ -58,9 +58,9 @@ const isFree = computed(() => props.model.input_price_cent === 0 && props.model.
     </div>
 
     <footer class="acts">
-      <button class="buy" @click="emit('buy', model)">购买额度</button>
-      <button class="try" title="在接口调试中使用" @click="emit('try', model)">
-        <IconBolt :size="14" /> 试用
+      <button class="buy" @click="emit('buy', model)">余额兑换</button>
+      <button class="try" title="在工作台中使用，按实际用量计费" @click="emit('try', model)">
+        <IconBolt :size="14" /> 开始对话
       </button>
     </footer>
   </article>
@@ -68,6 +68,7 @@ const isFree = computed(() => props.model.input_price_cent === 0 && props.model.
 
 <style scoped>
 .card {
+  min-width: 0;
   display: flex; flex-direction: column;
   background: var(--surface);
   border: 1px solid var(--hairline);
@@ -126,7 +127,7 @@ const isFree = computed(() => props.model.input_price_cent === 0 && props.model.
   color: var(--ink-900);
   line-height: 1.3;
 }
-.mid {
+.mid { overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   font-size: var(--fs-2xs);
   color: var(--ink-400);
   margin: 3px 0 var(--sp-4);
@@ -162,7 +163,7 @@ const isFree = computed(() => props.model.input_price_cent === 0 && props.model.
 }
 .mchip {
   font-size: var(--fs-2xs);
-  color: var(--ink-500);
+  color: var(--secondary-foreground);
   background: var(--paper-3);
   border-radius: var(--r-xs);
   padding: 2px 7px;
@@ -186,7 +187,7 @@ const isFree = computed(() => props.model.input_price_cent === 0 && props.model.
 .try {
   display: inline-flex; align-items: center; gap: 5px;
   height: 36px; padding: 0 16px;
-  background: var(--well); color: var(--ink-600);
+  background: var(--secondary); color: var(--secondary-foreground);
   border: none; border-radius: var(--r-sm);
   box-shadow: var(--inset-well);
   font-size: var(--fs-sm); font-weight: 540;

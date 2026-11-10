@@ -16,12 +16,14 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"io"
 	"log/slog"
 	"net/http"
 	"strings"
 	"time"
 
+	"github.com/frostloom/ai-gateway/internal/pkg/upstream"
 	"github.com/gin-gonic/gin"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -46,11 +48,20 @@ type routingAPI interface {
 	Report(ctx context.Context, providerID uint64, ok bool)
 }
 
+// reportProvider 把平台失败告诉路由。成功在 Redis 计数方案里不写任何东西，不再等这趟回报。
+func reportProvider(ctx context.Context, r routingAPI, prov *client.RouteResult, ok bool) {
+	if ok && prov != nil && prov.SkipSuccessReport {
+		return
+	}
+	r.Report(ctx, prov.ProviderID, ok)
+}
+
 type chatRequest struct {
 	Model     string        `json:"model"`
 	Messages  []chatMessage `json:"messages"`
 	MaxTokens int           `json:"max_tokens,omitempty"` // 缺席不转发：真实上游用模型默认值（0 会被 OpenAI 兼容接口拒掉）
 	Stream    bool          `json:"stream"`
+	raw       []byte        // 客户端原文。Pi 会带 content 数组、tools、max_completion_tokens，必须原样转给上游。
 }
 
 type chatMessage struct {
@@ -75,26 +86,33 @@ type usage struct {
 // 被关闭进 TIME_WAIT，堆积同样打爆临时端口。池子要能容纳峰值并发（压测 300/500 复用）。
 var (
 	upstreamClient = &http.Client{
-		Timeout:   2 * time.Minute,
-		Transport: &http.Transport{MaxIdleConns: 2048, MaxIdleConnsPerHost: 1024},
+		Timeout:       2 * time.Minute,
+		Transport:     &http.Transport{MaxIdleConns: 2048, MaxIdleConnsPerHost: 1024},
+		CheckRedirect: rejectUpstreamRedirect,
 	}
 	streamClient = &http.Client{ // 流式无总超时（长连接），靠请求 ctx 取消
-		Transport: &http.Transport{MaxIdleConns: 2048, MaxIdleConnsPerHost: 1024},
+		Transport:     &http.Transport{MaxIdleConns: 2048, MaxIdleConnsPerHost: 1024},
+		CheckRedirect: rejectUpstreamRedirect,
 	}
 )
+
+func rejectUpstreamRedirect(_ *http.Request, _ []*http.Request) error {
+	return http.ErrUseLastResponse
+}
 
 // Chat 编排入口：鉴权/限流/幂等已在中间件完成，这里只负责「路由→预占→转发→收尾」。
 // Omitted holdUnknown defaults to retaining bills when the upstream outcome is unknown.
 func Chat(b billingAPI, r routingAPI, log *slog.Logger, upstreamTimeout time.Duration, holdUnknown ...bool) gin.HandlerFunc {
 	conservative := len(holdUnknown) == 0 || holdUnknown[0]
 	return func(c *gin.Context) {
-		var req chatRequest
-		if err := c.ShouldBindJSON(&req); err != nil {
+		body, err := io.ReadAll(io.LimitReader(c.Request.Body, 8<<20))
+		if err != nil || len(body) == 0 {
 			abort(c, http.StatusBadRequest, "invalid request body")
 			return
 		}
-		if req.Model == "" || len(req.Messages) == 0 {
-			abort(c, http.StatusBadRequest, "model and messages required")
+		req, err := parseChatBody(body)
+		if err != nil {
+			abort(c, http.StatusBadRequest, "invalid request body")
 			return
 		}
 
@@ -104,7 +122,9 @@ func Chat(b billingAPI, r routingAPI, log *slog.Logger, upstreamTimeout time.Dur
 		estPrompt := estimateMessages(&req)
 
 		// 1) 路由：选 provider（无可用直接 503，没产生任何计费动作）
+		routeStart := time.Now()
 		prov, err := r.Route(c.Request.Context(), req.Model)
+		metrics.RequestHop("route", time.Since(routeStart))
 		if err != nil {
 			abort(c, http.StatusServiceUnavailable, "routing unavailable")
 			return
@@ -116,14 +136,9 @@ func Chat(b billingAPI, r routingAPI, log *slog.Logger, upstreamTimeout time.Dur
 
 		// 2) 预占：先扣后用，防超卖/防白嫖
 		rc, cancel := context.WithTimeout(c.Request.Context(), 3*time.Second)
-		canonicalRequest, err := json.Marshal(&req)
-		if err != nil {
-			cancel()
-			abort(c, http.StatusBadRequest, "invalid request body")
-			return
-		}
-		requestDigest := sha256.Sum256(canonicalRequest)
+		requestDigest := sha256.Sum256(chatUpstreamBody(&req))
 		rc = controlplane.WithReserveContent(rc, hex.EncodeToString(requestDigest[:]))
+		reserveStart := time.Now()
 		rr, err := b.Reserve(rc, &billingv1.ReserveRequest{
 			RequestId:           requestID,
 			TenantId:            tenantID,
@@ -133,6 +148,7 @@ func Chat(b billingAPI, r routingAPI, log *slog.Logger, upstreamTimeout time.Dur
 			EstPromptTokens:     estPrompt,
 			MaxCompletionTokens: int64(req.MaxTokens),
 		})
+		metrics.RequestHop("reserve", time.Since(reserveStart))
 		cancel()
 		if err != nil {
 			// 目录里没有/下架的模型 → billing 返回 InvalidArgument，映射为 400「模型未上架/已下架」
@@ -207,9 +223,8 @@ func forwardNonStream(c *gin.Context, b billingAPI, r routingAPI, log *slog.Logg
 	}
 
 	for attempt := 0; attempt < 3; attempt++ {
-		upstreamBody, _ := json.Marshal(req)
-		uReq, err := http.NewRequestWithContext(requestCtx, http.MethodPost,
-			prov.BaseURL+"/v1/chat/completions", bytes.NewReader(upstreamBody))
+		upstreamBody := chatUpstreamBody(req)
+		uReq, err := newChatUpstreamRequest(requestCtx, prov.BaseURL, upstreamBody)
 		if err != nil {
 			reverseWithBackground(b, log, requestID, billID, "build upstream request failed")
 			abort(c, http.StatusBadGateway, "upstream error")
@@ -217,10 +232,11 @@ func forwardNonStream(c *gin.Context, b billingAPI, r routingAPI, log *slog.Logg
 		}
 		setUpstreamHeaders(uReq, c, false, prov.APIKey)
 
+		upstreamStart := time.Now()
 		upResp, err := upstreamClient.Do(uReq)
 		if err != nil {
 			if conservative {
-				r.Report(c.Request.Context(), prov.ProviderID, false)
+				reportProvider(c.Request.Context(), r, prov, false)
 				log.Warn("upstream outcome unknown; bill left pending", "request_id", requestID, "err", err)
 				abort(c, http.StatusBadGateway, "upstream outcome unknown")
 				return
@@ -232,13 +248,22 @@ func forwardNonStream(c *gin.Context, b billingAPI, r routingAPI, log *slog.Logg
 			}
 			break
 		}
-		// Conservative mode does not forward error bodies. Close immediately so
-		// an upstream that never finishes its error response cannot hold a request.
-		if conservative && upResp.StatusCode/100 != 2 {
+		// 5xx 不读错误正文，避免上游不结束响应时把请求挂住。4xx 有明确拒绝，按原状态和正文退回。
+		if conservative && upResp.StatusCode >= 500 {
 			upResp.Body.Close()
-			r.Report(c.Request.Context(), prov.ProviderID, upResp.StatusCode < 500)
-			log.Warn("upstream rejected request; bill left pending", "request_id", requestID, "status", upResp.StatusCode)
-			abort(c, http.StatusBadGateway, "upstream outcome unknown")
+			reportProvider(c.Request.Context(), r, prov, false)
+			log.Warn("upstream 5xx", "request_id", requestID, "status", upResp.StatusCode)
+			reverseWithBackground(b, log, requestID, billID, "upstream status "+upResp.Status)
+			abort(c, http.StatusBadGateway, "upstream rejected request")
+			return
+		}
+		if conservative && upResp.StatusCode/100 != 2 {
+			statusCode := upResp.StatusCode
+			errBody := readLimitedBody(upResp.Body)
+			reportProvider(c.Request.Context(), r, prov, true)
+			log.Warn("upstream rejected request; precharge refunded", "request_id", requestID, "status", statusCode)
+			reverseWithBackground(b, log, requestID, billID, "upstream status "+upResp.Status)
+			writeUpstreamBody(c, statusCode, errBody)
 			return
 		}
 		body, readErr := io.ReadAll(upResp.Body)
@@ -260,7 +285,7 @@ func forwardNonStream(c *gin.Context, b billingAPI, r routingAPI, log *slog.Logg
 				break
 			}
 			// 4xx：业务拒绝，provider 正常 → 不重试，直接退款透传
-			r.Report(c.Request.Context(), prov.ProviderID, true)
+			reportProvider(c.Request.Context(), r, prov, true)
 			reverseWithBackground(b, log, requestID, billID, "upstream 4xx: "+upResp.Status)
 			c.Data(upResp.StatusCode, "application/json", body)
 			return
@@ -288,8 +313,9 @@ func forwardNonStream(c *gin.Context, b billingAPI, r routingAPI, log *slog.Logg
 				return
 			}
 		}
-		// 成功：上报健康 + 按实际结算
-		r.Report(c.Request.Context(), prov.ProviderID, true)
+		// 成功：Redis 计数方案不回报。没配 Redis 时仍回报，用来结束探测。
+		metrics.RequestHop("upstream", time.Since(upstreamStart))
+		reportProvider(c.Request.Context(), r, prov, true)
 		if conservative && pr.Usage == nil {
 			log.Warn("upstream response lacks usage; bill left pending", "request_id", requestID)
 			c.Data(http.StatusOK, "application/json", body)
@@ -338,9 +364,8 @@ func relayStream(c *gin.Context, b billingAPI, r routingAPI, log *slog.Logger, p
 
 	var upResp *http.Response
 	for attempt := 0; attempt < 3; attempt++ {
-		upstreamBody, _ := json.Marshal(req)
-		uReq, err := http.NewRequestWithContext(c.Request.Context(), http.MethodPost,
-			prov.BaseURL+"/v1/chat/completions", bytes.NewReader(upstreamBody))
+		upstreamBody := chatUpstreamBody(req)
+		uReq, err := newChatUpstreamRequest(c.Request.Context(), prov.BaseURL, upstreamBody)
 		if err != nil {
 			reverseWithBackground(b, log, requestID, billID, "build stream request failed")
 			abort(c, http.StatusBadGateway, "upstream error")
@@ -351,7 +376,7 @@ func relayStream(c *gin.Context, b billingAPI, r routingAPI, log *slog.Logger, p
 		resp, err := streamClient.Do(uReq)
 		if err != nil {
 			if conservative {
-				r.Report(c.Request.Context(), prov.ProviderID, false)
+				reportProvider(c.Request.Context(), r, prov, false)
 				log.Warn("upstream stream outcome unknown; bill left pending", "request_id", requestID, "err", err)
 				abort(c, http.StatusBadGateway, "upstream outcome unknown")
 				return
@@ -362,11 +387,13 @@ func relayStream(c *gin.Context, b billingAPI, r routingAPI, log *slog.Logger, p
 			}
 			break
 		}
-		if conservative && resp.StatusCode/100 != 2 {
-			resp.Body.Close()
-			r.Report(c.Request.Context(), prov.ProviderID, resp.StatusCode < 500)
-			log.Warn("upstream stream rejected request; bill left pending", "request_id", requestID, "status", resp.StatusCode)
-			abort(c, http.StatusBadGateway, "upstream outcome unknown")
+		if conservative && resp.StatusCode/100 != 2 && resp.StatusCode < 500 {
+			statusCode := resp.StatusCode
+			errBody := readLimitedBody(resp.Body)
+			reportProvider(c.Request.Context(), r, prov, true)
+			log.Warn("upstream stream rejected request; precharge refunded", "request_id", requestID, "status", statusCode)
+			reverseWithBackground(b, log, requestID, billID, "upstream status "+resp.Status)
+			writeUpstreamBody(c, statusCode, errBody)
 			return
 		}
 		if resp.StatusCode >= 500 {
@@ -382,7 +409,7 @@ func relayStream(c *gin.Context, b billingAPI, r routingAPI, log *slog.Logger, p
 		if resp.StatusCode/100 != 2 {
 			body, _ := io.ReadAll(resp.Body)
 			resp.Body.Close()
-			r.Report(c.Request.Context(), prov.ProviderID, true)
+			reportProvider(c.Request.Context(), r, prov, true)
 			reverseWithBackground(b, log, requestID, billID, "upstream 4xx: "+resp.Status)
 			c.Data(resp.StatusCode, "application/json", body)
 			return
@@ -398,11 +425,12 @@ func relayStream(c *gin.Context, b billingAPI, r routingAPI, log *slog.Logger, p
 	}
 	defer upResp.Body.Close()
 
-	// 流成功建立之后才写 SSE 头。中途失败不再换上游。
-	r.Report(c.Request.Context(), prov.ProviderID, true)
+	// 流成功建立之后才写 SSE 头。中途失败不再换上游。成功不回报。
+	reportProvider(c.Request.Context(), r, prov, true)
 	c.Header("Content-Type", "text/event-stream")
 	c.Header("Cache-Control", "no-cache")
 	c.Header("Connection", "keep-alive")
+	c.Header("X-Accel-Buffering", "no")
 
 	w := c.Writer
 	flusher, ok := w.(http.Flusher)
@@ -483,7 +511,7 @@ func relayStream(c *gin.Context, b billingAPI, r routingAPI, log *slog.Logger, p
 		return
 	}
 	if text := strings.TrimSpace(forwarded.String()); text != "" {
-		completion := tokens.Estimate(text)
+		completion := int64(tokens.Count(req.Model, text))
 		if completion < 1 {
 			completion = 1
 		}
@@ -613,12 +641,83 @@ func setUpstreamHeaders(uReq *http.Request, c *gin.Context, stream bool, upstrea
 	}
 }
 
-func estimateMessages(req *chatRequest) int64 {
-	var total int64
-	for _, m := range req.Messages {
-		total += tokens.Estimate(m.Content)
+func chatUpstreamBody(req *chatRequest) []byte {
+	if len(req.raw) > 0 {
+		return req.raw
 	}
-	return total
+	body, _ := json.Marshal(req)
+	return body
+}
+
+var errChatBody = errors.New("invalid chat body")
+
+func parseChatBody(body []byte) (chatRequest, error) {
+	var flex struct {
+		Model    string `json:"model"`
+		Messages []struct {
+			Role    string          `json:"role"`
+			Content json.RawMessage `json:"content"`
+		} `json:"messages"`
+		MaxTokens           int  `json:"max_tokens"`
+		MaxCompletionTokens int  `json:"max_completion_tokens"`
+		Stream              bool `json:"stream"`
+	}
+	if err := json.Unmarshal(body, &flex); err != nil {
+		return chatRequest{}, err
+	}
+	req := chatRequest{
+		Model:     canonicalModel(flex.Model),
+		Stream:    flex.Stream,
+		MaxTokens: flex.MaxTokens,
+		raw:       adaptChatBody(body),
+	}
+	if req.Model == "" || len(flex.Messages) == 0 {
+		return chatRequest{}, errChatBody
+	}
+	if req.MaxTokens <= 0 {
+		req.MaxTokens = flex.MaxCompletionTokens
+	}
+	for _, m := range flex.Messages {
+		if m.Role == "" {
+			return chatRequest{}, errChatBody
+		}
+		req.Messages = append(req.Messages, chatMessage{Role: m.Role, Content: messageText(m.Content)})
+	}
+	return req, nil
+}
+
+func messageText(raw json.RawMessage) string {
+	if len(raw) == 0 || string(raw) == "null" {
+		return ""
+	}
+	var text string
+	if json.Unmarshal(raw, &text) == nil {
+		return text
+	}
+	var parts []struct {
+		Text string `json:"text"`
+	}
+	if json.Unmarshal(raw, &parts) == nil {
+		var b strings.Builder
+		for _, part := range parts {
+			b.WriteString(part.Text)
+		}
+		return b.String()
+	}
+	return ""
+}
+
+func estimateMessages(req *chatRequest) int64 {
+	parts := make([]string, 0, len(req.Messages)*2)
+	for _, m := range req.Messages {
+		parts = append(parts, m.Role, m.Content)
+	}
+	// New API 的对话开销：每条消息 3，整次请求再加 3。
+	n := tokens.Count(req.Model, strings.Join(parts, "\n")) + len(req.Messages)*3 + 3
+	if n < 1 {
+		return 1
+	}
+	return int64(n)
 }
 
 // reverseWithBackground 独立 ctx 退款：上游失败时退回预扣。若退款本身失败，
@@ -634,6 +733,97 @@ func reverseWithBackground(b billingAPI, log *slog.Logger, requestID string, bil
 	log.Info("reversed", "request_id", requestID, "reversed", resp.Reversed, "refund", resp.RefundQuota, "reason", reason)
 }
 
+func adaptChatBody(body []byte) []byte {
+	var raw map[string]json.RawMessage
+	if json.Unmarshal(body, &raw) != nil {
+		return append([]byte(nil), body...)
+	}
+	msgsRaw, ok := raw["messages"]
+	if !ok {
+		return append([]byte(nil), body...)
+	}
+	var msgs []map[string]json.RawMessage
+	if json.Unmarshal(msgsRaw, &msgs) != nil {
+		return append([]byte(nil), body...)
+	}
+	changed := false
+	for i, msg := range msgs {
+		if jsonString(msg["role"]) != "developer" {
+			continue
+		}
+		encoded, err := json.Marshal("system")
+		if err != nil {
+			continue
+		}
+		msgs[i]["role"] = encoded
+		changed = true
+	}
+	if !changed {
+		return append([]byte(nil), body...)
+	}
+	encoded, err := json.Marshal(msgs)
+	if err != nil {
+		return append([]byte(nil), body...)
+	}
+	raw["messages"] = encoded
+	out, err := json.Marshal(raw)
+	if err != nil {
+		return append([]byte(nil), body...)
+	}
+	return out
+}
+
+func readLimitedBody(rc io.ReadCloser) []byte {
+	if rc == nil {
+		return nil
+	}
+	done := make(chan []byte, 1)
+	go func() {
+		b, _ := io.ReadAll(io.LimitReader(rc, 64<<10))
+		done <- b
+	}()
+	select {
+	case b := <-done:
+		rc.Close()
+		return b
+	case <-time.After(2 * time.Second):
+		rc.Close()
+		return nil
+	}
+}
+
+func writeUpstreamBody(c *gin.Context, status int, body []byte) {
+	trimmed := bytes.TrimSpace(body)
+	if len(trimmed) == 0 {
+		abort(c, status, http.StatusText(status))
+		return
+	}
+	ctype := "text/plain; charset=utf-8"
+	if trimmed[0] == '{' || trimmed[0] == '[' {
+		ctype = "application/json"
+	}
+	c.Data(status, ctype, body)
+}
+
 func abort(c *gin.Context, code int, msg string) {
-	c.AbortWithStatusJSON(code, gin.H{"error": gin.H{"message": msg}})
+	kind := "api_error"
+	switch code {
+	case http.StatusBadRequest:
+		kind = "invalid_request_error"
+	case http.StatusUnauthorized:
+		kind = "authentication_error"
+	case http.StatusPaymentRequired:
+		kind = "insufficient_quota"
+	case http.StatusTooManyRequests:
+		kind = "rate_limit_error"
+	}
+	c.AbortWithStatusJSON(code, gin.H{"error": gin.H{"message": msg, "type": kind}})
+}
+
+func newChatUpstreamRequest(ctx context.Context, base string, body []byte) (*http.Request, error) {
+	endpoint, err := upstream.ChatURL(base)
+	if err != nil {
+		return nil, err
+	}
+	return http.NewRequestWithContext(ctx, http.MethodPost, endpoint, bytes.NewReader(body))
 }

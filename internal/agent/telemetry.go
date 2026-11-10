@@ -33,6 +33,8 @@ type TurnTelemetry struct {
 	JevIntentConfidence    float64           `json:"jev_intent_confidence"`
 	JevRouteShape          string            `json:"jev_route_shape,omitempty"`
 	JevShapeConfidence     float64           `json:"jev_shape_confidence"`
+	JevTopicFit            string            `json:"jev_topic_fit,omitempty"`
+	JevTopicConfidence     float64           `json:"jev_topic_confidence"`
 	JevLegitProbability    float64           `json:"jev_legit_probability"`
 	JevRiskScore           float64           `json:"jev_risk_score"`
 	JevRiskConfidence      float64           `json:"jev_risk_confidence"`
@@ -142,6 +144,30 @@ func beginLLMAttempt(ctx context.Context, protocol llmProtocol) (context.Context
 			stats.LLMLatencyMS += float64(time.Since(started)) / float64(time.Millisecond)
 		}
 		op.End(err)
+	}
+}
+
+// recordLLMExchange keeps the conversation and tool calls on the generation span.
+// The system prompt is omitted so the visible input stays the user turn and tool results.
+func recordLLMExchange(ctx context.Context, messages []Message, output *Message) {
+	observation, _ := ctx.Value(llmObservationKey{}).(llmObservation)
+	if observation.op == nil {
+		return
+	}
+	visible := make([]Message, 0, len(messages))
+	for _, message := range messages {
+		if message.Role == "system" {
+			continue
+		}
+		visible = append(visible, message)
+	}
+	observation.op.Input(visible)
+	if output == nil {
+		return
+	}
+	raw, err := json.Marshal(output)
+	if err == nil {
+		observation.op.Output(string(raw))
 	}
 }
 

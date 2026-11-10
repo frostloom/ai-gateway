@@ -155,7 +155,11 @@ func (tb *Toolbox) Preview(ctx context.Context, name string, args map[string]any
 	ctx, op := observability.Start(ctx, "tool.preview."+name, "tool")
 	op.Phase("preview")
 	op.Input(args)
-	defer func() { op.Output(result); op.End(err) }()
+	defer func() {
+		op.Output(result)
+		observability.NoteTool(ctx, "preview."+name, result)
+		op.End(err)
+	}()
 	return t.preview(ctx, args, tenantID)
 }
 
@@ -175,7 +179,11 @@ func (tb *Toolbox) Run(ctx context.Context, name string, args map[string]any, te
 	}
 	op.Phase(phase)
 	op.Input(args)
-	defer func() { op.Output(result); op.End(err) }()
+	defer func() {
+		op.Output(result)
+		observability.NoteTool(ctx, name, result)
+		op.End(err)
+	}()
 	return t.run(ctx, args, tenantID, idemKey)
 }
 
@@ -319,7 +327,7 @@ func (tb *Toolbox) readRecentBills() *execTool {
 func (tb *Toolbox) listPlans() *execTool {
 	return &execTool{
 		name:        "list_plans",
-		description: "查询套餐目录（一次性/定期订阅，含额度与价格）。",
+		description: "查询套餐目录，包含价格、计费周期和小时、周、周期金额权益。",
 		parameters:  obj(nil, nil),
 		run: func(ctx context.Context, args map[string]any, tenantID uint64, _ string) (string, error) {
 			v, err := tb.me(ctx, tenantID)
@@ -331,12 +339,14 @@ func (tb *Toolbox) listPlans() *execTool {
 			}
 			lines := make([]string, 0, len(v.Plans))
 			for _, p := range v.Plans {
-				if p.Status != 0 {
+				if p.Status != 0 || p.PlanType != store.PlanTypeRecurring || (p.WindowQuotaCent <= 0 && p.WeekQuotaCent <= 0 && p.CycleQuotaCent <= 0) {
 					continue
 				}
-				// M9 GPT Plus 式：月费 + 每 N 小时滚动的各档次 token 额度（不「入账钱」）。
-				lines = append(lines, fmt.Sprintf("套餐#%d %s（定期订阅）· 月费 ¥%d · 每 %d 小时刷新额度：%s",
-					p.ID, p.Name, p.PriceMoney, p.RefreshHours, planQuotaLine(&p)))
+				lines = append(lines, fmt.Sprintf("套餐#%d %s（定期订阅）· ¥%d / %d 天 · 权益：%s",
+					p.ID, p.Name, p.PriceMoney, p.ValidityDays, planQuotaLine(&p)))
+			}
+			if len(lines) == 0 {
+				return "暂无上架套餐。", nil
 			}
 			return "可选套餐：\n" + joinLines(lines), nil
 		},
@@ -369,11 +379,33 @@ func (tb *Toolbox) readMySubscription() *execTool {
 			if s.AutoRenew && s.PendingPlanID != nil {
 				line += fmt.Sprintf("，下期将切换为套餐#%d", *s.PendingPlanID)
 			}
-			// M9：各档次每窗口剩余额度（token），不再显示「累计已授予 ¥」。
-			if len(v.Allowance) > 0 {
+			validityDays := 0
+			for _, plan := range v.Plans {
+				if plan.ID == s.PlanID {
+					validityDays = plan.ValidityDays
+					break
+				}
+			}
+			for _, allowance := range v.MoneyAllowance {
+				percent := float64(0)
+				if allowance.QuotaCent > 0 {
+					percent = 100 * float64(allowance.ConsumedCent) / float64(allowance.QuotaCent)
+				}
+				line += fmt.Sprintf("；%s金额权益：已用 ¥%.2f（%.1f%%），剩余 ¥%.2f / 总额 ¥%.2f",
+					moneyPeriodLabel(allowance.Period, v.RefreshHours, validityDays), yuan(allowance.ConsumedCent), percent, yuan(allowance.RemainingCent), yuan(allowance.QuotaCent))
+				if allowance.ResetsAt != nil {
+					line += "，恢复时间 " + allowance.ResetsAt.Format("2006-01-02 15:04:05 MST")
+				}
+			}
+			// Historical entitlements remain inspectable as percentages without converting them to money.
+			if len(v.MoneyAllowance) == 0 && len(v.Allowance) > 0 {
 				parts := make([]string, 0, len(v.Allowance))
 				for _, a := range v.Allowance {
-					parts = append(parts, fmt.Sprintf("%s %s/%s", a.Tier, tokensCN(a.Remaining), tokensCN(a.Quota)))
+					percent := float64(0)
+					if a.Quota > 0 {
+						percent = math.Max(0, math.Min(100, 100*float64(a.Remaining)/float64(a.Quota)))
+					}
+					parts = append(parts, fmt.Sprintf("%s 剩余 %.1f%%", a.Tier, percent))
 				}
 				line += "，剩余额度：" + strings.Join(parts, " · ")
 				if v.RefreshHours > 0 {
@@ -431,36 +463,16 @@ func (tb *Toolbox) listModels() *execTool {
 func (tb *Toolbox) rechargeTool() *execTool {
 	return &execTool{
 		name:        "recharge",
-		description: "充值：给账户充值（模拟支付，1 元 = 100 分）。需要用户确认。",
+		description: "充值入口当前关闭。账户余额可通过用户页面的一次性兑换码入口增加。",
 		confirm:     true,
 		parameters: obj(map[string]any{
 			"amount_money": numProp("充值金额（元），整数，大于 0"),
 		}, []string{"amount_money"}),
-		preview: func(ctx context.Context, args map[string]any, tenantID uint64) (string, error) {
-			money, err := argInt(args, "amount_money")
-			if err != nil {
-				return "", err
-			}
-			if money <= 0 {
-				return "", fmt.Errorf("充值金额必须大于 0")
-			}
-			return fmt.Sprintf("将模拟充值 ¥%d（模拟支付，不产生真实扣款）。确认后到账。", money), nil
+		preview: func(context.Context, map[string]any, uint64) (string, error) {
+			return "", fmt.Errorf("充值入口暂时关闭，请使用余额兑换码")
 		},
-		run: func(ctx context.Context, args map[string]any, tenantID uint64, idemKey string) (string, error) {
-			money, err := argInt(args, "amount_money")
-			if err != nil {
-				return "", err
-			}
-			var o store.RechargeOrder
-			if err := tb.postJSON(ctx, "/admin/recharge",
-				map[string]any{"tenant_id": tenantID, "amount_money": money, "idem_key": idemKey}, &o); err != nil {
-				return "", err
-			}
-			// 建单成功后模拟支付（order_no 唯一 → 幂等）。
-			if err := tb.postJSON(ctx, "/admin/recharge/pay", map[string]any{"order_no": o.OrderNo}, nil); err != nil {
-				return "", err
-			}
-			return fmt.Sprintf("充值成功：订单 %s 已支付，到账 ¥%d（%d 分）。", o.OrderNo, o.AmountMoney, o.AmountCent), nil
+		run: func(context.Context, map[string]any, uint64, string) (string, error) {
+			return "", fmt.Errorf("充值入口暂时关闭，请使用余额兑换码")
 		},
 	}
 }
@@ -537,31 +549,14 @@ func (tb *Toolbox) refundRechargeTool() *execTool {
 func (tb *Toolbox) subscribePlanTool() *execTool {
 	return &execTool{
 		name:        "subscribe_plan",
-		description: "订购定期订阅套餐：月费 ¥X 换每 N 小时滚动的各档次 token 额度（GPT Plus 式，不入账钱）。用户已指定套餐名称时直接传 plan_name，无需先 list_plans；服务器唯一匹配后预览，需要用户确认。",
+		description: "月卡开通尚未开放，等待真实支付接入。可查询套餐目录和已有订阅权益。",
 		confirm:     true,
 		parameters:  planParameters(),
-		preview: func(ctx context.Context, args map[string]any, tenantID uint64) (string, error) {
-			plan, err := tb.findPlan(ctx, tenantID, args)
-			if err != nil {
-				return "", err
-			}
-			// M9：只有定期订阅在售，月费换额度资格（不入账钱）。
-			return fmt.Sprintf("将订阅「%s」：月费 ¥%d，每 %d 小时刷新额度：%s。确认后开通。",
-				plan.Name, plan.PriceMoney, plan.RefreshHours, planQuotaLine(plan)), nil
+		preview: func(context.Context, map[string]any, uint64) (string, error) {
+			return "", fmt.Errorf("月卡开通尚未开放，真实支付接入后开放")
 		},
-		run: func(ctx context.Context, args map[string]any, tenantID uint64, _ string) (string, error) {
-			planID, err := planIDArg(args)
-			if err != nil {
-				return "", err
-			}
-			if err := tb.postJSON(ctx, "/admin/subscribe", map[string]any{"tenant_id": tenantID, "plan_id": planID}, nil); err != nil {
-				return "", err
-			}
-			name := fmt.Sprintf("#%d", planID)
-			if frozenName, err := argStr(args, "plan_name"); err == nil {
-				name = frozenName
-			}
-			return fmt.Sprintf("订阅成功：已开通套餐「%s」并到账本期额度。", name), nil
+		run: func(context.Context, map[string]any, uint64, string) (string, error) {
+			return "", fmt.Errorf("月卡开通尚未开放，真实支付接入后开放")
 		},
 	}
 }
@@ -569,28 +564,14 @@ func (tb *Toolbox) subscribePlanTool() *execTool {
 func (tb *Toolbox) changePlanTool() *execTool {
 	return &execTool{
 		name:        "change_plan",
-		description: "改套餐：仅定期订阅之间，下期生效（当期额度不变）。用户已指定目标套餐名称时直接传 plan_name，无需先 list_plans；服务器唯一匹配后预览，需要用户确认。",
+		description: "套餐变更尚未开放，等待真实支付接入。已有订阅可查询权益或取消续费。",
 		confirm:     true,
 		parameters:  planParameters(),
-		preview: func(ctx context.Context, args map[string]any, tenantID uint64) (string, error) {
-			plan, err := tb.findPlan(ctx, tenantID, args)
-			if err != nil {
-				return "", err
-			}
-			if plan.PlanType != store.PlanTypeRecurring {
-				return "", fmt.Errorf("只能改成定期订阅套餐（%s 是一次性套餐）", plan.Name)
-			}
-			return fmt.Sprintf("将把当前订阅改为定期套餐「%s」：下期续费生效，当期已订购额度与到期日不变。确认后生效。", plan.Name), nil
+		preview: func(context.Context, map[string]any, uint64) (string, error) {
+			return "", fmt.Errorf("套餐变更尚未开放，真实支付接入后开放")
 		},
-		run: func(ctx context.Context, args map[string]any, tenantID uint64, _ string) (string, error) {
-			planID, err := planIDArg(args)
-			if err != nil {
-				return "", err
-			}
-			if err := tb.postJSON(ctx, "/admin/change-plan", map[string]any{"tenant_id": tenantID, "plan_id": planID}, nil); err != nil {
-				return "", err
-			}
-			return fmt.Sprintf("已设置：下期续费将切换为套餐 #%d。", planID), nil
+		run: func(context.Context, map[string]any, uint64, string) (string, error) {
+			return "", fmt.Errorf("套餐变更尚未开放，真实支付接入后开放")
 		},
 	}
 }
@@ -860,8 +841,35 @@ func yuan(cent int64) float64 {
 	return float64(cent) / 100
 }
 
-// planQuotaLine 套餐各档次每窗口额度展示（按贵贱顺序）：「轻量200万/文本100万/推理50万/旗舰20万」
+func moneyPeriodLabel(period string, refreshHours, validityDays int) string {
+	switch period {
+	case "window":
+		return fmt.Sprintf("滚动 %d 小时", refreshHours)
+	case "week":
+		return "滚动 7 天（周）"
+	default:
+		if validityDays == 30 {
+			return "30 天（月）计费周期"
+		}
+		return "本计费周期"
+	}
+}
+
+// planQuotaLine formats monetary benefits and preserves legacy token plan terms.
 func planQuotaLine(p *store.Plan) string {
+	if p.WindowQuotaCent > 0 || p.WeekQuotaCent > 0 || p.CycleQuotaCent > 0 {
+		parts := make([]string, 0, 3)
+		for _, allowance := range []store.MoneyAllowance{
+			{Period: "window", QuotaCent: p.WindowQuotaCent},
+			{Period: "week", QuotaCent: p.WeekQuotaCent},
+			{Period: "cycle", QuotaCent: p.CycleQuotaCent},
+		} {
+			if allowance.QuotaCent > 0 {
+				parts = append(parts, fmt.Sprintf("%s ¥%.2f", moneyPeriodLabel(allowance.Period, p.RefreshHours, p.ValidityDays), yuan(allowance.QuotaCent)))
+			}
+		}
+		return strings.Join(parts, " / ")
+	}
 	qm := p.TierQuotaMap()
 	parts := make([]string, 0, len(qm))
 	for _, t := range store.TierNames() {

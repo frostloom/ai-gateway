@@ -2,7 +2,7 @@
 import { api } from '../shared/api'
 import type {
   OverviewResp, Bill, ProviderState, ProviderMargin, SalesResp,
-  ReconcileResp, AuditLogItem, HealthResp, Model,
+  ReconcileResp, AuditLogItem, HealthResp, Model, ChannelDiscoverRequest, ChannelDiscovery, ModelImportItem, ModelImportResult,
 } from './types'
 import type { Plan, Subscription, TierRemain, RechargeOrder, Topup } from '../portal/types'
 
@@ -23,6 +23,10 @@ export const billsApi = (q: Record<string, string | number> = {}) =>
 export const providersApi = () => api<ProviderState[]>('/admin/providers')
 export const channelsApi = () => api<{ items: ProviderMargin[] }>('/admin/channels')
 export const upsertChannelApi = (body: Record<string, unknown>) => api('/admin/channels', { body })
+export const discoverChannelApi = (body: ChannelDiscoverRequest) => api<ChannelDiscovery>('/admin/channels/discover', { body })
+export const importChannelModelsApi = (provider_id: number, items: ModelImportItem[]) =>
+  api<ModelImportResult>('/admin/models/import', { body: { provider_id, items } })
+export const deleteChannelApi = (id: number) => api('/admin/channels?id=' + encodeURIComponent(id), { method: 'DELETE' })
 export const modelsApi = (q: Record<string, string | number> = {}) =>
   api<{ items: Model[] }>('/admin/models' + (Object.keys(q).length ? '?' + new URLSearchParams(Object.entries(q).map(([k, v]) => [k, String(v)])) : ''))
 export const createModelApi = (body: Record<string, unknown>) => api<Model>('/admin/models', { body })
@@ -39,3 +43,8 @@ export const topupsApi = (tenantId = 0) => api<{ items: Topup[] }>(`/admin/topup
 export const rechargeOrdersApi = (tenantId = 0) => api<{ items: RechargeOrder[] }>(`/admin/recharge-orders?tenant_id=${tenantId}`)
 export const meApi = (tenantId: number) => api<import('../portal/types').MeView>(`/admin/me?tenant_id=${tenantId}`)
 export const plansApi = () => api<{ items: Plan[] }>('/admin/plans')
+export const savePlanApi = (plan: Pick<Plan, 'Name' | 'PlanType' | 'PriceMoney' | 'ValidityDays' | 'RefreshHours' | 'TierQuota' | 'Status' | 'WindowQuotaCent' | 'WeekQuotaCent' | 'CycleQuotaCent'> & { ID?: number }) => api<Plan>('/admin/plans', { body: plan })
+
+export interface BalanceVoucher { id: number; prefix: string; amount_cent: number; expires_at: string; redeemed_tenant_id: number | null; redeemed_at: string | null; created_at: string }
+export const vouchersApi = () => api<{ items: BalanceVoucher[] }>('/admin/vouchers')
+export const createVouchersApi = (amount_money: number, count: number, validity_days: number) => api<{ items: { code: string; item: BalanceVoucher }[] }>('/admin/vouchers', { body: { amount_money, count, validity_days } })

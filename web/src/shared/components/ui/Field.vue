@@ -6,9 +6,9 @@ withDefaults(defineProps<{ label: string; hint?: string; error?: string; require
   <label class="field">
     <span class="lbl">
       {{ label }}<i v-if="required" class="req">*</i>
-      <span v-if="hint" class="hint">{{ hint }}</span>
     </span>
     <div class="ctl" :class="{ bad: !!error }"><slot /></div>
+    <span v-if="hint && !error" class="hint">{{ hint }}</span>
     <span v-if="error" class="err">{{ error }}</span>
   </label>
 </template>
@@ -16,20 +16,20 @@ withDefaults(defineProps<{ label: string; hint?: string; error?: string; require
 <style scoped>
 .field { display: block; margin-bottom: var(--sp-4); }
 .lbl {
-  display: flex; align-items: baseline; gap: 6px;
+  display: flex; align-items: baseline; min-height: 18px; gap: 4px;
   font-size: var(--fs-xs); font-weight: 560;
   color: var(--ink-600);
-  margin-bottom: 7px;
+  margin-bottom: 8px;
 }
 .req { color: var(--danger); font-style: normal; }
-.hint { font-size: var(--fs-2xs); color: var(--ink-400); font-weight: 400; }
+.hint { display: block; margin-top: 6px; line-height: 1.5; font-size: var(--fs-2xs); color: var(--ink-400); font-weight: 400; }
 
 .ctl :deep(input),
 .ctl :deep(select),
 .ctl :deep(textarea) {
-  width: 100%; height: 38px; padding: 0 var(--sp-4);
-  border: 1px solid var(--hairline-2);
-  border-radius: var(--r-md);
+  width: 100%; height: 40px; padding: 0 var(--sp-4);
+  border: 1px solid var(--field-border);
+  border-radius: var(--r-xs);
   background: var(--surface);
   box-shadow: var(--inset-well);
   transition: box-shadow var(--t-base), background var(--t-fast);

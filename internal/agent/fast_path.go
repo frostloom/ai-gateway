@@ -36,9 +36,6 @@ func (h *Handler) fastPathReason(userMsg string, ses *session, v jevVerdict) str
 	if h.RoutingMode() == RoutingModel || h.RoutingMode() == RoutingJevHint {
 		return "routing_mode_disabled"
 	}
-	if h.skipsJevForContext(ses) {
-		return "conversation_context"
-	}
 	if h.jev == nil || !v.Available {
 		return "judge_unavailable"
 	}
@@ -58,7 +55,7 @@ func (h *Handler) fastPathReason(userMsg string, ses *session, v jevVerdict) str
 	if !v.SingleRead || !boundedProbability(v.ShapeConf) || v.ShapeConf < min {
 		return "not_single_parameterless_read"
 	}
-	if ses == nil || ses.PendingAction != nil || len(ses.History) != 1 {
+	if ses == nil || (h.RoutingMode() != RoutingJevSelective && (ses.PendingAction != nil || len(ses.History) != 1)) {
 		return "conversation_context"
 	}
 	switch v.Intent {
@@ -152,6 +149,30 @@ func validFastAnswers(r *jev.Result) bool {
 		}
 	}
 	return true
+}
+
+const offTopicReply = "这个问题和模型商城的账户业务无关。我只能帮你处理余额、消费、账单、套餐和订阅，或办理充值、退款、订购和退订。"
+
+func (h *Handler) refuseOffTopic(ctx context.Context, sid string, tenant uint64, ses *session, v jevVerdict) (string, bool) {
+	if h.RoutingMode() != RoutingJevSelective || !v.Available || !v.OffTopic {
+		return "", false
+	}
+	min := h.jevFastPathMin
+	if min == 0 {
+		min = .90
+	}
+	if !boundedProbability(v.OffTopicConf) || v.OffTopicConf < min {
+		return "", false
+	}
+	if stats := turnTelemetry(ctx); stats != nil {
+		stats.JevShortCircuit = true
+		stats.JevFastPathReason = "off_topic"
+	}
+	h.audit(sid, tenant, "off_topic", map[string]any{}, false, "", offTopicReply, guardJSON("jev", "off_topic", "", map[string]any{"confidence": v.OffTopicConf, "threshold": min}))
+	if ses != nil {
+		ses.History = append(ses.History, Message{Role: "assistant", Content: offTopicReply})
+	}
+	return offTopicReply, true
 }
 
 func (h *Handler) tryJevFastPath(ctx context.Context, sid string, tenant uint64, msg string, ses *session, v jevVerdict) (string, []traceItem, bool, error) {

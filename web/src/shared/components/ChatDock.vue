@@ -1,16 +1,16 @@
 <script setup lang="ts">
 /**
- * 全局 AI 客服悬浮层（对齐阿里云 AI 助理形态）
+ * 全局 AI 客服悬浮层
  *
  * - 右侧停靠，可拖拽（拖头部移动，拖左边缘改宽度），位置/尺寸记忆在 sessionStorage
- * - 可最小化成浮标（带未读角标），跨栏目/跨视图常驻不丢会话
+ * - 可关闭成浮标（带未读角标），跨栏目/跨视图常驻不丢会话
  * - 任务式对话：写操作给「确认/取消」按钮条；工具执行过程渲染成步骤卡
  * - 身份双模：租户 key（/portal/chat）或管理员会话（/admin/chat，可切目标租户）
  */
-import { ref, computed, nextTick, onMounted, watch } from 'vue'
+import { ref, computed, nextTick, onMounted, onBeforeUnmount, watch, inject } from 'vue'
 import {
-  IconSparkles, IconMinus, IconArrowUp, IconCheck, IconTool,
-  IconUser, IconShieldCheck, IconRefresh, IconArrowsMaximize,
+  IconMessageCircle, IconArrowUp, IconCheck, IconTool,
+  IconUser, IconShieldCheck, IconRefresh, IconArrowsMaximize, IconArrowsMinimize, IconX,
 } from '@tabler/icons-vue'
 import { chatLayer, openChat, closeChat } from '../chatLayer'
 import { auth } from '../api'
@@ -35,6 +35,7 @@ interface Msg {
   at: number
 }
 
+const go = inject<((key: string) => void) | undefined>('go', undefined)
 const props = withDefaults(defineProps<{
   /** 'portal' 用租户 key 打 /portal/chat；'admin' 用管理员会话打 /admin/chat */
   mode?: 'portal' | 'admin'
@@ -42,119 +43,151 @@ const props = withDefaults(defineProps<{
   tenants?: { id: number; name: string }[]
   title?: string
   subtitle?: string
-}>(), { mode: 'portal', title: 'AI 客服', subtitle: '查余额 · 充值 · 订阅 · 退款' })
+}>(), { mode: 'portal', title: 'AI 客服', subtitle: '账户服务与操作指引' })
 
 const PANEL_KEY = 'agw.chat.panel'
 
 const msgs = ref<Msg[]>([])
 const input = ref('')
 const sending = ref(false)
+const inputEl = ref<HTMLTextAreaElement | null>(null)
+const composing = ref(false)
+const INPUT_LIMIT = 2000
+const inputError = ref('')
+const resetRequested = ref(false)
+const launcherEl = ref<HTMLButtonElement | null>(null)
+const followLatest = ref(true)
+function resizeInput() {
+  const el = inputEl.value
+  if (!el) return
+  el.style.height = 'auto'
+  el.style.height = Math.min(el.scrollHeight, 150) + 'px'
+}
+function onInputKeydown(event: KeyboardEvent) {
+  if (event.key !== 'Enter' || event.shiftKey || event.isComposing || composing.value || event.keyCode === 229) return
+  event.preventDefault()
+  send()
+}
+async function focusInput() {
+  await nextTick()
+  if (!chatLayer.open) return
+  resizeInput()
+  inputEl.value?.focus({ preventScroll: true })
+}
+function clearInput() { input.value = ''; inputError.value = ''; focusInput() }
+watch(input, () => { inputError.value = input.value.length > INPUT_LIMIT ? `消息最多 ${INPUT_LIMIT} 字` : ''; nextTick(resizeInput) })
 const listEl = ref<HTMLElement | null>(null)
 const panelEl = ref<HTMLElement | null>(null)
 const dragging = ref(false)
 const resizing = ref(false)
-const sessId = ref(props.mode === 'portal' ? auth.getSid() : sessionStorage.getItem('agw.chat.adminSid') || '')
+function savedSession() {
+  try { return props.mode === 'portal' ? auth.getSid() : sessionStorage.getItem('agw.chat.adminSid') || '' }
+  catch { return '' }
+}
+const sessId = ref(savedSession())
 
 const greetings: Record<string, string> = {
-  portal: '你好，我是商城 AI 客服。可以帮你查余额、看消费、充值、退款、订阅套餐。涉及资金的操作我会先给你预览，你确认后我才执行。',
-  admin: '你好，我是运营助手。你正以管理员身份代客操作，可以查余额、看消费、充值、退款、订阅套餐。写操作同样需要你确认后执行。',
+  portal: '你好，可以帮你查询余额、消费明细和订阅额度，也可以解答 API 接入问题。',
+  admin: '你好，可以帮你查询租户余额、消费和订阅状态。涉及账户变更的操作会先展示预览。',
 }
 
 const quickActions = computed(() => props.mode === 'admin'
-  ? ['查一下这个租户的余额', '看一下近 7 天消费', '这个租户订阅了什么', '帮他充 100 元']
-  : ['查一下我的余额', '近 7 天消费多少', '有哪些套餐', '帮我充 100 元'])
+  ? ['查一下这个租户的余额', '看一下近 7 天消费', '这个租户订阅了什么', '如何核对租户的账单']
+  : ['查一下我的余额', '近 7 天消费多少', '月卡额度如何使用', '如何查看我的账单明细'])
 
 /* ---------- 位置与尺寸（拖拽 / 记忆） ---------- */
 const DOCK_RIGHT = 24
 const DOCK_TOP = 76
 
-const pos = ref({ x: -1, y: -1, w: 384, h: 620 })
+const pos = ref({ x: -1, y: -1, w: 400, h: 600 })
+const expanded = ref(false)
+const viewport = ref({ w: window.innerWidth, h: window.innerHeight, top: 0, left: 0 })
+function updateViewport() {
+  const vv = window.visualViewport
+  viewport.value = { w: vv?.width || window.innerWidth, h: vv?.height || window.innerHeight, top: vv?.offsetTop || 0, left: vv?.offsetLeft || 0 }
+}
+let endPointer: (() => void) | undefined
 
 function loadPanel() {
   try {
     const raw = sessionStorage.getItem(PANEL_KEY)
     if (!raw) return
     const p = JSON.parse(raw)
-    if (typeof p.w === 'number') pos.value.w = Math.min(Math.max(p.w, 320), 720)
-    if (typeof p.h === 'number') pos.value.h = Math.min(Math.max(p.h, 380), 900)
-    if (typeof p.x === 'number' && p.x > -1) pos.value.x = p.x
-    if (typeof p.y === 'number' && p.y > -1) pos.value.y = p.y
+    if (Number.isFinite(p.w)) pos.value.w = Math.min(Math.max(p.w, 320), 720)
+    if (Number.isFinite(p.h)) pos.value.h = Math.min(Math.max(p.h, 380), 900)
+    if (Number.isFinite(p.x) && p.x > -1) pos.value.x = p.x
+    if (Number.isFinite(p.y) && p.y > -1) pos.value.y = p.y
+    expanded.value = p.expanded === true
   } catch { /* ignore */ }
 }
 function savePanel() {
-  try { sessionStorage.setItem(PANEL_KEY, JSON.stringify(pos.value)) } catch { /* ignore */ }
+  try { sessionStorage.setItem(PANEL_KEY, JSON.stringify({ ...pos.value, expanded: expanded.value })) } catch { /* ignore */ }
 }
 
 const panelStyle = computed(() => {
-  const right = pos.value.x < 0
-  return {
-    width: pos.value.w + 'px',
-    height: pos.value.h + 'px',
-    top: (pos.value.y < 0 ? DOCK_TOP : pos.value.y) + 'px',
-    ...(right ? { right: DOCK_RIGHT + 'px' } : { left: pos.value.x + 'px' }),
-  }
+  const { w: vw, h: vh, top, left } = viewport.value
+  const mobile = vw <= 720
+  const margin = expanded.value ? (mobile ? 0 : 16) : 8
+  const width = Math.max(1, Math.min(expanded.value ? 960 : mobile ? vw : pos.value.w, vw - margin * 2))
+  const height = Math.max(1, Math.min(expanded.value ? vh : pos.value.h, vh - margin * 2))
+  const x = expanded.value ? (vw - width) / 2 : mobile ? margin : Math.max(margin, Math.min(pos.value.x < 0 ? vw - width - DOCK_RIGHT : pos.value.x, vw - width - margin))
+  const y = expanded.value ? margin : Math.max(margin, Math.min(pos.value.y < 0 ? DOCK_TOP : pos.value.y, vh - height - margin))
+  return { width: width + 'px', height: height + 'px', top: (top + y) + 'px', left: (left + x) + 'px' }
 })
 
-function startDrag(e: MouseEvent) {
-  if ((e.target as HTMLElement).closest('button, input, select, .no-drag')) return
+function startPointer(e: PointerEvent, resize: boolean) {
+  if (e.button !== 0 || viewport.value.w <= 720 || expanded.value) return
+  if (!resize && (e.target as HTMLElement).closest('button, input, select, .no-drag')) return
   const el = panelEl.value
   if (!el) return
+  e.preventDefault()
+  endPointer?.()
   const r = el.getBoundingClientRect()
   const dx = e.clientX - r.left
   const dy = e.clientY - r.top
-  dragging.value = true
-  const move = (ev: MouseEvent) => {
-    const nx = Math.min(Math.max(ev.clientX - dx, 8), window.innerWidth - pos.value.w - 8)
-    const ny = Math.min(Math.max(ev.clientY - dy, 8), window.innerHeight - 80)
-    pos.value.x = nx
-    pos.value.y = ny
+  dragging.value = !resize
+  resizing.value = resize
+  const move = (ev: PointerEvent) => {
+    if (ev.pointerId !== e.pointerId) return
+    if (resize) {
+      pos.value.w = Math.min(Math.max(r.right - ev.clientX, 320), 720, viewport.value.w - 16, r.right - 8)
+      pos.value.x = r.right - pos.value.w
+    } else {
+      pos.value.x = Math.max(8, Math.min(ev.clientX - dx, viewport.value.w - r.width - 8))
+      pos.value.y = Math.max(8, Math.min(ev.clientY - dy, viewport.value.h - r.height - 8))
+    }
   }
-  const up = () => {
+  const stop = (ev: PointerEvent) => { if (ev.pointerId === e.pointerId) endPointer?.() }
+  endPointer = () => {
     dragging.value = false
-    document.removeEventListener('mousemove', move)
-    document.removeEventListener('mouseup', up)
-    savePanel()
-  }
-  document.addEventListener('mousemove', move)
-  document.addEventListener('mouseup', up)
-}
-
-function startResize(e: MouseEvent) {
-  e.stopPropagation()
-  const startX = e.clientX
-  const startW = pos.value.w
-  const el = panelEl.value
-  const startRight = el ? el.getBoundingClientRect().right : window.innerWidth
-  resizing.value = true
-  const move = (ev: MouseEvent) => {
-    // 若已脱离右侧停靠，拖左边改宽度时同步左边界
-    const dw = startX - ev.clientX
-    const w = Math.min(Math.max(startW + dw, 320), 720)
-    pos.value.w = w
-    if (pos.value.x >= 0) pos.value.x = Math.max(8, startRight - w)
-  }
-  const up = () => {
     resizing.value = false
-    document.removeEventListener('mousemove', move)
-    document.removeEventListener('mouseup', up)
+    document.removeEventListener('pointermove', move)
+    document.removeEventListener('pointerup', stop)
+    document.removeEventListener('pointercancel', stop)
+    endPointer = undefined
     savePanel()
   }
-  document.addEventListener('mousemove', move)
-  document.addEventListener('mouseup', up)
+  document.addEventListener('pointermove', move)
+  document.addEventListener('pointerup', stop)
+  document.addEventListener('pointercancel', stop)
 }
 
-function resetPos() {
-  pos.value.x = -1
-  pos.value.y = -1
-  pos.value.w = 384
-  pos.value.h = 620
+function toggleExpanded() {
+  endPointer?.()
+  expanded.value = !expanded.value
   savePanel()
+  nextTick(() => { resizeInput(); scrollBottom() })
 }
 
 /* ---------- 会话 ---------- */
-async function scrollBottom() {
+function onScroll() {
+  const el = listEl.value
+  if (el) followLatest.value = el.scrollHeight - el.scrollTop - el.clientHeight < 64
+}
+
+async function scrollBottom(force = false) {
   await nextTick()
-  if (listEl.value) listEl.value.scrollTop = listEl.value.scrollHeight
+  if (listEl.value && (force || followLatest.value)) listEl.value.scrollTop = listEl.value.scrollHeight
 }
 
 function push(m: Msg) {
@@ -170,10 +203,16 @@ function greet() {
 
 async function send(text?: string) {
   const t = (text ?? input.value).trim()
-  if (!t || sending.value) return
-  input.value = ''
+  if (!t || sending.value || composing.value) return
+  if (t.length > INPUT_LIMIT) { inputError.value = `消息最多 ${INPUT_LIMIT} 字`; focusInput(); return }
+  resetRequested.value = false
+  if (text === undefined) input.value = ''
+  followLatest.value = true
+  // Once a new request starts, the previous operation may have been consumed upstream.
+  for (const m of msgs.value) { if (m.pending) { m.pending = false; m.pendingStale = true } }
   push({ role: 'user', text: t, at: Date.now() })
   sending.value = true
+  const requestTenant = chatLayer.tenantId
   try {
     const url = props.mode === 'admin' ? '/admin/chat' : '/portal/chat'
     const body: Record<string, unknown> = { message: t }
@@ -184,6 +223,7 @@ async function send(text?: string) {
 
     const res = await fetch(url, { method: 'POST', headers, body: JSON.stringify(body), credentials: 'include' })
     const raw = await res.text()
+    if (chatLayer.tenantId !== requestTenant) return
     let data: any = null
     try { data = JSON.parse(raw) } catch { /* 非 JSON */ }
     if (!res.ok) {
@@ -192,9 +232,12 @@ async function send(text?: string) {
       push({ role: 'agent', text: String(msg), error: true, at: Date.now() })
       return
     }
+    if (!data || typeof data.reply !== 'string') throw new Error('客服返回了无效响应，请稍后重试')
     sessId.value = data.session_id || sessId.value
-    if (props.mode === 'portal') auth.setSid(sessId.value)
-    else sessionStorage.setItem('agw.chat.adminSid', sessId.value)
+    try {
+      if (props.mode === 'portal') auth.setSid(sessId.value)
+      else sessionStorage.setItem('agw.chat.adminSid', sessId.value)
+    } catch { /* The in-memory conversation remains usable when storage is unavailable. */ }
 
     // 新一轮结果到达：此前挂起的确认条全部失效（防止对已过期操作重复点「确认执行」）。
     // 后端同一会话只会保留一个 pending_action，前端必须与之对齐。
@@ -218,32 +261,75 @@ async function send(text?: string) {
     push({ role: 'agent', text: e?.message || '客服暂时不可用', error: true, at: Date.now() })
   } finally {
     sending.value = false
+    if (chatLayer.tenantId !== requestTenant) reset()
+    // Replies must not pull focus from another control or a collapsed panel.
+    if (chatLayer.open && document.activeElement === inputEl.value) resizeInput()
   }
 }
 
 async function confirm(ok: boolean) {
-  await send(ok ? '确认' : '取消')
+  if (sending.value) return
+  const request = send(ok ? '确认' : '取消')
+  focusInput()
+  await request
 }
 
 function reset() {
+  if (sending.value) return
+  resetRequested.value = false
+  input.value = ''
+  inputError.value = ''
   msgs.value = []
   sessId.value = ''
-  if (props.mode === 'portal') auth.clearSid()
-  else sessionStorage.removeItem('agw.chat.adminSid')
+  try {
+    if (props.mode === 'portal') auth.clearSid()
+    else sessionStorage.removeItem('agw.chat.adminSid')
+  } catch { /* The active session has already been cleared in memory. */ }
   greet()
+  followLatest.value = true
+  focusInput()
+}
+
+function requestReset() {
+  if (sending.value) return
+  resetRequested.value = true
+  nextTick(() => panelEl.value?.querySelector<HTMLButtonElement>('.reset-cancel')?.focus())
+}
+
+function onPanelEscape(event: KeyboardEvent) {
+  if (event.isComposing || composing.value || event.keyCode === 229) return
+  event.preventDefault()
+  event.stopPropagation()
+  if (resetRequested.value) { resetRequested.value = false; focusInput() }
+  else closePanel()
 }
 
 function closePanel() {
+  endPointer?.()
+  resetRequested.value = false
   closeChat()
+  nextTick(() => launcherEl.value?.focus({ preventScroll: true }))
 }
 
 onMounted(() => {
   loadPanel()
+  updateViewport()
+  window.addEventListener('resize', updateViewport)
+  window.visualViewport?.addEventListener('resize', updateViewport)
+  window.visualViewport?.addEventListener('scroll', updateViewport)
   greet()
-  if (chatLayer.open) scrollBottom()
+  if (chatLayer.open) { scrollBottom(); focusInput() }
+
 })
 
-watch(() => chatLayer.open, v => { if (v) { greet(); scrollBottom() } })
+onBeforeUnmount(() => {
+  endPointer?.()
+  window.removeEventListener('resize', updateViewport)
+  window.visualViewport?.removeEventListener('resize', updateViewport)
+  window.visualViewport?.removeEventListener('scroll', updateViewport)
+})
+watch(() => chatLayer.open, v => { if (v) { greet(); followLatest.value = true; scrollBottom(true); focusInput() } })
+watch(() => chatLayer.tenantId, () => reset())
 
 defineExpose({ send })
 </script>
@@ -252,11 +338,14 @@ defineExpose({ send })
   <!-- 浮标（收起态） -->
   <button
     v-if="!chatLayer.open"
+    ref="launcherEl"
     class="launcher"
+    :aria-label="`打开${title}${chatLayer.unread ? `，${chatLayer.unread} 条未读` : ''}`"
+    aria-expanded="false"
     :title="`打开${title}`"
     @click="openChat"
   >
-    <IconSparkles :size="22" />
+    <IconMessageCircle :size="22" />
     <span v-if="chatLayer.unread" class="badge">{{ chatLayer.unread > 9 ? '9+' : chatLayer.unread }}</span>
   </button>
 
@@ -266,15 +355,16 @@ defineExpose({ send })
       v-if="chatLayer.open"
       ref="panelEl"
       class="panel"
-      :class="{ dragging, resizing }"
+      :class="{ dragging, resizing, expanded }"
       :style="panelStyle"
       role="dialog"
-      aria-label="AI 客服"
+      :aria-label="title"
+      @keydown.esc="onPanelEscape"
     >
-      <!-- 左边缘拖拽改宽 -->
-      <div class="resizer" @mousedown="startResize" />
+      <!-- 普通窗口可拖拽改宽，放大时保留原窗口位置。 -->
+      <div v-if="!expanded" class="resizer" @pointerdown="startPointer($event, true)" />
 
-      <header class="phead" @mousedown="startDrag">
+      <div class="phead" @pointerdown="startPointer($event, false)">
         <div class="hbrand">
           <span class="hdot" />
           <div class="htext">
@@ -283,30 +373,36 @@ defineExpose({ send })
           </div>
         </div>
         <div class="hacts no-drag">
+          <button class="hbtn" :title="expanded ? '还原客服窗口' : '放大客服窗口'" :aria-label="expanded ? '还原客服窗口' : '放大客服窗口'" :aria-pressed="expanded" @click="toggleExpanded"><IconArrowsMinimize v-if="expanded" :size="14" /><IconArrowsMaximize v-else :size="14" /></button>
+          <button class="hbtn" title="新建会话" aria-label="新建会话" :disabled="sending" @click="requestReset"><IconRefresh :size="14" /></button>
+          <button class="hbtn" title="关闭客服，保留会话" aria-label="关闭客服，保留会话" @click="closePanel"><IconX :size="16" /></button>
+        </div>
+      </div>
+
+      <!-- 身份提示条 -->
+      <div v-if="mode === 'admin'" class="idbar">
           <select
             v-if="mode === 'admin' && tenants?.length"
             v-model.number="chatLayer.tenantId"
+            :disabled="sending"
             class="tsel"
+            aria-label="目标租户"
             title="以哪个租户身份操作"
           >
             <option :value="0">默认租户</option>
             <option v-for="t in tenants" :key="t.id" :value="t.id">{{ t.name }}</option>
           </select>
-          <button class="hbtn" title="回到默认位置" @click="resetPos"><IconArrowsMaximize :size="14" /></button>
-          <button class="hbtn" title="重置会话" @click="reset"><IconRefresh :size="14" /></button>
-          <button class="hbtn" title="收起" @click="closePanel"><IconMinus :size="15" /></button>
-        </div>
-      </header>
-
-      <!-- 身份提示条 -->
-      <div v-if="mode === 'admin'" class="idbar">
         <IconShieldCheck :size="13" />
-        <span>管理员代客模式{{ chatLayer.tenantId ? ` · 租户 #${chatLayer.tenantId}` : ' · 默认租户' }}，写操作需你确认</span>
+        <span>管理员代客模式{{ chatLayer.tenantId ? `，租户 #${chatLayer.tenantId}` : '，默认租户' }}，写操作需你确认</span>
       </div>
 
-      <div ref="listEl" class="plist">
+      <div v-if="resetRequested" class="reset-bar" role="group" aria-label="确认新建会话">
+        <p>新建会话将清除当前对话与待确认操作，是否继续？</p>
+        <div><button class="cno reset-cancel" @click="resetRequested = false; focusInput()">保留会话</button><button class="cyes" @click="reset">新建会话</button></div>
+      </div>
+      <div ref="listEl" @scroll="onScroll" class="plist" role="log" aria-live="polite" aria-relevant="additions" :aria-busy="sending">
         <div v-for="(m, i) in msgs" :key="i" class="brow" :class="m.role">
-          <div v-if="m.role === 'agent'" class="avatar"><IconSparkles :size="14" /></div>
+          <div v-if="m.role === 'agent'" class="avatar"><IconMessageCircle :size="14" /></div>
           <div v-else class="avatar user"><IconUser :size="14" /></div>
           <div class="bwrap">
             <div class="bubble" :class="{ err: m.error }">{{ m.text }}</div>
@@ -324,49 +420,66 @@ defineExpose({ send })
             <div v-if="m.pending" class="confirm">
               <p class="cprev">{{ m.pendingPreview }}</p>
               <div class="cacts">
-                <button class="cyes" @click="confirm(true)"><IconCheck :size="14" /> 确认执行</button>
-                <button class="cno" @click="confirm(false)"><IconX :size="14" /> 取消</button>
+                <button class="cyes" :disabled="sending" @click="confirm(true)"><IconCheck :size="14" /> 确认执行</button>
+                <button class="cno" :disabled="sending" @click="confirm(false)"><IconX :size="14" /> 取消</button>
               </div>
             </div>
 
             <!-- 已被取代的挂起：留痕但不可再点（防重复执行已过期操作） -->
             <div v-else-if="m.pendingStale" class="stale">
               <IconCheck :size="12" />
-              <span>该待确认操作已结束</span>
+              <span>该操作的确认入口已关闭，请核对后续回复</span>
             </div>
           </div>
         </div>
 
         <!-- 快捷指令（对话为空或只有问候时） -->
         <div v-if="msgs.length <= 1 && !sending" class="quick">
+          <template v-if="mode === 'portal' && go"><button class="qbtn" @click="go('access'); closePanel()">指引 API 接入</button><button class="qbtn" @click="go('wallet'); closePanel()">查看钱包记录</button><button class="qbtn" @click="go('plans'); closePanel()">查看月卡规则</button></template>
           <button v-for="q in quickActions" :key="q" class="qbtn" @click="send(q)">{{ q }}</button>
         </div>
 
         <div v-if="sending" class="brow agent">
-          <div class="avatar"><IconSparkles :size="14" /></div>
+          <div class="avatar"><IconMessageCircle :size="14" /></div>
           <div class="bubble typing"><i /><i /><i /></div>
         </div>
       </div>
 
-      <footer class="pfoot">
-        <textarea
-          v-model="input"
-          class="pin"
-          rows="1"
-          :placeholder="`给${mode === 'admin' ? '运营助手' : '客服'}发消息，Enter 发送 / Shift+Enter 换行`"
-          @keydown.enter.exact.prevent="send()"
-        />
-        <button class="psend" :disabled="sending || !input.trim()" title="发送" @click="send()">
-          <IconArrowUp :size="17" />
-        </button>
-      </footer>
+      <button v-if="!followLatest" class="latest" @click="followLatest = true; scrollBottom(true)">回到最新消息</button>
+      <div class="pfoot">
+        <div class="composer">
+          <textarea
+            ref="inputEl"
+            v-model="input"
+            class="pin"
+            rows="1"
+            enterkeyhint="send"
+            aria-label="客服消息"
+            aria-describedby="chat-input-hint"
+            :aria-invalid="!!inputError"
+            :placeholder="sending ? '正在回复，可继续编辑下一条消息' : '输入你的问题…'"
+            @compositionstart="composing = true"
+            @compositionend="composing = false"
+            @keydown="onInputKeydown"
+          />
+          <div class="composer-meta"><span id="chat-input-hint" :class="{ 'input-error': inputError }">{{ inputError || 'Enter 发送，Shift + Enter 换行' }}</span><span>{{ input.length }} / {{ INPUT_LIMIT }}</span></div>
+        </div>
+        <div class="send-actions">
+          <button v-if="input" class="hbtn" aria-label="清空输入" title="清空输入" @click="clearInput"><IconX :size="15" /></button>
+          <button class="psend" :disabled="sending || !input.trim() || !!inputError || composing" :aria-label="sending ? '正在发送' : '发送消息'" :title="sending ? '正在发送' : '发送消息'" @click="send()"><IconArrowUp :size="17" /></button>
+        </div>
+      </div>
     </section>
   </Transition>
 </template>
 
 <style scoped>
+/* Hallmark · v2.0.0 · theme: custom · scope: app */
+/* Critique: compact message bubbles, a fixed composer and clear service controls. */
+/* Hallmark · waive 24b · inherited compact chat controls use 2px increments · keep the established input and message density */
 /* ---------- 浮标（收起态） ---------- */
 .launcher {
+  white-space: nowrap;
   position: fixed;
   right: 24px;
   bottom: 24px;
@@ -374,13 +487,10 @@ defineExpose({ send })
   width: 56px; height: 56px;
   border-radius: 50%;
   border: none;
-  background: linear-gradient(150deg, var(--accent-500), var(--accent-700));
-  color: #fff;
+  background: var(--ink-900);
+  color: var(--primary-foreground);
   display: grid; place-items: center;
-  box-shadow:
-    0 2px 6px rgb(13 128 88 / .28),
-    0 16px 34px -8px rgb(13 128 88 / .45),
-    inset 0 1px 0 rgb(255 255 255 / .25);
+  box-shadow: var(--shadow-float);
   transition: transform var(--t-spring), box-shadow var(--t-base), filter var(--t-fast);
 }
 .launcher::after {
@@ -393,20 +503,20 @@ defineExpose({ send })
   transition: opacity var(--t-base), transform var(--t-spring);
 }
 .launcher:hover {
-  transform: translateY(-3px) scale(1.05);
+  transform: translateY(-2px);
   filter: brightness(1.06);
 }
-.launcher:hover::after { opacity: 1; transform: scale(1.04); }
+.launcher:hover::after { opacity: 0; }
 .launcher:active { transform: scale(.95); }
 
 .badge {
   position: absolute; top: -3px; right: -3px;
   min-width: 20px; height: 20px; padding: 0 5px;
   border-radius: var(--r-pill);
-  background: var(--danger); color: #fff;
+  background: var(--danger); color: var(--primary-foreground);
   font-size: var(--fs-2xs); font-weight: 700;
   display: grid; place-items: center;
-  box-shadow: 0 0 0 2.5px var(--bg), 0 2px 6px rgb(184 66 63 / .4);
+  box-shadow: 0 0 0 2px var(--bg), var(--shadow-float);
 }
 
 /* ---------- 面板（浮层） ---------- */
@@ -419,37 +529,33 @@ defineExpose({ send })
   /* 阶梯阴影 + 内高光：与页面拉开真实层级，不靠描边 */
   box-shadow:
     var(--shadow-pop),
-    inset 0 0 0 1px rgb(17 25 23 / .05),
+    inset 0 0 0 1px var(--hairline),
     var(--inset-hi-strong);
   overflow: hidden;
   min-width: 320px;
   transition: box-shadow var(--t-base);
 }
-.panel.dragging {
-  box-shadow:
-    0 3px 6px rgb(17 25 23 / .06),
-    0 28px 56px -14px rgb(17 25 23 / .26),
-    0 72px 140px -40px rgb(17 25 23 / .34),
-    inset 0 0 0 1px rgb(17 25 23 / .06);
-}
+.panel.dragging { box-shadow: var(--shadow-pop); }
 .panel.dragging, .panel.resizing { user-select: none; }
 .panel.resizing { transition: none; }
 
 .resizer {
   position: absolute; left: 0; top: 0; bottom: 0; width: 5px;
-  cursor: ew-resize; z-index: 2;
+  cursor: ew-resize; z-index: 2; touch-action: none;
 }
 .resizer:hover { background: color-mix(in srgb, var(--accent-500) 22%, transparent); }
 
 .phead {
+  touch-action: none;
   display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2);
   padding: 12px var(--sp-2) 12px var(--sp-5);
-  background: rgb(255 255 255 / .72);
+  background: var(--surface);
   backdrop-filter: blur(16px) saturate(180%);
   cursor: grab;
   flex: none;
 }
 .panel.dragging .phead { cursor: grabbing; }
+.panel.expanded .phead { cursor: default; }
 .hbrand { display: flex; align-items: center; gap: 9px; min-width: 0; }
 .hdot {
   width: 7px; height: 7px; border-radius: 50%;
@@ -481,6 +587,7 @@ defineExpose({ send })
 }
 
 .idbar {
+  flex-wrap: wrap;
   display: flex; align-items: center; gap: 6px;
   padding: 8px var(--sp-5);
   background: var(--info-bg); color: var(--info);
@@ -500,7 +607,7 @@ defineExpose({ send })
 .brow.agent { align-self: flex-start; }
 .avatar {
   flex: none; width: 26px; height: 26px; border-radius: 9px;
-  background: var(--accent-600); color: #fff;
+  background: var(--accent-600); color: var(--primary-foreground);
   display: grid; place-items: center; margin-top: 1px;
   box-shadow: var(--shadow-xs);
 }
@@ -520,7 +627,7 @@ defineExpose({ send })
 }
 .brow.user .bubble {
   background: var(--accent-600);
-  color: #fff;
+  color: var(--primary-foreground);
   border-top-right-radius: 6px;
   box-shadow: var(--shadow-accent);
 }
@@ -542,7 +649,9 @@ defineExpose({ send })
 .sic { flex: none; color: var(--ink-400); }
 .step.done .sic { color: var(--ok); }
 .sname { font-weight: 620; color: var(--ink-700); font-family: var(--font-mono); flex: none; }
-.sres { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sres { min-width: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.sname { max-width: 42%; overflow-wrap: anywhere; }
+.step { align-items: flex-start; }
 
 /* 确认条：高危操作 —— 用暖色底 + 内描边，不用生硬外框 */
 .confirm {
@@ -562,7 +671,7 @@ defineExpose({ send })
   display: inline-flex; align-items: center; justify-content: center; gap: 4px;
   transition: background var(--t-fast), box-shadow var(--t-base), transform var(--t-spring), color var(--t-fast);
 }
-.cyes { background: var(--accent-600); color: #fff; box-shadow: var(--shadow-accent); }
+.cyes { background: var(--accent-600); color: var(--primary-foreground); box-shadow: var(--shadow-accent); }
 .cyes:hover { background: var(--accent-500); }
 .cyes:active, .cno:active { transform: scale(.97); }
 .cno { background: var(--surface); color: var(--ink-600); box-shadow: var(--shadow-raise); }
@@ -642,7 +751,7 @@ defineExpose({ send })
   flex: none;
   width: 36px; height: 36px;
   border-radius: 12px; border: none;
-  background: var(--accent-600); color: #fff;
+  background: var(--accent-600); color: var(--primary-foreground);
   display: grid; place-items: center;
   box-shadow: var(--shadow-accent);
   transition: background var(--t-fast), transform var(--t-spring);
@@ -654,21 +763,21 @@ defineExpose({ send })
 /* 入场 */
 .chatpop-enter-active { transition: opacity var(--t-base), transform var(--t-spring); }
 .chatpop-leave-active { transition: opacity var(--t-fast), transform var(--t-fast); }
-.chatpop-enter-from { opacity: 0; transform: translateY(14px) scale(.96); }
-.chatpop-leave-to { opacity: 0; transform: translateY(8px) scale(.98); }
+.chatpop-enter-from { transform: translateY(14px) scale(.96); }
+.chatpop-leave-to { transform: translateY(8px) scale(.98); }
 
 @media (max-width: 720px) {
-  .panel {
-    left: 8px !important;
-    right: 8px !important;
-    width: auto !important;
-    top: 8px !important;
-    height: calc(100dvh - 16px) !important;
-  }
+  .panel { min-width: 0; }
+  .panel.expanded { border-radius: 0; }
   .resizer { display: none; }
+  .phead { cursor: default; }
+  .composer .pin { font-size: 16px; }
+  .hbtn, .psend, .cyes, .cno, .qbtn { min-height: 44px; }
+  .hbtn { width: 36px; }
+  .launcher { right: 16px; bottom: max(16px, env(safe-area-inset-bottom)); }
 }
 /* Quiet support drawer */
-.launcher { width: 46px; height: 46px; border-radius: 14px; background: var(--accent-600); box-shadow: 0 4px 16px rgb(30 45 80 / .16); }
+.launcher { width: 46px; height: 46px; border-radius: 14px; background: var(--accent-600); box-shadow: var(--shadow-float); }
 .launcher::after { display: none; } .launcher:hover { transform: translateY(-1px); }
 .panel { border: 1px solid var(--hairline-2); box-shadow: var(--shadow-pop); border-radius: 12px; }
 .phead { background: var(--surface); backdrop-filter: none; border-bottom: 1px solid var(--hairline); }
@@ -677,4 +786,22 @@ defineExpose({ send })
 .qbtn { border: 1px solid var(--hairline); border-radius: 6px; box-shadow: none; }
 .qbtn:hover { transform: none; box-shadow: none; background: var(--accent-50); }
 .hbtn { border-radius: 6px; } .pin { border: 1px solid var(--hairline-2); border-radius: 6px; background: var(--surface); }
+.composer { flex: 1; min-width: 0; }
+.composer .pin { width: 100%; min-height: 42px; max-height: 150px; resize: none; overflow-y: auto; }
+.composer-meta { display: flex; justify-content: space-between; gap: 6px; margin-top: 7px; font-size: 10px; color: var(--ink-400); }
+.input-error { color: var(--danger); }
+.send-actions { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+.pfoot { align-items: flex-start; }
+button:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px solid var(--accent-500); outline-offset: 2px; }
+button:disabled { cursor: not-allowed; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+.reset-bar { padding: 12px 16px; border-bottom: 1px solid var(--hairline); font-size: var(--fs-xs); background: var(--surface-2); }
+.reset-bar p { margin-bottom: 10px; line-height: 1.6; }
+.reset-bar > div { display: flex; gap: 8px; }
+.latest { position: absolute; bottom: 130px; left: 50%; transform: translateX(-50%); padding: 8px 14px; border: 1px solid var(--hairline-2); border-radius: var(--r-pill); background: var(--surface); color: var(--ink-700); box-shadow: var(--shadow-xs); font-size: var(--fs-xs); white-space: nowrap; }
+.plist { overscroll-behavior: contain; }
+.hdot { background: var(--ink-500); box-shadow: none; }
+.htext small { max-width: 200px; }
+.hbtn:disabled { background: var(--surface-2); color: var(--ink-400); cursor: not-allowed; }
+@media (max-width: 720px) { .htext small { max-width: 155px; } .idbar .tsel { height: 36px; } }
 </style>

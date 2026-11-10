@@ -1,7 +1,6 @@
-// Package store billing 数据层：MySQL bills 账本（权威） + Redis balance（热投影）。
+// Package store billing 数据层：MySQL bills 账本 + Redis balance（当前余额）。
 //
-// 权威口径：MySQL bills 是账本，Redis balance 只是缓存投影。
-// 崩溃恢复以账本为准（对账/重建 job，M4）。
+// Redis 键还在时沿用 Redis。键不在时用 MySQL 账单合计回填。
 package store
 
 import (
@@ -27,6 +26,7 @@ import (
 	"google.golang.org/grpc/status"
 
 	"github.com/frostloom/ai-gateway/internal/pkg/controlplane"
+	"github.com/frostloom/ai-gateway/internal/pkg/metrics"
 	"github.com/frostloom/ai-gateway/internal/pkg/quota"
 	billingv1 "github.com/frostloom/ai-gateway/internal/proto/billing/v1"
 
@@ -89,20 +89,22 @@ type APIKey struct {
 }
 
 type Provider struct {
-	ID              uint64     `gorm:"primaryKey" json:"id"`
-	Name            string     `gorm:"size:64;uniqueIndex:uk_name;not null" json:"name"`
-	BaseURL         string     `gorm:"size:255;not null" json:"base_url"`
-	UpstreamKey     string     `gorm:"size:255" json:"upstream_key"`            // 上游 API key（demo 明文存；生产应加密/KMS 引用，转发时才解密）
-	CostInCent      int64      `gorm:"not null;default:0" json:"cost_in_cent"`  // 上游成本：输入 分/百万 token（毛利 = 售价 − 成本）
-	CostOutCent     int64      `gorm:"not null;default:0" json:"cost_out_cent"` // 上游成本：输出 分/百万 token
-	Models          string     `gorm:"type:json" json:"models"`                 // JSON 数组
-	Weight          int        `gorm:"not null;default:1" json:"weight"`
-	Status          int8       `gorm:"not null;default:0" json:"status"` // 0=active 1=disabled 2=banned
-	FailCount       int        `gorm:"not null;default:0" json:"fail_count"`
-	ConsecutiveFail int        `gorm:"not null;default:0" json:"consecutive_fail"`
-	CooldownUntil   *time.Time `json:"cooldown_until,omitempty"`
-	CreatedAt       time.Time  `json:"created_at"`
-	UpdatedAt       time.Time  `json:"updated_at"`
+	MessagesBaseURL  string     `gorm:"size:512;not null;default:''" json:"messages_base_url"`
+	ResponsesBaseURL string     `gorm:"size:512;not null;default:''" json:"responses_base_url"`
+	ID               uint64     `gorm:"primaryKey" json:"id"`
+	Name             string     `gorm:"size:64;uniqueIndex:uk_name;not null" json:"name"`
+	BaseURL          string     `gorm:"size:255;not null" json:"base_url"`
+	UpstreamKey      string     `gorm:"size:255" json:"upstream_key"`            // 上游 API key（demo 明文存；生产应加密/KMS 引用，转发时才解密）
+	CostInCent       int64      `gorm:"not null;default:0" json:"cost_in_cent"`  // 上游成本：输入 分/百万 token（毛利 = 售价 − 成本）
+	CostOutCent      int64      `gorm:"not null;default:0" json:"cost_out_cent"` // 上游成本：输出 分/百万 token
+	Models           string     `gorm:"type:json" json:"models"`                 // JSON 数组
+	Weight           int        `gorm:"not null;default:1" json:"weight"`
+	Status           int8       `gorm:"not null;default:0" json:"status"` // 0=active 1=disabled 2=banned
+	FailCount        int        `gorm:"not null;default:0" json:"fail_count"`
+	ConsecutiveFail  int        `gorm:"not null;default:0" json:"consecutive_fail"`
+	CooldownUntil    *time.Time `json:"cooldown_until,omitempty"`
+	CreatedAt        time.Time  `json:"created_at"`
+	UpdatedAt        time.Time  `json:"updated_at"`
 }
 
 type Bill struct {
@@ -117,6 +119,7 @@ type Bill struct {
 	Model              string  `gorm:"size:64"`                          // 调用名 == 目录 model_id
 	Funding            string  `gorm:"size:16;not null;default:balance"` // 扣费来源：balance|subscription（M9）
 	PreQuota           int64   `gorm:"not null"`                         // 预扣金额（分）
+	ReservedCostCent   *int64  `json:"ReservedCostCent,omitempty"`
 	ReservedTokens     *int64  // 订阅预占 token；历史未记录的 pending 为 nil
 	ReservedTier       *string `gorm:"size:64"` // 预占时档次快照
 	ActualQuota        *int64  // settle 实际金额（分）
@@ -157,7 +160,7 @@ func NewStore(db *gorm.DB, rdb *goredis.Client) *Store {
 // AutoMigrate 建表/补列（开发便利；生产以 scripts/schema.sql 为准）。
 func (s *Store) AutoMigrate() error {
 	return s.db.AutoMigrate(&Tenant{}, &APIKey{}, &Provider{}, &Model{}, &Bill{},
-		&Plan{}, &Subscription{}, &RechargeOrder{}, &Topup{}, &AgentSession{}, &AgentAuditLog{},
+		&Plan{}, &Subscription{}, &RechargeOrder{}, &Topup{}, &BalanceVoucher{}, &AgentSession{}, &AgentAuditLog{},
 		&OutboxEvent{}, &AuditEvent{}, &AdminUser{}, &AdminSession{}, &PortalUser{}, &PortalSession{})
 }
 
@@ -223,14 +226,18 @@ func (s *Store) reserveBatched(ctx context.Context, req *billingv1.ReserveReques
 	// The reserve Lua already treats an existing guard as an idempotent replay.
 	// A separate GET here is a round trip on every call. Rebuilding Redis from
 	// the lagging MySQL column would also put a batched debit back.
+	matchStart := time.Now()
 	if err := s.requireCashMatch(ctx, tenantID); err != nil {
 		return nil, status.Errorf(codes.Unavailable, "reserve cash projection: %v", err)
 	}
+	metrics.RequestHop("reserve_match", time.Since(matchStart))
 	if pre == 0 && (inC > 0 || outC > 0) {
 		pre = 1
 	}
 	owner := rand.Text()
+	luaStart := time.Now()
 	res, err := s.runCashLua(ctx, reserveLua, []string{BalanceKey(tenantID), ReqGuardKey(req.RequestId)}, pre, owner)
+	metrics.RequestHop("reserve_lua", time.Since(luaStart))
 	if err != nil {
 		return nil, status.Errorf(codes.Unavailable, "reserve lua: %v", err)
 	}
@@ -259,9 +266,11 @@ func (s *Store) reserveBatched(ctx context.Context, req *billingv1.ReserveReques
 	if code == 2 {
 		return s.replayBatchedReserve(ctx, req, bal)
 	}
+	enqueueStart := time.Now()
 	if err := s.batch.enqueueReserve(s.db, row, pre); err != nil {
 		return nil, status.Errorf(codes.Unavailable, "reserve batch: %v", err)
 	}
+	metrics.RequestHop("reserve_enqueue", time.Since(enqueueStart))
 	return &billingv1.ReserveResponse{Code: billingv1.ReserveCode_RESERVE_OK, BillId: int64(row.ID), BalanceAfter: bal}, nil
 }
 
@@ -431,6 +440,9 @@ func (s *Store) reserveLocked(ctx context.Context, req *billingv1.ReserveRequest
 		return nil, status.Errorf(codes.Unavailable, "subscription path: %v", err)
 	}
 
+	if isSub && tier == monetarySubscriptionTier {
+		return s.reserveMonetarySubscription(ctx, req, model, fingerprint, pre)
+	}
 	if isSub {
 		// 窗口额度检查：consumed[本档]（滚动窗口内已用 token）+ 本次估算 ≤ 窗口额度，否则超限拒绝。
 		consumed, err := s.subscriptionConsumed(dbctx, tenantID, refreshHours)
@@ -672,9 +684,6 @@ func (s *Store) compensateReserve(ctx context.Context, tenantID uint64, requestI
 // 免费档/无标签模型（不限量）、无订阅、订阅停用 → isSub=false（余额路径）。
 func (s *Store) subscriptionAllowancePath(ctx context.Context, model *Model, tenantID uint64) (isSub bool, refreshHours int, tier string, quota int64, err error) {
 	tier = TierFromTags(model.TagsList())
-	if tier == "" || tier == "免费" {
-		return false, 0, "", 0, nil // 免费/未知档不限量
-	}
 	sub, err := s.GetActiveSubscription(ctx, tenantID)
 	if err != nil || sub == nil {
 		return false, 0, "", 0, err
@@ -683,8 +692,14 @@ func (s *Store) subscriptionAllowancePath(ctx context.Context, model *Model, ten
 		return false, 0, tier, 0, nil
 	}
 	p, err := s.GetPlan(ctx, sub.PlanID)
-	if err != nil || p == nil || p.Status != 0 {
+	if err != nil || p == nil {
 		return false, 0, tier, 0, err
+	}
+	if p.WindowQuotaCent > 0 || p.WeekQuotaCent > 0 || p.CycleQuotaCent > 0 {
+		return true, p.RefreshHours, monetarySubscriptionTier, p.WindowQuotaCent, nil
+	}
+	if p.Status != 0 || tier == "" || tier == "免费" {
+		return false, 0, "", 0, nil
 	}
 	return true, p.RefreshHours, tier, p.TierQuotaFor(tier), nil
 }
@@ -722,6 +737,7 @@ func (s *Store) EnsureBalanceKeys(ctx context.Context) error {
 			return err
 		}
 		if n == 0 {
+			// Redis 没有这份余额，用 MySQL 账单合计回填。大约五秒内还没写入的扣款就少了。
 			if err := s.ensureBalanceKey(ctx, t.ID); err != nil {
 				return err
 			}
@@ -918,7 +934,9 @@ func addLedgerBalance(tx *gorm.DB, tenantID uint64, delta int64) error {
 }
 
 func (s *Store) settleCash(ctx context.Context, req *billingv1.SettleRequest) (*billingv1.SettleResponse, error) {
+	lookupStart := time.Now()
 	row, err := s.getReserve(ctx, req.RequestId)
+	metrics.RequestHop("settle_lookup", time.Since(lookupStart))
 	if err != nil {
 		return nil, err
 	}
@@ -954,18 +972,12 @@ func (s *Store) settleCash(ctx context.Context, req *billingv1.SettleRequest) (*
 	if err := s.cashMutationAllowed(); err != nil {
 		return nil, err
 	}
-	if err := s.repairOrphanGuard(ctx, row.TenantID, DeltaGuardKey(req.RequestId)); err != nil {
-		return nil, err
-	}
-	if err := s.requireCashMatch(ctx, row.TenantID); err != nil {
-		return nil, err
-	}
 
 	// M9 订阅额度：token 已在 reserve 时消耗（额度按窗口涌现），settle 不产生任何钱。
 	// actual=0/delta=0 → applyDelta(0) 是 no-op（settle.lua 既不改余额也不退回）。
 	if row.Funding == FundingSubscription {
 		actual, delta := int64(0), int64(0)
-		bal, _, err := s.applyDelta(ctx, row.TenantID, req.RequestId, 0)
+		bal, _, err := s.settleRedis(ctx, row.TenantID, req.RequestId, 0)
 		if err != nil {
 			return nil, err
 		}
@@ -1019,7 +1031,7 @@ func (s *Store) settleCash(ctx context.Context, req *billingv1.SettleRequest) (*
 	}
 	delta := actual - row.PreQuota
 
-	bal, applied, err := s.applyDelta(ctx, row.TenantID, req.RequestId, delta)
+	bal, applied, err := s.settleRedis(ctx, row.TenantID, req.RequestId, delta)
 	if err != nil {
 		return nil, err
 	}
@@ -1057,7 +1069,10 @@ func (s *Store) settleCash(ctx context.Context, req *billingv1.SettleRequest) (*
 	if shortfall > 0 {
 		settleRow.ErrorCode = fmt.Sprintf("shortfall:%d", shortfall)
 	}
-	if s.batch != nil && s.batch.queueSettle(row, settleRow, delta) {
+	queueStart := time.Now()
+	queued := s.batch != nil && s.batch.queueSettle(row, settleRow, delta)
+	metrics.RequestHop("settle_queue", time.Since(queueStart))
+	if queued {
 		return &billingv1.SettleResponse{Settled: true, DeltaQuota: delta, BalanceAfter: bal}, nil
 	}
 	if err := s.assignBillID(s.db, settleRow); err != nil {
@@ -1405,6 +1420,61 @@ func (s *Store) applyDelta(ctx context.Context, tenantID uint64, requestID strin
 		return 0, 0, status.Errorf(codes.FailedPrecondition, "balance would go negative: tenant=%d delta=%d", tenantID, delta)
 	}
 	return bal, applied, nil
+}
+
+// 标记还在时先不动钱。调用方按原路径用账本把 Redis 拨回，再结算一次。
+const settleOrphanProbeLua = `
+local guard_now = redis.call('GET', KEYS[2])
+if guard_now then return {-2, 0, 0} end
+`
+
+func (s *Store) applyDeltaUnlessOrphan(ctx context.Context, tenantID uint64, requestID string, delta int64) (int64, int64, bool, error) {
+	res, err := s.runCashLua(ctx, settleOrphanProbeLua+settleLua, []string{BalanceKey(tenantID), DeltaGuardKey(requestID)}, delta)
+	if err != nil {
+		return 0, 0, false, status.Errorf(codes.Unavailable, "delta lua: %v", err)
+	}
+	code, bal, applied := parseLuaTriple(res)
+	if code == -2 {
+		return 0, 0, true, nil
+	}
+	if code == -1 {
+		return 0, 0, false, status.Errorf(codes.FailedPrecondition, "balance would go negative: tenant=%d delta=%d", tenantID, delta)
+	}
+	return bal, applied, false, nil
+}
+
+// settleRedis 在内存里还有未刷出的账时，把「标记是否存在」和扣差额合成一次 Redis。
+// 标记已经存在时，仍先按账本拨回，再扣一次，和原来的两步相同。
+func (s *Store) settleRedis(ctx context.Context, tenantID uint64, requestID string, delta int64) (int64, int64, error) {
+	guard := DeltaGuardKey(requestID)
+	if s.batch != nil && s.batch.behind(tenantID) {
+		luaStart := time.Now()
+		bal, applied, orphan, err := s.applyDeltaUnlessOrphan(ctx, tenantID, requestID, delta)
+		metrics.RequestHop("settle_lua", time.Since(luaStart))
+		if err != nil || !orphan {
+			return bal, applied, err
+		}
+		guardStart := time.Now()
+		if err := s.repairOrphanGuard(ctx, tenantID, guard); err != nil {
+			return 0, 0, err
+		}
+		metrics.RequestHop("settle_guard", time.Since(guardStart))
+		return s.applyDelta(ctx, tenantID, requestID, delta)
+	}
+	guardStart := time.Now()
+	if err := s.repairOrphanGuard(ctx, tenantID, guard); err != nil {
+		return 0, 0, err
+	}
+	metrics.RequestHop("settle_guard", time.Since(guardStart))
+	matchStart := time.Now()
+	if err := s.requireCashMatch(ctx, tenantID); err != nil {
+		return 0, 0, err
+	}
+	metrics.RequestHop("settle_match", time.Since(matchStart))
+	luaStart := time.Now()
+	bal, applied, err := s.applyDelta(ctx, tenantID, requestID, delta)
+	metrics.RequestHop("settle_lua", time.Since(luaStart))
+	return bal, applied, err
 }
 
 // ---------- 内部 helpers ----------

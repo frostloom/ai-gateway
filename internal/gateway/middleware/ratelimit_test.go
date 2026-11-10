@@ -11,34 +11,32 @@ import (
 	goredis "github.com/redis/go-redis/v9"
 )
 
-func TestRateLimitCountsSameMillisecond(t *testing.T) {
+func TestTokenBucketBurstAndRefill(t *testing.T) {
 	mr := miniredis.RunT(t)
 	rdb := goredis.NewClient(&goredis.Options{Addr: mr.Addr()})
 	ctx := t.Context()
 	const now int64 = 1_700_000_000_000
-	window := time.Minute.Milliseconds()
-	for i := 0; i < 100; i++ {
-		allowed, err := rdb.Eval(ctx, rateLimitLua, []string{"rate:win:7", "rate:seq:7"}, now, window, 100).Bool()
-		if err != nil || !allowed {
-			t.Fatalf("same-ms request %d allowed=%v err=%v", i, allowed, err)
+	check := func(at int64, want bool) {
+		t.Helper()
+		got, err := rdb.Eval(ctx, rateLimitLua, []string{"rate:bucket:7", "rate:seq:7"}, at, 60000, 600, 2).Bool()
+		if err != nil || got != want {
+			t.Fatalf("at %d: allowed=%v, want %v, err=%v", at, got, want, err)
 		}
 	}
-	members, err := rdb.ZRange(ctx, "rate:win:7", 0, -1).Result()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(members) != 100 {
-		t.Fatalf("zset members = %d, want 100 distinct hits at one timestamp", len(members))
-	}
-	allowed, err := rdb.Eval(ctx, rateLimitLua, []string{"rate:win:7", "rate:seq:7"}, now, window, 100).Bool()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if allowed {
-		t.Fatal("101st request in the same millisecond was allowed")
-	}
+	check(now, true)
+	check(now, true)
+	check(now, false)
+	check(now+99, false)
+	check(now+100, true)
+	check(now+100, false)
+	check(now+1000, true)
+	check(now+1000, true)
+	check(now+1000, false)
+}
 
-	mr.FlushAll()
+func TestRateLimitCountsSameMillisecond(t *testing.T) {
+	mr := miniredis.RunT(t)
+	rdb := goredis.NewClient(&goredis.Options{Addr: mr.Addr()})
 	gin.SetMode(gin.TestMode)
 	r := gin.New()
 	r.Use(func(c *gin.Context) { c.Set("tenant_id", int64(7)) })

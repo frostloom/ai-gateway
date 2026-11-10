@@ -33,8 +33,8 @@ func TestSelectiveGateExactBoundaries(t *testing.T) {
 		{"negative_risk", "safety_not_clear", func(v *jevVerdict, _ *session) { v.RiskScore = -.01 }},
 		{"unavailable", "judge_unavailable", func(v *jevVerdict, _ *session) { v.Available = false }},
 		{"invalid_schema", "judge_schema_invalid", func(v *jevVerdict, _ *session) { v.FastFieldsValid = false }},
-		{"pending_refund", "conversation_context", func(_ *jevVerdict, s *session) { s.PendingAction = &pendingAction{Tool: "refund_recharge"} }},
-		{"followup", "conversation_context", func(_ *jevVerdict, s *session) { s.History = append(s.History, Message{Role: "assistant"}) }},
+		{"pending_refund", "eligible", func(_ *jevVerdict, s *session) { s.PendingAction = &pendingAction{Tool: "refund_recharge"} }},
+		{"followup", "eligible", func(_ *jevVerdict, s *session) { s.History = append(s.History, Message{Role: "assistant"}) }},
 		{"write_intent", "tool_not_supported", func(v *jevVerdict, _ *session) { v.Intent = "recharge" }},
 	} {
 		t.Run(tc.name, func(t *testing.T) {

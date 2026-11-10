@@ -70,7 +70,7 @@ func newTestStore(t *testing.T) (*Store, func()) {
 	// 清库 + 清 Redis 守卫 key，保证可重跑（guard TTL 24h，只清 DB 会残留）。
 	// M7 表有唯一键（plans.uk_name / recharge_orders.uk_order_no / topups.uk_ref / models.uk_model_id），
 	// 不清会跨轮次撞唯一索引 → 一并清理。
-	for _, tbl := range []string{"models", "agent_audit_log", "agent_sessions", "topups", "recharge_orders", "subscriptions", "plans", "bills", "tenants", "outbox_events", "audit_events"} {
+	for _, tbl := range []string{"balance_vouchers", "models", "agent_audit_log", "agent_sessions", "topups", "recharge_orders", "subscriptions", "plans", "bills", "tenants", "outbox_events", "audit_events"} {
 		if err := db.Exec("DELETE FROM " + tbl).Error; err != nil {
 			t.Fatalf("clean %s: %v", tbl, err)
 		}

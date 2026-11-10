@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { IconArrowUpRight, IconArrowDownLeft, IconRotate } from '@tabler/icons-vue'
 import { ordersApi, topupsApi, refundOrderApi, refundAmountApi } from '../api'
 import type { RechargeOrder, Topup, RefundResult } from '../types'
@@ -15,6 +15,7 @@ import Field from '../../shared/components/ui/Field.vue'
 import Skeleton from '../../shared/components/ui/Skeleton.vue'
 import Empty from '../../shared/components/ui/Empty.vue'
 
+const emit = defineEmits<{ (e: 'me'): void }>()
 const orders = ref<RechargeOrder[]>([])
 const topups = ref<Topup[]>([])
 const loading = ref(true)
@@ -23,6 +24,9 @@ const busy = ref(false)
 const refundTarget = ref<RechargeOrder | null>(null)
 const amountModal = ref(false)
 const refundAmt = ref(100)
+const amountIdem = ref(crypto.randomUUID())
+watch(amountModal, v => { if (v) amountIdem.value = crypto.randomUUID() })
+watch(refundAmt, () => { amountIdem.value = crypto.randomUUID() })
 
 async function load() {
   loading.value = true
@@ -30,34 +34,37 @@ async function load() {
     const [o, t] = await Promise.all([ordersApi(), topupsApi()])
     orders.value = o.items
     topups.value = t.items
-  } finally { loading.value = false }
+  } catch (e: any) { toastErr(e.message || '读取订单失败') } finally { loading.value = false }
 }
 onMounted(load)
 
 function askRefund(o: RechargeOrder) { refundTarget.value = o }
 
 async function doRefundOrder() {
-  if (!refundTarget.value) return
+  if (busy.value || !refundTarget.value) return
   busy.value = true
   try {
     const r: RefundResult = await refundOrderApi(refundTarget.value.OrderNo)
     toastOk(`已退款 ${money(r.refund_cent)}，当前余额 ${money(r.balance_after)}`)
     refundTarget.value = null
     await load()
+    emit('me')
   } catch (e: any) {
     toastErr(e?.message || '退款失败')
   } finally { busy.value = false }
 }
 
 async function doRefundAmount() {
-  const v = Math.floor(Number(refundAmt.value))
-  if (!v || v <= 0) { toastErr('请输入有效金额'); return }
+  if (busy.value) return
+  const v = Number(refundAmt.value)
+  if (!Number.isSafeInteger(v) || v <= 0 || v > 1000000) { toastErr('请输入 1 至 1,000,000 的整数金额'); return }
   busy.value = true
   try {
-    const r: RefundResult = await refundAmountApi(v)
+    const r: RefundResult = await refundAmountApi(v, amountIdem.value)
     toastOk(`已退款 ${money(r.refund_cent)}，当前余额 ${money(r.balance_after)}`)
     amountModal.value = false
     await load()
+    emit('me')
   } catch (e: any) {
     toastErr(e?.message || '退款失败')
   } finally { busy.value = false }
@@ -81,7 +88,7 @@ async function doRefundAmount() {
         <div v-for="o in orders" :key="o.ID" class="row num">
           <span class="ono mono">{{ o.OrderNo }}</span>
           <span class="amt">{{ money(o.AmountCent) }}</span>
-          <span><Tag :tone="ORDER_STATUS[o.Status].tone" dot>{{ ORDER_STATUS[o.Status].text }}</Tag></span>
+          <span><Tag :tone="ORDER_STATUS[o.Status]?.tone ?? 'muted'" dot>{{ ORDER_STATUS[o.Status]?.text ?? o.Status }}</Tag></span>
           <span class="tm">{{ fmtTime(o.CreatedAt) }}</span>
           <span class="ra">
             <BaseButton v-if="o.Status === 'paid'" size="sm" variant="secondary" @click="askRefund(o)">退款</BaseButton>
@@ -101,7 +108,7 @@ async function doRefundAmount() {
               <IconArrowDownLeft v-else :size="14" />
             </span>
             <div class="tinfo">
-              <span class="tsrc">{{ t.Source === 'recharge' ? '充值' : t.Source === 'refund' ? '退款' : '订阅' }}</span>
+              <span class="tsrc">{{ t.Source === 'recharge' ? '充值' : t.Source === 'refund' ? '退款' : t.Source === 'voucher' ? '兑换码' : '订阅' }}</span>
               <span class="tref mono">{{ t.RefID }}</span>
             </div>
             <span class="tamt num" :class="{ out: t.Amount < 0 }">{{ t.Amount >= 0 ? '+' : '' }}{{ money(t.Amount) }}</span>
@@ -116,13 +123,13 @@ async function doRefundAmount() {
       :open="!!refundTarget" title="退款确认"
       :text="refundTarget ? `确认退款订单 ${refundTarget.OrderNo}（${money(refundTarget.AmountCent)}）？退款量 = min(订单额度, 当前余额)。` : ''"
       danger :loading="busy" ok-text="确认退款"
-      @close="refundTarget = null" @confirm="doRefundOrder"
+      @close="!busy && (refundTarget = null)" @confirm="doRefundOrder"
     />
 
     <!-- 按金额退款 -->
-    <Modal :open="amountModal" title="按金额退款" @close="amountModal = false" width="400">
+    <Modal :open="amountModal" title="按金额退款" @close="!busy && (amountModal = false)" width="400">
       <Field label="退款金额" hint="最多退到当前余额（元，整数）" required>
-        <input v-model.number="refundAmt" type="number" min="1" />
+        <input v-model.number="refundAmt" type="number" min="1" max="1000000" step="1" :disabled="busy" />
       </Field>
       <template #footer>
         <BaseButton variant="ghost" @click="amountModal = false">取消</BaseButton>

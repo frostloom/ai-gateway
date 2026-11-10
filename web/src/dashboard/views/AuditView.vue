@@ -26,13 +26,12 @@ import Tag from '../../shared/components/ui/Tag.vue'
 import KpiCard from '../../shared/components/ui/KpiCard.vue'
 import RankList from '../../shared/components/ui/RankList.vue'
 import BaseButton from '../../shared/components/ui/BaseButton.vue'
-import DataTable from '../../shared/components/ui/DataTable.vue'
-
 const tenants = ref<TenantStat[]>([])
 const items = ref<AuditLogItem[]>([])
 const tid = ref(0)
 const loading = ref(false)
 const onlyRisky = ref(false)
+const openID = ref(0)
 
 /* ---------- 风险模型 ---------- */
 type Risk = 'critical' | 'high' | 'medium' | 'low'
@@ -150,8 +149,6 @@ const shown = computed(() => {
   const list = onlyRisky.value ? items.value.filter(isRisky) : items.value
   return [...list].sort((a, b) => weight(a) - weight(b))
 })
-
-const COLS = '76px 132px 54px 130px 74px 1.5fr 122px'
 
 async function loadTenants() {
   try { tenants.value = (await overviewApi()).tenants } catch { /* ignore */ }
@@ -317,47 +314,25 @@ function riskTag(a: AuditLogItem): { text: string; tone: 'danger' | 'warn' | 'in
         <BaseButton variant="secondary" size="sm" :loading="loading" @click="load">刷新</BaseButton>
       </template>
 
-      <DataTable
-        :cols="COLS"
-        :loading="loading"
-        :empty="!shown.length"
-        empty-text="暂无审计记录，去 AI 客服聊两句就会产生"
-      >
-        <template #head>
-          <span>风险</span>
-          <span>时间</span>
-          <span>租户</span>
-          <span>操作</span>
-          <span>确认</span>
-          <span>参数 / 结果</span>
-          <span>会话</span>
-        </template>
-
-        <div
-          v-for="a in shown"
-          :key="a.ID"
-          class="dt-row dt-num"
-          :class="{ 'row-danger': weight(a) <= 1 }"
-        >
-          <span><Tag :tone="riskTag(a).tone" :dot="weight(a) <= 2">{{ riskTag(a).text }}</Tag></span>
-          <span class="dt-muted time">{{ fmtTimeFull(a.CreatedAt) }}</span>
-          <span class="dt-muted">#{{ a.TenantID }}</span>
-          <span class="tool">
+      <p v-if="loading" class="note">正在读取审计…</p>
+      <p v-else-if="!shown.length" class="note">暂无审计记录。和客服聊过之后会出现在这里。</p>
+      <ul v-else class="reports">
+        <li v-for="a in shown" :key="a.ID" class="report" :class="{ hot: weight(a) <= 1 }">
+          <button type="button" class="reportHead" @click="openID = openID === a.ID ? 0 : a.ID">
+            <Tag :tone="riskTag(a).tone" :dot="weight(a) <= 2">{{ riskTag(a).text }}</Tag>
             <span class="tlabel">{{ meta(a).label }}</span>
-            <span class="tname mono">{{ a.Tool }}</span>
-          </span>
-          <span>
-            <Tag v-if="isWrite(a)" :tone="writeState(a).tone" dot>{{ writeState(a).text }}</Tag>
-            <span v-else-if="a.Tool === 'cancel_confirmation'" class="dt-muted dash">已取消</span>
-            <span v-else class="dt-muted dash">-</span>
-          </span>
-          <span class="detail">
-            <span class="dargs mono clip" :title="a.Args">{{ a.Args || a.Preview || '-' }}</span>
-            <span v-if="a.Result" class="dres clip" :title="a.Result">{{ a.Result }}</span>
-          </span>
-          <span class="mono clip dt-muted" :title="a.SessionID">{{ a.SessionID }}</span>
-        </div>
-      </DataTable>
+            <span class="meta">租户 #{{ a.TenantID }}</span>
+            <span class="date">{{ fmtTimeFull(a.CreatedAt) }}</span>
+          </button>
+          <div v-if="openID === a.ID" class="reportBody">
+            <p><b>{{ a.Tool }}</b> · {{ meta(a).desc || '客服操作' }}</p>
+            <p v-if="isWrite(a)">确认状态：{{ writeState(a).text }}</p>
+            <p class="mono">{{ a.Args || a.Preview || '没有参数' }}</p>
+            <p v-if="a.Result">{{ a.Result }}</p>
+            <p class="meta">会话 {{ a.SessionID }}</p>
+          </div>
+        </li>
+      </ul>
     </Card>
   </div>
 </template>
@@ -435,6 +410,14 @@ function riskTag(a: AuditLogItem): { text: string; tone: 'danger' | 'warn' | 'in
 .audit :deep(.dt-row.row-danger) { background: color-mix(in srgb, var(--danger) 4%, transparent); }
 .audit :deep(.dt-row.row-danger:hover) { background: color-mix(in srgb, var(--danger) 8%, transparent); }
 
+.reports { list-style: none; margin: 0; padding: 8px; display: flex; flex-direction: column; gap: 8px; }
+.report { overflow: hidden; border: 1px solid var(--hairline); border-radius: 12px; background: var(--surface); }
+.report.hot { border-color: var(--danger); }
+.reportHead { width: 100%; display: flex; align-items: center; gap: 12px; padding: 12px 14px; border: 0; background: transparent; color: var(--ink-800); text-align: left; cursor: pointer; }
+.reportHead:hover { background: var(--surface-2); }
+.reportHead .meta { flex: 1; color: var(--ink-500); font-size: 12px; }
+.date { color: var(--ink-400); font-size: 12px; font-variant-numeric: tabular-nums; }
+.reportBody { display: flex; flex-direction: column; gap: 6px; padding: 12px 16px 16px; border-top: 1px solid var(--hairline); font-size: 13px; color: var(--ink-700); }
 .time { font-size: var(--fs-2xs); white-space: nowrap; }
 .tool { display: flex; flex-direction: column; min-width: 0; }
 .tlabel { font-size: var(--fs-sm); font-weight: 600; color: var(--ink-800); }

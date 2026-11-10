@@ -30,6 +30,7 @@ func TestPreparedPairRealAgentLocalBudget(t *testing.T) {
 	log := slog.New(slog.NewTextHandler(io.Discard, nil))
 	token := "local-pair-control"
 	t.Setenv(controlplane.Env, token)
+	t.Setenv("ENABLE_DEMO_BILLING", "true")
 	adminServer := httptest.NewServer(admin.Handler(st, log, token))
 	defer adminServer.Close()
 	var calls atomic.Int64

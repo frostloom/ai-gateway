@@ -318,6 +318,27 @@ func TestLedgerBatchRestartKeepsLowerRedisBalance(t *testing.T) {
 	}
 }
 
+func TestLedgerBatchKeepsHigherRedisBalance(t *testing.T) {
+	s, done := newTestStore(t)
+	defer done()
+	s.EnableLedgerBatch(time.Hour)
+	tenantID := seedTenant(t, s, 1000)
+	ctx := context.Background()
+	if err := s.rdb.Set(ctx, BalanceKey(tenantID), 1100, 0).Err(); err != nil {
+		t.Fatalf("set redis: %v", err)
+	}
+	if err := s.requireCashMatch(ctx, tenantID); err != nil {
+		t.Fatalf("match: %v", err)
+	}
+	live, err := s.getBalance(ctx, tenantID)
+	if err != nil {
+		t.Fatalf("redis: %v", err)
+	}
+	if live != 1100 {
+		t.Fatalf("redis = %d, want 1100 kept", live)
+	}
+}
+
 func TestLedgerQueueConsumerWritesMySQLOnce(t *testing.T) {
 	s, done := newTestStore(t)
 	defer done()

@@ -1,7 +1,7 @@
 // gateway 网关入口：OpenAI 兼容 HTTP 入口。
 // 中间件顺序（有讲究）：
 //
-//	APIKey（先拒绝坏 key）→ Idempotency（生成 request_id/挡重复提交）→ RateLimit（按租户）
+//	APIKey（先拒绝坏 key）→ Idempotency（生成 request_id）→ RateLimit（按租户）
 package main
 
 import (
@@ -35,6 +35,7 @@ func main() {
 	redisAddr := config.Getenv("REDIS_ADDR", "127.0.0.1:6381")
 	redisPwd := config.Getenv("REDIS_PASSWORD", "")
 	ratePerMin := config.GetenvInt("RATE_LIMIT_PER_MIN", 600)
+	rateBurst := config.GetenvInt("RATE_LIMIT_BURST", min(ratePerMin, 100))
 	// An absent or invalid setting keeps ambiguous upstream outcomes pending.
 	// Explicit zero retains the legacy retry/refund behavior for controlled use.
 	holdUnknown := config.GetenvInt("GATEWAY_HOLD_UNKNOWN", 1) != 0
@@ -65,9 +66,24 @@ func main() {
 
 	v1 := r.Group("/v1")
 	v1.Use(middleware.APIKey(bc))
-	v1.Use(middleware.Idempotency(rdb))
-	v1.Use(middleware.RateLimit(rdb, time.Minute, ratePerMin))
+	v1.Use(middleware.Idempotency())
+	v1.Use(middleware.RateLimit(rdb, time.Minute, ratePerMin, rateBurst))
 	v1.POST("/chat/completions", handler.Chat(bc, rc, log, 2*time.Minute, holdUnknown))
+	v1.POST("/messages", handler.Native(bc, rc, log, "messages", holdUnknown))
+	v1.POST("/responses", handler.Native(bc, rc, log, "responses", holdUnknown))
+	v1.GET("/models", handler.OpenAIModels(billingAdminAddr, controlToken))
+	// Codex 的 base_url 不带 /v1，直接请求 /responses。
+	// Claude 的 ANTHROPIC_BASE_URL 带 /anthropic，再请求 /v1/messages。
+	rootAPI := r.Group("/")
+	rootAPI.Use(middleware.APIKey(bc))
+	rootAPI.Use(middleware.Idempotency())
+	rootAPI.Use(middleware.RateLimit(rdb, time.Minute, ratePerMin, rateBurst))
+	rootAPI.POST("/responses", handler.Native(bc, rc, log, "responses", holdUnknown))
+	rootAPI.POST("/anthropic/v1/messages", handler.Native(bc, rc, log, "messages", holdUnknown))
+	// DeepSeek 官网的 OpenAI 地址不带 /v1，客户端直接请求 /chat/completions。
+	rootAPI.POST("/chat/completions", handler.Chat(bc, rc, log, 2*time.Minute, holdUnknown))
+	rootAPI.GET("/models", handler.OpenAIModels(billingAdminAddr, controlToken))
+	rootAPI.GET("/anthropic/v1/models", handler.OpenAIModels(billingAdminAddr, controlToken))
 
 	// 面板：独立前端工程产物（web/ → dist），无 CDN 离线可用。
 	//   /            → dashboard.html（管理面板）
@@ -90,7 +106,8 @@ func main() {
 	portal := r.Group("/portal")
 	portal.Use(middleware.PortalSession(billingAdminAddr, bc, controlToken))
 	handler.RegisterPortal(portal, billingAdminAddr, agentAddr, log)
-	portal.POST("/completions", middleware.Idempotency(rdb), middleware.RateLimit(rdb, time.Minute, ratePerMin), handler.Chat(bc, rc, log, 2*time.Minute, holdUnknown))
+	portal.POST("/completions", middleware.Idempotency(), middleware.RateLimit(rdb, time.Minute, ratePerMin, rateBurst), handler.Chat(bc, rc, log, 2*time.Minute, holdUnknown))
+	portal.POST("/responses", middleware.Idempotency(), middleware.RateLimit(rdb, time.Minute, ratePerMin, rateBurst), handler.Native(bc, rc, log, "responses", holdUnknown))
 	userAuth := r.Group("/auth")
 	userAuth.Use(middleware.AuthRateLimit(rdb))
 	handler.RegisterUserAuth(userAuth, billingAdminAddr, log)

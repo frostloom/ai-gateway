@@ -85,6 +85,10 @@ func main() {
 		log.Error("BILLING_REQUIRE_RESERVE_V2 must be 0 or 1")
 		os.Exit(1)
 	}
+	if config.Getenv("BILLING_LEDGER_VIA_KAFKA", "0") == "1" {
+		log.Error("BILLING_LEDGER_VIA_KAFKA must stay off")
+		os.Exit(1)
+	}
 
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{Logger: gormlogger.Default.LogMode(gormlogger.Error)})
 	if err != nil {
@@ -121,11 +125,7 @@ func main() {
 		log.Error("migrate", "err", err)
 		os.Exit(1)
 	}
-	// 兜底：商品目录幂等填充（已存在的 model_id 不覆盖 admin 改价）。
-	if err := st.SeedModels(context.Background()); err != nil {
-		log.Error("seed models", "err", err)
-		os.Exit(1)
-	}
+	// Model pricing is configured explicitly by administrators after an upstream is added.
 	// 兜底：为活跃租户补建 balance key（以 tenants.initial_quota 初始化）。
 	if err := st.EnsureBalanceKeys(context.Background()); err != nil {
 		log.Error("ensure balance keys", "err", err)

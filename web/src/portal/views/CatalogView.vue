@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, inject } from 'vue'
+import { toastErr } from '../../shared/utils/toast'
 import { modelsApi } from '../api'
 import type { Model } from '../types'
 import ProductCard from '../components/ProductCard.vue'
-import RechargeModal from '../components/RechargeModal.vue'
 import Empty from '../../shared/components/ui/Empty.vue'
 import Skeleton from '../../shared/components/ui/Skeleton.vue'
 import { portalStore } from '../store'
@@ -14,22 +14,25 @@ const models = ref<Model[]>([])
 const loading = ref(true)
 const vendor = ref('')
 const sortPrice = ref(false)
-const rechargeOpen = ref(false)
+const search = ref('')
+const error = ref('')
 
 const vendors = computed(() => [...new Set(models.value.map(m => m.vendor))])
 const shown = computed(() => {
   let list = vendor.value ? models.value.filter(m => m.vendor === vendor.value) : models.value
+  list = list.filter(m => `${m.name} ${m.model_id} ${m.vendor}`.toLowerCase().includes(search.value.trim().toLowerCase()))
   if (sortPrice.value) list = [...list].sort((a, b) => (a.input_price_cent + a.output_price_cent) - (b.input_price_cent + b.output_price_cent))
   return list
 })
 
 async function load() {
   loading.value = true
-  try { models.value = (await modelsApi()).items } finally { loading.value = false }
+  error.value = ''
+  try { models.value = (await modelsApi()).items } catch (e: any) { error.value = e.message; toastErr(e.message) } finally { loading.value = false }
 }
 onMounted(load)
 
-function onBuy(_m: Model) { rechargeOpen.value = true }
+function onBuy(_m: Model) { go?.('wallet') }
 function onTry(m: Model) {
   portalStore.tryModel = m.model_id
   go?.('console')
@@ -40,14 +43,15 @@ function onTry(m: Model) {
   <div class="catalog">
     <div class="head">
       <div>
-        <h1 class="t">全部商品</h1>
-        <p class="s num">共 {{ models.length }} 款模型 · 价格单位 元 / 百万 token</p>
+        <h1 class="t">模型目录</h1>
+        <p class="s num">{{ models.length }} 款模型，价格单位为元 / 百万 token。</p>
       </div>
       <button class="sort" :class="{ on: sortPrice }" @click="sortPrice = !sortPrice">
-        按总价排序 {{ sortPrice ? '↑' : '↓' }}
+        按输入与输出单价之和排序 {{ sortPrice ? '↑' : '↓' }}
       </button>
     </div>
 
+    <label class="search-field">搜索模型<input v-model="search" placeholder="模型名称、ID 或厂商" type="search" /></label>
     <div class="filters">
       <button class="f" :class="{ on: vendor === '' }" @click="vendor = ''">全部</button>
       <button v-for="v in vendors" :key="v" class="f" :class="{ on: vendor === v }" @click="vendor = v">{{ v }}</button>
@@ -56,16 +60,18 @@ function onTry(m: Model) {
     <div v-if="loading" class="grid">
       <div v-for="i in 8" :key="i" class="skel"><Skeleton h="230px" /></div>
     </div>
-    <Empty v-else-if="!shown.length" text="没有符合条件的商品" />
+    <p v-else-if="error" role="alert">{{ error }} <button @click="load">重新加载</button></p>
+    <Empty v-else-if="!shown.length" text="没有符合条件的可用模型" />
     <div v-else class="grid">
       <ProductCard v-for="m in shown" :key="m.id" :model="m" @buy="onBuy" @try="onTry" />
     </div>
 
-    <RechargeModal :open="rechargeOpen" @close="rechargeOpen = false" @changed="load" />
+
   </div>
 </template>
 
 <style scoped>
+.search-field{display:flex;align-items:center;gap:16px;font-size:13px;margin-bottom:20px;} .search-field input{width:min(400px,75%);padding:12px 16px;border:1px solid var(--hairline-2);border-radius:7px;background:var(--surface);}
 .head {
   display: flex; align-items: flex-end; justify-content: space-between;
   gap: var(--sp-4); margin-bottom: var(--sp-5); flex-wrap: wrap;
@@ -75,16 +81,17 @@ function onTry(m: Model) {
   font-weight: 650;
   letter-spacing: -.026em;
 }
-.s { font-size: var(--fs-sm); color: var(--ink-400); margin-top: 5px; }
+.s { font-size: var(--fs-sm); color: var(--ink-400); margin-top: 4px; }
 
 .sort {
+  white-space: nowrap;
   height: 32px; padding: 0 var(--sp-4);
   border-radius: var(--r-sm);
   border: none;
   background: var(--paper);
   color: var(--ink-500);
   font-size: var(--fs-xs); font-weight: 600;
-  transition: all var(--t-fast);
+  transition: background var(--t-fast), color var(--t-fast), border-color var(--t-fast);
 }
 .sort:hover { border-color: var(--line-strong); color: var(--ink-700); }
 .sort.on {
@@ -104,7 +111,7 @@ function onTry(m: Model) {
   background: var(--paper);
   color: var(--ink-500);
   font-size: var(--fs-xs); font-weight: 560;
-  transition: all var(--t-fast);
+  transition: background var(--t-fast), color var(--t-fast), border-color var(--t-fast);
 }
 .f:hover { border-color: var(--line-strong); color: var(--ink-800); }
 .f.on {

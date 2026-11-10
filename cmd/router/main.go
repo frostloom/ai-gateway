@@ -3,6 +3,7 @@
 package main
 
 import (
+	"context"
 	"net/http"
 	"os"
 	"strconv"
@@ -16,6 +17,7 @@ import (
 	"github.com/frostloom/ai-gateway/internal/pkg/controlplane"
 	"github.com/frostloom/ai-gateway/internal/pkg/logger"
 	"github.com/frostloom/ai-gateway/internal/pkg/metrics"
+	"github.com/frostloom/ai-gateway/internal/pkg/redisx"
 	"github.com/frostloom/ai-gateway/internal/router"
 )
 
@@ -31,9 +33,22 @@ func main() {
 		os.Exit(1)
 	}
 	reg := router.New(db, log)
+	if addr := config.Getenv("REDIS_ADDR", ""); addr != "" {
+		rdb := redisx.New(addr, config.Getenv("REDIS_PASSWORD", ""))
+		rdb.Options().PoolSize = 128
+		if err := redisx.Ping(context.Background(), rdb); err != nil {
+			log.Error("connect redis", "err", err)
+			os.Exit(1)
+		}
+		reg.EnableFailureRedis(rdb)
+		log.Info("provider failure counts use redis")
+	}
 	reg.FailThreshold = config.GetenvInt("ROUTER_FAIL_THRESHOLD", 5)
 	reg.AutobanAfter = config.GetenvInt("ROUTER_AUTOBAN_AFTER", 20)
 	reg.Cooldown = time.Duration(config.GetenvInt("ROUTER_COOLDOWN", 10)) * time.Second
+	reg.FailWindow = time.Duration(config.GetenvInt("ROUTER_FAIL_WINDOW_SECONDS", 60)) * time.Second
+	reg.WarmFailures()
+	reg.StartProbe(time.Duration(config.GetenvInt("ROUTER_PROBE_SECONDS", 60)) * time.Second)
 
 	mux := router.NewHTTPHandler(reg, token, log)
 	mux.Handle("/metrics", metrics.Handler())

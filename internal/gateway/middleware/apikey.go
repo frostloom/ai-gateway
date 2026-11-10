@@ -12,6 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/frostloom/ai-gateway/internal/gateway/client"
+	"github.com/frostloom/ai-gateway/internal/pkg/metrics"
 )
 
 // APIKey 校验请求的 API Key。支持 Authorization: Bearer sk-xxx 与 api-key 头。
@@ -26,7 +27,9 @@ func APIKey(b *client.Billing) gin.HandlerFunc {
 		hash := sha256Hex(key)
 		ctx, cancel := context.WithTimeout(c.Request.Context(), 2*time.Second)
 		defer cancel()
+		authStart := time.Now()
 		resp, err := b.ValidateAPIKey(ctx, hash)
+		metrics.RequestHop("auth", time.Since(authStart))
 		if err != nil || resp == nil || !resp.Valid {
 			abort(c, http.StatusUnauthorized, "invalid api key")
 			return

@@ -85,6 +85,7 @@ func TestConversationRealAgentLocalDependencies(t *testing.T) {
 	log := slog.New(slog.NewTextHandler(io.Discard, nil))
 	token := "local-conversation-control"
 	t.Setenv(controlplane.Env, token)
+	t.Setenv("ENABLE_DEMO_BILLING", "true")
 	billingServer := httptest.NewServer(admin.Handler(st, log, token))
 	defer billingServer.Close()
 	type selection struct {

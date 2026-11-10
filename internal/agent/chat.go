@@ -325,6 +325,9 @@ func (h *Handler) process(ctx context.Context, sessionID string, tenantID uint64
 	// 中等可疑放行但警告+强制确认，正常则注入意图预判提示帮 LLM 一次选对工具。
 	// JEV 未接入或调用失败时静默退回原行为，绝不因判断引擎故障阻塞业务。
 	v := h.evaluateTurn(ctx, userMsg, ses)
+	if reply, handled := h.refuseOffTopic(ctx, sessionID, tenantID, ses, v); handled {
+		return reply, nil, nil
+	}
 	if v.Block {
 		if stats := turnTelemetry(ctx); stats != nil {
 			stats.JevBlocked = true

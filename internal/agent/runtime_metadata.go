@@ -25,7 +25,7 @@ type RuntimeMetadata struct {
 	ReplyRepairLimit int                `json:"reply_repair_limit"`
 }
 
-const runtimeContract = "customer-contract-v5;tenant-auth;read-only-four-first-independent-no-params;intent-shape>=0.90;legit>=0.85;risk<0.5;risk_conf>=0.8;shared-preview-confirm;no-pending-overwrite;empty-pending-confirm-noop;finite-recharge-completion-needs-execution;finite-explicit-own-recharge-preview-application;finite-refund-completion-needs-execution;reply-repair-max-one;explicit-own-cash-read-recovery-once-after-repair;no-numeric-inference;one-tool-per-iteration;loop-max-five"
+const runtimeContract = "customer-contract-v5;tenant-auth;read-only-four-any-turn-no-params;pending-open-current-turn-judged;offtopic-unrelated>=0.90;intent-shape>=0.90;legit>=0.85;risk<0.5;risk_conf>=0.8;shared-preview-confirm;no-pending-overwrite;empty-pending-confirm-noop;finite-recharge-completion-needs-execution;finite-explicit-own-recharge-preview-application;finite-refund-completion-needs-execution;reply-repair-max-one;explicit-own-cash-read-recovery-once-after-repair;no-numeric-inference;one-tool-per-iteration;loop-max-five"
 
 // EvaluationRuntimeMetadata captures configured hashes and bounds before an
 // evaluation sends any model request. It performs no network/environment access
@@ -39,9 +39,9 @@ func contentSHA(raw []byte) string {
 
 func (h *Handler) runtimeMetadata() *RuntimeMetadata {
 	metadata := &RuntimeMetadata{Model: "unknown", Protocol: "unknown", RoutingMode: string(h.RoutingMode()),
-		RoutingRevision: "selective-context-prefilter-v1",
+		RoutingRevision: "selective-pending-read-offtopic-v1",
 		PromptSHA256:    contentSHA([]byte(systemPrompt)), ContractSHA256: contentSHA([]byte(runtimeContract)),
-		ReplyRepairLimit: 1, Thresholds: map[string]float64{"intent_min": .90, "shape_min": .90,
+		ReplyRepairLimit: 1, Thresholds: map[string]float64{"intent_min": .90, "shape_min": .90, "offtopic_min": .90,
 			"legit_min": .85, "risk_max_exclusive": .5, "risk_confidence_min": .8}}
 	if h.jevFastPathMin > 0 {
 		metadata.Thresholds["intent_min"] = h.jevFastPathMin

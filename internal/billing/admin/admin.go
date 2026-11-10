@@ -6,15 +6,19 @@ package admin
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"log/slog"
 	"net/http"
+	"net/url"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"github.com/frostloom/ai-gateway/internal/billing/store"
 	"github.com/frostloom/ai-gateway/internal/pkg/controlplane"
+	"github.com/frostloom/ai-gateway/internal/pkg/upstream"
 )
 
 // maskKey 渠道 key 脱敏：列表/响应只标记「已配置」，不回显明文。
@@ -30,10 +34,13 @@ func maskKey(k string) string {
 // token 是控制面共享令牌。除 /healthz 和 /metrics 外，请求必须带 X-Control-Token。
 func Handler(st *store.Store, log *slog.Logger, token string) http.Handler {
 	mux := http.NewServeMux()
+	registerVouchers(mux, st, log)
+	registerProviderDiscovery(mux, st, log)
 
 	// 管理员认证（newapi 式初始登录，HttpOnly cookie 保持会话）。
 	registerAuth(mux, st, log)
 	registerPortalAuth(mux, st, log)
+	registerUnifiedLogin(mux, st)
 
 	// Prometheus 抓取（outbox relay produced / 消费 lag 等计费指标）。
 	mux.Handle("/metrics", promhttp.Handler())
@@ -93,6 +100,22 @@ func Handler(st *store.Store, log *slog.Logger, token string) http.Handler {
 	})
 
 	mux.HandleFunc("/admin/plans", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost {
+			var plan store.Plan
+			if !parseBody(w, r, &plan) {
+				return
+			}
+			if err := st.SaveConsolePlan(r.Context(), &plan); err != nil {
+				writeErr(w, http.StatusBadRequest, err.Error())
+				return
+			}
+			writeJSON(w, http.StatusOK, plan)
+			return
+		}
+		if r.Method != http.MethodGet {
+			writeErr(w, http.StatusMethodNotAllowed, "GET or POST required")
+			return
+		}
 		rows, err := st.ListPlans(r.Context())
 		if err != nil {
 			log.Error("list plans", "err", err)
@@ -108,16 +131,34 @@ func Handler(st *store.Store, log *slog.Logger, token string) http.Handler {
 	// POST /admin/providers upsert 渠道（按 name 幂等，重复名更新转发参数）。
 	mux.HandleFunc("/admin/providers", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
+		case http.MethodDelete:
+			id, err := strconv.ParseUint(r.URL.Query().Get("id"), 10, 64)
+			if err != nil || id == 0 {
+				writeErr(w, http.StatusBadRequest, "invalid channel id")
+				return
+			}
+			if err := st.DeleteProvider(r.Context(), id); err != nil {
+				if errors.Is(err, store.ErrProviderNotFound) {
+					writeErr(w, http.StatusNotFound, "channel not found")
+				} else {
+					log.Error("delete channel", "err", err)
+					writeErr(w, http.StatusInternalServerError, "delete channel failed")
+				}
+				return
+			}
+			writeJSON(w, http.StatusOK, map[string]any{"ok": true})
 		case http.MethodPost:
 			var in struct {
-				Name        string `json:"name"`
-				BaseURL     string `json:"base_url"`
-				UpstreamKey string `json:"upstream_key"`
-				Models      string `json:"models"` // JSON 数组串，如 ["deepseek-chat"] 或 ["*"]
-				Weight      int    `json:"weight"`
-				Status      int8   `json:"status"`
-				CostInCent  int64  `json:"cost_in_cent"`  // 上游成本：输入 分/百万 token
-				CostOutCent int64  `json:"cost_out_cent"` // 上游成本：输出 分/百万 token
+				Name             string  `json:"name"`
+				BaseURL          string  `json:"base_url"`
+				MessagesBaseURL  *string `json:"messages_base_url"`
+				ResponsesBaseURL *string `json:"responses_base_url"`
+				UpstreamKey      string  `json:"upstream_key"`
+				Models           string  `json:"models"` // JSON 数组串，如 ["deepseek-chat"] 或 ["*"]
+				Weight           int     `json:"weight"`
+				Status           int8    `json:"status"`
+				CostInCent       int64   `json:"cost_in_cent"`  // 上游成本：输入 分/百万 token
+				CostOutCent      int64   `json:"cost_out_cent"` // 上游成本：输出 分/百万 token
 			}
 			if !parseBody(w, r, &in) {
 				return
@@ -126,8 +167,51 @@ func Handler(st *store.Store, log *slog.Logger, token string) http.Handler {
 				writeErr(w, http.StatusBadRequest, "name and base_url required")
 				return
 			}
-			p := &store.Provider{Name: in.Name, BaseURL: in.BaseURL, UpstreamKey: in.UpstreamKey,
-				Models: in.Models, Weight: in.Weight, Status: in.Status, CostInCent: in.CostInCent, CostOutCent: in.CostOutCent}
+			u, urlErr := url.Parse(in.BaseURL)
+			var modelNames []string
+			if urlErr != nil || u.Hostname() == "" || (u.Scheme != "https" && u.Scheme != "http") || u.User != nil || u.RawQuery != "" || u.Fragment != "" || in.Weight < 1 || in.Weight > 1000000 || in.CostInCent < 0 || in.CostOutCent < 0 || in.Status < 0 || in.Status > 2 || json.Unmarshal([]byte(in.Models), &modelNames) != nil || len(modelNames) == 0 {
+				writeErr(w, http.StatusBadRequest, "请检查上游 HTTP(S) 地址、模型数组、正整数权重、状态与非负成本")
+				return
+			}
+			for _, name := range modelNames {
+				if strings.TrimSpace(name) == "" {
+					writeErr(w, http.StatusBadRequest, "模型名称不能为空")
+					return
+				}
+			}
+			var existing *store.Provider
+			if in.UpstreamKey == "" || in.MessagesBaseURL == nil || in.ResponsesBaseURL == nil {
+				var err error
+				existing, err = st.ProviderByName(r.Context(), in.Name)
+				if err != nil {
+					writeErr(w, http.StatusInternalServerError, "读取渠道失败")
+					return
+				}
+			}
+			if in.UpstreamKey == "" && existing != nil {
+				in.UpstreamKey = existing.UpstreamKey
+			}
+			messagesBase, responsesBase := "", ""
+			if existing != nil {
+				messagesBase = existing.MessagesBaseURL
+				responsesBase = existing.ResponsesBaseURL
+			}
+			if in.MessagesBaseURL != nil {
+				messagesBase = strings.TrimSpace(*in.MessagesBaseURL)
+			}
+			if in.ResponsesBaseURL != nil {
+				responsesBase = strings.TrimSpace(*in.ResponsesBaseURL)
+			}
+			for _, base := range []string{messagesBase, responsesBase} {
+				if base != "" {
+					if _, err := upstream.ParseBase(base); err != nil || len(base) > 512 {
+						writeErr(w, http.StatusBadRequest, "协议 Base URL 无效")
+						return
+					}
+				}
+			}
+			p := &store.Provider{Name: in.Name, BaseURL: in.BaseURL, UpstreamKey: in.UpstreamKey, Models: in.Models, Weight: in.Weight, Status: in.Status, CostInCent: in.CostInCent, CostOutCent: in.CostOutCent, MessagesBaseURL: messagesBase, ResponsesBaseURL: responsesBase}
+
 			if err := st.UpsertProvider(r.Context(), p); err != nil {
 				log.Error("upsert provider", "name", in.Name, "err", err)
 				writeErr(w, http.StatusInternalServerError, "upsert provider failed")
@@ -183,7 +267,12 @@ func Handler(st *store.Store, log *slog.Logger, token string) http.Handler {
 			writeErr(w, http.StatusInternalServerError, "consumption failed")
 			return
 		}
-		writeJSON(w, http.StatusOK, map[string]any{"items": rows})
+		byModel, err := st.ConsumptionByModel(r.Context(), tenantID, days)
+		if err != nil {
+			writeErr(w, http.StatusInternalServerError, "consumption models failed")
+			return
+		}
+		writeJSON(w, http.StatusOK, map[string]any{"items": rows, "by_model": byModel})
 	})
 
 	mux.HandleFunc("/admin/topups", func(w http.ResponseWriter, r *http.Request) {
@@ -210,47 +299,14 @@ func Handler(st *store.Store, log *slog.Logger, token string) http.Handler {
 
 	// ---------- M7 自服务：写操作 ----------
 
-	mux.HandleFunc("/admin/recharge", func(w http.ResponseWriter, r *http.Request) {
-		if !requirePOST(w, r) {
-			return
-		}
-		var in struct {
-			TenantID uint64 `json:"tenant_id"`
-			Money    int64  `json:"amount_money"` // 模拟元
-			IdemKey  string `json:"idem_key"`     // 可选：幂等锚点（agent 执行重试用）
-		}
-		if !parseBody(w, r, &in) {
-			return
-		}
-		o, err := st.CreateRechargeOrder(r.Context(), in.TenantID, in.Money, in.IdemKey)
-		if err != nil {
-			log.Error("create recharge", "err", err)
-			writeErr(w, http.StatusBadRequest, err.Error())
-			return
-		}
-		writeJSON(w, http.StatusOK, o)
-	})
+	// Payment callbacks are not configured. Keep both public and internal
+	// recharge entry points closed, regardless of demo environment settings.
+	for _, path := range []string{"/admin/recharge", "/admin/recharge/pay"} {
+		mux.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
+			writeErr(w, http.StatusForbidden, "充值入口暂时关闭，请使用余额兑换码")
+		})
+	}
 
-	mux.HandleFunc("/admin/recharge/pay", func(w http.ResponseWriter, r *http.Request) {
-		if !requirePOST(w, r) {
-			return
-		}
-		var in struct {
-			OrderNo string `json:"order_no"`
-		}
-		if !parseBody(w, r, &in) {
-			return
-		}
-		o, err := st.PayRecharge(r.Context(), in.OrderNo)
-		if err != nil {
-			log.Error("pay recharge", "err", err)
-			writeErr(w, http.StatusBadRequest, err.Error())
-			return
-		}
-		writeJSON(w, http.StatusOK, o)
-	})
-
-	// 退款两种方式：order_no 按订单退（min(订单额度,余额)）；amount_money 按金额退（min(金额,余额)）。
 	mux.HandleFunc("/admin/recharge/refund", func(w http.ResponseWriter, r *http.Request) {
 		if !requirePOST(w, r) {
 			return
@@ -283,44 +339,13 @@ func Handler(st *store.Store, log *slog.Logger, token string) http.Handler {
 		writeJSON(w, http.StatusOK, res)
 	})
 
-	mux.HandleFunc("/admin/subscribe", func(w http.ResponseWriter, r *http.Request) {
-		if !requirePOST(w, r) {
-			return
-		}
-		var in struct {
-			TenantID uint64 `json:"tenant_id"`
-			PlanID   uint64 `json:"plan_id"`
-		}
-		if !parseBody(w, r, &in) {
-			return
-		}
-		sub, err := st.SubscribePlan(r.Context(), in.TenantID, in.PlanID)
-		if err != nil {
-			log.Error("subscribe", "err", err)
-			writeErr(w, http.StatusBadRequest, err.Error())
-			return
-		}
-		writeJSON(w, http.StatusOK, sub)
-	})
-
-	mux.HandleFunc("/admin/change-plan", func(w http.ResponseWriter, r *http.Request) {
-		if !requirePOST(w, r) {
-			return
-		}
-		var in struct {
-			TenantID uint64 `json:"tenant_id"`
-			PlanID   uint64 `json:"plan_id"`
-		}
-		if !parseBody(w, r, &in) {
-			return
-		}
-		if err := st.ChangePlan(r.Context(), in.TenantID, in.PlanID); err != nil {
-			log.Error("change plan", "err", err)
-			writeErr(w, http.StatusBadRequest, err.Error())
-			return
-		}
-		writeJSON(w, http.StatusOK, map[string]any{"ok": true})
-	})
+	// Plan activation waits for verified payment callbacks. Cancellation remains
+	// available so existing subscribers can stop their next renewal.
+	for _, path := range []string{"/admin/subscribe", "/admin/change-plan"} {
+		mux.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
+			writeErr(w, http.StatusForbidden, "月卡开通与套餐变更尚未开放，真实支付接入后开放")
+		})
+	}
 
 	mux.HandleFunc("/admin/cancel-subscription", func(w http.ResponseWriter, r *http.Request) {
 		if !requirePOST(w, r) {
@@ -354,7 +379,7 @@ func Handler(st *store.Store, log *slog.Logger, token string) http.Handler {
 					status = &st8
 				}
 			}
-			rows, err := st.ListModels(r.Context(), q.Get("vendor"), status)
+			rows, err := st.ListConfiguredModels(r.Context(), q.Get("vendor"), status)
 			if err != nil {
 				log.Error("list models", "err", err)
 				writeErr(w, http.StatusInternalServerError, "list models failed")
@@ -370,22 +395,38 @@ func Handler(st *store.Store, log *slog.Logger, token string) http.Handler {
 			Vendor          string   `json:"vendor"`
 			ModelID         string   `json:"model_id"`
 			Name            string   `json:"name"`
-			InputPriceCent  int64    `json:"input_price_cent"`
-			OutputPriceCent int64    `json:"output_price_cent"`
+			InputPriceCent  *int64   `json:"input_price_cent"`
+			OutputPriceCent *int64   `json:"output_price_cent"`
 			ContextLen      int      `json:"context_len"`
 			Tags            []string `json:"tags"`
 		}
 		if !parseBody(w, r, &in) {
 			return
 		}
+		in.ModelID = strings.TrimSpace(in.ModelID)
+		in.Vendor = strings.TrimSpace(in.Vendor)
+		in.Name = strings.TrimSpace(in.Name)
 		if in.ModelID == "" || in.Vendor == "" {
 			writeErr(w, http.StatusBadRequest, "model_id 与 vendor 必填")
 			return
 		}
+		if in.InputPriceCent == nil || in.OutputPriceCent == nil || *in.InputPriceCent < 0 || *in.OutputPriceCent < 0 || in.ContextLen < 1 {
+			writeErr(w, http.StatusBadRequest, "单价须为非负整数，上下文长度须为正整数")
+			return
+		}
+		configured, err := st.ModelConfigured(r.Context(), in.ModelID)
+		if err != nil {
+			writeErr(w, http.StatusInternalServerError, "读取上游模型失败")
+			return
+		}
+		if !configured {
+			writeErr(w, http.StatusBadRequest, "请先在启用的上游渠道中配置此模型编号")
+			return
+		}
 		m := &store.Model{
 			Vendor: in.Vendor, ModelID: in.ModelID, Name: in.Name,
-			InputPriceCent: in.InputPriceCent, OutputPriceCent: in.OutputPriceCent,
-			ContextLen: in.ContextLen,
+			InputPriceCent: *in.InputPriceCent, OutputPriceCent: *in.OutputPriceCent,
+			ContextLen: in.ContextLen, Tags: "[]",
 		}
 		if len(in.Tags) > 0 {
 			b, _ := json.Marshal(in.Tags)
@@ -401,13 +442,103 @@ func Handler(st *store.Store, log *slog.Logger, token string) http.Handler {
 
 	// GET /portal/models?vendor= 买家目录：只列上架。
 	mux.HandleFunc("/portal/models", func(w http.ResponseWriter, r *http.Request) {
-		rows, err := st.ListModels(r.Context(), r.URL.Query().Get("vendor"), &enabledStatus)
+		rows, err := st.ListSupportedModels(r.Context(), r.URL.Query().Get("vendor"))
 		if err != nil {
 			log.Error("portal models", "err", err)
 			writeErr(w, http.StatusInternalServerError, "portal models failed")
 			return
 		}
 		writeJSON(w, http.StatusOK, map[string]any{"items": rows})
+	})
+
+	// 下游调用用的钥匙。明文只在创建响应里出现一次。
+	mux.HandleFunc("/portal/api-keys", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodGet {
+			tenantID := tenantIDFromQuery(r)
+			if tenantID == 0 {
+				writeErr(w, http.StatusBadRequest, "缺少账户")
+				return
+			}
+			rows, err := st.ListDownstreamAPIKeys(r.Context(), tenantID)
+			if err != nil {
+				log.Error("list downstream keys", "err", err)
+				writeErr(w, http.StatusInternalServerError, "读取密钥失败")
+				return
+			}
+			writeJSON(w, http.StatusOK, map[string]any{"items": rows})
+			return
+		}
+		if !requirePOST(w, r) {
+			return
+		}
+		var in struct {
+			TenantID uint64 `json:"tenant_id"`
+			Name     string `json:"name"`
+		}
+		if !parseBody(w, r, &in) {
+			return
+		}
+		plain, row, err := st.CreateDownstreamAPIKey(r.Context(), in.TenantID, in.Name)
+		if err != nil {
+			writeErr(w, http.StatusBadRequest, err.Error())
+			return
+		}
+		writeJSON(w, http.StatusOK, map[string]any{"key": plain, "item": row})
+	})
+	mux.HandleFunc("/portal/api-keys/delete", func(w http.ResponseWriter, r *http.Request) {
+		if !requirePOST(w, r) {
+			return
+		}
+		var in struct {
+			TenantID uint64 `json:"tenant_id"`
+			ID       uint64 `json:"id"`
+		}
+		if !parseBody(w, r, &in) {
+			return
+		}
+		if err := st.DeleteDownstreamAPIKey(r.Context(), in.TenantID, in.ID); err != nil {
+			writeErr(w, http.StatusBadRequest, err.Error())
+			return
+		}
+		writeJSON(w, http.StatusOK, map[string]any{"ok": true})
+	})
+	mux.HandleFunc("/portal/api-keys/status", func(w http.ResponseWriter, r *http.Request) {
+		if !requirePOST(w, r) {
+			return
+		}
+		var in struct {
+			TenantID uint64 `json:"tenant_id"`
+			ID       uint64 `json:"id"`
+			Status   int8   `json:"status"`
+		}
+		if !parseBody(w, r, &in) {
+			return
+		}
+		if err := st.SetDownstreamAPIKeyStatus(r.Context(), in.TenantID, in.ID, in.Status); err != nil {
+			writeErr(w, http.StatusBadRequest, err.Error())
+			return
+		}
+		writeJSON(w, http.StatusOK, map[string]any{"ok": true})
+	})
+
+	// POST /admin/api-keys/status 停用或启用密钥 {id, status}。停用会立刻清掉缓存。
+	mux.HandleFunc("/admin/api-keys/status", func(w http.ResponseWriter, r *http.Request) {
+		if !requirePOST(w, r) {
+			return
+		}
+		var in struct {
+			ID     uint64 `json:"id"`
+			Status int8   `json:"status"` // 0=启用 1=停用
+		}
+		if !parseBody(w, r, &in) {
+			return
+		}
+		if err := st.SetAPIKeyStatus(r.Context(), in.ID, in.Status); err != nil {
+			log.Error("update api key status", "err", err)
+			writeErr(w, http.StatusBadRequest, err.Error())
+			return
+		}
+		writeJSON(w, http.StatusOK, map[string]any{"ok": true})
 	})
 
 	// POST /admin/models/status 启停 {id, status}。
@@ -421,6 +552,28 @@ func Handler(st *store.Store, log *slog.Logger, token string) http.Handler {
 		}
 		if !parseBody(w, r, &in) {
 			return
+		}
+		if in.ID == 0 || (in.Status != 0 && in.Status != 1) {
+			writeErr(w, http.StatusBadRequest, "模型编号或状态无效")
+			return
+		}
+		if in.Status == 0 {
+			models, err := st.ListConfiguredModels(r.Context(), "", nil)
+			if err != nil {
+				writeErr(w, http.StatusInternalServerError, "读取上游模型失败")
+				return
+			}
+			configured := false
+			for _, model := range models {
+				if model.ID == in.ID {
+					configured = true
+					break
+				}
+			}
+			if !configured {
+				writeErr(w, http.StatusBadRequest, "请先在启用的上游渠道中配置此模型")
+				return
+			}
 		}
 		if err := st.UpdateModelStatus(r.Context(), in.ID, in.Status); err != nil {
 			log.Error("update model status", "err", err)

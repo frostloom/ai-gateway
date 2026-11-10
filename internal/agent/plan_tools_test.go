@@ -12,8 +12,8 @@ import (
 	"github.com/frostloom/ai-gateway/internal/billing/store"
 )
 
-// Removing name resolution, uniqueness checks, or frozen IDs must break these
-// tests. HTTP is the external boundary; previews and tool execution are real.
+// Keep the legacy selection contract covered independently of paid operations,
+// whose production preview and execution entry points remain closed.
 func TestPlanToolsResolveAndFreeze(t *testing.T) {
 	for _, tool := range []string{"subscribe_plan", "change_plan"} {
 		for _, name := range []string{"月度·旗舰", " 月度 旗舰 ", "旗舰"} {
@@ -30,37 +30,28 @@ func TestPlanToolsResolveAndFreeze(t *testing.T) {
 						return
 					}
 					writes++
-					var body map[string]any
-					_ = json.NewDecoder(r.Body).Decode(&body)
-					wantPath := "/admin/subscribe"
-					if tool == "change_plan" {
-						wantPath = "/admin/change-plan"
-					}
-					if r.URL.Path != wantPath || body["plan_id"] != float64(47) || body["tenant_id"] != float64(19) {
-						t.Errorf("wrong confirmed write: %s %#v", r.URL.Path, body)
-					}
-					_, _ = w.Write([]byte(`{}`))
+					t.Errorf("selection or closed operation unexpectedly wrote %s", r.URL.Path)
+					w.WriteHeader(http.StatusForbidden)
 				}))
 				defer server.Close()
 				tb := NewToolbox(NewAdminClient(server.URL))
 				args := map[string]any{"plan_name": name, "tenant_id": float64(999)}
-				preview, err := tb.Preview(context.Background(), tool, args, 19)
+				plan, err := tb.findPlan(context.Background(), 19, args)
 				if err != nil {
-					t.Fatalf("preview by user name: %v", err)
+					t.Fatalf("selection by user name: %v", err)
 				}
-				if !strings.Contains(preview, "月度·旗舰") || args["plan_id"] != int64(47) || args["plan_name"] != "月度·旗舰" {
-					t.Fatalf("preview must freeze catalog identity: %q %#v", preview, args)
+				if !strings.Contains(plan.Name, "月度·旗舰") || args["plan_id"] != int64(47) || args["plan_name"] != "月度·旗舰" {
+					t.Fatalf("selection must freeze catalog identity: %q %#v", plan.Name, args)
 				}
 				if writes != 0 {
-					t.Fatalf("preview wrote %d times", writes)
+					t.Fatalf("selection wrote %d times", writes)
 				}
-				// The same name now identifies another ID; confirmation stays on 47.
-				plans = []store.Plan{{ID: 83, Name: "月度·旗舰", PlanType: store.PlanTypeRecurring}}
-				if _, err := tb.Run(context.Background(), tool, args, 19, "confirmed"); err != nil {
-					t.Fatalf("confirmed run: %v", err)
+				// A previously frozen confirmation cannot open the closed operation.
+				if _, err := tb.Run(context.Background(), tool, args, 19, "confirmed"); err == nil || !strings.Contains(err.Error(), "尚未开放") {
+					t.Fatalf("closed operation run: %v", err)
 				}
-				if writes != 1 || reads != 1 {
-					t.Fatalf("confirmation must use frozen identity: reads=%d writes=%d", reads, writes)
+				if writes != 0 || reads != 1 {
+					t.Fatalf("closed operation contacted billing: reads=%d writes=%d", reads, writes)
 				}
 			})
 		}
@@ -102,11 +93,11 @@ func TestPlanToolsRejectUnsafeSelection(t *testing.T) {
 					_ = json.NewEncoder(w).Encode(store.MeView{Plans: tc.plans})
 				}))
 				defer server.Close()
-				if _, err := NewToolbox(NewAdminClient(server.URL)).Preview(context.Background(), tool, tc.args, 19); err == nil {
+				if _, err := NewToolbox(NewAdminClient(server.URL)).findPlan(context.Background(), 19, tc.args); err == nil {
 					t.Fatalf("unsafe selection accepted: %#v", tc.args)
 				}
 				if writes != 0 {
-					t.Fatalf("rejected preview wrote %d times", writes)
+					t.Fatalf("rejected selection wrote %d times", writes)
 				}
 			})
 		}
@@ -128,7 +119,7 @@ func TestPlanToolsKeepLegacyIDAndIgnoreUnavailablePlans(t *testing.T) {
 					{ID: 73, Name: "一次性·旗舰", PlanType: store.PlanTypeOneTime},
 				}})
 			}))
-			if _, err := NewToolbox(NewAdminClient(server.URL)).Preview(context.Background(), tool, args, 19); err != nil {
+			if _, err := NewToolbox(NewAdminClient(server.URL)).findPlan(context.Background(), 19, args); err != nil {
 				t.Errorf("%s valid selection %#v: %v", tool, args, err)
 			}
 			server.Close()
@@ -145,7 +136,7 @@ func TestPlanToolsPreferExactName(t *testing.T) {
 			}})
 		}))
 		args := map[string]any{"plan_name": "月度旗舰"}
-		if _, err := NewToolbox(NewAdminClient(server.URL)).Preview(context.Background(), tool, args, 19); err != nil {
+		if _, err := NewToolbox(NewAdminClient(server.URL)).findPlan(context.Background(), 19, args); err != nil {
 			t.Errorf("%s exact name rejected due to partial match: %v", tool, err)
 		} else if args["plan_id"] != int64(47) {
 			t.Errorf("%s selected partial match: %#v", tool, args)
@@ -184,5 +175,46 @@ func TestCancelledSubscriptionReadPreservesCurrentCycle(t *testing.T) {
 	}
 	if !strings.Contains(reply, "已停止续费") || !strings.Contains(reply, "到期前可继续使用") || strings.Contains(reply, "下期将切换") {
 		t.Fatalf("misleading cancelled subscription reply: %s", reply)
+	}
+}
+
+func TestCancelRenewalRemainsAvailableWhileActivationClosed(t *testing.T) {
+	for _, flag := range []string{"", "true"} {
+		t.Run("demo="+flag, func(t *testing.T) {
+			t.Setenv("ENABLE_DEMO_BILLING", flag)
+			end := time.Date(2026, 12, 1, 0, 0, 0, 0, time.UTC)
+			reads, writes := 0, 0
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				switch r.URL.Path {
+				case "/admin/me":
+					reads++
+					if r.Method != http.MethodGet || r.URL.Query().Get("tenant_id") != "42" {
+						t.Errorf("invalid cancellation preview request %s %s", r.Method, r.URL)
+					}
+					_ = json.NewEncoder(w).Encode(store.MeView{Subscription: &store.Subscription{PlanID: 7, AutoRenew: true, CycleEnd: &end}})
+				case "/admin/cancel-subscription":
+					writes++
+					var body map[string]any
+					_ = json.NewDecoder(r.Body).Decode(&body)
+					if r.Method != http.MethodPost || body["tenant_id"] != float64(42) {
+						t.Errorf("invalid cancellation write %s %#v", r.Method, body)
+					}
+					_ = json.NewEncoder(w).Encode(store.CancelResult{PlanName: "已有月卡", CurrentCycleEnd: &end})
+				default:
+					t.Errorf("unexpected cancellation request %s", r.URL)
+					w.WriteHeader(http.StatusNotFound)
+				}
+			}))
+			defer server.Close()
+			tb := NewToolbox(NewAdminClientWithToken(server.URL, ""))
+			preview, err := tb.Preview(context.Background(), "cancel_subscription", nil, 42)
+			if err != nil || !strings.Contains(preview, "只取消下期续费") || writes != 0 {
+				t.Fatalf("preview=%q writes=%d err=%v", preview, writes, err)
+			}
+			result, err := tb.Run(context.Background(), "cancel_subscription", map[string]any{"tenant_id": float64(999)}, 42, "confirm")
+			if err != nil || !strings.Contains(result, "下期不再续费") || reads != 1 || writes != 1 {
+				t.Fatalf("result=%q reads=%d writes=%d err=%v", result, reads, writes, err)
+			}
+		})
 	}
 }

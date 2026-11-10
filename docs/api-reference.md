@@ -323,12 +323,19 @@
 | `upstream_key` | string | 否 | 上游 API key |
 | `models` | string | 否 | JSON 数组串，如 `["deepseek-chat"]` 或 `["*"]` |
 | `weight` | int | 否 | 权重 |
-| `status` | int8 | 否 | 0=active 1=disabled 2=banned |
+| `status` | int8 | 否 | 0=active 1=disabled 2=banned 3=deleted |
 | `cost_in_cent` | int64 | 否 | 上游成本：输入 分/百万 token |
 | `cost_out_cent` | int64 | 否 | 上游成本：输出 分/百万 token |
 
 - 响应 `200`：**Provider**（同 ProviderMargin 的 Provider 部分，key 脱敏 `"sk-***"`，含真实 `id`）。
 - 错误：`400 {"error":"name and base_url required"}`。
+
+### DELETE /admin/channels?id={id}（移除渠道）
+
+- 需要管理员会话。将渠道标记为已删除、清除上游密钥并从渠道列表隐藏；渠道 ID 和历史账单保留。
+- 新选路大约每秒核对一次数据库里的启用状态，平时只看内存名单；已经选中渠道的在途请求可以继续。
+- 已删除渠道的名称保留，不能通过同名更新恢复；可使用新名称创建渠道。
+- 响应 `200 {"ok":true}`；ID 无效返回 400，渠道不存在或已删除返回 404。
 
 ### GET /admin/models（商品目录，卖方全量）
 
@@ -757,7 +764,7 @@
 | `/admin/overview` | GET | /admin/overview |
 | `/admin/bills` | GET | /admin/bills |
 | `/admin/me` `/admin/plans` `/admin/subscription` `/admin/consumption` | GET | /portal/me 等、/admin/me 等 |
-| `/admin/providers` | GET/POST | /admin/channels |
+| `/admin/providers` | GET/POST/DELETE | /admin/channels |
 | `/admin/topups` `/admin/recharge-orders` | GET | /portal/topups 等、/admin/topups 等 |
 | `/admin/recharge` `/admin/recharge/pay` `/admin/recharge/refund` | POST | /portal/recharge* |
 | `/admin/subscribe` `/admin/change-plan` `/admin/cancel-subscription` | POST | /portal/* |
@@ -773,3 +780,10 @@
 router :9102：`/route?model=&exclude=`(GET)、`/report`(POST `{provider_id, ok}` → `{"ok":true}`)、`/breakers`(GET → `[State]`)、`/providers`(GET → `[ProviderState]`)、`/healthz`。
 reconciler :9106：`/healthz`、`/status`(GET → `{"ok","svc","last_scanned","last_reversed","last_settled","last_rebuilt"}`)。
 agent :9105：`/chat`(POST)、`/healthz`。
+## 余额兑换码与金额月卡
+
+`GET /admin/vouchers` 返回最近 500 条兑换码库存，包含前缀、金额分、到期时间和兑换状态。`POST /admin/vouchers` 仅管理员可调用，接收 `amount_money` 整数元、`count` 1–100、`validity_days` 1–366，完整随机码只在这次响应的 `items[].code` 返回。
+
+`POST /portal/redeem` 接收 `code`，租户由登录态强制绑定。返回 `amount_cent`、`balance_cent`、`already_redeemed`。同账户重试幂等，其他账户重复兑换拒绝。普通用户 `/portal/recharge` 和 `/portal/recharge/pay` 现为 403。
+
+新套餐支持 `WindowQuotaCent`、`WeekQuotaCent`、`CycleQuotaCent`，金额均为整数分，至少配置一项，已配置额度按窗口、周、周期递增。`/portal/me` 的 `money_allowance` 返回 `period`、`quota_cent`、`consumed_cent`、`remaining_cent` 和可选 `resets_at`。已有旧套餐继续兼容，用户页面以金额权益展示新版套餐。

@@ -4,16 +4,25 @@ import (
 	"context"
 	"encoding/json"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/frostloom/ai-gateway/internal/jev"
 )
 
-type contextPrefilterJudge struct{ calls int }
+type contextPrefilterJudge struct {
+	calls   int
+	complex bool
+}
 
 func (j *contextPrefilterJudge) Evaluate(context.Context, any, map[string]jev.Question) (*jev.Result, error) {
 	j.calls++
-	return &jev.Result{Answers: fastVerdict("get_balance", .99).Answers}, nil
+	script := fastVerdict("get_balance", .99)
+	if j.complex {
+		script.Answers["route_shape"] = jev.AnswerChoice("complex", .99)
+		script.Answers["intent"] = jev.AnswerChoice("chitchat", .99)
+	}
+	return &jev.Result{Answers: script.Answers}, nil
 }
 
 func TestSelectiveContextPrefilterModes(t *testing.T) {
@@ -26,8 +35,8 @@ func TestSelectiveContextPrefilterModes(t *testing.T) {
 			{"nil", nil, false},
 			{"empty", &session{}, false},
 			{"first", &session{History: []Message{{Role: "user", Content: "查余额"}}}, false},
-			{"multi", &session{History: []Message{{Role: "assistant", Content: "上一轮"}, {Role: "user", Content: "查余额"}}}, true},
-			{"pending", &session{PendingAction: &pendingAction{Tool: "recharge", TenantID: 42}}, true},
+			{"multi", &session{History: []Message{{Role: "assistant", Content: "上一轮"}, {Role: "user", Content: "查余额"}}}, false},
+			{"pending", &session{PendingAction: &pendingAction{Tool: "recharge", TenantID: 42}}, false},
 		} {
 			t.Run(mode+"/"+tc.name, func(t *testing.T) {
 				h := &Handler{}
@@ -64,7 +73,7 @@ func TestSelectiveContextPrefilterPreservesModelInputsAndTools(t *testing.T) {
 			var baselineReply string
 			for _, mode := range []string{"model", "jev_selective"} {
 				configureRouting(t, h, mode)
-				judge := &contextPrefilterJudge{}
+				judge := &contextPrefilterJudge{complex: scenario == "pending_other"}
 				h.SetJev(judge)
 				ses := &session{History: []Message{{Role: "user", Content: "你好"}, {Role: "assistant", Content: "请问需要什么帮助？"}}}
 				message := "查余额"
@@ -95,8 +104,20 @@ func TestSelectiveContextPrefilterPreservesModelInputsAndTools(t *testing.T) {
 				}
 				if mode == "model" {
 					baselineRequests, baselineReply = llm.requests, reply
-				} else if !reflect.DeepEqual(baselineRequests, llm.requests) || reply != baselineReply || stats.JevCalls != 0 || stats.JevLatencyMS != 0 || stats.JevErrors != 0 || stats.JevFastPath || stats.JevFastPathReason != "conversation_context" || judge.calls != 0 {
-					t.Fatalf("prefilter changed fallback or called judge: requests=%v stats=%+v", llm.requests, stats)
+					continue
+				}
+				if scenario == "read" {
+					if len(llm.requests) != 0 || judge.calls != 1 || !stats.JevFastPath || stats.LLMCalls != 0 || !strings.Contains(reply, "¥") {
+						t.Fatalf("later whitelist read did not skip the model: reply=%s stats=%+v", reply, stats)
+					}
+					continue
+				}
+				reason := "compound_or_action_or_negation"
+				if scenario == "pending_other" {
+					reason = "not_single_parameterless_read"
+				}
+				if !reflect.DeepEqual(baselineRequests, llm.requests) || reply != baselineReply || judge.calls != 1 || stats.JevFastPath || stats.JevFastPathReason != reason {
+					t.Fatalf("business fallback changed model inputs: judge=%d requests=%v stats=%+v", judge.calls, llm.requests, stats)
 				}
 			}
 		})
@@ -123,7 +144,7 @@ func TestSelectiveContextPrefilterRuntimeIsDistinguishable(t *testing.T) {
 		if err := json.Unmarshal(raw, &metadata); err != nil {
 			t.Fatal(err)
 		}
-		if metadata["routing_revision"] != "selective-context-prefilter-v1" {
+		if metadata["routing_revision"] != "selective-pending-read-offtopic-v1" {
 			t.Fatalf("new routing implementation indistinguishable in %s: %s", mode, raw)
 		}
 	}

@@ -7,6 +7,8 @@ import (
 	"context"
 	"errors"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 // ErrSessionExpired 会话过期/无效（admin auth me 返回 401）。
@@ -43,7 +45,7 @@ func (s *Store) CountAdmins(ctx context.Context) (int64, error) {
 
 // CreateAdmin 新建管理员（setup 仅首次调用；靠 uk_admin_username 兜底并发重名）。
 func (s *Store) CreateAdmin(ctx context.Context, u *AdminUser) error {
-	return s.db.WithContext(ctx).Create(u).Error
+	return s.withAccountName(ctx, u.Username, func(tx *gorm.DB) error { return tx.Create(u).Error })
 }
 
 // GetAdminByUsername 按用户名取管理员（登录校验用）。

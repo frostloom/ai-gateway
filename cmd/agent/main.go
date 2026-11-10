@@ -38,7 +38,7 @@ func main() {
 	port := config.Getenv("AGENT_PORT", "9105")
 	llmBase := config.Getenv("AGENT_LLM_BASE_URL", "https://api.deepseek.com")
 	llmKey := config.Getenv("AGENT_LLM_API_KEY", "")
-	llmModel := config.Getenv("AGENT_LLM_MODEL", "deepseek-v4-flash")
+	llmModel := config.Getenv("AGENT_LLM_MODEL", "deepseek-flash")
 	billingAddr := config.Getenv("BILLING_ADDR", "127.0.0.1:9101")
 	adminBase := config.Getenv("BILLING_ADMIN_ADDR", "http://127.0.0.1:9103")
 	dsn := config.Getenv("MYSQL_DSN", "root:root@tcp(127.0.0.1:3307)/ai_gateway?charset=utf8mb4&parseTime=True&loc=Local")

@@ -67,6 +67,51 @@ func TestPortalAccountLifecycle(t *testing.T) {
 	}
 }
 
+func TestDownstreamAPIKeyShownOnce(t *testing.T) {
+	s, close := newTestStore(t)
+	defer close()
+	ctx := context.Background()
+	u, err := s.RegisterPortalUser(ctx, fmt.Sprintf("caller%d", time.Now().UnixNano()), "hash")
+	if err != nil {
+		t.Fatal(err)
+	}
+	other, err := s.RegisterPortalUser(ctx, fmt.Sprintf("other%d", time.Now().UnixNano()), "hash")
+	if err != nil {
+		t.Fatal(err)
+	}
+	plain, row, err := s.CreateDownstreamAPIKey(ctx, u.TenantID, "生产调用")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(plain) < 16 || plain[:3] != "sk-" || row.KeyPrefix != plain[:11] {
+		t.Fatalf("key shape: prefix %s", row.KeyPrefix)
+	}
+	var stored APIKey
+	if err := s.db.First(&stored, row.ID).Error; err != nil {
+		t.Fatal(err)
+	}
+	if stored.KeyHash == plain || stored.KeyPrefix == plain {
+		t.Fatal("plaintext stored")
+	}
+	got, err := s.ValidateAPIKey(ctx, portalTokenHash(plain))
+	if err != nil || got == nil || got.TenantID != u.TenantID {
+		t.Fatal(err)
+	}
+	listed, err := s.ListDownstreamAPIKeys(ctx, u.TenantID)
+	if err != nil || len(listed) != 1 || listed[0].KeyPrefix != row.KeyPrefix {
+		t.Fatalf("list: %+v %v", listed, err)
+	}
+	if err := s.SetDownstreamAPIKeyStatus(ctx, other.TenantID, row.ID, 1); err == nil {
+		t.Fatal("other tenant changed the key")
+	}
+	if err := s.SetDownstreamAPIKeyStatus(ctx, u.TenantID, row.ID, 1); err != nil {
+		t.Fatal(err)
+	}
+	if k, err := s.ValidateAPIKey(ctx, portalTokenHash(plain)); err != nil || k != nil {
+		t.Fatal("disabled key still accepted")
+	}
+}
+
 func TestChatSessionTenantIsolation(t *testing.T) {
 	s, close := newTestStore(t)
 	defer close()

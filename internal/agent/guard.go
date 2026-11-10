@@ -96,11 +96,13 @@ type jevVerdict struct {
 	Err             error
 
 	// 意图
-	Intent     string
-	IntentConf float64
-	SingleRead bool
-	RouteShape string
-	ShapeConf  float64
+	Intent       string
+	IntentConf   float64
+	SingleRead   bool
+	RouteShape   string
+	ShapeConf    float64
+	OffTopic     bool
+	OffTopicConf float64
 
 	// 合法性：这是否为租户本人的合理请求（越低越可疑）
 	LegitProb float64
@@ -142,10 +144,6 @@ func (h *Handler) evaluateTurn(ctx context.Context, userMsg string, ses *session
 	if !h.usesJevTurn() || h.jev == nil || strings.TrimSpace(userMsg) == "" {
 		return v
 	}
-	if h.skipsJevForContext(ses) {
-		return v
-	}
-
 	state := map[string]any{
 		"user_message": userMsg,
 		"context":      "模型商城的 AI 客服对话框。用户只能操作自己的租户账户。",
@@ -191,14 +189,21 @@ func (h *Handler) evaluateTurn(ctx context.Context, userMsg string, ses *session
 	if h.RoutingMode() == RoutingJevSelective || (h.RoutingMode() == RoutingLegacy && h.jevFastPathConfigured) {
 		questions["route_shape"] = jev.Question{
 			Type:         jev.QChoice,
-			Instructions: "用户是否仅要求一个可直接返回完整结果、无需提取参数、无需之前对话上下文的查询？single_read只能是查询当前本人余额、默认近7天消耗、全部套餐目录、当前本人订阅。充值/退款/订购/改套餐/退订、已满足目标状态判断、复合步骤、解释比较推荐、缺参数、否定指令、其他账户、自定义时间/筛选/笔数均属于complex；不要因为需要先查询信息而把办理任务判成single_read。",
+			Instructions: "只看当前这句话，已挂起且尚未确认的办理不构成这句话的参数或上下文。它是否仅要求一个可直接返回完整结果、无需提取参数、无需引用之前对话内容的查询？single_read只能是查询当前本人余额、默认近7天消耗、全部套餐目录、当前本人订阅。充值/退款/订购/改套餐/退订、已满足目标状态判断、复合步骤、解释比较推荐、缺参数、否定指令、其他账户、自定义时间/筛选/笔数均属于complex；不要因为需要先查询信息而把办理任务判成single_read。",
 			Criteria:     map[string]string{"single_read": "单个独立且无参数的白名单查询，可以直接返回实时工具结果", "complex": "办理操作、多个目标、需要解释推理、参数或上下文、非支持查询或不确定"},
+		}
+	}
+	if h.RoutingMode() == RoutingJevSelective {
+		questions["topic_fit"] = jev.Question{
+			Type:         jev.QChoice,
+			Instructions: "只看当前这句话，已挂起且尚未确认的办理不改变分类。这句话是否与模型商城的本人账户业务无关？off_topic 只包括写代码、做作业、通用知识、其他产品，以及与账户无关的闲聊。问候、余额、消费、账单、套餐、订阅、充值、退款、订购、改套餐、退订、缺参数补充、确认和取消都是 business。不确定时选 business。",
+			Criteria:     map[string]string{"off_topic": "与本人账户、套餐、消费、订单和办理无关的外部任务或闲聊", "business": "账户业务、业务咨询、补充参数、确认取消、问候，或不确定"},
 		}
 	}
 	started := time.Now()
 	ctx, observedJudge := beginJevObservation(ctx, "jev.intent")
 	r, err := h.jev.Evaluate(ctx, state, questions)
-	defer func() { endJevObservation(observedJudge, r, err) }()
+	defer func() { endJevObservation(observedJudge, userMsg, r, err) }()
 	if err == nil && r == nil {
 		err = fmt.Errorf("jev returned no result")
 	}
@@ -229,6 +234,10 @@ func (h *Handler) evaluateTurn(ctx context.Context, userMsg string, ses *session
 		v.SingleRead = a.Choice == "single_read"
 		v.ShapeConf = a.Conf()
 	}
+	if a, ok := r.Answers["topic_fit"]; ok && a.Type == string(jev.QChoice) {
+		v.OffTopic = a.Choice == "off_topic"
+		v.OffTopicConf = a.Conf()
+	}
 
 	if a, ok := r.Answers["intent"]; ok {
 		v.Intent = a.Choice
@@ -252,6 +261,12 @@ func (h *Handler) evaluateTurn(ctx context.Context, userMsg string, ses *session
 		stats.JevIntentConfidence = v.IntentConf
 		stats.JevRouteShape = v.RouteShape
 		stats.JevShapeConfidence = v.ShapeConf
+		if v.OffTopic {
+			stats.JevTopicFit = "off_topic"
+		} else if v.OffTopicConf > 0 {
+			stats.JevTopicFit = "business"
+		}
+		stats.JevTopicConfidence = v.OffTopicConf
 		stats.JevLegitProbability = v.LegitProb
 		stats.JevRiskScore = v.RiskScore
 		stats.JevRiskConfidence = v.RiskConf
@@ -346,7 +361,7 @@ func (h *Handler) guardWrite(ctx context.Context, tenantID uint64, tool string, 
 			},
 		},
 	})
-	defer func() { endJevObservation(observedJudge, r, err) }()
+	defer func() { endJevObservation(observedJudge, userMsg, r, err) }()
 	if err == nil && r == nil {
 		err = fmt.Errorf("jev returned no result")
 	}

@@ -20,10 +20,12 @@ import BillsView from './views/BillsView.vue'
 import SubscriptionView from './views/SubscriptionView.vue'
 import ReconcileView from './views/ReconcileView.vue'
 import AuditView from './views/AuditView.vue'
+import VouchersView from './views/VouchersView.vue'
+import PlanManageView from './views/PlanManageView.vue'
 import TryView from './views/TryView.vue'
 
 type ViewKey = 'overview' | 'sales' | 'models' | 'channels' | 'providers'
-  | 'bills' | 'subscription' | 'reconcile' | 'audit' | 'try'
+  | 'vouchers' | 'plans' | 'bills' | 'subscription' | 'reconcile' | 'audit' | 'try'
 
 interface NavItem { key: ViewKey; label: string; icon: any; group: string }
 
@@ -31,9 +33,11 @@ const navs: NavItem[] = [
   { key: 'overview', label: '总览', icon: IconLayoutDashboard, group: '运营' },
   { key: 'sales', label: '销售统计', icon: IconChartLine, group: '运营' },
   { key: 'bills', label: '账单明细', icon: IconReceipt2, group: '运营' },
+  { key: 'vouchers', label: '余额兑换码', icon: IconCreditCard, group: '运营' },
+  { key: 'plans', label: '月卡套餐配置', icon: IconCreditCard, group: '运营' },
   { key: 'subscription', label: '订阅入账', icon: IconCreditCard, group: '运营' },
-  { key: 'models', label: '商品管理', icon: IconBox, group: '供给' },
-  { key: 'channels', label: '渠道管理', icon: IconNetwork, group: '供给' },
+  { key: 'models', label: '模型与定价', icon: IconBox, group: '供给' },
+  { key: 'channels', label: '上游渠道', icon: IconNetwork, group: '供给' },
   { key: 'providers', label: '熔断观测', icon: IconActivity, group: '供给' },
   { key: 'reconcile', label: '对账检查', icon: IconScale, group: '系统' },
   { key: 'audit', label: '客服审计', icon: IconClipboardList, group: '系统' },
@@ -43,20 +47,24 @@ const groups = ['运营', '供给', '系统']
 const grouped = computed(() => groups.map(g => ({ g, items: navs.filter(n => n.group === g) })))
 
 const views: Record<ViewKey, any> = {
-  overview: OverviewView, sales: SalesView, models: ModelsView, channels: ChannelsView,
+  vouchers: VouchersView, plans: PlanManageView, overview: OverviewView, sales: SalesView, models: ModelsView, channels: ChannelsView,
   providers: ProvidersView, bills: BillsView, subscription: SubscriptionView,
   reconcile: ReconcileView, audit: AuditView, try: TryView,
 }
 
 const status = ref<'loading' | 'setup' | 'login' | 'in'>('loading')
-const cur = shallowRef<ViewKey>('overview')
+const cur = shallowRef<ViewKey>(navs.some(n => n.key === location.hash.slice(1)) ? location.hash.slice(1) as ViewKey : 'overview')
+function navigate(key: ViewKey) { cur.value = key; location.hash = key; mobileOpen.value = false }
+function readRoute() { cur.value = navs.some(n => n.key === location.hash.slice(1)) ? location.hash.slice(1) as ViewKey : 'overview' }
+onMounted(() => window.addEventListener('hashchange', readRoute))
+onUnmounted(() => window.removeEventListener('hashchange', readRoute))
 const user = ref('')
 const refreshTick = ref(0)
 const collapsed = ref(false)
 const mobileOpen = ref(false)
 const tenants = ref<{ id: number; name: string }[]>([])
 
-const descriptions: Record<ViewKey, string> = { overview: '查看网关运行状态、资金与模型使用情况', sales: '追踪收入、消耗和模型销售表现', models: '管理可用模型、定价与展示信息', channels: '配置上游渠道与模型映射', providers: '查看节点健康状态与熔断记录', bills: '查询请求账单与结算明细', subscription: '管理套餐订阅与资金入账', reconcile: '核对账本余额与缓存投影', audit: '查看客服操作、用户确认与安全判定', try: '发送请求，验证模型接口' }
+const descriptions: Record<ViewKey, string> = { vouchers: '管理一次性余额兑换码', plans: '管理窗口与周期金额权益', overview: '查看网关运行状态、资金与模型使用情况', sales: '追踪收入、消耗和模型销售表现', models: '管理可用模型、定价与展示信息', channels: '配置上游渠道与模型映射', providers: '查看节点健康状态与熔断记录', bills: '查询请求账单与结算明细', subscription: '管理套餐订阅与资金入账', reconcile: '核对账本余额与缓存投影', audit: '查看客服操作、用户确认与安全判定', try: '发送请求，验证模型接口' }
 
 const curLabel = computed(() => navs.find(n => n.key === cur.value)?.label ?? '')
 
@@ -109,7 +117,7 @@ async function logout() {
   <!-- 主界面 -->
   <div v-else class="app" :class="{ collapsed, mobileOpen }" @keydown.esc="mobileOpen = false">
     <button v-if="mobileOpen" class="nav-backdrop" aria-label="关闭导航" @click="mobileOpen = false" />
-    <aside class="side">
+    <aside class="side" aria-label="管理侧栏">
       <div class="sideInner">
         <div class="sbrand">
           <div class="mark sm"><IconShieldLock :size="15" stroke-width="1.9" /></div>
@@ -129,7 +137,7 @@ async function logout() {
               class="sitem"
               :class="{ on: cur === n.key }"
               :title="collapsed ? n.label : undefined"
-              @click="cur = n.key; mobileOpen = false"
+              @click="navigate(n.key)"
               :aria-current="cur === n.key ? 'page' : undefined"
               :aria-label="n.label"
             >
@@ -165,7 +173,7 @@ async function logout() {
       </header>
 
       <main class="content">
-        <div class="page-heading"><div><h1>{{ curLabel }}</h1><p>{{ descriptions[cur] }}</p></div><span class="page-meta">AI Gateway / 控制台</span></div>
+        <div v-if="cur !== 'plans' && cur !== 'channels' && cur !== 'try'" class="page-heading"><div><h1>{{ curLabel }}</h1><p v-if="cur === 'overview'">{{ descriptions[cur] }}</p></div></div>
         <component :is="views[cur]" :key="cur + ':' + refreshTick" />
       </main>
     </div>
@@ -175,42 +183,46 @@ async function logout() {
       mode="admin"
       :tenants="tenants"
       title="运营助手"
-      subtitle="代客查询 · 充值 · 退款 · 订阅"
+      subtitle="代客服务，写操作需确认"
     />
   </div>
 </template>
 
 <style scoped>
+/* Hallmark · v2.0.0 · theme: custom · scope: app · monochrome controls */
+/* Critique: neutral surfaces and functional labels preserve the existing data and actions. */
 .gate { min-height: 100dvh; display: grid; place-items: center; padding: 24px; background: var(--bg); }
 .gate-card { width: 100%; max-width: 400px; padding: 32px; background: var(--surface); border: 1px solid var(--hairline); border-radius: 12px; }
 .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; }
-.mark { width: 40px; height: 40px; border-radius: 10px; background: var(--accent-600); color: #fff; display: grid; place-items: center; flex: none; }
+.mark { width: 40px; height: 40px; border-radius: 10px; background: var(--ink-900); color: var(--paper-2); display: grid; place-items: center; flex: none; }
 .mark.sm { width: 30px; height: 30px; border-radius: 8px; }
 .bt { font-size: 18px; } .bs { font-size: 12px; color: var(--ink-500); margin-top: 5px; }
 .gerr { padding: 10px; background: var(--danger-bg); color: var(--danger); border-radius: 6px; margin-bottom: 16px; font-size: 12px; }
-.app { min-height: 100dvh; display: grid; grid-template-columns: 216px minmax(0, 1fr); }
-.app.collapsed { grid-template-columns: 68px minmax(0, 1fr); }
-.side { position: sticky; top: 0; height: 100dvh; background: var(--surface); border-right: 1px solid var(--hairline); }
+.app { min-height: 100dvh; display: grid; grid-template-columns: 256px minmax(0, 1fr); background: var(--shell); }
+.app.collapsed { grid-template-columns: 64px minmax(0, 1fr); }
+.side { position: fixed; left: 0; top: 0; width: 256px; height: 100dvh; background: var(--sidebar); border-right: 1px solid var(--sidebar-border); }
 .sideInner { display: flex; flex-direction: column; height: 100%; padding: 0 12px 16px; }
-.sbrand { display: flex; align-items: center; gap: 10px; height: 65px; padding: 0 8px; flex: none; }
-.stext { display: flex; flex-direction: column; } .stext strong { font-size: 15px; font-weight: 650; color: var(--ink-900); } .stext small { font-size: 11px; color: var(--ink-400); }
-.snav { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; padding-top: 12px; }
-.sgroup { padding: 16px 12px 6px; font-size: 11px; color: var(--ink-400); } .sgroup.mini { text-align: center; }
-.sitem { display: flex; align-items: center; gap: 10px; min-height: 38px; padding: 0 12px; border: none; border-radius: 6px; background: transparent; color: var(--ink-600); font-size: 13px; text-align: left; white-space: nowrap; transition: background var(--t-fast), color var(--t-fast); }
-.sitem:hover { background: var(--well); color: var(--ink-900); } .sitem.on { background: var(--accent-50); color: var(--accent-700); font-weight: 600; }
+.sbrand { display: flex; align-items: center; gap: 10px; height: 64px; padding: 0 8px; flex: none; }
+.stext { display: flex; flex-direction: column; } .stext strong { font-size: 16px; font-weight: 600; color: var(--sidebar-foreground); } .stext small { font-size: 12px; color: var(--muted-foreground); margin-top: 2px; }
+.snav { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 3px; padding-top: 14px; }
+.sgroup { padding: 14px 10px 6px; font-size: 11px; color: var(--ink-400); font-weight: 650; } .sgroup.mini { text-align: center; }
+.sitem { position: relative; display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0 10px; border: 1px solid transparent; border-radius: 8px; background: transparent; color: var(--sidebar-foreground); font-size: 14px; text-align: left; white-space: nowrap; }
+.sitem:hover { background: var(--sidebar-accent); color: var(--sidebar-accent-foreground); } .sitem.on { background: var(--sidebar-primary); color: var(--sidebar-primary-foreground); font-weight: 650; }
 .scollapse { display: flex; align-items: center; justify-content: center; gap: 8px; height: 34px; border: 1px solid var(--hairline); border-radius: 6px; background: var(--surface); color: var(--ink-500); font-size: 12px; }
-.main { min-width: 0; } .top { position: sticky; top: 0; z-index: var(--z-sticky); }
-.topInner { height: 65px; padding: 0 28px; display: flex; align-items: center; justify-content: space-between; gap: 16px; background: var(--surface); border-bottom: 1px solid var(--hairline); }
-.tleft, .tright { display: flex; align-items: center; gap: 12px; } .tt { font-size: 13px; color: var(--ink-800); } .breadcrumb { color: var(--ink-400); font-size: 13px; } .breadcrumb span { margin-left: 12px; }
-.user { padding: 5px 10px; background: var(--well); border-radius: 6px; font-size: 12px; color: var(--ink-600); }
+.app.collapsed .side { width: 64px; }
+.main { grid-column: 2; min-width: 0; } .top { position: sticky; top: 0; z-index: var(--z-sticky); }
+.topInner { height: 58px; padding: 0 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px; background: var(--surface); border-bottom:1px solid var(--hairline); }
+.tleft, .tright { display: flex; align-items: center; gap: 12px; } .tt { white-space: nowrap; font-size: 13px; color: var(--ink-800); } .breadcrumb { color: var(--ink-400); font-size: 13px; } .breadcrumb span { margin-left: 12px; }
+.user { max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 5px 10px; background: var(--well); border-radius: 6px; font-size: 12px; color: var(--secondary-foreground); }
 .logout, .mobmenu { width: 32px; height: 32px; border: none; border-radius: 6px; background: transparent; color: var(--ink-500); display: grid; place-items: center; }
 .logout:hover { background: var(--danger-bg); color: var(--danger); } .mobmenu { display: none; }
 .content { display: flex; flex-direction: column; gap: 24px; width: 100%; max-width: 1640px; margin: 0 auto; padding: 28px 28px 64px; }
 .nav-backdrop { display: none; }
 @media (max-width: 900px) {
   .app, .app.collapsed { grid-template-columns: minmax(0, 1fr); }
-  .side { position: fixed; left: 0; top: 0; z-index: var(--z-drawer); width: 216px; transform: translateX(-100%); transition: transform var(--t-base); }
-  .mobileOpen .side { transform: translateX(0); } .mobileOpen .side .stext { display: flex; }
+  .main { grid-column: 1; }
+  .side, .app.collapsed .side { position: fixed; left: 0; top: 0; z-index: var(--z-drawer); width: 216px; visibility: hidden; transform: translateX(-100%); transition: transform var(--t-base); }
+  .mobileOpen .side { transform: translateX(0); visibility: visible; } .mobileOpen .side .stext { display: flex; }
   .nav-backdrop { display: block; position: fixed; inset: 0; border: 0; background: rgb(20 24 35 / .25); z-index: 39; }
   .mobmenu { display: grid; } .scollapse { display: none; } .topInner { padding: 0 16px; height: 58px; }
   .content { padding: 20px 16px 64px; gap: 20px; } .breadcrumb { display: none; }

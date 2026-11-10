@@ -34,10 +34,15 @@ type Observer struct {
 	registry        *prometheus.Registry
 }
 type Turn struct {
-	observer *Observer
-	root     trace.Span
-	mu       sync.RWMutex
-	common   []attribute.KeyValue
+	observer  *Observer
+	root      trace.Span
+	mu        sync.RWMutex
+	common    []attribute.KeyValue
+	toolTrace []toolNote
+}
+type toolNote struct {
+	Name   string `json:"name"`
+	Result string `json:"result"`
 }
 type turnKey struct{}
 type Operation struct {
@@ -168,6 +173,20 @@ func (o *Observer) StartTurn(ctx context.Context, routing string) (context.Conte
 	}
 	return context.WithValue(ctx, turnKey{}, turn), turn
 }
+func NoteTool(ctx context.Context, name, result string) {
+	t, _ := ctx.Value(turnKey{}).(*Turn)
+	if t == nil || name == "" {
+		return
+	}
+	if len(result) > 500 {
+		result = result[:500]
+	}
+	t.mu.Lock()
+	if len(t.toolTrace) < 8 {
+		t.toolTrace = append(t.toolTrace, toolNote{Name: name, Result: result})
+	}
+	t.mu.Unlock()
+}
 func (t *Turn) BindIdentity(tenant uint64, sid string) {
 	if t == nil {
 		return
@@ -263,6 +282,14 @@ func (t *Turn) End(status int, s Summary) {
 		return
 	}
 	t.root.SetAttributes(meta("http_status", strconv.Itoa(status)), meta("stage", s.Stage), meta("pending_confirm", strconv.FormatBool(s.Pending)), meta("llm_calls", strconv.Itoa(s.LLMCalls)), meta("jev_calls", strconv.Itoa(s.JevCalls)), meta("jev_errors", strconv.Itoa(s.JevErrors)), meta("llm_usage_missing", strconv.Itoa(s.LLMUsageMissing)), meta("jev_usage_missing", strconv.Itoa(s.JevUsageMissing)), meta("jev_fast_path", strconv.FormatBool(s.FastPath)), meta("jev_fast_path_reason", s.FastReason), meta("jev_intent", s.Intent), meta("jev_intent_confidence", strconv.FormatFloat(s.IntentConfidence, 'f', -1, 64)))
+	t.mu.RLock()
+	tools := append([]toolNote(nil), t.toolTrace...)
+	t.mu.RUnlock()
+	if len(tools) > 0 {
+		if raw, err := json.Marshal(tools); err == nil {
+			t.root.SetAttributes(meta("tool_trace", string(raw)))
+		}
+	}
 	if s.JevCalls > 0 {
 		shape := s.RouteShape
 		if shape != "" && shape != "single_read" && shape != "complex" {

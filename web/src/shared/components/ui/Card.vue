@@ -21,7 +21,7 @@ withDefaults(defineProps<{
     <div class="core" :class="{ accentBar, well }">
       <header v-if="title || $slots.extra" class="head">
         <div class="hleft">
-          <h3 v-if="title" class="t">{{ title }}</h3>
+          <h2 v-if="title" class="t">{{ title }}</h2>
           <p v-if="sub" class="s">{{ sub }}</p>
         </div>
         <div v-if="$slots.extra" class="extra"><slot name="extra" /></div>

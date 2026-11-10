@@ -1,277 +1,373 @@
 <script setup lang="ts">
-import { ref, shallowRef, provide, onMounted, onUnmounted, computed } from 'vue'
+import { ref, computed, provide, onMounted, onUnmounted } from "vue";
 import {
-  IconShoppingBag, IconCategory, IconCreditCard, IconReceipt2,
-  IconTrendingUp, IconTerminal2, IconWallet, IconLogout, IconUserShield, IconMenu2,
-} from '@tabler/icons-vue'
-import { api, auth } from '../shared/api'
-import { money } from '../shared/utils/format'
-import { toastErr } from '../shared/utils/toast'
-import ToastHost from '../shared/components/ui/ToastHost.vue'
-import ChatDock from '../shared/components/ChatDock.vue'
-import AuthGate from '../shared/components/AuthGate.vue'
-import HomeView from './views/HomeView.vue'
-import CatalogView from './views/CatalogView.vue'
-import PlansView from './views/PlansView.vue'
-import OrdersView from './views/OrdersView.vue'
-import ConsumptionView from './views/ConsumptionView.vue'
-import ConsoleView from './views/ConsoleView.vue'
+  IconMessageCircle,
+  IconLogout,
+  IconMenu2,
+  IconWallet,
+} from "@tabler/icons-vue";
+import { api, auth } from "../shared/api";
+import { openChat, closeChat } from "../shared/chatLayer";
+import { money } from "../shared/utils/format";
+import { toastErr } from "../shared/utils/toast";
+import ToastHost from "../shared/components/ui/ToastHost.vue";
+import AuthGate from "../shared/components/AuthGate.vue";
+import ChatDock from "../shared/components/ChatDock.vue";
+import HomeView from "./views/HomeView.vue";
+import CatalogView from "./views/CatalogView.vue";
+import PlansView from "./views/PlansView.vue";
+import OrdersView from "./views/OrdersView.vue";
+import ConsumptionView from "./views/ConsumptionView.vue";
+import ConsoleView from "./views/ConsoleView.vue";
+import AccessView from "./views/AccessView.vue";
+import WalletView from "./views/WalletView.vue";
 
-type ViewKey = 'home' | 'catalog' | 'plans' | 'orders' | 'consumption' | 'console'
-
-const navs: { key: ViewKey; label: string; icon: any }[] = [
-  { key: 'home', label: '工作台', icon: IconShoppingBag },
-  { key: 'catalog', label: '模型广场', icon: IconCategory },
-  { key: 'plans', label: '订阅套餐', icon: IconCreditCard },
-  { key: 'orders', label: '我的订单', icon: IconReceipt2 },
-  { key: 'consumption', label: '用量统计', icon: IconTrendingUp },
-  { key: 'console', label: '接口调试', icon: IconTerminal2 },
-]
-
-const views: Record<ViewKey, any> = {
-  home: HomeView, catalog: CatalogView, plans: PlansView,
-  orders: OrdersView, consumption: ConsumptionView, console: ConsoleView,
+const navs = [
+  { key: "home", label: "概览", view: HomeView },
+  { key: "catalog", label: "模型目录", view: CatalogView },
+  { key: "console", label: "工作台", view: ConsoleView },
+  { key: "wallet", label: "余额与兑换", view: WalletView },
+  { key: "plans", label: "月卡套餐", view: PlansView },
+  { key: "consumption", label: "用量", view: ConsumptionView },
+  { key: "orders", label: "订单", view: OrdersView },
+  { key: "access", label: "API 接入", view: AccessView },
+];
+const cur = ref("home");
+const current = computed(
+  () => navs.find((n) => n.key === cur.value) || navs[0]!,
+);
+const logged = ref(false);
+const loading = ref(true);
+const username = ref("");
+const workbenchAccount = ref("");
+provide("workbench-account", workbenchAccount);
+interface PortalIdentity {
+  id?: number;
+  tenant_id?: number;
+  username: string;
+  role?: "admin" | "user";
 }
-
-const mobileOpen = ref(false)
-const currentLabel = computed(() => navs.find(n => n.key === cur.value)?.label || '工作台')
-const logged = ref(false)
-const loading = ref(true)
-const username = ref('')
-const cur = shallowRef<ViewKey>('home')
-const balance = ref<number | null>(null)
-
-async function authenticated(identity: { username: string; role: 'admin' | 'user' }) {
-  if (identity.role === 'admin') { window.location.assign('/'); return }
-  auth.clearKey(); auth.clearSid()
-  username.value = identity.username
-  logged.value = true
-  await refreshMe()
+function setIdentity(identity: PortalIdentity) {
+  username.value = identity.username;
+  workbenchAccount.value = Number.isSafeInteger(identity.id) && Number.isSafeInteger(identity.tenant_id) &&
+    identity.id! > 0 && identity.tenant_id! > 0 ? `${identity.tenant_id}:${identity.id}` : "";
 }
-
+const balance = ref<number | null>(null);
+const mobileOpen = ref(false);
+function readRoute() {
+  cur.value = navs.some((n) => n.key === location.hash.slice(1))
+    ? location.hash.slice(1)
+    : "home";
+  mobileOpen.value = false;
+}
+function go(key: string) {
+  if (!navs.some((n) => n.key === key)) return;
+  location.hash = key;
+  cur.value = key;
+  mobileOpen.value = false;
+  window.scrollTo({ top: 0 });
+}
+provide("go", go);
 async function refreshMe() {
   try {
-    const me = await api<any>('/portal/me')
-    balance.value = me.balance_cent
-  } catch { /* ignore */ }
+    balance.value = (
+      await api<{ balance_cent: number }>("/portal/me")
+    ).balance_cent;
+  } catch {
+    balance.value = null;
+  }
 }
-
-function expired() { logged.value = false; balance.value = null; auth.clearSid(); cur.value = 'home' }
+async function authenticated(identity: PortalIdentity) {
+  if (identity.role === "admin") {
+    location.assign("/");
+    return;
+  }
+  auth.clearKey();
+  auth.clearSid();
+  setIdentity(identity);
+  logged.value = true;
+  await refreshMe();
+}
+function expired() {
+  logged.value = false;
+  workbenchAccount.value = "";
+  balance.value = null;
+  auth.clearSid();
+  closeChat();
+}
 async function logout() {
-  try { await api('/auth/logout', { body: {} }); auth.clearKey(); expired() }
-  catch (e: any) { toastErr(e.message || '退出失败，请重试') }
+  try {
+    await api("/auth/logout", { body: {} });
+    auth.clearKey();
+    expired();
+  } catch (e: any) {
+    toastErr(e.message || "退出失败，请重试");
+  }
 }
-provide('go', (v: ViewKey) => { cur.value = v; window.scrollTo({ top: 0 }) })
 onMounted(async () => {
-  window.addEventListener('portal-session-expired', expired)
-  auth.clearKey()
-  try { const me = await api<{ username: string }>('/auth/me'); username.value = me.username; logged.value = true; await refreshMe() }
-  catch { logged.value = false }
-  finally { loading.value = false }
-})
-onUnmounted(() => window.removeEventListener('portal-session-expired', expired))
+  readRoute();
+  window.addEventListener("hashchange", readRoute);
+  window.addEventListener("portal-session-expired", expired);
+  auth.clearKey();
+  try {
+    const me = await api<PortalIdentity>("/auth/me");
+    setIdentity(me);
+    logged.value = true;
+    await refreshMe();
+  } catch {
+    logged.value = false;
+  } finally {
+    loading.value = false;
+  }
+});
+onUnmounted(() => {
+  window.removeEventListener("hashchange", readRoute);
+  window.removeEventListener("portal-session-expired", expired);
+});
 </script>
 
 <template>
   <ToastHost />
-
-  <div v-if="loading" class="gate" role="status">正在连接控制台…</div>
-  <AuthGate v-else-if="!logged" default-role="user" @authenticated="authenticated" />
-
-  <!-- 商城主体 -->
-  <div v-else class="app" :class="{ mobileOpen }" @keydown.esc="mobileOpen = false">
-    <button v-if="mobileOpen" class="nav-backdrop" aria-label="关闭导航" @click="mobileOpen = false" />
-    <aside class="sidebar">
-      <a class="portal-brand" href="/portal"><div class="mark sm"><IconShoppingBag :size="17" /></div><div><strong>AI Gateway</strong><small>用户控制台</small></div></a>
-      <p class="nav-group">工作空间</p>
-      <nav class="nav" aria-label="主导航">
-        <button v-for="n in navs" :key="n.key" class="navitem" :class="{ on: cur === n.key }" :aria-current="cur === n.key ? 'page' : undefined" @click="cur = n.key; mobileOpen = false"><component :is="n.icon" :size="17" :stroke-width="1.7" />{{ n.label }}</button>
-      </nav>
-      <div class="sidebar-foot"><span>统一模型接口</span><code>OpenAI compatible</code></div>
-    </aside>
-    <header class="topbar">
-      <div class="tleft">
-        <button class="icon-btn mobile-menu" aria-label="打开导航" :aria-expanded="mobileOpen" @click="mobileOpen = !mobileOpen"><IconMenu2 :size="18" /></button><span class="crumb">用户控制台 /</span><span class="tb">{{ currentLabel }}</span>
-      </div>
-
-      <div class="tright">
-        <span class="bal num" title="可用余额">
-          <IconWallet :size="14" />
-          {{ money(balance) }}
-        </span>
-        <a class="icon-btn" href="/" target="_blank" title="管理面板">
-          <IconUserShield :size="16" />
-        </a>
-        <span class="keychip mono" title="当前用户">{{ username }}</span>
-        <button class="icon-btn danger" title="退出登录" @click="logout">
-          <IconLogout :size="16" />
+  <div v-if="loading" class="gate" role="status">正在连接用户空间…</div>
+  <AuthGate
+    v-else-if="!logged"
+    default-role="user"
+    @authenticated="authenticated"
+  />
+  <div v-else class="portal-space" @keydown.esc="mobileOpen = false">
+    <header class="workspace-header">
+      <a class="workspace-brand" href="#home"
+        ><strong>AI Gateway<small>控制台</small></strong></a
+      >
+      <div class="header-actions">
+        <button class="support-button" @click="openChat">
+          <IconMessageCircle :size="18" /> 操作客服
+        </button>
+        <button class="balance-button" @click="go('wallet')">
+          <IconWallet :size="16" />{{ money(balance) }}
+        </button>
+        <span class="account-name">{{ username }}</span>
+        <button class="plain-icon" aria-label="退出登录" @click="logout">
+          <IconLogout :size="18" />
+        </button>
+        <button
+          class="plain-icon menu-toggle"
+          aria-label="展开导航"
+          :aria-expanded="mobileOpen"
+          @click="mobileOpen = !mobileOpen"
+        >
+          <IconMenu2 :size="20" />
         </button>
       </div>
     </header>
-
-    <main class="content">
-      <component :is="views[cur]" :key="cur" @me="refreshMe" />
+    <nav
+      class="workspace-nav"
+      :class="{ expanded: mobileOpen }"
+      aria-label="用户导航"
+    >
+      <a
+        v-for="n in navs"
+        :key="n.key"
+        :href="'#' + n.key"
+        :class="{ selected: cur === n.key }"
+        :aria-current="cur === n.key ? 'page' : undefined"
+        @click="mobileOpen = false"
+        >{{ n.label }}</a
+      >
+    </nav>
+    <main
+      class="workspace-content"
+      :class="{ 'workbench-content': cur === 'console' }"
+    >
+      <KeepAlive :key="workbenchAccount || username" include="ConsoleView">
+        <component :is="current.view" :key="cur" @me="refreshMe" />
+      </KeepAlive>
     </main>
-
-    <!-- 全局悬浮客服（跨栏目常驻、可拖拽/最小化）-->
-    <ChatDock mode="portal" />
+    <ChatDock mode="portal" subtitle="账户服务与操作指引" />
   </div>
 </template>
 
 <style scoped>
-/* ---------- 登录 ---------- */
+/* Hallmark · v2.0.0 · theme: custom · scope: app · monochrome controls */
+/* Critique: neutral surfaces and functional labels preserve the existing data and actions. */
 .gate {
   min-height: 100dvh;
-  display: grid; place-items: center;
-  padding: var(--sp-5);
-  background:
-    radial-gradient(900px 460px at 88% -12%, var(--accent-50), transparent 62%),
-    radial-gradient(700px 380px at -6% 108%, var(--accent-50), transparent 58%),
-    var(--paper-2);
+  display: grid;
+  place-items: center;
+  background: var(--bg);
 }
-.gate-card {
-  width: 100%; max-width: 430px;
-  background: var(--paper);
-  border: 1px solid var(--hairline);
-  border-radius: var(--r-lg);
-  box-shadow: var(--shadow-2);
-  padding: var(--sp-7);
+.portal-space {
+  min-height: 100dvh;
+  background: var(--shell);
 }
-.brand { display: flex; align-items: center; gap: var(--sp-3); margin-bottom: var(--sp-6); }
-.mark {
-  width: 42px; height: 42px;
-  border-radius: var(--r-md);
-  background: var(--accent-600); color: #fff;
-  display: grid; place-items: center;
-  box-shadow: var(--shadow-accent);
+.workspace-header {
+  min-height: 56px;
+  border-bottom: 1px solid var(--border);
+  padding: 8px max(24px, calc((100% - 1280px) / 2));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  background: var(--surface);
+}
+.workspace-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--ink-900);
   flex: none;
 }
-.mark.sm { width: 27px; height: 27px; border-radius: var(--r-sm); box-shadow: none; }
-.bt { font-size: var(--fs-xl); letter-spacing: -.02em; }
-.bs { font-size: var(--fs-xs); color: var(--ink-500); margin-top: 2px; }
-.glabel {
-  display: block;
-  font-size: var(--fs-xs); font-weight: 600; color: var(--ink-600);
-  margin-bottom: 6px;
+.brand-symbol {
+  width: 40px;
+  height: 40px;
+  background: var(--accent-600);
+  color: var(--surface);
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
 }
-.krow { display: flex; gap: var(--sp-2); }
-.keyin {
-  flex: 1; height: 42px; padding: 0 var(--sp-3);
-  border: none; border-radius: var(--r-sm);
-  font-family: var(--font-mono); font-size: var(--fs-sm);
-  transition: border-color var(--t-fast), box-shadow var(--t-fast);
+.workspace-brand strong {
+  font-size: 15px;
+  letter-spacing: -0.4px;
+  line-height: 1.35;
 }
-.keyin:focus {
-  outline: none;
-  border-color: var(--accent-500);
-  box-shadow: 0 0 0 3px var(--accent-50);
+.workspace-brand small {
+  display: inline;
+  margin-left: 12px;
+  font-size: 12px;
+  color: var(--ink-500);
+  font-weight: 400;
+  letter-spacing: 0;
 }
-.ghint { margin-top: var(--sp-3); font-size: var(--fs-xs); color: var(--ink-400); line-height: 1.6; }
-.ghint code {
-  font-family: var(--font-mono); font-size: .92em;
-  background: var(--paper-3); padding: 1px 5px; border-radius: var(--r-xs);
-  color: var(--ink-600);
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
-
-/* ---------- 壳体 ---------- */
-.app { min-height: 100dvh; display: flex; flex-direction: column; }
-
-.topbar {
-  position: sticky; top: 0; z-index: var(--z-sticky);
-  display: flex; align-items: center; gap: var(--sp-5);
-  height: 58px; padding: 0 var(--sp-6);
-  background: rgb(255 255 255 / .82);
-  backdrop-filter: blur(14px) saturate(180%);
+.support-button,
+.balance-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1px solid var(--hairline);
+  background: var(--surface);
+  border-radius: 7px;
+  font-size: 13px;
+  color: var(--accent-600);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.balance-button {
+  background: var(--shell);
+  border-color: transparent;
+  color: var(--ink-900);
+}
+.account-name {
+  font-size: 12px;
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.plain-icon {
+  display: grid;
+  place-items: center;
+  background: transparent;
+  border: 0;
+  color: var(--ink-500);
+  width: 32px;
+  height: 32px;
+}
+.menu-toggle {
+  display: none;
+}
+.workspace-nav {
+  display: flex;
+  padding: 0 max(24px, calc((100% - 1280px) / 2));
+  gap: 24px;
+  background: var(--surface);
   border-bottom: 1px solid var(--hairline);
 }
-.tleft { display: flex; align-items: center; gap: 9px; flex: none; }
-.tb {
-  font-size: var(--fs-md); font-weight: 650;
-  letter-spacing: -.02em; color: var(--ink-900);
-  white-space: nowrap;
-}
-
-.nav { display: flex; gap: 2px; flex: 1; overflow-x: auto; scrollbar-width: none; }
-.nav::-webkit-scrollbar { display: none; }
-.navitem {
-  border: none; background: transparent;
+.workspace-nav a {
+  padding: 12px 0;
   color: var(--ink-500);
-  font-size: var(--fs-sm); font-weight: 550;
-  padding: 7px 13px;
-  border-radius: var(--r-sm);
+  border-bottom: 2px solid transparent;
   white-space: nowrap;
-  transition: all var(--t-fast);
+  font-size: 13px;
 }
-.navitem:hover { color: var(--ink-800); background: var(--paper-3); }
-.navitem.on {
-  color: var(--accent-700);
-  background: var(--accent-50);
-  box-shadow: inset 0 0 0 1px var(--accent-100);
+.workspace-nav a.selected {
+  color: var(--accent-600);
+  border-bottom-color: var(--accent-600);
+  font-weight: 530;
 }
-
-.tright { display: flex; align-items: center; gap: var(--sp-2); flex: none; }
-.bal {
-  display: inline-flex; align-items: center; gap: 5px;
-  height: 30px; padding: 0 12px;
-  border-radius: var(--r-pill);
-  background: var(--accent-50);
-  border: 1px solid var(--accent-100);
-  color: var(--accent-700);
-  font-size: var(--fs-sm); font-weight: 650;
+.workspace-content {
+  max-width: 1328px;
+  margin: auto;
+  padding: 32px 24px 64px;
 }
-.icon-btn {
-  width: 30px; height: 30px;
-  display: grid; place-items: center;
-  border: none; border-radius: var(--r-sm);
-  background: transparent; color: var(--ink-400);
-  transition: all var(--t-fast);
+.workbench-content {
+  max-width: 1440px;
 }
-.icon-btn:hover { background: var(--paper-3); color: var(--ink-800); }
-.icon-btn.danger:hover { background: var(--danger-bg); color: var(--danger); }
-.keychip {
-  font-size: var(--fs-2xs); color: var(--ink-400);
-  padding: 4px 9px;
-  background: var(--paper-3);
-  border-radius: var(--r-pill);
-}
-
-.content {
-  flex: 1;
-  width: 100%; max-width: 1240px;
-  margin: 0 auto;
-  padding: var(--sp-6) var(--sp-6) var(--sp-10);
-}
-
 @media (max-width: 900px) {
-  .topbar { flex-wrap: wrap; height: auto; gap: var(--sp-3); padding: var(--sp-3) var(--sp-4); }
-  .nav { order: 3; width: 100%; }
-  .keychip { display: none; }
-  .content { padding: var(--sp-4) var(--sp-4) var(--sp-9); }
+  .workspace-header {
+    padding: 8px 16px;
+  }
+  .workspace-nav {
+    padding: 0 16px;
+    gap: 24px;
+    overflow: auto;
+  }
+  .account-name {
+    display: none;
+  }
+  .header-actions {
+    gap: 8px;
+  }
+  .workspace-content {
+    padding: 24px 16px 60px;
+  }
 }
-/* Console shell */
-.gate { background: var(--bg); } .gate-card { box-shadow: none; border: 1px solid var(--hairline); padding: 32px; }
-.krow { flex-direction: column; } .keyin { flex: auto; width: 100%; background: var(--surface); border: 1px solid var(--hairline-2); }
-.app { display: grid; grid-template-columns: 216px minmax(0, 1fr); grid-template-rows: 65px 1fr; }
-.sidebar { position: sticky; top: 0; grid-row: 1 / 3; height: 100dvh; background: var(--surface); border-right: 1px solid var(--hairline); display: flex; flex-direction: column; padding: 0 12px 20px; }
-.portal-brand { height: 65px; display: flex; align-items: center; gap: 10px; padding: 0 8px; color: var(--ink-900); }
-.portal-brand strong { font-size: 15px; font-weight: 650; } .portal-brand small { display: block; font-size: 11px; color: var(--ink-400); }
-.nav-group { margin: 28px 12px 8px; color: var(--ink-400); font-size: 11px; }
-.nav { display: flex; flex-direction: column; flex: 1; gap: 4px; overflow: auto; }
-.navitem { display: flex; align-items: center; gap: 10px; text-align: left; padding: 10px 12px; min-height: 38px; border-radius: 6px; }
-.navitem.on { box-shadow: none; font-weight: 600; }
-.sidebar-foot { display: flex; flex-direction: column; gap: 4px; padding: 14px 12px 0; border-top: 1px solid var(--hairline); color: var(--ink-400); font-size: 11px; }
-.sidebar-foot code { font-size: 10px; }
-.topbar { height: 65px; padding: 0 28px; justify-content: space-between; background: var(--surface); backdrop-filter: none; }
-.tb { font-size: 13px; font-weight: 500; } .crumb { font-size: 13px; color: var(--ink-400); margin-right: 5px; }
-.bal { background: var(--well); color: var(--ink-700); border: 0; border-radius: 6px; }
-.keychip { border-radius: 6px; } .mobile-menu, .nav-backdrop { display: none; }
-.content { max-width: 1480px; padding: 28px 28px 64px; min-width: 0; }
-@media (max-width: 900px) {
- .app { grid-template-columns: minmax(0, 1fr); grid-template-rows: 58px 1fr; }
- .sidebar { position: fixed; left: 0; top: 0; width: 216px; z-index: var(--z-drawer); transform: translateX(-100%); transition: transform var(--t-base); }
- .mobileOpen .sidebar { transform: translateX(0); }
- .nav { order: initial; width: auto; } .nav-backdrop { display: block; position: fixed; inset: 0; z-index: 39; border: 0; background: rgb(20 24 35 / .25); }
- .mobile-menu { display: grid; } .topbar { height: 58px; flex-wrap: nowrap; padding: 0 16px; gap: 8px; } .crumb { display: none; }
- .content { padding: 20px 16px 64px; }
+@media (max-width: 600px) {
+  .workspace-brand strong {
+    font-size: 15px;
+  }
+  .workspace-brand small {
+    display: none;
+  }
+  .balance-button {
+    display: none;
+  }
+  .menu-toggle {
+    display: grid;
+  }
+  .workspace-nav {
+    display: none;
+  }
+  .workspace-nav.expanded {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0 16px;
+  }
+  .workspace-nav a {
+    font-size: 12px;
+    text-align: center;
+  }
+  .support-button {
+    font-size: 12px;
+    padding: 8px;
+    white-space: nowrap;
+  }
+}
+
+:is(button, a, input, select, textarea):focus-visible {
+  outline: 2px solid var(--ink-900);
+  outline-offset: 3px;
+}
+button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 </style>

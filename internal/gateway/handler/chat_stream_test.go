@@ -182,8 +182,8 @@ func TestRelayStreamSettlesForwardedContentWithoutUsage(t *testing.T) {
 	if len(bill.reverses) != 0 {
 		t.Fatalf("reversed %d times, want 0", len(bill.reverses))
 	}
-	if len(bill.reports) != 1 || bill.reports[0].PromptTokens != 11 || bill.reports[0].CompletionTokens != 2 {
-		t.Fatalf("usage = %+v, want prompt 11 completion 2", bill.reports)
+	if len(bill.reports) != 1 || bill.reports[0].PromptTokens != 11 || bill.reports[0].CompletionTokens != 4 {
+		t.Fatalf("usage = %+v, want prompt 11 completion 4", bill.reports)
 	}
 	if len(bill.settles) != 1 || bill.settles[0].RequestId != "rid-est" {
 		t.Fatalf("settle = %+v", bill.settles)
@@ -193,6 +193,47 @@ func TestRelayStreamSettlesForwardedContentWithoutUsage(t *testing.T) {
 	}
 	if ct := w.Header().Get("Content-Type"); ct != "text/event-stream" {
 		t.Fatalf("content-type = %q", ct)
+	}
+}
+
+func TestConservativeStatusRefundsPrecharge(t *testing.T) {
+	bad := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.Error(w, "nope", http.StatusBadRequest)
+	}))
+	defer bad.Close()
+	bill := &fakeBilling{}
+	c, w := newGinCtx()
+	prov := &client.RouteResult{ProviderID: 1, Name: "bad", BaseURL: bad.URL}
+	req := &chatRequest{Model: "m", Messages: []chatMessage{{Role: "user", Content: "hi"}}}
+	forwardNonStream(c, bill, &fakeRouter{}, slog.New(slog.DiscardHandler), prov, req, "rid-400", 9, 4, time.Second, true)
+	if w.Code != http.StatusBadRequest || !strings.Contains(w.Body.String(), "nope") {
+		t.Fatalf("status = %d body=%q, want upstream 400", w.Code, w.Body.String())
+	}
+	if len(bill.reverses) != 1 || bill.reverses[0].RequestId != "rid-400" {
+		t.Fatalf("reverse = %+v", bill.reverses)
+	}
+	if len(bill.settles) != 0 {
+		t.Fatal("rejected request was settled")
+	}
+}
+
+func TestConservativeDialKeepsPrecharge(t *testing.T) {
+	ln, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	closed := ln.Addr().String()
+	ln.Close()
+	bill := &fakeBilling{}
+	c, w := newGinCtx()
+	prov := &client.RouteResult{ProviderID: 1, Name: "down", BaseURL: "http://" + closed}
+	req := &chatRequest{Model: "m", Messages: []chatMessage{{Role: "user", Content: "hi"}}}
+	forwardNonStream(c, bill, &fakeRouter{}, slog.New(slog.DiscardHandler), prov, req, "rid-dial", 9, 4, time.Second, true)
+	if w.Code != http.StatusBadGateway {
+		t.Fatalf("status = %d", w.Code)
+	}
+	if len(bill.reverses) != 0 || len(bill.settles) != 0 {
+		t.Fatalf("reverses=%d settles=%d, dial failure must stay pending", len(bill.reverses), len(bill.settles))
 	}
 }
 
@@ -247,7 +288,7 @@ func TestChatReportsSuccessfulFallbackProvider(t *testing.T) {
 	}{
 		{"nonstream", false, `{"choices":[],"usage":{"prompt_tokens":4,"completion_tokens":2}}`, 2},
 		{"stream_usage", true, "data: {\"choices\":[],\"usage\":{\"prompt_tokens\":4,\"completion_tokens\":2}}\n\ndata: [DONE]\n\n", 2},
-		{"stream_estimate", true, "data: {\"choices\":[{\"delta\":{\"content\":\"你好世界\"}}]}\n\ndata: [DONE]\n\n", 2},
+		{"stream_estimate", true, "data: {\"choices\":[{\"delta\":{\"content\":\"你好世界\"}}]}\n\ndata: [DONE]\n\n", 4},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			bad := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

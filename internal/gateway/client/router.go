@@ -22,10 +22,13 @@ type Router struct {
 }
 
 type RouteResult struct {
-	ProviderID uint64 `json:"provider_id"`
-	Name       string `json:"name"`
-	BaseURL    string `json:"base_url"`
-	APIKey     string `json:"api_key"` // 上游 API key（真实渠道鉴权；空 = mock 透传租户 key）
+	MessagesBaseURL   string `json:"messages_base_url"`
+	ResponsesBaseURL  string `json:"responses_base_url"`
+	ProviderID        uint64 `json:"provider_id"`
+	Name              string `json:"name"`
+	BaseURL           string `json:"base_url"`
+	APIKey            string `json:"api_key"` // 上游 API key（真实渠道鉴权；空 = mock 透传租户 key）
+	SkipSuccessReport bool   `json:"skip_success_report"`
 }
 
 func NewRouter(baseURL, token string) *Router {

@@ -12,12 +12,29 @@ import RankList from '../../shared/components/ui/RankList.vue'
 import Card from '../../shared/components/ui/Card.vue'
 import Tag from '../../shared/components/ui/Tag.vue'
 import DataTable from '../../shared/components/ui/DataTable.vue'
+import BaseButton from '../../shared/components/ui/BaseButton.vue'
 
 const ov = ref<OverviewResp | null>(null)
 const health = ref<HealthResp | null>(null)
 const sales = ref<SalesResp | null>(null)
 const loading = ref(true)
 let timer: number | null = null
+const days = ref(14)
+const errors = ref<string[]>([])
+const refreshing = ref(false)
+const updatedAt = ref('')
+let requestId = 0
+function calendarDay(d: Date) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` }
+const range = computed(() => { const to = new Date(); const from = new Date(); from.setDate(from.getDate() - days.value + 1); return { from: calendarDay(from), to: calendarDay(to) } })
+const dailySeries = computed(() => {
+  if (!sales.value) return []
+  const recorded = new Map(sales.value.by_day.map(d => [d.day.slice(0, 10), d]))
+  return Array.from({ length: days.value }, (_, i) => {
+    const date = new Date(`${range.value.from}T12:00:00`); date.setDate(date.getDate() + i)
+    const day = calendarDay(date)
+    return recorded.get(day) ?? { day, consumed_cent: 0, topup_cent: 0 }
+  })
+})
 
 const byTenant = (key: keyof TenantStat) =>
   (ov.value?.tenants ?? []).reduce((s, t) => s + ((t[key] as number) || 0), 0)
@@ -37,19 +54,19 @@ const svcLabel: Record<string, string> = {
 
 /** 近 14 天消耗趋势（面积图双序列：消耗 + 入账） */
 const trendSeries = computed(() => {
-  const days = (sales.value?.by_day ?? []).slice(-14)
+  const daily = dailySeries.value
   return [
-    { name: '消耗', points: days.map(d => ({ label: fmtDay(d.day), value: d.consumed_cent })) },
-    { name: '入账', points: days.map(d => ({ label: fmtDay(d.day), value: d.topup_cent })) },
+    { name: '消耗', points: daily.map(d => ({ label: fmtDay(d.day), value: d.consumed_cent })) },
+    { name: '入账', points: daily.map(d => ({ label: fmtDay(d.day), value: d.topup_cent })) },
   ]
 })
 
 const hasTrend = computed(() => (trendSeries.value[0]?.points.length ?? 0) > 1)
 
 /** KPI 迷你趋势：近 14 天消耗 */
-const spendTrend = computed(() => (sales.value?.by_day ?? []).slice(-14).map(d => d.consumed_cent))
+const spendTrend = computed(() => dailySeries.value.map(d => d.consumed_cent))
 /** KPI 迷你趋势：近 14 天入账 */
-const topupTrend = computed(() => (sales.value?.by_day ?? []).slice(-14).map(d => d.topup_cent))
+const topupTrend = computed(() => dailySeries.value.map(d => d.topup_cent))
 
 /** 模型排行（按销售额） */
 const modelRank = computed(() =>
@@ -67,14 +84,14 @@ const vendorRank = computed(() =>
 
 /** 一致性：正常租户 vs 异常租户（占比条） */
 const consistency = computed(() => {
-  const total = tenantCount.value || 1
+  const total = tenantCount.value
   const bad = inconsistentCount.value
-  return { good: total - bad, bad, total, pct: Math.round(((total - bad) / total) * 100) }
+  return { good: total - bad, bad, total, pct: total ? Math.round(((total - bad) / total) * 100) : 0 }
 })
 
 /** 半程环比：把近 14 天切成两段，比较后 7 天与前 7 天，给出真实涨跌而不是装饰性进度条 */
 function halfDelta(series: number[]): number | null {
-  if (series.length < 4) return null
+  if (series.length < 4 || series.length % 2 !== 0) return null
   const mid = Math.floor(series.length / 2)
   const prev = series.slice(0, mid).reduce((s, v) => s + (v || 0), 0)
   const next = series.slice(mid).reduce((s, v) => s + (v || 0), 0)
@@ -96,83 +113,89 @@ const sum = computed(() => ({
 const COLS = '1.1fr 1fr 1.15fr 1.15fr .9fr .8fr .7fr .95fr'
 
 async function load() {
-  try {
-    const to = new Date()
-    const from = new Date()
-    from.setDate(from.getDate() - 13)
-    const iso = (d: Date) => d.toISOString().slice(0, 10)
-
-    const [o, h, s] = await Promise.all([
-      overviewApi(),
-      healthApi(),
-      salesApi(iso(from), iso(to)).catch(() => null),
-    ])
-    ov.value = o
-    health.value = h
-    // 只接受形状正确的销售统计（缺 summary/by_day 视作不可用，走空态）
-    sales.value = s && s.summary && Array.isArray(s.by_day) ? s : null
-  } finally {
-    loading.value = false
-  }
+  const id = ++requestId
+  refreshing.value = true
+  const selected = { ...range.value }
+  const results = await Promise.allSettled([overviewApi(), healthApi(), salesApi(selected.from, selected.to)])
+  if (id !== requestId) return
+  errors.value = []
+  const [o, h, s] = results
+  if (o.status === 'fulfilled') ov.value = o.value
+  else { ov.value = null; errors.value.push('租户账本加载失败') }
+  if (h.status === 'fulfilled') health.value = h.value
+  else { health.value = null; errors.value.push('服务健康检查失败') }
+  if (s.status === 'fulfilled' && s.value?.summary && Array.isArray(s.value.by_day)) sales.value = s.value
+  else { sales.value = null; errors.value.push('销售统计加载失败') }
+  updatedAt.value = new Date().toLocaleTimeString('zh-CN', { hour12: false })
+  loading.value = false
+  refreshing.value = false
+}
+function changeRange(value: number) {
+  if (value === days.value) return
+  days.value = value
+  sales.value = null
+  loading.value = true
+  load()
 }
 
 onMounted(() => {
   load()
   timer = window.setInterval(load, 30000) // 30s 刷新（含趋势查询，不必 3s）
 })
-onBeforeUnmount(() => { if (timer) clearInterval(timer) })
+onBeforeUnmount(() => { requestId++; if (timer) clearInterval(timer) })
 </script>
 
 <template>
   <div class="overview">
+    <div class="analysis-head"><div><h2>运营概览</h2><p>{{ range.from }} 至 {{ range.to }}<span v-if="updatedAt">，更新于 {{ updatedAt }}</span></p></div><div class="range-controls"><div class="range-tabs" aria-label="统计时间范围"><button v-for="d in [7, 14, 30]" :key="d" :aria-pressed="days === d" :class="{ selected: days === d }" @click="changeRange(d)">{{ d }} 天</button></div><BaseButton variant="ghost" :disabled="refreshing" @click="load">{{ refreshing ? '刷新中' : '刷新' }}</BaseButton></div></div>
+    <div v-if="errors.length" class="load-error" role="alert">{{ errors.join('，') }}。请刷新重试。</div>
     <!-- 顶部：关键指标 + 趋势 -->
     <div class="kpis">
       <KpiCard
         label="总余额（账本口径）"
-        :value="money(totalBalance)"
+        :value="ov ? money(totalBalance) : '—'"
         :loading="loading"
         :icon="IconWallet"
         tone="default"
-        :sub="`${fmt(totalPending)} 分在途`"
-        :trend="topupTrend"
-        chart="spark"
+        :sub="ov ? `${money(totalPending)} 在途` : '数据不可用'"
+        chart="none"
       />
       <KpiCard
-        label="近 14 天消耗"
-        :value="money(sum.consumed)"
+        :label="`近 ${days} 天消耗`"
+        :value="sales ? money(sum.consumed) : '—'"
         :loading="loading"
         :icon="IconTrendingUp"
         tone="ok"
         :delta-pct="spendDelta"
-        :sub="`${fmt(sum.settledBills)} 笔结算`"
+        :sub="sales ? `${fmt(sum.settledBills)} 笔结算${days % 2 === 0 ? '，较前半程' : ''}` : '数据不可用'"
         :trend="spendTrend"
         chart="spark"
       />
       <KpiCard
-        label="近 14 天入账"
-        :value="money(sum.topup)"
+        :label="`近 ${days} 天入账`"
+        :value="sales ? money(sum.topup) : '—'"
         :loading="loading"
         :icon="IconReceipt2"
         tone="info"
         :delta-pct="topupDelta"
-        :sub="`${fmt(sum.activeTenants)} 个活跃买家`"
+        :sub="sales ? `${fmt(sum.activeTenants)} 个活跃租户${days % 2 === 0 ? '，较前半程' : ''}` : '数据不可用'"
         :trend="topupTrend"
         chart="bars"
       />
       <KpiCard
         label="账本一致性"
-        :value="inconsistentCount ? `${inconsistentCount} 个不一致` : '全部一致'"
+        :value="!ov || !tenantCount ? '—' : inconsistentCount ? `${inconsistentCount} 个不一致` : '全部一致'"
         :loading="loading"
         :icon="IconShieldCheck"
         :tone="inconsistentCount ? 'danger' : 'ok'"
-        :sub="`${tenantCount} 个租户`"
+        :sub="ov ? `${tenantCount} 个租户` : '数据不可用'"
         chart="none"
       />
     </div>
 
     <!-- 主图 + 排行 -->
     <div class="main-grid">
-      <Card title="消耗 / 入账趋势" sub="近 14 天，单位：元">
+      <Card title="消耗 / 入账趋势" :sub="`近 ${days} 天，金额以人民币计`">
         <div v-if="loading" class="chart-skel skeleton" />
         <AreaChart
           v-else-if="hasTrend"
@@ -180,10 +203,10 @@ onBeforeUnmount(() => { if (timer) clearInterval(timer) })
           :height="268"
           :format="(v: number) => money(v)"
         />
-        <div v-else class="chart-empty">暂无趋势数据</div>
+        <div v-else class="chart-empty">{{ sales ? '暂无趋势数据' : '销售统计不可用' }}</div>
       </Card>
 
-      <Card title="模型销售排行" sub="按消耗金额">
+      <Card title="模型销售排行" :sub="`近 ${days} 天，按消耗金额`">
         <RankList :rows="modelRank" :limit="6" :format="(v: number) => money(v)" />
       </Card>
     </div>
@@ -199,11 +222,11 @@ onBeforeUnmount(() => { if (timer) clearInterval(timer) })
               <span class="sstate">{{ v.ok ? '运行中' : (v.error || '不可达') }}</span>
             </div>
           </div>
-          <div v-if="!health" class="svc"><span class="sdot" /><div class="sinfo"><span class="sname">加载中</span></div></div>
+          <div v-if="!health" class="svc"><div class="sinfo"><span class="sname">{{ loading ? '加载中' : '健康数据不可用' }}</span></div></div>
         </div>
 
         <!-- 一致性占比条 -->
-        <div class="consist">
+        <div v-if="ov && tenantCount" class="consist">
           <div class="cbar-top">
             <span class="clabel">账本 / 投影一致性</span>
             <span class="cval num">{{ consistency.pct }}%</span>
@@ -218,7 +241,7 @@ onBeforeUnmount(() => { if (timer) clearInterval(timer) })
         </div>
       </Card>
 
-      <Card title="厂商销售排行" sub="按消耗金额">
+      <Card title="厂商销售排行" :sub="`近 ${days} 天，按消耗金额`">
         <RankList :rows="vendorRank" :limit="6" :format="(v: number) => money(v)" />
       </Card>
     </div>
@@ -344,10 +367,19 @@ onBeforeUnmount(() => { if (timer) clearInterval(timer) })
   background: var(--well);
   box-shadow: var(--inset-well);
 }
-.cbar i { display: block; height: 100%; transition: width var(--t-slow); }
-.cbar i.good { background: linear-gradient(90deg, var(--accent-500), var(--accent-400)); }
+.cbar i { display: block; height: 100%;  }
+.cbar i.good { background: var(--accent-500); }
 .cbar i.bad { background: var(--danger); }
 .cnote { font-size: var(--fs-2xs); color: var(--ink-400); margin-top: 8px; }
 
 .mismatch { color: var(--danger); font-weight: 650; }
+.analysis-head, .range-controls { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.analysis-head h2 { font-size: 20px; font-weight: 600; }
+.analysis-head p { margin-top: 6px; font-size: 12px; color: var(--ink-500); }
+.range-tabs { display: flex; padding: 3px; border: 1px solid var(--hairline); background: var(--surface-2); border-radius: 7px; }
+.range-tabs button { height: 34px; padding: 0 14px; border: 0; background: transparent; color: var(--ink-500); font-size: 12px; border-radius: 4px; }
+.range-tabs button.selected { color: var(--ink-900); background: var(--surface); box-shadow: var(--shadow-1); }
+.range-tabs button:focus-visible { outline: 2px solid var(--accent-500); outline-offset: 2px; }
+.load-error { color: var(--danger); border: 1px solid var(--danger); border-radius: 6px; padding: 12px 16px; font-size: 13px; }
+@media (max-width: 540px) { .kpis { grid-template-columns: minmax(0, 1fr); } .main-grid { min-width: 0; } }
 </style>

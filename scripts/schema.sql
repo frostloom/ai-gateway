@@ -34,6 +34,8 @@ CREATE TABLE IF NOT EXISTS providers (
   id               BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   name             VARCHAR(64) NOT NULL,
   base_url         VARCHAR(255) NOT NULL,
+  messages_base_url VARCHAR(512) NOT NULL DEFAULT '',
+  responses_base_url VARCHAR(512) NOT NULL DEFAULT '',
   upstream_key     VARCHAR(255) NOT NULL DEFAULT '' COMMENT '上游 API key（demo 明文存；生产接 KMS/密文）',
   cost_in_cent     BIGINT NOT NULL DEFAULT 0 COMMENT '上游成本：输入 分/百万 token（毛利=售价−成本）',
   cost_out_cent    BIGINT NOT NULL DEFAULT 0 COMMENT '上游成本：输出 分/百万 token',
@@ -63,6 +65,7 @@ CREATE TABLE IF NOT EXISTS bills (
   in_price_cent      BIGINT NULL COMMENT 'reserve 时目录价快照：输入价 分/百万token（改价不影响历史账单）',
   out_price_cent     BIGINT NULL COMMENT 'reserve 时目录价快照：输出价 分/百万token',
   pre_quota          BIGINT NOT NULL COMMENT 'reserve 预扣（分）',
+  reserved_cost_cent BIGINT NULL,
   reserved_tokens    BIGINT NULL COMMENT '订阅预占 token；历史未记录时为 NULL',
   reserved_tier      VARCHAR(64) NULL COMMENT '预占时订阅档次快照',
   actual_quota       BIGINT NULL COMMENT 'settle 实际（分）',
@@ -105,6 +108,9 @@ CREATE TABLE IF NOT EXISTS plans (
   price_money   BIGINT NOT NULL COMMENT '月费（元，模拟价，不接真钱）',
   validity_days INT NOT NULL DEFAULT 0 COMMENT '计费周期天数（续费/改套餐周期）',
   refresh_hours INT NOT NULL DEFAULT 5 COMMENT '额度滚动窗口小时数（M9：每 N 小时刷新，未用不累积）',
+  window_quota_cent BIGINT NOT NULL DEFAULT 0,
+  week_quota_cent BIGINT NOT NULL DEFAULT 0,
+  cycle_quota_cent BIGINT NOT NULL DEFAULT 0,
   tier_quota    JSON NOT NULL COMMENT '每窗口每档次的 token 额度 {"轻量":2000000,"文本":1000000,...}',
   status        TINYINT NOT NULL DEFAULT 0 COMMENT '0=active 1=disabled',
   created_at    DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
@@ -280,3 +286,17 @@ INSERT INTO api_keys (tenant_id, key_hash, key_prefix, name) VALUES
 INSERT INTO providers (name, base_url, models, weight) VALUES
   ('mock-a', 'http://127.0.0.1:9201', '["*"]', 5),
   ('mock-b', 'http://127.0.0.1:9202', '["*"]', 3);
+
+-- One-time balance vouchers. The bearer code is never stored in plaintext.
+CREATE TABLE IF NOT EXISTS balance_vouchers (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  code_hash CHAR(64) NOT NULL,
+  prefix VARCHAR(16) NOT NULL,
+  amount_cent BIGINT NOT NULL,
+  expires_at DATETIME(3) NOT NULL,
+  redeemed_tenant_id BIGINT UNSIGNED NULL,
+  redeemed_at DATETIME(3) NULL,
+  created_at DATETIME(3) NOT NULL,
+  UNIQUE KEY uk_voucher_hash (code_hash),
+  KEY idx_balance_vouchers_redeemed_tenant_id (redeemed_tenant_id)
+);

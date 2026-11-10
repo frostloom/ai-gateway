@@ -23,7 +23,10 @@ export interface Plan {
   PriceMoney: number          // 元
   ValidityDays: number
   RefreshHours: number
-  TierQuota: string           // JSON 串 {"旗舰":2000000,...}
+  WindowQuotaCent?: number    // 滚动窗口预算（分），旧套餐可缺省
+  WeekQuotaCent?: number     // 每周预算（分），旧套餐可缺省
+  CycleQuotaCent?: number     // 计费周期预算（分），旧套餐可缺省
+  TierQuota: string           // 旧套餐兼容字段，新金额套餐为 {}
   Status: number              // 0=active 1=disabled
   CreatedAt: string
   UpdatedAt: string
@@ -55,6 +58,15 @@ export interface TierRemain {
   remaining: number
 }
 
+/** 月卡金额预算（json tags，金额分） */
+export interface MoneyRemain {
+  period: 'window' | 'week' | 'cycle'
+  quota_cent: number
+  consumed_cent: number
+  remaining_cent: number
+  resets_at?: string
+}
+
 /** MeView（json tags，金额分） */
 export interface MeView {
   balance: number
@@ -63,6 +75,7 @@ export interface MeView {
   consistent: boolean
   subscription: Subscription | null
   allowance: TierRemain[]
+  money_allowance?: MoneyRemain[]
   refresh_hours: number
   plans: Plan[]
   consumption: DayStat[]
@@ -142,7 +155,12 @@ export function parseTags(s: string | undefined | null): string[] {
 
 export function parseTierQuota(s: string | undefined | null): Record<string, number> {
   if (!s) return {}
-  try { return JSON.parse(s) } catch { return {} }
+  try {
+    const value = JSON.parse(s)
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return {}
+    const valid = Object.entries(value).every(([tier, quota]) => tier.trim() && typeof quota === 'number' && Number.isSafeInteger(quota) && quota > 0)
+    return valid ? value : {}
+  } catch { return {} }
 }
 
 /** 订单/订阅状态 → 展示元 */

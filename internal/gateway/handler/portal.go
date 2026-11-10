@@ -10,7 +10,9 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
+	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -33,6 +35,7 @@ var chatHTTP = &http.Client{Timeout: 10 * time.Minute}
 //	billingAdminBase = http://127.0.0.1:9103（billing 自服务端点）
 //	agentBase        = http://127.0.0.1:9105（AI 客服）
 func RegisterPortal(g *gin.RouterGroup, billingAdminBase, agentBase string, log *slog.Logger) {
+	g.Use(func(c *gin.Context) { c.Header("Cache-Control", "no-store"); c.Next() })
 	// 只读：自己的一揽子数据（余额/订阅/目录/消耗/流水）
 	g.GET("/me", func(c *gin.Context) {
 		proxy(c, http.MethodGet, billingAdminBase+"/admin/me?tenant_id="+tenantStr(c), nil, log)
@@ -50,6 +53,39 @@ func RegisterPortal(g *gin.RouterGroup, billingAdminBase, agentBase string, log 
 	g.GET("/models", func(c *gin.Context) {
 		proxy(c, http.MethodGet, billingAdminBase+"/portal/models?"+c.Request.URL.RawQuery, nil, log)
 	})
+	g.GET("/access", func(c *gin.Context) {
+		scheme := "http"
+		if c.Request.TLS != nil || c.GetHeader("X-Forwarded-Proto") == "https" {
+			scheme = "https"
+		}
+		base := scheme + "://" + c.Request.Host
+		if pub := strings.TrimRight(strings.TrimSpace(os.Getenv("PUBLIC_BASE_URL")), "/"); pub != "" {
+			base = pub
+		}
+		model := strings.TrimSpace(os.Getenv("AGENT_LLM_MODEL"))
+		if model == "" {
+			model = "deepseek-flash"
+		}
+		c.JSON(http.StatusOK, gin.H{
+			"base_url":        base,
+			"openai_base_url": base + "/v1",
+			"claude_base_url": base + "/anthropic",
+			"model":           model,
+			"agent_model":     model,
+		})
+	})
+	g.GET("/api-keys", func(c *gin.Context) {
+		proxy(c, http.MethodGet, billingAdminBase+"/portal/api-keys?tenant_id="+tenantStr(c), nil, log)
+	})
+	g.POST("/api-keys", func(c *gin.Context) {
+		portalPOST(c, billingAdminBase+"/portal/api-keys", log)
+	})
+	g.POST("/api-keys/status", func(c *gin.Context) {
+		portalPOST(c, billingAdminBase+"/portal/api-keys/status", log)
+	})
+	g.POST("/api-keys/delete", func(c *gin.Context) {
+		portalPOST(c, billingAdminBase+"/portal/api-keys/delete", log)
+	})
 	// 我的消费（按模型分组，days 透传）。
 	g.GET("/consumption", func(c *gin.Context) {
 		proxy(c, http.MethodGet, billingAdminBase+"/admin/consumption?tenant_id="+tenantStr(c)+"&"+c.Request.URL.RawQuery, nil, log)
@@ -57,20 +93,19 @@ func RegisterPortal(g *gin.RouterGroup, billingAdminBase, agentBase string, log 
 
 	// 写操作：tenant_id 强制取自 key（前端传的被覆盖），防止越权改别人的账户
 	g.POST("/recharge", func(c *gin.Context) {
-		portalPOST(c, billingAdminBase+"/admin/recharge", log)
+		c.JSON(http.StatusForbidden, gin.H{"error": "充值入口暂时关闭，请使用余额兑换码"})
 	})
+	g.POST("/redeem", func(c *gin.Context) { portalPOST(c, billingAdminBase+"/portal/redeem", log) })
 	// 模拟支付：pending_payment → paid + 入账（页面「充值」按钮 = 建单+支付两步，与 AI 客服等价）
-	g.POST("/recharge/pay", func(c *gin.Context) {
-		portalPOST(c, billingAdminBase+"/admin/recharge/pay", log)
-	})
+	g.POST("/recharge/pay", func(c *gin.Context) { c.JSON(http.StatusForbidden, gin.H{"error": "充值入口暂时关闭"}) })
 	g.POST("/recharge/refund", func(c *gin.Context) {
 		portalPOST(c, billingAdminBase+"/admin/recharge/refund", log)
 	})
 	g.POST("/subscribe", func(c *gin.Context) {
-		portalPOST(c, billingAdminBase+"/admin/subscribe", log)
+		c.JSON(http.StatusForbidden, gin.H{"error": "月卡开通暂未开放"})
 	})
 	g.POST("/change-plan", func(c *gin.Context) {
-		portalPOST(c, billingAdminBase+"/admin/change-plan", log)
+		c.JSON(http.StatusForbidden, gin.H{"error": "套餐变更暂未开放"})
 	})
 	g.POST("/cancel-subscription", func(c *gin.Context) {
 		portalPOST(c, billingAdminBase+"/admin/cancel-subscription", log)
@@ -80,7 +115,7 @@ func RegisterPortal(g *gin.RouterGroup, billingAdminBase, agentBase string, log 
 	// 注意：不能用面板聚合用的 adminHTTP（5s 短超时）——agent 内部要走真实 DeepSeek 多轮 tool loop，
 	// LLM 稍慢（首 token 或重试）就会被 5s 掐断成「agent 不可达」。这里用专用长超时 client。
 	g.POST("/chat", func(c *gin.Context) {
-		body, err := io.ReadAll(c.Request.Body)
+		body, err := io.ReadAll(http.MaxBytesReader(c.Writer, c.Request.Body, 64<<10))
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "read body failed"})
 			return
@@ -106,13 +141,13 @@ func RegisterPortal(g *gin.RouterGroup, billingAdminBase, agentBase string, log 
 
 // portalPOST 读 body → 强制 tenant_id = key 派生值 → 转发 billing admin。
 func portalPOST(c *gin.Context, target string, log *slog.Logger) {
-	body, err := io.ReadAll(c.Request.Body)
+	body, err := io.ReadAll(http.MaxBytesReader(c.Writer, c.Request.Body, 64<<10))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "read body failed"})
 		return
 	}
 	m := map[string]any{}
-	if err := json.Unmarshal(body, &m); err != nil {
+	if err := json.Unmarshal(body, &m); err != nil || m == nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "bad json body"})
 		return
 	}

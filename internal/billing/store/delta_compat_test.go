@@ -55,3 +55,28 @@ func TestDeltaLegacyNumericRefundPreserved(t *testing.T) {
 		t.Fatalf("bal=%d applied=%d err=%v; old actual refund must survive conflict", bal, applied, err)
 	}
 }
+
+func TestApplyDeltaUnlessOrphan(t *testing.T) {
+	mr := miniredis.RunT(t)
+	rdb := goredis.NewClient(&goredis.Options{Addr: mr.Addr()})
+	defer rdb.Close()
+	s := NewStore(nil, rdb)
+	ctx := context.Background()
+	mr.Set(BalanceKey(1), "1000")
+	bal, applied, orphan, err := s.applyDeltaUnlessOrphan(ctx, 1, "fresh", 50)
+	if err != nil || orphan || bal != 950 || applied != 50 {
+		t.Fatalf("fresh bal=%d applied=%d orphan=%v err=%v", bal, applied, orphan, err)
+	}
+	mr.Set(BalanceKey(1), "1000")
+	mr.Set(DeltaGuardKey("stuck"), "v2:50")
+	bal, applied, orphan, err = s.applyDeltaUnlessOrphan(ctx, 1, "stuck", 50)
+	if err != nil || !orphan || bal != 0 || applied != 0 {
+		t.Fatalf("stuck bal=%d applied=%d orphan=%v err=%v", bal, applied, orphan, err)
+	}
+	if got, err := rdb.Get(ctx, BalanceKey(1)).Result(); err != nil || got != "1000" {
+		t.Fatalf("balance = %q err=%v, existing marker must not move money", got, err)
+	}
+	if got, err := rdb.Get(ctx, DeltaGuardKey("stuck")).Result(); err != nil || got != "v2:50" {
+		t.Fatalf("marker = %q err=%v", got, err)
+	}
+}

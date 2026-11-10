@@ -5,23 +5,49 @@ package store
 
 import (
 	"context"
+	"errors"
 
+	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
+
+const ProviderDeleted int8 = 3
+
+var ErrProviderNotFound = errors.New("provider not found")
+
+// DeleteProvider 把渠道标成已删除并清掉上游密钥。渠道 ID 和历史账单保留。
+func (s *Store) DeleteProvider(ctx context.Context, id uint64) error {
+	result := s.db.WithContext(ctx).Model(&Provider{}).Where("id = ? AND status <> ?", id, ProviderDeleted).
+		Updates(map[string]any{"status": ProviderDeleted, "upstream_key": ""})
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return ErrProviderNotFound
+	}
+	return nil
+}
 
 // UpsertProvider 按 name 幂等 upsert 渠道（重复名则更新转发参数/成本/权重/启停）。
 // models 为 JSON 数组字符串（如 ["deepseek-chat"] 或 ["*"]）。
 // OnConflict 更新时 gorm 不回填已存在行的 ID，这里按 name 取回，保证调用方拿到真实 ID。
 func (s *Store) UpsertProvider(ctx context.Context, p *Provider) error {
+	assignments := make([]clause.Assignment, 0, 8)
+	for _, col := range []string{"base_url", "messages_base_url", "responses_base_url", "upstream_key", "cost_in_cent", "cost_out_cent", "models", "weight", "status", "updated_at"} {
+		assignments = append(assignments, clause.Assignment{Column: clause.Column{Name: col}, Value: gorm.Expr("IF(status = 3, `" + col + "`, VALUES(`" + col + "`))")})
+	}
 	if err := s.db.WithContext(ctx).Clauses(clause.OnConflict{
 		Columns:   []clause.Column{{Name: "name"}},
-		DoUpdates: clause.AssignmentColumns([]string{"base_url", "upstream_key", "cost_in_cent", "cost_out_cent", "models", "weight", "status"}),
+		DoUpdates: assignments,
 	}).Create(p).Error; err != nil {
 		return err
 	}
 	var got Provider
 	if err := s.db.WithContext(ctx).Where("name = ?", p.Name).First(&got).Error; err != nil {
 		return err
+	}
+	if got.Status == ProviderDeleted {
+		return errors.New("channel name belongs to a deleted channel")
 	}
 	p.ID = got.ID
 	return nil
@@ -57,7 +83,7 @@ func (s *Store) ListProvidersWithMargin(ctx context.Context) ([]ProviderMargin, 
 	}
 
 	var ps []Provider
-	if err := s.db.WithContext(ctx).Order("id").Find(&ps).Error; err != nil {
+	if err := s.db.WithContext(ctx).Where("status <> ?", ProviderDeleted).Order("id").Find(&ps).Error; err != nil {
 		return nil, err
 	}
 	out := make([]ProviderMargin, 0, len(ps))
@@ -72,4 +98,14 @@ func (s *Store) ListProvidersWithMargin(ctx context.Context) ([]ProviderMargin, 
 		out = append(out, ProviderMargin{Provider: p, SellingCent: a.Selling, CostCent: cost, MarginCent: a.Selling - cost})
 	}
 	return out, nil
+}
+
+// ProviderByName is used for masked-key edits without clearing stored credentials.
+func (s *Store) ProviderByName(ctx context.Context, name string) (*Provider, error) {
+	var row Provider
+	err := s.db.WithContext(ctx).Where("name = ?", name).First(&row).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
+	return &row, err
 }

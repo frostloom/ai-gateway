@@ -68,7 +68,7 @@ func isolatedObservedHandler(t *testing.T) (*Handler, *fakeAdmin) {
 	fa := &fakeAdmin{}
 	srv := httptest.NewServer(fa.handler())
 	t.Cleanup(srv.Close)
-	return &Handler{billing: fakeBilling{tenantID: 42}, tb: NewToolbox(NewAdminClient(srv.URL)), st: st, rdb: rdb, log: slog.New(slog.NewTextHandler(io.Discard, nil))}, fa
+	return &Handler{billing: fakeBilling{tenantID: 42}, tb: confirmationFixtureToolbox(NewAdminClient(srv.URL)), st: st, rdb: rdb, log: slog.New(slog.NewTextHandler(io.Discard, nil))}, fa
 }
 
 type observedSpans struct {
