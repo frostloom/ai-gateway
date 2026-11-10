@@ -136,6 +136,47 @@ func (o *Observer) Shutdown(ctx context.Context) error {
 	}
 	return o.provider.Shutdown(ctx)
 }
+
+type ExperimentLink struct {
+	ID, Name, DatasetID, ItemID, ExpectedOutput string
+	Input, Output                               any
+	Metadata                                    map[string]string
+}
+
+// RecordExperiment writes one root span the dataset grader can match.
+// The root observation id is this span's own id, which is what makes
+// isExperimentItemRootSpan true after Langfuse stores the event.
+func (o *Observer) RecordExperiment(ctx context.Context, link ExperimentLink) error {
+	if o == nil || !o.cfg.Enabled {
+		return errors.New("langfuse export disabled")
+	}
+	if link.DatasetID == "" || link.ItemID == "" || link.ID == "" {
+		return errors.New("experiment link is incomplete")
+	}
+	_, span := o.tracer.Start(ctx, "agent.turn", trace.WithNewRoot(), trace.WithAttributes(
+		attribute.String("langfuse.version", "agent-observability.v1"),
+		attribute.String("langfuse.release", o.cfg.Release),
+		attribute.String("langfuse.environment", o.cfg.Environment),
+		attribute.StringSlice("langfuse.trace.tags", []string{o.cfg.Environment, "dataset-experiment"}),
+		attribute.String("langfuse.observation.type", "agent"),
+		attribute.String("langfuse.experiment.id", link.ID),
+		attribute.String("langfuse.experiment.name", link.Name),
+		attribute.String("langfuse.experiment.dataset.id", link.DatasetID),
+		attribute.String("langfuse.experiment.item.id", link.ItemID),
+	))
+	span.SetAttributes(attribute.String("langfuse.experiment.item.root_observation_id", span.SpanContext().SpanID().String()))
+	if link.ExpectedOutput != "" {
+		span.SetAttributes(attribute.String("langfuse.experiment.item.expected_output", clip(redact(link.ExpectedOutput), contentLimit)))
+	}
+	o.content(span, "input", link.Input)
+	o.content(span, "output", link.Output)
+	for key, value := range link.Metadata {
+		span.SetAttributes(meta(key, clip(redact(value), 3500)))
+	}
+	span.End()
+	return nil
+}
+
 func (o *Observer) ForceFlush(ctx context.Context) error {
 	if o == nil {
 		return nil

@@ -11,6 +11,22 @@ import (
 )
 
 func main() {
+	if len(os.Args) >= 2 && os.Args[1] == "--grades-only" {
+		root := localpaired.CampaignDir
+		if len(os.Args) == 3 && os.Args[2] != "" {
+			root = os.Args[2]
+		}
+		langfuse, err := loadEnvFile("deploy/langfuse/.env.agent")
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err.Error())
+			os.Exit(1)
+		}
+		if err := localpaired.RepublishGrades(context.Background(), root, langfuse); err != nil {
+			fmt.Fprintln(os.Stderr, err.Error())
+			os.Exit(1)
+		}
+		return
+	}
 	auth, err := loadAuth()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())

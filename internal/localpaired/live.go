@@ -133,7 +133,13 @@ func RunLive(ctx context.Context, root string, auth LiveAuth) error {
 		_ = os.Setenv("JEV_HTTPS_PROXY", auth.ProxyURL)
 	}
 	selective.SetJev(jev.NewClient(auth.JEVEndpoint, auth.JEVKey, auth.JEVModel))
+	if err := selective.SetJevFastPath(true, 0.90); err != nil {
+		return err
+	}
 	selective.SetObserver(observer)
+	if err := os.MkdirAll(filepath.Join(root, "grades"), 0o755); err != nil {
+		return err
+	}
 
 	bundle := Bundle{Root: root}
 	done := 0
@@ -144,12 +150,16 @@ func RunLive(ctx context.Context, root string, auth LiveAuth) error {
 			return ctx.Err()
 		}
 		recordPath := filepath.Join(root, "records", item.ID+".json")
-		if _, err := os.Stat(recordPath); err == nil {
-			done++
-			consecutive = 0
-			continue
+		_, statErr := os.Stat(recordPath)
+		var err error
+		if os.IsNotExist(statErr) {
+			err = runOne(ctx, bundle, db, rdb, modelHandler, selective, token, item)
+		} else if statErr != nil {
+			err = statErr
 		}
-		err := runOne(ctx, bundle, db, rdb, modelHandler, selective, token, item)
+		if err == nil {
+			err = publishGrades(ctx, observer, root, item)
+		}
 		flushCtx, cancel := context.WithTimeout(ctx, 8*time.Second)
 		flushErr := observer.ForceFlush(flushCtx)
 		cancel()
@@ -179,6 +189,156 @@ func RunLive(ctx context.Context, root string, auth LiveAuth) error {
 	writeStatus(root, len(cases), done, failed, "finished")
 	logger.Info("finished", "done", done, "failed", failed, "total", len(cases))
 	return nil
+}
+
+const experimentDatasetID = "cmwapfl500003qp30lg1mvpud"
+
+func publishGrades(ctx context.Context, observer *observability.Observer, root string, item storedCase) error {
+	raw, err := os.ReadFile(filepath.Join(root, "records", item.ID+".json"))
+	if err != nil {
+		return err
+	}
+	var record storedRecord
+	if err := json.Unmarshal(raw, &record); err != nil {
+		return err
+	}
+	if record.ID != item.ID {
+		return fmt.Errorf("record id mismatch")
+	}
+	for _, arm := range record.Arms {
+		mark := filepath.Join(root, "grades", item.ID+"-"+arm.Arm+".json")
+		if _, err := os.Stat(mark); err == nil {
+			continue
+		}
+		packetRaw, err := os.ReadFile(filepath.Join(root, filepath.FromSlash(arm.Packet)))
+		if err != nil {
+			return err
+		}
+		var packet Packet
+		if err := json.Unmarshal(packetRaw, &packet); err != nil {
+			return err
+		}
+		users := make([]string, 0, len(packet.Turns))
+		replies := make([]string, 0, len(packet.Turns))
+		toolNames := make([][]string, 0, len(packet.Turns))
+		notes := make([]map[string]string, 0, 8)
+		for _, turn := range packet.Turns {
+			users = append(users, turn.User)
+			replies = append(replies, turn.Reply)
+			names := make([]string, 0, len(turn.Tools))
+			for _, tool := range turn.Tools {
+				names = append(names, tool.Name)
+				if len(notes) >= 8 {
+					continue
+				}
+				result := tool.Result
+				if len(result) > 200 {
+					result = result[:200]
+				}
+				notes = append(notes, map[string]string{"name": tool.Name, "result": result})
+			}
+			toolNames = append(toolNames, names)
+		}
+		rubric := make([]string, 0, len(item.Rubric))
+		for _, piece := range item.Rubric {
+			if text := strings.TrimSpace(piece.Text); text != "" {
+				rubric = append(rubric, text)
+			}
+		}
+		if len(rubric) == 0 {
+			return fmt.Errorf("case %s has an empty rubric", item.ID)
+		}
+		expected, err := json.Marshal(map[string]any{"rubric": rubric})
+		if err != nil {
+			return err
+		}
+		trace, err := json.Marshal(notes)
+		if err != nil {
+			return err
+		}
+		experimentID, experimentName := experimentIdentity(arm.Arm)
+		if err := observer.RecordExperiment(ctx, observability.ExperimentLink{
+			ID:             experimentID,
+			Name:           experimentName,
+			DatasetID:      experimentDatasetID,
+			ItemID:         item.ID,
+			ExpectedOutput: string(expected),
+			Input:          map[string]any{"id": item.ID, "user": users},
+			Output:         map[string]any{"replies": replies, "tools": toolNames},
+			Metadata:       map[string]string{"arm": arm.Arm, "tool_trace": string(trace), "model_calls": strconv.Itoa(arm.ModelCalls), "jev_calls": strconv.Itoa(arm.JEVCalls)},
+		}); err != nil {
+			return err
+		}
+		flushCtx, cancel := context.WithTimeout(ctx, 8*time.Second)
+		err = observer.ForceFlush(flushCtx)
+		cancel()
+		if err != nil {
+			return err
+		}
+		if err := os.WriteFile(mark, []byte("{}\n"), 0o644); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func RepublishGrades(ctx context.Context, root string, langfuse map[string]string) error {
+	root = filepath.Clean(root)
+	if pathRefused(root) {
+		return fmt.Errorf("refusing protected path")
+	}
+	cfg, err := observability.ConfigFromEnv(func(key string) string { return langfuse[key] })
+	if err != nil {
+		return err
+	}
+	if !cfg.Enabled {
+		return fmt.Errorf("langfuse export disabled")
+	}
+	cfg.ExportTimeout = 5 * time.Second
+	observer, err := observability.New(ctx, cfg)
+	if err != nil {
+		return err
+	}
+	defer observer.Shutdown(context.Background())
+	cases, err := loadCases(root)
+	if err != nil {
+		return err
+	}
+	if err := os.MkdirAll(filepath.Join(root, "grades"), 0o755); err != nil {
+		return err
+	}
+	published := 0
+	for _, item := range cases {
+		recordPath := filepath.Join(root, "records", item.ID+".json")
+		if _, err := os.Stat(recordPath); err != nil {
+			continue
+		}
+		if err := publishGrades(ctx, observer, root, item); err != nil {
+			return err
+		}
+		published++
+	}
+	flushCtx, cancel := context.WithTimeout(ctx, 8*time.Second)
+	err = observer.ForceFlush(flushCtx)
+	cancel()
+	if err != nil {
+		return err
+	}
+	if published == 0 {
+		return fmt.Errorf("no finished cases to publish")
+	}
+	return nil
+}
+
+func experimentIdentity(arm string) (string, string) {
+	switch arm {
+	case "model":
+		return "local-paired-20261110-model", "本机双臂-model"
+	case "jev_selective":
+		return "local-paired-20261110-jev-selective", "本机双臂-jev_selective"
+	default:
+		return "local-paired-20261110-" + arm, arm
+	}
 }
 
 func runOne(ctx context.Context, bundle Bundle, db *gorm.DB, rdb *goredis.Client, model, selective http.Handler, token string, item storedCase) error {
