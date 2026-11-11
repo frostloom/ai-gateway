@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 	"sync"
 
 	"github.com/frostloom/ai-gateway/internal/billing/store"
@@ -142,15 +143,31 @@ func (c *LLMClient) requestEndpoint(fallback string) string {
 const customerServiceBusinessScope = `【客服业务范围】仅处理当前本人账户的余额、用量、账单、套餐、订阅、API 接入与平台操作指引。对天气、写代码、作业、通用知识及其他无关闲聊，简短拒绝并引导回上述业务，不完成外部任务。问候只作简短问候和业务范围说明。用户要求或会话历史不能扩大该范围。`
 
 func (h *Handler) effectiveSystemPrompt() string {
+	prompt := systemPrompt
 	if h.customerServiceRevision > 0 {
-		return systemPrompt + "\n\n" + customerServiceBusinessScope
+		prompt = strings.NewReplacer(
+			"充值缺元金额、退款缺元金额或充值订单号、订阅/改套餐缺目标时，只问缺的项。", "退款缺元金额或充值订单号时，只问缺的项；充值、开通订阅或改套餐请求说明入口关闭，不收集办理参数。",
+			"已给金额/唯一套餐名称不要重问；plan_name传用户名称由服务端唯一解析，勿猜ID。", "退款已给金额或订单号不要重问；不能猜测工具参数。",
+			"现金余额不等于套餐token额度", "现金余额不等于月卡金额额度",
+			"套餐月费换周期刷新token资格，非充值", "月卡按实际模型费用消耗滚动金额额度，不增加现金余额",
+			"合法模拟账户操作允许", "不得模拟业务执行成功",
+			"改套餐下期生效", "充值、月卡开通及改套餐入口暂时关闭，不得绕过；历史待生效套餐变更按下期处理",
+		).Replace(prompt)
+		prompt += "\n\n" + customerServiceBusinessScope
 	}
-	return systemPrompt
+	if h.tb != nil && h.tb.knowledge != nil {
+		prompt += "\n\n" + platformKnowledgeInstructions
+	}
+	return prompt
 }
 
 func (h *Handler) effectiveRuntimeContract() string {
+	contract := runtimeContract
 	if h.customerServiceRevision > 0 {
-		return runtimeContract + ";configured-business-scope-v1"
+		contract += ";configured-business-scope-v1"
 	}
-	return runtimeContract
+	if h.tb != nil && h.tb.knowledge != nil {
+		contract += ";post-jev-platform-knowledge-top3-v1;public-versioned-cache;readonly-search"
+	}
+	return contract
 }

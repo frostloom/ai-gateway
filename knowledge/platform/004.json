@@ -1,0 +1,34 @@
+{
+  "id": "KB-004",
+  "title": "月卡套餐权益与开通状态",
+  "version": "2",
+  "status": "approved",
+  "reviewed_at": "2026-11-11",
+  "scope": "当前公共平台规则；账户状态、价格和可用权益以实时业务工具为准",
+  "aliases": [
+    "月卡",
+    "月卡怎么买",
+    "套餐价格",
+    "购买月卡",
+    "订阅开通",
+    "套餐权益"
+  ],
+  "sources": [
+    {
+      "path": "internal/agent/tools.go",
+      "symbol": "listPlans"
+    },
+    {
+      "path": "internal/gateway/handler/portal.go",
+      "symbol": "RegisterPortal"
+    },
+    {
+      "path": "internal/billing/store/subscription_money.go",
+      "symbol": "SubscriptionMoneyAllowance"
+    }
+  ],
+  "paragraphs": [
+    "当前月卡按人民币金额展示权益，可包含滚动小时窗口、滚动七天和本计费周期的额度。每个套餐的价格、窗口小时数、周期天数和金额上限以实时套餐信息为准，不保证所有套餐都是五小时或自然月。",
+    "普通用户的月卡开通入口及客服开通工具暂时关闭。可以查询套餐与本人已有订阅，客服不能通过知识库或用户确认绕过关闭的开通入口。已有订阅是否有效、剩余额度和到期时间需要实时查询。"
+  ]
+}

@@ -11,18 +11,20 @@ import (
 // RuntimeMetadata identifies the actual shared model/execution contract. It
 // contains no credentials. Dataset/fixture hashes belong to the evaluator.
 type RuntimeMetadata struct {
-	Model            string             `json:"model"`
-	Protocol         string             `json:"protocol"`
-	EndpointSHA256   string             `json:"endpoint_sha256"`
-	PromptSHA256     string             `json:"prompt_sha256"`
-	ToolsSHA256      string             `json:"tools_sha256"`
-	ContractSHA256   string             `json:"contract_sha256"`
-	RoutingMode      string             `json:"routing_mode"`
-	RoutingRevision  string             `json:"routing_revision"`
-	Thresholds       map[string]float64 `json:"thresholds"`
-	MaxOutputTokens  int                `json:"max_output_tokens"`
-	ThinkingMode     string             `json:"thinking_mode,omitempty"`
-	ReplyRepairLimit int                `json:"reply_repair_limit"`
+	KnowledgeCorpusVersion    string             `json:"knowledge_corpus_version,omitempty"`
+	KnowledgeRetrievalVersion string             `json:"knowledge_retrieval_version,omitempty"`
+	Model                     string             `json:"model"`
+	Protocol                  string             `json:"protocol"`
+	EndpointSHA256            string             `json:"endpoint_sha256"`
+	PromptSHA256              string             `json:"prompt_sha256"`
+	ToolsSHA256               string             `json:"tools_sha256"`
+	ContractSHA256            string             `json:"contract_sha256"`
+	RoutingMode               string             `json:"routing_mode"`
+	RoutingRevision           string             `json:"routing_revision"`
+	Thresholds                map[string]float64 `json:"thresholds"`
+	MaxOutputTokens           int                `json:"max_output_tokens"`
+	ThinkingMode              string             `json:"thinking_mode,omitempty"`
+	ReplyRepairLimit          int                `json:"reply_repair_limit"`
 
 	CustomerServiceRevision uint64 `json:"customer_service_revision,omitempty"`
 }
@@ -46,6 +48,10 @@ func (h *Handler) runtimeMetadata() *RuntimeMetadata {
 		ReplyRepairLimit: 1, Thresholds: map[string]float64{"intent_min": .90, "shape_min": .90, "offtopic_min": .90,
 			"risk_block_min": 1.5, "risk_block_confidence_min": .88,
 			"legit_min": .85, "risk_max_exclusive": .5, "risk_confidence_min": .8}}
+	if h.tb != nil && h.tb.knowledge != nil {
+		metadata.KnowledgeCorpusVersion = h.tb.knowledge.Version()
+		metadata.KnowledgeRetrievalVersion = h.tb.knowledge.RetrievalVersion()
+	}
 	if h.jevFastPathMin > 0 {
 		metadata.Thresholds["intent_min"] = h.jevFastPathMin
 		metadata.Thresholds["shape_min"] = h.jevFastPathMin

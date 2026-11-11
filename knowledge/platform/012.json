@@ -1,0 +1,42 @@
+{
+  "id": "KB-012",
+  "title": "API 接入与调用密钥管理",
+  "version": "2",
+  "status": "approved",
+  "reviewed_at": "2026-11-11",
+  "scope": "当前公共平台规则；账户状态、价格和可用权益以实时业务工具为准",
+  "aliases": [
+    "API接入",
+    "API Key",
+    "apikey",
+    "调用密钥",
+    "删除密钥",
+    "chat/completions",
+    "v1/messages",
+    "模型404"
+  ],
+  "sources": [
+    {
+      "path": "internal/gateway/handler/portal.go",
+      "symbol": "RegisterPortal"
+    },
+    {
+      "path": "cmd/gateway/main.go",
+      "symbol": "main"
+    },
+    {
+      "path": "internal/billing/store/portal_auth.go",
+      "symbol": "DeleteDownstreamAPIKey"
+    },
+    {
+      "path": "web/src/portal/views/AccessView.vue",
+      "symbol": "create"
+    }
+  ],
+  "paragraphs": [
+    "在 API 接入页创建用户调用密钥，完整密钥仅创建时显示一次，应自行安全保存。一个有效用户密钥可通过请求中的 model 指定管理员已配置并上架的模型，无需为每个模型另建密钥。可用模型编号以实时目录为准。",
+    "OpenAI 兼容客户端使用接入页的 /v1 基础地址，再请求 /chat/completions。Anthropic 客户端使用 /anthropic 基础地址，再请求 /v1/messages；网关也提供 /v1/messages 路由。目标上游必须支持对应协议，请复制接入页实际地址和精确模型编号。",
+    "调用出现 404 时，应检查基础地址与路径是否重复或缺失、model 是否在当前目录中，以及对应上游是否支持该协议；不能仅凭错误码断言原因。不要把用户调用密钥当作管理员上游密钥。",
+    "密钥支持启用、停用与删除。停用后可再启用，删除会撤销该密钥，不能恢复其调用权限；历史用量和账单仍保留。泄露时应停用或删除并创建新密钥，不要向客服发送完整密钥。"
+  ]
+}

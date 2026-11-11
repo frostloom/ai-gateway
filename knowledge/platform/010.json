@@ -1,0 +1,35 @@
+{
+  "id": "KB-010",
+  "title": "用量、消费与账单查询口径",
+  "version": "2",
+  "status": "approved",
+  "reviewed_at": "2026-11-11",
+  "scope": "当前公共平台规则；账户状态、价格和可用权益以实时业务工具为准",
+  "aliases": [
+    "用量",
+    "消费",
+    "账单",
+    "token用量",
+    "最近账单",
+    "七天消费",
+    "月消费"
+  ],
+  "sources": [
+    {
+      "path": "internal/agent/tools.go",
+      "symbol": "readConsumption"
+    },
+    {
+      "path": "internal/agent/tools.go",
+      "symbol": "readRecentBills"
+    },
+    {
+      "path": "web/src/portal/views/ConsumptionView.vue",
+      "symbol": "load"
+    }
+  ],
+  "paragraphs": [
+    "用户可在“用量”页面按时间范围查看调用数、已结算人民币费用、输入与输出 token，以及按模型和日期的统计。说明统计时要给出时间范围和单位，现金扣款、月卡权益消耗与 token 用量不能混为一谈。",
+    "客服每日消费查询工具返回最近七天的人民币消费；最近账单查询默认返回三条、最多十条，可包含输入输出 token 和费用。这些结果不等于整月完整用量，不能根据少量账单推断整月精确总额。"
+  ]
+}

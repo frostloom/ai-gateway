@@ -1,0 +1,32 @@
+{
+  "id": "KB-002",
+  "title": "现金余额与月卡金额额度",
+  "version": "2",
+  "status": "approved",
+  "reviewed_at": "2026-11-11",
+  "scope": "当前公共平台规则；账户状态、价格和可用权益以实时业务工具为准",
+  "aliases": [
+    "现金余额",
+    "钱包余额",
+    "余额",
+    "token和钱包一样吗",
+    "月卡额度",
+    "金额权益",
+    "余额和额度区别",
+    "零扣费"
+  ],
+  "sources": [
+    {
+      "path": "internal/billing/store/subscription_money.go",
+      "symbol": "SubscriptionMoneyAllowance"
+    },
+    {
+      "path": "web/src/portal/views/PlansView.vue",
+      "symbol": "periodLabel"
+    }
+  ],
+  "paragraphs": [
+    "现金余额与月卡权益分别计算。当前月卡页面按模型实际费用展示窗口、每周或本周期的人民币金额额度；不同模型单价不同，金额额度不能换成一个固定 token 数。开通订阅不会给现金余额充值。",
+    "现金余额、月卡剩余金额、有效周期和调用用量都要实时查询。历史订阅可能保留按模型档次计算的 token 额度，应以本人订阅实际返回的权益为准。零现金扣费不能推出零 token 用量。"
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "id": "KB-006",
+  "title": "退订只取消下期续费",
+  "version": "2",
+  "status": "approved",
+  "reviewed_at": "2026-11-11",
+  "scope": "当前公共平台规则；账户状态、价格和可用权益以实时业务工具为准",
+  "aliases": [
+    "退订",
+    "取消套餐会退钱吗",
+    "取消续费",
+    "自动续费",
+    "月卡退款"
+  ],
+  "sources": [
+    {
+      "path": "internal/billing/store/plan.go",
+      "symbol": "CancelSubscription"
+    },
+    {
+      "path": "internal/agent/tools.go",
+      "symbol": "cancelSubscriptionTool"
+    }
+  ],
+  "paragraphs": [
+    "已有定期订阅退订的含义是停止下期续费，本期权益保留至当前周期结束，本期费用不退。一次性套餐没有续费可取消，不支持按退订方式退款。实际可退订状态以本人实时订阅为准。",
+    "咨询退订规则不会直接取消订阅。需要先查询有效订阅、生成真实业务预览，明确当前周期结束时间与不退款规则，用户确认后才执行；成功与否以工具返回结果为准。"
+  ]
+}

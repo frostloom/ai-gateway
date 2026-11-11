@@ -1,0 +1,30 @@
+{
+  "id": "KB-003",
+  "title": "模型输入输出计价与按量计费",
+  "version": "2",
+  "status": "approved",
+  "reviewed_at": "2026-11-11",
+  "scope": "当前公共平台规则；账户状态、价格和可用权益以实时业务工具为准",
+  "aliases": [
+    "模型价格",
+    "输入价格",
+    "输出价格",
+    "按量计费",
+    "一百万token",
+    "计费公式"
+  ],
+  "sources": [
+    {
+      "path": "internal/pkg/quota/quota.go",
+      "symbol": "CostCentChecked"
+    },
+    {
+      "path": "internal/billing/store/console_catalog.go",
+      "symbol": "ListSupportedModels"
+    }
+  ],
+  "paragraphs": [
+    "模型调用按实际输入与输出 token 分别计价，再合计费用。价格表单位为分／百万 token；人民币费用以结算账单为准。输入、输出单价可能不同，不能用同一个固定 token 数说明所有模型的余额消耗。",
+    "模型编号和当前输入、输出价格应查询实时模型目录。预扣金额与最终实际结算可能不同；不要把预扣直接当作最终消费，也不要虚构缓存折扣或未配置模型的价格。"
+  ]
+}

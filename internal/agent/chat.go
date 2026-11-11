@@ -399,6 +399,7 @@ func isGearToolLine(t string) bool {
 // 每轮最多 5 次工具迭代，防 LLM 死循环。v 为 JEV 前置判定（含提示行与警告标记）。
 func (h *Handler) llmLoop(ctx context.Context, sessionID string, tenantID uint64, v jevVerdict, ses *session) (string, []traceItem, error) {
 	var trace []traceItem
+	ctx = h.prefetchKnowledge(ctx, lastUserMsg(ses))
 	pending := ses.PendingAction
 	// Request-local only: current-balance queries in a later turn must hit billing again.
 	readResults := map[string]string{}
@@ -411,6 +412,7 @@ func (h *Handler) llmLoop(ctx context.Context, sessionID string, tenantID uint64
 		if repair != "" {
 			messages[0].Content += "\n【纠正】" + repair
 		}
+		messages = h.knowledgeMessages(ctx, messages)
 		// 计时：多轮 loop 的耗时排查全靠这个（"总耗时 300s 但上游每次只要 2s"，
 		// 没有每轮计时就只能猜）。
 		t0 := time.Now()
@@ -504,6 +506,9 @@ func (h *Handler) llmLoop(ctx context.Context, sessionID string, tenantID uint64
 					// The previous call/result remains paired in history. Do not append an
 					// unexecuted call to the trace or let the model spin on the same query.
 					reply := sanitizeReply(result)
+					if name == "search_platform_knowledge" {
+						reply = "已查阅相关平台规则。请具体说明需要了解的事项；账户余额、当前权益和价格需实时查询。"
+					}
 					ses.History = append(ses.History, Message{Role: "assistant", Content: reply})
 					return reply, trace, nil
 				}
@@ -768,12 +773,13 @@ func isPendingCancellation(text string) bool {
 
 // readTools 只读工具集（即时执行，无需确认）。
 var readTools = map[string]bool{
-	"get_balance":         true,
-	"get_consumption":     true,
-	"get_recent_bills":    true,
-	"list_models":         true,
-	"list_plans":          true,
-	"get_my_subscription": true,
+	"search_platform_knowledge": true,
+	"get_balance":               true,
+	"get_consumption":           true,
+	"get_recent_bills":          true,
+	"list_models":               true,
+	"list_plans":                true,
+	"get_my_subscription":       true,
 }
 
 // ---------- 小工具 ----------

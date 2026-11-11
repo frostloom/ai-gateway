@@ -1,0 +1,34 @@
+{
+  "id": "KB-007",
+  "title": "套餐变更与当前办理入口",
+  "version": "2",
+  "status": "approved",
+  "reviewed_at": "2026-11-11",
+  "scope": "当前公共平台规则；账户状态、价格和可用权益以实时业务工具为准",
+  "aliases": [
+    "改套餐",
+    "更换月卡",
+    "升级套餐",
+    "降级套餐",
+    "下期变更",
+    "差价"
+  ],
+  "sources": [
+    {
+      "path": "internal/gateway/handler/portal.go",
+      "symbol": "RegisterPortal"
+    },
+    {
+      "path": "internal/agent/tools.go",
+      "symbol": "changePlanTool"
+    },
+    {
+      "path": "internal/billing/store/plan.go",
+      "symbol": "ChangePlan"
+    }
+  ],
+  "paragraphs": [
+    "普通用户的套餐变更入口及客服改套餐工具暂时关闭，当前不能办理升级、降级或改套餐。可以查询已有订阅及是否存在历史待生效变更，不能承诺立即切换或当场补退差价。",
+    "历史定期订阅的待生效套餐变更记录按下个周期处理；一次性套餐不支持该变更方式。当前套餐、待生效套餐及周期边界以实时订阅结果为准，知识资料不能替代办理权限。"
+  ]
+}

@@ -210,9 +210,11 @@ func (c *LLMClient) chatAnthropic(ctx context.Context, messages []Message, tools
 
 	ctx, finishAttempt := beginLLMAttempt(ctx, protoAnthropic)
 	httpReq = httpReq.WithContext(ctx)
+	observeKnowledgeRequest(ctx, messages)
 	defer func() {
 		err = c.safeError(err)
 		recordLLMExchange(ctx, messages, result)
+		observeKnowledgeResponse(ctx, messages, err)
 		finishAttempt(err)
 	}()
 	resp, err := c.cli.Do(httpReq)

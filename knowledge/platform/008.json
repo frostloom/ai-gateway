@@ -1,0 +1,38 @@
+{
+  "id": "KB-008",
+  "title": "余额兑换码与充值入口",
+  "version": "2",
+  "status": "approved",
+  "reviewed_at": "2026-11-11",
+  "scope": "当前公共平台规则；账户状态、价格和可用权益以实时业务工具为准",
+  "aliases": [
+    "充值",
+    "兑换码",
+    "券兑换",
+    "余额兑换",
+    "充值入口关闭",
+    "一次性码"
+  ],
+  "sources": [
+    {
+      "path": "internal/gateway/handler/portal.go",
+      "symbol": "RegisterPortal"
+    },
+    {
+      "path": "internal/billing/store/voucher.go",
+      "symbol": "CreateBalanceVouchers"
+    },
+    {
+      "path": "internal/billing/store/voucher.go",
+      "symbol": "RedeemBalanceVoucher"
+    },
+    {
+      "path": "internal/agent/tools.go",
+      "symbol": "rechargeTool"
+    }
+  ],
+  "paragraphs": [
+    "在线充值和支付入口暂时关闭，客服充值工具也已关闭。当前由管理员生成指定金额的一次性余额兑换码，用户在“余额与兑换”页面提交有效兑换码，成功后增加账户余额。客服不能模拟支付成功或直接代充。",
+    "兑换码有有效期，已使用、无效或过期的码不能再次增加余额。同一账户重试已成功的兑换不会重复入账。兑换失败应核对页面提示，操作过于频繁时稍后重试；不要要求用户在客服对话中公开完整兑换码。"
+  ]
+}
