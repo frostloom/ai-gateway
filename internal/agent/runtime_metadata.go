@@ -23,6 +23,8 @@ type RuntimeMetadata struct {
 	MaxOutputTokens  int                `json:"max_output_tokens"`
 	ThinkingMode     string             `json:"thinking_mode,omitempty"`
 	ReplyRepairLimit int                `json:"reply_repair_limit"`
+
+	CustomerServiceRevision uint64 `json:"customer_service_revision,omitempty"`
 }
 
 const runtimeContract = "customer-contract-v5;tenant-auth;read-only-four-any-turn-no-params;pending-open-current-turn-judged;offtopic-unrelated>=0.90;high-risk>=1.5-conf>=0.88-block;intent-shape>=0.90;legit>=0.85;risk<0.5;risk_conf>=0.8;shared-preview-confirm;no-pending-overwrite;empty-pending-confirm-noop;finite-recharge-completion-needs-execution;finite-explicit-own-recharge-preview-application;finite-refund-completion-needs-execution;reply-repair-max-one;explicit-own-cash-read-recovery-once-after-repair;no-numeric-inference;one-tool-per-iteration;loop-max-five"
@@ -38,9 +40,9 @@ func contentSHA(raw []byte) string {
 }
 
 func (h *Handler) runtimeMetadata() *RuntimeMetadata {
-	metadata := &RuntimeMetadata{Model: "unknown", Protocol: "unknown", RoutingMode: string(h.RoutingMode()),
+	metadata := &RuntimeMetadata{CustomerServiceRevision: h.customerServiceRevision, Model: "unknown", Protocol: "unknown", RoutingMode: string(h.RoutingMode()),
 		RoutingRevision: "selective-pending-read-offtopic-riskblock-v1",
-		PromptSHA256:    contentSHA([]byte(systemPrompt)), ContractSHA256: contentSHA([]byte(runtimeContract)),
+		PromptSHA256:    contentSHA([]byte(h.effectiveSystemPrompt())), ContractSHA256: contentSHA([]byte(h.effectiveRuntimeContract())),
 		ReplyRepairLimit: 1, Thresholds: map[string]float64{"intent_min": .90, "shape_min": .90, "offtopic_min": .90,
 			"risk_block_min": 1.5, "risk_block_confidence_min": .88,
 			"legit_min": .85, "risk_max_exclusive": .5, "risk_confidence_min": .8}}

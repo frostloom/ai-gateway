@@ -85,6 +85,8 @@ type Handler struct {
 	/*** 管理面板身份（gateway 注入内部密钥头时生效） ***/
 	internalToken string // AGENT_INTERNAL_TOKEN：gateway 与 agent 共享，防伪造管理员
 	defaultTenant uint64 // ADMIN_DEFAULT_TENANT：管理员未指定租户时的默认作用域
+
+	customerServiceRevision uint64
 }
 
 // SetObserver installs an independent optional telemetry sink before serving requests.
@@ -405,7 +407,7 @@ func (h *Handler) llmLoop(ctx context.Context, sessionID string, tenantID uint64
 	repaired := false
 
 	for iter := 0; iter < 5; iter++ {
-		messages := buildMessages(ses, pending, v)
+		messages := buildMessages(ses, pending, v, h.effectiveSystemPrompt())
 		if repair != "" {
 			messages[0].Content += "\n【纠正】" + repair
 		}
@@ -609,8 +611,11 @@ func (h *Handler) llmLoop(ctx context.Context, sessionID string, tenantID uint64
 // JEV 的两类提示行语义不同，都要带进去：
 //   - Hint：意图预判（正常请求，帮 LLM 一次选对工具）
 //   - Warn：安全提醒（中等可疑，要求谨慎并强制确认）
-func buildMessages(ses *session, pending *pendingAction, v jevVerdict) []Message {
+func buildMessages(ses *session, pending *pendingAction, v jevVerdict, basePrompt ...string) []Message {
 	sys := systemPrompt
+	if len(basePrompt) > 0 {
+		sys = basePrompt[0]
+	}
 	if v.Warn {
 		sys += "\n\n【安全模式】本轮请求的合理性判定偏低，请严格遵守：" +
 			"只做用户明确要求的事，涉及资金/合同的操作必须先给出预览并等用户确认，禁止推测执行。"

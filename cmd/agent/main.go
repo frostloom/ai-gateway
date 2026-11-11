@@ -29,6 +29,7 @@ import (
 	"github.com/frostloom/ai-gateway/internal/pkg/controlplane"
 	"github.com/frostloom/ai-gateway/internal/pkg/logger"
 	"github.com/frostloom/ai-gateway/internal/pkg/redisx"
+	"github.com/frostloom/ai-gateway/internal/supportconfig"
 )
 
 func main() {
@@ -180,7 +181,15 @@ func main() {
 		metrics = promhttp.HandlerFor(prometheus.Gatherers{prometheus.DefaultGatherer, observer.Gatherer()}, promhttp.HandlerOpts{})
 	}
 	mux.Handle("/metrics", metrics)
-	mux.Handle("/", h)
+	var settingsCipher *supportconfig.Cipher
+	if raw := os.Getenv(supportconfig.MasterKeyEnv); raw != "" {
+		settingsCipher, err = supportconfig.NewCipher(raw)
+		if err != nil {
+			log.Error("invalid customer service encryption configuration")
+			os.Exit(1)
+		}
+	}
+	mux.Handle("/", agent.NewDynamicHandler(h, st, settingsCipher))
 
 	log.Info("agent service listening",
 		"port", port, "model", llm.Model(), "protocol", llm.Protocol(),

@@ -23,9 +23,10 @@ import AuditView from './views/AuditView.vue'
 import VouchersView from './views/VouchersView.vue'
 import PlanManageView from './views/PlanManageView.vue'
 import TryView from './views/TryView.vue'
+import CustomerServiceView from './views/CustomerServiceView.vue'
 
 type ViewKey = 'overview' | 'sales' | 'models' | 'channels' | 'providers'
-  | 'vouchers' | 'plans' | 'bills' | 'subscription' | 'reconcile' | 'audit' | 'try'
+  | 'vouchers' | 'plans' | 'bills' | 'subscription' | 'reconcile' | 'audit' | 'try' | 'customer-service'
 
 interface NavItem { key: ViewKey; label: string; icon: any; group: string }
 
@@ -41,6 +42,7 @@ const navs: NavItem[] = [
   { key: 'providers', label: '熔断观测', icon: IconActivity, group: '供给' },
   { key: 'reconcile', label: '对账检查', icon: IconScale, group: '系统' },
   { key: 'audit', label: '客服审计', icon: IconClipboardList, group: '系统' },
+  { key: 'customer-service', label: 'AI 客服配置', icon: IconShieldLock, group: '系统' },
   { key: 'try', label: '接口调试', icon: IconTerminal2, group: '系统' },
 ]
 const groups = ['运营', '供给', '系统']
@@ -50,6 +52,7 @@ const views: Record<ViewKey, any> = {
   vouchers: VouchersView, plans: PlanManageView, overview: OverviewView, sales: SalesView, models: ModelsView, channels: ChannelsView,
   providers: ProvidersView, bills: BillsView, subscription: SubscriptionView,
   reconcile: ReconcileView, audit: AuditView, try: TryView,
+  'customer-service': CustomerServiceView,
 }
 
 const status = ref<'loading' | 'setup' | 'login' | 'in'>('loading')
@@ -64,7 +67,7 @@ const collapsed = ref(false)
 const mobileOpen = ref(false)
 const tenants = ref<{ id: number; name: string }[]>([])
 
-const descriptions: Record<ViewKey, string> = { vouchers: '管理一次性余额兑换码', plans: '管理窗口与周期金额权益', overview: '查看网关运行状态、资金与模型使用情况', sales: '追踪收入、消耗和模型销售表现', models: '管理可用模型、定价与展示信息', channels: '配置上游渠道与模型映射', providers: '查看节点健康状态与熔断记录', bills: '查询请求账单与结算明细', subscription: '管理套餐订阅与资金入账', reconcile: '核对账本余额与缓存投影', audit: '查看客服操作、用户确认与安全判定', try: '发送请求，验证模型接口' }
+const descriptions: Record<ViewKey, string> = { vouchers: '管理一次性余额兑换码', plans: '管理窗口与周期金额权益', overview: '查看网关运行状态、资金与模型使用情况', sales: '追踪收入、消耗和模型销售表现', models: '管理可用模型、定价与展示信息', channels: '配置上游渠道与模型映射', providers: '查看节点健康状态与熔断记录', bills: '查询请求账单与结算明细', subscription: '管理套餐订阅与资金入账', reconcile: '核对账本余额与缓存投影', audit: '查看客服操作、用户确认与安全判定', try: '发送请求，验证模型接口', 'customer-service': '设置客服主模型与 JEV 前置判断' }
 
 const curLabel = computed(() => navs.find(n => n.key === cur.value)?.label ?? '')
 

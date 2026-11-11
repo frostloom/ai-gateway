@@ -135,7 +135,7 @@ func NewClient(endpoint, apiKey, model string) *Client {
 		endpoint: endpoint,
 		apiKey:   apiKey,
 		model:    model,
-		cli:      &http.Client{Timeout: 10 * time.Second, Transport: jevTransport()},
+		cli:      &http.Client{Timeout: 10 * time.Second, Transport: jevTransport(), CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }},
 	}
 }
 

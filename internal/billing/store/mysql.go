@@ -161,7 +161,7 @@ func NewStore(db *gorm.DB, rdb *goredis.Client) *Store {
 func (s *Store) AutoMigrate() error {
 	return s.db.AutoMigrate(&Tenant{}, &APIKey{}, &Provider{}, &Model{}, &Bill{},
 		&Plan{}, &Subscription{}, &RechargeOrder{}, &Topup{}, &BalanceVoucher{}, &AgentSession{}, &AgentAuditLog{},
-		&OutboxEvent{}, &AuditEvent{}, &AdminUser{}, &AdminSession{}, &PortalUser{}, &PortalSession{})
+		&OutboxEvent{}, &AuditEvent{}, &AdminUser{}, &AdminSession{}, &PortalUser{}, &PortalSession{}, &CustomerServiceSettings{})
 }
 
 // ---------- 预占（核心） ----------

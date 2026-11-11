@@ -300,3 +300,19 @@ CREATE TABLE IF NOT EXISTS balance_vouchers (
   UNIQUE KEY uk_voucher_hash (code_hash),
   KEY idx_balance_vouchers_redeemed_tenant_id (redeemed_tenant_id)
 );
+
+-- Singleton customer-service settings. API credentials are AES-GCM ciphertext.
+CREATE TABLE IF NOT EXISTS customer_service_settings (
+  id BIGINT UNSIGNED NOT NULL PRIMARY KEY,
+  revision BIGINT UNSIGNED NOT NULL DEFAULT 0,
+  llm_base_url VARCHAR(512) NOT NULL,
+  llm_model VARCHAR(128) NOT NULL,
+  llm_protocol VARCHAR(16) NOT NULL,
+  llm_max_output_tokens BIGINT NOT NULL,
+  llm_key_ciphertext TEXT NOT NULL,
+  jev_enabled BOOLEAN NOT NULL DEFAULT FALSE,
+  jev_endpoint VARCHAR(512) NOT NULL,
+  jev_model VARCHAR(128) NOT NULL,
+  jev_key_ciphertext TEXT NOT NULL,
+  updated_at DATETIME(3) NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

@@ -154,3 +154,40 @@ export interface ModelImportResult {
   provider_id: number
   configured_models: string[]
 }
+
+export interface CustomerServiceConfig {
+  revision: number
+  updated_at: string
+  configured: boolean
+  encryption_ready: boolean
+  llm: {
+    base_url: string
+    model: string
+    protocol: 'openai' | 'anthropic'
+    max_output_tokens: number
+    api_key_configured: boolean
+  }
+  jev: {
+    enabled: boolean
+    endpoint: string
+    model: string
+    api_key_configured: boolean
+  }
+}
+
+export interface CustomerServiceUpdate {
+  revision: number
+  llm: {
+    base_url: string
+    model: string
+    protocol: 'openai' | 'anthropic'
+    max_output_tokens: number
+    api_key: string
+  }
+  jev: {
+    enabled: boolean
+    endpoint: string
+    model: string
+    api_key: string
+  }
+}

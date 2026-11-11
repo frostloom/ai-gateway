@@ -36,6 +36,7 @@ func Handler(st *store.Store, log *slog.Logger, token string) http.Handler {
 	mux := http.NewServeMux()
 	registerVouchers(mux, st, log)
 	registerProviderDiscovery(mux, st, log)
+	RegisterCustomerService(mux, st, log)
 
 	// 管理员认证（newapi 式初始登录，HttpOnly cookie 保持会话）。
 	registerAuth(mux, st, log)

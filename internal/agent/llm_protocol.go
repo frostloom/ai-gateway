@@ -135,7 +135,7 @@ func SetDebugDumpFile(f func(raw []byte)) { dumpFileFn = f }
 //
 // 仅用于诊断：把服务实际发出的 payload 原样重放，排除手工构造带来的差异。
 func (c *LLMClient) chatAnthropicRaw(ctx context.Context, raw []byte) (result *Message, err error) {
-	url := strings.TrimRight(c.baseURL, "/") + "/v1/messages"
+	url := c.requestEndpoint(strings.TrimRight(c.baseURL, "/") + "/v1/messages")
 	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(raw))
 	if err != nil {
 		return nil, err
@@ -146,7 +146,7 @@ func (c *LLMClient) chatAnthropicRaw(ctx context.Context, raw []byte) (result *M
 
 	ctx, finishAttempt := beginLLMAttempt(ctx, protoAnthropic)
 	httpReq = httpReq.WithContext(ctx)
-	defer func() { finishAttempt(err) }()
+	defer func() { err = c.safeError(err); finishAttempt(err) }()
 	resp, err := c.cli.Do(httpReq)
 	if err != nil {
 		return nil, fmt.Errorf("LLM 请求失败: %v", err)
@@ -199,7 +199,7 @@ func (c *LLMClient) chatAnthropic(ctx context.Context, messages []Message, tools
 		return nil, err
 	}
 
-	url := strings.TrimRight(c.baseURL, "/") + "/v1/messages"
+	url := c.requestEndpoint(strings.TrimRight(c.baseURL, "/") + "/v1/messages")
 	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(raw))
 	if err != nil {
 		return nil, err
@@ -211,6 +211,7 @@ func (c *LLMClient) chatAnthropic(ctx context.Context, messages []Message, tools
 	ctx, finishAttempt := beginLLMAttempt(ctx, protoAnthropic)
 	httpReq = httpReq.WithContext(ctx)
 	defer func() {
+		err = c.safeError(err)
 		recordLLMExchange(ctx, messages, result)
 		finishAttempt(err)
 	}()

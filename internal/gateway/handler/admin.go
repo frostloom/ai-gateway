@@ -74,6 +74,17 @@ func RegisterAdminAuth(g *gin.RouterGroup, billingAdminBase string, log *slog.Lo
 
 func RegisterAdmin(g *gin.RouterGroup, billingAdminBase, routerBase, reconcilerBase, agentBase string, log *slog.Logger) {
 	g.Use(func(c *gin.Context) { c.Header("Cache-Control", "no-store"); c.Next() })
+	g.GET("/customer-service", func(c *gin.Context) {
+		proxyJSON(c, billingAdminBase+"/admin/customer-service", log)
+	})
+	g.POST("/customer-service", func(c *gin.Context) {
+		body, err := io.ReadAll(http.MaxBytesReader(c.Writer, c.Request.Body, 32<<10))
+		if err != nil {
+			c.JSON(http.StatusRequestEntityTooLarge, gin.H{"error": "请求内容过大"})
+			return
+		}
+		proxy(c, http.MethodPost, billingAdminBase+"/admin/customer-service", body, log)
+	})
 	for path, target := range map[string]string{"/channels/discover": "/admin/providers/discover", "/models/import": "/admin/models/import"} {
 		g.POST(path, func(c *gin.Context) {
 			body, err := io.ReadAll(http.MaxBytesReader(c.Writer, c.Request.Body, 128<<10))

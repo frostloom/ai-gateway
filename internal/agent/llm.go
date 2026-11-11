@@ -84,6 +84,10 @@ type LLMClient struct {
 	maxTokens        int
 	cli              *http.Client
 	strictEvaluation bool
+
+	endpointURL       string
+	redactErrors      bool
+	fixedOutputBudget bool
 }
 
 // protoFromEnv 读取 AGENT_LLM_PROTOCOL（空则由 URL 推断）。
@@ -214,14 +218,15 @@ func (c *LLMClient) evaluationDisablesThinking() bool {
 //  3. 每次尝试都受 HTTP 超时约束，避免单次无限拖。
 //
 // 常规请求一次即成（2~10s），少数复杂请求最多多花一轮。
-func (c *LLMClient) Chat(ctx context.Context, messages []Message, tools []Tool) (*Message, error) {
+func (c *LLMClient) Chat(ctx context.Context, messages []Message, tools []Tool) (result *Message, err error) {
+	defer func() { err = c.safeError(err) }()
 	if c.apiKey == "" {
 		return nil, fmt.Errorf("AGENT_LLM_API_KEY 未配置，AI 客服不可用（请在 env 填入密钥）")
 	}
 	if c.proto != protoAnthropic {
 		return c.chatOpenAI(ctx, messages, tools)
 	}
-	if c.strictEvaluation {
+	if c.strictEvaluation || c.fixedOutputBudget {
 		return c.chatAnthropic(ctx, messages, tools, c.maxTokens)
 	}
 
@@ -288,7 +293,7 @@ func (c *LLMClient) chatOpenAI(ctx context.Context, messages []Message, tools []
 	if err != nil {
 		return nil, err
 	}
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.baseURL+"/chat/completions", bytes.NewReader(body))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.requestEndpoint(c.baseURL+"/chat/completions"), bytes.NewReader(body))
 	if err != nil {
 		return nil, err
 	}
@@ -298,6 +303,7 @@ func (c *LLMClient) chatOpenAI(ctx context.Context, messages []Message, tools []
 	ctx, finishAttempt := beginLLMAttempt(ctx, protoOpenAI)
 	req = req.WithContext(ctx)
 	defer func() {
+		err = c.safeError(err)
 		recordLLMExchange(ctx, messages, result)
 		finishAttempt(err)
 	}()

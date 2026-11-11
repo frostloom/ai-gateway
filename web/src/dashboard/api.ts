@@ -3,6 +3,7 @@ import { api } from '../shared/api'
 import type {
   OverviewResp, Bill, ProviderState, ProviderMargin, SalesResp,
   ReconcileResp, AuditLogItem, HealthResp, Model, ChannelDiscoverRequest, ChannelDiscovery, ModelImportItem, ModelImportResult,
+  CustomerServiceConfig, CustomerServiceUpdate,
 } from './types'
 import type { Plan, Subscription, TierRemain, RechargeOrder, Topup } from '../portal/types'
 
@@ -18,6 +19,8 @@ export const authLogout = () => api('/admin/auth/logout', { body: {} })
 /* ---------- 数据 ---------- */
 export const overviewApi = () => api<OverviewResp>('/admin/overview')
 export const healthApi = () => api<HealthResp>('/admin/health')
+export const customerServiceConfigApi = () => api<CustomerServiceConfig>('/admin/customer-service')
+export const saveCustomerServiceConfigApi = (body: CustomerServiceUpdate) => api<CustomerServiceConfig>('/admin/customer-service', { body })
 export const billsApi = (q: Record<string, string | number> = {}) =>
   api<{ total: number; items: Bill[] }>('/admin/bills?' + new URLSearchParams(Object.entries(q).map(([k, v]) => [k, String(v)])))
 export const providersApi = () => api<ProviderState[]>('/admin/providers')
