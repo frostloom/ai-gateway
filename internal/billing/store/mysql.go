@@ -695,6 +695,13 @@ func (s *Store) subscriptionAllowancePath(ctx context.Context, model *Model, ten
 	if err != nil || p == nil {
 		return false, 0, tier, 0, err
 	}
+	allowed, scopeErr := p.allowsModel(model.ModelID)
+	if scopeErr != nil {
+		return false, 0, tier, 0, scopeErr
+	}
+	if !allowed {
+		return false, 0, tier, 0, nil
+	}
 	if p.WindowQuotaCent > 0 || p.WeekQuotaCent > 0 || p.CycleQuotaCent > 0 {
 		return true, p.RefreshHours, monetarySubscriptionTier, p.WindowQuotaCent, nil
 	}

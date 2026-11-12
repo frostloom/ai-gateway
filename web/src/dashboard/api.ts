@@ -46,7 +46,7 @@ export const topupsApi = (tenantId = 0) => api<{ items: Topup[] }>(`/admin/topup
 export const rechargeOrdersApi = (tenantId = 0) => api<{ items: RechargeOrder[] }>(`/admin/recharge-orders?tenant_id=${tenantId}`)
 export const meApi = (tenantId: number) => api<import('../portal/types').MeView>(`/admin/me?tenant_id=${tenantId}`)
 export const plansApi = () => api<{ items: Plan[] }>('/admin/plans')
-export const savePlanApi = (plan: Pick<Plan, 'Name' | 'PlanType' | 'PriceMoney' | 'ValidityDays' | 'RefreshHours' | 'TierQuota' | 'Status' | 'WindowQuotaCent' | 'WeekQuotaCent' | 'CycleQuotaCent'> & { ID?: number }) => api<Plan>('/admin/plans', { body: plan })
+export const savePlanApi = (plan: Pick<Plan, 'Name' | 'PlanType' | 'PriceMoney' | 'ValidityDays' | 'RefreshHours' | 'TierQuota' | 'Status' | 'WindowQuotaCent' | 'WeekQuotaCent' | 'CycleQuotaCent' | 'AllowedModels'> & { ID?: number }) => api<Plan>('/admin/plans', { body: plan })
 
 export interface BalanceVoucher { id: number; prefix: string; amount_cent: number; expires_at: string; redeemed_tenant_id: number | null; redeemed_at: string | null; created_at: string }
 export const vouchersApi = () => api<{ items: BalanceVoucher[] }>('/admin/vouchers')

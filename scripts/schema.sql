@@ -111,6 +111,7 @@ CREATE TABLE IF NOT EXISTS plans (
   window_quota_cent BIGINT NOT NULL DEFAULT 0,
   week_quota_cent BIGINT NOT NULL DEFAULT 0,
   cycle_quota_cent BIGINT NOT NULL DEFAULT 0,
+  allowed_models TEXT NULL COMMENT 'JSON model_id array; NULL/empty/[] keeps legacy unrestricted scope',
   tier_quota    JSON NOT NULL COMMENT '每窗口每档次的 token 额度 {"轻量":2000000,"文本":1000000,...}',
   status        TINYINT NOT NULL DEFAULT 0 COMMENT '0=active 1=disabled',
   created_at    DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),

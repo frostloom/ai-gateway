@@ -137,6 +137,22 @@ func (s *Store) reserveMonetarySubscription(ctx context.Context, req *billingv1.
 		if sub.CycleEnd == nil || !time.Now().Before(*sub.CycleEnd) || (sub.Status != SubActive && sub.Status != SubCancelled) {
 			return errMonetaryQuota
 		}
+		// A fresh locked plan read must agree with the pre-lock funding choice.
+		// Status only controls new sales; existing subscribers retain current rights.
+		plan, err := lookupStore.GetPlan(ctx, sub.PlanID)
+		if err != nil {
+			return err
+		}
+		if plan == nil {
+			return errors.New("subscription plan unavailable")
+		}
+		allowed, err := plan.allowsModel(req.Model)
+		if err != nil {
+			return err
+		}
+		if !allowed {
+			return errors.New("subscription model scope changed")
+		}
 		allowances, err := txStore.SubscriptionMoneyAllowance(ctx, sub)
 		if err != nil {
 			return err

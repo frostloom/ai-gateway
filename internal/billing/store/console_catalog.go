@@ -61,6 +61,16 @@ func supportedCatalog(models []Model, providers []Provider) []Model {
 }
 
 func ValidateConsolePlan(p *Plan) error {
+	ids, err := p.ModelScope()
+	if err != nil {
+		return err
+	}
+	if len(ids) > 0 {
+		raw, _ := json.Marshal(ids)
+		p.AllowedModels = string(raw)
+	} else {
+		p.AllowedModels = "[]"
+	}
 	p.Name = strings.TrimSpace(p.Name)
 	if p.Name == "" || len([]rune(p.Name)) > 64 || p.PlanType != PlanTypeRecurring || p.PriceMoney < 0 || p.PriceMoney > 1000000 || p.ValidityDays < 1 || p.ValidityDays > 366 || p.RefreshHours < 1 || p.RefreshHours > 744 || (p.Status != 0 && p.Status != 1) {
 		return errors.New("请检查名称、价格、周期、刷新小时和状态")
@@ -93,6 +103,25 @@ func (s *Store) SaveConsolePlan(ctx context.Context, p *Plan) error {
 		if p.WindowQuotaCent == 0 && p.WeekQuotaCent == 0 && p.CycleQuotaCent == 0 {
 			return errors.New("新套餐请配置金额权益")
 		}
+		ids, _ := p.ModelScope()
+		if len(ids) == 0 {
+			return errors.New("新套餐请至少选择一个适用模型")
+		}
+		if len(ids) > 0 {
+			models, err := s.ListSupportedModels(ctx, "")
+			if err != nil {
+				return err
+			}
+			available := make(map[string]bool, len(models))
+			for _, m := range models {
+				available[m.ModelID] = true
+			}
+			for _, id := range ids {
+				if !available[id] {
+					return errors.New("适用模型必须已上架且配置了可用上游：" + id)
+				}
+			}
+		}
 		return s.db.WithContext(ctx).Create(p).Error
 	}
 	old, err := s.GetPlan(ctx, p.ID)
@@ -102,10 +131,18 @@ func (s *Store) SaveConsolePlan(ctx context.Context, p *Plan) error {
 	if old == nil {
 		return errors.New("套餐不存在")
 	}
+	oldScope, err := old.ModelScope()
+	if err != nil {
+		return err
+	}
+	newScope, _ := p.ModelScope()
+	if !reflect.DeepEqual(oldScope, newScope) && !(len(oldScope) == 0 && len(newScope) == 0) {
+		return errors.New("已保存套餐的适用模型保持固定，请复制为新套餐调整权益")
+	}
 	if old.WeekQuotaCent != p.WeekQuotaCent || old.WindowQuotaCent != p.WindowQuotaCent || old.CycleQuotaCent != p.CycleQuotaCent || old.Name != p.Name || old.PriceMoney != p.PriceMoney || old.ValidityDays != p.ValidityDays || old.RefreshHours != p.RefreshHours || !reflect.DeepEqual(old.TierQuotaMap(), p.TierQuotaMap()) {
 		return errors.New("已保存套餐的计费条款保持固定，请复制为新套餐调整权益；原套餐可启用或停用")
 	}
-	return s.db.WithContext(ctx).Model(&Plan{}).Where("id = ?", p.ID).Updates(map[string]any{"name": p.Name, "price_money": p.PriceMoney, "validity_days": p.ValidityDays, "refresh_hours": p.RefreshHours, "tier_quota": p.TierQuota, "status": p.Status}).Error
+	return s.db.WithContext(ctx).Model(&Plan{}).Where("id = ?", p.ID).Update("status", p.Status).Error
 }
 
 func (s *Store) PayTenantRecharge(ctx context.Context, tenantID uint64, orderNo string) (*RechargeOrder, error) {

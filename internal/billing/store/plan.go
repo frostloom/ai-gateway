@@ -20,6 +20,7 @@ import (
 	"math/big"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 
 	goredis "github.com/redis/go-redis/v9"
@@ -63,10 +64,47 @@ type Plan struct {
 	WindowQuotaCent int64  `gorm:"not null;default:0" json:"WindowQuotaCent,omitempty"`
 	WeekQuotaCent   int64  `gorm:"not null;default:0" json:"WeekQuotaCent,omitempty"`
 	CycleQuotaCent  int64  `gorm:"not null;default:0" json:"CycleQuotaCent,omitempty"`
+	AllowedModels   string `gorm:"type:text"`          // JSON model_id array; empty/[] retains legacy unrestricted rights.
 	TierQuota       string `gorm:"type:json;not null"` // 每窗口每档次 token 额度 {"轻量":2000000,...}
 	Status          int8   `gorm:"not null;default:0"` // 0=active 1=disabled
 	CreatedAt       time.Time
 	UpdatedAt       time.Time
+}
+
+// ModelScope parses persisted terms strictly: malformed scopes must never become cash fallback.
+func (p *Plan) ModelScope() ([]string, error) {
+	if p.AllowedModels == "" {
+		return nil, nil
+	}
+	var ids []string
+	if err := json.Unmarshal([]byte(p.AllowedModels), &ids); err != nil || ids == nil || len(ids) > 100 {
+		return nil, errors.New("套餐适用模型必须为最多 100 项的 JSON 数组")
+	}
+	seen := make(map[string]bool, len(ids))
+	for _, id := range ids {
+		if id == "" || id == "*" || strings.TrimSpace(id) != id || len([]rune(id)) > 64 || seen[id] {
+			return nil, errors.New("套餐适用模型不能为空、重复或包含通配符")
+		}
+		seen[id] = true
+	}
+	sort.Strings(ids)
+	return ids, nil
+}
+
+func (p *Plan) allowsModel(modelID string) (bool, error) {
+	ids, err := p.ModelScope()
+	if err != nil {
+		return false, err
+	}
+	if len(ids) == 0 {
+		return true, nil
+	}
+	for _, id := range ids {
+		if id == modelID {
+			return true, nil
+		}
+	}
+	return false, nil
 }
 
 // TierQuotaMap 解析 tier_quota JSON 为 map[tier]token；坏 JSON/空返回空 map。

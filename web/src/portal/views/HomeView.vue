@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref, onMounted, inject, computed } from "vue";
+import { ref, onMounted, onBeforeUnmount, inject, computed } from "vue";
 import { meApi } from "../api";
 import type { MeView } from "../types";
-import { money, fmtDay, fmtTime } from "../../shared/utils/format";
+import { money, fmt, fmtDay, fmtTimeFull } from "../../shared/utils/format";
 import { openChat } from "../../shared/chatLayer";
 import AreaChart from "../../shared/components/ui/AreaChart.vue";
 const go = inject<(key: string) => void>("go");
@@ -10,26 +10,27 @@ const emit = defineEmits<{ (e: "me"): void }>();
 const me = ref<MeView | null>(null);
 const loading = ref(true);
 const error = ref("");
-const spent = computed(
-  () => me.value?.consumption.reduce((sum, day) => sum + day.tokens, 0) ?? 0,
-);
-const calls = computed(
-  () =>
-    me.value?.consumption_by_model.reduce(
-      (sum, model) => sum + model.calls,
-      0,
-    ) ?? 0,
-);
-const series = computed(() => [
-  {
-    name: "使用金额",
-    color: "var(--ok)",
-    points: (me.value?.consumption ?? []).map((day) => ({
-      label: fmtDay(day.day),
-      value: day.tokens,
-    })),
-  },
-]);
+// Go's nil slices serialize to null, including accounts with no model calls.
+const consumption = computed(() => me.value?.consumption ?? []);
+const models = computed(() => me.value?.consumption_by_model ?? []);
+const moneyAllowance = computed(() => me.value?.money_allowance ?? []);
+const tierAllowances = computed(() => me.value?.allowance ?? []);
+const spent = computed(() => consumption.value.reduce((sum, day) => sum + (day.tokens ?? 0), 0));
+const calls = computed(() => models.value.reduce((sum, model) => sum + (model.calls ?? 0), 0));
+const available = computed(() => !loading.value && !!me.value && !error.value);
+const activeSubscription = computed(() => {
+  const sub = me.value?.subscription;
+  if (!sub || !['active', 'cancelled'].includes(sub.Status)) return null;
+  if (!sub.CycleEnd || !(Date.parse(sub.CycleEnd) > Date.now())) return null;
+  return sub;
+});
+const currentPlan = computed(() => me.value?.plans?.find(plan => plan.ID === activeSubscription.value?.PlanID));
+const series = computed(() => [{
+  name: "使用金额",
+  color: "var(--ok)",
+  points: consumption.value.map(day => ({ label: fmtDay(day.day), value: day.tokens ?? 0 })),
+}]);
+let requestId = 0;
 function percent(consumed: number, limit: number) {
   return limit > 0
     ? Math.max(0, Math.min(100, Math.round((consumed / limit) * 100)))
@@ -41,33 +42,42 @@ function periodName(period: string) {
     : period === "week"
       ? "每周"
       : me.value?.plans?.find((plan) => plan.ID === me.value?.subscription?.PlanID)?.ValidityDays === 30
-        ? "每月"
+        ? "30 天周期"
         : "本周期";
 }
 async function load() {
+  if (loading.value && requestId) return;
+  const id = ++requestId;
   loading.value = true;
   error.value = "";
   try {
-    me.value = await meApi();
+    const data = await meApi();
+    if (id !== requestId) return;
+    if (!data || !Number.isFinite(data.balance_cent)) throw new Error("账户数据不完整，请重新加载");
+    me.value = data;
     emit("me");
-  } catch (e: any) {
-    error.value = e.message || "使用情况读取失败";
+  } catch (e: unknown) {
+    if (id !== requestId) return;
+    me.value = null;
+    error.value = e instanceof Error ? e.message : "使用情况读取失败";
   } finally {
-    loading.value = false;
+    if (id === requestId) loading.value = false;
   }
 }
 onMounted(load);
+onBeforeUnmount(() => { requestId++; });
 </script>
 <template>
   <div class="activity-page">
     <header class="activity-heading">
       <h1>使用情况</h1>
       <div>
+        <button :disabled="loading" @click="load">{{ loading ? "加载中…" : "刷新" }}</button>
         <button @click="openChat">操作客服</button
         ><button @click="go?.('console')">新对话</button>
       </div>
     </header>
-    <p v-if="error" role="alert">
+    <p v-if="error" class="activity-error" role="alert">
       {{ error }} <button @click="load">重新加载</button>
     </p>
     <div class="activity-layout" :aria-busy="loading">
@@ -77,32 +87,33 @@ onMounted(load);
             <h2>账户用量</h2>
             <p>近 7 天</p>
           </div>
-          <strong>{{ loading ? "—" : money(spent) }}</strong>
+          <strong>{{ !available ? "—" : money(spent) }}</strong>
         </div>
         <div class="activity-chart">
           <p v-if="loading" role="status">加载中…</p>
           <AreaChart
-            v-else-if="me?.consumption.length"
+            v-else-if="available && consumption.length"
             :series="series"
             :height="260"
             :format="money"
           />
-          <div v-else class="chart-empty">暂无使用记录</div>
+          <div v-else-if="available" class="chart-empty"><span>暂无使用记录<small>开始对话或通过 API 调用后，在这里查看消耗。</small><button @click="go?.('console')">开始对话</button></span></div>
+          <div v-else class="chart-empty">使用情况暂不可用，请重新加载</div>
         </div>
         <div class="activity-facts">
           <div>
             <span>调用次数</span
-            ><strong>{{ loading ? "—" : calls.toLocaleString() }}</strong>
+            ><strong>{{ !available ? "—" : calls.toLocaleString() }}</strong>
           </div>
           <div>
             <span>使用模型</span
             ><strong>{{
-              loading ? "—" : (me?.consumption_by_model.length ?? 0)
+              !available ? "—" : models.length
             }}</strong>
           </div>
           <div>
             <span>日均使用</span
-            ><strong>{{ loading ? "—" : money(spent / 7) }}</strong>
+            ><strong>{{ !available ? "—" : money(spent / 7) }}</strong>
           </div>
         </div>
         <section class="model-activity">
@@ -110,17 +121,17 @@ onMounted(load);
             <h2>模型使用</h2>
             <button @click="go?.('consumption')">查看明细</button>
           </header>
-          <p v-if="!loading && !me?.consumption_by_model.length" class="empty">
+          <p v-if="available && !models.length" class="empty">
             暂无模型调用
           </p>
           <div
-            v-for="model in me?.consumption_by_model"
+            v-for="model in available ? models : []"
             :key="model.model"
             class="activity-model-row"
           >
             <span
               >{{ model.model }}<small>{{ model.vendor }}</small></span
-            ><span>{{ model.calls.toLocaleString() }} 次</span
+            ><span>{{ fmt(model.calls) }} 次</span
             ><strong>{{ money(model.cost_cent) }}</strong>
           </div>
         </section>
@@ -131,11 +142,11 @@ onMounted(load);
             <h2>账户余额</h2>
             <button @click="go?.('wallet')">兑换</button>
           </header>
-          <strong>{{ loading ? "—" : money(me?.balance_cent) }}</strong>
+          <strong>{{ !available ? "—" : money(me?.balance_cent) }}</strong>
           <dl>
             <div>
               <dt>计费方式</dt>
-              <dd>{{ me?.subscription ? "月卡权益" : "按量计费" }}</dd>
+              <dd>{{ !available ? "—" : activeSubscription ? "月卡权益 / 按量计费" : "按量计费" }}</dd>
             </div>
             <div>
               <dt>在线充值</dt>
@@ -148,9 +159,12 @@ onMounted(load);
             <h2>月卡使用进度</h2>
             <button @click="go?.('plans')">详情</button>
           </header>
-          <p v-if="!me?.subscription" class="empty">暂无生效月卡</p>
+          <p v-if="available && !activeSubscription" class="empty">暂无生效月卡</p>
+          <p v-if="loading" class="empty">加载月卡权益…</p>
+          <p v-else-if="!available" class="empty">月卡权益暂不可用</p>
+          <p v-else-if="activeSubscription" class="subscription-note">{{ currentPlan?.Name || "当前月卡" }}<small v-if="activeSubscription.CycleEnd">有效至 {{ fmtTimeFull(activeSubscription.CycleEnd) }}{{ activeSubscription.Status === "cancelled" ? "（已退订，到期结束）" : "" }}</small></p>
           <div
-            v-for="budget in me?.money_allowance"
+            v-for="budget in available && activeSubscription ? moneyAllowance : []"
             :key="budget.period"
             class="activity-limit"
           >
@@ -177,17 +191,18 @@ onMounted(load);
             <p>
               {{ money(budget.consumed_cent) }} / {{ money(budget.quota_cent)
               }}<small v-if="budget.resets_at"
-                >{{ fmtTime(budget.resets_at) }} 起恢复</small
+                >{{ budget.period === "cycle" ? "本期截止" : "最早恢复" }} {{ fmtTimeFull(budget.resets_at) }}</small
               >
             </p>
           </div>
-          <template v-if="!me?.money_allowance?.length">
-            <div v-for="allowance in me?.allowance" :key="allowance.tier" class="activity-limit">
+          <p v-if="available && activeSubscription && !moneyAllowance.length && !tierAllowances.length" class="empty">暂无可用额度明细</p>
+          <template v-if="available && activeSubscription && !moneyAllowance.length">
+            <div v-for="allowance in tierAllowances" :key="allowance.tier" class="activity-limit">
               <div><strong>{{ allowance.tier }}额度</strong><span>{{ percent(allowance.consumed, allowance.quota) }}%</span></div>
               <div class="usage-track" role="progressbar" :aria-label="allowance.tier + '使用比例'" :aria-valuenow="percent(allowance.consumed, allowance.quota)" aria-valuemin="0" aria-valuemax="100">
                 <i :style="{ transform: `scaleX(${percent(allowance.consumed, allowance.quota) / 100})` }" />
               </div>
-              <p>每 {{ me?.refresh_hours }} 小时滚动恢复</p>
+              <p>每 {{ me?.refresh_hours || 5 }} 小时滚动恢复</p>
             </div>
           </template>
         </section>
@@ -201,8 +216,12 @@ onMounted(load);
   </div>
 </template>
 <style scoped>
-/* Hallmark · theme: opencode-console-reference · scope: app */
-/* Critique: real activity leads, with monetary limits and balance in a quiet right rail. */
+.activity-error { padding: 12px 16px; border: 1px solid var(--danger); color: var(--danger); border-radius: 6px; font-size: 13px; }
+.chart-empty { text-align: center; }
+.chart-empty small, .subscription-note small { display: block; margin-top: 8px; font-size: 12px; line-height: 1.6; }
+.chart-empty button { margin-top: 12px; color: var(--ok-text); }
+.subscription-note { margin-top: 20px; font-size: 13px; line-height: 1.6; }
+.subscription-note small { color: var(--muted-foreground); }
 .activity-page {
   display: grid;
   gap: 28px;
@@ -448,9 +467,9 @@ dd {
     grid-template-columns: minmax(0, 1fr) 56px 64px;
     gap: 8px;
   }
-  .activity-heading > div {
-    gap: 8px;
-  }
+  .activity-heading { align-items: flex-start; flex-wrap: wrap; gap: 8px; }
+  .activity-heading > div { gap: 8px; flex-wrap: wrap; }
+  .activity-shortcuts { flex-wrap: wrap; gap: 16px; }
 }
 button:active { color: var(--ink-900); }
 button:disabled { cursor: not-allowed; opacity: .5; }

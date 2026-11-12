@@ -28,7 +28,7 @@ function calendarDay(d: Date) { return `${d.getFullYear()}-${String(d.getMonth()
 const range = computed(() => { const to = new Date(); const from = new Date(); from.setDate(from.getDate() - days.value + 1); return { from: calendarDay(from), to: calendarDay(to) } })
 const dailySeries = computed(() => {
   if (!sales.value) return []
-  const recorded = new Map(sales.value.by_day.map(d => [d.day.slice(0, 10), d]))
+  const recorded = new Map((sales.value.by_day ?? []).map(d => [d.day.slice(0, 10), d]))
   return Array.from({ length: days.value }, (_, i) => {
     const date = new Date(`${range.value.from}T12:00:00`); date.setDate(date.getDate() + i)
     const day = calendarDay(date)
@@ -41,10 +41,10 @@ const byTenant = (key: keyof TenantStat) =>
 
 const totalBalance = computed(() => byTenant('balance'))
 const totalPending = computed(() => byTenant('pending'))
-const inconsistentCount = computed(() => ov.value?.tenants.filter(t => !t.consistent).length ?? 0)
+const inconsistentCount = computed(() => ov.value?.tenants?.filter(t => !t.consistent).length ?? 0)
 const upCount = computed(() => Object.values(health.value?.services ?? {}).filter(s => s.ok).length)
 const svcCount = computed(() => Object.keys(health.value?.services ?? {}).length)
-const tenantCount = computed(() => ov.value?.tenants.length ?? 0)
+const tenantCount = computed(() => ov.value?.tenants?.length ?? 0)
 
 const svcLabel: Record<string, string> = {
   billing: 'billing', router: 'router', reconciler: 'reconciler', agent: 'agent',
@@ -120,13 +120,13 @@ async function load() {
   if (id !== requestId) return
   errors.value = []
   const [o, h, s] = results
-  if (o.status === 'fulfilled') ov.value = o.value
+  if (o.status === 'fulfilled' && o.value) ov.value = { ...o.value, tenants: o.value.tenants ?? [] }
   else { ov.value = null; errors.value.push('租户账本加载失败') }
-  if (h.status === 'fulfilled') health.value = h.value
+  if (h.status === 'fulfilled' && h.value) health.value = { ...h.value, services: h.value.services ?? {} }
   else { health.value = null; errors.value.push('服务健康检查失败') }
-  if (s.status === 'fulfilled' && s.value?.summary && Array.isArray(s.value.by_day)) sales.value = s.value
+  if (s.status === 'fulfilled' && s.value?.summary) sales.value = { ...s.value, by_day: s.value.by_day ?? [], by_model: s.value.by_model ?? [], by_vendor: s.value.by_vendor ?? [] }
   else { sales.value = null; errors.value.push('销售统计加载失败') }
-  updatedAt.value = new Date().toLocaleTimeString('zh-CN', { hour12: false })
+  updatedAt.value = errors.value.length === 3 ? '' : new Date().toLocaleTimeString('zh-CN', { hour12: false })
   loading.value = false
   refreshing.value = false
 }
@@ -140,7 +140,7 @@ function changeRange(value: number) {
 
 onMounted(() => {
   load()
-  timer = window.setInterval(load, 30000) // 30s 刷新（含趋势查询，不必 3s）
+  timer = window.setInterval(() => { if (!refreshing.value) load() }, 30000) // 30s 刷新（含趋势查询，不必 3s）
 })
 onBeforeUnmount(() => { requestId++; if (timer) clearInterval(timer) })
 </script>
@@ -207,13 +207,14 @@ onBeforeUnmount(() => { requestId++; if (timer) clearInterval(timer) })
       </Card>
 
       <Card title="模型销售排行" :sub="`近 ${days} 天，按消耗金额`">
-        <RankList :rows="modelRank" :limit="6" :format="(v: number) => money(v)" />
+        <div v-if="!sales" class="rank-state">{{ loading ? '加载中…' : '模型统计不可用' }}</div>
+        <RankList v-else :rows="modelRank" :limit="6" :format="(v: number) => money(v)" />
       </Card>
     </div>
 
     <!-- 服务健康 + 厂商 -->
     <div class="main-grid reverse">
-      <Card title="服务健康" :sub="`${upCount}/${svcCount} 正常`">
+      <Card title="服务健康" :sub="health ? (svcCount ? `${upCount}/${svcCount} 正常` : '暂无服务记录') : '健康数据不可用'">
         <div class="services">
           <div v-for="(v, k) in health?.services ?? {}" :key="k" class="svc" :class="{ bad: !v.ok }">
             <span class="sdot" />
@@ -222,6 +223,7 @@ onBeforeUnmount(() => { requestId++; if (timer) clearInterval(timer) })
               <span class="sstate">{{ v.ok ? '运行中' : (v.error || '不可达') }}</span>
             </div>
           </div>
+          <div v-if="health && !svcCount" class="svc"><div class="sinfo"><span class="sname">暂无服务健康记录</span></div></div>
           <div v-if="!health" class="svc"><div class="sinfo"><span class="sname">{{ loading ? '加载中' : '健康数据不可用' }}</span></div></div>
         </div>
 
@@ -242,7 +244,8 @@ onBeforeUnmount(() => { requestId++; if (timer) clearInterval(timer) })
       </Card>
 
       <Card title="厂商销售排行" :sub="`近 ${days} 天，按消耗金额`">
-        <RankList :rows="vendorRank" :limit="6" :format="(v: number) => money(v)" />
+        <div v-if="!sales" class="rank-state">{{ loading ? '加载中…' : '厂商统计不可用' }}</div>
+        <RankList v-else :rows="vendorRank" :limit="6" :format="(v: number) => money(v)" />
       </Card>
     </div>
 
@@ -252,7 +255,7 @@ onBeforeUnmount(() => { requestId++; if (timer) clearInterval(timer) })
         :cols="COLS"
         :loading="loading"
         :empty="!(ov?.tenants ?? []).length"
-        empty-text="还没有租户"
+        :empty-text="ov ? '还没有租户' : '租户账本不可用，请刷新重试'"
       >
         <template #head>
           <span>租户</span>
@@ -287,6 +290,7 @@ onBeforeUnmount(() => { requestId++; if (timer) clearInterval(timer) })
 </template>
 
 <style scoped>
+.rank-state { padding: 24px 0; color: var(--ink-400); font-size: 13px; }
 .overview { display: flex; flex-direction: column; gap: var(--sp-5); }
 
 .kpis {

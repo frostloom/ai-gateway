@@ -26,6 +26,7 @@ export interface Plan {
   WindowQuotaCent?: number    // 滚动窗口预算（分），旧套餐可缺省
   WeekQuotaCent?: number     // 每周预算（分），旧套餐可缺省
   CycleQuotaCent?: number     // 计费周期预算（分），旧套餐可缺省
+  AllowedModels?: string      // JSON model_id 数组；空值/[] 为历史全部模型范围
   TierQuota: string           // 旧套餐兼容字段，新金额套餐为 {}
   Status: number              // 0=active 1=disabled
   CreatedAt: string

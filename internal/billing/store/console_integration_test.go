@@ -26,7 +26,8 @@ func TestConsolePlanAndPaymentOwnership(t *testing.T) {
 		t.Fatalf("owner payment failed: %+v %v", paid, err)
 	}
 	plan := &Plan{Name: "console-test-plan", PlanType: PlanTypeRecurring, PriceMoney: 29, ValidityDays: 30, RefreshHours: 5, TierQuota: `{}`, WindowQuotaCent: 1000, CycleQuotaCent: 10000}
-	if err := s.SaveConsolePlan(ctx, plan); err != nil {
+	// Seed legacy unrestricted terms directly: new console plans require model scope.
+	if err := s.db.WithContext(ctx).Create(plan).Error; err != nil {
 		t.Fatal(err)
 	}
 	plan.PriceMoney = 30

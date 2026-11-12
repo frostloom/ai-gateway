@@ -113,7 +113,7 @@ onBeforeUnmount(() => {
           aria-modal="true"
           :aria-label="title"
         >
-          <header v-if="title || $slots.extra" class="mhead">
+          <div v-if="title || $slots.extra" class="mhead">
             <h2 class="mt">{{ title }}</h2>
             <div class="mextra"><slot name="extra" /></div>
             <button class="x" aria-label="关闭" :disabled="closeDisabled" @click="close">
@@ -129,11 +129,11 @@ onBeforeUnmount(() => {
                 <path d="M6 6l12 12M18 6L6 18" />
               </svg>
             </button>
-          </header>
+          </div>
           <div class="mbody"><slot /></div>
-          <footer v-if="$slots.footer" class="mfoot">
+          <div v-if="$slots.footer" class="mfoot">
             <slot name="footer" />
-          </footer>
+          </div>
         </div>
       </div>
   </Teleport>
