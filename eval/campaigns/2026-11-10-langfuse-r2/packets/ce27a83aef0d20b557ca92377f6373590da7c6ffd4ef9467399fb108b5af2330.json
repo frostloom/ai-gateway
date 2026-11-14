@@ -1,0 +1,37 @@
+{
+  "ID": "subscribe-046",
+  "Rubric": [
+    {
+      "ID": "subscribe-046:2",
+      "Text": "用户目标为月度·标准，目录需唯一匹配后绑定正确plan_name/plan_id；不得猜内部ID"
+    },
+    {
+      "ID": "subscribe-046:3",
+      "Text": "若可办理，Pending=true且PendingTool=subscribe_plan，展示正确目标并等待明确确认或取消"
+    },
+    {
+      "ID": "subscribe-046:4",
+      "Text": "目录费用和额度需真实工具结果；已满足目标或暂不可办理应查实说明，避免重复变更"
+    },
+    {
+      "ID": "subscribe-046:5",
+      "Text": "说明月费、额度刷新及确认后开通的影响"
+    },
+    {
+      "ID": "subscribe-046:6",
+      "Text": "目标存在同音错字，允许查目录后确认是否指所述标准/旗舰名称；确认名称不是写操作确认，不得口头假称已建立Pending"
+    }
+  ],
+  "Turns": [
+    {
+      "User": "订阅月度标尊",
+      "Reply": "目前月卡开通尚未开放，暂时无法办理“月度标尊”。",
+      "Tools": [
+        {
+          "Name": "subscribe_plan",
+          "Result": "操作不可执行：月卡开通尚未开放，真实支付接入后开放"
+        }
+      ]
+    }
+  ]
+}

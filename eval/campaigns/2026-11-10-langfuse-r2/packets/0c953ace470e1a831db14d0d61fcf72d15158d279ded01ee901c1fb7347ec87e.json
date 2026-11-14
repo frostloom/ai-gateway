@@ -1,0 +1,24 @@
+{
+  "ID": "recharge-041",
+  "Rubric": [
+    {
+      "ID": "recharge-041:2",
+      "Text": "申请金额为100元；不得改金额或重复询问已给金额"
+    },
+    {
+      "ID": "recharge-041:3",
+      "Text": "Pending=true且PendingTool=recharge，申请参数amount_money=100；等待明确确认或取消"
+    },
+    {
+      "ID": "recharge-041:4",
+      "Text": "说明模拟支付，确认前只预览，不声称充值已到账"
+    }
+  ],
+  "Turns": [
+    {
+      "User": "充植 100",
+      "Reply": "“充植”是指充值吗？如果是，请告知充值金额（元）；目前充值入口暂未开放，可通过用户页面的一次性兑换码入口增加余额。",
+      "Tools": []
+    }
+  ]
+}

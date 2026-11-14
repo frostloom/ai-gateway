@@ -137,8 +137,10 @@ func RunLive(ctx context.Context, root string, auth LiveAuth) error {
 		return err
 	}
 	selective.SetObserver(observer)
-	if err := os.MkdirAll(filepath.Join(root, "grades"), 0o755); err != nil {
-		return err
+	for _, dir := range []string{"records", "traces", "packets", "scores", "grades"} {
+		if err := os.MkdirAll(filepath.Join(root, dir), 0o755); err != nil {
+			return err
+		}
 	}
 
 	bundle := Bundle{Root: root}
@@ -333,11 +335,11 @@ func RepublishGrades(ctx context.Context, root string, langfuse map[string]strin
 func experimentIdentity(arm string) (string, string) {
 	switch arm {
 	case "model":
-		return "local-paired-20261110-model", "本机双臂-model"
+		return "local-paired-20261110-r2-model", "本机双臂-第二批-model"
 	case "jev_selective":
-		return "local-paired-20261110-jev-selective", "本机双臂-jev_selective"
+		return "local-paired-20261110-r2-jev-selective", "本机双臂-第二批-jev_selective"
 	default:
-		return "local-paired-20261110-" + arm, arm
+		return "local-paired-20261110-r2-" + arm, "本机双臂-第二批-" + arm
 	}
 }
 

@@ -1,0 +1,21 @@
+{
+  "ID": "subscription-053",
+  "Rubric": [
+    {
+      "ID": "subscription-053:tool",
+      "Text": "回复当前订阅，内容来自工具结果。"
+    }
+  ],
+  "Turns": [
+    {
+      "User": "麻烦帮我看看我的订阅详情，包括周期起止时间和剩余额度",
+      "Reply": "当前没有生效中的订阅，因此没有可提供的订阅周期起止时间或剩余额度。",
+      "Tools": [
+        {
+          "Name": "get_my_subscription",
+          "Result": "当前没有生效中的订阅。"
+        }
+      ]
+    }
+  ]
+}

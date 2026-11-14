@@ -1,0 +1,21 @@
+{
+  "ID": "balance-074",
+  "Rubric": [
+    {
+      "ID": "balance-074:tool",
+      "Text": "回复当前余额，数值来自工具结果。"
+    }
+  ],
+  "Turns": [
+    {
+      "User": "account balance 是多少",
+      "Reply": "Your available balance is ¥20,000.00, and your ledger balance is also ¥20,000.00.",
+      "Tools": [
+        {
+          "Name": "get_balance",
+          "Result": "当前可用余额 ¥20000.00；账本口径 ¥20000.00，两者一致。"
+        }
+      ]
+    }
+  ]
+}

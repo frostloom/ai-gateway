@@ -1,0 +1,31 @@
+{
+  "id": "subscribe-099",
+  "arms": [
+    {
+      "arm": "model",
+      "pass": false,
+      "reasons": [
+        "unchecked_kind"
+      ],
+      "model_calls": 2,
+      "jev_calls": 0,
+      "packet": "packets/8552481efe0d276c798aa510c4bbed1c0fdc48edef4b8c38f32fbc9020687d38.json",
+      "traces": [
+        "traces/trace-b78e901decf10c04010774c6b49c404deb9b3dbc4afe0689f937b31f920404ba.bin"
+      ]
+    },
+    {
+      "arm": "jev_selective",
+      "pass": false,
+      "reasons": [
+        "unchecked_kind"
+      ],
+      "model_calls": 2,
+      "jev_calls": 1,
+      "packet": "packets/ca0b555429928b20213af7ad9bba0a91d88989bf4fbae4c53b175b0eb7f6145d.json",
+      "traces": [
+        "traces/trace-886e01fed3484753383a74f86029b78dc94024af14b48fa180ed0de550df0291.bin"
+      ]
+    }
+  ]
+}

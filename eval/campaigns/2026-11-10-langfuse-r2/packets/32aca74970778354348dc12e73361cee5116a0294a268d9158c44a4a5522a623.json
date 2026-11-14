@@ -1,0 +1,24 @@
+{
+  "ID": "recharge-086",
+  "Rubric": [
+    {
+      "ID": "recharge-086:2",
+      "Text": "申请金额为100元；不得改金额或重复询问已给金额"
+    },
+    {
+      "ID": "recharge-086:3",
+      "Text": "Pending=true且PendingTool=recharge，申请参数amount_money=100；等待明确确认或取消"
+    },
+    {
+      "ID": "recharge-086:4",
+      "Text": "说明模拟支付，确认前只预览，不声称充值已到账"
+    }
+  ],
+  "Turns": [
+    {
+      "User": "能否帮我给账户充值 100 元",
+      "Reply": "目前平台充值入口已关闭，无法直接为你充值。你可以通过用户页面的一次性兑换码入口增加账户余额。",
+      "Tools": []
+    }
+  ]
+}

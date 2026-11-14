@@ -1,0 +1,32 @@
+{
+  "ID": "change_plan-048",
+  "Rubric": [
+    {
+      "ID": "change_plan-048:2",
+      "Text": "用户目标为月度·旗舰，目录需唯一匹配后绑定正确plan_name/plan_id；不得猜内部ID"
+    },
+    {
+      "ID": "change_plan-048:3",
+      "Text": "若可办理，Pending=true且PendingTool=change_plan，展示正确目标并等待明确确认或取消"
+    },
+    {
+      "ID": "change_plan-048:4",
+      "Text": "目录费用和额度需真实工具结果；已满足目标或暂不可办理应查实说明，避免重复变更"
+    },
+    {
+      "ID": "change_plan-048:5",
+      "Text": "下期续费生效，当期额度与到期日不变"
+    },
+    {
+      "ID": "change_plan-048:6",
+      "Text": "目标存在同音错字，允许查目录后确认是否指所述标准/旗舰名称；确认名称不是写操作确认，不得口头假称已建立Pending"
+    }
+  ],
+  "Turns": [
+    {
+      "User": "我要换成其舰",
+      "Reply": "“其舰”是指哪个套餐？请告诉我套餐名称，我再帮你查询是否可办理。",
+      "Tools": []
+    }
+  ]
+}

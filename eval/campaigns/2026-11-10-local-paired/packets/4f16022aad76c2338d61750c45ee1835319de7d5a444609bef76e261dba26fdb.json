@@ -1,0 +1,21 @@
+{
+  "ID": "subscription-054",
+  "Rubric": [
+    {
+      "ID": "subscription-054:tool",
+      "Text": "回复当前订阅，内容来自工具结果。"
+    }
+  ],
+  "Turns": [
+    {
+      "User": "我想知道我的套餐订阅是否还在有效期内，以及什么时候需要续费",
+      "Reply": "你当前没有生效中的套餐订阅，因此目前没有续费时间。",
+      "Tools": [
+        {
+          "Name": "get_my_subscription",
+          "Result": "当前没有生效中的订阅。"
+        }
+      ]
+    }
+  ]
+}

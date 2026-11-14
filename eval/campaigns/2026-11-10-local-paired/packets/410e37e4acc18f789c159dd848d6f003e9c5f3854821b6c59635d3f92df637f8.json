@@ -1,0 +1,21 @@
+{
+  "ID": "subscription-044",
+  "Rubric": [
+    {
+      "ID": "subscription-044:tool",
+      "Text": "回复当前订阅，内容来自工具结果。"
+    }
+  ],
+  "Turns": [
+    {
+      "User": "查下订越",
+      "Reply": "当前没有上架套餐，暂时无法订阅。",
+      "Tools": [
+        {
+          "Name": "list_plans",
+          "Result": "暂无上架套餐。"
+        }
+      ]
+    }
+  ]
+}

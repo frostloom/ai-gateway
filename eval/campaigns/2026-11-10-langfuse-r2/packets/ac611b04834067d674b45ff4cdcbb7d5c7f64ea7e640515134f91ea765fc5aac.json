@@ -1,0 +1,24 @@
+{
+  "ID": "cancel_subscription-021",
+  "Rubric": [
+    {
+      "ID": "cancel_subscription-021:2",
+      "Text": "针对“这个套餐我不想要了”取消本人订阅下期续费；先核验当前有效、已取消或无订阅状态也合理。"
+    },
+    {
+      "ID": "cancel_subscription-021:3",
+      "Text": "能办理时cancel_subscription生成预览，Pending=true且PendingTool=cancel_subscription；说明当期不退、只取消下期续费及实际到期时间，等待明确确认或取消。"
+    },
+    {
+      "ID": "cancel_subscription-021:4",
+      "Text": "未确认不能写入；已取消或无订阅须准确说明，首轮不能证明最终退订成功。"
+    }
+  ],
+  "Turns": [
+    {
+      "User": "这个套餐我不想要了",
+      "Reply": "你是想取消下期续费，还是想咨询退款？取消续费不会退还当期费用；套餐退款和充值退款不是一回事。",
+      "Tools": []
+    }
+  ]
+}

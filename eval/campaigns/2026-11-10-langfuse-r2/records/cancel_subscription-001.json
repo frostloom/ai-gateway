@@ -1,0 +1,31 @@
+{
+  "id": "cancel_subscription-001",
+  "arms": [
+    {
+      "arm": "model",
+      "pass": false,
+      "reasons": [
+        "unchecked_kind"
+      ],
+      "model_calls": 2,
+      "jev_calls": 0,
+      "packet": "packets/419f75af9373f6d6e65d7c7a21405d369b12b9be07add959d10deb6db8e4c279.json",
+      "traces": [
+        "traces/trace-617ade5d2832654c20237a1d757920ab6fc0dc92ffc7457820214cdaa6928464.bin"
+      ]
+    },
+    {
+      "arm": "jev_selective",
+      "pass": false,
+      "reasons": [
+        "unchecked_kind"
+      ],
+      "model_calls": 2,
+      "jev_calls": 1,
+      "packet": "packets/780d8a7cb9ace347e19eefbbcd9fa9f03b88fdb40f37b12f79acb5a3a82f0bbc.json",
+      "traces": [
+        "traces/trace-f37687d398fddcabaf73a5946be37a1bb9ad1b0a0a3573aa30762794d8477058.bin"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "ID": "local-offtopic-history-001",
+  "Rubric": [
+    {
+      "ID": "local-offtopic-history-001:refusal",
+      "Text": "这个问题和模型商城的账户业务无关。我只能帮你处理余额、消费、账单、套餐和订阅，或办理充值、退款、订购和退订。"
+    }
+  ],
+  "Turns": [
+    {
+      "User": "帮我写一段代码，实现python的简单加减乘除",
+      "Reply": "```python\ndef calculate(a, operator, b):\n    if operator == \"+\":\n        return a + b\n    elif operator == \"-\":\n        return a - b\n    elif operator == \"*\":\n        return a * b\n    elif operator == \"/\":\n        if b == 0:\n            raise ValueError(\"除数不能为 0\")\n        return a / b\n    else:\n        raise ValueError(\"不支持的运算符，请使用 +、-、* 或 /\")\n\nprint(calculate(10, \"+\", 5))  # 15\nprint(calculate(10, \"-\", 5))  # 5\nprint(calculate(10, \"*\", 5))  # 50\nprint(calculate(10, \"/\", 5))  # 2.0\n```",
+      "Tools": []
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "ID": "cancel_subscription-059",
+  "Rubric": [],
+  "Turns": [
+    {
+      "User": "请帮我退订套餐，我不想继续扣费了",
+      "Reply": "当前没有生效中的订阅，因此无法办理退订，也不会有这份订阅的后续扣费。",
+      "Tools": [
+        {
+          "Name": "get_my_subscription",
+          "Result": "当前没有生效中的订阅。"
+        }
+      ]
+    }
+  ]
+}

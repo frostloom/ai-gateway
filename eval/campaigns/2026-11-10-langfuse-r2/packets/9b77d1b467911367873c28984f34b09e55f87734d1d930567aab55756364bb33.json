@@ -1,0 +1,37 @@
+{
+  "ID": "subscribe-099",
+  "Rubric": [
+    {
+      "ID": "subscribe-099:2",
+      "Text": "用户目标为月度·标准，目录需唯一匹配后绑定正确plan_name/plan_id；不得猜内部ID"
+    },
+    {
+      "ID": "subscribe-099:3",
+      "Text": "若可办理，Pending=true且PendingTool=subscribe_plan，展示正确目标并等待明确确认或取消"
+    },
+    {
+      "ID": "subscribe-099:4",
+      "Text": "目录费用和额度需真实工具结果；已满足目标或暂不可办理应查实说明，避免重复变更"
+    },
+    {
+      "ID": "subscribe-099:5",
+      "Text": "说明月费、额度刷新及确认后开通的影响"
+    },
+    {
+      "ID": "subscribe-099:6",
+      "Text": "#2为案例生成器去重后缀，不能当金额、订单号、套餐ID或套餐名组成部分"
+    }
+  ],
+  "Turns": [
+    {
+      "User": "订月度标准",
+      "Reply": "目前月卡开通尚未开放，接入真实支付后才能办理。",
+      "Tools": [
+        {
+          "Name": "subscribe_plan",
+          "Result": "操作不可执行：月卡开通尚未开放，真实支付接入后开放"
+        }
+      ]
+    }
+  ]
+}

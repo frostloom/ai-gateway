@@ -1,0 +1,31 @@
+{
+  "id": "bills-036",
+  "arms": [
+    {
+      "arm": "model",
+      "pass": false,
+      "reasons": [
+        "unchecked_kind"
+      ],
+      "model_calls": 2,
+      "jev_calls": 0,
+      "packet": "packets/cfd6ac58a2656ab242ef1f754daa0d45e200f042ba980377dda228c9febba8e3.json",
+      "traces": [
+        "traces/trace-81a5ee86601e1526c0c5494d7d635b8caf1a875b73dbd326114ab7d2d08e74dc.bin"
+      ]
+    },
+    {
+      "arm": "jev_selective",
+      "pass": false,
+      "reasons": [
+        "unchecked_kind"
+      ],
+      "model_calls": 2,
+      "jev_calls": 1,
+      "packet": "packets/cfd6ac58a2656ab242ef1f754daa0d45e200f042ba980377dda228c9febba8e3.json",
+      "traces": [
+        "traces/trace-af1b66df605d50840512233602a82e602204621a2fb2ac6d9b707bee20c2f697.bin"
+      ]
+    }
+  ]
+}

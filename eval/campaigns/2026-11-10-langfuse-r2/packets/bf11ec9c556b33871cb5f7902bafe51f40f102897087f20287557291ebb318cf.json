@@ -1,0 +1,24 @@
+{
+  "ID": "cancel_subscription-086",
+  "Rubric": [
+    {
+      "ID": "cancel_subscription-086:2",
+      "Text": "针对“能否帮我退订当前套餐”取消本人订阅下期续费；先核验当前有效、已取消或无订阅状态也合理。"
+    },
+    {
+      "ID": "cancel_subscription-086:3",
+      "Text": "能办理时cancel_subscription生成预览，Pending=true且PendingTool=cancel_subscription；说明当期不退、只取消下期续费及实际到期时间，等待明确确认或取消。"
+    },
+    {
+      "ID": "cancel_subscription-086:4",
+      "Text": "未确认不能写入；已取消或无订阅须准确说明，首轮不能证明最终退订成功。"
+    }
+  ],
+  "Turns": [
+    {
+      "User": "能否帮我退订当前套餐",
+      "Reply": "可以。退订只会取消下期续费，当期套餐不退款；一次性套餐不能退订。如果你要办理，请明确告诉我“确认退订”。",
+      "Tools": []
+    }
+  ]
+}

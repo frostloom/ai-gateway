@@ -1,0 +1,21 @@
+{
+  "ID": "subscription-061",
+  "Rubric": [
+    {
+      "ID": "subscription-061:tool",
+      "Text": "回复当前订阅，内容来自工具结果。"
+    }
+  ],
+  "Turns": [
+    {
+      "User": "我这个月额度还有吗",
+      "Reply": "目前没有生效中的订阅，因此没有当前套餐额度可用。",
+      "Tools": [
+        {
+          "Name": "get_my_subscription",
+          "Result": "当前没有生效中的订阅。"
+        }
+      ]
+    }
+  ]
+}

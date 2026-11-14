@@ -1,0 +1,21 @@
+{
+  "ID": "subscription-002",
+  "Rubric": [
+    {
+      "ID": "subscription-002:tool",
+      "Text": "回复当前订阅，内容来自工具结果。"
+    }
+  ],
+  "Turns": [
+    {
+      "User": "查看我的订阅状态",
+      "Reply": "你当前没有生效中的订阅。",
+      "Tools": [
+        {
+          "Name": "get_my_subscription",
+          "Result": "当前没有生效中的订阅。"
+        }
+      ]
+    }
+  ]
+}

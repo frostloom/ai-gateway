@@ -1,0 +1,16 @@
+{
+  "ID": "cancel_subscription-016",
+  "Rubric": [],
+  "Turns": [
+    {
+      "User": "把这套餐停了吧",
+      "Reply": "目前没有生效中的订阅，因此无法为你办理停订。",
+      "Tools": [
+        {
+          "Name": "get_my_subscription",
+          "Result": "当前没有生效中的订阅。"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "root": "eval/campaigns/2026-11-10-local-paired",
+  "passes": 1,
+  "arms": [
+    "model",
+    "jev_selective"
+  ],
+  "grader_model": "gpt-6.1-sol",
+  "customer_model": "gpt-6-luna",
+  "case_count": 1220,
+  "dirs": [
+    "records",
+    "traces",
+    "packets",
+    "scores"
+  ]
+}

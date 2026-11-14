@@ -1,0 +1,21 @@
+{
+  "ID": "subscription-086",
+  "Rubric": [
+    {
+      "ID": "subscription-086:tool",
+      "Text": "回复当前订阅，内容来自工具结果。"
+    }
+  ],
+  "Turns": [
+    {
+      "User": "能否告知我的订阅到期时间",
+      "Reply": "你当前没有生效中的订阅，因此没有可告知的到期时间。",
+      "Tools": [
+        {
+          "Name": "get_my_subscription",
+          "Result": "当前没有生效中的订阅。"
+        }
+      ]
+    }
+  ]
+}

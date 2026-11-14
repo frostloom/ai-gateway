@@ -1,0 +1,31 @@
+{
+  "id": "recharge-036",
+  "arms": [
+    {
+      "arm": "model",
+      "pass": false,
+      "reasons": [
+        "unchecked_kind"
+      ],
+      "model_calls": 1,
+      "jev_calls": 0,
+      "packet": "packets/ce93649b68cf03c3893c4831fc0940caf47fec7906d9396929aa507ab7eb05df.json",
+      "traces": [
+        "traces/trace-910c29c2da7635a33a7e25326fd2d864924c2f87253e19297030dbbb44eb5ada.bin"
+      ]
+    },
+    {
+      "arm": "jev_selective",
+      "pass": false,
+      "reasons": [
+        "unchecked_kind"
+      ],
+      "model_calls": 1,
+      "jev_calls": 1,
+      "packet": "packets/3a91c16f1d0d9f38b0f6d10dc038eeffc56d6395450e2f3c16f7a39ccaf7f94c.json",
+      "traces": [
+        "traces/trace-c23bfd2efd40caddc4286d642f76a7d3a5ffdfa3fbf2de431007a9301b8d8fcb.bin"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "ID": "local-read-pending-001",
+  "Rubric": [
+    {
+      "ID": "local-read-pending-001:balance",
+      "Text": "回复当前余额，并保留待确认操作。"
+    }
+  ],
+  "Turns": [
+    {
+      "User": "查一下余额",
+      "Reply": "当前可用余额 ¥20000.00；账本口径 ¥20000.00，两者一致。",
+      "Tools": [
+        {
+          "Name": "get_balance",
+          "Result": "当前可用余额 ¥20000.00；账本口径 ¥20000.00，两者一致。"
+        }
+      ]
+    }
+  ]
+}

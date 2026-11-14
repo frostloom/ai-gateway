@@ -1,0 +1,21 @@
+{
+  "ID": "plans-048",
+  "Rubric": [
+    {
+      "ID": "plans-048:tool",
+      "Text": "回复套餐目录，内容来自工具结果。"
+    }
+  ],
+  "Turns": [
+    {
+      "User": "查下涛餐",
+      "Reply": "当前没有生效中的订阅。",
+      "Tools": [
+        {
+          "Name": "get_my_subscription",
+          "Result": "当前没有生效中的订阅。"
+        }
+      ]
+    }
+  ]
+}

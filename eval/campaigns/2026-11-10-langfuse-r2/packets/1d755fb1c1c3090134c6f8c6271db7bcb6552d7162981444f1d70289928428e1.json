@@ -1,0 +1,25 @@
+{
+  "ID": "cancel_subscription-066",
+  "Rubric": [
+    {
+      "ID": "cancel_subscription-066:2",
+      "Text": "对“我要停止付费”澄清要取消的对象及是否仅停止订阅续费；不能凭空补成退订授权。"
+    },
+    {
+      "ID": "cancel_subscription-066:3",
+      "Text": "可必要查询本人订阅辅助澄清；未澄清前不生成退订待确认预览。"
+    }
+  ],
+  "Turns": [
+    {
+      "User": "我要停止付费",
+      "Reply": "你当前没有生效中的订阅，因此没有下期续费可取消。",
+      "Tools": [
+        {
+          "Name": "get_my_subscription",
+          "Result": "当前没有生效中的订阅。"
+        }
+      ]
+    }
+  ]
+}

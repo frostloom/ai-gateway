@@ -1,0 +1,16 @@
+{
+  "ID": "cancel_subscription-082",
+  "Rubric": [],
+  "Turns": [
+    {
+      "User": "可以帮忙取消订阅吗",
+      "Reply": "可以帮你取消定期订阅续费，不过目前没有生效中的订阅，因此无法办理取消。",
+      "Tools": [
+        {
+          "Name": "get_my_subscription",
+          "Result": "当前没有生效中的订阅。"
+        }
+      ]
+    }
+  ]
+}

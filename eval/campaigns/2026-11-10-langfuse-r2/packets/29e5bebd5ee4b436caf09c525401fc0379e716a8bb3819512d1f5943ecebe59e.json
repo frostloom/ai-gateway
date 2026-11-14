@@ -1,0 +1,21 @@
+{
+  "ID": "subscription-056",
+  "Rubric": [
+    {
+      "ID": "subscription-056:tool",
+      "Text": "回复当前订阅，内容来自工具结果。"
+    }
+  ],
+  "Turns": [
+    {
+      "User": "我不太确定我的订阅有没有自动续费，麻烦帮我查一下订阅状态",
+      "Reply": "目前没有生效中的订阅，因此没有正在续费的订阅。",
+      "Tools": [
+        {
+          "Name": "get_my_subscription",
+          "Result": "当前没有生效中的订阅。"
+        }
+      ]
+    }
+  ]
+}

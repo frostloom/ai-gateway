@@ -1,0 +1,21 @@
+{
+  "ID": "subscription-052",
+  "Rubric": [
+    {
+      "ID": "subscription-052:tool",
+      "Text": "回复当前订阅，内容来自工具结果。"
+    }
+  ],
+  "Turns": [
+    {
+      "User": "你好，我之前订了一个套餐，想查一下它现在的状态和到期时间",
+      "Reply": "当前没有生效中的订阅，因此没有可查询的到期时间。",
+      "Tools": [
+        {
+          "Name": "get_my_subscription",
+          "Result": "当前没有生效中的订阅。"
+        }
+      ]
+    }
+  ]
+}

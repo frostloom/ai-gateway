@@ -1,0 +1,21 @@
+{
+  "ID": "subscription-068",
+  "Rubric": [
+    {
+      "ID": "subscription-068:tool",
+      "Text": "回复当前订阅，内容来自工具结果。"
+    }
+  ],
+  "Turns": [
+    {
+      "User": "套餐什么时候重置",
+      "Reply": "你目前没有生效中的订阅，因此没有套餐重置时间。",
+      "Tools": [
+        {
+          "Name": "get_my_subscription",
+          "Result": "当前没有生效中的订阅。"
+        }
+      ]
+    }
+  ]
+}

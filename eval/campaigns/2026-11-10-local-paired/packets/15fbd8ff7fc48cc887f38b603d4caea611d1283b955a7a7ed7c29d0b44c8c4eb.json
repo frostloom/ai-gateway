@@ -1,0 +1,21 @@
+{
+  "ID": "consumption-063",
+  "Rubric": [
+    {
+      "ID": "consumption-063:tool",
+      "Text": "回复近7天消耗，数值来自工具结果。"
+    }
+  ],
+  "Turns": [
+    {
+      "User": "我的钱主要花在哪了",
+      "Reply": "最近没有消费记录，所以目前无法判断你的钱主要花在哪了。",
+      "Tools": [
+        {
+          "Name": "get_recent_bills",
+          "Result": "最近没有消费记录。"
+        }
+      ]
+    }
+  ]
+}

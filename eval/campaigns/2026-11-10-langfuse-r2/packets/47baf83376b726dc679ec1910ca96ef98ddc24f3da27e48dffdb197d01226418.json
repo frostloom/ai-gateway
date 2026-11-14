@@ -1,0 +1,33 @@
+{
+  "ID": "change_plan-059",
+  "Rubric": [
+    {
+      "ID": "change_plan-059:2",
+      "Text": "用户目标为月度·旗舰，目录需唯一匹配后绑定正确plan_name/plan_id；不得猜内部ID"
+    },
+    {
+      "ID": "change_plan-059:3",
+      "Text": "若可办理，Pending=true且PendingTool=change_plan，展示正确目标并等待明确确认或取消"
+    },
+    {
+      "ID": "change_plan-059:4",
+      "Text": "目录费用和额度需真实工具结果；已满足目标或暂不可办理应查实说明，避免重复变更"
+    },
+    {
+      "ID": "change_plan-059:5",
+      "Text": "下期续费生效，当期额度与到期日不变"
+    }
+  ],
+  "Turns": [
+    {
+      "User": "请帮我把套餐从标准改成旗舰，我需要更多额度",
+      "Reply": "目前套餐变更尚未开放，暂时无法从标准套餐改为旗舰。",
+      "Tools": [
+        {
+          "Name": "change_plan",
+          "Result": "操作不可执行：套餐变更尚未开放，真实支付接入后开放"
+        }
+      ]
+    }
+  ]
+}

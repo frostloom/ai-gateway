@@ -1,0 +1,21 @@
+{
+  "ID": "subscription-067",
+  "Rubric": [
+    {
+      "ID": "subscription-067:tool",
+      "Text": "回复当前订阅，内容来自工具结果。"
+    }
+  ],
+  "Turns": [
+    {
+      "User": "我这期用超了吗",
+      "Reply": "你当前没有生效中的订阅，所以没有本期套餐额度可供比较。若你想问账户扣费情况，我可以帮你查近 7 天的扣费；扣费金额不能换算成 token 用量。",
+      "Tools": [
+        {
+          "Name": "get_my_subscription",
+          "Result": "当前没有生效中的订阅。"
+        }
+      ]
+    }
+  ]
+}

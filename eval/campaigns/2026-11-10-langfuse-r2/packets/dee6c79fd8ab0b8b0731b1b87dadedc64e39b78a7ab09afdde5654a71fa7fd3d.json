@@ -1,0 +1,21 @@
+{
+  "ID": "plans-065",
+  "Rubric": [
+    {
+      "ID": "plans-065:tool",
+      "Text": "回复套餐目录，内容来自工具结果。"
+    }
+  ],
+  "Turns": [
+    {
+      "User": "你们有什么会员吗",
+      "Reply": "目前暂无上架的会员套餐。",
+      "Tools": [
+        {
+          "Name": "list_plans",
+          "Result": "暂无上架套餐。"
+        }
+      ]
+    }
+  ]
+}

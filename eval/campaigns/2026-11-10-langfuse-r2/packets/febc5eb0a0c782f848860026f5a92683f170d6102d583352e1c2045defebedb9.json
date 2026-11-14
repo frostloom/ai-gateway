@@ -1,0 +1,21 @@
+{
+  "ID": "plans-073",
+  "Rubric": [
+    {
+      "ID": "plans-073:tool",
+      "Text": "回复套餐目录，内容来自工具结果。"
+    }
+  ],
+  "Turns": [
+    {
+      "User": "看下套餐的 price",
+      "Reply": "目前没有上架套餐，因此暂无套餐价格。",
+      "Tools": [
+        {
+          "Name": "list_plans",
+          "Result": "暂无上架套餐。"
+        }
+      ]
+    }
+  ]
+}

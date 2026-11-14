@@ -1,0 +1,31 @@
+{
+  "id": "refund-045",
+  "arms": [
+    {
+      "arm": "model",
+      "pass": false,
+      "reasons": [
+        "unchecked_kind"
+      ],
+      "model_calls": 1,
+      "jev_calls": 0,
+      "packet": "packets/93c0e44f9c310a5d02c5265bc135e6819c40d077581923e1ffb05d5a92def587.json",
+      "traces": [
+        "traces/trace-452028db273e7983e6007e084fee99eb8c59001ee78674433d5b411fea590dc3.bin"
+      ]
+    },
+    {
+      "arm": "jev_selective",
+      "pass": false,
+      "reasons": [
+        "unchecked_kind"
+      ],
+      "model_calls": 1,
+      "jev_calls": 1,
+      "packet": "packets/93c0e44f9c310a5d02c5265bc135e6819c40d077581923e1ffb05d5a92def587.json",
+      "traces": [
+        "traces/trace-f71e82980cd450331e83d2a23f08e1754edbdd335f7560bd52c10f696ec83f16.bin"
+      ]
+    }
+  ]
+}

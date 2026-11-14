@@ -1,0 +1,16 @@
+{
+  "ID": "bills-017",
+  "Rubric": [],
+  "Turns": [
+    {
+      "User": "我昨天那笔扣了多少",
+      "Reply": "最近没有消费记录，因此无法查到昨天的扣费金额。",
+      "Tools": [
+        {
+          "Name": "get_recent_bills",
+          "Result": "最近没有消费记录。"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "id": "consumption-054",
+  "arms": [
+    {
+      "arm": "model",
+      "pass": false,
+      "reasons": [
+        "unchecked_kind"
+      ],
+      "model_calls": 2,
+      "jev_calls": 0,
+      "packet": "packets/72e7ee9ced02b9f0d3b91b19b7d4ea462b52496ab4a1cc2709047c79e5d5357a.json",
+      "traces": [
+        "traces/trace-3585b9bcad0c3bff7120014d08123c76e3b672746314b1254bf4e9bf6207a547.bin"
+      ]
+    },
+    {
+      "arm": "jev_selective",
+      "pass": false,
+      "reasons": [
+        "unchecked_kind"
+      ],
+      "model_calls": 2,
+      "jev_calls": 1,
+      "packet": "packets/87f43cf9c6822edaee615d9c9659f485aa5a9ff6fd7c0384bdbeb914649cdd30.json",
+      "traces": [
+        "traces/trace-22a647aa2f242782c5ff97aba59665e2263b845c4e360451b885d7c3006fe161.bin"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "ID": "subscription-078",
+  "Rubric": [
+    {
+      "ID": "subscription-078:tool",
+      "Text": "回复当前订阅，内容来自工具结果。"
+    }
+  ],
+  "Turns": [
+    {
+      "User": "我的 quota 刷新了吗",
+      "Reply": "你当前没有生效中的订阅，因此没有订阅套餐额度可刷新。",
+      "Tools": [
+        {
+          "Name": "get_my_subscription",
+          "Result": "当前没有生效中的订阅。"
+        }
+      ]
+    }
+  ]
+}

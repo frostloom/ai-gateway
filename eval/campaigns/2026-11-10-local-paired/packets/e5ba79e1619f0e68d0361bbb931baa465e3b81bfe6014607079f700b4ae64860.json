@@ -1,0 +1,16 @@
+{
+  "ID": "bills-022",
+  "Rubric": [],
+  "Turns": [
+    {
+      "User": "我上次调用扣了多少",
+      "Reply": "最近没有消费记录，无法查到你上次调用的扣费金额。",
+      "Tools": [
+        {
+          "Name": "get_recent_bills",
+          "Result": "最近没有消费记录。"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "ID": "cancel_subscription-021",
+  "Rubric": [],
+  "Turns": [
+    {
+      "User": "这个套餐我不想要了",
+      "Reply": "你当前没有生效中的订阅，因此无法退订。若你指的是已购买的一次性套餐，请告诉我具体想处理什么；一次性套餐不可退订。",
+      "Tools": [
+        {
+          "Name": "get_my_subscription",
+          "Result": "当前没有生效中的订阅。"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "ID": "subscription-058",
+  "Rubric": [
+    {
+      "ID": "subscription-058:tool",
+      "Text": "回复当前订阅，内容来自工具结果。"
+    }
+  ],
+  "Turns": [
+    {
+      "User": "请帮我确认当前的订阅情况，我要决定是继续订还是改套餐",
+      "Reply": "你当前没有生效中的订阅。可以先查看套餐目录再决定；目前开通和变更套餐尚未开放。",
+      "Tools": [
+        {
+          "Name": "get_my_subscription",
+          "Result": "当前没有生效中的订阅。"
+        }
+      ]
+    }
+  ]
+}

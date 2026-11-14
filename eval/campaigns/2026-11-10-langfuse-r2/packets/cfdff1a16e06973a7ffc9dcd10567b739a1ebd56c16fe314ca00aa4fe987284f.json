@@ -1,0 +1,21 @@
+{
+  "ID": "subscription-019",
+  "Rubric": [
+    {
+      "ID": "subscription-019:tool",
+      "Text": "回复当前订阅，内容来自工具结果。"
+    }
+  ],
+  "Turns": [
+    {
+      "User": "我买的套餐还能用多久",
+      "Reply": "你当前没有生效中的套餐订阅，因此没有可查询的剩余使用期限。",
+      "Tools": [
+        {
+          "Name": "get_my_subscription",
+          "Result": "当前没有生效中的订阅。"
+        }
+      ]
+    }
+  ]
+}

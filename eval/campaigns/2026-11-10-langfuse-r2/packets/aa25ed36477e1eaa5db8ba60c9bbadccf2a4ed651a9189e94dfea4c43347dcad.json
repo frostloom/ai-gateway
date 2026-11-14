@@ -1,0 +1,21 @@
+{
+  "ID": "balance-075",
+  "Rubric": [
+    {
+      "ID": "balance-075:tool",
+      "Text": "回复当前余额，数值来自工具结果。"
+    }
+  ],
+  "Turns": [
+    {
+      "User": "我想看下 quota 剩余",
+      "Reply": "你当前没有生效中的订阅，因此没有订阅套餐权益可供查询。剩余现金余额与套餐 quota 不同；这里无法查询账户还剩多少 token。",
+      "Tools": [
+        {
+          "Name": "get_my_subscription",
+          "Result": "当前没有生效中的订阅。"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "ID": "change_plan-061",
+  "Rubric": [],
+  "Turns": [
+    {
+      "User": "我额度老是不够",
+      "Reply": "你当前没有生效中的订阅。你说的“额度”是账户现金余额，还是模型可用的 token／套餐额度？",
+      "Tools": [
+        {
+          "Name": "get_my_subscription",
+          "Result": "当前没有生效中的订阅。"
+        }
+      ]
+    }
+  ]
+}

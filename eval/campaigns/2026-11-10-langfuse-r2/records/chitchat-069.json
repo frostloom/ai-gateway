@@ -1,0 +1,31 @@
+{
+  "id": "chitchat-069",
+  "arms": [
+    {
+      "arm": "model",
+      "pass": false,
+      "reasons": [
+        "unchecked_kind"
+      ],
+      "model_calls": 1,
+      "jev_calls": 0,
+      "packet": "packets/702538f5969e6957ada139f6be124561c4c14847aa5de40c11fca74e8ec1469f.json",
+      "traces": [
+        "traces/trace-75e9fa2b8a56b83d74e4cfbba4b56549f57674f9ea7982d70dc15b4d2962203b.bin"
+      ]
+    },
+    {
+      "arm": "jev_selective",
+      "pass": false,
+      "reasons": [
+        "unchecked_kind"
+      ],
+      "model_calls": 0,
+      "jev_calls": 1,
+      "packet": "packets/5703e244b08a0d375eb9aa44f934e4e8431d4ff46d345300d8f5fb01c4ed8bb3.json",
+      "traces": [
+        "traces/trace-46f31ac95e821d45102e4173621ab442609ed21a7667e7046056dd5a8198958a.bin"
+      ]
+    }
+  ]
+}

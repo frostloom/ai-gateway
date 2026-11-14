@@ -1,0 +1,25 @@
+{
+  "id": "local-read-history-001",
+  "arms": [
+    {
+      "arm": "model",
+      "pass": true,
+      "model_calls": 2,
+      "jev_calls": 0,
+      "packet": "packets/36d0b5ce59dc534686cdf355cf6072498f416b7d28b7e149de642de43532d5ab.json",
+      "traces": [
+        "traces/trace-7433913d1f340cb2248e3b9ac082bd199cf8d13e9d493c09647c23154ae3aa68.bin"
+      ]
+    },
+    {
+      "arm": "jev_selective",
+      "pass": true,
+      "model_calls": 0,
+      "jev_calls": 1,
+      "packet": "packets/091f1e74245c868ff145e16579c90c69046f340d9a6ee98e31ca53b459364949.json",
+      "traces": [
+        "traces/trace-e653ddd5c883712e2f9f0c85b3069e28d9e5b92238a87b5b9634bf38f3312845.bin"
+      ]
+    }
+  ]
+}

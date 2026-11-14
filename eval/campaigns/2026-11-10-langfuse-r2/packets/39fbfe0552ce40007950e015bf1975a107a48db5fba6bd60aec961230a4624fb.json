@@ -1,0 +1,21 @@
+{
+  "ID": "subscription-057",
+  "Rubric": [
+    {
+      "ID": "subscription-057:tool",
+      "Text": "回复当前订阅，内容来自工具结果。"
+    }
+  ],
+  "Turns": [
+    {
+      "User": "我想了解一下我这个套餐的额度刷新时间是多久，以及现在还剩多少",
+      "Reply": "你目前没有生效中的套餐，因此没有套餐额度可供查询，也没有额度刷新时间。",
+      "Tools": [
+        {
+          "Name": "get_my_subscription",
+          "Result": "当前没有生效中的订阅。"
+        }
+      ]
+    }
+  ]
+}

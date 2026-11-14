@@ -1,0 +1,25 @@
+{
+  "id": "local-read-pending-001",
+  "arms": [
+    {
+      "arm": "model",
+      "pass": true,
+      "model_calls": 2,
+      "jev_calls": 0,
+      "packet": "packets/3791553cb6c6d9e15839461150f96a968408a8681f7803b280aa28a76c0ebf1f.json",
+      "traces": [
+        "traces/trace-0580b6d2fcb681d8fded4d67c10469608cd7159d87129c5d3d9ef5d1c58322d9.bin"
+      ]
+    },
+    {
+      "arm": "jev_selective",
+      "pass": true,
+      "model_calls": 0,
+      "jev_calls": 1,
+      "packet": "packets/c5a18dc93275f7bcc27dc78b566afae2f9a5aac842e9db0e068aad7495b99916.json",
+      "traces": [
+        "traces/trace-7bf49a0d1608a301f8f5680f6733200bd78e0c4ded10aac71deacc8393cacfbd.bin"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "ID": "cancel_subscription-074",
+  "Rubric": [],
+  "Turns": [
+    {
+      "User": "帮我退订 plan",
+      "Reply": "当前没有生效中的订阅，因此无法办理退订。",
+      "Tools": [
+        {
+          "Name": "get_my_subscription",
+          "Result": "当前没有生效中的订阅。"
+        }
+      ]
+    }
+  ]
+}

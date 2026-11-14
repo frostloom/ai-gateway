@@ -1,0 +1,33 @@
+{
+  "ID": "cancel_subscription-060",
+  "Rubric": [
+    {
+      "ID": "cancel_subscription-060:2",
+      "Text": "针对“我决定停掉这个订阅，麻烦帮我取消月度标准”取消本人订阅下期续费；先核验当前有效、已取消或无订阅状态也合理。"
+    },
+    {
+      "ID": "cancel_subscription-060:3",
+      "Text": "保留用户指定的套餐名称“我决定停掉这个订阅，麻烦帮我取消月度标准”，核对当前及待生效计划；不得默默取消另一档，目标无法匹配时应说明/澄清。"
+    },
+    {
+      "ID": "cancel_subscription-060:4",
+      "Text": "能办理时cancel_subscription生成预览，Pending=true且PendingTool=cancel_subscription；说明当期不退、只取消下期续费及实际到期时间，等待明确确认或取消。"
+    },
+    {
+      "ID": "cancel_subscription-060:5",
+      "Text": "未确认不能写入；已取消或无订阅须准确说明，首轮不能证明最终退订成功。"
+    }
+  ],
+  "Turns": [
+    {
+      "User": "我决定停掉这个订阅，麻烦帮我取消月度标准",
+      "Reply": "当前没有生效中的订阅，因此无法取消月度标准，也无需退订。",
+      "Tools": [
+        {
+          "Name": "cancel_subscription",
+          "Result": "操作不可执行：当前没有生效中的订阅，无需退订"
+        }
+      ]
+    }
+  ]
+}

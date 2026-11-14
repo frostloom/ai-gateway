@@ -1,0 +1,21 @@
+{
+  "ID": "consumption-078",
+  "Rubric": [
+    {
+      "ID": "consumption-078:tool",
+      "Text": "回复近7天消耗，数值来自工具结果。"
+    }
+  ],
+  "Turns": [
+    {
+      "User": "查下 token 消耗",
+      "Reply": "最近没有消费记录，因此目前查不到 token 消耗明细。",
+      "Tools": [
+        {
+          "Name": "get_recent_bills",
+          "Result": "最近没有消费记录。"
+        }
+      ]
+    }
+  ]
+}

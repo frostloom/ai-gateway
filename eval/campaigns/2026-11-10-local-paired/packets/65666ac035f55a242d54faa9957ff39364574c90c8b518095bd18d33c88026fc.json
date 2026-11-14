@@ -1,0 +1,21 @@
+{
+  "ID": "subscription-070",
+  "Rubric": [
+    {
+      "ID": "subscription-070:tool",
+      "Text": "回复当前订阅，内容来自工具结果。"
+    }
+  ],
+  "Turns": [
+    {
+      "User": "我的额度还有多少没用",
+      "Reply": "你当前没有生效中的订阅，因此查不到套餐额度还剩多少；现金余额也不等同于套餐额度。",
+      "Tools": [
+        {
+          "Name": "get_my_subscription",
+          "Result": "当前没有生效中的订阅。"
+        }
+      ]
+    }
+  ]
+}

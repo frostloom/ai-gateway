@@ -1,0 +1,31 @@
+{
+  "id": "change_plan-037",
+  "arms": [
+    {
+      "arm": "model",
+      "pass": false,
+      "reasons": [
+        "unchecked_kind"
+      ],
+      "model_calls": 1,
+      "jev_calls": 0,
+      "packet": "packets/a2ecaf8b46ec482785bad13b281b8e2f9d50f4be9a28a6394c49309344674637.json",
+      "traces": [
+        "traces/trace-5c58720609a6b67d175b0262625c1d64611b53fec7f11c5e9ccb5f6be9576b60.bin"
+      ]
+    },
+    {
+      "arm": "jev_selective",
+      "pass": false,
+      "reasons": [
+        "unchecked_kind"
+      ],
+      "model_calls": 2,
+      "jev_calls": 1,
+      "packet": "packets/3c363cdd78d5cc6e925b18eac12ab994f5777e0cc8770baf40c6f88b9deac8f5.json",
+      "traces": [
+        "traces/trace-55f642ad15e90248f956013e0573626f3ec965c65f3448d23cd8367f7a49ae31.bin"
+      ]
+    }
+  ]
+}

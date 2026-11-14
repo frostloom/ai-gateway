@@ -1,0 +1,21 @@
+{
+  "ID": "subscription-050",
+  "Rubric": [
+    {
+      "ID": "subscription-050:tool",
+      "Text": "回复当前订阅，内容来自工具结果。"
+    }
+  ],
+  "Turns": [
+    {
+      "User": "套惨剩余",
+      "Reply": "当前没有生效中的订阅，因此没有订阅套餐剩余权益可查。",
+      "Tools": [
+        {
+          "Name": "get_my_subscription",
+          "Result": "当前没有生效中的订阅。"
+        }
+      ]
+    }
+  ]
+}
