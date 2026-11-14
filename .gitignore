@@ -15,6 +15,7 @@ web/.npm-cache/
 .vscode/
 .idea/
 *.swp
+.DS_Store
 
 # 测试产物
 coverage.out
@@ -53,6 +54,11 @@ deploy/langfuse/.local-login.txt
 # 本地分支工作区
 /worktrees/
 
-# One-shot live pilot claims, private billing evidence and execution receipts
-/.tmp/paired-live-authorizations/
-/.tmp/paired-live-private/
+# 本地临时工作区（一次性领取、私密计费证据、执行回执等，全部只留本地）
+/.tmp/
+
+# 设计工具本地产物（截图/对照稿）
+.hallmark/
+
+# 2026-11 线下压测原始运行数据（结论在 docs，原始目录只留本地）
+/eval/project-load-2026-11-02/
