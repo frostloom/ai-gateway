@@ -1,18 +1,19 @@
 # AI 模型网关 / 计费平台（Go 微服务）
 
-> 换电脑与继续开发先读：[最新进展、产物用途及迁移交接（2026-10-20）](docs/MIGRATION-HANDOFF-2026-10-20.md)。包含私有配置位置、Docker 数据边界、启动步骤及未完成评测说明。
+> **现状说明（2026-11-11）**：默认计费已改为 Redis 实时余额与 MySQL 定时批量落账；下文带 M 编号的历史验收数字仅代表当时版本。最新学习入口及评测口径见 [当前架构与面试指南](docs/interview/current-2026-11-11.md)。
 
-> **一句话**：一个 OpenAI 兼容的多租户模型网关，核心是**计费正确性**——并发下额度不超卖、
-> 崩溃后账不丢不重、坏上游自动熔断切换。对标 new-api / one-api，并修掉了它们三个真实缺陷。
+> 历史迁移参考：[产物用途及迁移交接（2026-10-20）](docs/MIGRATION-HANDOFF-2026-10-20.md)。包含当时的私有配置位置、Docker 数据边界与启动步骤，现状以当前代码和本指南为准。
+
+> **一句话**：一个 OpenAI 兼容的多租户模型网关，核心是**计费正确性**——并发额度控制、批量落账与故障恢复，以及坏上游熔断切换。参考 new-api / one-api 的业务场景。
 
 - **语言/框架**：Go 1.25 · gin · gRPC · go-redis/v9 · GORM(MySQL) · Prometheus · **前端 web/（Vite+Vue3+TS）**
 - **服务**：gateway（API 网关 + Web 面板）· billing（计费 + admin 观测）· router（路由/熔断）· mock-provider（故障注入假上游）· **agent（AI 智能客服，第 6 服务，接入 JEV 判断引擎）** · reconciler · event-consumer
-- **存储**：MySQL（权威账本）· Redis（余额投影 / 会话态 / 限流 / 缓存）· Kafka（计费事件流，M10）
+- **存储**：Redis（批量模式下实时余额权威 / 会话态 / 限流 / 缓存）· MySQL（账单及余额定期落账）· Kafka（计费事件流，M10）
 - **Web 页面**：`/` 管理员账号登录 · `/portal` 普通用户直接注册、账号密码登录（无需邀请码，含 AI 客服聊天）——分别使用 HttpOnly 会话，独立前端工程构建，go:embed 托管，无 CDN
 - **AI 客服安全性**：执行层不信任 LLM（tenant 只来自验证过的 key、写操作必须用户确认、参数服务端重校验）
-  + **JEV「System One」判断引擎**（每轮先过一道判定，按置信度分层拦截/警告/预判，见 [docs/interview/10](docs/interview/10-intent-eval-and-jev.md)）
-- **评测**：30 条功能用例（离线确定性，2 秒跑完）+ **1220 条意图路由评测集**（12 类 × 100 条 × 9 种说法维度，量化 JEV 前后差异）
-- **面试文档**：[docs/interview/](docs/interview/)（Go 入门 + 分布式概念 + 每里程碑 Q&A + 项目故事 + 压测教学 + M7 AI 客服 + M10 意图评测与 JEV）
+  + **JEV「System One」判断引擎**（按配置执行选择性判断及快速路径，复杂请求回退主模型，见[当前指南](docs/interview/current-2026-11-11.md)）
+- **评测**：35 条离线功能用例；1220 条数据集已有本地双臂完整采集，另一次 Langfuse 相关运行状态记录 1218 完成、2 失败，本地 grade 文件均为空对象，评分结果尚待核验，详见[当前评测口径](docs/interview/current-2026-11-11.md#评测口径)。
+- **面试文档**：[当前指南](docs/interview/current-2026-11-11.md)、[面试追问与练习](docs/interview/interview-practice-2026-11-11.md)及历史 [docs/interview/](docs/interview/)（Go 入门 + 分布式概念 + 每里程碑 Q&A + 项目故事 + 压测教学 + M7 AI 客服 + M10 意图评测与 JEV）
 
 ---
 
@@ -60,7 +61,7 @@ HTTP/SSE（数据面，流式）。读到 usage 帧时按上游实际产出结�
 
 ---
 
-## 对标 new-api：三个缺陷 → 本项目三个修复（最强面试亮点）
+## 历史设计对照（理解问题；当前批量路径见下节）
 
 | new-api 的缺陷 | 后果 | 本项目的修复 |
 |---|---|---|
@@ -74,29 +75,13 @@ HTTP/SSE（数据面，流式）。读到 usage 帧时按上游实际产出结�
 
 ## 核心设计
 
-### 计费 Saga（bills 状态机）
+### 计费与对账（当前默认批量模式）
 
-```
-Reserve（Redis Lua 原子扣减 + 落库）→ [pending]
-   ├─ ReportUsage（幂等写 marker）→ [pending + marker]
-   │      └─ Settle（幂等）→ [settled]（按实际 delta 多退少补）
-   └─ Reverse（幂等）→ [reversed]（Redis 退回预扣）
+`BILLING_LEDGER_BATCH_SECONDS` 默认 5，允许 0–60；设为 0 关闭批量模式。批量模式下，请求先通过 Redis 原子预扣和结算，Redis 保存实时余额；账单和余额变动先进入进程内批次，后台按配置间隔写入 MySQL。写入间隔是调度周期，不保证故障时最多延迟 5 秒。Kafka 配置后异步承载请求明细，**不负责修改余额**；`BILLING_LEDGER_VIA_KAFKA=1` 会被启动入口拒绝。
 
-Reserve 内部微 Saga：Lua 扣减成功 → 插 reserve 行失败 → 反向 Lua 补偿
-```
+MySQL 可能暂时落后，不能在有在途变动时直接用旧 SQL 余额覆盖 Redis；账务故障要核对 Redis、批次、MySQL 与事件记录。批次和待发送事件包含内存状态，不能笼统声称任意崩溃都不丢账或仅靠 MySQL 就能恢复全部已确认变动。非批量模式仍有不同的同步写账与恢复路径。详见 [当前架构与面试指南](docs/interview/current-2026-11-11.md)。
 
-- **Redis balance 是缓存投影，MySQL bills 是权威账本**；对账定时「从账本重建投影」兜底。
-- **幂等**：`uk_request_phase` 唯一索引（权威）+ `billing:req/delta:{request_id}` SETNX（缓存层）+ 状态守卫
-  `UPDATE ... WHERE status='pending'`，`RowsAffected==1` 才算成功。
-- **绝不复用请求 ctx**：Settle 用独立 `context.WithTimeout(context.Background(), 10s)`，客户端断连也不丢账。
-
-### 对账（M4）
-
-```
-扫描: reserve 行 status=pending 且 created_at < now - 最大流时长 - 宽限期
-  pending + 无 usage_reported_at → 流从未产出完整结果 → Reverse 全退
-  pending + 有 usage_reported_at → 流已跑完但结算丢失 → 补 Settle
-```
+历史 M4 对账基于当时 MySQL 账单与 pending/usage marker：扫描滞留记录，按状态尝试补结算或冲正。它不应被描述为批量模式下无条件从旧 MySQL 重建 Redis 的方案。
 
 ### 路由 / 熔断（M5）
 
@@ -125,7 +110,7 @@ failover: 只在首个字节前失败重试，重试带 exclude 排除已试节�
 
 余额公式（唯一改动点，4 处一致）：
   balance = initial_quota + Σ(topups) − Σ(pending pre) − Σ(settled actual)
-  topups（入账流水，ref 唯一索引 = 幂等提交点）是正余额的权威账本
+  topups 记录入账流水，ref 唯一索引提供幂等约束；实时余额和落账状态需结合当前计费模式核对
 
 话费式口径：one_time 买断已停售；recurring 退订=当期不退只停下期续费；
 充值退款量 = min(订单额度, 当前余额)，绝不退成负；下单≠支付≠入账（状态机幂等）
@@ -186,14 +171,14 @@ agent 设置 `AGENT_KNOWLEDGE_ENABLED=1`，并用 `AGENT_KNOWLEDGE_DIR=knowledge
 
 ### P2 AI 客服评测集（数据驱动回归）
 
-- `eval/cases/*.json`：**30 条用例 × 5 维度**（意图/确认流程/安全注入/输出纯净/订阅额度），
+- `eval/cases/*.json`：**35 条用例 × 6 维度**（意图/确认流程/安全注入/输出纯净/订阅额度），
   每条 = 脚本化假 LLM + 多轮用户输入 + 断言集合（工具路由、确认状态机、
   tenant 覆写、admin 写调用、回复纯净度、拦截原因）。
 - `go run ./cmd/eval` 离线跑（假 LLM + 假 billing admin + 真 MySQL/Redis，零成本确定性回归，
-  当前 **30/30 全绿**）；`-mode http` 打真 agent（真 DeepSeek）。报告留档 `eval/reports/`。
+  历史运行结果见对应报告，当前版本需重新运行确认）；`-mode http` 打真 agent（真 DeepSeek）。报告留档 `eval/reports/`。
 - 权威回归基线：改 prompt / 工具描述 / 校验逻辑后必跑，通过率下降即回归。
 
-真实意图对照（每组 1,220 条）：`./scripts/run-intent-ab.ps1`；独立 JEV 开/关服务，输出 JSON 明细、混淆矩阵和 Markdown 对比。评分版本 2 使用严格 Top-1/Reach、分离澄清、失败与误拦，并记录真实 LLM 请求次数和 P50/P95 延迟。复现和口径见 [意图评测手册](eval/intent-suite/RUNBOOK.md)。
+历史意图对照运行说明（每组 1,220 条；最新运行见当前指南）：`./scripts/run-intent-ab.ps1`；独立 JEV 开/关服务，输出 JSON 明细、混淆矩阵和 Markdown 对比。评分版本 2 使用严格 Top-1/Reach、分离澄清、失败与误拦，并记录真实 LLM 请求次数和 P50/P95 延迟。复现和口径见 [意图评测手册](eval/intent-suite/RUNBOOK.md)。
 
 ### 前端验收（npm run verify）
 
@@ -213,26 +198,13 @@ cd web && npm run verify   # = vue-tsc --noEmit && vite build && node scripts/sm
 这一步能抓到「构建通过但运行时报错」以及交互/分级回归（本轮即由它发现并修掉了
 「确认后旧确认条仍可点」和「审计把正常预览行误报成未确认写」两个缺陷）。
 
-### P3 JEV 判断引擎（System One 给 System Two 上保险）
+### JEV 判断与客服快速路径
 
-Jev = TypeSafe AI 的判定模型：state + 类型化问题（noul/choice/score）→ 带置信度的结构化判定
-（~0.1s/次、约 $0.00008/次，不做文本生成）。agent 里两个落点：
+JEV 可按客服配置启用，用于选择性判断。支持的明确查询可进入只读快速路径；高置信度的高风险请求和无关内容按规则处理，复杂或判断失败时回退主模型。具体处理受运行模式、阈值和上下文影响，见 [fast_path.go](internal/agent/fast_path.go) 与 [当前架构指南](docs/interview/current-2026-11-11.md)。用户身份、工具参数与写操作确认仍由执行层控制；不能把判断模型当作唯一安全边界。
 
-```
-意图预判：LLM 调用前，Jev Choice 分类意图 → 高置信(≥JEV_INTENT_MIN)向系统提示注入
-          「安全预判」引导优先调用对应工具（不代行，LLM 仍是唯一执行者）
-写操作守门：写工具 Preview 后、挂起确认前，Jev Noul 判定「本人合理请求 vs 注入/异常」→
-          低于 JEV_GUARD_MIN 直接拦截（回复原因 + 审计 guard JSON + 指标 agent_jev_decisions_total）
-          ——与「用户二次确认」双保险：确认防误操作，Jev 防注入
-```
+### Kafka 计费事件流
 
-- `internal/jev/`：类型化客户端（兼容两种响应形态，容错解码）+ 假实现，单测覆盖解码/错误/fake；
-  未配置 `JEV_ENDPOINT/JEV_API_KEY` 时全部静默停用，行为与旧版一致。
-
-### M10 Kafka 计费事件流
-
-- billing 记账方法把 bill 行 + outbox 行**同事务**提交；outbox relay 轮询投递到 `billing.events`，
-  失败重试、超限改投 DLQ；event-consumer 幂等（`uk_event_id`）物化 `audit_events` 审计明细。
+- 默认批量模式下，明细异步发送 Kafka，失败进入重试及 outbox 路径；MySQL 批量落账与 Redis 余额控制独立。非批量模式使用账单与 outbox 同事务的路径；event-consumer 幂等物化审计明细。
 - `docker compose up -d kafka kafka-init`，`KAFKA_BROKERS` 空则不启用 relay。
 
 ### 可观测
@@ -292,7 +264,7 @@ bash scripts/loadtest/run.sh 200 60s     # 并发、时长可调
 
 ---
 
-## 验证结果（本机真实跑过）
+## 历史验证结果（对应当时版本，非当前性能保证）
 
 | 测试 | 结果 |
 |---|---|
@@ -344,10 +316,10 @@ bash scripts/loadtest/run.sh 200 60s     # 并发、时长可调
 
 ---
 
-## 评测（两套，互补）
+## 历史评测说明（具体运行与最新状态见当前指南）
 
 ```bash
-# ① 功能用例：30 条，脚本化假 LLM，离线确定性，2 秒跑完（改代码后必跑）
+# ① 功能用例：当前 35 条，脚本化假 LLM；耗时与结果以本次运行报告为准
 go run ./cmd/eval
 
 # ② 意图路由：1220 条，打真实 agent，量化路由准确率与 JEV 收益
@@ -360,7 +332,7 @@ go run ./cmd/eval -suite intent -mode http \
 |---|---|---|
 | 模型 | 「用例通过/失败」 | 「分类指标」 |
 | 测什么 | 确认状态机、tenant 隔离、审计留痕、参数校验 | 路由到哪个工具（Top-1 / Macro-F1 / OOS 误调用率） |
-| 规模 | 30 条 × 5 维度 | 1220 条（12 类 × 100 + 对抗 20） |
+| 规模 | 35 条 × 6 维度 | 1220 条（12 类 × 100 + 对抗 20） |
 | LLM | 脚本化（确定性、零成本） | 真实（花 token） |
 | 用途 | 改代码后回归 | 量化 JEV 前后差异、定位说法维度短板 |
 
@@ -405,7 +377,7 @@ internal/
   router/{registry,circuit}          权重路由 + 熔断状态机
   pkg/{config,logger,metrics,redisx,tokens,trace,xid,quota,kafka}    公共
 web/                                 独立前端工程（Vite+Vue3+TS）：双入口 portal/dashboard
-eval/cases|reports                    P2 客服评测用例（30 条 × 5 维度）与报告归档
+eval/cases|reports                    P2 客服评测用例（35 条 × 6 维度）与报告归档
 eval/intent-suite/                    M10 意图路由评测集（1220 条）+ DESIGN.md / RUNBOOK.md
 scripts/{schema.sql, m1~m7, seed, loadtest, channel}  DDL + 场景脚本 + 造数据 + 压测
 scripts/start-all.ps1                 Windows 一键启动（bash 走 WSL 不可用时的等价实现）
@@ -424,7 +396,7 @@ docs/api-reference.md                 前端对接 API 契约（portal/admin/age
 - [01-m1.md](docs/interview/01-m1.md) ~ [05-m5.md](docs/interview/05-m5.md) —— 每里程碑：概念层→代码导读→面试 Q&A→真实验证结果→口述抽查
 - [06-loadtest.md](docs/interview/06-loadtest.md) —— 压测教学：三条压测路径、P50/P95/P99 怎么读、六个坑、50→300 逐步加压实测
 - [07-m7.md](docs/interview/07-m7.md) —— M7/M9 AI 智能客服 + GPT Plus 式订阅：agentic 自服务、执行层不信任 LLM、话费式退款口径、二次确认状态机、审计可追责、订阅=每窗口 token 额度
-- [08-eval.md](docs/interview/08-eval.md) —— P2 AI 客服评测集：30 用例 × 5 维度、离/在线双模式、纵深断言、迭代闭环
+- [08-eval.md](docs/interview/08-eval.md) —— AI 客服评测集：35 用例 × 6 维度、离/在线双模式、纵深断言、迭代闭环
 - [09-jev.md](docs/interview/09-jev.md) —— P3 JEV 判断引擎：System One 给 System Two 上保险、意图预判 + 写操作守门、置信度阈值与审计
 - [10-intent-eval-and-jev.md](docs/interview/10-intent-eval-and-jev.md) —— M10 意图路由评测集（1220 条怎么建、为什么 CLINC150/Banking77 不能用）+ JEV 分层接入 + JEV 前后指标对比 + 并发超时踩坑
 
@@ -444,9 +416,9 @@ docs/api-reference.md                 前端对接 API 契约（portal/admin/age
 | P2 | AI 客服评测集：eval/cases 30 用例 × 5 维度（意图/确认/安全/纯净/额度）+ 离在线 runner + 报告 | 离线假 LLM 回归 **30/30 全绿** · go vet/test 全绿 |
 | P3 | JEV 判断引擎：internal/jev 类型化客户端(fake 单测) + 客服意图预判 + 写操作守门（置信度阈值拦截 + 审计 guard + 指标） | 假 Jev 守门/注入/放行/回退单测全绿 · 未配置静默停用无回归（评测 30/30 不变） |
 
-## 已知边界（面试可主动讲）
+## 历史版本边界（当前限制见当前指南）
 
-- 吞吐上限 ~210 req/s 由**端到端全链路延迟**决定（每请求 4 次 gRPC + Lua 原子扣减 + MySQL
+- 旧版本实测约 210 req/s 由**端到端全链路延迟**决定（每请求 4 次 gRPC + Lua 原子扣减 + MySQL
   落库 + 上游往返）：并发 100→300，吞吐几乎不变而 P50 469ms→1329ms 翻三倍。把 billing
   MySQL 池 50→100 实测吞吐不变（瓶颈不在池），扩展方向：billing 按租户分片 / 批量 settle
   合并写。
