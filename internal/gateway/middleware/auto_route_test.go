@@ -16,6 +16,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/frostloom/ai-gateway/internal/autoroute"
+	"github.com/frostloom/ai-gateway/internal/gateway/client"
 	"github.com/frostloom/ai-gateway/internal/jev"
 )
 
@@ -42,8 +43,9 @@ func scoredEval(score float64) jev.Evaluator {
 	}})
 }
 
-// autoRouteTestEnv 建 gin 引擎：该中间件 + 桩下游。桩读全量 body 记录字节与
-// ContentLength 后回 200；downstream 闭包捕获供断言。
+// autoRouteTestEnv 建 gin 引擎：Idempotency（生产两组都在 AutoRoute 之前生成 request_id）
+// + 该中间件 + 桩下游。桩读全量 body 记录字节与 ContentLength 后回 200；
+// downstream 闭包捕获供断言。
 func autoRouteTestEnv(t *testing.T, mw gin.HandlerFunc) (r *gin.Engine, downstream func() ([]byte, int64, bool)) {
 	t.Helper()
 	gin.SetMode(gin.TestMode)
@@ -51,7 +53,7 @@ func autoRouteTestEnv(t *testing.T, mw gin.HandlerFunc) (r *gin.Engine, downstre
 	var gotLen int64
 	called := false
 	r = gin.New()
-	r.POST("/v1/chat/completions", mw, func(c *gin.Context) {
+	r.POST("/v1/chat/completions", Idempotency(), mw, func(c *gin.Context) {
 		called = true
 		b, err := io.ReadAll(c.Request.Body)
 		if err != nil {
@@ -322,10 +324,19 @@ func TestAutoRouteLogsDecision(t *testing.T) {
 	log := slog.New(slog.NewJSONHandler(&buf, nil))
 	mw := AutoRoute(cfg, autoroute.NewSelector(cfg, scoredEval(2)), nil, log)
 	r, _ := autoRouteTestEnv(t, mw)
-	postAutoBody(t, r, autoRouteChatBody)
+	w := postAutoBody(t, r, autoRouteChatBody)
 
+	if w.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200", w.Code)
+	}
 	out := buf.String()
-	for _, key := range []string{"auto_route", `"mode":"on"`, `"model":"test-pro"`, `"would_be":"test-pro"`, "decision_ms", `"degraded":""`, `"breaker_state":"closed"`} {
+	// request_id 来自 Idempotency（本环境已挂载），应非空且带 req_ 前缀；
+	// scoredEval 不产 probabilities → nil 记空对象；threshold 来自配置。
+	for _, key := range []string{
+		"auto_route", `"mode":"on"`, `"model":"test-pro"`, `"would_be":"test-pro"`, "decision_ms",
+		`"degraded":""`, `"breaker_state":"closed"`,
+		`"request_id":"req_`, `"threshold":1.5`, `"probabilities":{}`,
+	} {
 		if !strings.Contains(out, key) {
 			t.Fatalf("日志缺少 %s: %s", key, out)
 		}
@@ -573,6 +584,42 @@ func TestAutoRouteProbeOnlyOnJudgedOnPath(t *testing.T) {
 		assertAutoDegradedAbsence(t, w)
 		if len(probed) != 0 {
 			t.Fatalf("未判定（兜底）不应探测，probe 调用 = %v", probed)
+		}
+	})
+}
+
+// TestNewAutoRouteProbe 缝隙测试：真实 client.Router 打到 httptest 的 /route，
+// 验证提取后的探测函数把 router 的「无可用 provider」信号（HTTP 503 → (nil, nil)）
+// 映射为 error。旧闭包直接丢弃结果只透传 err，该场景被误判为探测成功，
+// strong→cheap 降级的主触发路径失效、请求带判定档进 handler 再 503。
+func TestNewAutoRouteProbe(t *testing.T) {
+	t.Run("503无可用provider映射为error", func(t *testing.T) {
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if r.URL.Path != "/route" {
+				t.Errorf("探测应请求 /route, got %s", r.URL.Path)
+			}
+			w.WriteHeader(http.StatusServiceUnavailable)
+		}))
+		defer srv.Close()
+		probe := NewAutoRouteProbe(client.NewRouter(srv.URL, ""))
+		err := probe(context.Background(), "test-pro")
+		if err == nil {
+			t.Fatal("router 返回 (nil,nil)=无可用 provider 时探测必须报错，否则降级不触发")
+		}
+		if !strings.Contains(err.Error(), "no available provider") {
+			t.Fatalf("错误应说明无可用 provider, got %q", err.Error())
+		}
+	})
+
+	t.Run("200有provider返回nil", func(t *testing.T) {
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(`{"provider_id":7,"name":"pro","base_url":"https://up.example"}`))
+		}))
+		defer srv.Close()
+		probe := NewAutoRouteProbe(client.NewRouter(srv.URL, ""))
+		if err := probe(context.Background(), "test-pro"); err != nil {
+			t.Fatalf("有可用 provider 时探测不应报错: %v", err)
 		}
 	})
 }

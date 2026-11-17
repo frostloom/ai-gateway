@@ -1,5 +1,5 @@
 // autoroute state 提取测试：chat/responses 形状映射、多模态拼接、无文本与畸形输入拒绝、
-// maxBytes 裁剪保留最近轮次与单条 text 截断。
+// maxBytes 裁剪保留最近轮次与单条 text 截断、大规模裁剪复杂度。
 package autoroute
 
 import (
@@ -8,6 +8,7 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+	"time"
 )
 
 // extractOK 调用 ExtractState 并断言 ok，返回类型收窄后的状态切片。
@@ -186,5 +187,46 @@ func TestExtractStateTruncatesSingleEntry(t *testing.T) {
 	}
 	if !strings.HasPrefix(full[0]["text"], text) {
 		t.Fatalf("text 应为原文前缀: %q", text)
+	}
+}
+
+// 大规模裁剪：预算只装得下尾部一小段时，fitToBudget 应以 O(n) 完成
+//（旧实现每丢一条就对整段重序列化，1 万条小消息实测 ~14s CPU），
+// 且语义不变：保留恰好是最近的最大可容后缀。
+func TestFitToBudgetScaleKeepsRecentSuffixFast(t *testing.T) {
+	const n = 10000
+	msgs := make([]map[string]string, n)
+	for i := range msgs {
+		msgs[i] = map[string]string{"role": "user", "text": fmt.Sprintf("第%d轮:%s", i, strings.Repeat("x", 100))}
+	}
+	const maxBytes = 4096
+
+	start := time.Now()
+	got := fitToBudget(msgs, maxBytes)
+	elapsed := time.Since(start)
+
+	if elapsed > 5*time.Second {
+		t.Fatalf("fitToBudget %d 条耗时 %v，疑似回退为逐条丢弃重序列化的 O(n²)", n, elapsed)
+	}
+	if len(got) == 0 || len(got) >= n {
+		t.Fatalf("应发生裁剪且非空，保留条目 = %d/%d", len(got), n)
+	}
+	// 保留的必须是最近的连续后缀。
+	for i := range got {
+		if !reflect.DeepEqual(got[i], msgs[n-len(got)+i]) {
+			t.Fatalf("保留条目不是最近后缀: got[%d] ≠ msgs[%d]", i, n-len(got)+i)
+		}
+	}
+	// 长度在预算内，且已是最大可容后缀：再加一条更早条目必超预算。
+	b, err := json.Marshal(got)
+	if err != nil {
+		t.Fatalf("序列化裁剪状态失败: %v", err)
+	}
+	if len(b) > maxBytes {
+		t.Fatalf("裁剪后长度 %d 超过 maxBytes %d", len(b), maxBytes)
+	}
+	bigger, _ := json.Marshal(msgs[n-len(got)-1:])
+	if len(bigger) <= maxBytes {
+		t.Fatalf("裁剪不充分：再加一条更早条目长 %d 仍在预算 %d 内", len(bigger), maxBytes)
 	}
 }

@@ -136,20 +136,37 @@ func rawString(raw json.RawMessage) string {
 	return s
 }
 
-// fitToBudget 裁剪状态到 maxBytes 内：先整体序列化检查，超限则从最旧（头部）
-// 逐条丢弃再重序列化，直到放得下或只剩一条；单条仍超限则截断该条 text 字节。
+// fitToBudget 裁剪状态到 maxBytes 内：保留能放下的最大最近（尾部）后缀；
+// 只剩最后一条仍放不下则截断该条 text 字节。
+// 元素单独序列化的长度与位置无关（map 键序固定），故先算好各条长度，再从尾部
+// 向前累加一次求出最大可留后缀——O(n) 次序列化，避免逐条丢弃后整段重序列化的 O(n²)
+//（旧实现在 1 万条小消息上实测 ~14s CPU）。
 // 连空 text 骨架都放不下、或截断后无文本可保留时返回 nil（调用方按 ok=false 处理）。
 func fitToBudget(msgs []map[string]string, maxBytes int) []map[string]string {
-	for len(msgs) > 1 {
-		if b, _ := json.Marshal(msgs); len(b) <= maxBytes {
-			return msgs
+	if len(msgs) == 0 {
+		return nil
+	}
+	// 后缀 msgs[i:] 的序列化长度 = 2（[]）+ Σ len(elem) + (len(msgs)-1-i)（逗号数）。
+	lens := make([]int, len(msgs))
+	for i, m := range msgs {
+		b, _ := json.Marshal(m)
+		lens[i] = len(b)
+	}
+	i := len(msgs) - 1
+	total := 2 + lens[i]
+	for i > 0 {
+		next := total + lens[i-1] + 1
+		if next > maxBytes {
+			break
 		}
-		msgs = msgs[1:]
+		total = next
+		i--
 	}
-	if b, _ := json.Marshal(msgs); len(b) <= maxBytes {
-		return msgs
+	if total <= maxBytes {
+		return msgs[i:]
 	}
-	return truncateText(msgs[0], maxBytes)
+	// 连最后一条都放不下：截断其 text（与原实现一致，截最近一条）。
+	return truncateText(msgs[len(msgs)-1], maxBytes)
 }
 
 // truncateText 截断单条 text 使整条序列化 ≤ maxBytes：在合法 UTF-8 边界上寻找

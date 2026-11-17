@@ -4,6 +4,7 @@ package autoroute
 
 import (
 	"fmt"
+	"math"
 	"net/http"
 	"os"
 	"strconv"
@@ -118,7 +119,9 @@ func ConfigFromEnv(getenv func(string) string) (Config, error) {
 
 	if raw := getenv(EnvThreshold); raw != "" {
 		v, err := strconv.ParseFloat(raw, 64)
-		if err != nil || v <= 0 || v > maxThreshold {
+		// NaN 能通过 ParseFloat 且不落进任何区间比较，必须显式拒绝
+		//（否则静默路由全走便宜档）；±Inf 已被范围检查覆盖。
+		if err != nil || math.IsNaN(v) || v <= 0 || v > maxThreshold {
 			return Config{}, fmt.Errorf("autoroute: %s 需为 (0,%d] 的数字: %q", EnvThreshold, maxThreshold, raw)
 		}
 		cfg.Threshold = v

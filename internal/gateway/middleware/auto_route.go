@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log/slog"
 	"net/http"
@@ -17,6 +18,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/frostloom/ai-gateway/internal/autoroute"
+	"github.com/frostloom/ai-gateway/internal/gateway/client"
 	"github.com/frostloom/ai-gateway/internal/pkg/metrics"
 )
 
@@ -25,6 +27,23 @@ const autoRouteModelField = "auto"
 
 // autoRouteMaxBody 读 body 上限 8MiB，与 Chat/Native handler 一致。
 const autoRouteMaxBody = 8 << 20
+
+// NewAutoRouteProbe 由 router 客户端构造 route 探测函数（main.go 装配用）。
+// Router.Route 返回 (nil, nil) 表示 router 明确无可用 provider（HTTP 503），
+// 这里必须映射为 error：否则探测被误判成功，strong→cheap 降级的主触发路径失效，
+// 请求会带判定档继续进 handler 再 503。
+func NewAutoRouteProbe(rc *client.Router) func(ctx context.Context, model string) error {
+	return func(ctx context.Context, model string) error {
+		prov, err := rc.Route(ctx, model)
+		if err != nil {
+			return err
+		}
+		if prov == nil {
+			return fmt.Errorf("no available provider for %s", model)
+		}
+		return nil
+	}
+}
 
 // AutoRoute 处理 model=="auto" 的请求路由。
 //
@@ -45,7 +64,8 @@ const autoRouteMaxBody = 8 << 20
 // shadow 实际服务固定档、兜底判定（未判定档位）不探测，保持各自零流量影响语义。
 // 指标：每次决策记录 decisions/latency/breaker_state，兜底与降级另有计数；非 auto 请求零指标。
 // sel 仅在 off 态可为 nil；log 为 nil 时不输出日志（日志含
-// method/path/mode/model/would_be/score/fallback/degraded/decision_ms/breaker_state）。
+// method/path/request_id/mode/model/would_be/score/probabilities/threshold/
+// fallback/degraded/decision_ms/breaker_state）。
 func AutoRoute(cfg autoroute.Config, sel *autoroute.Selector, routeProbe func(ctx context.Context, model string) error, log *slog.Logger) gin.HandlerFunc {
 	if cfg.Mode != autoroute.ModeOff && sel == nil {
 		panic("middleware: AutoRoute 非 off 模式必须提供 Selector")
@@ -109,13 +129,21 @@ func AutoRoute(cfg autoroute.Config, sel *autoroute.Selector, routeProbe func(ct
 		metrics.AutoDecision(string(cfg.Mode), served, dec.LatencyMS)
 		metrics.AutoFallback(dec.Fallback)
 		if log != nil {
+			// probabilities 为 nil 时记空对象，保持日志 schema 稳定（slog 对 nil map 记 null）。
+			probabilities := dec.Probabilities
+			if probabilities == nil {
+				probabilities = map[string]float64{}
+			}
 			log.Info("auto_route",
 				"method", c.Request.Method,
 				"path", c.Request.URL.Path,
+				"request_id", c.GetString("request_id"),
 				"mode", string(cfg.Mode),
 				"model", served,
 				"would_be", dec.WouldBeModel,
 				"score", dec.Score,
+				"probabilities", probabilities,
+				"threshold", cfg.Threshold,
 				"fallback", dec.Fallback,
 				"degraded", degraded,
 				"decision_ms", dec.LatencyMS,

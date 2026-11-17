@@ -76,11 +76,9 @@ func main() {
 		}
 		autoSelector = autoroute.NewSelector(autoCfg, jevClient)
 	}
-	// route 探测与 handler 共用同一 router 客户端实例，只取 error。
-	autoRouteMW := middleware.AutoRoute(autoCfg, autoSelector, func(ctx context.Context, model string) error {
-		_, err := rc.Route(ctx, model)
-		return err
-	}, log)
+	// route 探测与 handler 共用同一 router 客户端实例，只取 error；
+	// NewAutoRouteProbe 把 router 的 (nil, nil)=无可用 provider 也映射为失败，触发降级。
+	autoRouteMW := middleware.AutoRoute(autoCfg, autoSelector, middleware.NewAutoRouteProbe(rc), log)
 
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()

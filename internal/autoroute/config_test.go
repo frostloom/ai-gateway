@@ -99,6 +99,7 @@ func TestConfigFromEnvShadowOnValidation(t *testing.T) {
 		{"THRESHOLD等于零", map[string]string{"AUTO_ROUTE_THRESHOLD": "0"}},
 		{"THRESHOLD负数", map[string]string{"AUTO_ROUTE_THRESHOLD": "-0.5"}},
 		{"THRESHOLD超过3", map[string]string{"AUTO_ROUTE_THRESHOLD": "3.01"}},
+		{"THRESHOLD是NaN", map[string]string{"AUTO_ROUTE_THRESHOLD": "NaN"}}, // ParseFloat 成功且两个区间比较都放行，必须显式拒绝
 		{"FAIL_MODE非法", map[string]string{"AUTO_ROUTE_FAIL_MODE": "sideways"}},
 		{"SHADOW_SERVE不在两档", map[string]string{"AUTO_ROUTE_SHADOW_SERVE": "other-model"}},
 		{"TIMEOUT_MS等于零", map[string]string{"AUTO_ROUTE_TIMEOUT_MS": "0"}},
