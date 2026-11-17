@@ -63,7 +63,7 @@
 ### 判定
 
 - 一次 `Evaluate` 调用：`state` = 最近若干条消息的 JSON（上限 8KiB，超出取最近消息）。
-- state 提取器按 body 形状分三种：chat/messages 取 `messages[].content`；responses 取 `input`（字符串或 item 数组）；无法识别形状 → **不改写、走兜底档位并记录**（永不因此失败请求）。
+- state 提取器按 body 形状分三种：chat/messages 取 `messages[].content`；responses 取 `input`（字符串或 item 数组）；无法识别形状 → **不调 JEV 判定、直接改写为兜底档位并记录**（永不因此失败请求）。
 - 问题：`complexity`，score 型 4 档 `[简单, 一般, 复杂, 极复杂]`（下标 0–3），取期望分数。
 - 阈值（默认 1.5，可配）：`score ≥ 阈值` → pro；否则 flash。
 - 概率与置信度写入日志备用；v1 不按置信度做特殊处理（统一阈值），避免多一条分支。
@@ -88,7 +88,7 @@
 | 2 | 强档无可用 provider（Route 时） | **自动降级便宜档**（默认开）：服务不中断、用户少付钱可能降质 | `X-Auto-Degraded: strong_unavailable` |
 | 2 | 便宜档无可用 provider（Route 时） | **不自动升级强档**（默认关，避免意外账单）→ 现有 503 | — |
 | 3 | 已 Reserve 后上游失败 | 仅同模型 provider failover（现有 3 次+exclude），耗尽 503；流式首字节后绝不重发 | 现有语义 |
-| 4 | 配置错误 | 启动 fail-fast；`off` 态 auto → 400；body 形状认不出 → 不改写走兜底档 | `X-Auto-Fallback: unparseable` |
+| 4 | 配置错误 | 启动 fail-fast；`off` 态 auto → 400；body 形状认不出 → 不判定、改写兜底档 | `X-Auto-Fallback: unparseable` |
 
 第 2 层安全性依据：`Route` 在 `Reserve` 之前（chat.go 现状），换档后按新模型 Reserve，计费与显式选择完全一致。第 3 层不跨档的原因：账单已按锁定档位预扣，中途换档破坏结算语义。
 - **配置错误与运行期故障分开对待**：模式为 `shadow`/`on` 时，若 JEV 配置缺失/端点形状非法、档位配置非法（缺失、重复、非目录已上架名无法校验、阈值越界），启动直接失败（fail fast）——不做"没配好就全量兜底"，避免 100% 流量静默降档。
