@@ -1,5 +1,7 @@
 # auto 模型路由：JEV 前置选档设计（2026-11-16）
 
+> **状态：已批准（2026-11-17）。** 用户按建议值整批批准：降级矩阵、熔断参数（3 次/30s）、L3 预算上限 ¥20、shadow 实现但不作上线门槛、portal 缓议。批准前后的全部决策见"降级策略（已批准）"与"开放问题的决议"两节。
+
 ## 背景与目的
 
 网关要增加一个 `auto` 模型模式：请求地址与方式与普通模型完全一致，仅 `model` 字段可以填 `auto`；网关用 JEV（TypeSafe System One，类型化判定模型）按任务难度在便宜档与强档之间选择真实模型——简单任务走便宜模型，困难任务走强模型。
@@ -23,7 +25,7 @@
 ## 非目标（v1 不做）
 
 - check-and-escalate（答题后再判定、弱回答升级重试）——可作为二期。
-- 跨档 failover：选中档的 provider 全部不可用时不回退另一档（走现有 503 语义）。
+- 上游运行期跨档重试：已 `Reserve` 锁定档位后的上游失败仍只做同模型 provider failover，不中途换档（`Route` 阶段的跨档降级见"降级策略（已批准）"）。
 - 四问式判定（topic/risk/隐私分类）、本地小模型替代 JEV。
 - 管理后台配置界面、按用户/密钥的路由偏好、决策缓存、多轮粘性（每请求独立判定）。
 - portal 组（`/portal/completions`、`/portal/responses`）的 auto 支持——单独产品面，留待后续评估。
@@ -73,6 +75,22 @@
   - `shadow`：只判定并记录，请求**以固定档位实际服务**（`AUTO_ROUTE_SHADOW_SERVE`，默认便宜档），响应头 `X-Auto-Applied: false` + `X-Auto-Would-Be`。用于上线前零质量风险地采集判定分布；只影响 auto 请求，普通流量零变化。
   - `on`：判定即改写，响应头 `X-Auto-Applied: true`。
 - 运行期 JEV 超时/失败 → 兜底档位（默认 `cheap`=flash），`X-Auto-Fallback: jev_error`，日志记录失败种类（复用 `jev.Failure` 有界诊断字段）。
+- **JEV 熔断器**：连续 3 次判定失败 → 熔断 30s，期间请求直接走兜底档、`X-Auto-Fallback: breaker_open`，不再等 2s 超时。半开探测：冷却期满后放行下一个请求真调 JEV，成功则闭合。v1 用进程内状态（多实例不同步，可接受）；参数可配。
+
+### 降级策略（已批准）
+
+按错误发生层分四级，默认值如下（均可配置）：
+
+| 层 | 场景 | 行为 | 标记 |
+| --- | --- | --- | --- |
+| 1 | JEV 判定失败/超时 | 兜底档（默认 `cheap`）放行 | `X-Auto-Fallback: jev_error\|timeout\|decode` |
+| 1 | JEV 连续 3 次失败 | 熔断 30s，期间直接兜底档 | `X-Auto-Fallback: breaker_open` |
+| 2 | 强档无可用 provider（Route 时） | **自动降级便宜档**（默认开）：服务不中断、用户少付钱可能降质 | `X-Auto-Degraded: strong_unavailable` |
+| 2 | 便宜档无可用 provider（Route 时） | **不自动升级强档**（默认关，避免意外账单）→ 现有 503 | — |
+| 3 | 已 Reserve 后上游失败 | 仅同模型 provider failover（现有 3 次+exclude），耗尽 503；流式首字节后绝不重发 | 现有语义 |
+| 4 | 配置错误 | 启动 fail-fast；`off` 态 auto → 400；body 形状认不出 → 不改写走兜底档 | `X-Auto-Fallback: unparseable` |
+
+第 2 层安全性依据：`Route` 在 `Reserve` 之前（chat.go 现状），换档后按新模型 Reserve，计费与显式选择完全一致。第 3 层不跨档的原因：账单已按锁定档位预扣，中途换档破坏结算语义。
 - **配置错误与运行期故障分开对待**：模式为 `shadow`/`on` 时，若 JEV 配置缺失/端点形状非法、档位配置非法（缺失、重复、非目录已上架名无法校验、阈值越界），启动直接失败（fail fast）——不做"没配好就全量兜底"，避免 100% 流量静默降档。
 - 上架/可用性不做启动时在线探测（网关启动早于 billing/router 是常见顺序，且本地存在 `models:["*"]` 通配 provider 使 Route 式探测恒真、无意义）。运行期由 billing（目录/价格）与 Route（provider）按普通模型同样规则强制。
 
@@ -84,9 +102,9 @@
 
 ### 可观测
 
-- 响应头：`X-Auto-Model`（实际服务模型）、`X-Auto-Would-Be`（判定档位；shadow 时与 Model 不同）、`X-Auto-Applied`、`X-Auto-Score`、`X-Auto-Decision-Ms`、`X-Auto-Fallback`（仅兜底时）。
-- 结构化日志 `auto_route`：request_id、模式、实际模型、判定档位、score、概率、阈值、判定耗时、兜底原因。
-- Prometheus：`gateway_auto_decisions_total{mode,model}`、`gateway_auto_decision_latency_seconds`、`gateway_auto_fallback_total{reason}`。
+- 响应头：`X-Auto-Model`（实际服务模型）、`X-Auto-Would-Be`（判定档位；shadow 时与 Model 不同）、`X-Auto-Applied`、`X-Auto-Score`、`X-Auto-Decision-Ms`、`X-Auto-Fallback`（仅兜底时：`jev_error|timeout|decode|breaker_open|unparseable`）、`X-Auto-Degraded`（仅跨档降级时：`strong_unavailable`）。
+- 结构化日志 `auto_route`：request_id、模式、实际模型、判定档位、score、概率、阈值、判定耗时、兜底/降级原因、熔断器状态。
+- Prometheus：`gateway_auto_decisions_total{mode,model}`、`gateway_auto_decision_latency_seconds`、`gateway_auto_fallback_total{reason}`、`gateway_auto_degraded_total{reason}`、`gateway_auto_breaker_state`（gauge：0 closed / 1 open）。
 - 不接 Langfuse（网关数据面当前未接 observer；评测在评测层做，见测试方案）。
 
 ### 配置（环境变量）
@@ -98,6 +116,10 @@
 | `AUTO_ROUTE_THRESHOLD` | `1.5` | score ≥ 阈值选强档 |
 | `AUTO_ROUTE_FAIL_MODE` | `cheap` | JEV 失败兜底档位（`cheap`/`strong`） |
 | `AUTO_ROUTE_SHADOW_SERVE` | 便宜档 | shadow 模式实际服务档位 |
+| `AUTO_ROUTE_DEGRADE_STRONG_UNAVAILABLE` | `1` | 强档无 provider 时自动降便宜档 |
+| `AUTO_ROUTE_UPGRADE_CHEAP_UNAVAILABLE` | `0` | 便宜档无 provider 时自动升强档 |
+| `AUTO_ROUTE_BREAKER_FAILURES` | `3` | JEV 连续失败 N 次进熔断 |
+| `AUTO_ROUTE_BREAKER_COOLDOWN_S` | `30` | 熔断冷却秒数（后半开探测） |
 | `AUTO_ROUTE_TIMEOUT_MS` | `2000` | 单次判定预算 |
 | `AUTO_ROUTE_MAX_INPUT_BYTES` | `8192` | 发给 JEV 的 state 上限 |
 | `JEV_ENDPOINT` / `JEV_API_KEY` / `JEV_MODEL` | 官方端点 / 必填 / `jev-latest` | 复用既有 `JEV_HTTPS_PROXY` |
@@ -112,6 +134,8 @@
 ### L0 单元测试（无外部依赖）
 
 - selector：阈值边界（恰好等于阈值）、配置校验、兜底行为、三种 state 提取器、输入裁剪、shadow 不改写为判定档、off 拒绝。
+- 熔断器：3 次失败→open、冷却后半开放行、成功→closed、失败计数复位。
+- 降级决策：强档 Route 失败→便宜档+标记（开关开/关）、便宜档失败不升级（开关默认关）、开关开时升级。
 
 ### L1 中间件/handler 集成（httptest + fake JEV/provider/billing）
 
@@ -121,6 +145,8 @@
 - 三类入口（chat/messages/responses）各自走通；无法识别的 body 形状走兜底并标记。
 - SSE 流式透传、4xx/5xx 透传语义、`Reserve` 收到实际模型、bills 记实际模型。
 - `off` 态 400、shadow 态服务固定档 + headers、JEV 失败/超时兜底。
+- 熔断打开期间请求不再调 JEV、直接兜底；半开探测成功后恢复。
+- Route 阶段强档无 provider：默认降级便宜档 + `X-Auto-Degraded`；便宜档无 provider：默认 503；两个开关的四种组合。
 
 ### L2 离线判定基准（付费：仅 JEV，需单独授权）
 
@@ -155,12 +181,13 @@
 6. **/v1/models 与 billing 目录** → v1 不列出 auto、不加入目录；off 态由中间件确定性 400。
 7. **L3 auto 臂驱动方式** → 真实网关端到端（本机部署两档真实 provider），JEV 调用计入 L3 预算；L2/L3 共用 selector。
 
-## 开放问题（需要用户决策）
+## 开放问题的决议（2026-11-17 用户批准）
 
-- L3 的样本量与预算额度。
-- 生产是否先跑一段 `shadow` 再切 `on`（建议是，成本为零，仅 JEV 调用费）。
-- 阈值默认 1.5 若需按 L2 数据回调，需要一次新的 JEV 测量授权（回调后重测那一轮）。
-- portal 是否在后续版本支持 auto。
+- **L3 预算**：上限 **¥20**（估算实际约 ¥5–10；执行前仍按项目规则报具体计划，花完照例回报）。
+- **shadow**：实现（off/shadow/on 三态），但**不作为上线门槛**；可用自己的工具 dogfood 采集分布。
+- **阈值回调**：L2 落盘每条用例的原始分数，换阈值只是本地重算，**不需要**新的 JEV 授权；只有改问题措辞/档位定义才需新授权。
+- **portal 支持 auto**：缓议，L3 之后再评估（接入本身只是把中间件挂到 portal 组）。
+- **降级矩阵与熔断参数**：按"降级策略（已批准）"节的默认值整批批准。
 
 ## 工作量分级
 
