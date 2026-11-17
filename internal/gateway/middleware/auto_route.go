@@ -17,6 +17,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/frostloom/ai-gateway/internal/autoroute"
+	"github.com/frostloom/ai-gateway/internal/pkg/metrics"
 )
 
 // autoRouteModelField 触发 auto 路由的 model 字面值。
@@ -34,9 +35,17 @@ const autoRouteMaxBody = 8 << 20
 //   - on：按判定档（或 JEV 失败兜底档）改写 body 的 model，同步 ContentLength。
 //
 // 响应头：X-Auto-Model（实际服务模型）、X-Auto-Would-Be 与 X-Auto-Score（仅判定成功时）、
-// X-Auto-Decision-Ms（判定耗时毫秒）、X-Auto-Applied、X-Auto-Fallback（仅兜底时）。
-// sel 仅在 off 态可为 nil；routeProbe 预留给 route 可用性探测（后续任务），当前忽略。
-// log 为 nil 时不输出日志。
+// X-Auto-Decision-Ms（判定耗时毫秒）、X-Auto-Applied、X-Auto-Fallback（仅兜底时）、
+// X-Auto-Degraded（仅 route 探测失败跨档改写时，strong_unavailable / cheap_unavailable）。
+//
+// route 探测：仅 on 模式且 JEV 判定成功时，在 Decide 之后、c.Next() 之前对判定档做一次
+// probe；失败按非对称矩阵跨档——判定强档且 DegradeStrongUnavailable 时降便宜档
+// （strong_unavailable）、判定便宜档且 UpgradeCheapUnavailable 时升强档（cheap_unavailable），
+// 对应开关关闭则保持原档且无 Degraded 头；probe 成功或降级后均不二次探测。
+// shadow 实际服务固定档、兜底判定（未判定档位）不探测，保持各自零流量影响语义。
+// 指标：每次决策记录 decisions/latency/breaker_state，兜底与降级另有计数；非 auto 请求零指标。
+// sel 仅在 off 态可为 nil；log 为 nil 时不输出日志（日志含
+// method/path/mode/model/would_be/score/fallback/degraded/decision_ms/breaker_state）。
 func AutoRoute(cfg autoroute.Config, sel *autoroute.Selector, routeProbe func(ctx context.Context, model string) error, log *slog.Logger) gin.HandlerFunc {
 	if cfg.Mode != autoroute.ModeOff && sel == nil {
 		panic("middleware: AutoRoute 非 off 模式必须提供 Selector")
@@ -60,7 +69,26 @@ func AutoRoute(cfg autoroute.Config, sel *autoroute.Selector, routeProbe func(ct
 		}
 
 		dec := sel.Decide(c.Request.Context(), time.Now(), body)
-		newBody, err := autoroute.RewriteModel(body, dec.ServedModel)
+		breakerState := sel.BreakerState()
+		metrics.SetAutoBreakerState(breakerState)
+
+		// route 探测：只对判定档做一次；降级/升级后不二次探测目标档。
+		served := dec.ServedModel
+		degraded := ""
+		if routeProbe != nil && cfg.Mode == autoroute.ModeOn && dec.Judged {
+			if err := routeProbe(c.Request.Context(), dec.WouldBeModel); err != nil {
+				switch {
+				case dec.WouldBeModel == cfg.StrongTier && cfg.DegradeStrongUnavailable:
+					served = cfg.CheapTier
+					degraded = "strong_unavailable"
+				case dec.WouldBeModel == cfg.CheapTier && cfg.UpgradeCheapUnavailable:
+					served = cfg.StrongTier
+					degraded = "cheap_unavailable"
+				}
+			}
+		}
+
+		newBody, err := autoroute.RewriteModel(body, served)
 		if err != nil {
 			// body 已确认为含 model 的 JSON 对象，此处错误理论不可达；防御性原样透传。
 			if log != nil {
@@ -71,17 +99,27 @@ func AutoRoute(cfg autoroute.Config, sel *autoroute.Selector, routeProbe func(ct
 			return
 		}
 
+		dec.ServedModel = served
 		setAutoRouteHeaders(c.Writer.Header(), dec)
+		if degraded != "" {
+			c.Writer.Header().Set("X-Auto-Degraded", degraded)
+			metrics.AutoDegraded(degraded)
+		}
+
+		metrics.AutoDecision(string(cfg.Mode), served, dec.LatencyMS)
+		metrics.AutoFallback(dec.Fallback)
 		if log != nil {
 			log.Info("auto_route",
 				"method", c.Request.Method,
 				"path", c.Request.URL.Path,
 				"mode", string(cfg.Mode),
-				"model", dec.ServedModel,
+				"model", served,
 				"would_be", dec.WouldBeModel,
 				"score", dec.Score,
 				"fallback", dec.Fallback,
-				"decision_ms", dec.LatencyMS)
+				"degraded", degraded,
+				"decision_ms", dec.LatencyMS,
+				"breaker_state", breakerState)
 		}
 		c.Request.Body = io.NopCloser(bytes.NewReader(newBody))
 		c.Request.ContentLength = int64(len(newBody))

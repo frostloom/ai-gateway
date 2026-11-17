@@ -2,7 +2,9 @@ package middleware
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
+	"errors"
 	"io"
 	"log/slog"
 	"net/http"
@@ -323,9 +325,254 @@ func TestAutoRouteLogsDecision(t *testing.T) {
 	postAutoBody(t, r, autoRouteChatBody)
 
 	out := buf.String()
-	for _, key := range []string{"auto_route", `"mode":"on"`, `"model":"test-pro"`, `"would_be":"test-pro"`, "decision_ms"} {
+	for _, key := range []string{"auto_route", `"mode":"on"`, `"model":"test-pro"`, `"would_be":"test-pro"`, "decision_ms", `"degraded":""`, `"breaker_state":"closed"`} {
 		if !strings.Contains(out, key) {
 			t.Fatalf("日志缺少 %s: %s", key, out)
 		}
 	}
+}
+
+// recordingProbe 计数探测桩：记录每次探测的模型名；fail 为 true 时返回错误模拟不可路由。
+func recordingProbe(calls *[]string, fail bool) func(context.Context, string) error {
+	return func(_ context.Context, model string) error {
+		*calls = append(*calls, model)
+		if fail {
+			return errors.New("route unavailable")
+		}
+		return nil
+	}
+}
+
+// assertAutoDegradedAbsence 断言响应无 X-Auto-Degraded 头。
+func assertAutoDegradedAbsence(t *testing.T, w *httptest.ResponseRecorder) {
+	t.Helper()
+	if v := w.Header().Get("X-Auto-Degraded"); v != "" {
+		t.Fatalf("不应有 X-Auto-Degraded 头，got %q", v)
+	}
+}
+
+// downstreamModel 解析下游收到的 body 的 model 字段。
+func downstreamModel(t *testing.T, got []byte) string {
+	t.Helper()
+	var top map[string]json.RawMessage
+	if err := json.Unmarshal(got, &top); err != nil {
+		t.Fatalf("下游 body 不是合法 JSON: %v\nbody: %s", err, string(got))
+	}
+	var model string
+	if err := json.Unmarshal(top["model"], &model); err != nil {
+		t.Fatalf("下游 model 非字符串: %v\nraw: %s", err, string(top["model"]))
+	}
+	return model
+}
+
+func TestAutoRouteDegradeStrongUnavailable(t *testing.T) {
+	t.Run("probe失败且degrade开改写便宜档", func(t *testing.T) {
+		cfg := autoRouteTestConfig(autoroute.ModeOn)
+		cfg.DegradeStrongUnavailable = true
+		var probed []string
+		mw := AutoRoute(cfg, autoroute.NewSelector(cfg, scoredEval(2)), recordingProbe(&probed, true), nil)
+		r, downstream := autoRouteTestEnv(t, mw)
+		w := postAutoBody(t, r, autoRouteChatBody)
+
+		if w.Code != http.StatusOK {
+			t.Fatalf("降级不应拒绝请求，status = %d", w.Code)
+		}
+		got, gotLen, _ := downstream()
+		if m := downstreamModel(t, got); m != "test-flash" {
+			t.Fatalf("降级下游 model = %q, want 便宜档 test-flash", m)
+		}
+		if gotLen != int64(len(got)) {
+			t.Fatalf("ContentLength = %d, want %d（需与新 body 同步）", gotLen, len(got))
+		}
+		if v := w.Header().Get("X-Auto-Degraded"); v != "strong_unavailable" {
+			t.Fatalf("X-Auto-Degraded = %q, want strong_unavailable", v)
+		}
+		if v := w.Header().Get("X-Auto-Model"); v != "test-flash" {
+			t.Fatalf("X-Auto-Model = %q, want 更新为 test-flash", v)
+		}
+		if v := w.Header().Get("X-Auto-Would-Be"); v != "test-pro" {
+			t.Fatalf("X-Auto-Would-Be = %q, want 保持判定档 test-pro", v)
+		}
+		if len(probed) != 1 || probed[0] != "test-pro" {
+			t.Fatalf("probe 调用记录 = %v, want 恰一次且只探判定档 [test-pro]（降级后不二次探测）", probed)
+		}
+	})
+
+	t.Run("probe失败且degrade关保持strong无头", func(t *testing.T) {
+		cfg := autoRouteTestConfig(autoroute.ModeOn)
+		cfg.DegradeStrongUnavailable = false
+		var probed []string
+		mw := AutoRoute(cfg, autoroute.NewSelector(cfg, scoredEval(2)), recordingProbe(&probed, true), nil)
+		r, downstream := autoRouteTestEnv(t, mw)
+		w := postAutoBody(t, r, autoRouteChatBody)
+
+		if w.Code != http.StatusOK {
+			t.Fatalf("status = %d, want 200", w.Code)
+		}
+		got, _, _ := downstream()
+		if m := downstreamModel(t, got); m != "test-pro" {
+			t.Fatalf("degrade 关下游 model = %q, want 保持 test-pro（真实链路由 handler Route 503）", m)
+		}
+		assertAutoDegradedAbsence(t, w)
+		if v := w.Header().Get("X-Auto-Model"); v != "test-pro" {
+			t.Fatalf("X-Auto-Model = %q, want test-pro", v)
+		}
+		if len(probed) != 1 || probed[0] != "test-pro" {
+			t.Fatalf("probe 调用记录 = %v, want 恰一次 [test-pro]", probed)
+		}
+	})
+}
+
+func TestAutoRouteCheapUnavailable(t *testing.T) {
+	t.Run("upgrade关默认不改写无头", func(t *testing.T) {
+		cfg := autoRouteTestConfig(autoroute.ModeOn)
+		cfg.UpgradeCheapUnavailable = false
+		var probed []string
+		mw := AutoRoute(cfg, autoroute.NewSelector(cfg, scoredEval(1)), recordingProbe(&probed, true), nil)
+		r, downstream := autoRouteTestEnv(t, mw)
+		w := postAutoBody(t, r, autoRouteChatBody)
+
+		if w.Code != http.StatusOK {
+			t.Fatalf("status = %d, want 200", w.Code)
+		}
+		got, _, _ := downstream()
+		if m := downstreamModel(t, got); m != "test-flash" {
+			t.Fatalf("upgrade 关下游 model = %q, want 保持 test-flash", m)
+		}
+		assertAutoDegradedAbsence(t, w)
+		if v := w.Header().Get("X-Auto-Model"); v != "test-flash" {
+			t.Fatalf("X-Auto-Model = %q, want test-flash", v)
+		}
+		if len(probed) != 1 || probed[0] != "test-flash" {
+			t.Fatalf("probe 调用记录 = %v, want 恰一次 [test-flash]", probed)
+		}
+	})
+
+	t.Run("upgrade开改写strong", func(t *testing.T) {
+		cfg := autoRouteTestConfig(autoroute.ModeOn)
+		cfg.UpgradeCheapUnavailable = true
+		var probed []string
+		mw := AutoRoute(cfg, autoroute.NewSelector(cfg, scoredEval(1)), recordingProbe(&probed, true), nil)
+		r, downstream := autoRouteTestEnv(t, mw)
+		w := postAutoBody(t, r, autoRouteChatBody)
+
+		if w.Code != http.StatusOK {
+			t.Fatalf("升级不应拒绝请求，status = %d", w.Code)
+		}
+		got, gotLen, _ := downstream()
+		if m := downstreamModel(t, got); m != "test-pro" {
+			t.Fatalf("升级下游 model = %q, want 强档 test-pro", m)
+		}
+		if gotLen != int64(len(got)) {
+			t.Fatalf("ContentLength = %d, want %d（需与新 body 同步）", gotLen, len(got))
+		}
+		if v := w.Header().Get("X-Auto-Degraded"); v != "cheap_unavailable" {
+			t.Fatalf("X-Auto-Degraded = %q, want cheap_unavailable", v)
+		}
+		if v := w.Header().Get("X-Auto-Model"); v != "test-pro" {
+			t.Fatalf("X-Auto-Model = %q, want 更新为 test-pro", v)
+		}
+		if v := w.Header().Get("X-Auto-Would-Be"); v != "test-flash" {
+			t.Fatalf("X-Auto-Would-Be = %q, want 保持判定档 test-flash", v)
+		}
+		if len(probed) != 1 || probed[0] != "test-flash" {
+			t.Fatalf("probe 调用记录 = %v, want 恰一次且只探判定档 [test-flash]（升级后不二次探测）", probed)
+		}
+	})
+}
+
+func TestAutoRouteProbeSuccessNoDegrade(t *testing.T) {
+	cfg := autoRouteTestConfig(autoroute.ModeOn)
+	var probed []string
+	mw := AutoRoute(cfg, autoroute.NewSelector(cfg, scoredEval(2)), recordingProbe(&probed, false), nil)
+	r, downstream := autoRouteTestEnv(t, mw)
+	w := postAutoBody(t, r, autoRouteChatBody)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200", w.Code)
+	}
+	got, _, _ := downstream()
+	if m := downstreamModel(t, got); m != "test-pro" {
+		t.Fatalf("probe 成功下游 model = %q, want test-pro", m)
+	}
+	assertAutoDegradedAbsence(t, w)
+	if len(probed) != 1 || probed[0] != "test-pro" {
+		t.Fatalf("probe 调用记录 = %v, want 恰一次 [test-pro]", probed)
+	}
+}
+
+func TestAutoRouteProbeOnlyOnJudgedOnPath(t *testing.T) {
+	t.Run("非auto请求不探测", func(t *testing.T) {
+		cfg := autoRouteTestConfig(autoroute.ModeOn)
+		var probed []string
+		mw := AutoRoute(cfg, autoroute.NewSelector(cfg, scoredEval(2)), recordingProbe(&probed, true), nil)
+		r, downstream := autoRouteTestEnv(t, mw)
+		body := `{"model":"test-flash","messages":[{"role":"user","content":"hi"}]}`
+		w := postAutoBody(t, r, body)
+
+		if w.Code != http.StatusOK {
+			t.Fatalf("status = %d, want 200", w.Code)
+		}
+		got, gotLen, _ := downstream()
+		if !bytes.Equal(got, []byte(body)) || gotLen != int64(len(body)) {
+			t.Fatalf("非 auto 请求应零变化透传: got %q len %d", string(got), gotLen)
+		}
+		if len(probed) != 0 {
+			t.Fatalf("非 auto 请求不应探测，probe 调用 = %v", probed)
+		}
+	})
+
+	t.Run("off模式auto请求不探测", func(t *testing.T) {
+		var probed []string
+		mw := AutoRoute(autoRouteTestConfig(autoroute.ModeOff), nil, recordingProbe(&probed, true), nil)
+		r, _ := autoRouteTestEnv(t, mw)
+		w := postAutoBody(t, r, autoRouteChatBody)
+
+		if w.Code != http.StatusBadRequest {
+			t.Fatalf("status = %d, want 400", w.Code)
+		}
+		if len(probed) != 0 {
+			t.Fatalf("off 模式不应探测，probe 调用 = %v", probed)
+		}
+	})
+
+	t.Run("shadow模式不探测", func(t *testing.T) {
+		cfg := autoRouteTestConfig(autoroute.ModeShadow)
+		var probed []string
+		mw := AutoRoute(cfg, autoroute.NewSelector(cfg, scoredEval(2)), recordingProbe(&probed, true), nil)
+		r, downstream := autoRouteTestEnv(t, mw)
+		w := postAutoBody(t, r, autoRouteChatBody)
+
+		if w.Code != http.StatusOK {
+			t.Fatalf("status = %d, want 200", w.Code)
+		}
+		got, _, _ := downstream()
+		if m := downstreamModel(t, got); m != "test-flash" {
+			t.Fatalf("shadow 下游 model = %q, want 固定档 test-flash", m)
+		}
+		assertAutoDegradedAbsence(t, w)
+		if len(probed) != 0 {
+			t.Fatalf("shadow 实际服务固定档不应探测，probe 调用 = %v", probed)
+		}
+	})
+
+	t.Run("兜底判定不探测", func(t *testing.T) {
+		cfg := autoRouteTestConfig(autoroute.ModeOn)
+		var probed []string
+		mw := AutoRoute(cfg, autoroute.NewSelector(cfg, jev.NewFake()), recordingProbe(&probed, true), nil)
+		r, downstream := autoRouteTestEnv(t, mw)
+		w := postAutoBody(t, r, autoRouteChatBody)
+
+		if w.Code != http.StatusOK {
+			t.Fatalf("status = %d, want 200", w.Code)
+		}
+		got, _, _ := downstream()
+		if m := downstreamModel(t, got); m != cfg.FallbackTier() {
+			t.Fatalf("兜底下游 model = %q, want %q", m, cfg.FallbackTier())
+		}
+		assertAutoDegradedAbsence(t, w)
+		if len(probed) != 0 {
+			t.Fatalf("未判定（兜底）不应探测，probe 调用 = %v", probed)
+		}
+	})
 }
