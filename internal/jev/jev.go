@@ -159,6 +159,11 @@ func jevTransport() http.RoundTripper {
 	return clone
 }
 
+// ProxyTransport 供包外复用同一「JEV 走操作员显式代理」的传输层（与 jevTransport 一致）。
+func ProxyTransport() http.RoundTripper {
+	return jevTransport()
+}
+
 // Evaluate 发一次判定：state + questions → 类型化答案。
 func (c *Client) Evaluate(ctx context.Context, state any, questions map[string]Question) (*Result, error) {
 	if c.apiKey == "" {
