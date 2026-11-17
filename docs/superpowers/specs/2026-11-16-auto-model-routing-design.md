@@ -105,7 +105,7 @@
 - 响应头：`X-Auto-Model`（实际服务模型）、`X-Auto-Would-Be`（判定档位；shadow 时与 Model 不同）、`X-Auto-Applied`、`X-Auto-Score`、`X-Auto-Decision-Ms`、`X-Auto-Fallback`（仅兜底时：`jev_error|timeout|decode|breaker_open|unparseable`）、`X-Auto-Degraded`（仅跨档降级时：`strong_unavailable`）。
 - 结构化日志 `auto_route`：request_id、模式、实际模型、判定档位、score、概率、阈值、判定耗时、兜底/降级原因、熔断器状态。
 - Prometheus：`gateway_auto_decisions_total{mode,model}`、`gateway_auto_decision_latency_seconds`、`gateway_auto_fallback_total{reason}`、`gateway_auto_degraded_total{reason}`、`gateway_auto_breaker_state`（gauge：0 closed / 1 open）。
-- 不接 Langfuse（网关数据面当前未接 observer；评测在评测层做，见测试方案）。
+- ~~不接 Langfuse（网关数据面当前未接 observer；评测在评测层做，见测试方案）~~ **已被 2026-11-17 用户指令推翻**：auto 决策导出 Langfuse——观测环境变量启用（`AGENT_LANGFUSE_ENABLED=1` + `LANGFUSE_PUBLIC_KEY/SECRET_KEY` + `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT` + `AGENT_LANGFUSE_HASH_KEY`）且 auto 非 off 时，每次 auto 决策写一条 `auto.route` 根 span（对话状态经既有裁剪/脱敏，元数据含 request_id/mode/served/would_be/tier/score/threshold/fallback/degraded/decision_ms/breaker_state）；未配置则不导出，行为不变。
 
 ### 配置（环境变量）
 

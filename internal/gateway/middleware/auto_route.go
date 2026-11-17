@@ -25,6 +25,12 @@ import (
 // autoRouteModelField 触发 auto 路由的 model 字面值。
 const autoRouteModelField = "auto"
 
+// AutoRouteRecorder 把 auto 分流决策导出到观测后端（生产为 Langfuse
+// auto.route span）；observability.Observer 结构化满足此接口。nil = 不导出。
+type AutoRouteRecorder interface {
+	RecordAutoRoute(ctx context.Context, state any, fields map[string]string)
+}
+
 // autoRouteMaxBody 读 body 上限 8MiB，与 Chat/Native handler 一致。
 const autoRouteMaxBody = 8 << 20
 
@@ -66,7 +72,9 @@ func NewAutoRouteProbe(rc *client.Router) func(ctx context.Context, model string
 // sel 仅在 off 态可为 nil；log 为 nil 时不输出日志（日志含
 // method/path/request_id/mode/model/would_be/score/probabilities/threshold/
 // fallback/degraded/decision_ms/breaker_state）。
-func AutoRoute(cfg autoroute.Config, sel *autoroute.Selector, routeProbe func(ctx context.Context, model string) error, log *slog.Logger) gin.HandlerFunc {
+// rec 非 nil 时把每次 auto 决策导出到观测后端（Langfuse，span name=auto.route，
+// 输入为发给 JEV 的对话状态、元数据为决策字段）；非 auto 请求不导出。
+func AutoRoute(cfg autoroute.Config, sel *autoroute.Selector, routeProbe func(ctx context.Context, model string) error, log *slog.Logger, rec AutoRouteRecorder) gin.HandlerFunc {
 	if cfg.Mode != autoroute.ModeOff && sel == nil {
 		panic("middleware: AutoRoute 非 off 模式必须提供 Selector")
 	}
@@ -151,6 +159,29 @@ func AutoRoute(cfg autoroute.Config, sel *autoroute.Selector, routeProbe func(ct
 		}
 		c.Request.Body = io.NopCloser(bytes.NewReader(newBody))
 		c.Request.ContentLength = int64(len(newBody))
+		if rec != nil {
+			state, _ := autoroute.ExtractState(body, cfg.MaxInputBytes)
+			tier := "other"
+			switch served {
+			case cfg.StrongTier:
+				tier = "strong"
+			case cfg.CheapTier:
+				tier = "cheap"
+			}
+			rec.RecordAutoRoute(c.Request.Context(), state, map[string]string{
+				"request_id":     c.GetString("request_id"),
+				"mode":           string(cfg.Mode),
+				"served_model":   served,
+				"would_be_model": dec.WouldBeModel,
+				"tier":           tier,
+				"score":          strconv.FormatFloat(dec.Score, 'f', -1, 64),
+				"threshold":      strconv.FormatFloat(cfg.Threshold, 'f', -1, 64),
+				"fallback":       dec.Fallback,
+				"degraded":       degraded,
+				"decision_ms":    strconv.FormatFloat(dec.LatencyMS, 'f', -1, 64),
+				"breaker_state":  breakerState,
+			})
+		}
 		c.Next()
 	}
 }

@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"log/slog"
 	"net/http"
@@ -101,7 +102,7 @@ func TestAutoRouteNonAutoPassthrough(t *testing.T) {
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			// mode=on + 可判定 eval：若误触发了 auto 路径，字节必然改变，逐字节断言即暴露
-			mw := AutoRoute(autoRouteTestConfig(autoroute.ModeOn), autoroute.NewSelector(autoRouteTestConfig(autoroute.ModeOn), scoredEval(2)), nil, nil)
+			mw := AutoRoute(autoRouteTestConfig(autoroute.ModeOn), autoroute.NewSelector(autoRouteTestConfig(autoroute.ModeOn), scoredEval(2)), nil, nil, nil)
 			r, downstream := autoRouteTestEnv(t, mw)
 			w := postAutoBody(t, r, tc.body)
 
@@ -122,7 +123,7 @@ func TestAutoRouteNonAutoPassthrough(t *testing.T) {
 
 func TestAutoRouteOffRejectsAutoModel(t *testing.T) {
 	// off 态 sel == nil 合法
-	mw := AutoRoute(autoRouteTestConfig(autoroute.ModeOff), nil, nil, nil)
+	mw := AutoRoute(autoRouteTestConfig(autoroute.ModeOff), nil, nil, nil, nil)
 	r, downstream := autoRouteTestEnv(t, mw)
 	w := postAutoBody(t, r, autoRouteChatBody)
 
@@ -159,7 +160,7 @@ func TestAutoRouteOnRewritesToJudgedTier(t *testing.T) {
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			cfg := autoRouteTestConfig(autoroute.ModeOn)
-			mw := AutoRoute(cfg, autoroute.NewSelector(cfg, scoredEval(tc.score)), nil, nil)
+			mw := AutoRoute(cfg, autoroute.NewSelector(cfg, scoredEval(tc.score)), nil, nil, nil)
 			r, downstream := autoRouteTestEnv(t, mw)
 			w := postAutoBody(t, r, autoRouteChatBody)
 
@@ -203,7 +204,7 @@ func TestAutoRouteOnRewritesToJudgedTier(t *testing.T) {
 
 func TestAutoRouteShadowServesFixedTier(t *testing.T) {
 	cfg := autoRouteTestConfig(autoroute.ModeShadow)
-	mw := AutoRoute(cfg, autoroute.NewSelector(cfg, scoredEval(2)), nil, nil)
+	mw := AutoRoute(cfg, autoroute.NewSelector(cfg, scoredEval(2)), nil, nil, nil)
 	r, downstream := autoRouteTestEnv(t, mw)
 	w := postAutoBody(t, r, autoRouteChatBody)
 
@@ -237,7 +238,7 @@ func TestAutoRouteFallbackOnJEVFailure(t *testing.T) {
 	t.Run("JEV评估失败兜底", func(t *testing.T) {
 		cfg := autoRouteTestConfig(autoroute.ModeOn)
 		// 空 script：Evaluate 即报错 → 非JEV错误归 jev_error 兜底
-		mw := AutoRoute(cfg, autoroute.NewSelector(cfg, jev.NewFake()), nil, nil)
+		mw := AutoRoute(cfg, autoroute.NewSelector(cfg, jev.NewFake()), nil, nil, nil)
 		r, downstream := autoRouteTestEnv(t, mw)
 		w := postAutoBody(t, r, autoRouteChatBody)
 
@@ -271,7 +272,7 @@ func TestAutoRouteFallbackOnJEVFailure(t *testing.T) {
 	t.Run("body形状认不出unparseable兜底", func(t *testing.T) {
 		cfg := autoRouteTestConfig(autoroute.ModeOn)
 		// 有 model 但无 messages/input：Decide 内部 ExtractState 失败 → unparseable 兜底
-		mw := AutoRoute(cfg, autoroute.NewSelector(cfg, scoredEval(2)), nil, nil)
+		mw := AutoRoute(cfg, autoroute.NewSelector(cfg, scoredEval(2)), nil, nil, nil)
 		r, downstream := autoRouteTestEnv(t, mw)
 		w := postAutoBody(t, r, `{"model":"auto"}`)
 
@@ -295,7 +296,7 @@ func TestAutoRouteFallbackOnJEVFailure(t *testing.T) {
 
 func TestAutoRouteStreamKeyPreserved(t *testing.T) {
 	cfg := autoRouteTestConfig(autoroute.ModeOn)
-	mw := AutoRoute(cfg, autoroute.NewSelector(cfg, scoredEval(2)), nil, nil)
+	mw := AutoRoute(cfg, autoroute.NewSelector(cfg, scoredEval(2)), nil, nil, nil)
 	r, downstream := autoRouteTestEnv(t, mw)
 	// stream 值带原样空白与转义字符，改写后其余键字节语义保留
 	body := "{\n  \"model\": \"auto\",\n  \"stream\" : true,\n  \"extra\": \"a<&>b\",\n  \"messages\": [{\"role\":\"user\",\"content\":\"帮我查话费\"}]\n}"
@@ -322,7 +323,7 @@ func TestAutoRouteLogsDecision(t *testing.T) {
 	cfg := autoRouteTestConfig(autoroute.ModeOn)
 	var buf bytes.Buffer
 	log := slog.New(slog.NewJSONHandler(&buf, nil))
-	mw := AutoRoute(cfg, autoroute.NewSelector(cfg, scoredEval(2)), nil, log)
+	mw := AutoRoute(cfg, autoroute.NewSelector(cfg, scoredEval(2)), nil, log, nil)
 	r, _ := autoRouteTestEnv(t, mw)
 	w := postAutoBody(t, r, autoRouteChatBody)
 
@@ -381,7 +382,7 @@ func TestAutoRouteDegradeStrongUnavailable(t *testing.T) {
 		cfg := autoRouteTestConfig(autoroute.ModeOn)
 		cfg.DegradeStrongUnavailable = true
 		var probed []string
-		mw := AutoRoute(cfg, autoroute.NewSelector(cfg, scoredEval(2)), recordingProbe(&probed, true), nil)
+		mw := AutoRoute(cfg, autoroute.NewSelector(cfg, scoredEval(2)), recordingProbe(&probed, true), nil, nil)
 		r, downstream := autoRouteTestEnv(t, mw)
 		w := postAutoBody(t, r, autoRouteChatBody)
 
@@ -413,7 +414,7 @@ func TestAutoRouteDegradeStrongUnavailable(t *testing.T) {
 		cfg := autoRouteTestConfig(autoroute.ModeOn)
 		cfg.DegradeStrongUnavailable = false
 		var probed []string
-		mw := AutoRoute(cfg, autoroute.NewSelector(cfg, scoredEval(2)), recordingProbe(&probed, true), nil)
+		mw := AutoRoute(cfg, autoroute.NewSelector(cfg, scoredEval(2)), recordingProbe(&probed, true), nil, nil)
 		r, downstream := autoRouteTestEnv(t, mw)
 		w := postAutoBody(t, r, autoRouteChatBody)
 
@@ -439,7 +440,7 @@ func TestAutoRouteCheapUnavailable(t *testing.T) {
 		cfg := autoRouteTestConfig(autoroute.ModeOn)
 		cfg.UpgradeCheapUnavailable = false
 		var probed []string
-		mw := AutoRoute(cfg, autoroute.NewSelector(cfg, scoredEval(1)), recordingProbe(&probed, true), nil)
+		mw := AutoRoute(cfg, autoroute.NewSelector(cfg, scoredEval(1)), recordingProbe(&probed, true), nil, nil)
 		r, downstream := autoRouteTestEnv(t, mw)
 		w := postAutoBody(t, r, autoRouteChatBody)
 
@@ -463,7 +464,7 @@ func TestAutoRouteCheapUnavailable(t *testing.T) {
 		cfg := autoRouteTestConfig(autoroute.ModeOn)
 		cfg.UpgradeCheapUnavailable = true
 		var probed []string
-		mw := AutoRoute(cfg, autoroute.NewSelector(cfg, scoredEval(1)), recordingProbe(&probed, true), nil)
+		mw := AutoRoute(cfg, autoroute.NewSelector(cfg, scoredEval(1)), recordingProbe(&probed, true), nil, nil)
 		r, downstream := autoRouteTestEnv(t, mw)
 		w := postAutoBody(t, r, autoRouteChatBody)
 
@@ -495,7 +496,7 @@ func TestAutoRouteCheapUnavailable(t *testing.T) {
 func TestAutoRouteProbeSuccessNoDegrade(t *testing.T) {
 	cfg := autoRouteTestConfig(autoroute.ModeOn)
 	var probed []string
-	mw := AutoRoute(cfg, autoroute.NewSelector(cfg, scoredEval(2)), recordingProbe(&probed, false), nil)
+	mw := AutoRoute(cfg, autoroute.NewSelector(cfg, scoredEval(2)), recordingProbe(&probed, false), nil, nil)
 	r, downstream := autoRouteTestEnv(t, mw)
 	w := postAutoBody(t, r, autoRouteChatBody)
 
@@ -516,7 +517,7 @@ func TestAutoRouteProbeOnlyOnJudgedOnPath(t *testing.T) {
 	t.Run("非auto请求不探测", func(t *testing.T) {
 		cfg := autoRouteTestConfig(autoroute.ModeOn)
 		var probed []string
-		mw := AutoRoute(cfg, autoroute.NewSelector(cfg, scoredEval(2)), recordingProbe(&probed, true), nil)
+		mw := AutoRoute(cfg, autoroute.NewSelector(cfg, scoredEval(2)), recordingProbe(&probed, true), nil, nil)
 		r, downstream := autoRouteTestEnv(t, mw)
 		body := `{"model":"test-flash","messages":[{"role":"user","content":"hi"}]}`
 		w := postAutoBody(t, r, body)
@@ -535,7 +536,7 @@ func TestAutoRouteProbeOnlyOnJudgedOnPath(t *testing.T) {
 
 	t.Run("off模式auto请求不探测", func(t *testing.T) {
 		var probed []string
-		mw := AutoRoute(autoRouteTestConfig(autoroute.ModeOff), nil, recordingProbe(&probed, true), nil)
+		mw := AutoRoute(autoRouteTestConfig(autoroute.ModeOff), nil, recordingProbe(&probed, true), nil, nil)
 		r, _ := autoRouteTestEnv(t, mw)
 		w := postAutoBody(t, r, autoRouteChatBody)
 
@@ -550,7 +551,7 @@ func TestAutoRouteProbeOnlyOnJudgedOnPath(t *testing.T) {
 	t.Run("shadow模式不探测", func(t *testing.T) {
 		cfg := autoRouteTestConfig(autoroute.ModeShadow)
 		var probed []string
-		mw := AutoRoute(cfg, autoroute.NewSelector(cfg, scoredEval(2)), recordingProbe(&probed, true), nil)
+		mw := AutoRoute(cfg, autoroute.NewSelector(cfg, scoredEval(2)), recordingProbe(&probed, true), nil, nil)
 		r, downstream := autoRouteTestEnv(t, mw)
 		w := postAutoBody(t, r, autoRouteChatBody)
 
@@ -570,7 +571,7 @@ func TestAutoRouteProbeOnlyOnJudgedOnPath(t *testing.T) {
 	t.Run("兜底判定不探测", func(t *testing.T) {
 		cfg := autoRouteTestConfig(autoroute.ModeOn)
 		var probed []string
-		mw := AutoRoute(cfg, autoroute.NewSelector(cfg, jev.NewFake()), recordingProbe(&probed, true), nil)
+		mw := AutoRoute(cfg, autoroute.NewSelector(cfg, jev.NewFake()), recordingProbe(&probed, true), nil, nil)
 		r, downstream := autoRouteTestEnv(t, mw)
 		w := postAutoBody(t, r, autoRouteChatBody)
 
@@ -622,4 +623,53 @@ func TestNewAutoRouteProbe(t *testing.T) {
 			t.Fatalf("有可用 provider 时探测不应报错: %v", err)
 		}
 	})
+}
+
+type fakeAutoRecorder struct {
+	calls  []map[string]string
+	states []any
+}
+
+func (f *fakeAutoRecorder) RecordAutoRoute(_ context.Context, state any, fields map[string]string) {
+	f.calls = append(f.calls, fields)
+	f.states = append(f.states, state)
+}
+
+func TestAutoRouteRecordsDecisionToObserver(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	rec := &fakeAutoRecorder{}
+	cfg := autoRouteTestConfig(autoroute.ModeOn)
+	env := gin.New()
+	env.Use(Idempotency())
+	env.Use(AutoRoute(cfg, autoroute.NewSelector(cfg, scoredEval(2)), nil, nil, rec))
+	env.POST("/chat", func(c *gin.Context) { c.Status(200) })
+	body := `{"model":"auto","messages":[{"role":"user","content":"帮我写一个 LRU 缓存"}]}`
+	w := httptest.NewRecorder()
+	env.ServeHTTP(w, httptest.NewRequest(http.MethodPost, "/chat", strings.NewReader(body)))
+	if w.Code != 200 || len(rec.calls) != 1 {
+		t.Fatalf("code=%d calls=%d", w.Code, len(rec.calls))
+	}
+	f := rec.calls[0]
+	if f["served_model"] != cfg.StrongTier || f["tier"] != "strong" || f["mode"] != "on" ||
+		f["request_id"] == "" || f["threshold"] == "" || f["breaker_state"] == "" {
+		t.Fatalf("fields=%v", f)
+	}
+	if s := fmt.Sprint(rec.states[0]); !strings.Contains(s, "LRU") {
+		t.Fatalf("state not exported: %v", rec.states[0])
+	}
+}
+
+func TestAutoRouteDoesNotRecordNonAuto(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	rec := &fakeAutoRecorder{}
+	cfg := autoRouteTestConfig(autoroute.ModeOn)
+	env := gin.New()
+	env.Use(AutoRoute(cfg, autoroute.NewSelector(cfg, scoredEval(2)), nil, nil, rec))
+	env.POST("/chat", func(c *gin.Context) { c.Status(200) })
+	w := httptest.NewRecorder()
+	env.ServeHTTP(w, httptest.NewRequest(http.MethodPost, "/chat",
+		strings.NewReader(`{"model":"deepseek-v4-flash","messages":[{"role":"user","content":"你好"}]}`)))
+	if w.Code != 200 || len(rec.calls) != 0 {
+		t.Fatalf("code=%d calls=%d", w.Code, len(rec.calls))
+	}
 }

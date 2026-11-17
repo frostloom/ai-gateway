@@ -20,6 +20,7 @@ import (
 	"github.com/frostloom/ai-gateway/internal/gateway/middleware"
 	"github.com/frostloom/ai-gateway/internal/gateway/web"
 	"github.com/frostloom/ai-gateway/internal/jev"
+	"github.com/frostloom/ai-gateway/internal/observability"
 	"github.com/frostloom/ai-gateway/internal/pkg/config"
 	"github.com/frostloom/ai-gateway/internal/pkg/controlplane"
 	"github.com/frostloom/ai-gateway/internal/pkg/logger"
@@ -76,9 +77,23 @@ func main() {
 		}
 		autoSelector = autoroute.NewSelector(autoCfg, jevClient)
 	}
+	// auto 决策导出 Langfuse：观测环境变量启用且 auto 非 off 时构造 observer，
+	// 每次 auto 决策写 auto.route span（对话状态经既有裁剪/脱敏）；未配置则为 nil。
+	var autoRecorder middleware.AutoRouteRecorder
+	if lfCfg, lfErr := observability.ConfigFromEnv(os.Getenv); lfErr != nil {
+		log.Error("parse langfuse config", "err", lfErr)
+		os.Exit(1)
+	} else if lfCfg.Enabled && autoCfg.Mode != autoroute.ModeOff {
+		observer, obsErr := observability.New(context.Background(), lfCfg)
+		if obsErr != nil {
+			log.Error("init langfuse observer", "err", obsErr)
+			os.Exit(1)
+		}
+		autoRecorder = observer
+	}
 	// route 探测与 handler 共用同一 router 客户端实例，只取 error；
 	// NewAutoRouteProbe 把 router 的 (nil, nil)=无可用 provider 也映射为失败，触发降级。
-	autoRouteMW := middleware.AutoRoute(autoCfg, autoSelector, middleware.NewAutoRouteProbe(rc), log)
+	autoRouteMW := middleware.AutoRoute(autoCfg, autoSelector, middleware.NewAutoRouteProbe(rc), log, autoRecorder)
 
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
