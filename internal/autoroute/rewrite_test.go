@@ -1,10 +1,12 @@
-// autoroute body 改写测试：model 字段替换、其余键逐字节保留（嵌套对象/数组/数字精度）、
-// 特殊字符转义与无效 JSON/非对象/缺 model 拒绝。
+// autoroute body 改写测试：model 字段替换、其余键保留（无 HTML 字符/多余空白时逐字节
+// 一致，含这些字符时语义等价且输出为转义形式）、特殊字符转义与无效 JSON/非对象/缺 model 拒绝。
 package autoroute
 
 import (
 	"bytes"
 	"encoding/json"
+	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -79,6 +81,40 @@ func TestRewriteModelReplacesNonStringModelValue(t *testing.T) {
 	}
 	if got != "new" || !bytes.Equal(dst["k"], json.RawMessage(`"v"`)) {
 		t.Fatalf("非字符串 model 未替换或其余键被改动: %s", out)
+	}
+}
+
+func TestRewriteModelEscapesHTMLAndCompactsWhitespace(t *testing.T) {
+	// 非 model 键的值含 <、>、&、字面 U+2028 与对象内无意义空白：
+	// 重序列化后语义等价，但原始字节被 escapeHTML 转义、空白被压缩（钉死该行为）。
+	// 反斜杠与 U+2028 用码点构造，避免源码字面转义序列被外部工具改写。
+	bs := string([]byte{0x5c})
+	sep := "x" + string(rune(0x2028)) + "y"
+	original := []byte(`{"model":"m","html":"a<b>&c","sep":"` + sep + `","ws":{ "x" : [1, 2] }}`)
+	out, err := RewriteModel(original, "new")
+	if err != nil {
+		t.Fatalf("RewriteModel 失败: %v", err)
+	}
+	src, dst := rawKeys(t, original), rawKeys(t, out)
+	for _, key := range []string{"html", "sep", "ws"} {
+		var want, got any
+		if err := json.Unmarshal(src[key], &want); err != nil {
+			t.Fatalf("解析原值 %q 失败: %v", key, err)
+		}
+		if err := json.Unmarshal(dst[key], &got); err != nil {
+			t.Fatalf("解析改写后 %q 失败: %v", key, err)
+		}
+		if !reflect.DeepEqual(want, got) {
+			t.Fatalf("键 %q 语义被改动: 原 %#v，改写后 %#v", key, want, got)
+		}
+	}
+	for _, esc := range []string{bs + "u003c", bs + "u003e", bs + "u0026", bs + "u2028"} {
+		if !strings.Contains(string(out), esc) {
+			t.Fatalf("输出缺少转义序列 %s: %s", esc, out)
+		}
+	}
+	if !strings.Contains(string(out), `"ws":{"x":[1,2]}`) {
+		t.Fatalf("对象内无意义空白未被压缩: %s", out)
 	}
 }
 
