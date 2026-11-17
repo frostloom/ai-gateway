@@ -1,0 +1,105 @@
+{"id":"chat-001","category":"chitchat","expect":"cheap","user":"你好呀"}
+{"id":"chat-002","category":"chitchat","expect":"cheap","user":"今天天气真不错，聊两句"}
+{"id":"chat-003","category":"chitchat","expect":"cheap","user":"讲个短笑话呗"}
+{"id":"chat-004","category":"chitchat","expect":"cheap","user":"你是谁呀？能干什么？"}
+{"id":"chat-005","category":"chitchat","expect":"cheap","user":"晚安，明天见"}
+{"id":"chat-006","category":"chitchat","expect":"cheap","user":"最近有点累，随便陪我聊聊"}
+{"id":"chat-007","category":"chitchat","expect":"cheap","user":"推荐一部轻松的电影"}
+{"id":"chat-008","category":"chitchat","expect":"cheap","user":"早上好！"}
+{"id":"chat-009","category":"chitchat","expect":"cheap","user":"你吃饭了吗"}
+{"id":"chat-010","category":"chitchat","expect":"cheap","user":"帮我起个网名，可爱一点的"}
+{"id":"chat-011","category":"chitchat","expect":"cheap","user":"今天心情不太好"}
+{"id":"chat-012","category":"chitchat","expect":"cheap","user":"周六去哪玩比较好"}
+{"id":"chat-013","category":"chitchat","expect":"cheap","user":"说一句鼓励我的话"}
+{"id":"chat-014","category":"chitchat","expect":"cheap","user":"你喜欢猫还是狗"}
+{"id":"chat-015","category":"chitchat","expect":"cheap","user":"发个表情包描述给我"}
+{"id":"qa-001","category":"simple_qa","expect":"cheap","user":"中国的首都是哪里？"}
+{"id":"qa-002","category":"simple_qa","expect":"cheap","user":"一年有几个月？"}
+{"id":"qa-003","category":"simple_qa","expect":"cheap","user":"水的化学式是什么"}
+{"id":"qa-004","category":"simple_qa","expect":"cheap","user":"苹果公司的创始人是谁"}
+{"id":"qa-005","category":"simple_qa","expect":"cheap","user":"英语 thank you 什么意思"}
+{"id":"qa-006","category":"simple_qa","expect":"cheap","user":"珠穆朗玛峰有多高"}
+{"id":"qa-007","category":"simple_qa","expect":"cheap","user":"《静夜思》是谁写的"}
+{"id":"qa-008","category":"simple_qa","expect":"cheap","user":"一米等于多少厘米"}
+{"id":"qa-009","category":"simple_qa","expect":"cheap","user":"周杰伦是哪里人"}
+{"id":"qa-010","category":"simple_qa","expect":"cheap","user":"太平洋在哪个大洲旁边"}
+{"id":"qa-011","category":"simple_qa","expect":"cheap","user":"狗的寿命一般多少年"}
+{"id":"qa-012","category":"simple_qa","expect":"cheap","user":"圆周率前三位是什么"}
+{"id":"qa-013","category":"simple_qa","expect":"cheap","user":"春节是农历几月初一吗"}
+{"id":"qa-014","category":"simple_qa","expect":"cheap","user":"盐的化学成分是什么"}
+{"id":"qa-015","category":"simple_qa","expect":"cheap","user":"长江是世界第几长河"}
+{"id":"fmt-001","category":"format_transform","expect":"cheap","user":"帮我把这段话翻译成英文：今天下午三点开会。"}
+{"id":"fmt-002","category":"format_transform","expect":"cheap","user":"把我说的改礼貌一点：把文件发我"}
+{"id":"fmt-003","category":"format_transform","expect":"cheap","user":"这句话有错别字吗：我明天去北京出差"}
+{"id":"fmt-004","category":"format_transform","expect":"cheap","user":"把下面的列表变成一句话：苹果、香蕉、橘子"}
+{"id":"fmt-005","category":"format_transform","expect":"cheap","user":"给这段加个标题：我们团队本周完成了网关压测。"}
+{"id":"fmt-006","category":"format_transform","expect":"cheap","user":"英文邮件落款怎么写"}
+{"id":"fmt-007","category":"format_transform","expect":"cheap","user":"帮我数一下这句话有几个字：周末去爬山"}
+{"id":"fmt-008","category":"format_transform","expect":"cheap","user":"把'2:30 PM'换算成24小时制"}
+{"id":"fmt-009","category":"format_transform","expect":"cheap","user":"帮我写一句生日祝福，送给同事"}
+{"id":"fmt-010","category":"format_transform","expect":"cheap","user":"这个手机号格式对吗：138-0013-8000"}
+{"id":"fmt-011","category":"format_transform","expect":"cheap","user":"把这段话缩短一半：我们将于下周一开始系统升级，预计持续两天，期间服务可能间歇性不可用，请提前做好准备。"}
+{"id":"fmt-012","category":"format_transform","expect":"cheap","user":"帮我把这个清单改成 markdown 复选框格式：买菜、遛狗、写周报"}
+{"id":"fmt-013","category":"format_transform","expect":"cheap","user":"谢谢怎么说更正式"}
+{"id":"fmt-014","category":"format_transform","expect":"cheap","user":"把这句话改成过去式：I go to school."}
+{"id":"fmt-015","category":"format_transform","expect":"cheap","user":"给'星辰'起个英文品牌名"}
+{"id":"code-001","category":"code_edit","expect":"strong","user":"这段 Go 代码为什么死锁？帮我修复：\nvar mu sync.Mutex\nfunc A(){ mu.Lock(); B(); mu.Unlock() }\nfunc B(){ mu.Lock(); defer mu.Unlock(); ... }"}
+{"id":"code-002","category":"code_edit","expect":"strong","user":"帮我重构这个函数，消除重复代码并加错误处理：\ndef load(p):\n  f=open(p); d=f.read(); return d"}
+{"id":"code-003","category":"code_edit","expect":"strong","user":"这个 SQL 查询很慢，帮我优化：SELECT * FROM orders o JOIN users u ON o.uid=u.id WHERE u.created > '2024-01-01' ORDER BY o.amount DESC"}
+{"id":"code-004","category":"code_edit","expect":"strong","user":"下面的 React 组件每次渲染都发请求，帮我找出原因并修复：\nfunction User(){ fetch('/api/user')...; return <div/> }"}
+{"id":"code-005","category":"code_edit","expect":"strong","user":"帮我把这个类改成线程安全的，并说明改动点：\nclass Counter { int c; void inc(){ c++; } }"}
+{"id":"code-006","category":"code_edit","expect":"strong","user":"这段正则在长输入上回溯爆炸，帮我改写：^(a+)+$"}
+{"id":"code-007","category":"code_edit","expect":"strong","user":"帮我 review 这个 diff，重点看并发和边界：\n+ if (cache.get(k) == null) { cache.put(k, load(k)); }"}
+{"id":"code-008","category":"code_edit","expect":"strong","user":"这个 Dockerfile 镜像 1.2GB，帮我减到 200MB 以内并解释每步：FROM ubuntu:latest RUN apt-get update && apt-get install -y golang..."}
+{"id":"code-009","category":"code_edit","expect":"strong","user":"帮我给这段 Python 加上完整的单元测试，覆盖异常分支：\ndef divide(a,b): return a/b"}
+{"id":"code-010","category":"code_edit","expect":"strong","user":"这段 TypeScript 类型报错，帮我修正并解释：const x: string[] = [1,2,3]"}
+{"id":"code-011","category":"code_edit","expect":"strong","user":"把这段命令式循环重构成函数式风格，保持可读性：\nresult=[]\nfor i in range(10):\n  if i%2==0: result.append(i*i)"}
+{"id":"code-012","category":"code_edit","expect":"strong","user":"这段 C++ 有内存泄漏和悬垂指针，帮我逐行指出并修复：\nint* p = new int[10]; delete p; *p = 1;"}
+{"id":"code-013","category":"code_edit","expect":"strong","user":"帮我把这个 REST API 从回调风格改成 async/await，并补上超时重试：fetchUser(id, cb)"}
+{"id":"code-014","category":"code_edit","expect":"strong","user":"这个 CSS 在移动端错位，帮我排查并给出响应式方案：.grid { display:grid; grid-template-columns: 4; }"}
+{"id":"code-015","category":"code_edit","expect":"strong","user":"帮我找出这段 JS 闭包在循环里的经典错误并修复：for(var i=0;i<3;i++) setTimeout(()=>alert(i),0)"}
+{"id":"gen-001","category":"code_gen","expect":"strong","user":"用 Go 写一个带 TTL 和最大容量的并发安全 LRU 缓存，附基准测试"}
+{"id":"gen-002","category":"code_gen","expect":"strong","user":"帮我写一个 Python 脚本：监控目录变化，新文件自动上传 S3，失败重试，日志轮转"}
+{"id":"gen-003","category":"code_gen","expect":"strong","user":"设计并实现一个短链接服务的数据模型和 API（含冲突处理和统计）"}
+{"id":"gen-004","category":"code_gen","expect":"strong","user":"写一个 Kubernetes Operator 的骨架：监听 CRD 变化并调谐副本数"}
+{"id":"gen-005","category":"code_gen","expect":"strong","user":"实现一个简单的模板引擎，支持变量、条件、循环，带完整测试"}
+{"id":"gen-006","category":"code_gen","expect":"strong","user":"帮我写一个 Chrome 扩展：划词翻译，调用本地词典，带生词本"}
+{"id":"gen-007","category":"code_gen","expect":"strong","user":"写一个分布式限流器的 Go 实现：令牌桶 + Redis 后端 + 优雅降级"}
+{"id":"gen-008","category":"code_gen","expect":"strong","user":"用 Rust 写一个命令行工具：解析 CSV 并按列聚合，支持流式处理大文件"}
+{"id":"gen-009","category":"code_gen","expect":"strong","user":"帮我实现一个迷你 React：虚拟 DOM、diff、批量更新，注释讲原理"}
+{"id":"gen-010","category":"code_gen","expect":"strong","user":"写一个 WebSocket 聊天服务端：房间、心跳、消息回执、断线重连"}
+{"id":"gen-011","category":"code_gen","expect":"strong","user":"设计一个多人协同编辑的 CRDT 文本算法实现，含冲突合并示例"}
+{"id":"gen-012","category":"code_gen","expect":"strong","user":"帮我写个脚本批量给图片加水印，多进程加速，保留 EXIF"}
+{"id":"gen-013","category":"code_gen","expect":"strong","user":"实现一个 SQL 解析器的词法和语法分析部分，支持 SELECT/WHERE/JOIN"}
+{"id":"gen-014","category":"code_gen","expect":"strong","user":"写一个时间序列数据库的存储引擎原型：分段、压缩、按时间查询"}
+{"id":"gen-015","category":"code_gen","expect":"strong","user":"帮我做一个 API 网关的 JWT 鉴权中间件：刷新令牌、黑名单、多租户"}
+{"id":"rsn-001","category":"reasoning","expect":"strong","user":"我们三个开关最多两个能同时开，每次变更要走审批，怎么设计状态机既安全又不阻塞日常发布？"}
+{"id":"rsn-002","category":"reasoning","expect":"strong","user":"一列火车上有若干人，每站上一半下一半又多一人，第五站后剩 3 人，求初始人数并说明推理"}
+{"id":"rsn-003","category":"reasoning","expect":"strong","user":"对比三种消息队列在 exactly-once 语义上的实现差异，给出选型建议"}
+{"id":"rsn-004","category":"reasoning","expect":"strong","user":"如果数据库和缓存要保证强一致，有哪些方案？各自牺牲了什么？"}
+{"id":"rsn-005","category":"reasoning","expect":"strong","user":"分析这段论证的漏洞：所有鸟都会飞，企鹅是鸟，所以企鹅会飞"}
+{"id":"rsn-006","category":"reasoning","expect":"strong","user":"设计一个方案：在不停机的前提下把单库 2TB 数据拆成 64 个分片"}
+{"id":"rsn-007","category":"reasoning","expect":"strong","user":"三个嫌疑人各说一句话，只有一人说真话，推理谁是小偷，写出推导过程"}
+{"id":"rsn-008","category":"reasoning","expect":"strong","user":"为什么 TCP 在高延迟卫星链路上吞吐差？从拥塞控制角度分析并给出调优参数"}
+{"id":"rsn-009","category":"reasoning","expect":"strong","user":"评估这个定价策略的风险：前 100 名免费，之后阶梯涨价，黄牛会怎么套利？"}
+{"id":"rsn-010","category":"reasoning","expect":"strong","user":"从第一性原理推导：为什么分布式系统不可能同时保证 CAP？给出证明思路"}
+{"id":"rsn-011","category":"reasoning","expect":"strong","user":"两个房间三个开关，只能进一次另一房间，如何确定开关对应哪个灯？"}
+{"id":"rsn-012","category":"reasoning","expect":"strong","user":"我们要在 99.9% 可用性基础上提到 99.99%，按投入产出排序列出前五项措施"}
+{"id":"rsn-013","category":"reasoning","expect":"strong","user":"解释这段代码的时间复杂度为什么是 O(n log n)，逐步分析：递归合并排序"}
+{"id":"rsn-014","category":"reasoning","expect":"strong","user":"一批产品次品率 2%，抽 10 件有 1 件次品的概率是多少？给出计算过程"}
+{"id":"rsn-015","category":"reasoning","expect":"strong","user":"博弈论分析：两家公司同时定价，都低价则都亏，都高价则平分，怎么定价最优？"}
+{"id":"doc-001","category":"long_context","expect":"strong","user":"[长文 1] 以下是我司 8000 字的年度技术复盘全文，请提炼：三个最大教训、两个保持项、一份下季度行动清单（按优先级）。< paste 长文 >"}
+{"id":"doc-002","category":"long_context","expect":"strong","user":"[合同 1] 这是 20 页服务合同的全文，逐条列出对我方不利的条款并给出谈判建议。< paste 合同 >"}
+{"id":"doc-003","category":"long_context","expect":"strong","user":"[论文 1] 这篇 15 页论文的方法、实验、局限分别是什么？实验设计有无缺陷？逐节分析。< paste 论文 >"}
+{"id":"doc-004","category":"long_context","expect":"strong","user":"[代码库 1] 这是我们服务的全部 23 个源文件，梳理调用链路、找出循环依赖并给出解耦方案。< paste 代码 >"}
+{"id":"doc-005","category":"long_context","expect":"strong","user":"[日志 1] 附带 2000 行生产事故日志，重建故障时间线，定位根因，写一页事故报告。< paste 日志 >"}
+{"id":"doc-006","category":"long_context","expect":"strong","user":"[财报 1] 三份年报放一起，对比营收结构、毛利率趋势和风险敞口，输出对比表格和结论。< paste 财报 >"}
+{"id":"doc-007","category":"long_context","expect":"strong","user":"[法规 1] 对照新旧两版数据安全法规全文，列出所有实质变更项及合规影响。< paste 法规 >"}
+{"id":"doc-008","category":"long_context","expect":"strong","user":"[用研 1] 30 位用户的访谈记录全文，做主题编码，输出频次最高的五个痛点及代表性原话。< paste 访谈 >"}
+{"id":"doc-009","category":"long_context","expect":"strong","user":"[PRD 1] 这份 40 页 PRD 与这 12 页技术方案是否一致？列出所有矛盾和遗漏。< paste 两份文档 >"}
+{"id":"doc-010","category":"long_context","expect":"strong","user":"[史稿 1] 通读这份编年史材料，考证两个互相矛盾的记载哪个更可信，给出证据链。< paste 材料 >"}
+{"id":"doc-011","category":"long_context","expect":"strong","user":"[周会 1] 我们团队一年的周会记录全文，统计承诺完成率并找出反复出现的阻塞因素。< paste 记录 >"}
+{"id":"doc-012","category":"long_context","expect":"strong","user":"[协议 1] 对照 RFC 原文和我们 600 行的协议实现，逐条核对不符之处。< paste 两者 >"}
+{"id":"doc-013","category":"long_context","expect":"strong","user":"[病历 1] 多位医生的多份病程记录，梳理病情演变时间线和用药调整逻辑。< paste 记录 >"}
+{"id":"doc-014","category":"long_context","expect":"strong","user":"[竞品 1] 六个竞品的官网+帮助文档全文，做功能矩阵对比并找空白机会点。< paste 材料 >"}
+{"id":"doc-015","category":"long_context","expect":"strong","user":"[需求 1] 500 条用户反馈原文，去重归类后按影响面和严重度排序，输出 top10。< paste 反馈 >"}

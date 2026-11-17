@@ -72,7 +72,7 @@ func defaultConfig() Config {
 		Mode:                     ModeOff,
 		CheapTier:                "deepseek-v4-flash",
 		StrongTier:               "deepseek-v4-pro",
-		Threshold:                1.5,
+		Threshold:                0.8, // L2b 异构基准最优一致率（90%）；2026-11-17 依已批准的阈值回调改自 1.5
 		FailMode:                 "cheap",
 		ShadowServe:              "deepseek-v4-flash",
 		TimeoutMS:                2000,

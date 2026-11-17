@@ -26,8 +26,8 @@ func TestConfigFromEnvDefaults(t *testing.T) {
 	if cfg.StrongTier != "deepseek-v4-pro" {
 		t.Errorf("StrongTier = %q, 期望 deepseek-v4-pro", cfg.StrongTier)
 	}
-	if cfg.Threshold != 1.5 {
-		t.Errorf("Threshold = %v, 期望 1.5", cfg.Threshold)
+	if cfg.Threshold != 0.8 {
+		t.Errorf("Threshold = %v, 期望 0.8", cfg.Threshold)
 	}
 	if cfg.FailMode != "cheap" {
 		t.Errorf("FailMode = %q, 期望 cheap", cfg.FailMode)

@@ -113,7 +113,7 @@
 | --- | --- | --- |
 | `AUTO_ROUTE_MODE` | `off` | `off` / `shadow` / `on` |
 | `AUTO_ROUTE_TIERS` | `deepseek-v4-flash,deepseek-v4-pro` | 顺序 = 便宜,强 |
-| `AUTO_ROUTE_THRESHOLD` | `1.5` | score ≥ 阈值选强档 |
+| `AUTO_ROUTE_THRESHOLD` | `0.8` | score ≥ 阈值选强档（2026-11-17 依 L2b 异构基准按已批准的回调机制从 1.5 调整，见 eval/autoroute/l2b-2026-11-17/） |
 | `AUTO_ROUTE_FAIL_MODE` | `cheap` | JEV 失败兜底档位（`cheap`/`strong`） |
 | `AUTO_ROUTE_SHADOW_SERVE` | 便宜档 | shadow 模式实际服务档位 |
 | `AUTO_ROUTE_DEGRADE_STRONG_UNAVAILABLE` | `1` | 强档无 provider 时自动降便宜档 |

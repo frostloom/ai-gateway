@@ -33,6 +33,7 @@ import (
 func main() {
 	var (
 		recordsDir = flag.String("records", "", "campaign records 目录（每例一个 JSON，含 packet 路径）")
+		prompts    = flag.String("prompts", "", "异构提示词 JSONL（id,category,expect,user），与 -records 二选一")
 		labelsPath = flag.String("labels", "", "难度标签 JSONL（case_id,label），可选")
 		outDir     = flag.String("out", "", "输出目录（写 results.jsonl 与 stability.jsonl）")
 		subset     = flag.Int("subset", 100, "稳定性抽样条数")
@@ -43,8 +44,8 @@ func main() {
 		timeoutMS  = flag.Int("timeout-ms", 2000, "单次判定预算（与生产默认一致）")
 	)
 	flag.Parse()
-	if *recordsDir == "" || *outDir == "" {
-		fmt.Fprintln(os.Stderr, "usage: autoroute-bench -records DIR -out DIR [flags]")
+	if (*recordsDir == "" && *prompts == "") || *outDir == "" {
+		fmt.Fprintln(os.Stderr, "usage: autoroute-bench -records DIR | -prompts FILE -out DIR [flags]")
 		os.Exit(2)
 	}
 	log := slog.New(slog.NewTextHandler(os.Stderr, nil))
@@ -52,16 +53,28 @@ func main() {
 		log.Error("mkdir", "err", err)
 		os.Exit(1)
 	}
-	cases, err := loadRecords(*recordsDir)
-	if err != nil {
-		log.Error("load records", "err", err)
-		os.Exit(1)
+	var cases []benchCase
+	var labels map[string]string
+	if *prompts != "" {
+		var err error
+		cases, labels, err = loadPrompts(*prompts)
+		if err != nil {
+			log.Error("load prompts", "err", err)
+			os.Exit(1)
+		}
+	} else {
+		loaded, err := loadRecords(*recordsDir)
+		if err != nil {
+			log.Error("load records", "err", err)
+			os.Exit(1)
+		}
+		sort.Slice(loaded, func(i, j int) bool { return loaded[i].ID < loaded[j].ID })
+		cases = loaded
+		labels = loadLabels(*labelsPath)
 	}
-	sort.Slice(cases, func(i, j int) bool { return cases[i].ID < cases[j].ID })
 	if *limit > 0 && *limit <= len(cases) {
 		cases = cases[:*limit]
 	}
-	labels := loadLabels(*labelsPath)
 
 	var eval jev.Evaluator
 	if *dryRun {
@@ -114,7 +127,7 @@ func main() {
 				dec := selector.Decide(context.Background(), time.Now(), c.Body)
 				raw, evalErr := rec.takeLast()
 				row := resultRow{
-					Case: c.ID, Rep: rep, Label: labels[c.ID], Tag: tag,
+					Case: c.ID, Rep: rep, Label: labels[c.ID], Tag: tag, Category: c.Category,
 					Judged: dec.Judged, Score: dec.Score, Tier: tierAt(dec.Score, cfg.Threshold),
 					Applied: dec.Applied, ServedModel: dec.ServedModel, WouldBeModel: dec.WouldBeModel,
 					Fallback: dec.Fallback, LatencyMS: dec.LatencyMS, WallMS: ms(time.Since(start)),
@@ -152,8 +165,43 @@ func main() {
 // ---------- 数据装载 ----------
 
 type benchCase struct {
-	ID   string
-	Body []byte
+	ID       string
+	Body     []byte
+	Category string
+}
+
+// loadPrompts 读异构提示词 JSONL，期望档（expect）即构造标签。
+func loadPrompts(path string) ([]benchCase, map[string]string, error) {
+	raw, err := os.ReadFile(path)
+	if err != nil {
+		return nil, nil, err
+	}
+	var cases []benchCase
+	labels := map[string]string{}
+	for _, line := range strings.Split(string(raw), "\n") {
+		var p struct {
+			ID       string `json:"id"`
+			Category string `json:"category"`
+			Expect   string `json:"expect"`
+			User     string `json:"user"`
+		}
+		if json.Unmarshal([]byte(line), &p) != nil || p.ID == "" || p.User == "" {
+			continue
+		}
+		body, err := json.Marshal(map[string]any{
+			"model":    "auto",
+			"messages": []map[string]string{{"role": "user", "content": p.User}},
+		})
+		if err != nil {
+			return nil, nil, err
+		}
+		cases = append(cases, benchCase{ID: p.ID, Body: body, Category: p.Category})
+		labels[p.ID] = p.Expect
+	}
+	if len(cases) == 0 {
+		return nil, nil, fmt.Errorf("no prompts loaded")
+	}
+	return cases, labels, nil
 }
 
 type packetFile struct {
@@ -307,6 +355,7 @@ type resultRow struct {
 	Case        string             `json:"case"`
 	Rep         int                `json:"rep"`
 	Tag         string             `json:"tag"`
+	Category    string             `json:"category,omitempty"`
 	Label       string             `json:"label,omitempty"`
 	Judged      bool               `json:"judged"`
 	Score       float64            `json:"score"`
