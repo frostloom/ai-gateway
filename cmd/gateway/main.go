@@ -2,6 +2,7 @@
 // 中间件顺序（有讲究）：
 //
 //	APIKey（先拒绝坏 key）→ Idempotency（生成 request_id）→ RateLimit（按租户）
+//	→ AutoRoute（model:"auto" 三态路由：off 拒绝 / shadow 只记录 / on 改写）
 package main
 
 import (
@@ -13,10 +14,12 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"github.com/frostloom/ai-gateway/internal/autoroute"
 	"github.com/frostloom/ai-gateway/internal/gateway/client"
 	"github.com/frostloom/ai-gateway/internal/gateway/handler"
 	"github.com/frostloom/ai-gateway/internal/gateway/middleware"
 	"github.com/frostloom/ai-gateway/internal/gateway/web"
+	"github.com/frostloom/ai-gateway/internal/jev"
 	"github.com/frostloom/ai-gateway/internal/pkg/config"
 	"github.com/frostloom/ai-gateway/internal/pkg/controlplane"
 	"github.com/frostloom/ai-gateway/internal/pkg/logger"
@@ -57,6 +60,28 @@ func main() {
 	defer bc.Close()
 	rc := client.NewRouter(routerAddr, controlToken)
 
+	// model:"auto" 路由：配置默认 off（off 时中间件照挂、selector 为 nil、不构造 JEV client，
+	// auto 请求确定性 400）。shadow/on 态 ConfigFromEnv 已 fail-fast 全量校验含 JEV 配置。
+	autoCfg, err := autoroute.ConfigFromEnv(os.Getenv)
+	if err != nil {
+		log.Error("parse auto route config", "err", err)
+		os.Exit(1)
+	}
+	var autoSelector *autoroute.Selector
+	if autoCfg.Mode != autoroute.ModeOff {
+		jevClient, err := jev.NewEvaluationClient(autoCfg.JEVEndpoint, autoCfg.JEVAPIKey, autoCfg.JEVModel, jev.ProxyTransport())
+		if err != nil {
+			log.Error("connect jev", "err", err)
+			os.Exit(1)
+		}
+		autoSelector = autoroute.NewSelector(autoCfg, jevClient)
+	}
+	// route 探测与 handler 共用同一 router 客户端实例，只取 error。
+	autoRouteMW := middleware.AutoRoute(autoCfg, autoSelector, func(ctx context.Context, model string) error {
+		_, err := rc.Route(ctx, model)
+		return err
+	}, log)
+
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
 	r.Use(gin.Recovery())
@@ -68,6 +93,7 @@ func main() {
 	v1.Use(middleware.APIKey(bc))
 	v1.Use(middleware.Idempotency())
 	v1.Use(middleware.RateLimit(rdb, time.Minute, ratePerMin, rateBurst))
+	v1.Use(autoRouteMW)
 	v1.POST("/chat/completions", handler.Chat(bc, rc, log, 2*time.Minute, holdUnknown))
 	v1.POST("/messages", handler.Native(bc, rc, log, "messages", holdUnknown))
 	v1.POST("/responses", handler.Native(bc, rc, log, "responses", holdUnknown))
@@ -78,6 +104,7 @@ func main() {
 	rootAPI.Use(middleware.APIKey(bc))
 	rootAPI.Use(middleware.Idempotency())
 	rootAPI.Use(middleware.RateLimit(rdb, time.Minute, ratePerMin, rateBurst))
+	rootAPI.Use(autoRouteMW)
 	rootAPI.POST("/responses", handler.Native(bc, rc, log, "responses", holdUnknown))
 	rootAPI.POST("/anthropic/v1/messages", handler.Native(bc, rc, log, "messages", holdUnknown))
 	// DeepSeek 官网的 OpenAI 地址不带 /v1，客户端直接请求 /chat/completions。
